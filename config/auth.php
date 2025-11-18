@@ -176,7 +176,7 @@ return [
         |
         | The plaintext Bearer token to be assigned to the demo API user account
         | created by the DemoUserSeeder.
-
+        |
         | If not specified, a secure random token will be auto-generated. Set this
         | to a known, simple value in local development for convenient API testing
         | with consistent credentials across database refreshes. The system will
