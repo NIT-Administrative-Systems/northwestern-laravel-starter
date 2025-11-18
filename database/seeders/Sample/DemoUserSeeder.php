@@ -9,6 +9,7 @@ use App\Domains\User\Models\ApiToken;
 use App\Domains\User\Models\Role;
 use App\Domains\User\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 /**
  * These users are used for end-to-end testing and can also be used for demos and impersonation during development.
@@ -78,7 +79,7 @@ class DemoUserSeeder extends Seeder
 
     private function apiUser(): void
     {
-        $rawToken = config('auth.api.demo_user_token');
+        $rawToken = config('auth.api.demo_user_token', Str::random(length: 64));
 
         User::factory()
             ->api()
