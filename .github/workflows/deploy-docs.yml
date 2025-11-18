@@ -1,0 +1,41 @@
+name: Deploy Documentation
+
+# Define the targeted versions to be used throughout the workflow.
+env:
+  NODE_VERSION: '24'
+  PNPM_VERSION: '10.x.x'
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+concurrency:
+  group: environment-${{ github.ref }}
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📂 Checkout Repository
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: 🔁 Setup Environment
+        uses: ./.github/actions/common-setup
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+          docs-only: true
+          build-docs: true
+
+      - name: 📚 Deploy Docs
+        if: github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs/dist
+          cname: laravel-starter.entapp.northwestern.edu

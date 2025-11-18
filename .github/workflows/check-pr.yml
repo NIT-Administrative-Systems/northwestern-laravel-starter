@@ -168,7 +168,7 @@ jobs:
           php-version: ${{ env.PHP_VERSION }}
           node-version: ${{ env.NODE_VERSION }}
           pnpm-version: ${{ env.PNPM_VERSION }}
-          build-assets: false
+          build-frontend-assets: false
 
       - name: 📷 Rector Cache
         uses: actions/cache@v4
@@ -269,7 +269,7 @@ jobs:
           php-version: ${{ env.PHP_VERSION }}
           node-version: ${{ env.NODE_VERSION }}
           pnpm-version: ${{ env.PNPM_VERSION }}
-          build-assets: false
+          build-frontend-assets: false
 
       - name: 📷 PHPStan Result Cache
         uses: actions/cache@v4

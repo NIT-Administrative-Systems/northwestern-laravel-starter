@@ -18,14 +18,23 @@ inputs:
     description: "pnpm version"
     required: false
     default: "10.x.x"
-  build-assets:
-    description: "Whether to run pnpm build (true|false)"
+  docs-only:
+    description: "If true, only run Node/pnpm steps and optional docs build (true|false)"
+    required: false
+    default: "false"
+  build-frontend-assets:
+    description: "Whether to run pnpm build in the project root (true|false)"
     required: false
     default: "true"
+  build-docs:
+    description: "Whether to build the documentation site in ./docs (true|false)"
+    required: false
+    default: "false"
 runs:
   using: "composite"
   steps:
     - name: 🐘 Setup PHP
+      if: ${{ inputs.docs-only != 'true' }}
       uses: shivammathur/setup-php@v2
       with:
         php-version: ${{ inputs['php-version'] }}
@@ -47,6 +56,7 @@ runs:
         cache: pnpm
 
     - name: 📷 pnpm Dependencies Cache
+      if: ${{ inputs.docs-only != 'true' }}
       uses: actions/cache@v4
       with:
         path: |
@@ -57,23 +67,27 @@ runs:
           ${{ runner.os }}-pnpm-
 
     - name: 💾 Install pnpm Dependencies
+      if: ${{ inputs.docs-only != 'true' }}
       shell: bash
       run: |
         pnpm install --frozen-lockfile --prefer-offline
         pnpm exec cypress install
 
     - name: 🔑 Compute composer.lock hash
+      if: ${{ inputs.docs-only != 'true' }}
       id: comp-hash
       shell: bash
       run: |
         echo "hash=${{ hashFiles('composer.lock') }}" >> "$GITHUB_OUTPUT"
 
     - name: 🔍 Determine Composer Cache Directory
+      if: ${{ inputs.docs-only != 'true' }}
       shell: bash
       id: composer-cache-dir
       run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
     - name: 📷 Composer Dependencies Cache
+      if: ${{ inputs.docs-only != 'true' }}
       uses: actions/cache@v4
       with:
         path: ${{ steps.composer-cache-dir.outputs.dir }}
@@ -82,10 +96,12 @@ runs:
           ${{ runner.os }}-composer-
 
     - name: 💾 Install Composer Dependencies
+      if: ${{ inputs.docs-only != 'true' }}
       shell: bash
       run: composer install --no-interaction --prefer-dist --no-progress --optimize-autoloader
 
     - name: ⚙️ Prepare Application Environment
+      if: ${{ inputs.docs-only != 'true' }}
       shell: bash
       run: |
         cp .env.ci .env
@@ -94,7 +110,21 @@ runs:
         php artisan ide-helper:meta
         php artisan ide-helper:models -N
 
-    - name: 🏗️ Build Assets
-      if: ${{ inputs.build-assets == 'true' }}
+    - name: 🏗️ Build Frontend Assets
+      if: ${{ inputs.docs-only != 'true' && inputs['build-frontend-assets'] == 'true' }}
       shell: bash
       run: pnpm build
+
+    - name: 📚 Install Docs Dependencies
+      if: ${{ inputs['build-docs'] == 'true' }}
+      shell: bash
+      run: |
+        cd docs
+        pnpm install --frozen-lockfile --prefer-offline
+
+    - name: 📚 Build Documentation
+      if: ${{ inputs['build-docs'] == 'true' }}
+      shell: bash
+      run: |
+        cd docs
+        pnpm build
