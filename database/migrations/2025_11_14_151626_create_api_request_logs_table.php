@@ -29,9 +29,11 @@ return new class extends Migration
 
             $table->timestamp('created_at');
 
+            $table->index('created_at');
             $table->index(['user_id', 'created_at']);
             $table->index(['user_api_token_id', 'created_at']);
-            $table->index('created_at');
+            $table->index(['created_at', 'user_id', 'status_code']);
+            $table->index(['created_at', 'path']);
         });
     }
 
