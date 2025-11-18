@@ -1,0 +1,13 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ namespace }};
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Domains\Core\Models\BaseModel;
+
+class {{ class }} extends BaseModel
+{
+    use HasFactory;
+}

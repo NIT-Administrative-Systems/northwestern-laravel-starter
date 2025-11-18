@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<phpunit
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+    bootstrap="vendor/autoload.php"
+    cacheDirectory=".phpunit.cache"
+    colors="true"
+    displayDetailsOnIncompleteTests="true"
+    displayDetailsOnPhpunitDeprecations="true"
+    displayDetailsOnTestsThatTriggerWarnings="true"
+    displayDetailsOnTestsThatTriggerNotices="true"
+    displayDetailsOnTestsThatTriggerDeprecations="true"
+    displayDetailsOnTestsThatTriggerErrors="true"
+>
+    <testsuites>
+        <testsuite name="Unit">
+            <directory>tests/Unit</directory>
+        </testsuite>
+        <testsuite name="Feature">
+            <directory>tests/Feature</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory>app</directory>
+        </include>
+        <exclude>
+            <!--
+                Code Coverage Exclusions
+
+                These components are excluded because they either:
+                - Contain boilerplate/framework code
+                - Represent static data structures (enums, models, etc.)
+                - Consist primarily of declarative definitions
+
+                Including them would artificially dilute our coverage metrics
+                without adding meaningful quality insights.
+            -->
+            <file>app/Console/Commands/RebuildDatabaseCommand.php</file>
+            <directory>app/Domains/Core/Exceptions</directory>
+            <directory>app/Domains/Core/Models</directory>
+            <directory>app/Domains/Core/Types</directory>
+            <directory>app/Domains/Core/Concerns</directory>
+            <directory>app/Domains/Core/GlobalAlerts</directory>
+            <directory>app/Domains/User/Enums</directory>
+            <directory>app/Domains/User/Exceptions</directory>
+            <directory>app/Domains/User/Models</directory>
+            <directory>app/Domains/User/Seeders</directory>
+            <directory>app/Providers</directory>
+            <directory>app/View/Components</directory>
+            <directory>app/Http/Controllers/Auth</directory>
+            <file>app/Domains/Core/Seeders/IdempotentSeeder.php</file>
+        </exclude>
+    </source>
+    <php>
+        <env name="APP_ENV" value="testing" />
+        <env name="APP_MAINTENANCE_DRIVER" value="file" />
+        <env name="BCRYPT_ROUNDS" value="4" />
+        <env name="CACHE_STORE" value="array" />
+        <env name="DB_CONNECTION" value="phpunit" />
+        <env name="MAIL_MAILER" value="array" />
+        <env name="PULSE_ENABLED" value="false" />
+        <env name="QUEUE_CONNECTION" value="sync" />
+        <env name="BROADCAST_CONNECTION" value="log" />
+        <env name="SESSION_DRIVER" value="array" />
+        <env name="TELESCOPE_ENABLED" value="false" />
+    </php>
+</phpunit>

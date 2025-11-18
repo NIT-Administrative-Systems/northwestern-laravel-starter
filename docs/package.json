@@ -1,0 +1,22 @@
+{
+    "type": "module",
+    "scripts": {
+        "astro": "astro",
+        "build": "astro build",
+        "dev": "astro dev",
+        "preview": "astro preview",
+        "start": "astro dev"
+    },
+    "dependencies": {
+        "@astrojs/starlight": "^0.32.6",
+        "astro": "^5.15.2",
+        "sharp": "^0.34.4",
+        "starlight-links-validator": "^0.14.3"
+    },
+    "engines": {
+        "node": ">= 24.0.0",
+        "npm": "please-use-pnpm",
+        "pnpm": ">= 10.0.0",
+        "yarn": "please-use-pnpm"
+    }
+}

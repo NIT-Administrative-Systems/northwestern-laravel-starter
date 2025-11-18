@@ -1,0 +1,55 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Http\Middleware\AuthenticatesApiTokens;
+use App\Http\Middleware\EnsureApiEnabled;
+use App\Http\Middleware\LogsApiRequests;
+use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| Public API Routes
+|--------------------------------------------------------------------------
+| Endpoints that do not require API authentication. Useful for health checks
+| or other publicly accessible resources.
+*/
+
+Route::middleware([EnsureApiEnabled::class])->group(function () {
+    Route::get('health', Spatie\Health\Http\Controllers\HealthCheckJsonResultsController::class);
+});
+
+/*
+|--------------------------------------------------------------------------
+| Protected API Routes
+|--------------------------------------------------------------------------
+| Endpoints that require API token authentication and are fully logged
+| through the API request logging middleware.
+*/
+
+Route::middleware([EnsureApiEnabled::class, LogsApiRequests::class, AuthenticatesApiTokens::class])->group(function () {
+    //
+});
+
+/*
+|--------------------------------------------------------------------------
+| EventHub Webhook Routes
+|--------------------------------------------------------------------------
+| Endpoints used by Northwestern's EventHub for inbound event delivery.
+*/
+
+// Route::middleware(['eventhub_hmac'])->prefix('eventhub')->group(function () {
+//     Route::post('example-update', ExampleUpdateController::class)->eventHubWebhook('ses.example.updates', ['contentType' => 'application/xml']);
+// });
+
+/*
+|--------------------------------------------------------------------------
+| Mock API Routes
+|--------------------------------------------------------------------------
+| Local-only mock implementations of external services used for integration
+| testing and offline development.
+*/
+
+// Route::prefix('mock')->withoutMiddleware(ThrottleRequests::class.':api')->group(function () {
+//
+// });

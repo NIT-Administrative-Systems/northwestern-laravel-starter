@@ -1,0 +1,472 @@
+name: Check PR
+
+# Define the targeted versions to be used throughout the workflow.
+env:
+  NODE_VERSION: '24'
+  PNPM_VERSION: '10.x.x'
+  PHP_VERSION: '8.4'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  determine-scope:
+    name: 🎯 Determine Scope
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      iac: ${{ steps.changes.outputs.iac }}
+      docs: ${{ steps.changes.outputs.docs }}
+      code: ${{ steps.changes.outputs.code }}
+    steps:
+      - name: 📂 Checkout Repository
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: 🔎 Detect Changed Files
+        uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            iac:
+              - 'iac/**'
+            docs:
+              - 'docs/**'
+            code:
+              - '**'
+              - '!iac/**'
+              - '!docs/**'
+
+  validate-docs:
+    name: 📚 Validate Documentation
+    needs: determine-scope
+    if: needs.determine-scope.outputs.docs == 'true'
+    runs-on: ubuntu-latest
+    environment: ci-cd
+    timeout-minutes: 5
+
+    steps:
+      - name: 📂 Checkout Repository
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: $PNPM_VERSION
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: $NODE_VERSION
+          cache: pnpm
+
+      - name: 📷 pnpm Dependencies Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            docs/node_modules
+          key: ${{ runner.os }}-pnpm-docs-${{ hashFiles('docs/pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-docs-
+
+      - name: 💾 Install pnpm Dependencies
+        run: |
+          cd docs/
+          pnpm install --frozen-lockfile --prefer-offline
+
+      - name: 🔧 Build Documentation
+        run: |
+          cd docs/
+          pnpm build
+
+#  validate-infrastructure:
+#    name: 🏗️ Validate Infrastructure
+#    needs: determine-scope
+#    if: needs.determine-scope.outputs.iac == 'true'
+#    runs-on: ubuntu-latest
+#    environment: ci-cd
+#
+#    steps:
+#      - name: 📂 Checkout Repository
+#        uses: actions/checkout@v5
+#        with:
+#          ref: ${{ github.head_ref }}
+#          token: ${{ secrets.EACD_BOT_FOR_COMMIT_PAT }}
+#
+#      - name: 🌱 Setup OpenTofu
+#        uses: opentofu/setup-opentofu@v1
+#        with:
+#          tofu_version: 1.10.2
+#
+#      - name: ⚙️ Configure Environment Variables
+#        run: |
+#          echo "AWS_ACCESS_KEY_ID=${{ secrets.TF_KEY_ADO_NONPROD }}" >> $GITHUB_ENV
+#          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.TF_SECRET_ADO_NONPROD }}" >> $GITHUB_ENV
+#          echo "TF_VAR_local_state_passphrase=${{ secrets.TF_LOCAL_STATE_ENCRYPTION_KEY_2025_07 }}" >> $GITHUB_ENV
+#          echo "TF_VAR_shared_state_passphrase=${{ secrets.TF_SHARED_RESOURCES_STATE_ENCRYPTION_KEY_2025_07 }}" >> $GITHUB_ENV
+#          echo "WORKING_DIR=iac/develop" >> $GITHUB_ENV
+#
+#      - name: 🧱 OpenTofu Init
+#        id: init
+#        run: |
+#          cd $WORKING_DIR
+#          tofu init
+#
+#      - name: ✅ OpenTofu Validate
+#        id: validate
+#        run: |
+#          cd $WORKING_DIR
+#          tofu validate -no-color
+#
+#      - name: 📋 OpenTofu Plan
+#        id: plan
+#        run: |
+#          cd $WORKING_DIR
+#          tofu plan -no-color -var="master_password=${{ secrets.DB_PASSWORD }}" -out=.planfile
+#
+#      - name: 📊 Comment OpenTofu Plan
+#        uses: borchero/terraform-plan-comment@v2
+#        if: always()
+#        with:
+#          header: 📝 OpenTofu Plan
+#          terraform-cmd: 'tofu'
+#          working-directory: ${{ env.WORKING_DIR }}
+#          planfile: .planfile
+#          token: ${{ secrets.GITHUB_TOKEN }}
+#
+#      - name: 🔍 Check for OpenTofu Plan Errors
+#        if: always() && steps.plan.outcome == 'failure'
+#        run: |
+#          echo "::error::OpenTofu plan failed. Check the plan output above for details."
+#          exit 1
+
+  lint-and-format:
+    name: 🔍 Lint and Format
+    needs: determine-scope
+    if: needs.determine-scope.outputs.code == 'true'
+    runs-on: ubuntu-latest
+    environment: ci-cd
+    timeout-minutes: 15
+
+    steps:
+      - name: 📂 Checkout Repository
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.EACD_BOT_FOR_COMMIT_PAT }}
+
+      - name: 🔁 Setup Environment
+        uses: ./.github/actions/common-setup
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+          build-assets: false
+
+      - name: 📷 Rector Cache
+        uses: actions/cache@v4
+        with:
+          path: /tmp/rector
+          key: ${{ runner.os }}-rector-${{ hashFiles('rector.php', 'composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-rector-
+
+      - name: 📷 Pint Cache
+        uses: actions/cache@v4
+        with:
+          path: ./storage/pint.cache
+          key: ${{ runner.os }}-pint-${{ hashFiles('pint.json', 'composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pint-
+
+      - name: 📷 Prettier Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules/.cache/prettier
+            .prettier-cache
+          key: prettier-${{ hashFiles('package.json', 'pnpm-lock.yaml', '.prettierrc') }}
+          restore-keys: |
+            prettier-${{ hashFiles('package.json', 'pnpm-lock.yaml', '.prettierrc') }}-
+            prettier-
+
+      - name: 🔧️ Run Rector
+        run: composer rector
+
+      - name: 🍺 Run Laravel Pint
+        run: composer format:php
+
+      - name: ✨ Run Prettier
+        run: composer format:frontend
+
+      - name: ❌ Remove Debug Code from Tests
+        run: |
+          # Remove it.only() from Cypress tests
+          files=`grep -lR 'it.only' cypress/e2e/*.cy.ts || true`
+          if [ ! -z "$files" ]; then
+            echo "Found 'it.only()' in the following files: $files"
+            for file in $files; do
+              sed -i -e 's/it.only/it/g' "$file"
+            done
+          fi
+
+          # Remove describe.only() from Cypress tests
+          files=`grep -lR 'describe.only' cypress/e2e/*.cy.ts || true`
+          if [ ! -z "$files" ]; then
+            echo "Found 'describe.only()' in the following files: $files"
+            for file in $files; do
+              sed -i -e 's/describe.only/describe/g' "$file"
+            done
+          fi
+
+          # Remove test.only() from PHP tests
+          files=`grep -lR 'test\.only' tests/ || true`
+          if [ ! -z "$files" ]; then
+            echo "Found 'test.only()' in the following files: $files"
+            for file in $files; do
+              sed -i -e 's/test\.only(/test(/g' "$file"
+            done
+          fi
+
+      - name: 🔍 Check for Uncommitted Changes
+        id: file-changes
+        run: echo "changes=$(if git diff --quiet; then echo 'false'; else echo 'true'; fi)" >> $GITHUB_OUTPUT
+
+      - name: 📝 Auto-Commit Code Style Fixes
+        if: steps.file-changes.outputs.changes == 'true'
+        run: |
+          git config --global user.name "ADOES Bot"
+          git config --global user.email "DL_NUIT_ET_SysDev@e.northwestern.edu"
+          git commit -a -m "Apply code style changes"
+          git push
+          exit 1
+
+  static-analysis:
+    name: 🔬 Static Analysis
+    needs: [determine-scope, lint-and-format]
+    if: needs.determine-scope.outputs.code == 'true'
+    runs-on: ubuntu-latest
+    environment: ci-cd
+    timeout-minutes: 10
+
+    steps:
+      - name: 📂 Checkout Repository
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.EACD_BOT_FOR_COMMIT_PAT }}
+
+      - name: 🔁 Setup Environment
+        uses: ./.github/actions/common-setup
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+          build-assets: false
+
+      - name: 📷 PHPStan Result Cache
+        uses: actions/cache@v4
+        with:
+          path: tmp
+          key: phpstan-results-${{ hashFiles('phpstan.neon', 'composer.lock') }}
+          restore-keys: |
+            phpstan-results-${{ hashFiles('phpstan.neon') }}-
+            phpstan-results-
+            ${{ runner.os }}-phpstan-results-
+
+      - name: 🔬 PHPStan
+        run: ./vendor/bin/phpstan analyse --no-progress --error-format=checkstyle > phpstan-report.xml
+
+      - name: 📊 Publish PHPStan Report
+        if: github.actor != 'dependabot[bot]' && always()
+        uses: lcollins/checkstyle-github-action@v3.1.0
+        with:
+          name: "📊 PHPStan Analysis Report"
+          path: "phpstan-report.xml"
+          title: "PHPStan Analysis Report"
+
+  unit-tests:
+    name: 🧪 Unit Tests (${{ matrix.shard }}/3)
+    needs: [determine-scope, lint-and-format]
+    if: needs.determine-scope.outputs.code == 'true'
+    runs-on: ubuntu-latest
+    environment: ci-cd
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [ 1, 2, 3]
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+    steps:
+      - name: 📂 Checkout Repository
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: 🔁 Setup Environment
+        uses: ./.github/actions/common-setup
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+
+      - name: 📷 PHPUnit Cache
+        uses: actions/cache@v4
+        with:
+          path: ./.phpunit.cache
+          key: ${{ runner.os }}-phpunit-${{ hashFiles('phpunit.xml', 'composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-phpunit-
+
+      - name: 🎯 Configure PHPUnit Matcher
+        uses: mheap/phpunit-matcher-action@v1
+
+      # If you need to debug tests or follow the execution order more clearly, replace `--teamcity` with `--verbose`
+      - name: 🧪 PHPUnit
+        env:
+          XDEBUG_MODE: coverage
+        run: >
+          ./vendor/bin/pest --parallel
+          --shard ${{ matrix.shard }}/3
+          --cache-result
+          --cache-directory=.phpunit.cache
+          --log-junit .build/junit-pr${{ github.event.pull_request.number }}-run${{ github.run_id }}-shard${{ matrix.shard }}.xml
+          --teamcity
+
+      - name: 📦 Upload Test Results
+        uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: Test Results PR${{ github.event.pull_request.number }} Run${{ github.run_id }} Shard${{ matrix.shard }}
+          path: .build/junit-pr${{ github.event.pull_request.number }}-run${{ github.run_id }}-shard${{ matrix.shard }}.xml
+          retention-days: 1
+
+  publish-test-results:
+    name: 📊 Publish Test Results
+    needs: unit-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: always() && github.actor != 'dependabot[bot]' && needs.determine-scope.outputs.code == 'true'
+
+    steps:
+      - name: 📥 Download Test Results
+        uses: actions/download-artifact@v6
+        with:
+          path: artifacts
+          pattern: Test Results PR${{ github.event.pull_request.number }} Run${{ github.run_id }}*
+          merge-multiple: true
+
+      - name: 📊 Publish Unit Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2.7
+        with:
+          check_name: "📊 PHPUnit Test Results"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          files: "artifacts/**/*.xml"
+
+  end-to-end-tests:
+    name: 🌲 Cypress Tests
+    needs: [determine-scope, lint-and-format]
+    if: needs.determine-scope.outputs.code == 'true'
+    runs-on: ubuntu-latest
+    environment: ci-cd
+    timeout-minutes: 30
+    # strategy:
+    #  fail-fast: false
+    #  matrix:
+    #    Run copies of the current job in parallel
+    #    containers: [1, 2, 3, 4]
+    services:
+      s3:
+        image: minio/minio:edge-cicd
+        ports:
+          - 9000:9000
+        env:
+          MINIO_ROOT_USER: s3admin
+          MINIO_ROOT_PASSWORD: s3secret
+        options: --health-cmd "curl -s http://localhost:9000/minio/health/live"
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+    steps:
+      - name: 📂 Checkout Repository
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.EACD_BOT_FOR_COMMIT_PAT }}
+
+      - name: 🔁 Setup Environment
+        uses: ./.github/actions/common-setup
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+
+      - name: 🪣 Create Minio Bucket
+        run: |
+          curl -o ./mc -# https://dl.min.io/client/mc/release/linux-amd64/mc
+          chmod +x ./mc
+          ./mc alias set gha http://localhost:9000 s3admin s3secret
+          ./mc mb gha/northwestern-laravel-starter
+
+      - name: 🔧 Prepare Application Environment
+        run: |
+          php artisan migrate
+
+      - name: 🌲 Cypress
+        uses: cypress-io/github-action@v6
+        with:
+          config: baseUrl=http://localhost:8000
+          start: php artisan serve --port=8000 --no-reload
+          wait-on: http://localhost:8000
+          wait-on-timeout: 180
+          browser: chrome
+          # group: "Integration Tests - Chrome"
+          # record: true
+          # parallel: true
+        env:
+          # CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          AWS_ACCESS_KEY_ID: s3admin
+          AWS_SECRET_ACCESS_KEY: s3secret
+          PHP_CLI_SERVER_WORKERS: 4
+
+      - name: 📜 Display Laravel Logs
+        if: always()
+        run: cat -n storage/logs/laravel.log | fold -w 120  || true
+
+      # This step can be removed if your project records results directly to Cypress Cloud
+      - name: 📜 Publish Test Summary Results
+        uses: ctrf-io/github-test-reporter@v1
+        with:
+          report-path: .build/ctrf-report.json
+          pull-request: true
+          github-report: true
+          overwrite-comment: true
+          upload-artifact: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: always()

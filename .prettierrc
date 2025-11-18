@@ -1,0 +1,32 @@
+{
+    "plugins": [
+        "@shufo/prettier-plugin-blade",
+        "prettier-plugin-organize-imports",
+        "prettier-plugin-packagejson",
+        "prettier-plugin-astro",
+        "@prettier/plugin-xml"
+    ],
+    "overrides": [
+        {
+            "files": ["*.blade.php"],
+            "options": {
+                "parser": "blade",
+                "tabWidth": 4,
+                "wrapAttributes":  "force-aligned",
+                "wrapAttributesMinAttrs": 3,
+                "sortTailwindcssClasses": true,
+                "sortHtmlAttributes": "code-guide",
+                "endOfLine": "lf",
+                "extraLiners": "",
+                "trailingCommaPHP": true,
+                "componentPrefix": "x-,livewire:"
+            }
+        },
+        {
+            "files": "*.astro",
+            "options": {
+                "parser": "astro"
+            }
+        }
+    ]
+}

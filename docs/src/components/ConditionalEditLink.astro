@@ -1,0 +1,9 @@
+---
+import type { Props } from "@astrojs/starlight/props";
+
+import EditLink from "@astrojs/starlight/components/EditLink.astro";
+
+const isHomepage = Astro.locals.starlightRoute.id === "";
+---
+
+{isHomepage ? <div /> : <EditLink {...Astro.props} />}

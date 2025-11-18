@@ -1,0 +1,141 @@
+@import 'variables';
+
+.ts-control {
+    border: var(--bs-border-width) solid #ccc;
+    color: var(--bs-body-color);
+    font-size: 0.9rem;
+    font-weight: 400;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    line-height: 1.6;
+}
+
+.card-body .ts-control {
+    background-color: rgba(var(--bs-white-rgb), var(--bs-bg-opacity)) !important;
+}
+
+.ts-dropdown,
+.ts-dropdown.form-control,
+.ts-dropdown.form-select {
+    border-radius: 0;
+}
+.ts-wrapper.required::before {
+    content: none !important;
+}
+
+.ts-dropdown-content {
+    max-height: 450px;
+
+    .option {
+        display: flex;
+        flex-direction: row;
+        justify-content: start;
+        align-items: start;
+        column-gap: 0.5rem;
+
+        .ts-option-innerLabel {
+            flex-grow: 1;
+        }
+    }
+}
+
+.ts-dropdown .active {
+    background-color: #{$purple};
+    color: #fff !important;
+}
+
+.ts-dropdown .active.create {
+    color: #fff !important;
+}
+
+.ts-wrapper.multi .ts-control > div.active {
+    background: #{$purple};
+}
+
+.ts-wrapper.multi .ts-control > div.item {
+    border: 1px solid rgba(78, 42, 132, 0.45);
+}
+
+.ts-wrapper:not(.form-control, .form-select).multi  .ts-control {
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3E%3C/svg%3E");
+    background-position: right .75rem center;
+    background-repeat: no-repeat;
+    background-size: 16px 12px;
+    cursor: pointer;
+}
+
+.focus .ts-control {
+    border-color: #a795c2;
+    box-shadow: 0 0 0 0.25rem rgba($purple, .25);
+}
+
+/** Hide placeholder when 0 items are selected when the input is inside the tom-select dropdown */
+.plugin-dropdown_input .ts-control .items-placeholder {
+    display: none !important;
+}
+
+.plugin-dropdown_input.focus .ts-dropdown .dropdown-input {
+    border-color: #a795c2;
+    box-shadow: 0 0 0 0.25rem #a795c2;
+}
+
+.ts-control {
+    cursor: pointer !important;
+
+    input,
+    span {
+        cursor: pointer !important;
+    }
+}
+
+.ts-control input[readonly] {
+    cursor: pointer;
+}
+
+.plugin-checkbox_options {
+    .option input{
+        @extend .form-check-input;
+        margin-top: 0.25em;
+    }
+
+    .option input[type=checkbox i] {
+        cursor: pointer;
+    }
+}
+
+.ts-wrapper.disabled,
+.ts-wrapper.locked {
+    cursor: not-allowed !important;
+}
+
+.ts-wrapper.disabled .ts-control,
+.ts-wrapper.locked .ts-control {
+    cursor: not-allowed !important;
+}
+
+.ts-wrapper.disabled:hover,
+.ts-wrapper.locked:hover {
+    cursor: not-allowed !important;
+}
+
+.ts-wrapper.disabled *,
+.ts-wrapper.locked * {
+    cursor: not-allowed !important;
+}
+
+
+#customColumnSelect {
+    #updateColumnSelectionButton {
+        width: 3.5rem;
+    }
+
+    div {
+        flex-grow: 1;
+
+        .ts-wrapper,
+        .ts-control {
+            height: 100%;
+        }
+    }
+}

@@ -1,0 +1,20 @@
+includes:
+    - ./vendor/larastan/larastan/extension.neon
+    - vendor/phpstan/phpstan-mockery/extension.neon
+
+rules:
+    - Spatie\Ray\PHPStan\RemainingRayCallRule
+
+parameters:
+    paths:
+        - app
+        - database
+        - config
+        - tests
+    level: 5
+    editorUrl: 'phpstorm://open?file=%%file%%&line=%%line%%'
+    tmpDir: /tmp/phpstan
+    treatPhpDocTypesAsCertain: false
+    checkModelProperties: true
+    checkModelAppends: true
+    reportUnmatchedIgnoredErrors: false

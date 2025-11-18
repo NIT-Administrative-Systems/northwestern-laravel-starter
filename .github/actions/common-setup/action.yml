@@ -1,0 +1,100 @@
+$schema: "https://json.schemastore.org/github-action"
+name: "Common Setup"
+description: "Runs common setup steps for caching, installing dependencies, and preparing the environment"
+inputs:
+  php-version:
+    description: "The PHP version to use"
+    required: false
+    default: "8.4"
+  coverage:
+    description: "Coverage driver for setup-php (none|xdebug)"
+    required: false
+    default: "none"
+  node-version:
+    description: "Node.js version"
+    required: false
+    default: "24"
+  pnpm-version:
+    description: "pnpm version"
+    required: false
+    default: "10.x.x"
+  build-assets:
+    description: "Whether to run pnpm build (true|false)"
+    required: false
+    default: "true"
+runs:
+  using: "composite"
+  steps:
+    - name: 🐘 Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ inputs['php-version'] }}
+        coverage: ${{ inputs.coverage }}
+        extensions: >-
+          dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite,
+          bcmath,soap,intl, gd, exif, iconv, swoole, simplexml, xml
+        ini-values: memory_limit=-1
+
+    - name: 📦 Setup pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: ${{ inputs['pnpm-version'] }}
+
+    - name: 🟢 Setup Node.js
+      uses: actions/setup-node@v6
+      with:
+        node-version: ${{ inputs['node-version'] }}
+        cache: pnpm
+
+    - name: 📷 pnpm Dependencies Cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          node_modules
+          ~/.cache/Cypress
+        key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-
+
+    - name: 💾 Install pnpm Dependencies
+      shell: bash
+      run: |
+        pnpm install --frozen-lockfile --prefer-offline
+        pnpm exec cypress install
+
+    - name: 🔑 Compute composer.lock hash
+      id: comp-hash
+      shell: bash
+      run: |
+        echo "hash=${{ hashFiles('composer.lock') }}" >> "$GITHUB_OUTPUT"
+
+    - name: 🔍 Determine Composer Cache Directory
+      shell: bash
+      id: composer-cache-dir
+      run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+    - name: 📷 Composer Dependencies Cache
+      uses: actions/cache@v4
+      with:
+        path: ${{ steps.composer-cache-dir.outputs.dir }}
+        key: ${{ runner.os }}-composer-${{ steps.comp-hash.outputs.hash }}
+        restore-keys: |
+          ${{ runner.os }}-composer-
+
+    - name: 💾 Install Composer Dependencies
+      shell: bash
+      run: composer install --no-interaction --prefer-dist --no-progress --optimize-autoloader
+
+    - name: ⚙️ Prepare Application Environment
+      shell: bash
+      run: |
+        cp .env.ci .env
+        php artisan key:generate
+        php artisan ide-helper:generate
+        php artisan ide-helper:meta
+        php artisan ide-helper:models -N
+
+    - name: 🏗️ Build Assets
+      if: ${{ inputs.build-assets == 'true' }}
+      shell: bash
+      run: pnpm build
