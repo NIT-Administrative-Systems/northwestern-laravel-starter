@@ -26,6 +26,7 @@ class ApiToken extends BaseModel
     use HasFactory;
 
     protected $casts = [
+        'token_prefix' => 'encrypted',
         'last_used_at' => 'datetime',
         'valid_from' => 'datetime',
         'valid_to' => 'datetime',
