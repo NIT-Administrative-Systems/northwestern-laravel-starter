@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Domains\User\Actions;
+namespace App\Domains\User\Actions\Api;
 
 use App\Domains\User\Enums\AuthTypeEnum;
 use App\Domains\User\Models\ApiToken;

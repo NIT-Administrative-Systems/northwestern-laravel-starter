@@ -6,8 +6,8 @@ namespace App\Http\Controllers\Auth;
 
 use App\Domains\Core\Enums\ExternalServiceEnum;
 use App\Domains\Core\Exceptions\ServiceDownError;
-use App\Domains\User\Actions\CreateUserByLookup;
 use App\Domains\User\Actions\DetermineUserSegment;
+use App\Domains\User\Actions\Directory\CreateUserByLookup;
 use App\Domains\User\Models\User;
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;

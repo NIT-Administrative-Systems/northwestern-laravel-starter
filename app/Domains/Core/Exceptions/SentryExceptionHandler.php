@@ -10,6 +10,9 @@ use Throwable;
 
 use function Sentry\configureScope;
 
+/**
+ * Handles reporting exceptions to Sentry with enriched user context.
+ */
 class SentryExceptionHandler
 {
     public function report(Throwable $exception): void

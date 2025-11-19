@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Http\Controllers\Admin;
 
-use App\Domains\User\Actions\StartImpersonation;
-use App\Domains\User\Actions\StopImpersonation;
+use App\Domains\User\Actions\Impersonation\StartImpersonation;
+use App\Domains\User\Actions\Impersonation\StopImpersonation;
 use App\Domains\User\Models\User;
 use App\Http\Controllers\Admin\ImpersonationController;
 use PHPUnit\Framework\Attributes\CoversClass;

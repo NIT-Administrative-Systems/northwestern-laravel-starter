@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
-use App\Domains\User\Actions\StartImpersonation;
-use App\Domains\User\Actions\StopImpersonation;
+use App\Domains\User\Actions\Impersonation\StartImpersonation;
+use App\Domains\User\Actions\Impersonation\StopImpersonation;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Domains\User\Actions;
+namespace App\Domains\User\Actions\Impersonation;
 
 use App\Domains\User\Models\User;
 use Lab404\Impersonate\Exceptions\InvalidUserProvider;

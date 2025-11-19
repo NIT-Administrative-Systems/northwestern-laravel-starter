@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\Domains\User\Actions;
+namespace Tests\Feature\Domains\User\Actions\Impersonation;
 
-use App\Domains\User\Actions\StartImpersonation;
+use App\Domains\User\Actions\Impersonation\StartImpersonation;
 use App\Domains\User\Models\User;
 use Lab404\Impersonate\Services\ImpersonateManager;
 use Mockery;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Domains\User\Actions;
+namespace App\Domains\User\Actions\Local;
 
 use App\Domains\User\Models\User;
 use App\Domains\User\Models\UserLoginLink;

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\Domains\User\Actions;
+namespace Tests\Feature\Domains\User\Actions\Local;
 
-use App\Domains\User\Actions\ValidateLoginLink;
+use App\Domains\User\Actions\Local\ValidateLoginLink;
 use App\Domains\User\Models\User;
 use App\Domains\User\Models\UserLoginLink;
 use Illuminate\Support\Str;

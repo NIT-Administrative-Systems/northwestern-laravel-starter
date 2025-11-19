@@ -11,7 +11,7 @@ use Lab404\Impersonate\Events\TakeImpersonation;
  * When a {@see TakeImpersonation} event is fired by the {@see \Lab404\Impersonate\Impersonate} package, create a new
  * {@see ImpersonationLog} so that we can track who impersonated who.
  */
-class ImpersonateEvent
+class LogImpersonationAccess
 {
     public function handle(TakeImpersonation $event): void
     {

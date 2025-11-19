@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\Domains\User\Actions;
+namespace Tests\Feature\Domains\User\Actions\Directory;
 
-use App\Domains\User\Actions\CreateUserByLookup;
+use App\Domains\User\Actions\Directory\CreateUserByLookup;
 use App\Domains\User\Enums\AffiliationEnum;
 use App\Domains\User\Enums\AuthTypeEnum;
 use App\Domains\User\Exceptions\BadDirectoryEntry;

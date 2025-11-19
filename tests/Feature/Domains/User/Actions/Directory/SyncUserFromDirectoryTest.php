@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\Domains\User\Actions;
+namespace Tests\Feature\Domains\User\Actions\Directory;
 
-use App\Domains\User\Actions\SyncUserFromDirectory;
+use App\Domains\User\Actions\Directory\SyncUserFromDirectory;
 use App\Domains\User\Enums\AffiliationEnum;
 use App\Domains\User\Enums\AuthTypeEnum;
 use App\Domains\User\Models\User;

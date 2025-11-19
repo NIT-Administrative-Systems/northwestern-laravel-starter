@@ -2,10 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\Domains\User\Actions;
+namespace Tests\Feature\Domains\User\Actions\Local;
 
-use App\Domains\User\Actions\CreateLocalUser;
-use App\Domains\User\Actions\SendLoginLink;
+use App\Domains\User\Actions\Local\CreateLocalUser;
 use App\Domains\User\Enums\AuthTypeEnum;
 use Illuminate\Support\Facades\Mail;
 use PHPUnit\Framework\Attributes\CoversClass;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\ApiTokens\Actions;
 
-use App\Domains\User\Actions\RotateApiToken;
+use App\Domains\User\Actions\Api\RotateApiToken;
 use App\Domains\User\Enums\PermissionEnum;
 use App\Domains\User\Models\ApiToken;
 use App\Filament\Resources\ApiTokens\Schemas\ApiTokenSchemas;

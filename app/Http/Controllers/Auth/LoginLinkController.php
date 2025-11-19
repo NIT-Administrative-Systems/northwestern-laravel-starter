@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Auth;
 
 use App\Domains\User\Actions\DetermineUserSegment;
-use App\Domains\User\Actions\SendLoginLink;
-use App\Domains\User\Actions\ValidateLoginLink;
+use App\Domains\User\Actions\Local\SendLoginLink;
+use App\Domains\User\Actions\Local\ValidateLoginLink;
 use App\Domains\User\Models\User;
 use App\Domains\User\Models\UserLoginLink;
 use App\Http\Controllers\Controller;

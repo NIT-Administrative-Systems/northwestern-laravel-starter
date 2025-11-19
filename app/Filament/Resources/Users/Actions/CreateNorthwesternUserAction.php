@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users\Actions;
 
-use App\Domains\User\Actions\CreateUserByLookup;
+use App\Domains\User\Actions\Directory\CreateUserByLookup;
 use App\Domains\User\Enums\PermissionEnum;
 use App\Domains\User\Exceptions\BadDirectoryEntry;
 use App\Filament\Resources\Users\UserResource;

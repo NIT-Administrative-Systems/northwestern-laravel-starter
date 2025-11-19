@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Domains\User\Actions;
+namespace App\Domains\User\Actions\Impersonation;
 
 use Lab404\Impersonate\Services\ImpersonateManager;
 use Symfony\Component\HttpKernel\Exception\HttpException;

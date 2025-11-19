@@ -22,8 +22,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * This provides a complete audit trail of all impersonation sessions,
  * which is critical for security compliance and troubleshooting.
  *
- * @see \App\Domains\User\Actions\StartImpersonation
- * @see \App\Domains\User\Actions\StopImpersonation
+ * @see \App\Domains\User\Actions\Impersonation\StartImpersonation
+ * @see \App\Domains\User\Actions\Impersonation\StopImpersonation
  */
 class ImpersonationLog extends BaseModel
 {

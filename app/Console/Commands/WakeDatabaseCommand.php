@@ -7,6 +7,11 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Attempts to wake a potentially inactive serverless RDS database by establishing a connection.
+ *
+ * Useful to run as a deployment hook to avoid first-request timeouts.
+ */
 class WakeDatabaseCommand extends Command
 {
     protected $signature = 'db:wake

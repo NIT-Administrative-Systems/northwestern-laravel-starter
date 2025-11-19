@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\Domains\User\Actions;
+namespace Tests\Feature\Domains\User\Actions\Impersonation;
 
-use App\Domains\User\Actions\StartImpersonation;
-use App\Domains\User\Actions\StopImpersonation;
+use App\Domains\User\Actions\Impersonation\StartImpersonation;
+use App\Domains\User\Actions\Impersonation\StopImpersonation;
 use App\Domains\User\Enums\RoleTypeEnum;
 use App\Domains\User\Models\Role;
 use App\Domains\User\Models\User;

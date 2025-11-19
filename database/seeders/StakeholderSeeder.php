@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Domains\User\Actions\CreateUserByLookup;
+use App\Domains\User\Actions\Directory\CreateUserByLookup;
 use App\Domains\User\Enums\RoleTypeEnum;
 use App\Domains\User\Models\Role;
 use Illuminate\Database\Seeder;
