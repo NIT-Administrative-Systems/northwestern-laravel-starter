@@ -136,12 +136,11 @@ class UsersRelationManager extends RelationManager
 
                                     return User::query()
                                         ->where(function (Builder $query) use ($search) {
-                                            /** @var Builder<User> $query */
                                             $query->searchByName($search)
                                                 ->orWhere('username', 'ilike', "%{$search}%")
                                                 ->orWhere('email', 'ilike', "%{$search}%");
                                         })
-                                        ->when($isApiRole, fn (Builder $query) => $query->where('auth_type', AuthTypeEnum::API))
+                                        ->when($isApiRole, fn (Builder $query) => $query->api())
                                         ->when(! $isApiRole, fn (Builder $query) => $query->where('auth_type', '!=', AuthTypeEnum::API))
                                         ->whereDoesntHave('roles', function (Builder $query) use ($role) {
                                             $query->where('id', $role->id);

@@ -6,7 +6,6 @@ namespace Tests\Feature\Domains\User\Jobs;
 
 use App\Domains\User\Jobs\DownloadWildcardPhotoJob;
 use App\Domains\User\Models\User;
-use App\Domains\User\Repositories\UserRepository;
 use Illuminate\Support\Facades\Storage;
 use Northwestern\SysDev\SOA\DirectorySearch;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -40,7 +39,6 @@ class DownloadWildcardPhotoTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $userRepository = $this->createMock(UserRepository::class);
         $directorySearch = $this->createMock(DirectorySearch::class);
 
         $directorySearch->expects($this->once())
@@ -48,10 +46,8 @@ class DownloadWildcardPhotoTest extends TestCase
             ->with($this->equalTo($user->username))
             ->willReturn(false);
 
-        $userRepository->expects($this->never())->method('updateWildcardPhoto');
-
         $job = new DownloadWildcardPhotoJob($user);
-        $job->handle($userRepository, $directorySearch);
+        $job->handle($directorySearch);
     }
 
     public function test_empty_photo_updates_null_without_storage_call(): void
@@ -60,7 +56,6 @@ class DownloadWildcardPhotoTest extends TestCase
 
         Storage::fake('s3');
 
-        $userRepository = $this->createMock(UserRepository::class);
         $directorySearch = $this->createMock(DirectorySearch::class);
 
         $directorySearch->expects($this->once())
@@ -68,12 +63,8 @@ class DownloadWildcardPhotoTest extends TestCase
             ->with($this->equalTo($user->username))
             ->willReturn([]);
 
-        $userRepository->expects($this->once())
-            ->method('updateWildcardPhoto')
-            ->with($this->equalTo($user), $this->equalTo(null));
-
         $job = new DownloadWildcardPhotoJob($user);
-        $job->handle($userRepository, $directorySearch);
+        $job->handle($directorySearch);
 
         Storage::disk('s3')->assertMissing("wildcard-photos/{$user->username}.jpg");
     }
@@ -84,7 +75,6 @@ class DownloadWildcardPhotoTest extends TestCase
 
         Storage::fake('s3');
 
-        $userRepository = $this->createMock(UserRepository::class);
         $directorySearch = $this->createMock(DirectorySearch::class);
 
         $originalPhoto = 'fake-image-data';
@@ -97,12 +87,8 @@ class DownloadWildcardPhotoTest extends TestCase
 
         $expectedPath = "wildcard-photos/{$user->username}.jpg";
 
-        $userRepository->expects($this->once())
-            ->method('updateWildcardPhoto')
-            ->with($this->equalTo($user), $this->equalTo($expectedPath));
-
         $job = new DownloadWildcardPhotoJob($user);
-        $job->handle($userRepository, $directorySearch);
+        $job->handle($directorySearch);
 
         Storage::disk('s3')->assertExists($expectedPath);
 

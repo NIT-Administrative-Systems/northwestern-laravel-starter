@@ -9,7 +9,6 @@ use App\Domains\User\Enums\DirectorySearchType;
 use App\Domains\User\Exceptions\BadDirectoryEntry;
 use App\Domains\User\Jobs\DownloadWildcardPhotoJob;
 use App\Domains\User\Models\User;
-use App\Domains\User\Repositories\UserRepository;
 use Exception;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Arr;
@@ -26,7 +25,7 @@ readonly class CreateUserByLookup
     public function __construct(
         protected DirectorySearch $directorySearch,
         protected SyncUserFromDirectory $directorySync,
-        protected UserRepository $userRepository,
+        protected PersistUserWithUniqueUsername $persistUserWithUniqueUsername,
     ) {
         //
     }
@@ -104,10 +103,10 @@ readonly class CreateUserByLookup
 
         $existingUser = match ($searchType) {
             DirectorySearchType::EMAIL => User::query()
-                ->where('email', 'ilike', trim($searchValue))
+                ->whereEmailEquals($searchValue)
                 ->first(),
             DirectorySearchType::NETID => User::query()
-                ->where('username', 'ilike', trim($searchValue))
+                ->whereUsernameEquals($searchValue)
                 ->first(),
             DirectorySearchType::EMPLOYEE_ID => User::query()
                 ->where('employee_id', '=', trim($searchValue))
@@ -153,23 +152,17 @@ readonly class CreateUserByLookup
 
         // Synchronize user attributes with directory data (does not save yet)
         if ($searchType === DirectorySearchType::EMAIL) {
-            $user = ($this->directorySync)($this->findUserByEmail($directoryData['mail']), $directoryData);
+            $user = ($this->directorySync)(
+                User::firstExistingByEmailOrNewSso($directoryData['mail']),
+                $directoryData,
+            );
         } else {
-            $user = ($this->directorySync)($this->userRepository->findOrNewByNetId($directoryData['uid']), $directoryData);
+            $user = ($this->directorySync)(
+                User::firstExistingSsoByNetIdOrNew($directoryData['uid']),
+                $directoryData,
+            );
         }
 
-        return $this->userRepository->save($user);
-    }
-
-    private function findUserByEmail(string $email): User
-    {
-        $normalizedEmail = strtolower(trim($email));
-
-        $ssoUser = $this->userRepository->findByEmail($normalizedEmail);
-
-        return $ssoUser ?? $this->userRepository->findLocalUserByEmail($normalizedEmail) ?? new User([
-            'email' => $normalizedEmail,
-            'auth_type' => AuthTypeEnum::SSO,
-        ]);
+        return ($this->persistUserWithUniqueUsername)($user);
     }
 }

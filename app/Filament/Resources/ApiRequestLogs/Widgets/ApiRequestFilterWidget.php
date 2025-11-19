@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\ApiRequestLogs\Widgets;
 
-use App\Domains\User\Enums\AuthTypeEnum;
 use App\Domains\User\Models\User;
 use Carbon\Carbon;
 use Filament\Forms\Components\Select;
@@ -54,7 +53,7 @@ class ApiRequestFilterWidget extends Widget implements HasForms
                     ->placeholder('All Users')
                     ->options(function () {
                         return User::query()
-                            ->where('auth_type', AuthTypeEnum::API)
+                            ->api()
                             ->orderBy('username')
                             ->pluck('username', 'id');
                     })
