@@ -71,7 +71,7 @@ class SendApiTokenExpirationNotificationsCommand extends Command
      */
     private function getExpiringTokens(int $daysBeforeExpiration): Collection
     {
-        $now = Carbon::now(timezone: 'UTC');
+        $now = Carbon::now(timezone: config('app.timezone'));
         $targetDate = $now->copy()->addDays($daysBeforeExpiration);
 
         return ApiToken::query()
