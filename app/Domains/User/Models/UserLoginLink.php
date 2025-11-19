@@ -10,9 +10,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class LoginLink extends BaseModel
+class UserLoginLink extends BaseModel
 {
-    protected $table = 'user_login_links';
+    protected $table = 'user_one_time_login_links';
 
     protected $casts = [
         'expires_at' => 'datetime',

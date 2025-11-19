@@ -86,10 +86,10 @@ class User extends Authenticatable implements Auditable, FilamentUser, HasName
         return $this->hasOne(UserLoginRecord::class)->latestOfMany();
     }
 
-    /** @return HasMany<LoginLink, $this> */
+    /** @return HasMany<UserLoginLink, $this> */
     public function login_links(): HasMany
     {
-        return $this->hasMany(LoginLink::class);
+        return $this->hasMany(UserLoginLink::class);
     }
 
     /**

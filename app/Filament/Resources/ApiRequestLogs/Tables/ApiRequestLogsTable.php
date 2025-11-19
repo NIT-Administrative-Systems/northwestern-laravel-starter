@@ -123,7 +123,7 @@ class ApiRequestLogsTable
                     ->dateTime()
                     ->since()
                     ->dateTimeTooltip()
-                    ->sortable(query: fn (Builder $query, string $direction): Builder => $query->orderBy('user_api_token_request_logs.created_at', $direction)),
+                    ->sortable(query: fn (Builder $query, string $direction): Builder => $query->orderBy('api_request_logs.created_at', $direction)),
             ])
             ->defaultSort('created_at', 'desc')
             ->heading('API Request Logs')

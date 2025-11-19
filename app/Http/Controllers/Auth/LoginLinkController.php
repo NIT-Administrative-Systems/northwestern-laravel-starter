@@ -7,7 +7,7 @@ namespace App\Http\Controllers\Auth;
 use App\Domains\User\Actions\DetermineUserSegment;
 use App\Domains\User\Actions\SendLoginLink;
 use App\Domains\User\Actions\ValidateLoginLink;
-use App\Domains\User\Models\LoginLink;
+use App\Domains\User\Models\UserLoginLink;
 use App\Domains\User\Repositories\UserRepository;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\SendLoginLinkRequest;
@@ -117,9 +117,9 @@ class LoginLinkController extends Controller
                 ]);
         }
 
-        $hashedToken = LoginLink::hashFromPlain($token);
+        $hashedToken = UserLoginLink::hashFromPlain($token);
 
-        $loginLink = LoginLink::where('token', $hashedToken)->firstOrFail();
+        $loginLink = UserLoginLink::where('token', $hashedToken)->firstOrFail();
         $loginLink->markAsUsed($request->ip());
 
         if (! $user->email_verified_at) {

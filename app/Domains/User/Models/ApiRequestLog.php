@@ -15,11 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class ApiRequestLog extends Model
 {
     /** @use HasFactory<ApiRequestLogFactory> */
-    use HasFactory;
-
-    use MassPrunable;
-
-    protected $table = 'user_api_token_request_logs';
+    use HasFactory, MassPrunable;
 
     public const null UPDATED_AT = null;
 
@@ -27,22 +23,6 @@ class ApiRequestLog extends Model
         'failure_reason' => ApiRequestFailureEnum::class,
         'created_at' => 'datetime',
     ];
-
-    /**
-     * @return BelongsTo<User, $this>
-     */
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
-    }
-
-    /**
-     * @return BelongsTo<ApiToken, $this>
-     */
-    public function api_token(): BelongsTo
-    {
-        return $this->belongsTo(ApiToken::class, 'user_api_token_id');
-    }
 
     /**
      * Automatically deletes logs older than the configured retention period.
@@ -58,5 +38,21 @@ class ApiRequestLog extends Model
         }
 
         return static::query()->where('created_at', '<', now()->subDays($retentionDays));
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /**
+     * @return BelongsTo<ApiToken, $this>
+     */
+    public function api_token(): BelongsTo
+    {
+        return $this->belongsTo(ApiToken::class, 'user_api_token_id');
     }
 }

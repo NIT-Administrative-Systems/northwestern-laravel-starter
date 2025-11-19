@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Tests\Feature\Http\Controllers\Auth;
 
 use App\Domains\User\Enums\UserSegmentEnum;
-use App\Domains\User\Models\LoginLink;
 use App\Domains\User\Models\User;
+use App\Domains\User\Models\UserLoginLink;
 use App\Domains\User\Models\UserLoginRecord;
 use App\Http\Controllers\Auth\LoginLinkController;
 use Illuminate\Support\Facades\Mail;
@@ -128,9 +128,9 @@ class LoginLinkControllerTest extends TestCase
         $user = User::factory()->affiliate()->create(['email' => 'test@example.com']);
         $rawToken = Str::random(64);
 
-        LoginLink::create([
+        UserLoginLink::create([
             'user_id' => $user->id,
-            'token' => LoginLink::hashFromPlain($rawToken),
+            'token' => UserLoginLink::hashFromPlain($rawToken),
             'email' => $user->email,
             'expires_at' => now()->addMinutes(15),
         ]);
@@ -146,9 +146,9 @@ class LoginLinkControllerTest extends TestCase
         $user = User::factory()->affiliate()->create();
         $rawToken = Str::random(64);
 
-        LoginLink::create([
+        UserLoginLink::create([
             'user_id' => $user->id,
-            'token' => LoginLink::hashFromPlain($rawToken),
+            'token' => UserLoginLink::hashFromPlain($rawToken),
             'email' => $user->email,
             'expires_at' => now()->addMinutes(15),
         ]);
@@ -165,9 +165,9 @@ class LoginLinkControllerTest extends TestCase
         $user = User::factory()->affiliate()->create();
         $rawToken = Str::random(64);
 
-        $loginLink = LoginLink::create([
+        $loginLink = UserLoginLink::create([
             'user_id' => $user->id,
-            'token' => LoginLink::hashFromPlain($rawToken),
+            'token' => UserLoginLink::hashFromPlain($rawToken),
             'email' => $user->email,
             'expires_at' => now()->addMinutes(15),
         ]);
@@ -184,9 +184,9 @@ class LoginLinkControllerTest extends TestCase
         $user = User::factory()->affiliate()->create();
         $rawToken = Str::random(64);
 
-        $loginLink = LoginLink::create([
+        $loginLink = UserLoginLink::create([
             'user_id' => $user->id,
-            'token' => LoginLink::hashFromPlain($rawToken),
+            'token' => UserLoginLink::hashFromPlain($rawToken),
             'email' => $user->email,
             'expires_at' => now()->addMinutes(15),
         ]);
@@ -213,9 +213,9 @@ class LoginLinkControllerTest extends TestCase
         ]);
         $rawToken = Str::random(64);
 
-        LoginLink::create([
+        UserLoginLink::create([
             'user_id' => $user->id,
-            'token' => LoginLink::hashFromPlain($rawToken),
+            'token' => UserLoginLink::hashFromPlain($rawToken),
             'email' => $user->email,
             'expires_at' => now()->addMinutes(15),
         ]);
@@ -240,9 +240,9 @@ class LoginLinkControllerTest extends TestCase
 
         $rawToken = Str::random(64);
 
-        LoginLink::create([
+        UserLoginLink::create([
             'user_id' => $user->id,
-            'token' => LoginLink::hashFromPlain($rawToken),
+            'token' => UserLoginLink::hashFromPlain($rawToken),
             'email' => $user->email,
             'expires_at' => now()->addMinutes(15),
         ]);
@@ -262,9 +262,9 @@ class LoginLinkControllerTest extends TestCase
         $user = User::factory()->affiliate()->create();
         $rawToken = Str::random(64);
 
-        LoginLink::create([
+        UserLoginLink::create([
             'user_id' => $user->id,
-            'token' => LoginLink::hashFromPlain($rawToken),
+            'token' => UserLoginLink::hashFromPlain($rawToken),
             'email' => $user->email,
             'expires_at' => now()->addMinutes(15),
         ]);
@@ -284,9 +284,9 @@ class LoginLinkControllerTest extends TestCase
         $user = User::factory()->affiliate()->create();
         $rawToken = Str::random(64);
 
-        LoginLink::create([
+        UserLoginLink::create([
             'user_id' => $user->id,
-            'token' => LoginLink::hashFromPlain($rawToken),
+            'token' => UserLoginLink::hashFromPlain($rawToken),
             'email' => $user->email,
             'expires_at' => now()->addMinutes(15),
         ]);
@@ -305,9 +305,9 @@ class LoginLinkControllerTest extends TestCase
         $user = User::factory()->affiliate()->create();
         $rawToken = Str::random(64);
 
-        LoginLink::create([
+        UserLoginLink::create([
             'user_id' => $user->id,
-            'token' => LoginLink::hashFromPlain($rawToken),
+            'token' => UserLoginLink::hashFromPlain($rawToken),
             'email' => $user->email,
             'expires_at' => now()->addMinutes(15),
         ]);

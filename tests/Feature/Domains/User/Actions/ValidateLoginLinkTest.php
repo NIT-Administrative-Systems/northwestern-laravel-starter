@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Tests\Feature\Domains\User\Actions;
 
 use App\Domains\User\Actions\ValidateLoginLink;
-use App\Domains\User\Models\LoginLink;
 use App\Domains\User\Models\User;
+use App\Domains\User\Models\UserLoginLink;
 use Illuminate\Support\Str;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
@@ -18,9 +18,9 @@ class ValidateLoginLinkTest extends TestCase
     {
         $user = User::factory()->affiliate()->create();
         $rawToken = Str::random(64);
-        $hashedToken = LoginLink::hashFromPlain($rawToken);
+        $hashedToken = UserLoginLink::hashFromPlain($rawToken);
 
-        LoginLink::create([
+        UserLoginLink::create([
             'user_id' => $user->id,
             'token' => $hashedToken,
             'email' => $user->email,
@@ -39,9 +39,9 @@ class ValidateLoginLinkTest extends TestCase
         $correctToken = Str::random(64);
         $wrongToken = Str::random(64);
 
-        LoginLink::create([
+        UserLoginLink::create([
             'user_id' => $user->id,
-            'token' => LoginLink::hashFromPlain($correctToken),
+            'token' => UserLoginLink::hashFromPlain($correctToken),
             'email' => $user->email,
             'expires_at' => now()->addMinutes(15),
         ]);
@@ -63,7 +63,7 @@ class ValidateLoginLinkTest extends TestCase
         $user = User::factory()->affiliate()->create();
         $rawToken = Str::random(64);
 
-        LoginLink::create([
+        UserLoginLink::create([
             'user_id' => $user->id,
             'token' => hash('sha256', $rawToken),
             'email' => $user->email,
@@ -80,9 +80,9 @@ class ValidateLoginLinkTest extends TestCase
         $user = User::factory()->affiliate()->create();
         $rawToken = Str::random(64);
 
-        LoginLink::create([
+        UserLoginLink::create([
             'user_id' => $user->id,
-            'token' => LoginLink::hashFromPlain($rawToken),
+            'token' => UserLoginLink::hashFromPlain($rawToken),
             'email' => $user->email,
             'expires_at' => now()->addMinutes(15),
             'used_at' => now()->subMinutes(5),
@@ -99,16 +99,16 @@ class ValidateLoginLinkTest extends TestCase
         $token1 = Str::random(64);
         $token2 = Str::random(64);
 
-        LoginLink::create([
+        UserLoginLink::create([
             'user_id' => $user->id,
-            'token' => LoginLink::hashFromPlain($token1),
+            'token' => UserLoginLink::hashFromPlain($token1),
             'email' => $user->email,
             'expires_at' => now()->addMinutes(15),
         ]);
 
-        LoginLink::create([
+        UserLoginLink::create([
             'user_id' => $user->id,
-            'token' => LoginLink::hashFromPlain($token2),
+            'token' => UserLoginLink::hashFromPlain($token2),
             'email' => $user->email,
             'expires_at' => now()->addMinutes(15),
         ]);
@@ -128,9 +128,9 @@ class ValidateLoginLinkTest extends TestCase
         $user2 = User::factory()->affiliate()->create(['email' => 'user2@example.com']);
         $rawToken = Str::random(64);
 
-        LoginLink::create([
+        UserLoginLink::create([
             'user_id' => $user1->id,
-            'token' => LoginLink::hashFromPlain($rawToken),
+            'token' => UserLoginLink::hashFromPlain($rawToken),
             'email' => $user1->email,
             'expires_at' => now()->addMinutes(15),
         ]);
@@ -147,9 +147,9 @@ class ValidateLoginLinkTest extends TestCase
         $user = User::factory()->affiliate()->create();
         $rawToken = Str::random(64);
 
-        LoginLink::create([
+        UserLoginLink::create([
             'user_id' => $user->id,
-            'token' => LoginLink::hashFromPlain($rawToken),
+            'token' => UserLoginLink::hashFromPlain($rawToken),
             'email' => $user->email,
             'expires_at' => now()->subMinute(),
             'used_at' => now()->subMinutes(5),

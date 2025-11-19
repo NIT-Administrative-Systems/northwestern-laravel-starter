@@ -11,7 +11,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('user_login_links', static function (Blueprint $table) {
+        Schema::create('user_one_time_login_links', static function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id');
 
