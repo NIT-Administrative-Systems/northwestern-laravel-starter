@@ -30,6 +30,8 @@ class ImpersonationLog extends BaseModel
     /** @use HasFactory<UserFactory> */
     use HasFactory;
 
+    protected $table = 'user_impersonation_logs';
+
     /** @return BelongsTo<User, $this> */
     public function impersonator(): BelongsTo
     {

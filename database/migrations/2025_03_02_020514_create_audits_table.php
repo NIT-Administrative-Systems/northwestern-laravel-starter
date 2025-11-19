@@ -19,7 +19,9 @@ return new class extends Migration
             $morphPrefix = config('audit.user.morph_prefix', 'user');
 
             $table->bigIncrements('id');
+            $table->foreignId('impersonator_user_id')->nullable()->index();
             $table->uuid('trace_id')->nullable();
+
             $table->string($morphPrefix . '_type')->nullable();
             $table->unsignedBigInteger($morphPrefix . '_id')->nullable();
             $table->string('event');

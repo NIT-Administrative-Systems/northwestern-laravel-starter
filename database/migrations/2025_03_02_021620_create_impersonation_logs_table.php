@@ -11,17 +11,13 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('impersonation_logs', static function (Blueprint $table) {
+        Schema::create('user_impersonation_logs', static function (Blueprint $table) {
             $table->id();
 
             $table->foreignId('impersonator_user_id')->index();
             $table->foreignId('impersonated_user_id')->index();
 
             $table->timestamps();
-        });
-
-        Schema::table('audits', static function (Blueprint $table) {
-            $table->foreignId('impersonator_user_id')->nullable()->index();
         });
     }
 
