@@ -74,7 +74,7 @@ class SendApiTokenExpirationNotificationsCommand extends Command
      */
     private function getExpiringTokens(int $daysBeforeExpiration): Collection
     {
-        $now = Carbon::now();
+        $now = Carbon::now(timezone: 'UTC');
         $targetDate = $now->copy()->addDays($daysBeforeExpiration);
 
         return ApiToken::query()
@@ -83,6 +83,7 @@ class SendApiTokenExpirationNotificationsCommand extends Command
                 $query->whereNotNull('email')
                     ->where('email', '!=', config('mail.from.address'));
             })
+            ->whereNull('revoked_at')
             ->whereNotNull('valid_to')
             ->whereBetween('valid_to', [
                 $targetDate->copy()->startOfDay(),
