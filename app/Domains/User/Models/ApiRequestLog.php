@@ -24,9 +24,6 @@ class ApiRequestLog extends Model
     public const null UPDATED_AT = null;
 
     protected $casts = [
-        'request_headers' => 'array',
-        'request_body' => 'array',
-        'response_body' => 'array',
         'failure_reason' => ApiRequestFailureEnum::class,
         'created_at' => 'datetime',
     ];
