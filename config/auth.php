@@ -90,6 +90,9 @@ return [
         | endpoints. It identifies the API "realm" so clients know which API
         | is requesting bearer credentials.
         |
+        | This value will also be shown in API token expiration notifications
+        | if the feature is enabled.
+        |
         */
 
         'auth_realm' => config('app.name') . ' API',
@@ -130,6 +133,22 @@ return [
             // Threshold (in milliseconds) used to categorize a request as "slow"
             // for internal monitoring/display purposes.
             'slow_request_threshold_ms' => 500,
+
+            /*
+            |--------------------------------------------------------------------------
+            | Data Retention
+            |--------------------------------------------------------------------------
+            |
+            | Automatically delete logs older than this many days to prevent unbounded
+            | database growth.
+            |
+            | Set to 0 to disable automatic pruning (not recommended for production).
+            | For high-traffic apps, consider using a dedicated observability tool
+            | instead (Sentry, New Relic, Datadog, etc.).
+            |
+            */
+
+            'retention_days' => (int) env('API_REQUEST_LOG_RETENTION_DAYS', 90),
 
             /*
             |--------------------------------------------------------------------------
@@ -176,7 +195,7 @@ return [
         |
         | The plaintext Bearer token to be assigned to the demo API user account
         | created by the DemoUserSeeder.
-
+        |
         | If not specified, a secure random token will be auto-generated. Set this
         | to a known, simple value in local development for convenient API testing
         | with consistent credentials across database refreshes. The system will

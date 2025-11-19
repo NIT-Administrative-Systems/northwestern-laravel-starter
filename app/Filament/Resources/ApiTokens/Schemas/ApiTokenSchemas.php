@@ -59,13 +59,6 @@ class ApiTokenSchemas
                     ->label('Valid To')
                     ->placeholder('Indefinite')
                     ->native(false)
-                    ->default(function ($record) {
-                        if ($record instanceof ApiToken && $record->valid_to) {
-                            return $record->valid_to->timezone(auth()->user()->timezone);
-                        }
-
-                        return null;
-                    })
                     ->minDate(fn (callable $get) => $get('valid_from')),
 
                 TagsInput::make('allowed_ips')
@@ -144,7 +137,7 @@ class ApiTokenSchemas
             ->icon(Heroicon::OutlinedExclamationTriangle)
             ->iconColor('warning')
             ->iconSize(IconSize::Large)
-            ->description('The Bearer token will not be shown again. Make sure to copy it now.')
+            ->description('This token will not be shown again. Make sure to copy it now.')
             ->schema([
                 CodeEntry::make('token')
                     ->label('Bearer Token')

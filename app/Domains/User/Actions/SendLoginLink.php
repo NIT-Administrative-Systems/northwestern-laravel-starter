@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Domains\User\Actions;
 
 use App\Domains\User\Mail\LoginLinkNotification;
-use App\Domains\User\Models\LoginLink;
 use App\Domains\User\Models\User;
+use App\Domains\User\Models\UserLoginLink;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
 use Illuminate\Support\Facades\Crypt;
@@ -26,7 +26,7 @@ use RuntimeException;
  */
 readonly class SendLoginLink
 {
-    public function __invoke(User $user, ?string $requestedIpAddress = null): LoginLink
+    public function __invoke(User $user, ?string $requestedIpAddress = null): UserLoginLink
     {
         if (! $user->is_local_user) {
             throw new RuntimeException('Login links can only be sent to local users.');
@@ -45,7 +45,7 @@ readonly class SendLoginLink
         }
 
         $rawToken = Str::random(length: 64);
-        $hashedToken = LoginLink::hashFromPlain($rawToken);
+        $hashedToken = UserLoginLink::hashFromPlain($rawToken);
 
         $loginLink = DB::transaction(function () use ($user, $hashedToken, $requestedIpAddress, $rateLimitKey) {
             $link = $user->login_links()->create([

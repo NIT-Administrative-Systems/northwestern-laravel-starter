@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domains\User\Actions;
 
-use App\Domains\User\Models\LoginLink;
 use App\Domains\User\Models\User;
+use App\Domains\User\Models\UserLoginLink;
 use SensitiveParameter;
 
 /**
@@ -22,9 +22,9 @@ readonly class ValidateLoginLink
         #[SensitiveParameter]
         string $rawToken
     ): ?User {
-        $hashedToken = LoginLink::hashFromPlain($rawToken);
+        $hashedToken = UserLoginLink::hashFromPlain($rawToken);
 
-        return LoginLink::query()
+        return UserLoginLink::query()
             ->where('token', $hashedToken)
             ->unused()
             ->notExpired()

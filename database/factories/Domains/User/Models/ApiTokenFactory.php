@@ -25,12 +25,17 @@ class ApiTokenFactory extends Factory
 
         return [
             'user_id' => User::factory(),
-            'token_prefix' => mb_substr($rawToken, 0, 5),
-            'token_hash' => ApiToken::hashFromPlain($rawToken),
             'valid_from' => now(),
-            'valid_to' => null,
-            'last_used_at' => null,
+            'valid_to' => now()->addDays(90),
+            'allowed_ips' => null,
             'usage_count' => 0,
+            'last_used_at' => null,
+            'expiration_notified_at' => null,
+            'revoked_at' => null,
+            'rotated_from_token_id' => null,
+            'rotated_by_user_id' => null,
+            'token_hash' => ApiToken::hashFromPlain($rawToken),
+            'token_prefix' => mb_substr($rawToken, 0, 5),
         ];
     }
 }

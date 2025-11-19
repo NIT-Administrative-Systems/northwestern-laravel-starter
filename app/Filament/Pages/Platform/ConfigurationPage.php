@@ -33,6 +33,8 @@ class ConfigurationPage extends Page implements HasTable
 
     protected static ?string $title = 'Configuration';
 
+    protected ?string $subheading = 'System configuration overview';
+
     protected static ?string $navigationLabel = 'Configuration';
 
     protected static ?string $slug = 'configuration';

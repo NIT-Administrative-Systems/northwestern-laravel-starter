@@ -15,19 +15,21 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id');
 
-            $table->string('token_hash', 64)->unique();
-            $table->string('token_prefix', 5);
-
             $table->datetime('valid_from');
             $table->datetime('valid_to')->nullable();
             $table->json('allowed_ips')->nullable();
-            $table->unsignedBigInteger('usage_count')->default(0);
 
+            $table->unsignedBigInteger('usage_count')->default(0);
             $table->datetime('last_used_at')->nullable();
             $table->datetime('expiration_notified_at')->nullable();
             $table->datetime('revoked_at')->nullable();
+
             $table->foreignId('rotated_from_token_id')->nullable();
             $table->foreignId('rotated_by_user_id')->nullable();
+
+            $table->string('token_hash', 64)->unique();
+            $table->string('token_prefix');
+
             $table->timestamps();
 
             $table->index(['user_id', 'last_used_at', 'valid_from', 'id'], 'user_api_tokens_user_lookup');

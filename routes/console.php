@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Console\Commands\SendApiTokenExpirationNotificationsCommand;
+use Illuminate\Database\Console\PruneCommand;
 use Illuminate\Support\Facades\Schedule;
 use Laravel\Telescope\Console\PruneCommand as TelescopePruneCommand;
 use Livewire\Features\SupportConsoleCommands\Commands\S3CleanupCommand as CleanTemporaryS3FilesCommand;
@@ -51,11 +52,11 @@ use Spatie\Health\Commands\RunHealthChecksCommand;
 
 Schedule::command(TelescopePruneCommand::class)->daily();
 Schedule::command(CleanTemporaryS3FilesCommand::class)->daily();
+Schedule::command(PruneCommand::class)->daily();
 
 if (config('auth.api.expiration_notifications.enabled')) {
     Schedule::command(SendApiTokenExpirationNotificationsCommand::class)
-        ->dailyAt('09:00')
-        ->timezone(config('app.schedule_timezone'));
+        ->dailyAt('09:00');
 }
 
 /*

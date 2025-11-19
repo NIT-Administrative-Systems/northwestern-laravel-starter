@@ -6,8 +6,8 @@ namespace Tests\Feature\Domains\User\Actions;
 
 use App\Domains\User\Actions\SendLoginLink;
 use App\Domains\User\Mail\LoginLinkNotification;
-use App\Domains\User\Models\LoginLink;
 use App\Domains\User\Models\User;
+use App\Domains\User\Models\UserLoginLink;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
@@ -125,7 +125,7 @@ class SendLoginLinkTest extends TestCase
 
         // Second user should still work
         $loginLink = $this->action()($user2);
-        $this->assertInstanceOf(LoginLink::class, $loginLink);
+        $this->assertInstanceOf(UserLoginLink::class, $loginLink);
     }
 
     public function test_can_handle_null_ip_address(): void

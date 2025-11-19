@@ -7,8 +7,8 @@ namespace App\Http\Controllers\Auth;
 use App\Domains\User\Actions\DetermineUserSegment;
 use App\Domains\User\Actions\SendLoginLink;
 use App\Domains\User\Actions\ValidateLoginLink;
-use App\Domains\User\Models\LoginLink;
-use App\Domains\User\Repositories\UserRepository;
+use App\Domains\User\Models\User;
+use App\Domains\User\Models\UserLoginLink;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\SendLoginLinkRequest;
 use Carbon\CarbonInterval;
@@ -41,7 +41,6 @@ class LoginLinkController extends Controller
     public function __construct(
         private readonly SendLoginLink $sendLoginLink,
         private readonly ValidateLoginLink $validateLoginLink,
-        private readonly UserRepository $userRepository,
         private readonly DetermineUserSegment $determineUserSegment,
     ) {
         //
@@ -78,7 +77,10 @@ class LoginLinkController extends Controller
         $email = $request->email();
         $start = microtime(true);
 
-        $user = $this->userRepository->findLocalUserByEmail($email);
+        $user = User::query()
+            ->local()
+            ->whereEmailEquals($email)
+            ->first();
 
         if ($user) {
             try {
@@ -117,9 +119,9 @@ class LoginLinkController extends Controller
                 ]);
         }
 
-        $hashedToken = LoginLink::hashFromPlain($token);
+        $hashedToken = UserLoginLink::hashFromPlain($token);
 
-        $loginLink = LoginLink::where('token', $hashedToken)->firstOrFail();
+        $loginLink = UserLoginLink::where('token', $hashedToken)->firstOrFail();
         $loginLink->markAsUsed($request->ip());
 
         if (! $user->email_verified_at) {

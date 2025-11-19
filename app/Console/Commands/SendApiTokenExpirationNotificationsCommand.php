@@ -19,9 +19,6 @@ class SendApiTokenExpirationNotificationsCommand extends Command
 
     protected $description = 'Send expiration notifications for API tokens that are approaching their expiration date';
 
-    /**
-     * Execute the console command.
-     */
     public function handle(): int
     {
         if (! config('auth.api.expiration_notifications.enabled')) {
@@ -74,7 +71,7 @@ class SendApiTokenExpirationNotificationsCommand extends Command
      */
     private function getExpiringTokens(int $daysBeforeExpiration): Collection
     {
-        $now = Carbon::now();
+        $now = Carbon::now(timezone: config('app.timezone'));
         $targetDate = $now->copy()->addDays($daysBeforeExpiration);
 
         return ApiToken::query()
@@ -83,6 +80,7 @@ class SendApiTokenExpirationNotificationsCommand extends Command
                 $query->whereNotNull('email')
                     ->where('email', '!=', config('mail.from.address'));
             })
+            ->whereNull('revoked_at')
             ->whereNotNull('valid_to')
             ->whereBetween('valid_to', [
                 $targetDate->copy()->startOfDay(),
@@ -116,14 +114,6 @@ class SendApiTokenExpirationNotificationsCommand extends Command
         ]);
 
         $this->components->success("Email sent successfully to {$user->email}");
-
-        Log::info('API token expiration notification sent', [
-            'user_id' => $user->id,
-            'username' => $user->username,
-            'token_id' => $token->id,
-            'days_until_expiration' => $daysUntilExpiration,
-            'expiration_date' => $token->valid_to?->toIso8601String(),
-        ]);
     }
 
     /**
@@ -133,7 +123,7 @@ class SendApiTokenExpirationNotificationsCommand extends Command
     {
         $user = $token->user;
 
-        $this->components->error("    Failed to send notification for {$user->username}: {$e->getMessage()}");
+        $this->components->error("Failed to send notification for {$user->username}: {$e->getMessage()}");
 
         Log::error('Failed to send API token expiration notification', [
             'user_id' => $user->id,

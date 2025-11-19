@@ -10,4 +10,6 @@ use Filament\Resources\Pages\ListRecords;
 class ListAudits extends ListRecords
 {
     protected static string $resource = AuditResource::class;
+
+    protected ?string $subheading = 'Model change history and revision tracking';
 }

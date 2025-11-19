@@ -6,7 +6,6 @@ namespace App\Domains\User\Jobs;
 
 use App\Domains\User\Enums\AuthTypeEnum;
 use App\Domains\User\Models\User;
-use App\Domains\User\Repositories\UserRepository;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Storage;
@@ -25,7 +24,7 @@ class DownloadWildcardPhotoJob implements ShouldQueue
         //
     }
 
-    public function handle(UserRepository $userRepository, DirectorySearch $directorySearch): void
+    public function handle(DirectorySearch $directorySearch): void
     {
         // Non-Northwestern users don't have a Wildcard photo, so there's no action to take.
         if ($this->user->auth_type !== AuthTypeEnum::SSO || ! config('platform.wildcard_photo_sync')) {
@@ -48,6 +47,9 @@ class DownloadWildcardPhotoJob implements ShouldQueue
             Storage::disk('s3')->put($photoS3Key, $decodedPhoto);
         }
 
-        $userRepository->updateWildcardPhoto($this->user, $photoS3Key);
+        $this->user->update([
+            'wildcard_photo_s3_key' => $photoS3Key,
+            'wildcard_photo_last_synced_at' => now(),
+        ]);
     }
 }
