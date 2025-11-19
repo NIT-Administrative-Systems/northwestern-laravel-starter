@@ -9,9 +9,12 @@ use App\Domains\User\Enums\PermissionEnum;
 use App\Domains\User\Models\ApiToken;
 use App\Filament\Resources\ApiTokens\Schemas\ApiTokenSchemas;
 use Filament\Actions\Action;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Wizard;
 use Filament\Support\Enums\Size;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\HtmlString;
 
 class RotateApiTokenAction extends Action
 {
@@ -35,6 +38,18 @@ class RotateApiTokenAction extends Action
             ->steps([
                 Wizard\Step::make('Rotate Token')
                     ->schema([
+                        Section::make('Notice')
+                            ->icon(Heroicon::OutlinedExclamationTriangle)
+                            ->schema([
+                                TextEntry::make('rotate_notice')
+                                    ->hiddenLabel()
+                                    ->color('warning')
+                                    ->default(new HtmlString(<<<'HTML'
+Rotating this token will immediately deactivate the current credential and generate a new <code>Bearer</code> token. Any system or integration that relies on this token will need to be updated to use the new value.<br><br>
+If you need a transition period, you can create a new token first, update your integration(s) accordingly, and then revoke the current token once the change is complete.
+HTML))
+                                    ->columnSpanFull(),
+                            ]),
                         ApiTokenSchemas::tokenConfigurationSection(),
                     ])
                     ->afterValidation(function (
