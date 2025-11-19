@@ -3,7 +3,7 @@
 
 Hello,
 
-A Bearer token associated with **{{ $user->full_name }}** (`{{ $user->username }}`) is nearing its expiration date.
+An API token for **{{ config('auth.api.auth_realm') }}** associated with **{{ $user->full_name }}** (`{{ $user->username }}`) is nearing its expiration date.
 
 ## Token Details
 
@@ -18,26 +18,15 @@ A Bearer token associated with **{{ $user->full_name }}** (`{{ $user->username }
 **Action Recommended:** Consider rotating this token ahead of time to prevent any service interruptions.
 @endif
 
-## Required Steps
-
-1. Log in to **{{ config('app.name') }}**
-2. Navigate to the API User's profile
-3. Create a new token before the current one expires
-4. Update any integration that uses the `Authorization: Bearer {token}` header with the new credential
-5. Rotate the expiring token to prevent additional notifications
-
 @if($token->usage_count > 0)
-**Note:** This token has been used {{ number_format($token->usage_count) }} {{ Str::plural('time', $token->usage_count) }}. Please ensure you update all systems using this token before revoking it.
+**Note:** This token has been used {{ number_format($token->usage_count) }} {{ Str::plural('time', $token->usage_count) }} and was last used on {{ $token->last_used_at?->format('F j, Y \a\t g:i A T') }}.
+Please ensure you update all systems using this token before revoking it.
 @endif
-
-<x-mail::button :url="config('app.url')">
-View API User Profile
-</x-mail::button>
 
 Thanks,<br>
 {{ config('app.name') }}
 
 <x-slot:subcopy>
-This is an automated notification. If you believe you received this email in error, please contact your administrator.
+This is an automated notification. If you believe you received this email in error, please contact an administrator.
 </x-slot:subcopy>
 </x-mail::message>

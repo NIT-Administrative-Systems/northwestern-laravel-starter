@@ -90,6 +90,9 @@ return [
         | endpoints. It identifies the API "realm" so clients know which API
         | is requesting bearer credentials.
         |
+        | This value will also be shown in API token expiration notifications
+        | if the feature is enabled.
+        |
         */
 
         'auth_realm' => config('app.name') . ' API',
