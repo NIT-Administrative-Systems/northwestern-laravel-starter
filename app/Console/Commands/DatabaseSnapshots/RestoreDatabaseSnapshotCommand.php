@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Console\Commands;
+namespace App\Console\Commands\DatabaseSnapshots;
 
 use App\Domains\Core\Database\ConfigurableDbDumperFactory;
 use App\Domains\Core\Database\SchemaChecksumManager;

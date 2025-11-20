@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\Http\Controllers\Admin;
+namespace Tests\Feature\Http\Controllers\Auth;
 
 use App\Domains\User\Actions\Impersonation\StartImpersonation;
 use App\Domains\User\Actions\Impersonation\StopImpersonation;
 use App\Domains\User\Models\User;
-use App\Http\Controllers\Admin\ImpersonationController;
+use App\Http\Controllers\Auth\ImpersonationController;
+use Illuminate\Support\Facades\Session;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
@@ -28,6 +29,21 @@ class ImpersonationControllerTest extends TestCase
         $response = $this->get('/impersonate/take/2/web');
 
         $response->assertRedirect('https://example.com/dashboard');
+    }
+
+    public function test_take_impersonation_redirects_to_custom_non_root_url(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $this->mock(StartImpersonation::class, function ($mock) {
+            $mock->expects('__invoke')
+                ->andReturns('/admin/users');
+        });
+
+        $response = $this->get('/impersonate/take/2/web');
+
+        $response->assertRedirect('/admin/users');
     }
 
     public function test_take_impersonation_redirects_back(): void
@@ -78,5 +94,41 @@ class ImpersonationControllerTest extends TestCase
         $response->assertRedirect('/auth/type');
 
         $this->assertGuest();
+    }
+
+    public function test_take_impersonation_redirects_to_referer_if_redirect_is_root(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $referer = 'https://my-app.test/current/page';
+
+        $this->mock(StartImpersonation::class, function ($mock) {
+            $mock->expects('__invoke')
+                ->andReturns('/');
+        });
+
+        $response = $this->get('/impersonate/take/2/web', [
+            'Referer' => $referer,
+        ]);
+
+        $response->assertRedirect($referer);
+    }
+
+    public function test_take_impersonation_stores_valid_referer_url_in_session(): void
+    {
+        Session::start();
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $referer = 'https://my-app.test/some-page';
+
+        $this->mock(StartImpersonation::class, function ($mock) {
+            $mock->expects('__invoke')->andReturns('back');
+        });
+
+        $this->get('/impersonate/take/2/web', ['Referer' => $referer]);
+
+        $this->assertSame($referer, session('impersonation.return_url'));
     }
 }

@@ -24,7 +24,7 @@ Route::prefix('auth')->group(function () {
     });
 });
 
-Route::get('/impersonate/take/{id}/{guardName?}', [Controllers\Admin\ImpersonationController::class, 'take'])->name('impersonate');
-Route::get('/impersonate/leave', [Controllers\Admin\ImpersonationController::class, 'leave'])->name('impersonate.leave');
+Route::get('/impersonate/take/{id}/{guardName?}', [Controllers\Auth\ImpersonationController::class, 'take'])->name('impersonate');
+Route::get('/impersonate/leave', [Controllers\Auth\ImpersonationController::class, 'leave'])->name('impersonate.leave');
 
 Route::sentryTunnel(withoutMiddleware: [VerifyCsrfToken::class]);

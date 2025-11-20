@@ -13,11 +13,10 @@ use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Context;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\IpUtils;
 use Symfony\Component\HttpFoundation\Response;
-
-use function Illuminate\Support\defer;
 
 /**
  * Authenticates API requests using Bearer token authentication with {@see ApiToken} records.
@@ -83,16 +82,14 @@ class AuthenticatesApiTokens
             $this->fail(ApiRequestFailureEnum::IP_DENIED);
         }
 
-        Auth::onceUsingId($user->getKey());
+        DB::table('user_api_tokens')
+            ->where('id', $apiToken->getKey())
+            ->update([
+                'usage_count' => DB::raw('usage_count + 1'),
+                'last_used_at' => now(),
+            ]);
 
-        defer(function () use ($apiToken) {
-            ApiToken::withoutAuditing(function () use ($apiToken) {
-                $apiToken->increment(
-                    column: 'usage_count',
-                    extra: ['last_used_at' => now()]
-                );
-            });
-        });
+        Auth::onceUsingId($user->getKey());
 
         return $next($request);
     }

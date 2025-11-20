@@ -10,14 +10,14 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 
-class UserController extends Controller
+class WildcardPhotoController extends Controller
 {
     public function __construct()
     {
         $this->middleware('auth');
     }
 
-    public function showWildcardPhoto(User $user): RedirectResponse
+    public function show(User $user): RedirectResponse
     {
         $imageUrl = filled($user->wildcard_photo_s3_key) && Gate::allows('view', $user)
             ? Storage::temporaryUrl(

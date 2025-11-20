@@ -21,7 +21,9 @@ final class PersistUserWithUniqueUsername
     {
         return DB::transaction(function () use ($user) {
             try {
-                $user->save();
+                DB::transaction(function () use ($user) {
+                    $user->save();
+                });
 
                 return $user;
             } catch (UniqueConstraintViolationException) {

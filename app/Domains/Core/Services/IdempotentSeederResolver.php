@@ -20,7 +20,7 @@ use SplFileInfo;
  * their dependencies, and returns them in topologically sorted execution order using
  * depth-first search. Detects circular dependencies and missing references.
  */
-final class IdempotentSeederResolver
+class IdempotentSeederResolver
 {
     /**
      * @var array<class-string<IdempotentSeederInterface>, SeederInfo>
@@ -83,18 +83,6 @@ final class IdempotentSeederResolver
             $this->topologicalSort();
         } catch (RuntimeException $e) {
             $errors[] = $e->getMessage();
-        }
-
-        foreach ($this->seeders as $seederInfo) {
-            foreach ($seederInfo->dependsOn as $dependency) {
-                if (! isset($this->seeders[$dependency]) && ! class_exists($dependency)) {
-                    $errors[] = sprintf(
-                        "Seeder '%s' depends on '%s' which does not exist or is missing #[AutoSeed] attribute",
-                        $seederInfo->className,
-                        $dependency
-                    );
-                }
-            }
         }
 
         return $errors;
