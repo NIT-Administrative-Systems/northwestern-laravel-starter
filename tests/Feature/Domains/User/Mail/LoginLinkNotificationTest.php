@@ -28,7 +28,7 @@ class LoginLinkNotificationTest extends TestCase
         );
     }
 
-    public function test_content_decryps_token_and_generates_url(): void
+    public function test_content_decrypts_token_and_generates_url(): void
     {
         $user = User::factory()->make();
         $rawToken = 'my-secret-token-123';
