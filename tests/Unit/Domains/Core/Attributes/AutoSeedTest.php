@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\Domains\Core\Attributes;
+namespace Tests\Unit\Domains\Core\Attributes;
 
 use App\Domains\Core\Attributes\AutoSeed;
 use App\Domains\Core\Contracts\IdempotentSeederInterface;
