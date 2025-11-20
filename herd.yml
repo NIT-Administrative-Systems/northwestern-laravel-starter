@@ -1,4 +1,4 @@
-name: :app_slug
+name: northwestern-laravel-starter
 php: "8.4"
 secured: true
 aliases: {}
