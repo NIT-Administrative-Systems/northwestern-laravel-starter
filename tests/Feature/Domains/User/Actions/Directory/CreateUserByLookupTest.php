@@ -9,6 +9,8 @@ use App\Domains\User\Enums\AffiliationEnum;
 use App\Domains\User\Enums\AuthTypeEnum;
 use App\Domains\User\Exceptions\BadDirectoryEntry;
 use App\Domains\User\Models\User;
+use Illuminate\Contracts\Bus\Dispatcher;
+use Illuminate\Support\Facades\Exceptions;
 use Northwestern\SysDev\SOA\DirectorySearch;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
@@ -95,6 +97,42 @@ class CreateUserByLookupTest extends TestCase
         $this->expectException(BadDirectoryEntry::class);
         $this->expectExceptionMessage('no-email');
         $this->service(['directorySearch' => $directoryApi])('no-email');
+    }
+
+    public function test_returns_null_if_existing_user_is_api_type(): void
+    {
+        User::factory()->create([
+            'username' => 'api-user',
+            'auth_type' => AuthTypeEnum::API,
+        ]);
+
+        $result = $this->service()('api-user');
+
+        $this->assertNull($result);
+    }
+
+    public function test_catches_exception_during_immediate_job_dispatch(): void
+    {
+        config(['platform.wildcard_photo_sync' => true]);
+
+        $directoryApi = $this->createStub(DirectorySearch::class);
+        $directoryApi->method('lookup')->willReturn(self::studentData('abc123'));
+
+        $this->mock(Dispatcher::class, function ($mock) {
+            $mock->shouldReceive('dispatchSync')
+                ->once()
+                ->andThrow(new \Exception('Job dispatch failed'));
+        });
+
+        Exceptions::fake();
+
+        $user = $this->service(['directorySearch' => $directoryApi])('abc123', immediate: true);
+
+        $this->assertInstanceOf(User::class, $user);
+
+        Exceptions::assertReported(function (\Exception $e) {
+            return $e->getMessage() === 'Job dispatch failed';
+        });
     }
 
     public function test_missing_email_returns_existing_user(): void

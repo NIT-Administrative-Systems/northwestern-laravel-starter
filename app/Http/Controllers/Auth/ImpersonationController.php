@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Auth;
 
 use App\Domains\User\Actions\Impersonation\StartImpersonation;
 use App\Domains\User\Actions\Impersonation\StopImpersonation;

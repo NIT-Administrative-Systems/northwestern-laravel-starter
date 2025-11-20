@@ -24,9 +24,12 @@ class LoginSelectionController extends Controller
         }
 
         /**
-         * Out of the box, the application only handles OAuth login. If your application requires additional login methods,
-         * such as temporary logins for external users, you could alternatively redirect them to an interstitial login
-         * selection page by analyzing a cookie set by the application to differentiate them from regular users.
+         * In the CI environment (e.g. GitHub Actions), we show the login selection page
+         * instead of redirecting to Azure AD, since CI doesn't have Azure credentials
+         * and cannot perform real OAuth logins.
+         *
+         * This ensures that frontend tests or CI-driven browser interactions can reach
+         * the login page without triggering external auth flows.
          */
         if (App::environment('ci')) {
             return view('auth.login-selection');

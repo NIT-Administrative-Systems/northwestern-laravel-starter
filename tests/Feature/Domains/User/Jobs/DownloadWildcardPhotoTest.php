@@ -18,7 +18,7 @@ class DownloadWildcardPhotoTest extends TestCase
     {
         parent::setUp();
 
-        if (! config('platform.wildcard_photo_sync.enabled')) {
+        if (! config('platform.wildcard_photo_sync')) {
             $this->markTestSkipped('Wildcard photo sync is not enabled');
         }
     }

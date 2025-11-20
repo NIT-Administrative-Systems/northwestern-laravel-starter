@@ -25,7 +25,7 @@ class ValidateConfigurationCommand extends Command
      *
      * @return ConfigValidator[]
      */
-    private function validators(): array
+    protected function validators(): array
     {
         return [
             new EnvironmentVariablesValidator(),

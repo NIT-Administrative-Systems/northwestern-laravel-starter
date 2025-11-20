@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace Tests\Feature\Http\Controllers;
 
 use App\Domains\User\Models\User;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\WildcardPhotoController;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
-#[CoversClass(UserController::class)]
-class UserControllerTest extends TestCase
+#[CoversClass(WildcardPhotoController::class)]
+class WildcardPhotoControllerTest extends TestCase
 {
     private User $user;
 
@@ -24,7 +24,7 @@ class UserControllerTest extends TestCase
     {
         parent::setUp();
 
-        if (! config('platform.wildcard_photo_sync.enabled')) {
+        if (! config('platform.wildcard_photo_sync')) {
             $this->markTestSkipped('Wildcard photo sync is not enabled');
         }
 

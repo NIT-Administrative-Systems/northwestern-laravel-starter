@@ -67,7 +67,7 @@ readonly class CreateApiUser
             $user->api_tokens()->create([
                 'token_prefix' => mb_substr($rawToken, 0, 5),
                 'token_hash' => ApiToken::hashFromPlain($rawToken),
-                'valid_from' => $validFrom ?? Carbon::now(),
+                'valid_from' => $validFrom ?? Carbon::now()->toImmutable(),
                 'valid_to' => $validTo,
                 'allowed_ips' => $allowedIps,
             ]);

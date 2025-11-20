@@ -93,7 +93,7 @@ class UserBuilder extends Builder
     /**
      * Get the first LOCAL user matching the given email address, or null if none exist.
      */
-    public function findLocalByEmail(string $email): ?User
+    public function firstLocalByEmail(string $email): ?User
     {
         return $this->local()
             ->whereEmailEquals($email)
@@ -106,8 +106,8 @@ class UserBuilder extends Builder
      */
     public function firstByEmailSsoThenLocal(string $email): ?User
     {
-        return $this->firstSsoByEmail($email)
-            ?? $this->findLocalByEmail($email);
+        return (clone $this)->firstSsoByEmail($email)
+            ?? (clone $this)->firstLocalByEmail($email);
     }
 
     /**

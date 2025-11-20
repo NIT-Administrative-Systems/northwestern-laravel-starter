@@ -65,8 +65,6 @@ class WebSSOController extends Controller
      */
     protected function authenticated(Request $request, $user): void
     {
-        // Potentially expire a cookie used to differentiate between external users and internal users.
-
         $user->login_records()->create([
             'logged_in_at' => Carbon::now(),
             'segment' => ($this->determineUserSegment)($user),

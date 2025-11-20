@@ -77,10 +77,7 @@ class LoginLinkController extends Controller
         $email = $request->email();
         $start = microtime(true);
 
-        $user = User::query()
-            ->local()
-            ->whereEmailEquals($email)
-            ->first();
+        $user = User::firstLocalByEmail($email);
 
         if ($user) {
             try {
@@ -150,6 +147,8 @@ class LoginLinkController extends Controller
      * learned from response times as a side-channel.
      *
      * @throws ValidationException
+     *
+     * @codeCoverageIgnore
      */
     private function checkSessionRateLimit(Request $request): void
     {

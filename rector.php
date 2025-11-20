@@ -6,6 +6,7 @@ use Rector\Caching\ValueObject\Storage\FileCacheStorage;
 use Rector\Config\RectorConfig;
 use Rector\EarlyReturn\Rector\Return_\ReturnBinaryOrToEarlyReturnRector;
 use Rector\Php74\Rector\Closure\ClosureToArrowFunctionRector;
+use Rector\Php81\Rector\MethodCall\SpatieEnumMethodCallToEnumConstRector;
 use Rector\Php83\Rector\ClassMethod\AddOverrideAttributeToOverriddenMethodsRector;
 use Rector\PHPUnit;
 use Rector\TypeDeclaration\Rector\Closure\AddClosureVoidReturnTypeWhereNoReturnRector;
@@ -24,6 +25,7 @@ return RectorConfig::configure()
         AddClosureVoidReturnTypeWhereNoReturnRector::class,
         ReturnBinaryOrToEarlyReturnRector::class,
         ClosureToArrowFunctionRector::class,
+        SpatieEnumMethodCallToEnumConstRector::class,
     ])
     ->withPhpSets()
     ->withRules([
