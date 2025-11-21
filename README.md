@@ -3,18 +3,13 @@
         <source
             width="650px"
             media="(prefers-color-scheme: dark)"
-            srcset="art/readme-lockup-dark.svg"
+            srcset="art/readme-lockup-dark.png"
         >      
         <img
             width="650px"
-            src="art/readme-lockup-light.svg"
+            src="art/readme-lockup-light.png"
             alt="Northwestern Laravel Starter"/>
     </picture>
-</p>
-
-<p align="center">
-    <img src="https://img.shields.io/badge/PHP-8.4-blue" alt="PHP Version">
-    <img src="https://img.shields.io/badge/Laravel-12.x-red" alt="Laravel Version">
 </p>
 
 <hr/>
@@ -61,9 +56,6 @@ A robust, enterprise-ready Laravel starter kit tailored specifically for [Northw
 ### 📈 Monitoring & Operations
 - **Health Checks & Monitoring**: Built-in health checks to monitor critical system components.
 - **Analytics Dashboards**: Pre-built dashboards for API request metrics and login activity.
-
-### ➕ Additional Features
-See the [documentation](laravel-starter.entapp.northwestern.edu) for a full list of the available features.
 
 ## 📋 System Requirements
 
