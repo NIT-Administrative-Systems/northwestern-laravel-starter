@@ -26,6 +26,7 @@ class ApiRequestLogsTable
         $isRelationManager = $table->getLivewire() instanceof ApiRequestLogsRelationManager;
 
         return $table
+            ->poll()
             ->recordClasses(fn (ApiRequestLog $record): ?string => $record->duration_ms > (int) config('auth.api.request_logging.slow_request_threshold_ms')
                 ? 'bg-red-50/50 dark:bg-red-900/10'
                 : null)
