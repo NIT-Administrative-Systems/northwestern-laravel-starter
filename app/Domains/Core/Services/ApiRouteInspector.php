@@ -11,9 +11,8 @@ use Illuminate\Routing\Router;
  * Inspects the application's registered routes to determine whether any API endpoints
  * are protected by the {@see AuthenticatesApiTokens} middleware.
  *
- * This is used by the **API Request Logging** dashboard to decide whether metrics should
- * be displayed or whether a warning should be shown indicating that no protected API
- * routes exist.
+ * This is used by the **API Request Logging** dashboard to decide whether a warning
+ * should be shown indicating that no protected API routes exist.
  */
 readonly class ApiRouteInspector
 {

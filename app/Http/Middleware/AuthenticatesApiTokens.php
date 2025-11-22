@@ -34,8 +34,8 @@ class AuthenticatesApiTokens
      * Authenticates API requests using Bearer tokens with IP-based access control.
      *
      * This method validates Bearer tokens against stored HMAC-SHA256 hashes and enforces
-     * IP allowlists when configured. Failed authentication attempts are logged with specific
-     * failure reasons for security monitoring.
+     * IP allowlists when configured. Failed authentication attempts are logged with
+     * specific failure reasons for security monitoring.
      *
      * @param  Request  $request  The incoming HTTP request
      * @param  Closure(Request): (Response)  $next  The next middleware in the pipeline
