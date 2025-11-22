@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Sleep;
 use Illuminate\Validation\ValidationException;
 use RuntimeException;
+use SensitiveParameter;
 
 class LoginLinkController extends Controller
 {
@@ -102,8 +103,11 @@ class LoginLinkController extends Controller
         return back()->with('status', 'If an account with that email exists, a login link has been sent.');
     }
 
-    public function verify(Request $request, string $token): RedirectResponse
-    {
+    public function verify(
+        Request $request,
+        #[SensitiveParameter]
+        string $token
+    ): RedirectResponse {
         abort_unless(config('auth.local.enabled'), 404);
 
         $user = ($this->validateLoginLink)($token);

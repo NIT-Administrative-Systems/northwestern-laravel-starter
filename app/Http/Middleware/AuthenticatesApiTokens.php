@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Middleware;
 
 use App\Domains\Core\Enums\ApiRequestFailureEnum;
+use App\Domains\Core\Exceptions\MissingRequestIpForRestrictedToken;
 use App\Domains\Core\ValueObjects\ApiRequestContext;
 use App\Domains\User\Enums\AuthTypeEnum;
 use App\Domains\User\Models\ApiToken;
@@ -13,7 +14,6 @@ use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Context;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\IpUtils;
 use Symfony\Component\HttpFoundation\Response;
@@ -62,6 +62,7 @@ class AuthenticatesApiTokens
         }
 
         $tokenHash = ApiToken::hashFromPlain($rawToken);
+        unset($rawToken);
 
         $apiToken = ApiToken::query()
             ->withWhereHas('user', fn ($query) => $query->where('auth_type', AuthTypeEnum::API))
@@ -82,12 +83,10 @@ class AuthenticatesApiTokens
             $this->fail(ApiRequestFailureEnum::IP_DENIED);
         }
 
-        DB::table('user_api_tokens')
-            ->where('id', $apiToken->getKey())
-            ->update([
-                'usage_count' => DB::raw('usage_count + 1'),
-                'last_used_at' => now(),
-            ]);
+        $apiToken->increment(
+            column: 'usage_count',
+            extra: ['last_used_at' => now()]
+        );
 
         Auth::onceUsingId($user->getKey());
 
@@ -106,12 +105,25 @@ class AuthenticatesApiTokens
      */
     private function isIpAllowed(?string $requestIp, ?array $allowedIps): bool
     {
-        // If no IP restrictions are configured, allow all IPs
-        if ($requestIp === null || blank($allowedIps)) {
+        // No IP restrictions configured
+        if (blank($allowedIps)) {
             return true;
         }
 
-        // Check if the request IP matches any of the allowed IPs or CIDR ranges
+        /**
+         * IP restrictions ARE configured, but the request IP is missing.
+         * This can happen when the app is behind a proxy or load
+         * balancer that does not forward the client IP, or when
+         * the request comes from an internal service without
+         * a client IP.
+         */
+        if (blank($requestIp)) {
+            report(new MissingRequestIpForRestrictedToken($allowedIps));
+
+            return false;
+        }
+
+        // IP restrictions ARE configured and the request IP is present
         return IpUtils::checkIp($requestIp, $allowedIps);
     }
 

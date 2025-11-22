@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use SensitiveParameter;
 
 class UserLoginLink extends BaseModel
 {
@@ -65,7 +66,7 @@ class UserLoginLink extends BaseModel
      * @param  string  $token  The plain token to hash.
      * @return string The resulting hash.
      */
-    public static function hashFromPlain(string $token): string
+    public static function hashFromPlain(#[SensitiveParameter] string $token): string
     {
         return hash_hmac('sha256', $token, (string) config('app.key'));
     }

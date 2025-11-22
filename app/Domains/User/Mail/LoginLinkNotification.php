@@ -12,6 +12,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\URL;
+use SensitiveParameter;
 
 /**
  * Email notification containing a login link for passwordless authentication.
@@ -49,7 +50,7 @@ class LoginLinkNotification extends Mailable implements ShouldQueue
         );
     }
 
-    private function generateLoginLinkUrl(string $rawToken): string
+    private function generateLoginLinkUrl(#[SensitiveParameter] string $rawToken): string
     {
         return URL::route('login-link.verify', ['token' => $rawToken]);
     }

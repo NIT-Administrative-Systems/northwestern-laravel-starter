@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use SensitiveParameter;
 
 /**
  * @property list<string> $allowed_ips List of IP addresses from which this token can be used.
@@ -141,7 +142,7 @@ class ApiToken extends BaseModel
      * @param  string  $token  The plain token to hash.
      * @return string The resulting hash.
      */
-    public static function hashFromPlain(string $token): string
+    public static function hashFromPlain(#[SensitiveParameter] string $token): string
     {
         return hash_hmac('sha256', $token, (string) config('app.key'));
     }
