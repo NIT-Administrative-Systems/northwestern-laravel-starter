@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users\Actions;
 
-use App\Domains\User\Actions\Directory\CreateUserByLookup;
+use App\Domains\User\Actions\Directory\FindOrUpdateUserFromDirectory;
 use App\Domains\User\Enums\PermissionEnum;
 use App\Domains\User\Exceptions\BadDirectoryEntry;
 use App\Filament\Resources\Users\UserResource;
@@ -44,7 +44,7 @@ class CreateNorthwesternUserAction extends Action
                         $set('netid', trim($state ?? ''));
                     })
                     ->rules([
-                        fn (CreateUserByLookup $createByLookup) => function ($attribute, $value, $fail) use ($createByLookup) {
+                        fn (FindOrUpdateUserFromDirectory $findOrUpdateUserFromDirectory) => function ($attribute, $value, $fail) use ($findOrUpdateUserFromDirectory) {
                             $searchValue = trim($value);
 
                             if (blank($searchValue)) {
@@ -52,7 +52,7 @@ class CreateNorthwesternUserAction extends Action
                             }
 
                             try {
-                                $user = $createByLookup($searchValue, immediate: true);
+                                $user = $findOrUpdateUserFromDirectory($searchValue, immediate: true);
 
                                 if (! $user) {
                                     $fail('Not found in the directory. You can search by a Northwestern email address or NetID.');
@@ -65,11 +65,11 @@ class CreateNorthwesternUserAction extends Action
                         },
                     ]),
             ])
-            ->action(function (array $data, CreateUserByLookup $createByLookup) {
+            ->action(function (array $data, FindOrUpdateUserFromDirectory $findOrUpdateUserFromDirectory) {
                 $searchValue = trim((string) $data['netid']);
 
                 try {
-                    $user = ($createByLookup)($searchValue, immediate: true);
+                    $user = ($findOrUpdateUserFromDirectory)($searchValue, immediate: true);
 
                     if (! $user) {
                         // This shouldn't happen since validation passed, but handle it

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Domains\User\Actions\Directory\CreateUserByLookup;
+use App\Domains\User\Actions\Directory\FindOrUpdateUserFromDirectory;
 use App\Domains\User\Enums\RoleTypeEnum;
 use App\Domains\User\Models\Role;
 use Illuminate\Database\Seeder;
@@ -20,12 +20,18 @@ use Throwable;
  */
 class StakeholderSeeder extends Seeder
 {
-    public function run(CreateUserByLookup $createByLookup): void
-    {
-        $this->superAdmins($createByLookup);
+    public function __construct(
+        protected FindOrUpdateUserFromDirectory $findOrUpdateUserFromDirectory
+    ) {
+        //
     }
 
-    protected function superAdmins(CreateUserByLookup $createByLookup): void
+    public function run(): void
+    {
+        $this->superAdmins();
+    }
+
+    protected function superAdmins(): void
     {
         /**
          * Assign the Super Administrator role to a predefined list of NetIDs.
@@ -35,10 +41,7 @@ class StakeholderSeeder extends Seeder
          * to easily configure users per environment without modifying code or
          * manually processing user assignments.
          */
-        $userNetIds = array_filter(
-            array_map('trim', explode(',', config('platform.stakeholders.super_admins', ''))),
-            fn ($netId) => filled($netId),
-        );
+        $userNetIds = $this->parseStakeholderConfig(config('platform.stakeholders.super_admins', []));
 
         if (empty($userNetIds)) {
             $this->command->warn('No NetIDs have been configured in "SUPER_ADMIN_NETIDS"');
@@ -47,7 +50,6 @@ class StakeholderSeeder extends Seeder
         }
 
         $this->createAndAssignRole(
-            $createByLookup,
             $userNetIds,
             Role::whereHas('role_type', fn ($query) => $query->where('slug', RoleTypeEnum::SYSTEM_MANAGED))->firstOrFail()
         );
@@ -57,7 +59,7 @@ class StakeholderSeeder extends Seeder
      * @param  list<string>  $netIds
      * @param  Role|Collection<int, Role>  $roles
      */
-    protected function createAndAssignRole(CreateUserByLookup $createByLookup, array $netIds, Role|Collection $roles): void
+    protected function createAndAssignRole(array $netIds, Role|Collection $roles): void
     {
         if ($roles instanceof Role) {
             $roles = collect([$roles]);
@@ -65,7 +67,7 @@ class StakeholderSeeder extends Seeder
 
         foreach ($netIds as $netId) {
             try {
-                $user = retry(3, fn () => $createByLookup($netId));
+                $user = retry(3, fn () => ($this->findOrUpdateUserFromDirectory)($netId));
                 $user->roles()->sync($roles->map->id);
             } catch (Throwable) {
                 $this->command->getOutput()->writeln(
@@ -73,5 +75,24 @@ class StakeholderSeeder extends Seeder
                 );
             }
         }
+    }
+
+    /**
+     * Parses a stakeholder configuration value, which can be either a comma-separated string
+     * of NetIDs or an array of NetIDs, into a clean array of NetIDs.
+     *
+     * @param  string|array  $config  The configuration value from `config/platform.php`.
+     * @return array<int, string> A cleaned array of NetIDs.
+     */
+    protected function parseStakeholderConfig(string|array $config): array
+    {
+        if (is_string($config)) {
+            $config = explode(',', $config);
+        }
+
+        return array_values(array_filter(
+            array_map('trim', $config),
+            fn ($netId) => filled($netId),
+        ));
     }
 }

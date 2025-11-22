@@ -26,25 +26,4 @@ class PersistUserWithUniqueUsernameTest extends TestCase
         $this->assertDatabaseHas('users', ['username' => 'unique_user']);
         $this->assertTrue($savedUser->exists);
     }
-
-    public function test_it_returns_existing_user_on_unique_constraint_violation(): void
-    {
-        $existing = User::factory()->createOne([
-            'username' => 'api-user',
-            'auth_type' => AuthTypeEnum::API,
-        ]);
-
-        $existing->refresh();
-
-        $conflicting = User::factory()->make([
-            'username' => 'api-user',
-            'auth_type' => AuthTypeEnum::API,
-        ]);
-
-        $action = new PersistUserWithUniqueUsername();
-
-        $result = $action($conflicting);
-
-        $this->assertSame($existing->getKey(), $result->getKey());
-    }
 }

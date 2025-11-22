@@ -7,7 +7,7 @@ namespace App\Http\Controllers\Auth;
 use App\Domains\Core\Enums\ExternalServiceEnum;
 use App\Domains\Core\Exceptions\ServiceDownError;
 use App\Domains\User\Actions\DetermineUserSegment;
-use App\Domains\User\Actions\Directory\CreateUserByLookup;
+use App\Domains\User\Actions\Directory\FindOrUpdateUserFromDirectory;
 use App\Domains\User\Models\User;
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
@@ -41,16 +41,16 @@ class WebSSOController extends Controller
         //
     }
 
-    protected function findUserByNetID(CreateUserByLookup $createByLookup, ?string $netid = null): ?Authenticatable
+    protected function findUserByNetID(FindOrUpdateUserFromDirectory $findOrUpdateUserFromDirectory, ?string $netid = null): ?Authenticatable
     {
         return retry(
             times: self::RETRY_LOOKUP_TIMES,
-            callback: function () use ($createByLookup, $netid): User {
-                $user = $createByLookup($netid);
+            callback: function () use ($findOrUpdateUserFromDirectory, $netid): User {
+                $user = $findOrUpdateUserFromDirectory($netid);
 
                 throw_unless($user, new ServiceDownError(
                     service: ExternalServiceEnum::DIRECTORY_SEARCH,
-                    additionalMessage: $createByLookup->getLastError(),
+                    additionalMessage: $findOrUpdateUserFromDirectory->getLastError(),
                     retryAttempted: self::RETRY_LOOKUP_TIMES,
                 ));
 

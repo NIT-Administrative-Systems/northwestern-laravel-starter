@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\User\Actions\Directory;
 
-use App\Domains\User\Actions\Directory\CreateUserByLookup;
+use App\Domains\User\Actions\Directory\FindOrUpdateUserFromDirectory;
 use App\Domains\User\Enums\AffiliationEnum;
 use App\Domains\User\Enums\AuthTypeEnum;
 use App\Domains\User\Exceptions\BadDirectoryEntry;
@@ -15,8 +15,8 @@ use Northwestern\SysDev\SOA\DirectorySearch;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
-#[CoversClass(CreateUserByLookup::class)]
-class CreateUserByLookupTest extends TestCase
+#[CoversClass(FindOrUpdateUserFromDirectory::class)]
+class FindOrUpdateUserFromDirectoryTest extends TestCase
 {
     public function test_invoke(): void
     {
@@ -430,9 +430,9 @@ class CreateUserByLookupTest extends TestCase
     /**
      * @param  array<string, mixed>  $dependencies
      */
-    protected function service(array $dependencies = []): CreateUserByLookup
+    protected function service(array $dependencies = []): FindOrUpdateUserFromDirectory
     {
-        return resolve(CreateUserByLookup::class, $dependencies);
+        return resolve(FindOrUpdateUserFromDirectory::class, $dependencies);
     }
 
     /**

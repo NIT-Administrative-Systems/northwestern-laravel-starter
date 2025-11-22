@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users\Schemas;
 
-use App\Domains\User\Actions\Directory\CreateUserByLookup;
+use App\Domains\User\Actions\Directory\FindOrUpdateUserFromDirectory;
 use App\Domains\User\Enums\PermissionEnum;
 use App\Domains\User\Models\User;
 use App\Filament\Resources\Users\UserResource;
@@ -217,8 +217,8 @@ class NorthwesternUserInfolist
                                             'This will pull the latest attributes from the Northwestern Directory and update the user in the platform.'
                                         )
                                         ->modalSubmitActionLabel('Start Sync')
-                                        ->action(function ($record, CreateUserByLookup $createByLookup) {
-                                            $user = ($createByLookup)($record->username, immediate: true);
+                                        ->action(function ($record, FindOrUpdateUserFromDirectory $findOrUpdateUserFromDirectory) {
+                                            $user = ($findOrUpdateUserFromDirectory)($record->username, immediate: true);
 
                                             if ($record->directory_sync_last_failed_at !== $user?->directory_sync_last_failed_at) {
                                                 Notification::make()
