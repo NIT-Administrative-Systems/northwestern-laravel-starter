@@ -94,7 +94,7 @@ A robust, enterprise-ready Laravel starter kit tailored specifically for [Northw
 
 ## 🚀 Getting Started
 
-Visit the [documentation](laravel-starter.entapp.northwestern.edu) for complete installation, configuration, and usage guides.
+Visit the [documentation](https://laravel-starter.entapp.northwestern.edu) for complete installation, configuration, and usage guides.
 
 ## 🤝 Acknowledgements
 
