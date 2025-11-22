@@ -6,6 +6,7 @@ namespace Tests\Feature\Http\Controllers\Auth;
 
 use App\Domains\User\Actions\Impersonation\StartImpersonation;
 use App\Domains\User\Actions\Impersonation\StopImpersonation;
+use App\Domains\User\Enums\PermissionEnum;
 use App\Domains\User\Models\User;
 use App\Http\Controllers\Auth\ImpersonationController;
 use Illuminate\Support\Facades\Session;
@@ -15,9 +16,20 @@ use Tests\TestCase;
 #[CoversClass(ImpersonationController::class)]
 class ImpersonationControllerTest extends TestCase
 {
+    public function test_take_impersonation_requires_authorization(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $response = $this->get('/impersonate/take/2/web');
+
+        $response->assertForbidden();
+    }
+
     public function test_take_impersonation_redirects_to_custom_url(): void
     {
         $user = User::factory()->create();
+        $user->givePermissionTo(PermissionEnum::MANAGE_IMPERSONATION);
         $this->actingAs($user);
 
         $this->mock(StartImpersonation::class, function ($mock) use ($user) {
@@ -34,6 +46,7 @@ class ImpersonationControllerTest extends TestCase
     public function test_take_impersonation_redirects_to_custom_non_root_url(): void
     {
         $user = User::factory()->create();
+        $user->givePermissionTo(PermissionEnum::MANAGE_IMPERSONATION);
         $this->actingAs($user);
 
         $this->mock(StartImpersonation::class, function ($mock) {
@@ -49,6 +62,7 @@ class ImpersonationControllerTest extends TestCase
     public function test_take_impersonation_redirects_back(): void
     {
         $user = User::factory()->create();
+        $user->givePermissionTo(PermissionEnum::MANAGE_IMPERSONATION);
         $this->actingAs($user);
 
         $this->mock(StartImpersonation::class, function ($mock) {
@@ -99,6 +113,7 @@ class ImpersonationControllerTest extends TestCase
     public function test_take_impersonation_redirects_to_referer_if_redirect_is_root(): void
     {
         $user = User::factory()->create();
+        $user->givePermissionTo(PermissionEnum::MANAGE_IMPERSONATION);
         $this->actingAs($user);
 
         $referer = 'https://my-app.test/current/page';
@@ -119,9 +134,10 @@ class ImpersonationControllerTest extends TestCase
     {
         Session::start();
         $user = User::factory()->create();
+        $user->givePermissionTo(PermissionEnum::MANAGE_IMPERSONATION);
         $this->actingAs($user);
 
-        $referer = 'https://my-app.test/some-page';
+        $referer = config('app.url') . '/some/page';
 
         $this->mock(StartImpersonation::class, function ($mock) {
             $mock->expects('__invoke')->andReturns('back');
@@ -130,5 +146,23 @@ class ImpersonationControllerTest extends TestCase
         $this->get('/impersonate/take/2/web', ['Referer' => $referer]);
 
         $this->assertSame($referer, session('impersonation.return_url'));
+    }
+
+    public function test_take_impersonation_does_not_store_invalid_referer_url_in_session(): void
+    {
+        Session::start();
+        $user = User::factory()->create();
+        $user->givePermissionTo(PermissionEnum::MANAGE_IMPERSONATION);
+        $this->actingAs($user);
+
+        $referer = 'https://malicious-site.test/some/page';
+
+        $this->mock(StartImpersonation::class, function ($mock) {
+            $mock->expects('__invoke')->andReturns('back');
+        });
+
+        $this->get('/impersonate/take/2/web', ['Referer' => $referer]);
+
+        $this->assertNull(session('impersonation.return_url'));
     }
 }

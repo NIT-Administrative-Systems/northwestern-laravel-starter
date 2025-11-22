@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Domains\User\Actions\Impersonation\StartImpersonation;
 use App\Domains\User\Actions\Impersonation\StopImpersonation;
+use App\Domains\User\Enums\PermissionEnum;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -23,11 +24,17 @@ class ImpersonationController extends Controller
         $user = auth()->user();
 
         abort_unless(filled($user), 403);
+        abort_unless($user->can(PermissionEnum::MANAGE_IMPERSONATION), 403);
 
-        // Store the current page URL before impersonation
+        // Validate that the URL is from the same domain
         $returnUrl = $request->headers->get('referer');
         if ($returnUrl && filter_var($returnUrl, FILTER_VALIDATE_URL)) {
-            session()->put('impersonation.return_url', $returnUrl);
+            $parsedUrl = parse_url($returnUrl);
+            $currentHost = parse_url((string) config('app.url'), PHP_URL_HOST);
+
+            if (isset($parsedUrl['host']) && $parsedUrl['host'] === $currentHost) {
+                session()->put('impersonation.return_url', $returnUrl);
+            }
         }
 
         $redirectTo = $startImpersonation(
