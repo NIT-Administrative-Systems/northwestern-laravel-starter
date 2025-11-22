@@ -16,6 +16,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Sleep;
 use Illuminate\Validation\ValidationException;
@@ -123,15 +124,18 @@ class LoginLinkController extends Controller
         $hashedToken = UserLoginLink::hashFromPlain($token);
 
         $loginLink = UserLoginLink::where('token', $hashedToken)->firstOrFail();
-        $loginLink->markAsUsed($request->ip());
 
-        if (! $user->email_verified_at) {
-            $user->update(['email_verified_at' => now()]);
-        }
+        DB::transaction(static function () use ($user, $loginLink, $request) {
+            $loginLink->markAsUsed($request->ip());
 
-        Auth::login($user, remember: true);
+            if (! $user->email_verified_at) {
+                $user->update(['email_verified_at' => now()]);
+            }
 
-        $request->session()->regenerate();
+            Auth::login($user, remember: true);
+
+            $request->session()->regenerate();
+        });
 
         $user->login_records()->create([
             'logged_in_at' => now(),
