@@ -16,6 +16,35 @@
 
 A robust, enterprise-ready Laravel starter kit tailored specifically for [Northwestern University](https://www.northwestern.edu/) projects. This opinionated project provides everything you need to build secure, scalable, and maintainable web applications or fully API-driven services.
 
+<div align="center">
+  <table>
+    <tr>
+      <td align="center">
+        <a href="art/ui-preview-1.png" target="_blank">
+          <img src="art/ui-preview-1.png" width="500" alt="Authentication screen and homepage UI" />
+        </a>
+      </td>
+      <td align="center">
+        <a href="art/ui-preview-2.png" target="_blank">
+          <img src="art/ui-preview-2.png" width="500" alt="User profile and table UI" />
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <a href="art/ui-preview-3.png" target="_blank">
+          <img src="art/ui-preview-3.png" width="500" alt="API user profile, role creation form, and audit log UI" />
+        </a>
+      </td>
+      <td align="center">
+        <a href="art/ui-preview-4.png" target="_blank">
+          <img src="art/ui-preview-4.png" width="500" alt="API Request Log and Login Records dashboard UI" />
+        </a>
+      </td>
+    </tr>
+  </table>
+</div>
+
 ## ✨ Features
 
 ### 🏗️ Architectural Foundation
