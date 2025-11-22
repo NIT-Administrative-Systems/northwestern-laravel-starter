@@ -19,8 +19,8 @@
         @can(PermissionEnum::ACCESS_ADMIN_PANEL)
             <li class="nav-item px-md-1">
                 <a class="nav-link" href="{{ Filament::getPanel(AdministrationPanelProvider::ID)->getUrl() }}">
-                    <i class="fas fa-gauge fa-fw me-1" aria-hidden="true"></i>
-                    Dashboard
+                    <i class="fas fa-wrench fa-fw me-1" aria-hidden="true"></i>
+                    Administration
                 </a>
             </li>
         @endcan

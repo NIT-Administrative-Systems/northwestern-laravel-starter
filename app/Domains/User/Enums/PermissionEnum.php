@@ -20,7 +20,6 @@ enum PermissionEnum: string implements HasLabel
 
     // System Managed Permissions
     case MANAGE_ALL = 'manage-all';
-
     case MANAGE_IMPERSONATION = 'manage-impersonation';
     case VIEW_AUDIT_LOGS = 'view-audit-logs';
     case VIEW_LOGIN_RECORDS = 'view-login-records';
