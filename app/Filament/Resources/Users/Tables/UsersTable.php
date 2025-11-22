@@ -7,9 +7,9 @@ namespace App\Filament\Resources\Users\Tables;
 use App\Domains\User\Enums\AffiliationEnum;
 use App\Domains\User\Enums\AuthTypeEnum;
 use App\Domains\User\Models\User;
+use App\Filament\Resources\Users\Support\NetIdStatus;
 use Filament\Actions\Action;
 use Filament\Actions\ViewAction;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -73,26 +73,10 @@ class UsersTable
                     ->searchable(),
                 IconColumn::make('netid_inactive')
                     ->label('NetID Status')
-                    ->getStateUsing(fn (User $record): string => match ($record->netid_inactive) {
-                        true => 'inactive',
-                        false => 'active',
-                        null => 'unknown',
-                    })
-                    ->icon(fn (User $record): Heroicon => match ($record->netid_inactive) {
-                        true => Heroicon::OutlinedXCircle,
-                        false => Heroicon::OutlinedCheckCircle,
-                        null => Heroicon::OutlinedQuestionMarkCircle,
-                    })
-                    ->color(fn (User $record): string => match ($record->netid_inactive) {
-                        true => 'danger',
-                        false => 'success',
-                        null => 'warning',
-                    })
-                    ->tooltip(fn (User $record): string => match ($record->netid_inactive) {
-                        true => 'Inactive',
-                        false => 'Active',
-                        null => 'Unknown',
-                    })
+                    ->getStateUsing(fn (User $record) => NetIdStatus::getState($record))
+                    ->icon(fn (User $record) => NetIdStatus::getIcon($record))
+                    ->color(fn (User $record) => NetIdStatus::getColor($record))
+                    ->tooltip(fn (User $record) => NetIdStatus::getLabel($record))
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('last_directory_sync_at')

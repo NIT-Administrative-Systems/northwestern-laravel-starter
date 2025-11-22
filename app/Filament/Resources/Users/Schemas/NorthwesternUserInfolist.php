@@ -7,6 +7,7 @@ namespace App\Filament\Resources\Users\Schemas;
 use App\Domains\User\Actions\Directory\FindOrUpdateUserFromDirectory;
 use App\Domains\User\Enums\PermissionEnum;
 use App\Domains\User\Models\User;
+use App\Filament\Resources\Users\Support\NetIdStatus;
 use App\Filament\Resources\Users\UserResource;
 use Filament\Actions\Action;
 use Filament\Infolists\Components\ImageEntry;
@@ -160,27 +161,9 @@ class NorthwesternUserInfolist
 
                                 TextEntry::make('netid_inactive')
                                     ->label('NetID Status')
-                                    ->formatStateUsing(function ($record) {
-                                        return match ($record->netid_inactive) {
-                                            true => 'Inactive',
-                                            false => 'Active',
-                                            default => 'Unknown',
-                                        };
-                                    })
-                                    ->icon(function ($record) {
-                                        return match ($record->netid_inactive) {
-                                            true => Heroicon::OutlinedXCircle,
-                                            false => Heroicon::OutlinedCheckCircle,
-                                            default => Heroicon::OutlinedQuestionMarkCircle,
-                                        };
-                                    })
-                                    ->iconColor(function ($record) {
-                                        return match ($record->netid_inactive) {
-                                            true => 'danger',
-                                            false => 'success',
-                                            default => 'warning',
-                                        };
-                                    })
+                                    ->formatStateUsing(fn (User $record) => NetIdStatus::getLabel($record))
+                                    ->icon(fn (User $record) => NetIdStatus::getIcon($record))
+                                    ->iconColor(fn (User $record) => NetIdStatus::getColor($record))
                                     ->default('Unknown'),
                             ])->columns(),
 
