@@ -14,7 +14,7 @@ Route::prefix('auth')->group(function () {
     });
 
     Route::get('type', Controllers\Auth\LoginSelectionController::class)->name('login-selection');
-    Route::get('logout', Controllers\Auth\LogoutSelectionController::class)->name('logout');
+    Route::post('logout', Controllers\Auth\LogoutSelectionController::class)->name('logout');
 
     Route::prefix('azure-ad')->group(function () {
         Route::get('redirect', [Controllers\Auth\WebSSOController::class, 'oauthRedirect'])->name('login-oauth-redirect');

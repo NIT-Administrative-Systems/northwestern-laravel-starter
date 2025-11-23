@@ -49,12 +49,13 @@
                         <i class="fas fa-sign-out-alt fa-fw ms-1" aria-hidden="true"></i>
                     </a>
                 @else
-                    <a class="nav-link"
-                       data-cy="logout-link"
-                       href="{{ route('logout') }}">
-                        Sign out
-                        <i class="fas fa-sign-out-alt fa-fw ms-1" aria-hidden="true"></i>
-                    </a>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button class="nav-link btn btn-link" data-cy="logout-link">
+                            Sign out
+                            <i class="fas fa-sign-out-alt fa-fw ms-1" aria-hidden="true"></i>
+                        </button>
+                    </form>
                 @endImpersonating
             </li>
         @endauth
