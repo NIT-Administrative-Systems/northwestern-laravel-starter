@@ -189,10 +189,10 @@
                         btn.innerHTML = '<i class="fa fa-spinner fa-spin me-2"></i> Sending...';
 
                         const userFeedback = {
-                            event_id: '{{ app('sentry')->getLastEventId() }}',
+                            associatedEventId: '{{ app('sentry')->getLastEventId() }}',
                             name: document.getElementById('nameInput').value,
                             email: document.getElementById('emailInput').value,
-                            comments: document.getElementById('commentInput').value,
+                            message: document.getElementById('commentInput').value,
                         };
 
                         try {
