@@ -27,6 +27,10 @@ class SentryExceptionHandler
 
     private function addSentryContext(): void
     {
+        if (! app()->bound('app') || ! auth()->hasResolvedGuards()) {
+            return;
+        }
+
         if (! auth()->check()) {
             return;
         }
