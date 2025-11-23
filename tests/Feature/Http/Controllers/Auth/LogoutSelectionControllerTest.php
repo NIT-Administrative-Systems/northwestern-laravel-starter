@@ -14,7 +14,7 @@ class LogoutSelectionControllerTest extends TestCase
 {
     public function test_redirects_to_login_selection_when_user_not_authenticated(): void
     {
-        $response = $this->get(route('logout'));
+        $response = $this->post(route('logout'));
 
         $response->assertRedirect(route('login-selection'));
     }
@@ -29,7 +29,7 @@ class LogoutSelectionControllerTest extends TestCase
 
         $oldSessionId = session()->getId();
 
-        $response = $this->get(route('logout'));
+        $response = $this->post(route('logout'));
 
         $response->assertRedirect(route('login-selection'));
         $this->assertGuest();
@@ -43,7 +43,7 @@ class LogoutSelectionControllerTest extends TestCase
 
         $this->actingAs($user);
 
-        $response = $this->get(route('logout'));
+        $response = $this->post(route('logout'));
 
         $response->assertRedirect(route('login-oauth-logout'));
         $this->assertAuthenticatedAs($user);
