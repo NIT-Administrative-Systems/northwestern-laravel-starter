@@ -52,7 +52,7 @@ use Spatie\Health\Commands\RunHealthChecksCommand;
 
 Schedule::command(TelescopePruneCommand::class)->daily();
 Schedule::command(CleanTemporaryS3FilesCommand::class)->daily();
-Schedule::command(PruneCommand::class)->daily();
+Schedule::command(PruneCommand::class, ['--path' => 'App/Domains/**/Models'])->daily();
 
 if (config('auth.api.expiration_notifications.enabled')) {
     Schedule::command(SendApiTokenExpirationNotificationsCommand::class)
