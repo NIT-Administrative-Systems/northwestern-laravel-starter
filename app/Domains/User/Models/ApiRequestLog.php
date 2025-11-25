@@ -31,13 +31,19 @@ class ApiRequestLog extends Model
      */
     public function prunable(): Builder
     {
-        $retentionDays = (int) config('auth.api.request_logging.retention_days', 90);
+        $retentionDays = config('auth.api.request_logging.retention_days');
 
-        if ($retentionDays <= 0) {
+        if ($retentionDays === null) {
             return static::query()->whereRaw('1 = 0');
         }
 
-        return static::query()->where('created_at', '<', now()->subDays($retentionDays));
+        if (! is_numeric($retentionDays) || $retentionDays < 0) {
+            throw new \InvalidArgumentException(
+                'API request log retention days must be a positive integer or null.'
+            );
+        }
+
+        return static::query()->where('created_at', '<', now()->subDays((int) $retentionDays));
     }
 
     /**
