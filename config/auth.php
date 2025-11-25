@@ -142,7 +142,7 @@ return [
             | Automatically delete logs older than this many days to prevent unbounded
             | database growth.
             |
-            | Set to 0 to disable automatic pruning (not recommended for production).
+            | Set to null to disable automatic pruning (not recommended for production).
             | For high-traffic apps, consider using a dedicated observability tool
             | instead (Sentry, New Relic, Datadog, etc.).
             |
