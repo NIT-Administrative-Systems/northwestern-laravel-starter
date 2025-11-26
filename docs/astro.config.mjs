@@ -9,7 +9,8 @@ export default defineConfig({
 		starlight({
 			title: 'Northwestern Laravel Starter',
             components: {
-              EditLink: './src/components/ConditionalEditLink.astro'
+              EditLink: './src/components/ConditionalEditLink.astro',
+              Hero: './src/components/Hero.astro'
             },
             editLink: {
                 baseUrl: 'https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/edit/main/docs/',
