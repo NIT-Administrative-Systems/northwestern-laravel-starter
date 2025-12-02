@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Domains\Core\Exceptions\NoRollback;
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Query\Expression;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
@@ -27,8 +26,8 @@ return new class extends Migration
             $table->string('password')->nullable();
             $table->string('phone')->nullable();
             $table->text('description')->nullable();
-            $table->json('job_titles')->default(new Expression('(JSON_ARRAY())'));
-            $table->json('departments')->default(new Expression('(JSON_ARRAY())'));
+            $table->json('job_titles')->default('[]');
+            $table->json('departments')->default('[]');
             $table->string('timezone')->default('America/Chicago');
             $table->string('wildcard_photo_s3_key')->nullable();
             $table->dateTime('wildcard_photo_last_synced_at')->nullable();
