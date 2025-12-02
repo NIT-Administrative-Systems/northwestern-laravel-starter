@@ -1,0 +1,258 @@
+---
+title: Domain-Driven Design
+description: Overview of the DDD architecture
+---
+
+The starter loosely follows Domain-Driven Design (DDD) principles to organize code in a scalable, maintainable way. It is structured around business domains rather than technical layers.
+
+## Directory Structure
+
+import { FileTree } from '@astrojs/starlight/components';
+
+<FileTree>
+- app
+    - Console
+        - Commands/
+    - Domains
+        - Core
+            - Enums/
+            - Models/
+            - Services/
+            - ...
+        - User
+            - Actions/
+            - Enums/
+            - Models/
+            - Policies/
+            - QueryBuilders/
+            - ...
+    - Filament
+        - Resources/
+        - ...
+    - Http/
+        - Controllers/
+        - Middleware/
+        - Requests/
+    - Providers/
+    - View/
+        - Components/
+</FileTree>
+
+## Domain Organization
+
+### Core Domain
+
+The **Core** domain contains foundational functionality that applies across the entire application:
+
+**Location:** `app/Domains/Core/`
+
+**Responsibilities:**
+
+- Base models and concerns
+- Core enums (External Services, API Request Failures)
+- Core services (DateTime formatting, Configuration validation)
+- Shared utilities and helpers
+
+**When to add code to Core:**
+
+- Functionality needed by multiple domains
+- Infrastructure concerns (logging, caching, etc.)
+- Shared enums
+- Base classes and traits
+- Framework extensions
+
+### User Domain
+
+The **User** domain handles everything related to users, authentication, and authorization:
+
+**Location:** `app/Domains/User/`
+
+**Responsibilities:**
+
+- User management
+- Authentication (WebSSO, API tokens, local)
+- Authorization (roles, permissions)
+- Audit logging
+- User login tracking
+- Impersonation
+- API request logging
+
+## Component Types
+
+### Actions
+
+**Purpose:** Encapsulate single-responsibility business operations
+
+**Location:** `app/Domains/{Domain}/Actions/`
+
+**Characteristics:**
+
+- Single method (usually `__invoke()` or `handle()`)
+- Focused on one specific operation
+- Easily testable
+- Can be injected into controllers or called from other actions
+
+**Example:**
+
+```php
+namespace App\Domains\User\Actions;
+
+class DetermineUserSegment
+{
+    public function __invoke(User $user): UserSegmentEnum
+    {
+        // Business logic to determine user segment
+    }
+}
+```
+
+**When to use Actions:**
+
+- Complex business logic that doesn't belong in a model
+- Operations that span multiple models
+- Reusable operations called from multiple places
+- Operations that need to be tested in isolation
+
+### Enums
+
+**Purpose:** Define sets of related constants with behavior
+
+**Location:** `app/Domains/{Domain}/Enums/`
+
+**Characteristics:**
+
+- Backed by strings or integers
+- Can have methods for labels, descriptions, behavior
+- Type-safe throughout the application
+
+**Example:**
+
+```php
+namespace App\Domains\User\Enums;
+
+use Filament\Support\Contracts\HasLabel;
+
+enum AuthTypeEnum: string implements HasLabel
+{
+    case SSO = 'sso';
+    case LOCAL = 'local';
+    case API = 'api';
+
+    public function getLabel(): string
+    {
+        return match ($this) {
+            self::SSO => 'NetID',
+            self::LOCAL => 'Login Link',
+            self::API => 'API',
+        };
+    }
+}
+```
+
+:::tip
+For enums that will be represented in the Filament UI, consider implementing [available interfaces](https://filamentphp.com/docs/4.x/advanced/enums) like `HasLabel` so they integrate seamlessly.
+:::
+
+### Models
+
+**Purpose:** Represent database tables and their relationships
+
+**Location:** `app/Domains/{Domain}/Models/`
+
+**Characteristics:**
+
+- Extend `BaseModel`
+- Include relationships, scopes, and accessors
+
+**Base Model:**
+
+All models should extend `BaseModel` which provides:
+
+- Automatic audit logging
+- Shared scopes and utilities
+
+### Services
+
+**Purpose:** Complex operations or integrations with external systems
+
+**Location:** `app/Domains/{Domain}/Services/`
+
+**Characteristics:**
+
+- More complex than Actions
+- Often stateful
+- Handle external integrations
+- May coordinate multiple Actions
+
+**When to use Services:**
+
+- External API integrations
+- Complex calculations or transformations
+- Operations requiring significant setup
+
+### Query Builders
+
+**Purpose:** Encapsulate complex queries and scopes
+
+**Location:** `app/Domains/{Domain}/QueryBuilders/`
+
+**Characteristics:**
+
+- Extend Eloquent's query builder
+- Provide fluent, chainable query methods
+- Keep query logic out of controllers or models
+
+**Example:**
+
+```php
+namespace App\Domains\User\QueryBuilders;
+
+use App\Domains\User\Enums\AuthTypeEnum;
+use Illuminate\Database\Eloquent\Builder;
+
+/**
+ * @template TModel of User
+ *
+ * @extends Builder<TModel>
+ */
+class UserBuilder extends Builder
+{
+    public function sso(): self
+    {
+        return $this->where('auth_type', AuthTypeEnum::SSO);
+    }
+
+    public function whereEmailEquals(string $email): self
+    {
+        $normalized = strtolower(trim($email));
+
+        return $this->where('email', 'ilike', $normalized);
+    }
+}
+```
+
+## Adding New Domains
+
+As your application grows, you may want to add new domains. For example, if building a course management system, you might add:
+
+<FileTree>
+- app/Domains/Course/
+    - Actions/
+        - EnrollStudent.php
+        - UnenrollStudent.php
+    - Enums/
+        - CourseStatusEnum.php
+    - Models/
+        - Course.php
+        - Enrollment.php
+        - Section.php
+    - Services/
+        - CourseRegistrationService.php
+</FileTree>
+
+**Guidelines for new domains:**
+
+1. **Domain should represent a business concept** - Not a technical layer
+2. **Domain should have clear boundaries** - Minimal coupling with other domains
+3. **Domain should be cohesive** - All code in domain relates to same concept
+

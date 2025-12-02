@@ -1,0 +1,61 @@
+---
+title: Database Snapshots
+description: Using database snapshots to quickly restore state during development
+---
+
+Database snapshots allow you to save the current state of your database and quickly restore it later. This is invaluable during development when you need to:
+
+- Test data modifications and quickly reset to a known state
+- Quickly switch between different test scenarios
+- Preserve data before making potentially destructive changes
+
+:::note[Development Only]
+Database snapshots are intended for development and testing environments only. For production backups, use proper database backup solutions.
+:::
+
+## Creating Snapshots
+
+### Basic Snapshot Creation
+
+Create a snapshot with a descriptive name:
+
+```bash
+php artisan snapshot:create my-snapshot-name
+```
+
+The snapshot will be saved to the `database/snapshots/` directory.
+
+### Example Workflow
+
+```bash
+# Rebuild database with fresh data
+php artisan db:rebuild
+
+# Create some test data through the UI
+
+# Save this state
+php artisan snapshot:create clean-test-data
+
+# Now you can make changes, and restore whenever needed
+php artisan snapshot:restore clean-test-data
+```
+
+## Listing Snapshots
+
+View all available snapshots:
+
+```bash
+php artisan snapshot:list
+```
+
+## Restoring Snapshots
+
+Restore a snapshot by name:
+
+```bash
+php artisan snapshot:restore my-snapshot-name
+```
+
+:::caution[Destructive Operation]
+Restoring a snapshot will **completely replace** your current database with the snapshot data. All current data will be lost.
+:::

@@ -1,0 +1,187 @@
+---
+title: Initial Customization
+description: Configure and personalize the starter kit for your project
+---
+
+import { Card, CardGrid, Aside, Tabs, TabItem, Steps, Code } from '@astrojs/starlight/components';
+
+Before launching your application, customize these key settings to fit your project's needs.
+
+---
+
+## 1. Super Administrator Accounts
+
+*Super Administrators* have full access to the entire application and bypass all authorization checks. Commonly, these users are reserved for IT staff or core development team members.
+
+### Configuration
+
+Add NetIDs to your `.env` file, or the `.env.example` file if they will be the same across environments:
+
+```bash
+# Comma-separated list of NetIDs
+SUPER_ADMIN_NETIDS=abc123,xyz789,def456
+```
+
+### How It Works
+
+The `StakeholderSeeder` runs automatically during `php artisan db:rebuild` and:
+
+1. **Looks up each NetID** in the Northwestern Directory
+2. **Creates user accounts** with their directory information (name, email, department, etc.)
+3. **Assigns the System-Managed role** (full application access)
+4. **Skips existing users** - safe to run multiple times (idempotent)
+
+<Tabs>
+  <TabItem label="Initial Setup" icon="rocket">
+    After configuring `SUPER_ADMIN_NETIDS`, rebuild the database to provision administrators:
+
+    ```bash
+    php artisan db:rebuild
+    ```
+  </TabItem>
+
+  <TabItem label="Add Admins Later" icon="seti:config">
+    To add administrators to an existing database without losing data:
+
+    ```bash
+    php artisan db:seed --class=StakeholderSeeder
+    ```
+  </TabItem>
+</Tabs>
+
+<Aside type="caution">
+The `StakeholderSeeder` requires a valid **Directory Search API key**. Ensure `DIRECTORY_SEARCH_API_KEY` is configured before running.
+</Aside>
+
+---
+
+## 2. Local Authentication (Passwordless)
+
+<Aside type="note">
+Local authentication allows external users (non-Northwestern) to access your application via email-based magic links after they are invited by an administrator. Disable this if your app is only intended for Northwestern users.
+</Aside>
+
+### Configuration Options
+
+Edit `config/auth.php` or set environment variables:
+
+```bash
+# Enable/disable local authentication
+LOCAL_AUTH_ENABLED=true
+
+# How long login links remain valid (minutes)
+LOCAL_AUTH_LOGIN_LINK_EXPIRATION_MINUTES=15
+
+# Rate limit for login link requests (per hour)
+LOCAL_AUTH_RATE_LIMIT_PER_HOUR=5
+
+# Redirect destination after successful login
+LOCAL_AUTH_REDIRECT_AFTER_LOGIN=/
+```
+
+<CardGrid>
+  <Card title="Enabled" icon="approve-check">
+    **When to enable:**
+    - Clients or partners without NetIDs
+    - Testing accounts for non-Northwestern users
+  </Card>
+
+  <Card title="Disabled" icon="warning">
+    **When to disable:**
+    - Northwestern-only applications
+    - No external user requirements
+  </Card>
+</CardGrid>
+
+### How Local Auth Works
+
+<Steps>
+1. Admin creates a local user account through the Filament panel
+2. Admin can trigger an immediate login link email, or the user can request one themselves
+3. User receives an email with a login link valid for a limited time
+4. User clicks link and is authenticated (no password needed)
+5. Link expires and becomes invalid after use
+</Steps>
+
+---
+
+## 3. API Configuration
+
+<Aside type="note">
+The API layer is enabled by default. Disable it if your application doesn't need programmatic access.
+</Aside>
+
+### Core Settings
+
+```bash
+# Master on/off switch for all API functionality
+API_ENABLED=true
+
+# Rate limiting (requests per minute)
+API_RATE_LIMIT_ATTEMPTS=1800
+```
+
+### Request Logging
+
+```bash
+# Enable API request logging
+API_REQUEST_LOGGING_ENABLED=true
+
+# Auto-delete logs older than this (days)
+API_REQUEST_LOG_RETENTION_DAYS=90
+
+# Slow request threshold for monitoring (milliseconds)
+API_REQUEST_LOGGING_SLOW_THRESHOLD_MS=500
+```
+
+### Sampling (High-Traffic Apps)
+
+<Aside type="tip" title="Performance Optimization">
+For high-throughput APIs, enable sampling to log only a percentage of successful requests. **Errors are always logged** regardless of sampling settings.
+</Aside>
+
+```bash
+# Enable probabilistic sampling
+API_REQUEST_LOGGING_SAMPLING_ENABLED=true
+
+# Sample rate (0.0 to 1.0) - 0.1 = 10% of successful requests
+API_REQUEST_LOGGING_SAMPLE_RATE=0.1
+```
+
+---
+
+## 4. Project Cleanup
+
+<Aside type="caution" title="Important">
+Perform these cleanup tasks to personalize the starter kit for your project and remove references to the Northwestern Laravel Starter.
+</Aside>
+
+### Find & Replace
+
+<Steps>
+
+1. **Application Name**
+
+   Find: `Northwestern Laravel Starter`
+
+   Replace: `Your Application Name`
+
+2. **Package/Project Identifier**
+
+   Find: `northwestern-laravel-starter`
+
+   Replace: `your-project-slug`
+
+</Steps>
+
+### Documentation Site
+
+By default, the `docs/` directory contains documentation for the starter kit itself. This can be removed entirely or modified to host your project's documentation.
+
+If you want to remove the documentation module, follow these steps:
+
+```bash
+rm .github/workflows/deploy-docs.yml
+rm -rf docs/
+```
+

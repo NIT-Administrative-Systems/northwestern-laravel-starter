@@ -1,0 +1,138 @@
+---
+title: UI Architecture
+description: Understanding the dual UI stack approach
+---
+
+import { Card, CardGrid, LinkCard, Aside, Badge } from '@astrojs/starlight/components';
+
+The Northwestern Laravel Starter is architected with **two separate and distinct UI stacks**. This dual-stack approach is optimized to deliver the best experience for different audiences and use cases: a custom, branded stack for users, and a rapid administration panel for staff/developers.
+
+## User Facing Interface - Northwestern Laravel UI
+
+This stack is dedicated to creating a cohesive, branded experience for end-users and the public.
+
+**Repository:** [Northwestern Laravel UI](https://github.com/NIT-Administrative-Systems/northwestern-laravel-ui)
+
+### Stack Details
+
+* **View Layer:** Blade Templates
+* **Styling:** Customized Bootstrap 5
+* **Icons:** Font Awesome
+
+### Purpose & Use Cases
+
+* **Public Facing Pages:** Landing pages, informational content.
+* **Custom Experiences:** User dashboards, complex custom workflows.
+* **Branding:** Achieving the official **Northwestern branded look and feel**.
+* **Design Flexibility:** Provides full control over the design and frontend code.
+
+> **Example:** The application's default home page (`/`) is built entirely with this stack.
+
+## Administration Interface - Filament
+
+This stack provides a rapid application development framework for internal staff, focused on data management and configuration.
+
+**Framework:** [Filament](https://filamentphp.com)
+
+### Stack Details
+
+* **View Layer:** Filament
+* **Styling:** Tailwind CSS
+* **Icons:** Heroicons
+
+### Purpose & Use Cases
+
+* **Staff/Developer Admin:** Internal tooling and system configuration.
+* **Data Management:** Full **CRUD** operations and interactive tables.
+- **Analytics:** Custom reporting dashboards and chart metrics.
+* **Access:** Available at the `/administration` panel (requires authentication and specific permissions).
+
+---
+
+## Choosing the Right Stack
+
+The choice between stacks depends entirely on the audience and the required level of customization.
+
+<CardGrid>
+    <Card title="Northwestern Laravel UI" icon="seti:html">
+        <Badge text="Best For" variant="success" />
+        * **Custom User Experiences**
+        * Public-facing Content & Landing Pages
+        * Official Branded Pages
+        * Complex Custom Workflows
+        <hr />
+        <Badge text="Trade-offs" variant="caution" />
+        * **More Development Time**
+        * Manual building of forms/tables
+    </Card>
+
+    <Card title="Filament" icon="rocket">
+        <Badge text="Best For" variant="success" />
+        * **Staff Admin Panels**
+        * Rapid CRUD Operations
+        * User/System Configuration
+        * Analytics Dashboards
+        * Internal Staff Tooling
+        <hr />
+        <Badge text="Trade-offs" variant="caution" />
+        * **Limited UI Customization**
+        * Often not suitable for public users
+    </Card>
+</CardGrid>
+
+---
+
+## Filament Architecture
+
+Filament's power lies in its structure based on **Panels** and **Resources**.
+
+### Filament Panels
+
+A **Panel** is a discrete, isolated area of the site with its own navigation, set of resources, and pages.
+
+> **Example:** Everything under `/administration` is driven by the `AdministrationPanelProvider`.
+
+#### Panel ID & Authorization
+
+When adding a new Panel, the **ID** is critical for authorization:
+
+```php {3, 9}
+class AdministrationPanelProvider extends PanelProvider
+{
+    public const string ID = 'administration';
+
+    public function panel(Panel $panel): Panel
+    {
+        return $panel
+            ->default()
+            ->id(self::ID)
+            // . . .
+    }
+}
+```
+
+The initial access check for the entire panel is determined by the `User::canAccessPanel()` method, which uses this ID constant to execute the appropriate permission check.
+
+### Filament Resources
+
+Filament adapts Eloquent Models to its system using *Resources*. This is where the configuration for the tables, filters, and CRUD screens resides.
+
+<Aside title="Filament Resources vs. Eloquent Resources" type="caution">
+    Filament Resources are a different concept from Laravel's built-in [Eloquent Resources](https://laravel.com/docs/12.x/eloquent-resources). They are primarily for UI definition.
+</Aside>
+
+#### Generating Resources
+
+To ensure correct mapping to the application's domain structure, you must specify the model namespace when generating a resource:
+```bash
+php artisan make:filament-resource User --generate --model-namespace=App\\Domains\\User\\Models
+```
+The `--generate` flag is highly recommended as it uses model introspection to create reasonable defaults for forms and columns.
+
+#### Relation Managers
+
+To facilitate relationships between resources (e.g., users belonging to a role), you use *Relation Managers*. You must specify the related model's full path:
+```bash
+# Example: Generating a manager for the Role::users() relationship
+php artisan make:filament-relation-manager --related-model=App\\Domains\\User\\Models\\User --attach Role users username
+```

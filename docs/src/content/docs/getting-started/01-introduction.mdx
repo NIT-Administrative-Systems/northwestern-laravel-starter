@@ -1,0 +1,65 @@
+---
+title: Introduction
+description: What the Northwestern Laravel Starter provides
+---
+
+import { Card, CardGrid, LinkCard, Aside, Badge } from '@astrojs/starlight/components';
+
+The **Northwestern Laravel Starter** is a robust, enterprise-focused Laravel starter kit tailored for [Northwestern University](https://www.northwestern.edu) projects. This opinionated project provides everything you need to build secure, scalable, and maintainable web applications or fully API-driven services.
+
+## What This Starter Provides
+
+<CardGrid stagger>
+  <Card title="🎓 Northwestern Integrations" icon="puzzle">
+    - **WebSSO/Entra ID** - Single sign-on with Northwestern authentication
+    - **Directory Search API** - User lookup and demographic sync
+    - **Wildcard Photos** - ID photo integration with auto-caching
+    - **EventHub** - Publish to topics and consume events through configured webhooks
+  </Card>
+
+  <Card title="🏗️ Architecture" icon="laptop">
+    - **Domain-Driven Design** - Organized by business concerns
+    - **Action-Based Logic** - Single-responsibility action classes
+    - **Idempotent Seeding** - Production-safe database seeders
+    - **Advanced Permissions** - Fine-grained role-based access
+  </Card>
+
+  <Card title="🔐 Security & Compliance" icon="approve-check">
+    - **Multi-Auth Methods** - SSO, API tokens, passwordless links
+    - **Comprehensive Auditing** - Complete trail of all changes
+    - **Data Encryption** - At-rest and in-transit protection
+    - **User Impersonation** - Secure troubleshooting capability
+  </Card>
+
+  <Card title="🔌 API Features" icon="external">
+    - **Token Management** - Rotation, expiration, IP allowlists, notifications
+    - **Request Analytics** - Performance metrics & sampling
+    - **RFC 9457 Errors** - Standardized error responses
+    - **Trace IDs** - Correlate logs and requests easily
+  </Card>
+
+  <Card title="🎨 User Interface" icon="star">
+    - **Filament 4** - Modern administration interface
+    - **Pre-built Resources** - Users, roles, tokens, audits
+    - **Analytics Dashboards** - Login trends & API metrics
+    - **Northwestern Branding** - University styling guidelines
+  </Card>
+
+  <Card title="🧑‍💻 Developer Experience" icon="rocket">
+    - **Database Snapshots** - Save/restore state instantly
+    - **Health Checks** - Monitor platform services
+    - **Laravel Telescope** - Powerful debugging tool
+    - **CI/CD Ready** - GitHub Actions workflows included
+  </Card>
+</CardGrid>
+
+## Who Should Use This Starter
+
+- **Northwestern IT Projects** - Any web application or API being built for Northwestern University that needs integration with University services.
+- **Administrative Systems** - Applications requiring user management, authentication, audit logging, and compliance with University policies.
+- **API Services** - Fully API-driven services that integrate with other Northwestern systems.
+
+<Aside type="caution">
+This starter kit is designed primarily for Northwestern University projects. If you're outside Northwestern, you may not be able to use it as-is, but the architecture and patterns may still be valuable as reference material.
+</Aside>
+

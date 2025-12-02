@@ -1,0 +1,149 @@
+---
+title: Installation
+description: Step-by-step installation instructions for the Northwestern Laravel Starter
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+
+## Initial Setup
+
+### 1. Clone Project
+
+If you're starting a new project using this starter:
+
+```bash
+# Clone the repository
+git clone https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter.git your-project-name
+cd your-project-name
+
+# Initialize a fresh repository
+git init -b develop # or `main` depending on your branching strategy
+git add .
+git commit -m "chore: initial commit from Northwestern Laravel Starter"
+```
+
+### 2. Provision Required Services
+
+The application expects specific services to exist before you can begin local development:
+
+<Steps>
+    1. **Create Databases**
+
+        Create the two databases required by the application:
+
+        ```text
+        your_project_name_local   # Primary application database
+        your_project_name_test    # PHPUnit test database
+        ```
+
+    2. **Create MinIO Bucket**
+
+        Create a bucket for local object storage:
+
+        ```text
+        your-project-name
+        ```
+
+</Steps>
+
+### 3. Update Configuration Files
+
+<Steps>
+    1. **`.env.example`**
+
+        Update the file by referencing the services you created in the previous step and setting other project-specific defaults:
+
+        ```bash
+        APP_NAME="Your Project Name"
+        APP_URL=https://your-project-name.test
+        DB_DATABASE=your_project_name_local
+        DB_PHPUNIT_DATABASE=your_project_name_test
+        AWS_BUCKET=your-project-name
+        AZURE_CLIENT_ID=your-azure-entra-id-client-id
+        ```
+
+        Ideally, these changes should be committed to your repository to serve as the base configuration for other developers.
+
+
+    2. **`herd.yml`**
+
+        If you're using [Laravel Herd](https://herd.laravel.com), update the `name` field to match your folder/repository name:
+
+        ```diff
+        - name: northwestern-laravel-starter
+        + name: your-project-name
+        ```
+</Steps>
+
+### 4. Install Dependencies
+
+```bash
+herd init    # If using Laravel Herd
+herd secure  # If using Laravel Herd
+
+composer install
+cp .env.example .env
+php artisan key:generate
+
+nvm install
+nvm use v24
+npm install -g pnpm@latest-10 # If pnpm is not already installed
+
+pnpm install
+pnpm build
+```
+
+### 5. Environment Configuration
+
+In your **LOCAL** `.env` file, the follow environment variables must be set:
+
+```bash
+AZURE_CLIENT_SECRET=your-value-here
+DIRECTORY_SEARCH_API_KEY=your-value-here
+EVENT_HUB_API_KEY=your-value-here # Only if the EventHub integration is needed
+````
+
+### 6. Validate Configuration
+
+To ensure your environment is correctly configured, run:
+
+```bash
+php artisan config:validate
+````
+
+If any issues are detected, the command will output error messages to help you resolve them.
+
+### 6. Database Scaffolding
+
+```bash
+php artisan db:rebuild
+```
+
+This will:
+
+- Create all database tables
+- Seed system permissions
+- Seed default roles
+- Seed role types
+- Seed example users
+
+:::caution
+This command is only intended for local and testing environments. Use this as needed as the schema or seeders change during development.
+:::
+
+## Verification
+
+### Test the Application
+
+Start the development server:
+
+```bash
+# If using Laravel Herd, your site should already be available at:
+http://your-project-name.test
+
+# Otherwise, use the built-in PHP server:
+php artisan serve
+```
+
+Visit the application in your browser. You should see the homepage.
+

@@ -1,0 +1,122 @@
+---
+title: Idempotent Seeding System
+description: How the production-safe seeding system works
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+The starter implements an **idempotent seeding system** that allows database seeders to run multiple times safely without creating duplicate data or causing errors. This is critical for production environments where you need to update seed data without rebuilding the entire database.
+
+## What is Idempotent Seeding?
+
+**Idempotent** means an operation can be performed multiple times without changing the result beyond the initial application.
+
+In the context of database seeders:
+
+- Running a seeder once creates the expected data
+- Running it again doesn't create duplicates
+- Running it a third time still produces the same result
+- Data is updated if it exists, created if it doesn't
+
+## Creating an Idempotent Seeder
+
+Tables that are idempotently seeded typically follow a common schema: a unique `slug` mapped to an enum case, a label, and potentially other descriptive fields.
+
+The `App\Domains\Core\Seeders\IdempotentSeeder` can be used to populate such tables easily. It handles `INSERT`, `UPDATE`, and `DELETE` operations based on the values it's given. If something is removed or modified, the seeder will handle the change appropriately. It is aware of the `SoftDeletes` trait and can set (or unset) the `deleted_at` column correctly.
+
+### `AutoSeed` Attribute
+
+To register an idempotent seeder to be run by `db:seed` and during deployments, provide the `#[AutoSeed]` attribute on the seeder class. It will be automatically discovered and executed.
+
+If the data relies on other tables being seeded first, you can specify dependencies using the `dependsOn` parameter:
+
+```php
+#[AutoSeed(dependsOn: [OtherSeeder::class])]
+class MySeeder extends IdempotentSeeder
+{
+    // ...
+}
+````
+
+### Implementation Example
+
+Provided below is an example of a simple idempotent seeder. The `$model` property must be provided. The `data()` method can get data from anywhere; this example is an implementation for an enum.
+
+<Tabs syncKey="pkg">
+    <TabItem label="migration.php">
+        ```php
+        Schema::create('product_statuses', function (Blueprint $table) {
+            $table->id();
+
+            $table->string('slug')->unique();
+            $table->string('label');
+
+            $table->tinyInteger('order_index')->default(5);
+
+            $table->timestamps();
+            $table->softDeletes();
+        });
+        ```
+    </TabItem>
+    <TabItem label="ProductStatusEnum.php">
+        ```php
+        enum ProductStatusEnum: string
+        {
+            case PROVISIONING = 'provisioning';
+
+            public function label(): string
+            {
+                return Str::of($this->value)->replace('-', ' ')->title()->toString();
+            }
+        }
+        ```
+    </TabItem>
+    <TabItem label="ProductStatus.php">
+        ```php
+        class ProductStatus extends BaseModel
+        {
+            use SoftDeletes;
+
+            protected $casts = [
+                'slug' => ProductStatusEnum::class,
+            ];
+        }
+        ```
+    </TabItem>
+    <TabItem label="ProductStatusSeeder.php">
+        ```php
+        #[AutoSeed]
+        class ProductStatusSeeder extends IdempotentSeeder
+        {
+            protected string $model = ProductStatus::class;
+
+            protected string $slugColumn = 'slug';
+
+            public function data(): array
+            {
+                return collect(ProductStatusEnum::cases())
+                    ->map(function (ProductStatusEnum $case): array {
+                        return [
+                            'slug' => $case->value,
+                            'label' => $case->label(),
+                        ];
+                    })
+                    ->all();
+            }
+        }
+        ```
+    </TabItem>
+</Tabs>
+
+### Viewing Idempotent Seeders
+
+```bash
+php artisan db:seed:list
+```
+
+This shows:
+
+- Seeder class names
+- Their dependencies
+- Execution order
+

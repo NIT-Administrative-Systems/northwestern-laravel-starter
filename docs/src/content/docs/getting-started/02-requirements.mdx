@@ -1,0 +1,90 @@
+---
+title: Requirements
+description: System requirements for the Northwestern Laravel Starter
+---
+
+import { Card, CardGrid, Aside, Code, Tabs, TabItem } from '@astrojs/starlight/components';
+
+## System Requirements
+
+- **🐘 PHP**: `^8.4`
+- **🟢 Node.js**: `v24.x`
+- **🟠 pnpm**: `^10.0`
+- **🗄️ PostgreSQL**: `16+`
+
+### PHP Extensions
+
+The following PHP extensions are required to satisfy application dependencies:
+
+```text
+ext-ctype       ext-curl        ext-dom         ext-fileinfo
+ext-filter      ext-hash        ext-iconv       ext-intl
+ext-json        ext-libxml      ext-mbstring    ext-openssl
+ext-pcre        ext-pdo         ext-phar        ext-reflection
+ext-session     ext-simplexml   ext-sodium      ext-tokenizer
+ext-xml         ext-xmlreader   ext-xmlwriter   ext-zip
+```
+
+### Database Requirements
+
+<Aside type="caution" title="PostgreSQL Only">
+**PostgreSQL 16+** is the **only** officially supported database driver for this project. Further documentation will assume PostgreSQL is in use.
+
+The application has **not been tested** with MySQL, MariaDB, SQLite, or other database engines. Key limitations with other databases:
+
+- **Schema Compatibility** - Certain migrations may use PostgreSQL-specific features
+- **Native Functions** - Filament charts and analytics widgets rely on PostgreSQL functions
+
+If you choose to use a different database driver, expect to modify migrations, seeders, and dashboard widgets.
+</Aside>
+
+## Local Development Setup
+
+<CardGrid>
+  <Card title="🚀 Laravel Herd" icon="rocket">
+    **Recommended**
+
+    [Laravel Herd](https://herd.laravel.com/) provides an all-in-one development environment for macOS and Windows:
+    - PHP 8.4+ with extension management
+    - Nginx web server
+    - PostgreSQL, Redis, and MinIO services
+    - Automatic site provisioning
+  </Card>
+
+  <Card title="⋈ Laravel Valet" icon="seti:config">
+    **Alternative**
+
+    [Laravel Valet](https://laravel.com/docs/valet) is a lightweight macOS environment requiring manual installation of PHP, PostgreSQL, and other dependencies.
+
+    Suitable as an alternative if you cannot use Laravel Herd.
+  </Card>
+</CardGrid>
+
+## Northwestern-Specific Requirements
+
+<Aside type="caution" title="API Access Required">
+Access to Northwestern integrations requires approval and credentials through the [API Service Registry](https://apiserviceregistry.northwestern.edu).
+</Aside>
+
+To make the most of this project, you'll need access to the following integrations:
+
+<CardGrid stagger>
+  <Card title="🔐 WebSSO / Entra ID" icon="approve-check">
+    SSO configuration for Northwestern authentication. Credentials must be obtained through the Entra ID application registration process.
+
+    **Required** for user authentication via NetID.
+  </Card>
+
+  <Card title="📚 Directory Search" icon="magnifier">
+    Service responsible for user lookups, demographic sync, and organizational data.
+
+    **Required** for Northwestern user provisioning.
+  </Card>
+
+  <Card title="📡 EventHub" icon="rocket">
+    Webhook configuration and HMAC shared secret for event subscriptions.
+
+    **Optional** - Only needed if consuming or publishing events.
+  </Card>
+</CardGrid>
+
