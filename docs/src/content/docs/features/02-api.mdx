@@ -1,0 +1,184 @@
+---
+title: API
+description: Complete guide to the API token system and features
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## Overview
+
+The starter includes a comprehensive API system designed for secure, monitored programmatic access to your application. The system provides token-based authentication, IP allowlisting, request logging, and detailed analytics.
+
+<Aside>
+If your application does not require an API, you can disable the entire feature set:
+
+```php
+// .env
+API_ENABLED=false
+```
+</Aside>
+
+## Key Features
+
+### API Token Management
+
+- **Multiple Tokens Per User** - Create multiple tokens for different integrations
+- **Validity Windows** - Set active and expiration dates
+- **Easy Revocation** - Disable tokens instantly
+
+### IP Allowlisting
+
+- **CIDR Notation Support** - Restrict access by IP address or range
+- **Multiple IPs** - Allow access from multiple locations
+- **Flexible Configuration** - Per-token IP restrictions
+
+### Request Logging
+
+- **Performance Metrics** - Track request duration
+- **Response Tracking** - Log HTTP status codes
+- **Configurable Sampling** - Control logging volume for high-traffic APIs
+
+### Analytics & Monitoring
+
+- **Request Charts** - Visualize API usage over time
+- **Slow Request Detection** - Identify performance issues
+- **Endpoint Analysis** - See which endpoints are most used
+
+## Authentication Flow
+
+### 1. Token Creation
+
+An administrator creates an API user and their first token using the **Create API User** action in the Filament Administration Panel. This action launches a wizard that guides the user through the process of providing the user's details and configuring the token's properties, such as its validity period and allowed IP addresses.
+
+### 2. Token Delivery
+
+The plain-text token shown once at creation:
+
+```
+Token: abc123def456ghi789jkl012mno345pqr678stu901vwx234yz
+```
+
+### 3. Client Configuration
+
+Client includes token in requests:
+
+```http
+GET /api/users HTTP/1.1
+Host: your-app.northwestern.edu
+Authorization: Bearer abc123def456ghi789jkl012mno345pqr678stu901vwx234yz
+```
+
+### 4. Request Authentication
+
+Middleware:
+
+1. Extracts token from Authorization header
+2. Finds user with matching token hash
+3. Checks token is active (not expired, within valid window)
+4. Validates source IP (if allowlist configured)
+5. Authenticates request as that user
+
+### 5. Request Logging
+
+After request completes:
+
+- Request details logged to database
+- Duration calculated
+- Response status recorded
+- Analytics updated
+
+## API Token Lifecycle
+
+### Token States
+
+**Pending** - Token created but not yet active (before `valid_from` date)
+
+**Active** - Token is active and can be used for authentication
+
+**Expired** - Token has passed its `valid_to` date and cannot be used
+
+**Revoked** - Token manually disabled
+
+### Expiration Notifications
+
+To avoid surprise outages, the system automatically sends reminder emails as tokens approach their expiration date when an API user has an email address configured.
+
+By default, notifications are sent 30, 14, 7, and 3 days before expiration, as well as on the day of expiration.
+
+You can adjust the notification intervals in the configuration file:
+
+```php
+// config/auth.php
+'expiration_notifications' => [
+    'enabled' => env('API_TOKEN_EXPIRATION_NOTIFICATIONS_ENABLED', true),
+    'intervals' => [30, 14, 7, 3, 1],
+],
+```
+
+If you do not wish to send expiration notifications, you can disable this feature entirely:
+
+```php
+// .env
+API_TOKEN_EXPIRATION_NOTIFICATIONS_ENABLED=false
+```
+
+## Request Logging
+
+### What Gets Logged
+
+Every API request log entry includes:
+
+| Field               | Description                                            |
+| ------------------- | ------------------------------------------------------ |
+| `trace_id`          | Unique request identifier                              |
+| `user_id`           | ID of the authenticated user                           |
+| `user_api_token_id` | ID of the API token used for authentication (nullable) |
+| `method`            | HTTP method (GET, POST, etc.)                          |
+| `path`              | Request path (relative URL)                            |
+| `route_name`        | Named route for the request (if applicable)            |
+| `ip_address`        | Source IP address                                      |
+| `status_code`       | HTTP status code                                       |
+| `duration_ms`       | Request duration in milliseconds                       |
+| `response_bytes`    | Size of the response body in bytes (if measurable)     |
+| `user_agent`        | User agent string from the request (if provided)       |
+| `failure_reason`    | Authentication or request failure reason, if any       |
+| `created_at`        | Timestamp when the request was logged                  |
+
+### Sampling Configuration
+
+For high-volume APIs, consider sampling to reduce the database load:
+
+```php
+// .env
+
+API_REQUEST_LOGGING_SAMPLING_ENABLED=true
+API_REQUEST_LOGGING_SAMPLING_RATE=0.1 // Log 10% of requests
+```
+
+:::tip[Failures Always Logged]
+Non-successful requests (`4xx`/`5xx`) are always logged regardless of the sample rate.
+:::
+
+## Authorization
+
+To handle granular access control for API users, the system leverages the existing role and permission structure.
+
+### API Integration Role Type
+
+API users can **ONLY** be assigned roles with a role type of **API Integration**. This is intentionally restrictive to prevent API users from being granted permissions that are not relevant or appropriate for programmatic access.
+
+### API-Relevant Permissions
+
+When creating/editing **API Integration** roles, only permissions marked as API-relevant are presented for assignment. These are determined by the `isApiRelevant()` method on the `PermissionEnum`:
+
+```php
+public function isApiRelevant(): bool
+{
+    return match ($this) {
+        self::VIEW_USERS => true,
+        default => false,
+    };
+}
+```
+
+As you add new permissions to the system, ensure to update this method accordingly.

@@ -82,6 +82,7 @@ Certain fields are excluded from audit logs to prevent storing sensitive or irre
 
 ```php
 // Within an Eloquent model
+
 protected array $auditExclude = [
     'password',
 ]

@@ -1,0 +1,528 @@
+---
+title: Component Library
+description: A reference guide for custom Blade components available in the starter
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+<Aside type="note" title="User-Facing Components">
+The starter provides a series of custom Blade components that leverage **Bootstrap 5** styling. These components are specifically designed for the **user-facing interface** of your application. For more information about the dual UI architecture, see the [UI Architecture](/architecture/01-ui-architecture/) documentation.
+</Aside>
+
+The starter includes reusable, accessible, and customizable Blade components that integrate seamlessly with the Northwestern Laravel UI stack.
+
+---
+
+## Navigation Components
+
+### Breadcrumbs
+
+A Bootstrap-based breadcrumb navigation component that automatically handles the last item as active and supports both named routes and direct URLs.
+
+#### Parameters
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>breadcrumbs</code></td>
+<td><code>array&lt;string, string&gt;</code></td>
+<td>Yes</td>
+<td>An associative array where keys are route names (or URLs) and values are the display labels</td>
+</tr>
+</tbody>
+</table>
+
+#### Features
+
+- **Automatic Active State**: The last breadcrumb is automatically marked as active
+- **Named Routes & URLs**: Accepts both Laravel named routes and direct URLs
+- **Cypress Testing Support**: Includes `data-cy` attributes for automated testing
+
+#### Usage Example
+
+```blade
+<x-breadcrumbs :breadcrumbs="[
+    'home' => 'Home',
+    'dashboard.index' => 'Dashboard',
+    'users.index' => 'Users',
+    'users.show' => 'John Doe'
+]" />
+```
+
+**With Direct URLs:**
+
+```blade
+<x-breadcrumbs :breadcrumbs="[
+    'home' => 'Home',
+    'https://example.com/external' => 'External Link',
+    'users.index' => 'Users'
+]" />
+```
+
+---
+
+## Interactive Components
+
+### Clipboard
+
+A feature-rich copy-to-clipboard component with visual feedback, tooltips, and flexible styling options. Uses ClipboardJS for reliable cross-browser copying functionality.
+
+#### Parameters
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>text</code></td>
+<td><code>string</code></td>
+<td>Yes</td>
+<td>-</td>
+<td>The text content to copy to the clipboard</td>
+</tr>
+<tr>
+<td><code>label</code></td>
+<td><code>string|null</code></td>
+<td>No</td>
+<td><code>null</code></td>
+<td>Optional label text to display alongside the icon</td>
+</tr>
+<tr>
+<td><code>isButton</code></td>
+<td><code>bool</code></td>
+<td>No</td>
+<td><code>true</code></td>
+<td>Render as a button (<code>true</code>) or inline span (<code>false</code>)</td>
+</tr>
+<tr>
+<td><code>buttonSize</code></td>
+<td><code>string|null</code></td>
+<td>No</td>
+<td><code>null</code></td>
+<td>Bootstrap button size: <code>sm</code> or <code>lg</code></td>
+</tr>
+<tr>
+<td><code>buttonVariant</code></td>
+<td><code>string</code></td>
+<td>No</td>
+<td><code>outline-secondary</code></td>
+<td>Bootstrap button variant for the default state</td>
+</tr>
+<tr>
+<td><code>successVariant</code></td>
+<td><code>string</code></td>
+<td>No</td>
+<td><code>outline-success</code></td>
+<td>Bootstrap button variant for the success state</td>
+</tr>
+<tr>
+<td><code>iconPosition</code></td>
+<td><code>string</code></td>
+<td>No</td>
+<td><code>left</code></td>
+<td>Icon position: <code>left</code>, <code>right</code>, or <code>none</code></td>
+</tr>
+</tbody>
+</table>
+
+#### Valid Button Variants
+
+The component accepts any standard Bootstrap 5 button variant:
+
+- **Solid**: `primary`, `secondary`, `success`, `danger`, `warning`, `info`, `light`, `dark`, `link`
+- **Outline**: `outline-primary`, `outline-secondary`, `outline-success`, `outline-danger`, `outline-warning`, `outline-info`, `outline-light`, `outline-dark`
+
+#### Usage Examples
+
+**Basic Button:**
+
+```blade
+<x-clipboard text="Hello World" />
+```
+
+**With Label:**
+
+```blade
+<x-clipboard
+    text="user@example.com"
+    label="Email Address"
+    button-variant="primary"
+/>
+```
+
+**Small Button:**
+
+```blade
+<x-clipboard
+    text="{{ $apiToken }}"
+    label="Copy Token"
+    button-size="sm"
+/>
+```
+
+**Inline Span (No Button):**
+
+```blade
+<x-clipboard
+    :text="$user->id"
+    label="Copy ID"
+    :is-button="false"
+/>
+```
+
+**Icon on Right:**
+
+```blade
+<x-clipboard
+    text="https://example.com/share/12345"
+    label="Share Link"
+    icon-position="right"
+    button-variant="success"
+/>
+```
+
+**No Icon (Label Only):**
+
+```blade
+<x-clipboard
+    text="{{ $secret }}"
+    label="Copy Secret"
+    icon-position="none"
+/>
+```
+
+**Custom Styling with Classes:**
+
+```blade
+<x-clipboard
+    text="{{ $code }}"
+    label="Copy Code"
+    class="w-100"
+/>
+```
+
+---
+
+## Form Components
+
+### Select
+
+A powerful, searchable select component built on [Tom Select](https://tom-select.js.org) with support for multiple selection, asynchronous search, plugins, and advanced features. Designed to work seamlessly with Livewire.
+
+#### Parameters
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td><code>string</code></td>
+<td>Yes</td>
+<td>-</td>
+<td>Unique identifier for the select element</td>
+</tr>
+<tr>
+<td><code>options</code></td>
+<td><code>array|Collection</code></td>
+<td>Yes</td>
+<td>-</td>
+<td>Options for the select (arrays, Collections, or Enums)</td>
+</tr>
+<tr>
+<td><code>settings</code></td>
+<td><code>array</code></td>
+<td>No</td>
+<td><code>[]</code></td>
+<td>Additional Tom Select settings (merged with defaults)</td>
+</tr>
+<tr>
+<td><code>plugins</code></td>
+<td><code>array</code></td>
+<td>No</td>
+<td><code>[]</code></td>
+<td>Tom Select plugins to enable with optional configurations</td>
+</tr>
+<tr>
+<td><code>searchable</code></td>
+<td><code>bool</code></td>
+<td>No</td>
+<td><code>true</code></td>
+<td>Enable/disable search functionality</td>
+</tr>
+<tr>
+<td><code>searchUrl</code></td>
+<td><code>string</code></td>
+<td>No</td>
+<td><code>''</code></td>
+<td>URL for asynchronous search API endpoint</td>
+</tr>
+<tr>
+<td><code>optionCountSingularNoun</code></td>
+<td><code>string</code></td>
+<td>No</td>
+<td><code>Item</code></td>
+<td>Singular noun for the option count plugin</td>
+</tr>
+<tr>
+<td><code>optionCountPluralNoun</code></td>
+<td><code>string|null</code></td>
+<td>No</td>
+<td>Auto-generated</td>
+<td>Plural noun for the option count plugin</td>
+</tr>
+<tr>
+<td><code>maxOptions</code></td>
+<td><code>int|null</code></td>
+<td>No</td>
+<td><code>30</code></td>
+<td>Maximum number of options to display</td>
+</tr>
+</tbody>
+</table>
+
+#### Available Plugins
+
+The Select component supports the following Tom Select plugins:
+
+- `caret_position` - Adjust caret position in input
+- `change_listener` - Listen for changes
+- `checkbox_options` - Add checkboxes to options
+- `clear_button` - Add a clear all button
+- `drag_drop` - Drag and drop to reorder
+- `dropdown_header` - Custom dropdown header
+- `dropdown_input` - Input field in dropdown
+- `input_autogrow` - Auto-grow input width
+- `no_active_items` - Disable active item behavior
+- `no_backspace_delete` - Disable backspace deletion
+- `optgroup_columns` - Display optgroups as columns
+- `remove_button` - Add remove buttons to items
+- `restore_on_backspace` - Restore item on backspace
+- `virtual_scroll` - Virtual scrolling for large lists
+- `option_count` - Display option count *(custom plugin)*
+
+See the [Tom Select Plugins Documentation](https://tom-select.js.org/plugins) for detailed plugin options.
+
+#### Features
+
+- **Multiple Data Formats**: Supports arrays, Collections, Enums (both Unit and Backed)
+- **Optgroup Support**: Nested arrays automatically render as optgroups
+- **Async Search**: Built-in support for server-side search with automatic throttling (250ms)
+- **Enum Integration**: Automatic label resolution for enums with `label()` method
+- **Accessibility**: Proper ARIA attributes and semantic HTML
+
+#### Usage Examples
+
+**Basic Select:**
+
+```blade
+<x-select
+    id="country"
+    :options="['us' => 'United States', 'ca' => 'Canada', 'mx' => 'Mexico']"
+/>
+```
+
+**With Collection:**
+
+```blade
+<x-select
+    id="users"
+    :options="$users->pluck('name', 'id')"
+    placeholder="Select a user"
+/>
+```
+
+**With Enums:**
+
+```blade
+<x-select
+    id="affiliation"
+    :options="App\Enums\AffiliationEnum::cases()"
+/>
+```
+
+**With Optgroups:**
+
+```blade
+<x-select
+    id="locations"
+    :options="[
+        'North America' => [
+            'us' => 'United States',
+            'ca' => 'Canada'
+        ],
+        'Europe' => [
+            'uk' => 'United Kingdom',
+            'de' => 'Germany'
+        ]
+    ]"
+/>
+```
+
+**Multiple Selection with Plugins:**
+
+```blade
+<x-select
+    id="tags"
+    :options="$tags"
+    :plugins="['checkbox_options', 'remove_button', 'clear_button']"
+    multiple
+/>
+```
+
+**Async Search:**
+
+```blade
+<x-select
+    id="users-search"
+    :options="[]"
+    search-url="{{ route('api.users.search') }}"
+    placeholder="Type to search users..."
+/>
+```
+
+**With Custom Settings:**
+
+```blade
+<x-select
+    id="priority"
+    :options="['low' => 'Low', 'medium' => 'Medium', 'high' => 'High']"
+    :settings="[
+        'selectOnTab' => true,
+        'closeAfterSelect' => true,
+        'maxItems' => 3
+    ]"
+/>
+```
+
+**With Option Count Plugin:**
+
+```blade
+<x-select
+    id="courses"
+    :options="$courses"
+    :plugins="['option_count' => true]"
+    option-count-singular-noun="Course"
+    option-count-plural-noun="Courses"
+/>
+```
+
+**Non-Searchable Select:**
+
+```blade
+<x-select
+    id="status"
+    :options="['active' => 'Active', 'inactive' => 'Inactive']"
+    :searchable="false"
+/>
+```
+
+**Livewire Integration:**
+
+```blade
+<x-select
+    id="department"
+    :options="$departments"
+    wire:model="selectedDepartment"
+    ignore-livewire-updates
+/>
+```
+
+#### Async Search API Response Format
+
+When using `search-url`, your API endpoint should return JSON in this format:
+
+```json
+[
+    {"value": "1", "text": "Option 1"},
+    {"value": "2", "text": "Option 2"}
+]
+```
+
+The component automatically sends these query parameters:
+- `q`: The search query string
+- `l`: The maximum number of options to return
+
+---
+
+## Northwestern Specific Components
+
+### Wildcard Photo
+
+Displays a user's Wildcard ID photo from Northwestern's identity system. The component handles photo caching, URL generation with cache busting, and provides lazy loading for performance.
+
+#### Parameters
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>user</code></td>
+<td><code>User|null</code></td>
+<td>Yes</td>
+<td>The User model instance to display the photo for</td>
+</tr>
+</tbody>
+</table>
+
+#### Features
+
+- **Cache Busting**: Automatically includes a cache-busting parameter based on `wildcard_photo_last_synced_at`
+- **Lazy Loading**: Images load lazily to improve page performance
+- **Fallback Support**: Gracefully handles missing photos with a default route
+
+#### Usage Examples
+
+**Basic Usage:**
+
+```blade
+<x-wildcard-photo :user="$user" />
+```
+
+**With Custom Classes:**
+
+```blade
+<x-wildcard-photo
+    :user="$user"
+    class="border-3"
+/>
+```
+
+**With Custom Size:**
+
+```blade
+<x-wildcard-photo
+    :user="$user"
+    class="img-thumbnail"
+    style="width: 150px; height: 150px;"
+/>
+```
