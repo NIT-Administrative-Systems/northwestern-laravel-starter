@@ -95,13 +95,13 @@ pnpm build
 
 ### 5. Environment Configuration
 
-In your **LOCAL** `.env` file, the follow environment variables must be set:
+In your **LOCAL** `.env` file, the following environment variables must be set:
 
 ```bash
 AZURE_CLIENT_SECRET=your-value-here
 DIRECTORY_SEARCH_API_KEY=your-value-here
 EVENT_HUB_API_KEY=your-value-here # Only if the EventHub integration is needed
-````
+```
 
 ### 6. Validate Configuration
 
@@ -109,11 +109,11 @@ To ensure your environment is correctly configured, run:
 
 ```bash
 php artisan config:validate
-````
+```
 
 If any issues are detected, the command will output error messages to help you resolve them.
 
-### 6. Database Scaffolding
+### 7. Database Scaffolding
 
 ```bash
 php artisan db:rebuild

@@ -1,0 +1,165 @@
+---
+title: Audit Logging
+description: Comprehensive audit trail system for compliance and security
+---
+
+import { Card, CardGrid, Aside, Code } from '@astrojs/starlight/components';
+
+The starter includes a comprehensive audit logging system that automatically tracks all significant user actions and data changes throughout your application. This provides a complete historical record for compliance, security investigations, and debugging.
+
+## Why Audit Logging Matters
+
+<CardGrid>
+  <Card title="Compliance & Regulations" icon="document">
+    Many Northwestern applications handle sensitive data subject to regulations requiring audit trails:
+
+    - **FERPA** - Student education records
+    - **HIPAA** - Healthcare information
+    - **University Policies** - Administrative data retention requirements
+  </Card>
+
+  <Card title="Security & Forensics" icon="approve-check">
+    Audit logs help detect and investigate security incidents:
+
+    - Unauthorized access attempts
+    - Suspicious data modifications
+    - Account compromise indicators
+    - Privilege escalation attempts
+  </Card>
+
+  <Card title="Debugging & Troubleshooting" icon="magnifier">
+    Audit trails assist with diagnosing issues:
+
+    - Understanding how data reached its current state
+    - Identifying when changes were made
+    - Determining who made specific changes
+    - Reproducing reported issues
+  </Card>
+
+  <Card title="Accountability & Transparency" icon="star">
+    Complete audit trails provide:
+
+    - Attribution for all actions
+    - Transparency in administrative processes
+    - Evidence for dispute resolution
+    - Historical context for decisions
+  </Card>
+</CardGrid>
+
+---
+
+## What Gets Audited
+
+### Automatic Model Auditing
+
+All models extending `BaseModel` automatically log the following Eloquent events with complete before/after state:
+
+- **Created** - When a new record is inserted
+- **Updated** - When an existing record is modified
+- **Deleted** - When a record is deleted (including soft deletes)
+- **Restored** - When a soft-deleted record is restored
+
+Each audit log entry includes:
+
+- **Event Type** - The operation performed (created, updated, deleted, restored)
+- **User** - Who performed the action (authenticated user)
+- **Timestamp** - Exactly when the change occurred
+- **Old Values** - The state before the change (for updates and deletes)
+- **New Values** - The state after the change (for creates and updates)
+- **User Agent** - The browser/client that made the request
+- **IP Address** - Where the request originated from
+- **URL** - The route where the action occurred
+
+### Custom Audit Events
+
+Beyond automatic model events, the system logs custom events for critical operations:
+
+**Role Assignment & Removal**
+
+When roles are assigned to or removed from users:
+
+- User receiving the role change
+- Role being assigned/removed
+- Before state (previous roles)
+- After state (new roles)
+- User who made the change
+- Timestamp of the change
+
+**Permission Syncing**
+
+When a role's permissions are modified:
+
+- Role whose permissions changed
+- Old permission set
+- New permission set
+- User who made the change
+- Timestamp of the sync
+
+**Impersonation Sessions**
+
+When administrators impersonate users:
+
+- When impersonation starts
+- Who is being impersonated
+- Who started the impersonation
+- When impersonation ends
+- Actions performed during impersonation
+
+---
+
+## Audit Exclusions
+
+Certain fields can be excluded from audit logs to prevent storing sensitive or irrelevant data. You can configure exclusions at the model level:
+
+```php
+// Within an Eloquent model extending BaseModel
+
+protected array $auditExclude = [
+    'password',
+    'remember_token',
+];
+```
+
+### Why Exclude Fields?
+
+<CardGrid>
+  <Card title="Security" icon="approve-check">
+    Prevent sensitive data from being stored in audit logs:
+    - Passwords (even hashed)
+    - API tokens
+    - Encryption keys
+    - OAuth secrets
+  </Card>
+
+  <Card title="Volume Control" icon="rocket">
+    Exclude fields that change too frequently:
+    - Session timestamps
+    - Cache counters
+    - Temporary flags
+    - Analytics data
+  </Card>
+
+  <Card title="Relevance" icon="magnifier">
+    Skip technical fields not meaningful for audits:
+    - Internal system flags
+    - Framework metadata
+    - Computed values
+  </Card>
+
+  <Card title="Storage Efficiency" icon="star">
+    Reduce audit table size and improve performance:
+    - Less disk space usage
+    - Faster queries
+    - Easier log analysis
+  </Card>
+</CardGrid>
+
+---
+
+## Creating Custom Audit Events
+
+For actions that don't fit standard CRUD operations, you can log custom audit events. The `AuditsPermissions` and `AuditsRoles` traits demonstrate this pattern.
+
+<Aside type="tip" title="Additional Resources">
+For more advanced audit logging patterns, refer to the [Laravel Auditing documentation](https://laravel-auditing.com/guide/audit-custom.html#example-custom-log-event).
+</Aside>
