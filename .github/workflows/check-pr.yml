@@ -60,12 +60,12 @@ jobs:
       - name: 📦 Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: $PNPM_VERSION
+          version: ${{ env.PNPM_VERSION }}
 
       - name: 🟢 Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: $NODE_VERSION
+          node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
 
       - name: 📷 pnpm Dependencies Cache

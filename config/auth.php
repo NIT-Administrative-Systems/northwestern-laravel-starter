@@ -44,16 +44,16 @@ return [
 
     'local' => [
         // Enable/disable local authentication system
-        'enabled' => env('LOCAL_AUTH_ENABLED', false),
+        'enabled' => env('LOCAL_AUTH_ENABLED', true),
 
         // How long login links remain valid
-        'login_link_expiration_minutes' => 15,
+        'login_link_expiration_minutes' => env('LOCAL_AUTH_LOGIN_LINK_EXPIRATION_MINUTES', 15),
 
         // Maximum requests per hour (applies to both form submissions and login link sends)
-        'rate_limit_per_hour' => 5,
+        'rate_limit_per_hour' => env('LOCAL_AUTH_RATE_LIMIT_PER_HOUR', 10),
 
         // Where to send users after a successful login (route name or path)
-        'redirect_after_login' => '/',
+        'redirect_after_login' => env('LOCAL_AUTH_REDIRECT_AFTER_LOGIN', '/'),
     ],
 
     /*

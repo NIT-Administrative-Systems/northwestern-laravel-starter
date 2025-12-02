@@ -1,0 +1,285 @@
+---
+title: Artisan Commands
+description: Reference guide for custom Artisan commands in the starter
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The starter includes several custom Artisan commands for managing your application's database, configuration, and Northwestern integrations.
+
+## Database Commands
+
+### `db:rebuild`
+
+Completely rebuild the database by dropping all tables, running migrations, and executing all auto-discovered seeders.
+
+```bash
+php artisan db:rebuild
+```
+
+**What it does:**
+
+1. Drops all tables, views, and types
+2. Runs all migrations
+3. Executes all seeders marked with `#[AutoSeed]` attribute
+4. Regenerates IDE helper files
+
+<Aside type="caution" title="Destructive Operation">
+This command will **completely wipe your database**. Only use in local and testing environments. Never run this in production.
+</Aside>
+
+**When to use:**
+
+- Initial project setup
+- After pulling schema changes from git
+- When switching between feature branches with different schemas
+- Resetting test data during development
+
+**Related:** `db:wipe`, `migrate:fresh`, `db:seed`
+
+---
+
+### `db:seed:list`
+
+Display all auto-discovered seeders with their dependencies and execution order.
+
+```bash
+php artisan db:seed:list
+```
+
+**Output example:**
+
+```
+ ┌───┬──────────────────┬──────────────────────────────────┐
+ │ # │ Seeder           │ Dependencies                     │
+ ├───┼──────────────────┼──────────────────────────────────┤
+ │ 1 │ PermissionSeeder │ none                             │
+ │ 2 │ RoleTypeSeeder   │ none                             │
+ │ 3 │ RoleSeeder       │ RoleTypeSeeder, PermissionSeeder │
+ └───┴──────────────────┴──────────────────────────────────┘
+```
+
+**When to use:**
+
+- Verify seeder discovery and dependencies
+- Troubleshoot seeding order issues
+- Document available seeders for your team
+
+**See also:** [Idempotent Seeding](/architecture/03-idempotent-seeding/) documentation
+
+---
+
+### `db:snapshot:create {name}`
+
+Create a snapshot of the current database state.
+
+```bash
+php artisan db:snapshot:create my-snapshot-name
+```
+
+**Options:**
+
+- `{name}` - (required) Descriptive name for the snapshot
+
+**What it does:**
+
+1. Validates database schema matches current migrations
+2. Dumps database to `database/snapshots/{name}.sql`
+3. Stores metadata about the snapshot (timestamp, schema version)
+
+<Aside type="tip">
+Use descriptive snapshot names like `clean-test-data` or `before-feature-x` to make them easier to identify later.
+</Aside>
+
+**When to use:**
+
+- Before making risky database changes
+- Saving a known-good state for testing
+- Creating test data fixtures
+- Preserving demo data
+
+**See also:** [Database Snapshots](/features/04-database-snapshots/) documentation
+
+---
+
+### `db:snapshot:restore {name}`
+
+Restore a previously created database snapshot.
+
+```bash
+php artisan db:snapshot:restore my-snapshot-name
+```
+
+**Options:**
+
+- `{name}` - (required) Name of the snapshot to restore
+
+**What it does:**
+
+1. Validates snapshot exists
+2. Checks schema compatibility
+3. Drops all current database tables
+4. Restores data from snapshot SQL file
+
+<Aside type="caution" title="Destructive Operation">
+Restoring a snapshot will **completely replace** your current database. All current data will be lost.
+</Aside>
+
+**When to use:**
+
+- Resetting to a known state during testing
+- Recovering from bad data changes during development
+- Switching between test scenarios
+
+---
+
+### `db:snapshot:list`
+
+List all available database snapshots.
+
+```bash
+php artisan db:snapshot:list
+```
+
+---
+
+### `db:wake`
+
+Wake up a potentially-inactive serverless RDS database by establishing a connection.
+
+```bash
+php artisan db:wake
+```
+
+**What it does:**
+
+Attempts to connect to the database and execute a simple query, causing serverless databases (like AWS Aurora Serverless) to wake from sleep mode.
+
+**When to use:**
+
+- Before running migrations
+- As part of deployment scripts
+- When you know the database has been idle
+
+<Aside type="note">
+This is primarily useful for AWS Aurora Serverless or similar serverless database configurations that automatically pause after periods of inactivity.
+</Aside>
+
+---
+
+## Configuration Commands
+
+### `config:validate`
+
+Validate application configuration and environment variables.
+
+```bash
+php artisan config:validate
+```
+
+**What it does:**
+
+Checks that all required environment variables are set and configuration is valid:
+
+- Northwestern API credentials (Directory Search, WebSSO, EventHub)
+- Database connection details
+- S3/MinIO configuration
+- Required app settings
+
+**When to use:**
+
+- After initial installation
+- After environment variable changes
+- Before deployment
+- Troubleshooting integration issues
+
+---
+
+## Maintenance Commands
+
+### `send:api-token-expiration-notifications`
+
+Send expiration reminder emails for API tokens approaching their expiration date.
+
+```bash
+php artisan send:api-token-expiration-notifications
+```
+
+**What it does:**
+
+1. Queries for active API tokens with upcoming expiration dates
+2. Checks which tokens are due for notifications (30, 14, 7, 3, 1 days before)
+3. Sends reminder emails to token owners
+
+**See also:** [API Documentation](/features/03-api/#expiration-notifications)
+
+---
+
+## Health Check Commands
+
+### `health:check`
+
+Run health checks for all external integrations and services.
+
+```bash
+php artisan health:check
+```
+
+**What it does:**
+
+Validates connectivity and configuration for:
+
+- **Database** - Connection and query execution
+- **S3/MinIO** - Bucket access and write permissions
+- **Directory Search API** - API connectivity and test query
+- **WebSSO/Entra ID** - Authentication endpoint availability
+- **EventHub** - API endpoint accessibility (if configured)
+
+**When to use:**
+
+- After deployment
+- Troubleshooting integration issues
+- Monitoring service connectivity
+- As part of CI/CD pipelines
+
+**Integration:**
+
+The `/api/health` endpoint also runs these checks for automated monitoring:
+
+```bash
+curl https://your-app.northwestern.edu/api/health
+```
+
+---
+
+## IDE Helper Commands
+
+The starter uses `laravel-ide-helper` to generate IDE autocomplete files. These commands are automatically run after `db:rebuild`:
+
+### `ide-helper:generate`
+
+Generate IDE helper file for Laravel facades.
+
+```bash
+php artisan ide-helper:generate
+```
+
+### `ide-helper:models`
+
+Generate PHPDoc annotations for Eloquent models.
+
+```bash
+php artisan ide-helper:models --write --reset
+```
+
+### `ide-helper:meta`
+
+Generate PhpStorm meta file for container bindings.
+
+```bash
+php artisan ide-helper:meta
+```
+
+<Aside type="tip">
+These commands are automatically executed as part of `db:rebuild`. You rarely need to run them manually unless you're specifically updating IDE helpers.
+</Aside>

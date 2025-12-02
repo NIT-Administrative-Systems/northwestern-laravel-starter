@@ -1,0 +1,275 @@
+---
+title: Authentication
+description: Multi-method authentication system for Northwestern users and external collaborators
+---
+
+import { Card, CardGrid, Aside, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
+
+The Northwestern Laravel Starter provides a flexible, multi-method authentication system designed to handle both Northwestern users (via NetID/SSO) and external collaborators (via passwordless login links or API tokens).
+
+## Authentication Methods
+
+<CardGrid>
+  <Card title="Entra ID" icon="approve-check">
+    **Northwestern Single Sign-On**
+
+    Primary authentication method for Northwestern users via NetID.
+
+    - Integrated with Northwestern's identity provider
+    - Multi-factor authentication support
+    - Automatic user provisioning
+    - Session-based authentication
+  </Card>
+
+  <Card title="Passwordless Login Links" icon="external">
+    **Magic Link Authentication**
+
+    Email-based passwordless authentication for external users.
+
+    - No password management
+    - Time-limited login links
+    - Rate limiting protection
+    - Invite-only access
+  </Card>
+
+  <Card title="API Tokens" icon="rocket">
+    **Bearer Token Authentication**
+
+    Long-lived tokens for programmatic API access.
+
+    - Multiple tokens per user
+    - IP allowlisting
+    - Token expiration
+  </Card>
+</CardGrid>
+
+---
+
+## Entra ID Authentication
+
+Northwestern users authenticate via single sign-on using their NetID credentials.
+
+### How It Works
+
+<Steps>
+
+1. **User visits protected route**
+
+   User attempts to access a route requiring authentication
+
+2. **Redirect to SSO**
+
+   Application redirects to Northwestern's authentication service
+
+3. **User authenticates**
+
+   User enters NetID and password (+ MFA if enabled)
+
+4. **Callback with token**
+
+   SSO provider redirects back with authentication token
+
+5. **User provisioning**
+
+   Application creates/updates user record from Directory Search data
+
+6. **Session established**
+
+   User is logged in and session cookie is set
+
+</Steps>
+
+### User Provisioning
+
+When a Northwestern user logs in for the first time, the application:
+
+1. **Validates NetID** from SSO response
+2. **Queries Directory Search API** for user demographics
+3. **Creates user record** with demographic data:
+   - Full name
+   - Email address
+   - Department
+   - Affiliations (student, faculty, staff, etc.)
+   - etc.
+
+Subsequent logins update the user's demographic data to keep it synchronized.
+
+---
+
+## Passwordless Login Links
+
+External users (non-Northwestern) can access the application via time-limited magic links sent to their email.
+
+### How It Works
+
+<Steps>
+
+1. **Admin creates local user**
+
+   Administrator creates a local user account in the Filament panel
+
+2. **Invite link sent**
+
+   Admin triggers login link email or user requests one themselves
+
+3. **User receives email**
+
+   Email contains time-limited magic link (valid for 15 minutes by default)
+
+4. **User clicks link**
+
+   Link authenticates user and establishes session
+
+5. **Link expires**
+
+   Link becomes invalid after use or expiration
+
+</Steps>
+
+### Configuration
+
+```bash
+# .env
+
+# Enable/disable local authentication
+LOCAL_AUTH_ENABLED=true
+
+# How long login links remain valid (minutes)
+LOCAL_AUTH_LOGIN_LINK_EXPIRATION_MINUTES=15
+
+# Rate limit for login link requests (per hour)
+LOCAL_AUTH_RATE_LIMIT_PER_HOUR=10
+
+# Where to redirect after successful login
+LOCAL_AUTH_REDIRECT_AFTER_LOGIN=/
+```
+
+### Creating Local Users
+
+<Tabs>
+  <TabItem label="Via Administration Panel" icon="seti:config">
+    1. Navigate to **Users**
+    2. Click **Actions** → **Create Local User**
+    3. Enter user details (name, email, etc.)
+    6. Create the user
+  </TabItem>
+
+  <TabItem label="Programmatically" icon="seti:php">
+    ```php
+    use App\Domains\User\Models\User;
+    use App\Domains\User\Enums\AffiliationEnum;
+    use App\Domains\User\Enums\AuthTypeEnum;
+    use App\Domains\User\Actions\Local\SendLoginLink;
+
+    $user = User::create([
+        'username' => 'jdoe',
+        'auth_type' => AuthTypeEnum::LOCAL,
+        'primary_affiliation' => AffiliationEnum::AFFILIATE,
+        'email' => 'jane.doe@example.com',
+        'first_name' => 'Jane',
+        'last_name' => 'Doe',
+    ]);
+
+    // Send login link
+    resolve(SendLoginLink::class)($user, request()->ip());
+    ```
+  </TabItem>
+</Tabs>
+
+### Security Features
+
+<CardGrid>
+  <Card title="Time-Limited Links" icon="approve-check">
+    Links automatically expire after configured duration (default: 15 minutes)
+  </Card>
+
+  <Card title="Single-Use Tokens" icon="approve-check">
+    Each link can only be used once, preventing replay attacks
+  </Card>
+
+  <Card title="Rate Limiting" icon="warning">
+    Limits login link requests to prevent abuse and enumeration attacks
+  </Card>
+
+  <Card title="Timing Attack Protection" icon="approve-check">
+    Consistent response times prevent user enumeration via timing analysis
+  </Card>
+</CardGrid>
+
+---
+
+## API Token Authentication
+
+API users authenticate using long-lived Bearer tokens for programmatic access.
+
+### How It Works
+
+<Steps>
+
+1. **Admin creates API user**
+
+   Administrator creates an API user and generates first token
+
+2. **Token delivered once**
+
+   Plain-text token shown only at creation (never retrievable again)
+
+3. **Client stores token**
+
+   Client securely stores token for API requests
+
+4. **Token in requests**
+
+   Client includes token in `Authorization: Bearer` header
+
+5. **Middleware validates**
+
+   `AuthenticatesApiTokens` middleware validates token and IP allowlist
+
+6. **Request logged**
+
+   API request logged with metrics and analytics
+
+</Steps>
+
+See the [API Documentation](/features/03-api/) for complete API token management details.
+
+---
+
+## Authorization
+
+After authentication, authorization is handled through Laravel's permission system combined with custom policies.
+
+### Permission System
+
+The starter uses a role-based permission system:
+
+<Steps>
+
+1. **Permissions** - Granular actions users can perform (view users, edit roles, etc.)
+
+2. **Roles** - Collections of permissions assigned to users
+
+3. **Role Types** - Categories of roles (Staff, API Integration, etc.)
+
+4. **Policies** - Laravel policies check permissions for specific actions
+
+</Steps>
+
+### Super Administrators
+
+Users listed in `SUPER_ADMIN_NETIDS` bypass all authorization checks:
+
+```bash
+# .env
+SUPER_ADMIN_NETIDS=abc123,xyz789,def456
+```
+
+These users:
+- Have access to all areas of the application
+- Bypass all policy checks
+- Are seeded automatically via `StakeholderSeeder`
+
+<Aside type="caution">
+Super administrators should be limited to core IT staff and developers. Their NetIDs bypass all authorization checks, granting them unrestricted access to the entire application.
+</Aside>

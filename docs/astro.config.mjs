@@ -2,10 +2,15 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import starlightLinksValidator from 'starlight-links-validator';
+import mermaid from 'astro-mermaid';
 
 // https://astro.build/config
 export default defineConfig({
 	integrations: [
+        mermaid({
+            theme: 'default',
+            autoTheme: true,
+        }),
 		starlight({
 			title: 'Northwestern Laravel Starter',
             components: {
@@ -25,17 +30,25 @@ export default defineConfig({
 			},
 			sidebar: [
                 {
-                    label: 'About',
-                    autogenerate: { directory: 'about' },
+                    label: 'Getting Started',
+                    autogenerate: { directory: 'getting-started' },
                 },
-				{
-					label: 'Guides',
+                {
+                    label: 'Architecture',
+                    autogenerate: { directory: 'architecture' },
+                },
+                {
+                    label: 'Features',
+                    autogenerate: { directory: 'features' },
+                },
+                {
+                    label: 'Guides',
                     autogenerate: { directory: 'guides' },
-				},
-				{
-					label: 'Reference',
-					autogenerate: { directory: 'reference' },
-				},
+                },
+                {
+                    label: 'Reference',
+                    autogenerate: { directory: 'reference' },
+                }
 			],
             plugins: [
                 starlightLinksValidator(),
