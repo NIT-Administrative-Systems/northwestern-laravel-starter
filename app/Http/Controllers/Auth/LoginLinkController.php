@@ -18,7 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Support\Sleep;
+use Illuminate\Support\Timebox;
 use Illuminate\Validation\ValidationException;
 use RuntimeException;
 use SensitiveParameter;
@@ -44,6 +44,7 @@ class LoginLinkController extends Controller
         private readonly SendLoginLink $sendLoginLink,
         private readonly ValidateLoginLink $validateLoginLink,
         private readonly DetermineUserSegment $determineUserSegment,
+        private readonly Timebox $timebox,
     ) {
         //
     }
@@ -77,29 +78,24 @@ class LoginLinkController extends Controller
         $this->checkSessionRateLimit($request);
 
         $email = $request->email();
-        $start = microtime(true);
-
-        $user = User::firstLocalByEmail($email);
-
-        if ($user) {
-            try {
-                ($this->sendLoginLink)($user, $request->ip());
-            } catch (RuntimeException $e) {
-                // Rate limit exceeded
-                throw ValidationException::withMessages([
-                    'email' => $e->getMessage(),
-                ]);
-            }
-        }
-
-        $elapsedMs = (int) ((microtime(true) - $start) * 1000);
-
         $jitterMs = random_int(0, 50);
-        $targetMs = self::MIN_TOTAL_RESPONSE_TIME_MS + $jitterMs;
+        $minimumTimeMs = self::MIN_TOTAL_RESPONSE_TIME_MS + $jitterMs;
 
-        if ($elapsedMs < $targetMs) {
-            Sleep::for($targetMs - $elapsedMs)->milliseconds();
-        }
+        $this->timebox->call(function (Timebox $timebox) use ($email, $request) {
+            $user = User::firstLocalByEmail($email);
+
+            if ($user) {
+                try {
+                    ($this->sendLoginLink)($user, $request->ip());
+                    $timebox->returnEarly();
+                } catch (RuntimeException $e) {
+                    // Rate limit exceeded
+                    throw ValidationException::withMessages([
+                        'email' => $e->getMessage(),
+                    ]);
+                }
+            }
+        }, $minimumTimeMs * 1000);
 
         return back()->with('status', 'If an account with that email exists, a login link has been sent.');
     }
