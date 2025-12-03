@@ -186,7 +186,7 @@ class User extends Authenticatable implements Auditable, FilamentUser, HasName
          * @phpstan-ignore match.unhandled
          */
         return match ($panel->getId()) {
-            AdministrationPanelProvider::ID => $this->can(PermissionEnum::ACCESS_ADMIN_PANEL),
+            AdministrationPanelProvider::ID => $this->can(PermissionEnum::ACCESS_ADMINISTRATION_PANEL),
         };
     }
 }

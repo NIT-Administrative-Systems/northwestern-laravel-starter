@@ -48,7 +48,7 @@ class ViewRole extends ViewRecord
     {
         return [
             EditAction::make()
-                ->authorize(PermissionEnum::MODIFY_ROLES)
+                ->authorize(PermissionEnum::EDIT_ROLES)
                 ->hidden(fn () => $this->record->isSystemManagedType()),
         ];
     }

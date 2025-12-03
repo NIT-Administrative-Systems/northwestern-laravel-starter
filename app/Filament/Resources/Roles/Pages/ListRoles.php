@@ -18,7 +18,7 @@ class ListRoles extends ListRecords
     {
         return [
             CreateAction::make()
-                ->authorize(PermissionEnum::MODIFY_ROLES)
+                ->authorize(PermissionEnum::EDIT_ROLES)
                 ->label('Create Role')
                 ->icon(Heroicon::OutlinedPlusCircle),
         ];

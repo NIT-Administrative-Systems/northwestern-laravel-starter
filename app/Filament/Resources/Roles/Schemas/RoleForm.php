@@ -176,7 +176,15 @@ class RoleForm
                         // System Permissions - only visible to users with MANAGE_ALL and hidden for API roles
                         filled($systemPermissions) ? CheckboxList::make('system_permissions')
                             ->label('System Managed Permissions')
-                            ->helperText('These permissions are sensitive and should not be given out broadly. They are only visible to users with the "Manage All" permission.')
+                            ->helperText(new HtmlString(<<<'HTML'
+        <div class="mt-3 rounded-md border border-red-500/40 bg-red-500/5 px-4 py-3 text-xs leading-relaxed text-red-200">
+            <p class="font-semibold text-red-200">Sensitive Permissions</p>
+            <p class="mt-1">
+                These permissions are sensitive and should not be given out broadly. They are only visible to users with the
+                <span class="font-semibold">"Manage All"</span> permission.
+            </p>
+        </div>
+    HTML))
                             ->options(collect($systemPermissions)->mapWithKeys(fn ($data, $value) => [
                                 $value => $data['label'],
                             ])->toArray())

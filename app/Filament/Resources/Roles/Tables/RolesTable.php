@@ -49,7 +49,7 @@ class RolesTable
                         }
 
                         return auth()->user()->hasPermissionTo(PermissionEnum::VIEW_ROLES) &&
-                            ! auth()->user()->hasPermissionTo(PermissionEnum::MODIFY_ROLES);
+                            ! auth()->user()->hasPermissionTo(PermissionEnum::EDIT_ROLES);
                     }),
                 EditAction::make()
                     ->visible(function ($record) {
@@ -57,7 +57,7 @@ class RolesTable
                             return false;
                         }
 
-                        return auth()->user()->hasPermissionTo(PermissionEnum::MODIFY_ROLES);
+                        return auth()->user()->hasPermissionTo(PermissionEnum::EDIT_ROLES);
                     }),
             ])
             ->toolbarActions([
