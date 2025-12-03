@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Roles\Schemas;
 
 use App\Domains\User\Enums\PermissionEnum;
+use App\Domains\User\Enums\PermissionScopeEnum;
 use App\Domains\User\Enums\RoleTypeEnum;
 use App\Domains\User\Models\Permission;
 use App\Domains\User\Models\RoleType;
@@ -16,6 +17,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\HtmlString;
 
 class RoleForm
 {
@@ -25,10 +27,15 @@ class RoleForm
         $nonApiPermissions = [];
         $systemPermissions = [];
 
+        $permissionScopeBadgeHTML = collect(PermissionScopeEnum::cases())->mapWithKeys(function (PermissionScopeEnum $scope) {
+            return [$scope->value => $scope->getBadgeHTML()];
+        });
+
         foreach (Permission::all() as $permission) {
             $permissionData = [
                 'label' => $permission->label,
                 'description' => $permission->description,
+                'scopeBadgeHTML' => $permissionScopeBadgeHTML[$permission->scope->value],
             ];
 
             if ($permission->system_managed) {
@@ -115,7 +122,7 @@ class RoleForm
                         filled($apiPermissions) ? CheckboxList::make('api_permissions')
                             ->label('API Permissions')
                             ->options(collect($apiPermissions)->mapWithKeys(fn ($data, $value) => [
-                                $value => $data['label'],
+                                $value => new HtmlString($data['label'] . $data['scopeBadgeHTML']),
                             ])->toArray())
                             ->descriptions(collect($apiPermissions)->mapWithKeys(fn ($data, $value) => [
                                 $value => $data['description'],
@@ -146,7 +153,7 @@ class RoleForm
                         filled($nonApiPermissions) ? CheckboxList::make('regular_permissions')
                             ->label('Permissions')
                             ->options(collect($nonApiPermissions)->mapWithKeys(fn ($data, $value) => [
-                                $value => $data['label'],
+                                $value => new HtmlString($data['label'] . $data['scopeBadgeHTML']),
                             ])->toArray())
                             ->descriptions(collect($nonApiPermissions)->mapWithKeys(fn ($data, $value) => [
                                 $value => $data['description'],
@@ -186,7 +193,7 @@ class RoleForm
         </div>
     HTML))
                             ->options(collect($systemPermissions)->mapWithKeys(fn ($data, $value) => [
-                                $value => $data['label'],
+                                $value => new HtmlString($data['label'] . $data['scopeBadgeHTML']),
                             ])->toArray())
                             ->descriptions(collect($systemPermissions)->mapWithKeys(fn ($data, $value) => [
                                 $value => $data['description'],

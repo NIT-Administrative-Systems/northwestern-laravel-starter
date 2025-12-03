@@ -31,8 +31,6 @@ enum PermissionEnum: string implements HasLabel
     // Audit & Monitoring
     case VIEW_AUDIT_LOGS = 'view-audit-logs';
     case VIEW_LOGIN_RECORDS = 'view-login-records';
-    case MANAGE_API_USERS = 'manage-api-users';
-    case DELETE_ROLES = 'delete-roles';
 
     /**
      * A human-readable label of the permission.
@@ -105,6 +103,51 @@ enum PermissionEnum: string implements HasLabel
         return match ($this) {
             self::VIEW_USERS => true,
             default => false,
+        };
+    }
+
+    /**
+     * Determines the authorization scope of this permission.
+     *
+     * The scope indicates whether the permission grants system-wide access (SYSTEM_WIDE)
+     * or is limited to resources owned by the user (PERSONAL).
+     *
+     * ## Default Behavior
+     *
+     * All permissions in the starter are HIGH_LEVEL by default, meaning they grant
+     * unrestricted system-wide access.
+     *
+     * ## Adding Personal-Scoped Permissions
+     *
+     * When adding permissions for self-service functionality (e.g., users managing their
+     * own profiles or content), explicitly mark them as PERSONAL scope:
+     *
+     * ```php
+     * return match ($this) {
+     *     // Personal-scoped permissions (limited to owned resources)
+     *     self::VIEW_OWN_PROFILE,
+     *     self::EDIT_OWN_PROFILE,
+     *     self::VIEW_OWN_AUDIT_LOGS => PermissionScopeEnum::PERSONAL,
+     *
+     *     // All other permissions default to system-wide access
+     *     default => PermissionScopeEnum::HIGH_LEVEL,
+     * };
+     * ```
+     *
+     * Remember to implement corresponding ownership checks in your Laravel policies
+     * when using personal-scoped permissions.
+     *
+     * @see PermissionScopeEnum For detailed documentation on permission scopes
+     */
+    public function scope(): PermissionScopeEnum
+    {
+        return match ($this) {
+            // When adding personal-scoped permissions, add them here:
+            // self::VIEW_OWN_PROFILE,
+            // self::EDIT_OWN_PROFILE => PermissionScopeEnum::PERSONAL,
+
+            // All permissions are SYSTEM_WIDE (system-wide) by default
+            default => PermissionScopeEnum::SYSTEM_WIDE,
         };
     }
 }

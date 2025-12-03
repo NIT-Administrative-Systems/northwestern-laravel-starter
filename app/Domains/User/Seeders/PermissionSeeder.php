@@ -24,6 +24,7 @@ class PermissionSeeder extends Seeder implements IdempotentSeederInterface
                 'description' => $permission->description(),
                 'system_managed' => $permission->isSystemManaged(),
                 'api_relevant' => $permission->isApiRelevant(),
+                'scope' => $permission->scope(),
             ];
         })->each(function (array $permissionData) {
             try {

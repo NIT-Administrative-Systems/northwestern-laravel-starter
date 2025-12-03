@@ -23,6 +23,7 @@ return new class extends Migration
 
             $table->string('name');
             $table->string('label');
+            $table->string('scope');
             $table->string('description');
             $table->string('guard_name');
             $table->boolean('system_managed');
