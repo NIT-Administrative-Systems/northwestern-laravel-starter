@@ -6,6 +6,33 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Environment Lockdown
+    |--------------------------------------------------------------------------
+    |
+    | When enabled, users without **non-default roles** cannot access the
+    | application and are instead shown a lockdown page. This is useful for
+    | staging/demo environments to prevent unauthorized access from users who
+    | discover the application URL.
+    |
+    | This rule specifically focuses on users who only possess the default
+    | system role (e.g., "Northwestern User") and have not been granted
+    | specific application privileges.
+    |
+    | By default, lockdown is enabled for non-production environments and
+    | disabled for production, local development, CI, and tests.
+    |
+    | Users with impersonation active or any non-default role bypass the lockdown.
+    |
+    */
+    'lockdown' => [
+        'enabled' => env('ENVIRONMENT_LOCKDOWN_ENABLED', match (env('APP_ENV')) {
+            'production', 'local', 'testing', 'ci' => false,
+            default => true,
+        }),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Stakeholder Accounts
     |--------------------------------------------------------------------------
     |

@@ -8,9 +8,11 @@ use App\Domains\Core\Models\Concerns\Auditable as AuditableConcern;
 use App\Domains\User\Enums\AffiliationEnum;
 use App\Domains\User\Enums\AuthTypeEnum;
 use App\Domains\User\Enums\PermissionEnum;
+use App\Domains\User\Enums\SystemRoleEnum;
 use App\Domains\User\Models\Concerns\AuditsRoles;
 use App\Domains\User\Models\Concerns\HandlesImpersonation;
 use App\Domains\User\QueryBuilders\UserBuilder;
+use App\Http\Middleware\EnvironmentLockdown;
 use App\Providers\Filament\AdministrationPanelProvider;
 use Database\Factories\Domains\User\Models\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
@@ -169,6 +171,25 @@ class User extends Authenticatable implements Auditable, FilamentUser, HasName
     {
         return Attribute::make(
             get: fn (): bool => $this->auth_type === AuthTypeEnum::API,
+        );
+    }
+
+    /**
+     * @comment User's roles beyond the default "Northwestern User" system role.
+     *
+     * This excludes the "Northwestern User" role which is automatically assigned
+     * to all SSO users. Use this when checking for real application access.
+     *
+     * @see EnvironmentLockdown
+     *
+     * @return Attribute<Collection<int, Role>, never>
+     */
+    protected function nonDefaultRoles(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): Collection => $this->roles->reject(
+                fn ($role) => $role->name === SystemRoleEnum::NORTHWESTERN_USER->value
+            ),
         );
     }
 

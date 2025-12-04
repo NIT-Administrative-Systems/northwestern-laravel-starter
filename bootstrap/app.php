@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Domains\Core\Exceptions\ProblemDetailsRenderer;
 use App\Domains\Core\Exceptions\SentryExceptionHandler;
+use App\Http\Middleware\EnvironmentLockdown;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -25,6 +26,10 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->validateCsrfTokens(except: [
             '/__cypress__/artisan',
+        ]);
+
+        $middleware->web([
+            EnvironmentLockdown::class,
         ]);
 
         $middleware->throttleApi();

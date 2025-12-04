@@ -74,6 +74,9 @@ class ConfigurationPage extends Page implements HasTable
 
         return [
             'Platform URL' => url('/'),
+            'Environment Lockdown' => config('platform.lockdown.enabled')
+                ? 'Enabled: Non-default roles required for access'
+                : 'Disabled: No role-based access restrictions',
             ...$systemMock('EventHub', 'nusoa.eventHub.mock', 'nusoa.eventHub.baseUrl'),
             'Mail Driver' => config('mail.default'),
             'Mail Server' => strtolower((string) config('mail.default')) === 'ses'

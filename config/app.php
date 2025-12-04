@@ -6,6 +6,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Production Application URL
+    |--------------------------------------------------------------------------
+    |
+    | This value is the absolute, stable URL of the live, production environment.
+    | It is used by non-production environments (staging, QA) for redirects,
+    | email links, and general information about the application's true home.
+    |
+    */
+
+    'production_url' => env('PRODUCTION_URL', 'https://northwestern.edu'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Schedule Timezone
     |--------------------------------------------------------------------------
     |
