@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Roles\Pages;
 
 use App\Domains\User\Enums\PermissionEnum;
+use App\Domains\User\Enums\RoleModificationOriginEnum;
 use App\Domains\User\Models\Role;
 use App\Domains\User\Models\User;
 use App\Filament\Resources\Roles\RoleResource;
@@ -31,11 +32,13 @@ class EditRole extends EditRecord
             DeleteAction::make()
                 ->authorize(PermissionEnum::DELETE_ROLES)
                 ->hidden(fn () => $this->record->isSystemManagedType())
-                ->before(function () {
-                    // Remove role from all assigned users before deleting
-                    $this->record->users()->each(function (User $user) {
-                        $user->removeRoleWithAudit($this->record);
-                    });
+                ->before(function (Role $record) {
+                    // Remove the role from all assigned users before deleting
+                    $record->users()
+                        ->lazyById(100)
+                        ->each(function (User $user) use ($record) {
+                            $user->removeRoleWithAudit($record, RoleModificationOriginEnum::REMOVED_BY_DELETION);
+                        });
                 }),
         ];
     }
