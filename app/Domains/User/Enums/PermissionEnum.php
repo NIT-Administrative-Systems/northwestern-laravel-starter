@@ -114,7 +114,7 @@ enum PermissionEnum: string implements HasLabel
      *
      * ## Default Behavior
      *
-     * All permissions in the starter are HIGH_LEVEL by default, meaning they grant
+     * All permissions in the starter are SYSTEM_WIDE by default, meaning they grant
      * unrestricted system-wide access.
      *
      * ## Adding Personal-Scoped Permissions
@@ -130,7 +130,7 @@ enum PermissionEnum: string implements HasLabel
      *     self::VIEW_OWN_AUDIT_LOGS => PermissionScopeEnum::PERSONAL,
      *
      *     // All other permissions default to system-wide access
-     *     default => PermissionScopeEnum::HIGH_LEVEL,
+     *     default => PermissionScopeEnum::SYSTEM_WIDE,
      * };
      * ```
      *

@@ -17,7 +17,7 @@ use Illuminate\Support\Str;
  *
  * ## Scope Types
  *
- * **HIGH_LEVEL**: System-wide permissions that grant unrestricted access across all resources.
+ * **SYSTEM_WIDE**: System-wide permissions that grant unrestricted access across all resources.
  * - Example: `view-users` allows viewing ALL users in the system
  * - Example: `edit-roles` allows editing ANY role
  * - Typically assigned to administrators and staff
@@ -35,7 +35,7 @@ use Illuminate\Support\Str;
  * ```php
  * public function update(User $user, Post $post): bool
  * {
- *     // HIGH_LEVEL permission bypasses ownership check
+ *     // SYSTEM_WIDE permission bypasses ownership check
  *     if ($user->hasPermissionTo('edit-any-post')) {
  *         return true;
  *     }
