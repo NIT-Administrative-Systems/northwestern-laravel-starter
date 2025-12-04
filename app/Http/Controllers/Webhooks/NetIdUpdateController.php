@@ -5,28 +5,52 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Webhooks;
 
 use App\Domains\User\Events\NetIdUpdated;
+use App\Domains\User\Listeners\ProcessNetIdUpdate;
 use App\Domains\User\Models\User;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Event;
 use InvalidArgumentException;
+use Throwable;
 
 /**
- * Handles incoming webhook notifications from Northwestern's **NetID Update** message topic.
+ * Handles webhook notifications from Northwestern's **NetID Update** message topic.
  *
- * Messages are delivered when NetIDs are deactivated, deprovisioned, put on security hold,
- * and other actions. This controller validates the payload and dispatches an event for
- * relevant updates.
+ * NetID update messages are sent when a user is deactivated, deprovisioned,
+ * placed on security hold, or other lifecycle changes.
+ *
+ * @see NetIdUpdated For payload parsing and event originination
+ * @see ProcessNetIdUpdate For event handling
  */
 class NetIdUpdateController extends Controller
 {
-    public function __invoke(Request $request): Response
+    public const string STATUS_ACCEPTED = 'accepted';
+
+    public const string STATUS_IGNORED = 'ignored';
+
+    public const string REASON_INVALID_PAYLOAD = 'invalid-payload';
+
+    public const string REASON_UNKNOWN_USER = 'unknown-user';
+
+    public function __invoke(Request $request): JsonResponse
     {
         try {
-            $event = new NetIdUpdated($request->getContent());
-        } catch (InvalidArgumentException $e) {
-            return response($e->getMessage(), 204);
+            $payload = $request->getContent();
+            $event = new NetIdUpdated($payload);
+        } catch (Throwable $e) {
+            /**
+             * Unexpected errors should be reported but still return a successful
+             * response. We don't want malformed requests to hit the DLQ and
+             * continue retrying invalid payloads.
+             */
+            report_unless($e instanceof InvalidArgumentException, $e);
+
+            return response()->json([
+                'status' => self::STATUS_IGNORED,
+                'reason' => self::REASON_INVALID_PAYLOAD,
+                'message' => $e->getMessage(),
+            ]);
         }
 
         $user = User::query()
@@ -34,11 +58,19 @@ class NetIdUpdateController extends Controller
             ->firstWhere('username', $event->netId);
 
         if ($user === null) {
-            return response("NetID [{$event->netId}] not known to this application.", 204);
+            return response()->json([
+                'status' => self::STATUS_IGNORED,
+                'reason' => self::REASON_UNKNOWN_USER,
+                'netid' => $event->netId,
+            ]);
         }
 
         Event::dispatch($event);
 
-        return response('Message received');
+        return response()->json([
+            'status' => self::STATUS_ACCEPTED,
+            'netid' => $event->netId,
+            'action' => $event->action->value,
+        ], 202);
     }
 }

@@ -13,7 +13,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Processes **NetID Update** events from Northwestern's Identity system.
+ * Processes **NetID Update** events received from Northwestern's Identity system.
  *
  * When a NetID is deactivated, deprovisioned, or put on security hold, this listener:
  * - Removes all role assignments except the default {@see SystemRoleEnum::NORTHWESTERN_USER} role

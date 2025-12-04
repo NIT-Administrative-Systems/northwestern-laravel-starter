@@ -6,17 +6,19 @@ namespace App\Console\Commands;
 
 use App\Domains\Core\Concerns\MocksEventHub;
 use App\Domains\User\Enums\NetIdUpdateActionEnum;
+use App\Domains\User\Listeners\ProcessNetIdUpdate;
+use App\Http\Controllers\Webhooks\NetIdUpdateController;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
 
 use function Laravel\Prompts\select;
 
 /**
- * Simulates Northwestern Identity NetID update webhooks for local development and testing.
+ * Simulates webhooks for messages delivered to Northwestern Identity's **NetID Updates** topic.
  *
  * This command allows developers to test the NetID webhook integration without relying on
- * external Northwestern systems. It replicates the behavior of Northwestern's EventHub
- * NetID Update notifications by sending formatted webhook payloads to the application.
+ * external Northwestern systems. It replicates the behavior of EventHub's delivery for
+ * notifications by sending formatted webhook payloads to the application.
  *
  * @see NetIdUpdateController
  * @see ProcessNetIdUpdate

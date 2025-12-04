@@ -39,7 +39,7 @@ Route::middleware([EnsureApiEnabled::class, LogsApiRequests::class, Authenticate
 */
 
 Route::middleware(['eventhub_hmac'])->prefix('eventhub')->group(function () {
-    Route::post('netid-update', App\Http\Controllers\Webhooks\NetIdUpdateController::class)->eventHubWebhook('etidentity.ldap.netid.term')->name('netid-update');
+    // Route::post('netid-update', App\Http\Controllers\Webhooks\NetIdUpdateController::class)->eventHubWebhook('etidentity.ldap.netid.term')->name('netid-update');
 });
 
 /*
