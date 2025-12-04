@@ -10,7 +10,7 @@ applyTo: "app/**/*.php,bootstrap/**/*.php,config/**/*.php,routes/**/*.php,tests/
 - **Strict typing**: Start files with `declare(strict_types=1)`;. Use typed properties, scalar/union/DTO types, and return types everywhere. Favor constructor property promotion and `readonly` when stable immutability is intentional.
 - **PHP language features**: Use named arguments, match expressions, nullsafe operator (?->), and attributes over DocBlock annotations. Prefer enums for constrained sets and value objects for domain primitives.
 - **Naming**: Classes/interfaces/traits in `PascalCase`, methods/variables in `camelCase`, configuration keys in `snake_case`, enum cases and class constants in `UPPER_SNAKE_CASE`.
-- **DocBlocks**: Only add DocBlocks when types need extra context (e.g., collections with generics, third-party payloads). Use `@comment` for attribute/accessor documentation that should be picked up by code generators. Document *why* a decision is made, not obvious logic.
+- **DocBlocks**: Only add DocBlocks when types need extra context (e.g., collections with generics, third-party payloads). Use `@comment` for attribute/accessor documentation that should be picked up by code generators. Document _why_ a decision is made, not obvious logic.
 - **Dependencies**: Prefer dependency injection over manually resolving classes out of the container when possible. Use Laravel contracts when binding abstractions for easier testing.
 
 ## Architectural conventions
@@ -35,8 +35,8 @@ applyTo: "app/**/*.php,bootstrap/**/*.php,config/**/*.php,routes/**/*.php,tests/
 
 ## Testing & quality gates
 
-- Write feature/unit tests using PHPUnit; colocate tests under `tests/Feature` or `tests/Unit` mirroring namespaces.
-- Use `#[CoversClass(ClassName::class)]` attributes on test classes for coverage tracking.
-- Prefer factories over manual model creation. Note that `UserFactory` automatically assigns `SystemRoleEnum::NORTHWESTERN_USER` to SSO users via `afterCreating` hook; use `->affiliate()` state for users without auto-assigned roles.
-- Mock external services (e.g., `ImpersonateManager`) in tests rather than relying on session state.
-- Run `composer analyse:php` (PHPStan) before merging. Keep baseline errors at zero—add `@phpstan-ignore-next-line` only with justification.
+- **Test organization:** Write feature/unit tests using PHPUnit; colocate tests under `tests/Feature` or `tests/Unit` mirroring namespaces. Use `#[CoversClass(ClassName::class)]` attributes on test classes for coverage tracking.
+- **Factory usage:** Prefer factories over manual model creation. Note that `UserFactory` automatically assigns `SystemRoleEnum::NORTHWESTERN_USER` to SSO users via `afterCreating` hook; use `->affiliate()` state for users without auto-assigned roles.
+- **Mocking external services:** Mock external services (e.g., `ImpersonateManager`, `DirectorySearchService`) in tests rather than relying on real API calls or session state. Use `Event::fake()` and `Queue::fake()` to test event/job dispatching without side effects.
+- **Static analysis:** Run `composer analyse:php` (PHPStan) before merging. Keep baseline errors at zero—add `@phpstan-ignore-next-line` only with justification.
+- **Code formatting:** Always run `composer format:php` (Laravel Pint) before committing to ensure PSR-12 compliance.
