@@ -13,6 +13,7 @@ use App\Http\Controllers\Webhooks\NetIdUpdateController;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Route;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
@@ -24,6 +25,8 @@ class NetIdUpdateControllerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        Route::post('netid-update', NetIdUpdateController::class)->eventHubWebhook('etidentity.ldap.netid.term')->name('netid-update');
 
         Event::fake();
     }
