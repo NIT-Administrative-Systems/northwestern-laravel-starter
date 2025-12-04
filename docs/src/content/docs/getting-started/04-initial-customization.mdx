@@ -150,7 +150,35 @@ API_REQUEST_LOGGING_SAMPLE_RATE=0.1
 
 ---
 
-## 4. Project Cleanup
+## 4. Northwestern Integrations
+
+### NetID Update Webhook
+
+The **NetID Update** webhook receives notifications when Northwestern users are deactivated, deprovisioned, or placed on security hold. This enables automatic role removal, or additional business logic, when users leave Northwestern.
+
+**If you have an EventHub subscription to the `etidentity.ldap.netid.term` topic:**
+
+<Steps>
+    1. Open `routes/api.php`
+
+    2. Uncomment the NetID Update webhook route:
+        ```diff
+        Route::middleware(['eventhub_hmac'])->prefix('eventhub')->group(function () {
+        -    // Route::post('netid-update', App\Http\Controllers\Webhooks\NetIdUpdateController::class)->eventHubWebhook('etidentity.ldap.netid.term')->name('netid-update');
+        +    Route::post('netid-update', App\Http\Controllers\Webhooks\NetIdUpdateController::class)->eventHubWebhook('etidentity.ldap.netid.term')->name('netid-update');
+        });
+        ```
+
+        <Aside type="danger" title="Important">
+            If your application employs a scale-to-zero database strategy for non-production environments, consider **ONLY** enabling this webhook in production by wrapping it in an environment check. Failure to do so may lead to excessive database spin-ups and an accumulation of messages being sent to the DLQ.
+        </Aside>
+</Steps>
+
+
+
+**If you don't have an EventHub subscription, leave this route commented out.**
+
+## 5. Project Cleanup
 
 <Aside type="caution" title="Important">
 Perform these cleanup tasks to personalize the starter kit for your project and remove references to the Northwestern Laravel Starter.

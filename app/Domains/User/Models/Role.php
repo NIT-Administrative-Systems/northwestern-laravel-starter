@@ -11,6 +11,7 @@ use App\Domains\User\Models\Concerns\AuditsPermissions;
 use Database\Factories\Domains\User\Models\RoleFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\Permission\Models\Role as SpatieRole;
@@ -31,6 +32,12 @@ class Role extends SpatieRole implements Auditable
         $role = parent::create($attributes);
 
         return $role;
+    }
+
+    /** @return BelongsToMany<User, $this> */
+    public function users(): BelongsToMany
+    {
+        return parent::users();
     }
 
     /** @return BelongsTo<RoleType, $this> */

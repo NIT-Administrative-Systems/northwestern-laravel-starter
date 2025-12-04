@@ -38,9 +38,10 @@ Route::middleware([EnsureApiEnabled::class, LogsApiRequests::class, Authenticate
 | Endpoints used by Northwestern's EventHub for inbound event delivery.
 */
 
-// Route::middleware(['eventhub_hmac'])->prefix('eventhub')->group(function () {
-//     Route::post('example-update', ExampleUpdateController::class)->eventHubWebhook('ses.example.updates', ['contentType' => 'application/xml']);
-// });
+Route::middleware(['eventhub_hmac'])->prefix('eventhub')->group(function () {
+    // Uncomment the following route if your project is subscribed to the `etidentity.ldap.netid.term` topic.
+    // Route::post('netid-update', App\Http\Controllers\Webhooks\NetIdUpdateController::class)->eventHubWebhook('etidentity.ldap.netid.term')->name('netid-update');
+});
 
 /*
 |--------------------------------------------------------------------------

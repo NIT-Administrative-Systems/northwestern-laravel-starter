@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Users\RelationManagers;
 
 use App\Domains\User\Enums\PermissionEnum;
+use App\Domains\User\Enums\RoleModificationOriginEnum;
 use App\Domains\User\Enums\RoleTypeEnum;
 use App\Domains\User\Models\Role;
 use App\Domains\User\Models\User;
@@ -171,7 +172,7 @@ class RolesRelationManager extends RelationManager
                             return;
                         }
 
-                        $user->assignRoleWithAudit($role);
+                        $user->assignRoleWithAudit($role, RoleModificationOriginEnum::UI_ACTION);
                     })
                     ->successNotificationTitle('Role assigned'),
             ])
@@ -186,7 +187,7 @@ class RolesRelationManager extends RelationManager
                     ->action(function (Role $record, RelationManager $livewire): void {
                         /** @var User $user */
                         $user = $livewire->getOwnerRecord();
-                        $user->removeRoleWithAudit($record);
+                        $user->removeRoleWithAudit($record, RoleModificationOriginEnum::UI_ACTION);
                     })
                     ->successNotificationTitle('Role removed'),
             ])
