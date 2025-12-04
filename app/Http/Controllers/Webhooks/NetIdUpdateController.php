@@ -20,7 +20,7 @@ use Throwable;
  * NetID update messages are sent when a user is deactivated, deprovisioned,
  * placed on security hold, or other lifecycle changes.
  *
- * @see NetIdUpdated For payload parsing and event originination
+ * @see NetIdUpdated For payload parsing and event origination
  * @see ProcessNetIdUpdate For event handling
  */
 class NetIdUpdateController extends Controller

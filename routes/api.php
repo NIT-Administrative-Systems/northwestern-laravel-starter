@@ -39,6 +39,7 @@ Route::middleware([EnsureApiEnabled::class, LogsApiRequests::class, Authenticate
 */
 
 Route::middleware(['eventhub_hmac'])->prefix('eventhub')->group(function () {
+    // Uncomment the following route if your project is subscribed to the `etidentity.ldap.netid.term` topic.
     // Route::post('netid-update', App\Http\Controllers\Webhooks\NetIdUpdateController::class)->eventHubWebhook('etidentity.ldap.netid.term')->name('netid-update');
 });
 
