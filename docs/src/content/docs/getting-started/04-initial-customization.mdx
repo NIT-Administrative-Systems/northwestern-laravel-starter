@@ -174,11 +174,78 @@ The **NetID Update** webhook receives notifications when Northwestern users are 
         </Aside>
 </Steps>
 
-
-
 **If you don't have an EventHub subscription, leave this route commented out.**
 
-## 5. Project Cleanup
+___
+
+## 5. Environment Lockdown
+
+The **Environment Lockdown** feature restricts application access to users who have been explicitly assigned application-specific roles. Users with only the default _Northwestern User_ role (automatically assigned during SSO login), or no roles, are redirected to a lockdown page explaining they need to be granted access by an administrator.
+
+This feature is particularly useful for **non-production** where you want to prevent unauthorized users from accessing the application if they discover the URL.
+
+### Default Behavior
+
+By default, lockdown is **enabled** for non-production environments and **disabled** for production, local development, CI, and tests:
+
+```php
+// config/platform.php
+'lockdown' => [
+    'enabled' => env('ENVIRONMENT_LOCKDOWN_ENABLED', match (env('APP_ENV')) {
+        'production', 'local', 'testing', 'ci' => false,
+        default => true,
+    }),
+],
+```
+
+### Disabling for Specific Environments
+
+To disable lockdown for a specific environment, add this to your `.env` file:
+
+```bash
+ENVIRONMENT_LOCKDOWN_ENABLED=false
+```
+
+<Aside type="tip">
+This is useful if you need to temporarily disable lockdown for testing or if you want to enable it in production for a closed beta launch.
+</Aside>
+
+### Important: Production URL Configuration
+
+<Aside type="danger" title="Action Required">
+If you plan to use Environment Lockdown in your lower environments, you **must** configure the production URL. The lockdown page displays a link to the production environment so users know where to find the live application.
+</Aside>
+
+**Option 1: Update Config Default (Recommended)**
+
+Edit `config/app.php` to replace the default value:
+
+```diff title="config/app.php"
+- 'production_url' => env('PRODUCTION_URL', 'https://northwestern.edu'),
++ 'production_url' => env('PRODUCTION_URL', 'https://your-app.northwestern.edu'),
+```
+
+**Option 2: Environment Variable**
+
+Add this to your `.env` file:
+
+```bash
+PRODUCTION_URL=https://your-app.northwestern.edu
+```
+
+### Exempted Routes
+
+The following routes are always accessible, regardless of lockdown status:
+
+- Authentication routes (OAuth, login links, logout)
+- Impersonation routes (take/leave impersonation)
+- The lockdown page itself
+
+These exemptions ensure users can log in and administrators can manage impersonation. If you create additional routes that should be exempt, list them in `EnvironmentLockdown::EXEMPTED_ROUTES` accordingly.
+
+___
+
+## 6. Project Cleanup
 
 <Aside type="caution" title="Important">
 Perform these cleanup tasks to personalize the starter kit for your project and remove references to the Northwestern Laravel Starter.
