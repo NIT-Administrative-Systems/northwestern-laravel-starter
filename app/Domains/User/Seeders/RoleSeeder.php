@@ -8,6 +8,7 @@ use App\Domains\Core\Attributes\AutoSeed;
 use App\Domains\Core\Contracts\IdempotentSeederInterface;
 use App\Domains\User\Enums\PermissionEnum;
 use App\Domains\User\Enums\RoleTypeEnum;
+use App\Domains\User\Enums\SystemRoleEnum;
 use App\Domains\User\Models\Role;
 use App\Domains\User\Models\RoleType;
 use Illuminate\Database\Seeder;
@@ -30,9 +31,16 @@ class RoleSeeder extends Seeder implements IdempotentSeederInterface
 
         $roles = collect([
             [
-                'name' => 'Super Administrator',
+                'name' => SystemRoleEnum::SUPER_ADMINISTRATOR,
                 'role_type_id' => $systemManagedRoleId,
                 'permissions' => PermissionEnum::cases(),
+            ],
+            [
+                'name' => SystemRoleEnum::NORTHWESTERN_USER,
+                'role_type_id' => $systemManagedRoleId,
+                'permissions' => [
+                    // Add permissions as needed
+                ],
             ],
         ]);
 

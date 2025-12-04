@@ -6,6 +6,7 @@ namespace Tests\Feature\Domains\User\Actions;
 
 use App\Domains\User\Actions\PersistUserWithUniqueUsername;
 use App\Domains\User\Enums\AuthTypeEnum;
+use App\Domains\User\Enums\SystemRoleEnum;
 use App\Domains\User\Models\User;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
@@ -25,5 +26,18 @@ class PersistUserWithUniqueUsernameTest extends TestCase
 
         $this->assertDatabaseHas('users', ['username' => 'unique_user']);
         $this->assertTrue($savedUser->exists);
+    }
+
+    public function test_it_assigns_default_role_for_sso_user(): void
+    {
+        $user = User::factory()->make([
+            'username' => 'sso_user',
+            'auth_type' => AuthTypeEnum::SSO,
+        ]);
+
+        $action = new PersistUserWithUniqueUsername();
+        $savedUser = $action($user);
+
+        $this->assertTrue($savedUser->hasRole(SystemRoleEnum::NORTHWESTERN_USER));
     }
 }

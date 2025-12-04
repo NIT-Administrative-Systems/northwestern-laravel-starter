@@ -6,6 +6,7 @@ namespace Database\Factories\Domains\User\Models;
 
 use App\Domains\User\Enums\AffiliationEnum;
 use App\Domains\User\Enums\AuthTypeEnum;
+use App\Domains\User\Enums\SystemRoleEnum;
 use App\Domains\User\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -35,6 +36,15 @@ class UserFactory extends Factory
             'departments' => [fake()->company()],
             'timezone' => fake()->timezone(),
         ];
+    }
+
+    public function configure(): static
+    {
+        return $this->afterCreating(function (User $user) {
+            if ($user->auth_type === AuthTypeEnum::SSO) {
+                $user->assignRole(SystemRoleEnum::NORTHWESTERN_USER);
+            }
+        });
     }
 
     /**

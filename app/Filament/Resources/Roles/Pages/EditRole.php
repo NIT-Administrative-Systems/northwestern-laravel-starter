@@ -6,6 +6,7 @@ namespace App\Filament\Resources\Roles\Pages;
 
 use App\Domains\User\Enums\PermissionEnum;
 use App\Domains\User\Models\Role;
+use App\Domains\User\Models\User;
 use App\Filament\Resources\Roles\RoleResource;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
@@ -32,8 +33,8 @@ class EditRole extends EditRecord
                 ->hidden(fn () => $this->record->isSystemManagedType())
                 ->before(function () {
                     // Remove role from all assigned users before deleting
-                    $this->record->users()->each(function ($user) {
-                        $user->removeRole($this->record);
+                    $this->record->users()->each(function (User $user) {
+                        $user->removeRoleWithAudit($this->record);
                     });
                 }),
         ];

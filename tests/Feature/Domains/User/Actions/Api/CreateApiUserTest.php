@@ -20,7 +20,10 @@ class CreateApiUserTest extends TestCase
     {
         parent::setUp();
 
-        CarbonImmutable::setTestNow();
+        $now = CarbonImmutable::parse('2025-12-03 00:00:00');
+
+        CarbonImmutable::setTestNow($now);
+        Carbon::setTestNow($now);
     }
 
     public function test_it_creates_api_user_with_token(): void
@@ -56,8 +59,6 @@ class CreateApiUserTest extends TestCase
 
     public function test_it_uses_defaults_when_optional_arguments_are_null(): void
     {
-        Carbon::setTestNow(now());
-
         $action = new CreateApiUser();
 
         [$user, $token] = $action(

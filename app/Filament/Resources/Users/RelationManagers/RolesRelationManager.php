@@ -65,7 +65,7 @@ class RolesRelationManager extends RelationManager
             ])
             ->headerActions([
                 AttachAction::make()
-                    ->authorize(PermissionEnum::MANAGE_USER_ROLES)
+                    ->authorize(PermissionEnum::ASSIGN_ROLES)
                     ->label('Assign Role')
                     ->color('primary')
                     ->outlined()

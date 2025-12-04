@@ -38,7 +38,7 @@ class RolePolicyTest extends TestCase
     public function test_create_allows_user_with_permission(): void
     {
         $user = User::factory()->create();
-        $user->givePermissionTo(PermissionEnum::MODIFY_ROLES);
+        $user->givePermissionTo(PermissionEnum::EDIT_ROLES);
 
         $this->assertTrue($this->policy()->create($user));
     }
@@ -53,7 +53,7 @@ class RolePolicyTest extends TestCase
     public function test_update_allows_user_with_permission(): void
     {
         $user = User::factory()->create();
-        $user->givePermissionTo(PermissionEnum::MODIFY_ROLES);
+        $user->givePermissionTo(PermissionEnum::EDIT_ROLES);
 
         $this->assertTrue($this->policy()->update($user));
     }

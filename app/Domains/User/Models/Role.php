@@ -52,7 +52,7 @@ class Role extends SpatieRole implements Auditable
      * Determine if the given user can manage this role (assign/remove it from users).
      *
      * System Administrator roles require the MANAGE_ALL permission.
-     * All other roles require the MANAGE_USER_ROLES permission.
+     * All other roles require the ASSIGN_ROLES permission.
      */
     public function canBeManaged(?User $user = null): bool
     {
@@ -66,6 +66,6 @@ class Role extends SpatieRole implements Auditable
             return $user->hasPermissionTo(PermissionEnum::MANAGE_ALL);
         }
 
-        return $user->hasPermissionTo(PermissionEnum::MANAGE_USER_ROLES);
+        return $user->hasPermissionTo(PermissionEnum::ASSIGN_ROLES);
     }
 }

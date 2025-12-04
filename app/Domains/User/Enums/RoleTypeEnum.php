@@ -49,7 +49,7 @@ enum RoleTypeEnum: string implements HasColor, HasIcon, HasLabel
     public function getDescription(): string
     {
         return match ($this) {
-            self::SYSTEM_MANAGED => 'System-level administrators with full platform access.',
+            self::SYSTEM_MANAGED => 'Roles that are programmatically managed by the system.',
             self::APPLICATION_ADMIN => 'Application administrators who manage specific areas.',
             self::APPLICATION_ROLE => 'Standard user roles with specific permissions.',
             self::API_INTEGRATION => 'Roles for API consumers and integrations.',

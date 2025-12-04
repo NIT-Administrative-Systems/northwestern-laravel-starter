@@ -9,33 +9,39 @@ use Illuminate\Support\Str;
 
 enum PermissionEnum: string implements HasLabel
 {
-    // General Permissions
-    case ACCESS_ADMIN_PANEL = 'access-admin-panel';
+    // System Administration
+    case MANAGE_ALL = 'manage-all';
+    case ACCESS_ADMINISTRATION_PANEL = 'access-administration-panel';
+    case MANAGE_IMPERSONATION = 'manage-impersonation';
+
+    // User Management
     case VIEW_USERS = 'view-users';
     case CREATE_USERS = 'create-users';
     case EDIT_USERS = 'edit-users';
-    case VIEW_ROLES = 'view-roles';
-    case MODIFY_ROLES = 'modify-roles';
-    case MANAGE_USER_ROLES = 'manage-user-roles';
 
-    // System Managed Permissions
-    case MANAGE_ALL = 'manage-all';
-    case MANAGE_IMPERSONATION = 'manage-impersonation';
+    // Role Management
+    case VIEW_ROLES = 'view-roles';
+    case EDIT_ROLES = 'edit-roles';
+    case DELETE_ROLES = 'delete-roles';
+    case ASSIGN_ROLES = 'assign-roles';
+
+    // API User Management
+    case MANAGE_API_USERS = 'manage-api-users';
+
+    // Audit & Monitoring
     case VIEW_AUDIT_LOGS = 'view-audit-logs';
     case VIEW_LOGIN_RECORDS = 'view-login-records';
-    case MANAGE_API_USERS = 'manage-api-users';
-    case DELETE_ROLES = 'delete-roles';
 
     /**
      * A human-readable label of the permission.
      */
     public function getLabel(): string
     {
-        return match ($this) {
-            self::MANAGE_API_USERS => 'Manage API Users',
-            // Auto-converts the string to a title. You can override one by adding a specific case.
-            default => Str::of($this->value)->replace('-', ' ')->title()->toString(),
-        };
+        return Str::of($this->value)
+            ->replace('-', ' ')
+            ->title()
+            ->replaceMatches('/\bapi\b/i', 'API')
+            ->toString();
     }
 
     /**
@@ -45,21 +51,28 @@ enum PermissionEnum: string implements HasLabel
     public function description(): string
     {
         return match ($this) {
-            // General Permissions
-            self::ACCESS_ADMIN_PANEL => 'Provides entry to the administration dashboard.',
-            self::VIEW_USERS => 'Allows viewing of all user profiles.',
-            self::CREATE_USERS => 'Enables creation of new user profiles.',
-            self::EDIT_USERS => 'Permits editing of existing user profiles.',
-            self::VIEW_ROLES => 'Allows viewing of all defined roles and their association permissions.',
-            self::MODIFY_ROLES => 'Enables creation and modification of role definitions and permission sets.',
-            self::MANAGE_USER_ROLES => 'Grants the ability to assign, update, or remove roles from users.',
-            // System Managed Permissions
-            self::MANAGE_ALL => 'Provides unrestricted administrative control over all resources and operations.',
-            self::MANAGE_IMPERSONATION => 'Allows authorized users to impersonate other accounts for troubleshooting and support.',
-            self::VIEW_AUDIT_LOGS => 'Grants access to view system generated audit logs.',
-            self::VIEW_LOGIN_RECORDS => 'Allows viewing of user authentication history.',
-            self::MANAGE_API_USERS => 'Grants the ability to create API users and manage their roles and API tokens.',
-            self::DELETE_ROLES => 'Permits permanent deletion of roles.',
+            // System Administration
+            self::ACCESS_ADMINISTRATION_PANEL => 'Allows access to the Administration panel.',
+            self::MANAGE_IMPERSONATION => 'Allows impersonating other users for troubleshooting and support purposes.',
+            self::MANAGE_ALL => 'Grants unrestricted administrative control over all resources and operations.',
+
+            // User Management
+            self::VIEW_USERS => 'Allows viewing all user profiles and their details.',
+            self::CREATE_USERS => 'Allows creating new user accounts.',
+            self::EDIT_USERS => 'Allows editing existing user profiles and details.',
+
+            // Role Management
+            self::VIEW_ROLES => 'Allows viewing all roles and their associated permissions.',
+            self::EDIT_ROLES => 'Allows creating and editing role definitions and permission assignments.',
+            self::DELETE_ROLES => 'Allows permanently deleting roles from the system.',
+            self::ASSIGN_ROLES => 'Allows assigning, updating, or removing roles from users.',
+
+            // API User Management
+            self::MANAGE_API_USERS => 'Allows creating API users and managing their tokens, roles, and access.',
+
+            // Audit & Monitoring
+            self::VIEW_AUDIT_LOGS => 'Allows viewing system audit logs and change history.',
+            self::VIEW_LOGIN_RECORDS => 'Allows viewing user authentication history and login records.',
         };
     }
 
@@ -71,8 +84,12 @@ enum PermissionEnum: string implements HasLabel
     public function isSystemManaged(): bool
     {
         return match ($this) {
-            /** @phpstan-ignore-next-line  */
-            self::MANAGE_ALL, self::DELETE_ROLES, self::MANAGE_IMPERSONATION, self::VIEW_AUDIT_LOGS, self::VIEW_LOGIN_RECORDS => true,
+            self::MANAGE_ALL,
+            self::ACCESS_ADMINISTRATION_PANEL,
+            self::MANAGE_IMPERSONATION,
+            self::DELETE_ROLES,
+            self::VIEW_AUDIT_LOGS,
+            self::VIEW_LOGIN_RECORDS => true,
             default => false,
         };
     }
@@ -86,6 +103,51 @@ enum PermissionEnum: string implements HasLabel
         return match ($this) {
             self::VIEW_USERS => true,
             default => false,
+        };
+    }
+
+    /**
+     * Determines the authorization scope of this permission.
+     *
+     * The scope indicates whether the permission grants system-wide access (SYSTEM_WIDE)
+     * or is limited to resources owned by the user (PERSONAL).
+     *
+     * ## Default Behavior
+     *
+     * All permissions in the starter are SYSTEM_WIDE by default, meaning they grant
+     * unrestricted system-wide access.
+     *
+     * ## Adding Personal-Scoped Permissions
+     *
+     * When adding permissions for self-service functionality (e.g., users managing their
+     * own profiles or content), explicitly mark them as PERSONAL scope:
+     *
+     * ```php
+     * return match ($this) {
+     *     // Personal-scoped permissions (limited to owned resources)
+     *     self::VIEW_OWN_PROFILE,
+     *     self::EDIT_OWN_PROFILE,
+     *     self::VIEW_OWN_AUDIT_LOGS => PermissionScopeEnum::PERSONAL,
+     *
+     *     // All other permissions default to system-wide access
+     *     default => PermissionScopeEnum::SYSTEM_WIDE,
+     * };
+     * ```
+     *
+     * Remember to implement corresponding ownership checks in your Laravel policies
+     * when using personal-scoped permissions.
+     *
+     * @see PermissionScopeEnum For detailed documentation on permission scopes
+     */
+    public function scope(): PermissionScopeEnum
+    {
+        return match ($this) {
+            // When adding personal-scoped permissions, add them here:
+            // self::VIEW_OWN_PROFILE,
+            // self::EDIT_OWN_PROFILE => PermissionScopeEnum::PERSONAL,
+
+            // All permissions are SYSTEM_WIDE (system-wide) by default
+            default => PermissionScopeEnum::SYSTEM_WIDE,
         };
     }
 }
