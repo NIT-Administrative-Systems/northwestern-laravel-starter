@@ -9,10 +9,10 @@
         "test:e2e:skip-rebuild": "cypress open --env SKIP_DATABASE_REBUILD=true"
     },
     "dependencies": {
-        "@sentry/browser": "^9.46.0",
+        "@sentry/browser": "^9.47.1",
         "bootstrap": "^5.3.8",
         "clipboard": "^2.0.11",
-        "sass": "^1.93.2",
+        "sass": "^1.94.2",
         "tom-select": "^2.4.3"
     },
     "devDependencies": {
@@ -23,9 +23,9 @@
         "@shufo/prettier-plugin-blade": "^1.16.1",
         "@tailwindcss/vite": "^4.1.17",
         "@types/alpinejs": "^3.13.11",
-        "@types/node": "^24.9.2",
-        "autoprefixer": "^10.4.21",
-        "axios": "^1.13.1",
+        "@types/node": "^24.10.1",
+        "autoprefixer": "^10.4.22",
+        "axios": "^1.13.2",
         "bootstrap": "^5.2.3",
         "concurrently": "^9.2.1",
         "cypress": "^14.5.4",
@@ -33,10 +33,10 @@
         "cypress-ctrf-json-reporter": "^0.0.11",
         "cypress-wait-until": "^3.0.2",
         "laravel-vite-plugin": "^1.3.0",
-        "prettier": "^3.6.2",
+        "prettier": "^3.7.4",
         "prettier-plugin-astro": "^0.14.1",
         "prettier-plugin-organize-imports": "^4.3.0",
-        "prettier-plugin-packagejson": "^2.5.19",
+        "prettier-plugin-packagejson": "^2.5.20",
         "sass": "^1.56.1",
         "tailwindcss": "^4.1.17",
         "typescript": "^5.9.3",

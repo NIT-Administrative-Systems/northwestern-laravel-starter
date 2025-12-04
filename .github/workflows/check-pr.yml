@@ -25,7 +25,7 @@ jobs:
       code: ${{ steps.changes.outputs.code }}
     steps:
       - name: 📂 Checkout Repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.head_ref }}
 
@@ -53,7 +53,7 @@ jobs:
 
     steps:
       - name: 📂 Checkout Repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.head_ref }}
 
@@ -95,7 +95,7 @@ jobs:
 #
 #    steps:
 #      - name: 📂 Checkout Repository
-#        uses: actions/checkout@v5
+#        uses: actions/checkout@v6
 #        with:
 #          ref: ${{ github.head_ref }}
 #          token: ${{ secrets.EACD_BOT_FOR_COMMIT_PAT }}
@@ -157,7 +157,7 @@ jobs:
 
     steps:
       - name: 📂 Checkout Repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.head_ref }}
           token: ${{ secrets.EACD_BOT_FOR_COMMIT_PAT }}
@@ -258,7 +258,7 @@ jobs:
 
     steps:
       - name: 📂 Checkout Repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.head_ref }}
           token: ${{ secrets.EACD_BOT_FOR_COMMIT_PAT }}
@@ -316,7 +316,7 @@ jobs:
 
     steps:
       - name: 📂 Checkout Repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.head_ref }}
 
@@ -413,7 +413,7 @@ jobs:
 
     steps:
       - name: 📂 Checkout Repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.head_ref }}
           token: ${{ secrets.EACD_BOT_FOR_COMMIT_PAT }}
