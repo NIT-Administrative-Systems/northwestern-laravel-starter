@@ -56,7 +56,6 @@ return RectorConfig::configure()
         PHPUnit\PHPUnit100\Rector\Class_\StaticDataProviderClassMethodRector::class,
         PHPUnit\CodeQuality\Rector\MethodCall\AssertNotOperatorRector::class,
         PHPUnit\CodeQuality\Rector\MethodCall\AssertCompareOnCountableWithMethodToAssertCountRector::class,
-        PHPUnit\CodeQuality\Rector\MethodCall\AssertPropertyExistsRector::class,
         PHPUnit\CodeQuality\Rector\MethodCall\FlipAssertRector::class,
         PHPUnit\CodeQuality\Rector\FuncCall\AssertFuncCallToPHPUnitAssertRector::class,
         PHPUnit\CodeQuality\Rector\Class_\PreferPHPUnitThisCallRector::class,
