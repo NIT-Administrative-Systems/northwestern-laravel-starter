@@ -57,7 +57,6 @@
                         <p class="small text-muted mb-3">
                             If you arrived here by mistake, please use the link below to access the live environment.
                         </p>
-                        {{-- Making the button primary and larger to draw the user's eye --}}
                         <a class="btn btn-primary px-5" href="{{ $productionUrl }}">
                             <i class="fa fa-arrow-right me-2" aria-hidden="true"></i>
                             Go to Production Environment
