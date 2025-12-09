@@ -23,6 +23,10 @@
     --sl-color-bg-nav: hsl(var(--brand-purple));
 }
 
+.site-title {
+    font-family: "Poppins", sans-serif !important;
+}
+
 .site-title,
 .header a,
 .social-icons a,

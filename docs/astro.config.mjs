@@ -24,6 +24,8 @@ export default defineConfig({
             customCss: [
               './src/styles/custom.css',
                 './src/styles/layout.css',
+                '@fontsource/poppins/400.css',
+                '@fontsource/poppins/600.css',
             ],
 			social: {
 				github: 'https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter',
