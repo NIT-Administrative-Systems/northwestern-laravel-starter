@@ -172,6 +172,7 @@ API users can **ONLY** be assigned roles with a role type of **API Integration**
 When creating/editing **API Integration** roles, only permissions marked as API-relevant are presented for assignment. These are determined by the `isApiRelevant()` method on the `PermissionEnum`:
 
 ```php
+// app/Domains/User/Enums/PermissionEnum.php
 public function isApiRelevant(): bool
 {
     return match ($this) {

@@ -54,6 +54,7 @@ The application expects specific services to exist before you can begin local de
         Update the file by referencing the services you created in the previous step and setting other project-specific defaults:
 
         ```bash
+        // .env.example
         APP_NAME="Your Project Name"
         APP_URL=https://your-project-name.test
         DB_DATABASE=your_project_name_local
@@ -70,6 +71,7 @@ The application expects specific services to exist before you can begin local de
         If you're using [Laravel Herd](https://herd.laravel.com), update the `name` field to match your folder/repository name:
 
         ```diff
+        // herd.yml
         - name: northwestern-laravel-starter
         + name: your-project-name
         ```
@@ -98,6 +100,7 @@ pnpm build
 In your **LOCAL** `.env` file, the following environment variables must be set:
 
 ```bash
+// .env
 AZURE_CLIENT_SECRET=your-value-here
 DIRECTORY_SEARCH_API_KEY=your-value-here
 EVENT_HUB_API_KEY=your-value-here # Only if the EventHub integration is needed

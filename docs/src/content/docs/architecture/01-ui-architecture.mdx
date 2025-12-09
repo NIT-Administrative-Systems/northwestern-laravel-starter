@@ -96,7 +96,8 @@ A **Panel** is a discrete, isolated area of the site with its own navigation, se
 
 When adding a new Panel, the **ID** is critical for authorization:
 
-```php {3, 9}
+```php {4, 10}
+// app/Providers/Filament/AdministrationPanelProvider.php
 class AdministrationPanelProvider extends PanelProvider
 {
     public const string ID = 'administration';

@@ -18,6 +18,7 @@ Before launching your application, customize these key settings to fit your proj
 Add NetIDs to your `.env` file, or the `.env.example` file if they will be the same across environments:
 
 ```bash
+// .env
 # Comma-separated list of NetIDs
 SUPER_ADMIN_NETIDS=abc123,xyz789,def456
 ```
@@ -66,6 +67,7 @@ Local authentication allows external users (non-Northwestern) to access your app
 Edit `config/auth.php` or set environment variables:
 
 ```bash
+// config/auth.php
 # Enable/disable local authentication
 LOCAL_AUTH_ENABLED=true
 
@@ -114,6 +116,7 @@ The API layer is enabled by default. Disable it if your application doesn't need
 ### Core Settings
 
 ```bash
+// .env
 # Master on/off switch for all API functionality
 API_ENABLED=true
 
@@ -124,6 +127,7 @@ API_RATE_LIMIT_ATTEMPTS=1800
 ### Request Logging
 
 ```bash
+// .env
 # Enable API request logging
 API_REQUEST_LOGGING_ENABLED=true
 
@@ -141,6 +145,7 @@ For high-throughput APIs, enable sampling to log only a percentage of successful
 </Aside>
 
 ```bash
+// .env
 # Enable probabilistic sampling
 API_REQUEST_LOGGING_SAMPLING_ENABLED=true
 
@@ -163,6 +168,7 @@ The **NetID Update** webhook receives notifications when Northwestern users are 
 
     2. Uncomment the NetID Update webhook route:
         ```diff
+        // routes/api.php
         Route::middleware(['eventhub_hmac'])->prefix('eventhub')->group(function () {
         -    // Route::post('netid-update', App\Http\Controllers\Webhooks\NetIdUpdateController::class)->eventHubWebhook('etidentity.ldap.netid.term')->name('netid-update');
         +    Route::post('netid-update', App\Http\Controllers\Webhooks\NetIdUpdateController::class)->eventHubWebhook('etidentity.ldap.netid.term')->name('netid-update');
@@ -203,6 +209,7 @@ By default, lockdown is **enabled** for non-production environments and **disabl
 To disable lockdown for a specific environment, add this to your `.env` file:
 
 ```bash
+// .env
 ENVIRONMENT_LOCKDOWN_ENABLED=false
 ```
 
@@ -230,6 +237,7 @@ Edit `config/app.php` to replace the default value:
 Add this to your `.env` file:
 
 ```bash
+// .env
 PRODUCTION_URL=https://your-app.northwestern.edu
 ```
 
