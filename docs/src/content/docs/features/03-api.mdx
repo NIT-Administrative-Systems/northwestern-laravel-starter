@@ -87,19 +87,7 @@ After request completes:
 - Response status recorded
 - Analytics updated
 
-## API Token Lifecycle
-
-### Token States
-
-**Pending** - Token created but not yet active (before `valid_from` date)
-
-**Active** - Token is active and can be used for authentication
-
-**Expired** - Token has passed its `valid_to` date and cannot be used
-
-**Revoked** - Token manually disabled
-
-### Expiration Notifications
+## Expiration Notifications
 
 To avoid surprise outages, the system automatically sends reminder emails as tokens approach their expiration date when an API user has an email address configured.
 
@@ -124,12 +112,14 @@ API_TOKEN_EXPIRATION_NOTIFICATIONS_ENABLED=false
 
 ## Request Logging
 
+Requests to protected API endpoints are automatically logged to the `api_request_logs` table. This provides a lightweight mechanism for monitoring API usage and debugging issues.
+
 ### What Gets Logged
 
-Every API request log entry includes:
+Every log entry includes:
 
 | Field               | Description                                            |
-| ------------------- | ------------------------------------------------------ |
+|---------------------|--------------------------------------------------------|
 | `trace_id`          | Unique request identifier                              |
 | `user_id`           | ID of the authenticated user                           |
 | `user_api_token_id` | ID of the API token used for authentication (nullable) |
@@ -146,7 +136,7 @@ Every API request log entry includes:
 
 ### Sampling Configuration
 
-For high-volume APIs, consider sampling to reduce the database load:
+To manage the database load, you can configure probabilistic sampling through environment variables:
 
 ```php
 // .env
@@ -155,9 +145,19 @@ API_REQUEST_LOGGING_SAMPLING_ENABLED=true
 API_REQUEST_LOGGING_SAMPLING_RATE=0.1 // Log 10% of requests
 ```
 
-:::tip[Failures Always Logged]
-Non-successful requests (`4xx`/`5xx`) are always logged regardless of the sample rate.
+:::tip[Failures are always logged]
+Non-successful requests (`4xx`/`5xx`) are excluded from sampling and are **always logged** to ensure errors are never missed.
 :::
+
+### Production Considerations
+
+**This is a basic utility, not a replacement for full-scale observability solutions.**
+
+Database-based logging is immensely helpful during local development to spot slow endpoints, and monitor low-traffic non-production environments.
+
+For production applications expecting high volume:
+- **Opt for a dedicated APM:** Use legitimate tools like [New Relic](https://newrelic.com) or [Datadog](https://www.datadoghq.com) for deeper insights and to avoid database bloat.
+- **Adjust sampling:** If you keep this feature enabled in production, consider setting a very low sampling rate (or disabling it entirely) to avoid the database write overhead.
 
 ## Authorization
 
