@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Http\Middleware\AuthenticatesApiTokens;
+use App\Http\Middleware\AuthenticatesAccessTokens;
 use App\Http\Middleware\EnsureApiEnabled;
 use App\Http\Middleware\LogsApiRequests;
 use Illuminate\Support\Facades\Route;
@@ -23,11 +23,11 @@ Route::middleware([EnsureApiEnabled::class])->group(function () {
 |--------------------------------------------------------------------------
 | Protected API Routes
 |--------------------------------------------------------------------------
-| Endpoints that require API token authentication and are fully logged
+| Endpoints that require access token authentication and are fully logged
 | through the API request logging middleware.
 */
 
-Route::middleware([EnsureApiEnabled::class, LogsApiRequests::class, AuthenticatesApiTokens::class])->group(function () {
+Route::middleware([EnsureApiEnabled::class, LogsApiRequests::class, AuthenticatesAccessTokens::class])->group(function () {
     //
 });
 

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Domains\User\Mail\ApiTokenExpirationNotification;
-use App\Domains\User\Models\ApiToken;
+use App\Domains\User\Mail\AccessTokenExpirationNotification;
+use App\Domains\User\Models\AccessToken;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
@@ -13,16 +13,16 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Throwable;
 
-class SendApiTokenExpirationNotificationsCommand extends Command
+class SendAccessTokenExpirationNotificationsCommand extends Command
 {
-    protected $signature = 'api-tokens:notify-expiration';
+    protected $signature = 'access-tokens:notify-expiration';
 
-    protected $description = 'Send expiration notifications for API tokens that are approaching their expiration date';
+    protected $description = 'Send expiration notifications for access tokens that are approaching their expiration date';
 
     public function handle(): int
     {
         if (! config('auth.api.expiration_notifications.enabled')) {
-            $this->components->info('API token expiration notifications are disabled in the configuration');
+            $this->components->info('Access Token expiration notifications are disabled in the configuration');
 
             return self::SUCCESS;
         }
@@ -67,14 +67,14 @@ class SendApiTokenExpirationNotificationsCommand extends Command
      * Get tokens that are expiring within the specified number of days
      * and haven't been notified yet (or were last notified more than 24 hours ago).
      *
-     * @return Collection<int, ApiToken>
+     * @return Collection<int, AccessToken>
      */
     private function getExpiringTokens(int $daysBeforeExpiration): Collection
     {
         $now = Carbon::now(timezone: config('app.timezone'));
         $targetDate = $now->copy()->addDays($daysBeforeExpiration);
 
-        return ApiToken::query()
+        return AccessToken::query()
             ->with(['user'])
             ->whereHas('user', function ($query) {
                 $query->whereNotNull('email')
@@ -99,14 +99,14 @@ class SendApiTokenExpirationNotificationsCommand extends Command
     /**
      * Process a single token and send notification.
      */
-    private function processToken(ApiToken $token, int $daysUntilExpiration): void
+    private function processToken(AccessToken $token, int $daysUntilExpiration): void
     {
         $user = $token->user;
 
         $this->line("⏳ Processing token for {$user->username} ({$user->email})");
 
         Mail::to($user->email)->queue(
-            new ApiTokenExpirationNotification($user, $token, $daysUntilExpiration)
+            new AccessTokenExpirationNotification($user, $token, $daysUntilExpiration)
         );
 
         $token->update([
@@ -119,13 +119,13 @@ class SendApiTokenExpirationNotificationsCommand extends Command
     /**
      * Handle errors that occur during token processing.
      */
-    private function handleError(ApiToken $token, Throwable $e): void
+    private function handleError(AccessToken $token, Throwable $e): void
     {
         $user = $token->user;
 
         $this->components->error("Failed to send notification for {$user->username}: {$e->getMessage()}");
 
-        Log::error('Failed to send API token expiration notification', [
+        Log::error('Failed to send access token expiration notification', [
             'user_id' => $user->id,
             'username' => $user->username,
             'token_id' => $token->id,

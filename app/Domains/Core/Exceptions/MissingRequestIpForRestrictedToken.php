@@ -10,7 +10,7 @@ class MissingRequestIpForRestrictedToken extends RuntimeException
 {
     public function __construct(
         public readonly array $allowedIps = [],
-        string $message = 'Request IP missing for IP-restricted API token.',
+        string $message = 'Request IP missing for IP-restricted Access Token.',
         int $code = 0,
         ?\Throwable $previous = null,
     ) {

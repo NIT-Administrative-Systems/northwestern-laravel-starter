@@ -8,8 +8,8 @@ use App\Domains\User\Models\User;
 use App\Filament\Navigation\AdministrationNavGroup;
 use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Filament\Resources\Users\Pages\ViewUser;
+use App\Filament\Resources\Users\RelationManagers\AccessTokensRelationManager;
 use App\Filament\Resources\Users\RelationManagers\ApiRequestLogsRelationManager;
-use App\Filament\Resources\Users\RelationManagers\ApiTokensRelationManager;
 use App\Filament\Resources\Users\RelationManagers\AuditsRelationManager;
 use App\Filament\Resources\Users\RelationManagers\LoginRecordsRelationManager;
 use App\Filament\Resources\Users\RelationManagers\RolesRelationManager;
@@ -47,7 +47,7 @@ class UserResource extends Resource
             RolesRelationManager::class,
             AuditsRelationManager::class,
             LoginRecordsRelationManager::class,
-            ApiTokensRelationManager::class,
+            AccessTokensRelationManager::class,
             ApiRequestLogsRelationManager::class,
         ];
     }

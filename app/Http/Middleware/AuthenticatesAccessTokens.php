@@ -8,7 +8,7 @@ use App\Domains\Core\Enums\ApiRequestFailureEnum;
 use App\Domains\Core\Exceptions\MissingRequestIpForRestrictedToken;
 use App\Domains\Core\ValueObjects\ApiRequestContext;
 use App\Domains\User\Enums\AuthTypeEnum;
-use App\Domains\User\Models\ApiToken;
+use App\Domains\User\Models\AccessToken;
 use Closure;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\Request;
@@ -19,16 +19,16 @@ use Symfony\Component\HttpFoundation\IpUtils;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Authenticates API requests using Bearer token authentication with {@see ApiToken} records.
+ * Authenticates API requests using Bearer token authentication with {@see AccessToken} records.
  *
  * This middleware:
- * 1. Validates Bearer token from the Authorization header
- * 2. Checks for active API tokens and associated API users
+ * 1. Validates Bearer token from Authorization header
+ * 2. Checks for active Access Tokens and associated API users
  * 3. Enforces IP-based access control if configured on the token
- * 4. Updates the {@see ApiToken::$last_used_at} timestamp and usage count
+ * 4. Updates the {@see AccessToken::$last_used_at} timestamp and usage count
  * 5. Authenticates the user for the current request
  */
-class AuthenticatesApiTokens
+class AuthenticatesAccessTokens
 {
     /**
      * Authenticates API requests using Bearer tokens with IP-based access control.
@@ -43,7 +43,7 @@ class AuthenticatesApiTokens
      * @throws AuthenticationException When authentication fails for any reason
      *
      * @see ApiRequestFailureEnum for the specific failure reasons tracked in logs
-     * @see ApiToken for token management
+     * @see AccessToken for token management
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -61,29 +61,29 @@ class AuthenticatesApiTokens
             $this->fail(ApiRequestFailureEnum::MISSING_CREDENTIALS);
         }
 
-        $tokenHash = ApiToken::hashFromPlain($rawToken);
+        $tokenHash = AccessToken::hashFromPlain($rawToken);
         unset($rawToken);
 
-        $apiToken = ApiToken::query()
+        $accessToken = AccessToken::query()
             ->withWhereHas('user', fn ($query) => $query->where('auth_type', AuthTypeEnum::API))
             ->where('token_hash', $tokenHash)
             ->active()
             ->first();
 
-        if (! $apiToken || ! $apiToken->user) {
+        if (! $accessToken || ! $accessToken->user) {
             $this->fail(ApiRequestFailureEnum::TOKEN_INVALID_OR_EXPIRED);
         }
 
-        $user = $apiToken->user;
+        $user = $accessToken->user;
 
         Context::add(ApiRequestContext::USER_ID, $user->getKey());
-        Context::add(ApiRequestContext::TOKEN_ID, $apiToken->getKey());
+        Context::add(ApiRequestContext::TOKEN_ID, $accessToken->getKey());
 
-        if (! $this->isIpAllowed($request->ip(), $apiToken->allowed_ips)) {
+        if (! $this->isIpAllowed($request->ip(), $accessToken->allowed_ips)) {
             $this->fail(ApiRequestFailureEnum::IP_DENIED);
         }
 
-        $apiToken->increment(
+        $accessToken->increment(
             column: 'usage_count',
             extra: ['last_used_at' => now()]
         );

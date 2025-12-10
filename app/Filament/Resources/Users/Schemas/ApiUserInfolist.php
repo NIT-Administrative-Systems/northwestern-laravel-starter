@@ -105,14 +105,14 @@ class ApiUserInfolist
                                 TextEntry::make('active_tokens_count')
                                     ->label('Active Tokens')
                                     ->inlineLabel()
-                                    ->getStateUsing(fn (User $record) => number_format($record->active_api_tokens()->count())),
+                                    ->getStateUsing(fn (User $record) => number_format($record->active_access_tokens()->count())),
 
                                 TextEntry::make('total_api_requests')
                                     ->label('Total API Requests')
-                                    ->tooltip('Total successful API requests made by this user across all API tokens')
+                                    ->tooltip('Total successful API requests made by this user across all tokens')
                                     ->inlineLabel()
                                     ->numeric()
-                                    ->getStateUsing(fn (User $record) => number_format((int) $record->api_tokens()->sum('usage_count'))),
+                                    ->getStateUsing(fn (User $record) => number_format((int) $record->access_tokens()->sum('usage_count'))),
 
                                 TextEntry::make('last_api_request_at')
                                     ->label('Last API Request')
@@ -121,7 +121,7 @@ class ApiUserInfolist
                                     ->dateTime()
                                     ->since()
                                     ->dateTimeTooltip()
-                                    ->getStateUsing(fn (User $record) => $record->api_tokens()->max('last_used_at')),
+                                    ->getStateUsing(fn (User $record) => $record->access_tokens()->max('last_used_at')),
                             ])
                                 ->columns(1),
 

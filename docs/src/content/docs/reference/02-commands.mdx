@@ -197,17 +197,17 @@ Checks that all required environment variables are set and configuration is vali
 
 ## Maintenance Commands
 
-### `send:api-token-expiration-notifications`
+### `access-tokens:notify-expiration`
 
-Send expiration reminder emails for API tokens approaching their expiration date.
+Send expiration reminder emails for access tokens approaching their expiration date.
 
 ```bash
-php artisan send:api-token-expiration-notifications
+php artisan access-tokens:notify-expiration
 ```
 
 **What it does:**
 
-1. Queries for active API tokens with upcoming expiration dates
+1. Queries for active access tokens with upcoming expiration dates
 2. Checks which tokens are due for notifications (30, 14, 7, 3, 1 days before)
 3. Sends reminder emails to token owners
 

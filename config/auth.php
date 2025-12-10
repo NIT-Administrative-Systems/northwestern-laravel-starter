@@ -90,7 +90,7 @@ return [
         | endpoints. It identifies the API "realm" so clients know which API
         | is requesting bearer credentials.
         |
-        | This value will also be shown in API token expiration notifications
+        | This value will also be shown in access token expiration notifications
         | if the feature is enabled.
         |
         */
@@ -118,7 +118,7 @@ return [
         | API Request Logging
         |--------------------------------------------------------------------------
         |
-        | Enable light metadata logging for requests authenticated via API tokens.
+        | Enable lightweight logging for requests authenticated via access tokens.
         | It's an internal record for troubleshooting to supplement external
         | observability platforms.
         |
@@ -172,7 +172,7 @@ return [
 
         /*
         |--------------------------------------------------------------------------
-        | API Token Expiration Notifications
+        | Access Token Expiration Notifications
         |--------------------------------------------------------------------------
         |
         | Configure when and how often users are notified about expiring API
@@ -184,13 +184,13 @@ return [
         */
 
         'expiration_notifications' => [
-            'enabled' => env('API_TOKEN_EXPIRATION_NOTIFICATIONS_ENABLED', true),
+            'enabled' => env('API_ACCESS_TOKEN_EXPIRATION_NOTIFICATIONS_ENABLED', true),
             'intervals' => [30, 14, 7, 3, 1],
         ],
 
         /*
         |--------------------------------------------------------------------------
-        | Demo API Token
+        | Demo Access Token
         |--------------------------------------------------------------------------
         |
         | The plaintext Bearer token to be assigned to the demo API user account
@@ -203,7 +203,7 @@ return [
         |
         */
 
-        'demo_user_token' => env('API_DEMO_USER_TOKEN'),
+        'demo_user_token' => env('API_DEMO_USER_ACCESS_TOKEN'),
 
     ],
 

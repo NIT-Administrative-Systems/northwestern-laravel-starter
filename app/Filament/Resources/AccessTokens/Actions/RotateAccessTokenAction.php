@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Resources\ApiTokens\Actions;
+namespace App\Filament\Resources\AccessTokens\Actions;
 
-use App\Domains\User\Actions\Api\RotateApiToken;
+use App\Domains\User\Actions\Api\RotateAccessToken;
 use App\Domains\User\Enums\PermissionEnum;
-use App\Domains\User\Models\ApiToken;
-use App\Filament\Resources\ApiTokens\Schemas\ApiTokenSchemas;
+use App\Domains\User\Models\AccessToken;
+use App\Filament\Resources\AccessTokens\Schemas\AccessTokenSchemas;
 use Filament\Actions\Action;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
@@ -16,11 +16,11 @@ use Filament\Support\Enums\Size;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\HtmlString;
 
-class RotateApiTokenAction extends Action
+class RotateAccessTokenAction extends Action
 {
     public static function getDefaultName(): ?string
     {
-        return 'rotateApiToken';
+        return 'rotateAccessToken';
     }
 
     protected function setUp(): void
@@ -50,23 +50,23 @@ If you need a transition period, you can create a new token first, update your i
 HTML))
                                     ->columnSpanFull(),
                             ]),
-                        ApiTokenSchemas::tokenConfigurationSection(),
+                        AccessTokenSchemas::tokenConfigurationSection(),
                     ])
                     ->afterValidation(function (
                         array $state,
                         callable $set,
-                        RotateApiToken $rotateApiToken,
-                        ApiToken $record,
+                        RotateAccessToken $rotateAccessToken,
+                        AccessToken $record,
                     ) {
                         // If we've already rotated this token in this wizard session, don't do it again.
-                        if (session()->has(ApiTokenSchemas::SESSION_KEY)) {
+                        if (session()->has(AccessTokenSchemas::SESSION_KEY)) {
                             return;
                         }
 
-                        $configuration = ApiTokenSchemas::normalizeConfigurationState($state);
+                        $configuration = AccessTokenSchemas::normalizeConfigurationState($state);
 
-                        $newToken = $rotateApiToken(
-                            token: $record,
+                        $newToken = $rotateAccessToken(
+                            previousAccessToken: $record,
                             rotatedBy: auth()->user(),
                             validFrom: $configuration['valid_from'],
                             validTo: $configuration['valid_to'],
@@ -74,7 +74,7 @@ HTML))
                         );
 
                         session([
-                            ApiTokenSchemas::SESSION_KEY => [
+                            AccessTokenSchemas::SESSION_KEY => [
                                 'token' => $newToken,
                                 'record_id' => $record->getKey(),
                             ],
@@ -82,12 +82,12 @@ HTML))
                     }),
                 Wizard\Step::make('Copy Token')
                     ->schema(
-                        ApiTokenSchemas::copyTokenStepSchema(),
+                        AccessTokenSchemas::copyTokenStepSchema(),
                     ),
             ])
-            ->modalSubmitAction(fn (Action $action) => ApiTokenSchemas::copyTokenSubmitButton($action))
-            ->action(fn () => ApiTokenSchemas::clearTokenSession())
-            ->successNotificationTitle('API token rotated')
-            ->visible(fn (ApiToken $record): bool => ApiTokenSchemas::canShowRotate($record));
+            ->modalSubmitAction(fn (Action $action) => AccessTokenSchemas::copyTokenSubmitButton($action))
+            ->action(fn () => AccessTokenSchemas::clearTokenSession())
+            ->successNotificationTitle('Access Token rotated')
+            ->visible(fn (AccessToken $record): bool => AccessTokenSchemas::canShowRotate($record));
     }
 }

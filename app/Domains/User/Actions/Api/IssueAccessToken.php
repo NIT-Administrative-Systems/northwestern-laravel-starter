@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Domains\User\Actions\Api;
 
 use App\Domains\User\Enums\AuthTypeEnum;
-use App\Domains\User\Models\ApiToken;
+use App\Domains\User\Models\AccessToken;
 use App\Domains\User\Models\User;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Carbon;
@@ -18,7 +18,7 @@ use InvalidArgumentException;
  * This allows rotating credentials or creating additional tokens with different
  * validity periods or IP restrictions for the same API user.
  */
-readonly class IssueApiToken
+readonly class IssueAccessToken
 {
     /**
      * Issue a new token for the given API user.
@@ -27,7 +27,7 @@ readonly class IssueApiToken
      * @param  CarbonInterface|null  $validFrom  When the token becomes valid (defaults to now)
      * @param  CarbonInterface|null  $validTo  When the token expires (null for indefinite)
      * @param  array<int, string>|null  $allowedIps  Optional list of allowed IP addresses or CIDR ranges
-     * @return array{0: string, 1: ApiToken} Tuple of plaintext token and the created {@see ApiToken}
+     * @return array{0: string, 1: AccessToken} Tuple of plaintext token and the created {@see AccessToken}
      */
     public function __invoke(
         User $user,
@@ -41,14 +41,14 @@ readonly class IssueApiToken
 
         $rawToken = Str::random(length: 64);
 
-        $apiToken = $user->api_tokens()->create([
+        $accessToken = $user->access_tokens()->create([
             'token_prefix' => mb_substr($rawToken, 0, 5),
-            'token_hash' => ApiToken::hashFromPlain($rawToken),
+            'token_hash' => AccessToken::hashFromPlain($rawToken),
             'valid_from' => $validFrom ?? Carbon::now(),
             'valid_to' => $validTo,
             'allowed_ips' => $allowedIps,
         ]);
 
-        return [$rawToken, $apiToken];
+        return [$rawToken, $accessToken];
     }
 }

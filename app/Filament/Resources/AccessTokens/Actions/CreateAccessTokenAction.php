@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Resources\ApiTokens\Actions;
+namespace App\Filament\Resources\AccessTokens\Actions;
 
-use App\Domains\User\Actions\Api\IssueApiToken;
+use App\Domains\User\Actions\Api\IssueAccessToken;
 use App\Domains\User\Enums\PermissionEnum;
 use App\Domains\User\Models\User;
-use App\Filament\Resources\ApiTokens\Schemas\ApiTokenSchemas;
-use App\Filament\Resources\Users\RelationManagers\ApiTokensRelationManager;
+use App\Filament\Resources\AccessTokens\Schemas\AccessTokenSchemas;
+use App\Filament\Resources\Users\RelationManagers\AccessTokensRelationManager;
 use Filament\Actions\Action;
 use Filament\Schemas\Components\Wizard;
 use Filament\Support\Icons\Heroicon;
 
-class CreateApiTokenAction extends Action
+class CreateAccessTokenAction extends Action
 {
     public static function getDefaultName(): ?string
     {
-        return 'createApiToken';
+        return 'createAccessToken';
     }
 
     protected function setUp(): void
@@ -33,19 +33,19 @@ class CreateApiTokenAction extends Action
             ->steps([
                 Wizard\Step::make('Configure Token')
                     ->schema([
-                        ApiTokenSchemas::tokenConfigurationSection(),
+                        AccessTokenSchemas::tokenConfigurationSection(),
                     ])
                     ->afterValidation(function (
                         array $state,
                         callable $set,
-                        IssueApiToken $issueApiToken,
-                        ApiTokensRelationManager $livewire,
+                        IssueAccessToken $issueAccessToken,
+                        AccessTokensRelationManager $livewire,
                     ) {
                         /** @var User $owner */
                         $owner = $livewire->getOwnerRecord();
-                        $configuration = ApiTokenSchemas::normalizeConfigurationState($state);
+                        $configuration = AccessTokenSchemas::normalizeConfigurationState($state);
 
-                        [$rawToken, $apiToken] = $issueApiToken(
+                        [$rawToken, $accessToken] = $issueAccessToken(
                             user: $owner,
                             validFrom: $configuration['valid_from'],
                             validTo: $configuration['valid_to'],
@@ -53,20 +53,20 @@ class CreateApiTokenAction extends Action
                         );
 
                         session([
-                            ApiTokenSchemas::SESSION_KEY => [
+                            AccessTokenSchemas::SESSION_KEY => [
                                 'token' => $rawToken,
-                                'record_id' => $apiToken->getKey(),
+                                'record_id' => $accessToken->getKey(),
                             ],
                         ]);
                     }),
                 Wizard\Step::make('Copy Token')
                     ->schema(
-                        ApiTokenSchemas::copyTokenStepSchema(),
+                        AccessTokenSchemas::copyTokenStepSchema(),
                     ),
             ])
-            ->modalSubmitAction(fn (Action $action) => ApiTokenSchemas::copyTokenSubmitButton($action))
-            ->action(fn () => ApiTokenSchemas::clearTokenSession())
+            ->modalSubmitAction(fn (Action $action) => AccessTokenSchemas::copyTokenSubmitButton($action))
+            ->action(fn () => AccessTokenSchemas::clearTokenSession())
 
-            ->successNotificationTitle('API token created');
+            ->successNotificationTitle('Access Token created');
     }
 }

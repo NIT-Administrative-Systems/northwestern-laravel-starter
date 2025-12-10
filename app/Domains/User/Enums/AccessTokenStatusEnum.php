@@ -9,7 +9,7 @@ use Filament\Support\Contracts\HasIcon;
 use Filament\Support\Contracts\HasLabel;
 use Filament\Support\Icons\Heroicon;
 
-enum ApiTokenStatusEnum: string implements HasColor, HasIcon, HasLabel
+enum AccessTokenStatusEnum: string implements HasColor, HasIcon, HasLabel
 {
     case PENDING = 'pending';
     case ACTIVE = 'active';

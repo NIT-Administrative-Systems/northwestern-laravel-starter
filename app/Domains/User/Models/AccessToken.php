@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Domains\User\Models;
 
 use App\Domains\Core\Models\BaseModel;
-use App\Domains\User\Enums\ApiTokenStatusEnum;
+use App\Domains\User\Enums\AccessTokenStatusEnum;
 use Carbon\Carbon;
-use Database\Factories\Domains\User\Models\ApiTokenFactory;
+use Database\Factories\Domains\User\Models\AccessTokenFactory;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -19,11 +19,9 @@ use SensitiveParameter;
 /**
  * @property list<string> $allowed_ips List of IP addresses from which this token can be used.
  */
-class ApiToken extends BaseModel
+class AccessToken extends BaseModel
 {
-    protected $table = 'user_api_tokens';
-
-    /** @use HasFactory<ApiTokenFactory> */
+    /** @use HasFactory<AccessTokenFactory> */
     use HasFactory;
 
     protected $casts = [
@@ -42,7 +40,7 @@ class ApiToken extends BaseModel
     protected $appends = ['status'];
 
     /**
-     * Order API tokens by their operational relevance.
+     * Order Access Tokens by their operational relevance.
      *
      * This is a useful default for UI presentation, so that most relevant tokens are shown first.
      *
@@ -98,7 +96,7 @@ class ApiToken extends BaseModel
     }
 
     /**
-     * @return BelongsTo<ApiToken, $this>
+     * @return BelongsTo<AccessToken, $this>
      */
     public function rotated_from_token(): BelongsTo
     {
@@ -118,19 +116,19 @@ class ApiToken extends BaseModel
      */
     public function request_logs(): HasMany
     {
-        return $this->hasMany(ApiRequestLog::class, 'user_api_token_id');
+        return $this->hasMany(ApiRequestLog::class, 'access_token_id');
     }
 
-    /** @return Attribute<ApiTokenStatusEnum, never> */
+    /** @return Attribute<AccessTokenStatusEnum, never> */
     protected function status(): Attribute
     {
         return Attribute::make(
             get: function () {
                 return match (true) {
-                    filled($this->revoked_at) => ApiTokenStatusEnum::REVOKED,
-                    $this->valid_to?->isPast() => ApiTokenStatusEnum::EXPIRED,
-                    $this->valid_from->isFuture() => ApiTokenStatusEnum::PENDING,
-                    default => ApiTokenStatusEnum::ACTIVE,
+                    filled($this->revoked_at) => AccessTokenStatusEnum::REVOKED,
+                    $this->valid_to?->isPast() => AccessTokenStatusEnum::EXPIRED,
+                    $this->valid_from->isFuture() => AccessTokenStatusEnum::PENDING,
+                    default => AccessTokenStatusEnum::ACTIVE,
                 };
             }
         );

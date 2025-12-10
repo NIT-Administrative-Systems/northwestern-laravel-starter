@@ -20,7 +20,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  * This middleware records request/response details for authenticated API traffic
  * and any request that produced an API failure reason. It runs after the
  * authentication middleware, so the log entry can include the resolved
- * user, API token ID, status code, duration, and failure reason.
+ * user, Access Token ID, status code, duration, and failure reason.
  *
  * Successful requests may be sampled based on configuration; failures are
  * always logged. Framework-level exceptions that bypass the middleware
@@ -73,7 +73,7 @@ class LogsApiRequests
             ApiRequestLog::create([
                 'trace_id' => Context::get(ApiRequestContext::TRACE_ID),
                 'user_id' => $userId,
-                'user_api_token_id' => Context::get(ApiRequestContext::TOKEN_ID),
+                'access_token_id' => Context::get(ApiRequestContext::TOKEN_ID),
                 'method' => $request->method(),
                 'path' => $request->path(),
                 'route_name' => $request->route()?->getName(),

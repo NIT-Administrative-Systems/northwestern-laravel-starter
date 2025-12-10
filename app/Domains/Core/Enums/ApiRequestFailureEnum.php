@@ -47,7 +47,7 @@ enum ApiRequestFailureEnum: string implements HasColor, HasDescription, HasIcon,
             self::INVALID_HEADER_FORMAT => 'The Authorization header was missing or was not prefixed with "Bearer ".',
             self::MISSING_CREDENTIALS => 'The Authorization header contained a Bearer scheme but no token was provided.',
             self::TOKEN_INVALID_OR_EXPIRED => 'The Bearer token provided was not found, was expired, or was inactive for the associated user.',
-            self::IP_DENIED => 'The client\'s IP address does not match any of the allowed IP addresses or CIDR ranges configured for the matching API token.',
+            self::IP_DENIED => 'The client\'s IP address does not match any of the allowed IP addresses or CIDR ranges configured for the matching Access Token.',
 
             self::VALIDATION_FAILED => 'The request payload failed validation. One or more fields did not meet the required format, type, or business rules.',
             self::CONFLICT => 'The request could not be completed due to a conflict with the current state of the resource (for example, uniqueness or version conflicts).',

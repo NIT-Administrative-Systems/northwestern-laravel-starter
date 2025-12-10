@@ -105,17 +105,17 @@ class User extends Authenticatable implements Auditable, FilamentUser, HasName
     }
 
     /**
-     * @return HasMany<ApiToken, $this>
+     * @return HasMany<AccessToken, $this>
      */
-    public function api_tokens(): HasMany
+    public function access_tokens(): HasMany
     {
-        return $this->hasMany(ApiToken::class);
+        return $this->hasMany(AccessToken::class);
     }
 
-    /** @return HasMany<ApiToken, $this> */
-    public function active_api_tokens(): HasMany
+    /** @return HasMany<AccessToken, $this> */
+    public function active_access_tokens(): HasMany
     {
-        return $this->api_tokens()->active();
+        return $this->access_tokens()->active();
     }
 
     /**

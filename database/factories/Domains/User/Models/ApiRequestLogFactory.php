@@ -29,7 +29,7 @@ class ApiRequestLogFactory extends Factory
         return [
             'trace_id' => $this->faker->uuid(),
             'user_id' => User::factory()->api(),
-            'user_api_token_id' => null,
+            'access_token_id' => null,
             'method' => $this->faker->randomElement(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']),
             'path' => $this->faker->randomElement([
                 '/api/v1/data',
@@ -47,10 +47,10 @@ class ApiRequestLogFactory extends Factory
         ];
     }
 
-    public function successful(int $userApiTokenId): self
+    public function successful(int $accessTokenId): self
     {
         return $this->state(fn (array $attributes) => [
-            'user_api_token_id' => $userApiTokenId,
+            'access_token_id' => $accessTokenId,
             'status_code' => $this->faker->randomElement([200, 201, 204]),
             'failure_reason' => null,
         ]);
@@ -59,7 +59,7 @@ class ApiRequestLogFactory extends Factory
     public function failed(?ApiRequestFailureEnum $reason = null): self
     {
         return $this->state(fn (array $attributes) => [
-            'user_api_token_id' => null,
+            'access_token_id' => null,
             'status_code' => 401,
             'failure_reason' => $reason ?? Arr::random(ApiRequestFailureEnum::cases()),
         ]);

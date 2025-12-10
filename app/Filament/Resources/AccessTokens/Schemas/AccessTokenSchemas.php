@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Resources\ApiTokens\Schemas;
+namespace App\Filament\Resources\AccessTokens\Schemas;
 
-use App\Domains\User\Enums\ApiTokenStatusEnum;
-use App\Domains\User\Models\ApiToken;
+use App\Domains\User\Enums\AccessTokenStatusEnum;
+use App\Domains\User\Models\AccessToken;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Filament\Actions\Action;
@@ -21,26 +21,26 @@ use Filament\Support\Icons\Heroicon;
 use Phiki\Grammar\Grammar;
 
 /**
- * Reusable schema fragments and helpers for API token-related Filament {@see Wizard}s.
+ * Reusable schema fragments and helpers for Access Token related Filament {@see Wizard}s.
  */
-class ApiTokenSchemas
+class AccessTokenSchemas
 {
     /**
-     * Session key used by all flows that temporarily expose a raw API token
+     * Session key used by all flows that temporarily expose a raw Access Token
      *
      * The value stored under this key is a small associative array containing:
      * - **token:** `string` - The raw Bearer token
-     * - **record_id:** `int|null` - The associated ApiToken ID, when applicable
+     * - **record_id:** `int|null` - The associated AccessToken ID, when applicable
      * - **user_id:** `int|null` The associated User ID, when applicable
      */
-    public const string SESSION_KEY = 'api_token_credentials';
+    public const string SESSION_KEY = 'access_token_credentials';
 
     /**
      * Generic configuration section for token validity and IP restrictions.
      *
      * Usage:
      * - In create flows, no record is bound, so the defaults assume a fresh token.
-     * - In rotation flows, an {@see ApiToken} record is bound and values are
+     * - In rotation flows, an {@see AccessToken} record is bound and values are
      *   pre-filled from that record where appropriate.
      */
     public static function tokenConfigurationSection(): Section
@@ -64,7 +64,7 @@ class ApiTokenSchemas
                 TagsInput::make('allowed_ips')
                     ->label('Allowed IP Addresses')
                     ->default(function ($record) {
-                        if ($record instanceof ApiToken) {
+                        if ($record instanceof AccessToken) {
                             return $record->allowed_ips ?? [];
                         }
 
@@ -126,7 +126,7 @@ class ApiTokenSchemas
      * - the usage/help content.
      *
      * The token is resolved from {@see self::SESSION_KEY}. If a `record_id` is
-     * present, and the current record is an {@see ApiToken}, the token is only
+     * present, and the current record is an {@see AccessToken}, the token is only
      * shown when the IDs match.
      *
      * @return array<int,Section>
@@ -152,9 +152,9 @@ class ApiTokenSchemas
 
                         $recordId = data_get($data, 'record_id');
 
-                        // If this session token is tied to a specific ApiToken record,
+                        // If this session token is tied to a specific AccessToken record,
                         // only show it when the bound record matches.
-                        if ($recordId !== null && $record instanceof ApiToken) {
+                        if ($recordId !== null && $record instanceof AccessToken) {
                             return $record->getKey() === $recordId
                                 ? $token
                                 : null;
@@ -198,15 +198,15 @@ class ApiTokenSchemas
     }
 
     /**
-     * Determine whether an API token is still mutable (e.g. may be rotated or revoked).
+     * Determine whether an Access Token is still mutable (e.g. may be rotated or revoked).
      *
      * A token is considered mutable while it is in either the PENDING or ACTIVE state.
      */
-    public static function isMutable(ApiToken $token): bool
+    public static function isMutable(AccessToken $token): bool
     {
         return in_array(
             $token->status,
-            [ApiTokenStatusEnum::PENDING, ApiTokenStatusEnum::ACTIVE],
+            [AccessTokenStatusEnum::PENDING, AccessTokenStatusEnum::ACTIVE],
             true,
         );
     }
@@ -220,7 +220,7 @@ class ApiTokenSchemas
      *   session (so the wizard can render and close cleanly even if the token
      *   has just transitioned state).
      */
-    public static function canShowRotate(ApiToken $token): bool
+    public static function canShowRotate(AccessToken $token): bool
     {
         if (self::isMutable($token)) {
             return true;

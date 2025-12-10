@@ -6,9 +6,9 @@ namespace Tests\Feature\Http\Middleware;
 
 use App\Domains\Core\Enums\ApiRequestFailureEnum;
 use App\Domains\Core\ValueObjects\ApiRequestContext;
-use App\Domains\User\Models\ApiToken;
+use App\Domains\User\Models\AccessToken;
 use App\Domains\User\Models\User;
-use App\Http\Middleware\AuthenticatesApiTokens;
+use App\Http\Middleware\AuthenticatesAccessTokens;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Context;
@@ -18,8 +18,8 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
-#[CoversClass(AuthenticatesApiTokens::class)]
-class AuthenticatesApiTokensTest extends TestCase
+#[CoversClass(AuthenticatesAccessTokens::class)]
+class AuthenticatesAccessTokensTest extends TestCase
 {
     private string $endpoint = '/api/test';
 
@@ -29,7 +29,7 @@ class AuthenticatesApiTokensTest extends TestCase
     {
         parent::setUp();
 
-        Route::middleware(AuthenticatesApiTokens::class)->get($this->endpoint, function () {
+        Route::middleware(AuthenticatesAccessTokens::class)->get($this->endpoint, function () {
             return response()->json(['user_id' => Auth::id()]);
         });
 
@@ -52,7 +52,7 @@ class AuthenticatesApiTokensTest extends TestCase
     }
 
     /**
-     * @return array{0: string, 1: ApiToken} Tuple of plain token and the created {@see ApiToken}
+     * @return array{0: string, 1: AccessToken} Tuple of plain token and the created {@see AccessToken}
      */
     private function issueToken(User $user, array $overrides = []): array
     {
@@ -61,13 +61,13 @@ class AuthenticatesApiTokensTest extends TestCase
 
         $attributes = array_merge([
             'token_prefix' => mb_substr((string) $plainToken, 0, 5),
-            'token_hash' => ApiToken::hashFromPlain($plainToken),
+            'token_hash' => AccessToken::hashFromPlain($plainToken),
             'valid_from' => $this->testTime->subMinute(),
             'valid_to' => null,
             'allowed_ips' => null,
         ], $overrides);
 
-        $token = ApiToken::factory()
+        $token = AccessToken::factory()
             ->for($user)
             ->create($attributes);
 
@@ -193,7 +193,7 @@ class AuthenticatesApiTokensTest extends TestCase
                 'instance' => '/api/test',
             ]);
 
-        $this->assertDatabaseMissing(ApiToken::class, [
+        $this->assertDatabaseMissing(AccessToken::class, [
             'user_id' => $user->id,
             'last_used_at' => $this->testTime,
         ]);
@@ -234,7 +234,7 @@ class AuthenticatesApiTokensTest extends TestCase
         $response->assertOk()
             ->assertJson(['user_id' => $user->id]);
 
-        $this->assertDatabaseHas(ApiToken::class, [
+        $this->assertDatabaseHas(AccessToken::class, [
             'id' => $token->id,
             'last_used_at' => $this->testTime,
             'usage_count' => 1,
@@ -260,7 +260,7 @@ class AuthenticatesApiTokensTest extends TestCase
             ->assertOk()
             ->assertJson(['user_id' => $user->id]);
 
-        $this->assertDatabaseHas(ApiToken::class, [
+        $this->assertDatabaseHas(AccessToken::class, [
             'id' => $token->id,
             'last_used_at' => $this->testTime,
             'usage_count' => 1,
@@ -276,7 +276,7 @@ class AuthenticatesApiTokensTest extends TestCase
             ->assertOk()
             ->assertJson(['user_id' => $user->id]);
 
-        $this->assertDatabaseHas(ApiToken::class, [
+        $this->assertDatabaseHas(AccessToken::class, [
             'id' => $token->id,
             'usage_count' => 1,
         ]);
@@ -287,7 +287,7 @@ class AuthenticatesApiTokensTest extends TestCase
             ->assertOk()
             ->assertJson(['user_id' => $user->id]);
 
-        $this->assertDatabaseHas(ApiToken::class, [
+        $this->assertDatabaseHas(AccessToken::class, [
             'id' => $token->id,
             'usage_count' => 2,
         ]);
@@ -494,7 +494,7 @@ class AuthenticatesApiTokensTest extends TestCase
             ->getJson($this->endpoint, $this->bearerHeader($plainToken))
             ->assertUnauthorized();
 
-        $this->assertDatabaseMissing(ApiToken::class, [
+        $this->assertDatabaseMissing(AccessToken::class, [
             'id' => $token->id,
             'last_used_at' => $this->testTime,
         ]);

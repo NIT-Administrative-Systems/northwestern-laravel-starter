@@ -7,7 +7,7 @@ namespace Tests\Feature\Domains\User\Actions\Api;
 use App\Domains\User\Actions\Api\CreateApiUser;
 use App\Domains\User\Enums\AffiliationEnum;
 use App\Domains\User\Enums\AuthTypeEnum;
-use App\Domains\User\Models\ApiToken;
+use App\Domains\User\Models\AccessToken;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -48,13 +48,13 @@ class CreateApiUserTest extends TestCase
         $this->assertSame('api@example.com', $user->email);
         $this->assertSame('Test description', $user->description);
 
-        $apiToken = $user->api_tokens->first();
-        $this->assertInstanceOf(ApiToken::class, $apiToken);
-        $this->assertSame(mb_substr($token, 0, 5), $apiToken->token_prefix);
-        $this->assertSame(ApiToken::hashFromPlain($token), $apiToken->token_hash);
-        $this->assertEquals(now()->addHour()->startOfSecond(), $apiToken->valid_from->startOfSecond());
-        $this->assertEquals(now()->addDays(7)->startOfSecond(), $apiToken->valid_to->startOfSecond());
-        $this->assertSame(['127.0.0.1'], $apiToken->allowed_ips);
+        $accessToken = $user->access_tokens->first();
+        $this->assertInstanceOf(AccessToken::class, $accessToken);
+        $this->assertSame(mb_substr($token, 0, 5), $accessToken->token_prefix);
+        $this->assertSame(AccessToken::hashFromPlain($token), $accessToken->token_hash);
+        $this->assertEquals(now()->addHour()->startOfSecond(), $accessToken->valid_from->startOfSecond());
+        $this->assertEquals(now()->addDays(7)->startOfSecond(), $accessToken->valid_to->startOfSecond());
+        $this->assertSame(['127.0.0.1'], $accessToken->allowed_ips);
     }
 
     public function test_it_uses_defaults_when_optional_arguments_are_null(): void
@@ -72,9 +72,9 @@ class CreateApiUserTest extends TestCase
         $this->assertNull($user->description);
         $this->assertNull($user->email);
 
-        $apiToken = $user->api_tokens->first();
-        $this->assertEquals(now()->startOfSecond(), $apiToken->valid_from->startOfSecond());
-        $this->assertNull($apiToken->valid_to);
-        $this->assertNull($apiToken->allowed_ips);
+        $accessToken = $user->access_tokens->first();
+        $this->assertEquals(now()->startOfSecond(), $accessToken->valid_from->startOfSecond());
+        $this->assertNull($accessToken->valid_to);
+        $this->assertNull($accessToken->allowed_ips);
     }
 }

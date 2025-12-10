@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Console\Commands\SendApiTokenExpirationNotificationsCommand;
+use App\Console\Commands\SendAccessTokenExpirationNotificationsCommand;
 use Illuminate\Database\Console\PruneCommand;
 use Illuminate\Support\Facades\Schedule;
 use Laravel\Telescope\Console\PruneCommand as TelescopePruneCommand;
@@ -55,7 +55,7 @@ Schedule::command(CleanTemporaryS3FilesCommand::class)->daily();
 Schedule::command(PruneCommand::class, ['--path' => glob('app/Domains/*/Models')])->daily();
 
 if (config('auth.api.expiration_notifications.enabled')) {
-    Schedule::command(SendApiTokenExpirationNotificationsCommand::class)
+    Schedule::command(SendAccessTokenExpirationNotificationsCommand::class)
         ->dailyAt('09:00');
 }
 

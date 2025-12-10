@@ -62,13 +62,13 @@ The **Northwestern Laravel Starter** provides a cohesive solution that takes car
 
 ### 🔐 Authentication & Authorization
 
-- **Multi-Authentication Methods**: Support for Entra ID SSO, API tokens, and passwordless email-based login links.
+- **Multi-Authentication Methods**: Support for Entra ID SSO, Access Tokens, and passwordless email-based login links.
 - **Role-Based Access Control**: Fine-grained role and permissions system managed through an intuitive interface.
 - **User Impersonation**: Secure ability to troubleshoot user-specific issues and simulate user experiences.
 
 ### 🔌 API Features
 
-- **Advanced API Token Management**: Cryptographically secure tokens with CIDR-based IP restrictions, rotation,
+- **Advanced Access Token Management**: Cryptographically secure tokens with CIDR-based IP restrictions, rotation,
   time-bound validity, and automatic expiration notifications.
 - **API Request Logging & Analytics**: Comprehensive request tracking with performance metrics, failure analysis, and
   probabilistic sampling.

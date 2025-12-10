@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Commands;
 
-use App\Console\Commands\SendApiTokenExpirationNotificationsCommand;
-use App\Domains\User\Mail\ApiTokenExpirationNotification;
-use App\Domains\User\Models\ApiToken;
+use App\Console\Commands\SendAccessTokenExpirationNotificationsCommand;
+use App\Domains\User\Mail\AccessTokenExpirationNotification;
+use App\Domains\User\Models\AccessToken;
 use App\Domains\User\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
-#[CoversClass(SendApiTokenExpirationNotificationsCommand::class)]
-class SendApiApiTokenExpirationNotificationsCommandTest extends TestCase
+#[CoversClass(SendAccessTokenExpirationNotificationsCommand::class)]
+class SendAccessTokenExpirationNotificationsCommandTest extends TestCase
 {
     protected function setUp(): void
     {
@@ -34,14 +34,14 @@ class SendApiApiTokenExpirationNotificationsCommandTest extends TestCase
     {
         config(['auth.api.expiration_notifications.enabled' => false]);
 
-        $this->artisan(SendApiTokenExpirationNotificationsCommand::class)
-            ->expectsOutputToContain('API token expiration notifications are disabled in the configuration')
+        $this->artisan(SendAccessTokenExpirationNotificationsCommand::class)
+            ->expectsOutputToContain('Access Token expiration notifications are disabled in the configuration')
             ->assertSuccessful();
     }
 
     public function test_command_handles_no_expiring_tokens_gracefully(): void
     {
-        $this->artisan(SendApiTokenExpirationNotificationsCommand::class)
+        $this->artisan(SendAccessTokenExpirationNotificationsCommand::class)
             ->expectsOutputToContain('Checking for tokens expiring in: 7, 30 days')
             ->expectsOutputToContain('No tokens expiring in 7 days')
             ->expectsOutputToContain('No tokens expiring in 30 days')
@@ -58,13 +58,13 @@ class SendApiApiTokenExpirationNotificationsCommandTest extends TestCase
         $thirtyDaysFromNow = $now->copy()->addDays(30)->startOfDay();
 
         // Token 1: Expiring in 7 days
-        $token1 = ApiToken::factory()->for(User::factory()->create(['email' => 'user1@test.com']))->create(['valid_to' => $sevenDaysFromNow, 'expiration_notified_at' => null]);
+        $token1 = AccessToken::factory()->for(User::factory()->create(['email' => 'user1@test.com']))->create(['valid_to' => $sevenDaysFromNow, 'expiration_notified_at' => null]);
         // Token 2: Expiring in 30 days
-        $token2 = ApiToken::factory()->for(User::factory()->create(['email' => 'user2@test.com']))->create(['valid_to' => $thirtyDaysFromNow, 'expiration_notified_at' => null]);
+        $token2 = AccessToken::factory()->for(User::factory()->create(['email' => 'user2@test.com']))->create(['valid_to' => $thirtyDaysFromNow, 'expiration_notified_at' => null]);
         // Token 3: Expiring in 35 days (should be ignored)
-        ApiToken::factory()->for(User::factory()->create(['email' => 'user3@test.com']))->create(['valid_to' => $now->copy()->addDays(35), 'expiration_notified_at' => null]);
+        AccessToken::factory()->for(User::factory()->create(['email' => 'user3@test.com']))->create(['valid_to' => $now->copy()->addDays(35), 'expiration_notified_at' => null]);
 
-        $this->artisan(SendApiTokenExpirationNotificationsCommand::class)
+        $this->artisan(SendAccessTokenExpirationNotificationsCommand::class)
             ->expectsOutputToContain('Found 1 token(s) expiring in 7 days')
             ->expectsOutputToContain("Email sent successfully to {$token1->user->email}")
             ->expectsOutputToContain('Found 1 token(s) expiring in 30 days')
@@ -72,11 +72,11 @@ class SendApiApiTokenExpirationNotificationsCommandTest extends TestCase
             ->expectsOutputToContain('Successfully sent 2 notification(s)')
             ->assertSuccessful();
 
-        Mail::assertQueued(ApiTokenExpirationNotification::class, 2);
-        Mail::assertQueued(ApiTokenExpirationNotification::class, function (ApiTokenExpirationNotification $mail) use ($token1) {
+        Mail::assertQueued(AccessTokenExpirationNotification::class, 2);
+        Mail::assertQueued(AccessTokenExpirationNotification::class, function (AccessTokenExpirationNotification $mail) use ($token1) {
             return $mail->token->is($token1) && $mail->daysUntilExpiration === 7;
         });
-        Mail::assertQueued(ApiTokenExpirationNotification::class, function (ApiTokenExpirationNotification $mail) use ($token2) {
+        Mail::assertQueued(AccessTokenExpirationNotification::class, function (AccessTokenExpirationNotification $mail) use ($token2) {
             return $mail->token->is($token2) && $mail->daysUntilExpiration === 30;
         });
 
@@ -94,24 +94,24 @@ class SendApiApiTokenExpirationNotificationsCommandTest extends TestCase
         $sevenDaysFromNow = $now->copy()->addDays(7)->endOfDay();
 
         // Token 1: Notified 1 hour ago (within 24 hours, should be ignored)
-        ApiToken::factory()->for(User::factory())->create([
+        AccessToken::factory()->for(User::factory())->create([
             'valid_to' => $sevenDaysFromNow,
             'expiration_notified_at' => $now->copy()->subHours(1),
         ]);
 
         // Token 2: Notified 25 hours ago (outside 24 hours, should be processed)
-        $token2 = ApiToken::factory()->for(User::factory()->create(['email' => 'process@test.com']))->create([
+        $token2 = AccessToken::factory()->for(User::factory()->create(['email' => 'process@test.com']))->create([
             'valid_to' => $sevenDaysFromNow,
             'expiration_notified_at' => $now->copy()->subHours(25),
         ]);
 
-        $this->artisan(SendApiTokenExpirationNotificationsCommand::class)
+        $this->artisan(SendAccessTokenExpirationNotificationsCommand::class)
             ->expectsOutputToContain('Found 1 token(s) expiring in 7 days')
             ->expectsOutputToContain("Email sent successfully to {$token2->user->email}")
             ->expectsOutputToContain('Successfully sent 1 notification(s)')
             ->assertSuccessful();
 
-        Mail::assertQueued(ApiTokenExpirationNotification::class, 1);
+        Mail::assertQueued(AccessTokenExpirationNotification::class, 1);
 
         Carbon::setTestNow();
     }
@@ -122,11 +122,11 @@ class SendApiApiTokenExpirationNotificationsCommandTest extends TestCase
         Carbon::setTestNow($now);
 
         $sevenDaysFromNow = $now->copy()->addDays(7)->endOfDay();
-        $failingToken = ApiToken::factory()->for(User::factory())->create(['valid_to' => $sevenDaysFromNow, 'expiration_notified_at' => null]);
+        $failingToken = AccessToken::factory()->for(User::factory())->create(['valid_to' => $sevenDaysFromNow, 'expiration_notified_at' => null]);
 
         Mail::shouldReceive('to')->once()->andThrow(new \Exception('SMTP connection failure'));
 
-        $this->artisan(SendApiTokenExpirationNotificationsCommand::class)
+        $this->artisan(SendAccessTokenExpirationNotificationsCommand::class)
             ->expectsOutputToContain('Found 1 token(s) expiring in 7 days')
             ->expectsOutputToContain("Failed to send notification for {$failingToken->user->username}: SMTP connection failure")
             ->expectsOutputToContain('Failed to send 1 notification(s) - check logs for details')
@@ -143,20 +143,20 @@ class SendApiApiTokenExpirationNotificationsCommandTest extends TestCase
         Carbon::setTestNow($now);
         $sevenDaysFromNow = $now->copy()->addDays(7)->endOfDay();
 
-        $validToken = ApiToken::factory()->for(User::factory())->create(['valid_to' => $sevenDaysFromNow, 'revoked_at' => null]);
+        $validToken = AccessToken::factory()->for(User::factory())->create(['valid_to' => $sevenDaysFromNow, 'revoked_at' => null]);
 
         $systemUser = User::factory()->create(['email' => config('mail.from.address')]);
-        ApiToken::factory()->for($systemUser)->create(['valid_to' => $sevenDaysFromNow]);
+        AccessToken::factory()->for($systemUser)->create(['valid_to' => $sevenDaysFromNow]);
 
-        ApiToken::factory()->for(User::factory())->create(['valid_to' => $sevenDaysFromNow, 'revoked_at' => $now]);
+        AccessToken::factory()->for(User::factory())->create(['valid_to' => $sevenDaysFromNow, 'revoked_at' => $now]);
 
-        $this->artisan(SendApiTokenExpirationNotificationsCommand::class)
+        $this->artisan(SendAccessTokenExpirationNotificationsCommand::class)
             ->expectsOutputToContain('Found 1 token(s) expiring in 7 days')
             ->expectsOutputToContain("Email sent successfully to {$validToken->user->email}")
             ->expectsOutputToContain('Successfully sent 1 notification(s)')
             ->assertSuccessful();
 
-        Mail::assertQueued(ApiTokenExpirationNotification::class, 1);
+        Mail::assertQueued(AccessTokenExpirationNotification::class, 1);
 
         Carbon::setTestNow();
     }

@@ -6,8 +6,8 @@ namespace Tests\Feature\Http\Middleware;
 
 use App\Domains\Core\Enums\ApiRequestFailureEnum;
 use App\Domains\Core\ValueObjects\ApiRequestContext;
+use App\Domains\User\Models\AccessToken;
 use App\Domains\User\Models\ApiRequestLog;
-use App\Domains\User\Models\ApiToken;
 use App\Domains\User\Models\User;
 use App\Http\Middleware\LogsApiRequests;
 use Illuminate\Support\Facades\Context;
@@ -68,7 +68,7 @@ class LogsApiRequestsTest extends TestCase
     public function test_authenticated_successful_request_is_logged(): void
     {
         $user = User::factory()->api()->create();
-        $token = ApiToken::factory()->for($user)->create();
+        $token = AccessToken::factory()->for($user)->create();
         $traceId = Str::uuid()->toString();
 
         Context::add(ApiRequestContext::USER_ID, $user->id);
@@ -81,7 +81,7 @@ class LogsApiRequestsTest extends TestCase
         $this->assertDatabaseHas(ApiRequestLog::class, [
             'trace_id' => $traceId,
             'user_id' => $user->id,
-            'user_api_token_id' => $token->id,
+            'access_token_id' => $token->id,
             'method' => 'GET',
             'path' => 'api/test',
             'status_code' => 200,
@@ -376,7 +376,7 @@ class LogsApiRequestsTest extends TestCase
     public function test_all_context_values_are_captured_in_log(): void
     {
         $user = User::factory()->api()->create();
-        $token = ApiToken::factory()->for($user)->create();
+        $token = AccessToken::factory()->for($user)->create();
         $traceId = Str::uuid()->toString();
 
         Context::add(ApiRequestContext::USER_ID, $user->id);
@@ -390,7 +390,7 @@ class LogsApiRequestsTest extends TestCase
         $this->assertDatabaseHas(ApiRequestLog::class, [
             'trace_id' => $traceId,
             'user_id' => $user->id,
-            'user_api_token_id' => $token->id,
+            'access_token_id' => $token->id,
             'method' => 'GET',
             'path' => 'api/test',
             'status_code' => 200,

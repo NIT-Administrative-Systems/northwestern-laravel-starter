@@ -55,10 +55,10 @@ class ApiRequestLog extends Model
     }
 
     /**
-     * @return BelongsTo<ApiToken, $this>
+     * @return BelongsTo<AccessToken, $this>
      */
-    public function api_token(): BelongsTo
+    public function access_token(): BelongsTo
     {
-        return $this->belongsTo(ApiToken::class, 'user_api_token_id');
+        return $this->belongsTo(AccessToken::class);
     }
 }
