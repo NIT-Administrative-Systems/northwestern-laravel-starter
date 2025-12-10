@@ -8,7 +8,6 @@ use App\Domains\User\Enums\AuthTypeEnum;
 use App\Domains\User\Models\AccessToken;
 use App\Domains\User\Models\User;
 use Carbon\CarbonInterface;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 
@@ -24,15 +23,15 @@ readonly class IssueAccessToken
      * Issue a new token for the given API user.
      *
      * @param  User  $user  The API user to issue a token for
-     * @param  CarbonInterface|null  $validFrom  When the token becomes valid (defaults to now)
-     * @param  CarbonInterface|null  $validTo  When the token expires (null for indefinite)
+     * @param  string  $name  Descriptive name for the token (e.g., "Production Server")
+     * @param  CarbonInterface|null  $expiresAt  When the token expires (null for no expiration)
      * @param  array<int, string>|null  $allowedIps  Optional list of allowed IP addresses or CIDR ranges
      * @return array{0: string, 1: AccessToken} Tuple of plaintext token and the created {@see AccessToken}
      */
     public function __invoke(
         User $user,
-        ?CarbonInterface $validFrom = null,
-        ?CarbonInterface $validTo = null,
+        string $name,
+        ?CarbonInterface $expiresAt = null,
         ?array $allowedIps = null,
     ): array {
         if ($user->auth_type !== AuthTypeEnum::API) {
@@ -42,10 +41,10 @@ readonly class IssueAccessToken
         $rawToken = Str::random(length: 64);
 
         $accessToken = $user->access_tokens()->create([
+            'name' => $name,
             'token_prefix' => mb_substr($rawToken, 0, 5),
             'token_hash' => AccessToken::hashFromPlain($rawToken),
-            'valid_from' => $validFrom ?? Carbon::now(),
-            'valid_to' => $validTo,
+            'expires_at' => $expiresAt,
             'allowed_ips' => $allowedIps,
         ]);
 

@@ -49,6 +49,11 @@ class ApiRequestLogsTable
                     ->fontFamily(FontFamily::Mono)
                     ->toggleable(isToggledHiddenByDefault: true),
 
+                TextColumn::make('access_token.name')
+                    ->label('Token Name')
+                    ->placeholder('N/A')
+                    ->searchable(),
+
                 TextColumn::make('method')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {

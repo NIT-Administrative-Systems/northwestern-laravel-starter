@@ -25,15 +25,15 @@ class IssueAccessTokenTest extends TestCase
 
         [$token, $accessToken] = $action(
             user: $user,
-            validFrom: now()->addHour(),
-            validTo: now()->addDays(7),
+            name: 'Test Token',
+            expiresAt: now()->addDays(7),
             allowedIps: ['192.168.1.1']
         );
 
+        $this->assertSame('Test Token', $accessToken->name);
         $this->assertSame(mb_substr($token, 0, 5), $accessToken->token_prefix);
         $this->assertSame(AccessToken::hashFromPlain($token), $accessToken->token_hash);
-        $this->assertEquals(now()->addHour()->startOfSecond(), $accessToken->valid_from->startOfSecond());
-        $this->assertEquals(now()->addDays(7)->startOfSecond(), $accessToken->valid_to->startOfSecond());
+        $this->assertEquals(now()->addDays(7)->startOfSecond(), $accessToken->expires_at->startOfSecond());
         $this->assertSame(['192.168.1.1'], $accessToken->allowed_ips);
         $this->assertTrue($user->access_tokens->contains($accessToken));
     }
@@ -46,7 +46,7 @@ class IssueAccessTokenTest extends TestCase
         $user = User::factory()->affiliate()->create();
 
         $action = new IssueAccessToken();
-        $action($user);
+        $action($user, 'Test');
     }
 
     public function test_defaults_are_used_when_optional_parameters_are_omitted(): void
@@ -57,10 +57,13 @@ class IssueAccessTokenTest extends TestCase
 
         $action = new IssueAccessToken();
 
-        [$token, $accessToken] = $action($user);
+        [$token, $accessToken] = $action(
+            user: $user,
+            name: 'Default Token'
+        );
 
-        $this->assertEquals(now()->startOfSecond(), $accessToken->valid_from->startOfSecond());
-        $this->assertNull($accessToken->valid_to);
+        $this->assertSame('Default Token', $accessToken->name);
+        $this->assertNull($accessToken->expires_at);
         $this->assertNull($accessToken->allowed_ips);
     }
 }

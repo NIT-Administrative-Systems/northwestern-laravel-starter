@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('access_tokens', static function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id');
+            $table->string('name');
 
-            $table->datetime('valid_from');
-            $table->datetime('valid_to')->nullable();
+            $table->datetime('expires_at')->nullable();
             $table->json('allowed_ips')->nullable();
 
             $table->unsignedBigInteger('usage_count')->default(0);
@@ -32,8 +32,8 @@ return new class extends Migration
 
             $table->timestamps();
 
-            $table->index(['user_id', 'last_used_at', 'valid_from', 'id'], 'user_access_tokens_user_lookup');
-            $table->index('valid_to', 'user_access_tokens_valid_to_index');
+            $table->index(['user_id', 'last_used_at', 'id'], 'user_access_tokens_user_lookup');
+            $table->index('expires_at', 'user_access_tokens_expires_at_index');
             $table->index('last_used_at', 'user_access_tokens_last_used_at_index');
         });
     }

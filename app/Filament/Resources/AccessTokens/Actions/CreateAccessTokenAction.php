@@ -47,8 +47,8 @@ class CreateAccessTokenAction extends Action
 
                         [$rawToken, $accessToken] = $issueAccessToken(
                             user: $owner,
-                            validFrom: $configuration['valid_from'],
-                            validTo: $configuration['valid_to'],
+                            name: $configuration['name'],
+                            expiresAt: $configuration['expires_at'],
                             allowedIps: $configuration['allowed_ips'],
                         );
 

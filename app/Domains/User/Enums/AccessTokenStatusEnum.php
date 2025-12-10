@@ -11,7 +11,6 @@ use Filament\Support\Icons\Heroicon;
 
 enum AccessTokenStatusEnum: string implements HasColor, HasIcon, HasLabel
 {
-    case PENDING = 'pending';
     case ACTIVE = 'active';
     case EXPIRED = 'expired';
     case REVOKED = 'revoked';
@@ -24,7 +23,6 @@ enum AccessTokenStatusEnum: string implements HasColor, HasIcon, HasLabel
     public function getColor(): string
     {
         return match ($this) {
-            self::PENDING => 'warning',
             self::ACTIVE => 'success',
             self::EXPIRED => 'gray',
             self::REVOKED => 'danger',
@@ -34,7 +32,6 @@ enum AccessTokenStatusEnum: string implements HasColor, HasIcon, HasLabel
     public function getIcon(): Heroicon
     {
         return match ($this) {
-            self::PENDING => Heroicon::OutlinedClock,
             self::ACTIVE => Heroicon::OutlinedBolt,
             self::EXPIRED => Heroicon::OutlinedArchiveBoxXMark,
             self::REVOKED => Heroicon::OutlinedShieldExclamation,

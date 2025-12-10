@@ -22,13 +22,13 @@ class RotateAccessTokenTest extends TestCase
 
         $user = User::factory()->api()->create();
 
-        [$oldTokenString, $oldToken] = new IssueAccessToken()($user);
+        [$oldTokenString, $oldToken] = new IssueAccessToken()($user, 'Test');
 
         $rotator = new RotateAccessToken(new IssueAccessToken());
 
         Auth::login($user);
 
-        $newTokenString = $rotator($oldToken);
+        $newTokenString = $rotator($oldToken, $oldToken->name);
 
         $this->assertNotEquals($oldTokenString, $newTokenString);
 

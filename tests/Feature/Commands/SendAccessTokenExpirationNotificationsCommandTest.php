@@ -58,11 +58,11 @@ class SendAccessTokenExpirationNotificationsCommandTest extends TestCase
         $thirtyDaysFromNow = $now->copy()->addDays(30)->startOfDay();
 
         // Token 1: Expiring in 7 days
-        $token1 = AccessToken::factory()->for(User::factory()->create(['email' => 'user1@test.com']))->create(['valid_to' => $sevenDaysFromNow, 'expiration_notified_at' => null]);
+        $token1 = AccessToken::factory()->for(User::factory()->create(['email' => 'user1@test.com']))->create(['name' => 'Token 1', 'expires_at' => $sevenDaysFromNow, 'expiration_notified_at' => null]);
         // Token 2: Expiring in 30 days
-        $token2 = AccessToken::factory()->for(User::factory()->create(['email' => 'user2@test.com']))->create(['valid_to' => $thirtyDaysFromNow, 'expiration_notified_at' => null]);
+        $token2 = AccessToken::factory()->for(User::factory()->create(['email' => 'user2@test.com']))->create(['name' => 'Token 2', 'expires_at' => $thirtyDaysFromNow, 'expiration_notified_at' => null]);
         // Token 3: Expiring in 35 days (should be ignored)
-        AccessToken::factory()->for(User::factory()->create(['email' => 'user3@test.com']))->create(['valid_to' => $now->copy()->addDays(35), 'expiration_notified_at' => null]);
+        AccessToken::factory()->for(User::factory()->create(['email' => 'user3@test.com']))->create(['name' => 'Token 3', 'expires_at' => $now->copy()->addDays(35), 'expiration_notified_at' => null]);
 
         $this->artisan(SendAccessTokenExpirationNotificationsCommand::class)
             ->expectsOutputToContain('Found 1 token(s) expiring in 7 days')
@@ -95,13 +95,15 @@ class SendAccessTokenExpirationNotificationsCommandTest extends TestCase
 
         // Token 1: Notified 1 hour ago (within 24 hours, should be ignored)
         AccessToken::factory()->for(User::factory())->create([
-            'valid_to' => $sevenDaysFromNow,
+            'name' => 'Recently Notified',
+            'expires_at' => $sevenDaysFromNow,
             'expiration_notified_at' => $now->copy()->subHours(1),
         ]);
 
         // Token 2: Notified 25 hours ago (outside 24 hours, should be processed)
         $token2 = AccessToken::factory()->for(User::factory()->create(['email' => 'process@test.com']))->create([
-            'valid_to' => $sevenDaysFromNow,
+            'name' => 'Needs Notification',
+            'expires_at' => $sevenDaysFromNow,
             'expiration_notified_at' => $now->copy()->subHours(25),
         ]);
 
@@ -122,7 +124,7 @@ class SendAccessTokenExpirationNotificationsCommandTest extends TestCase
         Carbon::setTestNow($now);
 
         $sevenDaysFromNow = $now->copy()->addDays(7)->endOfDay();
-        $failingToken = AccessToken::factory()->for(User::factory())->create(['valid_to' => $sevenDaysFromNow, 'expiration_notified_at' => null]);
+        $failingToken = AccessToken::factory()->for(User::factory())->create(['name' => 'Failing Token', 'expires_at' => $sevenDaysFromNow, 'expiration_notified_at' => null]);
 
         Mail::shouldReceive('to')->once()->andThrow(new \Exception('SMTP connection failure'));
 
@@ -143,12 +145,12 @@ class SendAccessTokenExpirationNotificationsCommandTest extends TestCase
         Carbon::setTestNow($now);
         $sevenDaysFromNow = $now->copy()->addDays(7)->endOfDay();
 
-        $validToken = AccessToken::factory()->for(User::factory())->create(['valid_to' => $sevenDaysFromNow, 'revoked_at' => null]);
+        $validToken = AccessToken::factory()->for(User::factory())->create(['name' => 'Valid Token', 'expires_at' => $sevenDaysFromNow, 'revoked_at' => null]);
 
         $systemUser = User::factory()->create(['email' => config('mail.from.address')]);
-        AccessToken::factory()->for($systemUser)->create(['valid_to' => $sevenDaysFromNow]);
+        AccessToken::factory()->for($systemUser)->create(['name' => 'System Token', 'expires_at' => $sevenDaysFromNow]);
 
-        AccessToken::factory()->for(User::factory())->create(['valid_to' => $sevenDaysFromNow, 'revoked_at' => $now]);
+        AccessToken::factory()->for(User::factory())->create(['name' => 'Revoked Token', 'expires_at' => $sevenDaysFromNow, 'revoked_at' => $now]);
 
         $this->artisan(SendAccessTokenExpirationNotificationsCommand::class)
             ->expectsOutputToContain('Found 1 token(s) expiring in 7 days')

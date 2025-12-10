@@ -3,9 +3,7 @@ title: API System
 description: Complete guide to the Access Token system and features
 ---
 
-import { Aside } from '@astrojs/starlight/components';
-
-## Overview
+import { Aside, Steps } from '@astrojs/starlight/components';
 
 The starter includes a comprehensive API system designed for secure, monitored programmatic access to your application. The system provides token-based authentication, IP allowlisting, request logging, and detailed analytics.
 
@@ -18,82 +16,99 @@ API_ENABLED=false
 ```
 </Aside>
 
+## Core Concepts
+
+The API architecture is designed to separate human identity from machine identity, utilizing a strict one-to-many relationship between API Users and their Access Tokens.
+
+### API Users
+
+An **API User** represents a specific machine actor.
+
+- **Distinct from Humans** - Separate from standard user accounts. They cannot log in through the UI.
+- **Scoped Authority** - They can only be assigned **API Integration** roles to ensure they are never granted elevated permissions.
+
+### Access Tokens
+
+Each API user can possess multiple **Access Tokens**. These are the actual credentials used in the `Authorization` header.
+
+- **Immediate Activation** - Tokens are valid immediately upon creation.
+- **Optional Expiration** - Tokens can be set to expire after a certain date, or remain valid indefinitely.
+- **Granular Restrictions** - Each token can have its own specific IP allowlist, independent of other tokens belonging to the same user.
+
+## Strategy: Why Multiple Tokens?
+
+In production environments, it is best practice to issue a unique token for every distinct service connecting to your API, even if they represent the same "API User" or organization.
+
+- **Isolation** - A single compromised integration does not jeopardize others
+- **Safe Rotation** - Rotate one token without interrupting other consumers
+- **Better Analytics** - Usage logs are tied to the specific token. This allows you to see granular usage patterns per integration.
+
 ## Key Features
 
 ### Access Token Management
 
-- **Multiple Tokens Per User** - Create multiple tokens for different integrations
-- **Validity Windows** - Set active and expiration dates
-- **Easy Revocation** - Disable tokens instantly
+- **Multi-Token Architecture** - Create unique credentials for every consumer
+- **Flexible Lifecycles** - Choose between ephemeral tokens with hard expiration dates or permanent keys for long-term usage
+- **Easy Revocation** - Invalidate compromised credentials instantly through the administration panel
 
 ### IP Allowlisting
 
-- **CIDR Notation Support** - Restrict access by IP address or range
-- **Multiple IPs** - Allow access from multiple locations
-- **Flexible Configuration** - Per-token IP restrictions
+- **CIDR Notation Support** - Restrict access to specific subnets (e.g., `10.0.0.0/24`) or single IPs
+- **Multi-Origin Support** - Allow a single token to be used from multiple distinct locations
 
-### Request Logging
+### Request Logging & Monitoring
 
-- **Performance Metrics** - Track request duration
-- **Response Tracking** - Log HTTP status codes
-- **Configurable Sampling** - Control logging volume for high-traffic APIs
-
-### Analytics & Monitoring
-
-- **Request Charts** - Visualize API usage over time
-- **Slow Request Detection** - Identify performance issues
-- **Endpoint Analysis** - See which endpoints are most used
+- **Performance Metrics** - Every request is timed and logged, allowing you to spot slow endpoints
+- **Traffic Analysis** - Built-in charts visualize API usage, error rates, and endpoint popularity over time
+- **Sampling** - Configurable logging rates to prevent database bloat in high-traffic environments
 
 ## Authentication Flow
 
-### 1. Token Creation
+<Steps>
+    1. **Token Creation**
 
-An administrator creates an API user and their first token using the **Create API User** action in the Filament Administration Panel. This action launches a wizard that guides the user through the process of providing the user's details and configuring the token's properties, such as its validity period and allowed IP addresses.
+       An administrator creates an API user and generates a token through the administration panel. During creation, you may optionally set an **Expiration**. If omitted, the token remains valid indefinitely.
 
-### 2. Token Delivery
+    2. **Token Delivery**
 
-The plain-text token shown once at creation:
+         The plain-text token is displayed **once** at creation. Be sure to copy and store it securely, as it cannot be retrieved later.
 
-```
-Token: abc123def456ghi789jkl012mno345pqr678stu901vwx234yz
-```
+        ```
+        Bearer Token: abc123def456ghi789jkl012mno345pqr678stu901vwx234yz
+        ```
 
-### 3. Client Configuration
+    3. **Client Request**
 
-Client includes token in requests:
+       The external client includes the token in the request header:
 
-```http
-GET /api/users HTTP/1.1
-Host: your-app.northwestern.edu
-Authorization: Bearer abc123def456ghi789jkl012mno345pqr678stu901vwx234yz
-```
+        ```http
+        GET /api/users HTTP/1.1
+        Host: your-app.northwestern.edu
+        Authorization: Bearer abc123def456ghi789jkl012mno345pqr678stu901vwx234yz
+        ```
 
-### 4. Request Authentication
+    4. **System Validation**
 
-Middleware:
+       The middleware performs a sequence of checks:
 
-1. Extracts token from Authorization header
-2. Finds user with matching token hash
-3. Checks token is active (not expired, within valid window)
-4. Validates source IP (if allowlist configured)
-5. Authenticates request as that user
+       1. **Format:** Extracts the Bearer token
+       2. **Identity:** Locates the API User by the token hash
+       3. **Validity:** Checks if the token has ben revoked or expired
+       4. **Security:** Verifies the request IP matches the allowlist (if configured)
+       5. **Authorization:** Grants access based on the API User's assigned role(s)
 
-### 5. Request Logging
+    5. **Logging**
 
-After request completes:
-
-- Request details logged to database
-- Duration calculated
-- Response status recorded
-- Analytics updated
+       After the response is sent, the system logs the request details for monitoring and analytics.
+</Steps>
 
 ## Expiration Notifications
 
-To avoid surprise outages, the system automatically sends reminder emails as tokens approach their expiration date when an API user has an email address configured.
+To prevent service interruptions, the system automatically sends email notifications when a token is approaching its expiration date and the API User has an email address configured.
 
-By default, notifications are sent 30, 14, 7, and 3 days before expiration, as well as on the day of expiration.
+By default, notifications are sent 30, 14, 7, and 3 days before expiration, as well as on the final day.
 
-You can adjust the notification intervals in the configuration file:
+You can adjust these intervals in the configuration:
 
 ```php
 // config/auth.php

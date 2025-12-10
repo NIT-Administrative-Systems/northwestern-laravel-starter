@@ -67,9 +67,9 @@ HTML))
 
                         $newToken = $rotateAccessToken(
                             previousAccessToken: $record,
+                            name: $configuration['name'],
                             rotatedBy: auth()->user(),
-                            validFrom: $configuration['valid_from'],
-                            validTo: $configuration['valid_to'],
+                            expiresAt: $configuration['expires_at'],
                             allowedIps: $configuration['allowed_ips'],
                         );
 

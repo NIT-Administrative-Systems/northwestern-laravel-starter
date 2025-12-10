@@ -27,8 +27,7 @@ class AccessToken extends BaseModel
     protected $casts = [
         'token_prefix' => 'encrypted',
         'last_used_at' => 'datetime',
-        'valid_from' => 'datetime',
-        'valid_to' => 'datetime',
+        'expires_at' => 'datetime',
         'revoked_at' => 'datetime',
         'allowed_ips' => 'array',
     ];
@@ -52,22 +51,19 @@ class AccessToken extends BaseModel
         $at ??= Carbon::now();
 
         return $query
-            // Active -> Pending -> Expired -> Revoked
+            // Active -> Expired -> Revoked
             ->orderByRaw(
                 'CASE
                     WHEN revoked_at IS NOT NULL THEN 0
-                    WHEN valid_to IS NOT NULL AND valid_to < ? THEN 1
-                    WHEN valid_from > ? THEN 2
-                    ELSE 3
+                    WHEN expires_at IS NOT NULL AND expires_at < ? THEN 1
+                    ELSE 2
                  END DESC',
-                [$at, $at]
+                [$at]
             )
             // Used tokens before never used ones
             ->orderByRaw('last_used_at IS NOT NULL DESC')
             // For used tokens, most recently used first
             ->orderByDesc('last_used_at')
-            // Among never-used tokens, most recently valid-from first
-            ->orderByDesc('valid_from')
             // Tie-breaker by ID (newest first)
             ->orderByDesc('id');
     }
@@ -80,10 +76,9 @@ class AccessToken extends BaseModel
         return $query
             ->whereNull('revoked_at')
             ->whereNotNull('token_hash')
-            ->where('valid_from', '<=', $at)
             ->where(
-                fn ($q) => $q->whereNull('valid_to')
-                    ->orWhere('valid_to', '>=', $at)
+                fn ($q) => $q->whereNull('expires_at')
+                    ->orWhere('expires_at', '>=', $at)
             );
     }
 
@@ -126,8 +121,7 @@ class AccessToken extends BaseModel
             get: function () {
                 return match (true) {
                     filled($this->revoked_at) => AccessTokenStatusEnum::REVOKED,
-                    $this->valid_to?->isPast() => AccessTokenStatusEnum::EXPIRED,
-                    $this->valid_from->isFuture() => AccessTokenStatusEnum::PENDING,
+                    $this->expires_at?->isPast() => AccessTokenStatusEnum::EXPIRED,
                     default => AccessTokenStatusEnum::ACTIVE,
                 };
             }
