@@ -1,9 +1,9 @@
 <x-mail::message>
-# API Token Expiration Notice
+# Access Token Expiration Notice
 
 Hello,
 
-An API token for **{{ config('auth.api.auth_realm') }}** associated with **{{ $user->full_name }}** (`{{ $user->username }}`) is nearing its expiration date.
+An access token for **{{ config('auth.api.auth_realm') }}** associated with **{{ $user->full_name }}** (`{{ $user->username }}`) is nearing its expiration date.
 
 ## Token Details
 

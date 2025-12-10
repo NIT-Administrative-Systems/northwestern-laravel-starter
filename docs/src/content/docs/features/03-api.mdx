@@ -1,6 +1,6 @@
 ---
 title: API System
-description: Complete guide to the API token system and features
+description: Complete guide to the Access Token system and features
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -20,7 +20,7 @@ API_ENABLED=false
 
 ## Key Features
 
-### API Token Management
+### Access Token Management
 
 - **Multiple Tokens Per User** - Create multiple tokens for different integrations
 - **Validity Windows** - Set active and expiration dates
@@ -98,7 +98,7 @@ You can adjust the notification intervals in the configuration file:
 ```php
 // config/auth.php
 'expiration_notifications' => [
-    'enabled' => env('API_TOKEN_EXPIRATION_NOTIFICATIONS_ENABLED', true),
+    'enabled' => env('API_ACCESS_TOKEN_EXPIRATION_NOTIFICATIONS_ENABLED', true),
     'intervals' => [30, 14, 7, 3, 1],
 ],
 ```
@@ -107,7 +107,7 @@ If you do not wish to send expiration notifications, you can disable this featur
 
 ```php
 // .env
-API_TOKEN_EXPIRATION_NOTIFICATIONS_ENABLED=false
+API_ACCESS_TOKEN_EXPIRATION_NOTIFICATIONS_ENABLED=false
 ```
 
 ## Request Logging
@@ -118,21 +118,21 @@ Requests to protected API endpoints are automatically logged to the `api_request
 
 Every log entry includes:
 
-| Field               | Description                                            |
-|---------------------|--------------------------------------------------------|
-| `trace_id`          | Unique request identifier                              |
-| `user_id`           | ID of the authenticated user                           |
-| `user_api_token_id` | ID of the API token used for authentication (nullable) |
-| `method`            | HTTP method (GET, POST, etc.)                          |
-| `path`              | Request path (relative URL)                            |
-| `route_name`        | Named route for the request (if applicable)            |
-| `ip_address`        | Source IP address                                      |
-| `status_code`       | HTTP status code                                       |
-| `duration_ms`       | Request duration in milliseconds                       |
-| `response_bytes`    | Size of the response body in bytes (if measurable)     |
-| `user_agent`        | User agent string from the request (if provided)       |
-| `failure_reason`    | Authentication or request failure reason, if any       |
-| `created_at`        | Timestamp when the request was logged                  |
+| Field             | Description                                               |
+|-------------------|-----------------------------------------------------------|
+| `trace_id`        | Unique request identifier                                 |
+| `user_id`         | ID of the authenticated user                              |
+| `access_token_id` | ID of the Access Token used for authentication (nullable) |
+| `method`          | HTTP method (GET, POST, etc.)                             |
+| `path`            | Request path (relative URL)                               |
+| `route_name`      | Named route for the request (if applicable)               |
+| `ip_address`      | Source IP address                                         |
+| `status_code`     | HTTP status code                                          |
+| `duration_ms`     | Request duration in milliseconds                          |
+| `response_bytes`  | Size of the response body in bytes (if measurable)        |
+| `user_agent`      | User agent string from the request (if provided)          |
+| `failure_reason`  | Authentication or request failure reason, if any          |
+| `created_at`      | Timestamp when the request was logged                     |
 
 ### Sampling Configuration
 

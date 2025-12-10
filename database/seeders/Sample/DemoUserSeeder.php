@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Database\Seeders\Sample;
 
 use App\Domains\User\Enums\RoleTypeEnum;
-use App\Domains\User\Models\ApiToken;
+use App\Domains\User\Models\AccessToken;
 use App\Domains\User\Models\Role;
 use App\Domains\User\Models\User;
 use Illuminate\Database\Seeder;
@@ -79,14 +79,15 @@ class DemoUserSeeder extends Seeder
 
     private function apiUser(): void
     {
-        $rawToken = config('auth.api.demo_user_token', Str::random(length: 64));
+        $demoToken = config('auth.api.demo_user_token');
+        $rawToken = blank($demoToken) ? Str::random(64) : $demoToken;
 
         User::factory()
             ->api()
-            ->has(ApiToken::factory()->state([
+            ->has(AccessToken::factory()->state([
                 'token_prefix' => mb_substr($rawToken, 0, 5),
-                'token_hash' => ApiToken::hashFromPlain($rawToken),
-            ]), 'api_tokens')
+                'token_hash' => AccessToken::hashFromPlain($rawToken),
+            ]), 'access_tokens')
             ->state([
                 'username' => 'api-nuit',
                 'description' => 'API user for demo and testing purposes.',

@@ -5,7 +5,7 @@ description: Multi-method authentication system for Northwestern users and exter
 
 import { Card, CardGrid, Aside, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
 
-The Northwestern Laravel Starter provides a flexible, multi-method authentication system designed to handle both Northwestern users (via NetID/SSO) and external collaborators (via passwordless login links or API tokens).
+The Northwestern Laravel Starter provides a flexible, multi-method authentication system designed to handle both Northwestern users (via NetID/SSO) and external collaborators (via passwordless login links or Access Tokens).
 
 ## Authentication Methods
 
@@ -32,7 +32,7 @@ The Northwestern Laravel Starter provides a flexible, multi-method authenticatio
     - Invite-only access
   </Card>
 
-  <Card title="API Tokens" icon="rocket">
+  <Card title="Access Tokens" icon="rocket">
     **Bearer Token Authentication**
 
     Long-lived tokens for programmatic API access.
@@ -198,7 +198,7 @@ LOCAL_AUTH_REDIRECT_AFTER_LOGIN=/
 
 ---
 
-## API Token Authentication
+## Access Token Authentication
 
 API users authenticate using long-lived Bearer tokens for programmatic access.
 
@@ -224,7 +224,7 @@ API users authenticate using long-lived Bearer tokens for programmatic access.
 
 5. **Middleware validates**
 
-   `AuthenticatesApiTokens` middleware validates token and IP allowlist
+   `AuthenticatesAccessTokens` middleware validates token and IP allowlist
 
 6. **Request logged**
 
@@ -232,7 +232,7 @@ API users authenticate using long-lived Bearer tokens for programmatic access.
 
 </Steps>
 
-See the [API Documentation](/features/03-api/) for complete API token management details.
+See the [API Documentation](/features/03-api/) for complete Access Token management details.
 
 ---
 

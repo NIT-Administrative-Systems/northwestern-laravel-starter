@@ -7,7 +7,7 @@ namespace App\Filament\Resources\Users\Actions;
 use App\Domains\User\Actions\Api\CreateApiUser;
 use App\Domains\User\Enums\PermissionEnum;
 use App\Domains\User\Models\User;
-use App\Filament\Resources\ApiTokens\Schemas\ApiTokenSchemas;
+use App\Filament\Resources\AccessTokens\Schemas\AccessTokenSchemas;
 use App\Filament\Resources\Users\UserResource;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;
@@ -65,7 +65,7 @@ class CreateApiUserAction extends Action
                                                 function () {
                                                     return function (string $attribute, $value, $fail) {
                                                         // Skip validation if we already created a user in this session
-                                                        if (session()->has(ApiTokenSchemas::SESSION_KEY . '.user_id')) {
+                                                        if (session()->has(AccessTokenSchemas::SESSION_KEY . '.user_id')) {
                                                             return;
                                                         }
 
@@ -114,12 +114,12 @@ class CreateApiUserAction extends Action
 
                 Wizard\Step::make('Configure Token')
                     ->schema([
-                        ApiTokenSchemas::tokenConfigurationSection(),
+                        AccessTokenSchemas::tokenConfigurationSection(),
                     ])
                     ->afterValidation(function ($state, $set, CreateApiUser $createApiUser) {
                         $username = 'api-' . ltrim(strtolower((string) $state['username']), 'api-');
 
-                        $configuration = ApiTokenSchemas::normalizeConfigurationState($state);
+                        $configuration = AccessTokenSchemas::normalizeConfigurationState($state);
 
                         [$user, $token] = $createApiUser(
                             username: $username,
@@ -132,7 +132,7 @@ class CreateApiUserAction extends Action
                         );
 
                         session([
-                            ApiTokenSchemas::SESSION_KEY => [
+                            AccessTokenSchemas::SESSION_KEY => [
                                 'token' => $token,
                                 'user_id' => $user->getKey(),
                             ],
@@ -141,13 +141,13 @@ class CreateApiUserAction extends Action
 
                 Wizard\Step::make('Copy Token')
                     ->schema(
-                        ApiTokenSchemas::copyTokenStepSchema(),
+                        AccessTokenSchemas::copyTokenStepSchema(),
                     ),
             ])
-            ->modalSubmitAction(fn (Action $action) => ApiTokenSchemas::copyTokenSubmitButton($action))
+            ->modalSubmitAction(fn (Action $action) => AccessTokenSchemas::copyTokenSubmitButton($action))
             ->action(function () {
-                $userId = session(ApiTokenSchemas::SESSION_KEY . '.user_id');
-                ApiTokenSchemas::clearTokenSession();
+                $userId = session(AccessTokenSchemas::SESSION_KEY . '.user_id');
+                AccessTokenSchemas::clearTokenSession();
 
                 if ($userId) {
                     /** @var User $user */
@@ -155,7 +155,7 @@ class CreateApiUserAction extends Action
                     if ($user) {
                         Notification::make()
                             ->title('API user created')
-                            ->body("{$user->full_name} has been created with an active API token.")
+                            ->body("{$user->full_name} has been created with an active access token.")
                             ->success()
                             ->send();
 

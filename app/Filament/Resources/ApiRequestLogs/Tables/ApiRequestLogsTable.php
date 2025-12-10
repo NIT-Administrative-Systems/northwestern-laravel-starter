@@ -44,7 +44,7 @@ class ApiRequestLogsTable
                     ->searchable()
                     ->hiddenOn(ApiRequestLogsRelationManager::class),
 
-                TextColumn::make('api_token.id')
+                TextColumn::make('access_token.id')
                     ->label('Token ID')
                     ->fontFamily(FontFamily::Mono)
                     ->toggleable(isToggledHiddenByDefault: true),

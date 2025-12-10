@@ -20,8 +20,8 @@ final readonly class ApiRequestContext
     /** ID of the authenticated API user (if authentication succeeded). */
     public const string USER_ID = 'api_user_id';
 
-    /** ID of the authenticated API token (if token validation succeeded). */
-    public const string TOKEN_ID = 'api_token_id';
+    /** ID of the authenticated Access Token (if token validation succeeded). */
+    public const string TOKEN_ID = 'access_token_id';
 
     /** Readable failure reason set by authentication or exception handling. */
     public const string FAILURE_REASON = 'api_failure_reason';

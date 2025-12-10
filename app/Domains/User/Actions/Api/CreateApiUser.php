@@ -6,7 +6,7 @@ namespace App\Domains\User\Actions\Api;
 
 use App\Domains\User\Enums\AffiliationEnum;
 use App\Domains\User\Enums\AuthTypeEnum;
-use App\Domains\User\Models\ApiToken;
+use App\Domains\User\Models\AccessToken;
 use App\Domains\User\Models\User;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Carbon;
@@ -64,15 +64,15 @@ readonly class CreateApiUser
                 'description' => $description,
             ]);
 
-            $user->api_tokens()->create([
+            $user->access_tokens()->create([
                 'token_prefix' => mb_substr($rawToken, 0, 5),
-                'token_hash' => ApiToken::hashFromPlain($rawToken),
+                'token_hash' => AccessToken::hashFromPlain($rawToken),
                 'valid_from' => $validFrom ?? Carbon::now()->toImmutable(),
                 'valid_to' => $validTo,
                 'allowed_ips' => $allowedIps,
             ]);
 
-            return $user->fresh('api_tokens');
+            return $user->fresh('access_tokens');
         });
 
         return [$user, $rawToken];

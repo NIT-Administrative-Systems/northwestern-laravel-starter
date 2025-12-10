@@ -41,7 +41,7 @@
 
 ## Schema & naming conventions
 
-- **Tables**: plural, `snake_case` names (`api_tokens`, `login_records`). Pivot tables follow `singular_singular` alphabetical order (`role_user`, not `user_role`).
+- **Tables**: plural, `snake_case` names (`access_tokens`, `login_records`). Pivot tables follow `singular_singular` alphabetical order (`role_user`, not `user_role`).
 - **Primary Key**: Tables should always have an `id` column as the primary key (`$table->id()`).
 - **Columns**: `snake_case`; booleans start with `is_`/`has_`, timestamps use `_at` suffix, dates use `_on` suffix.
 - **Foreign keys**: Always use `singular_id` format (`user_id`, `role_id`) when defining foreign keys. ONLY use the `foreignId()` method. NEVER chain it with `->constrained()`, `->cascadeOnDelete()`, or `->restrictOnUpdate()` - this project intentionally avoids database-level constraints.
@@ -61,7 +61,7 @@
 ```php
 public function up(): void
 {
-    Schema::create('api_tokens', function (Blueprint $table) {
+    Schema::create('access_tokens', function (Blueprint $table) {
         $table->id();
         $table->foreignId('user_id')->index();
 

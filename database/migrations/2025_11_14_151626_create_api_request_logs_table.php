@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->uuid('trace_id');
             $table->foreignId('user_id');
-            $table->foreignId('user_api_token_id')->nullable();
+            $table->foreignId('access_token_id')->nullable();
 
             $table->string('method', 10);
             $table->text('path');
@@ -30,7 +30,7 @@ return new class extends Migration
             $table->timestamp('created_at');
 
             $table->index(['user_id', 'created_at']);
-            $table->index(['user_api_token_id', 'created_at']);
+            $table->index(['access_token_id', 'created_at']);
             $table->index(['created_at', 'user_id', 'status_code']);
             $table->index(['created_at', 'path']);
         });

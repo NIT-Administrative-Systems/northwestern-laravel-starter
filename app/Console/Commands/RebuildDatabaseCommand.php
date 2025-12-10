@@ -48,13 +48,13 @@ class RebuildDatabaseCommand extends Command
 
         if (blank(config('auth.api.demo_user_token'))) {
             $this->newLine(count: 2);
-            $this->warn("The demo API user's (<options=bold;fg=magenta>api-nuit</>) default token is missing; a random value has been generated.");
+            $this->warn("The demo API user's (<options=bold;fg=magenta>api-nuit</>) default access token is missing; a random value has been generated.");
 
             $this->newLine();
             $this->warn('For predictable local testing, you should add the following to your <options=underscore>.env</> file:');
 
             $this->newLine();
-            $this->warn("\t<fg=magenta>API_DEMO_USER_TOKEN=<options=bold>your‑value‑here</></>");
+            $this->warn("\t<fg=magenta>API_DEMO_USER_ACCESS_TOKEN=<options=bold>your‑value‑here</></>");
         }
 
         $this->newLine();

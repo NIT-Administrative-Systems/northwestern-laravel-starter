@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Resources\ApiTokens\Actions;
+namespace App\Filament\Resources\AccessTokens\Actions;
 
 use App\Domains\User\Enums\PermissionEnum;
-use App\Domains\User\Models\ApiToken;
-use App\Filament\Resources\ApiTokens\Schemas\ApiTokenSchemas;
+use App\Domains\User\Models\AccessToken;
+use App\Filament\Resources\AccessTokens\Schemas\AccessTokenSchemas;
 use Filament\Actions\Action;
 use Filament\Support\Enums\Size;
 use Filament\Support\Icons\Heroicon;
 
-class RevokeApiTokenAction extends Action
+class RevokeAccessTokenAction extends Action
 {
     public static function getDefaultName(): ?string
     {
-        return 'revokeApiToken';
+        return 'revokeAccessToken';
     }
 
     protected function setUp(): void
@@ -29,15 +29,15 @@ class RevokeApiTokenAction extends Action
             ->outlined()
             ->size(Size::ExtraSmall)
             ->requiresConfirmation()
-            ->modalHeading('Revoke API Token')
+            ->modalHeading('Revoke Access Token')
             ->modalDescription('Are you sure you want to revoke this token? This action cannot be undone and should ONLY be done if the token was created in error or if credentials need to be rotated. Revoking a token in use can potentially cause a service outage for consumers.')
             ->modalSubmitActionLabel('Revoke Token')
-            ->action(function (ApiToken $record) {
+            ->action(function (AccessToken $record) {
                 $record->update([
                     'revoked_at' => now(),
                 ]);
             })
             ->successNotificationTitle('Token revoked')
-            ->visible(fn (ApiToken $record) => ApiTokenSchemas::isMutable($record));
+            ->visible(fn (AccessToken $record) => AccessTokenSchemas::isMutable($record));
     }
 }

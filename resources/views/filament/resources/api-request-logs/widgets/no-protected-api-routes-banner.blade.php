@@ -15,7 +15,7 @@
                 <p class="leading-relaxed">
                     This dashboard records traffic for routes that are protected by the
                     <code
-                          class="bg-warning-100/60 dark:bg-warning-500/20 rounded px-1.5 py-0.5 font-mono text-[0.8rem]">AuthenticatesApiTokens</code>
+                          class="bg-warning-100/60 dark:bg-warning-500/20 rounded px-1.5 py-0.5 font-mono text-[0.8rem]">AuthenticatesAccessTokens</code>
                     middleware. No matching routes have been observed in
                     <code
                           class="bg-warning-100/60 dark:bg-warning-500/20 rounded px-1.5 py-0.5 font-mono text-[0.8rem]">routes/api.php</code>.
@@ -30,7 +30,7 @@
                         <li>
                             Protect at least one route with
                             <code
-                                  class="bg-warning-100/60 dark:bg-warning-500/20 rounded px-1.5 py-0.5 font-mono text-[0.8rem]">AuthenticatesApiTokens</code>
+                                  class="bg-warning-100/60 dark:bg-warning-500/20 rounded px-1.5 py-0.5 font-mono text-[0.8rem]">AuthenticatesAccessTokens</code>
                             to begin collecting metrics.
                         </li>
                         <li>

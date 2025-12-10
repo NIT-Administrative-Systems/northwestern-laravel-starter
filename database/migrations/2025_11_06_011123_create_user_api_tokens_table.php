@@ -11,7 +11,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('user_api_tokens', static function (Blueprint $table) {
+        Schema::create('access_tokens', static function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id');
 
@@ -32,9 +32,9 @@ return new class extends Migration
 
             $table->timestamps();
 
-            $table->index(['user_id', 'last_used_at', 'valid_from', 'id'], 'user_api_tokens_user_lookup');
-            $table->index('valid_to', 'user_api_tokens_valid_to_index');
-            $table->index('last_used_at', 'user_api_tokens_last_used_at_index');
+            $table->index(['user_id', 'last_used_at', 'valid_from', 'id'], 'user_access_tokens_user_lookup');
+            $table->index('valid_to', 'user_access_tokens_valid_to_index');
+            $table->index('last_used_at', 'user_access_tokens_last_used_at_index');
         });
     }
 

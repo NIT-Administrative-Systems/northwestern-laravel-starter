@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace Database\Factories\Domains\User\Models;
 
-use App\Domains\User\Models\ApiToken;
+use App\Domains\User\Models\AccessToken;
 use App\Domains\User\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
 /**
- * @extends Factory<ApiToken>
+ * @extends Factory<AccessToken>
  */
-class ApiTokenFactory extends Factory
+class AccessTokenFactory extends Factory
 {
-    protected $model = ApiToken::class;
+    protected $model = AccessToken::class;
 
     /**
-     * @return array<model-property<ApiToken>, mixed>
+     * @return array<model-property<AccessToken>, mixed>
      */
     public function definition(): array
     {
@@ -34,7 +34,7 @@ class ApiTokenFactory extends Factory
             'revoked_at' => null,
             'rotated_from_token_id' => null,
             'rotated_by_user_id' => null,
-            'token_hash' => ApiToken::hashFromPlain($rawToken),
+            'token_hash' => AccessToken::hashFromPlain($rawToken),
             'token_prefix' => mb_substr($rawToken, 0, 5),
         ];
     }

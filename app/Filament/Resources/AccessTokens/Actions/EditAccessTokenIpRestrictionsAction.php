@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Resources\ApiTokens\Actions;
+namespace App\Filament\Resources\AccessTokens\Actions;
 
 use App\Domains\User\Enums\PermissionEnum;
-use App\Domains\User\Models\ApiToken;
-use App\Filament\Resources\ApiTokens\Schemas\ApiTokenSchemas;
+use App\Domains\User\Models\AccessToken;
+use App\Filament\Resources\AccessTokens\Schemas\AccessTokenSchemas;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TagsInput;
 use Filament\Schemas\Components\Section;
@@ -14,11 +14,11 @@ use Filament\Support\Enums\Size;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Str;
 
-class EditApiTokenIpRestrictionsAction extends Action
+class EditAccessTokenIpRestrictionsAction extends Action
 {
     public static function getDefaultName(): ?string
     {
-        return 'editApiTokenIpRestrictions';
+        return 'editAccessTokenIpRestrictions';
     }
 
     protected function setUp(): void
@@ -50,23 +50,23 @@ class EditApiTokenIpRestrictionsAction extends Action
                             ->reorderable(),
                     ]),
             ])
-            ->fillForm(fn (ApiToken $record) => [
+            ->fillForm(fn (AccessToken $record) => [
                 'allowed_ips' => $record->allowed_ips,
             ])
-            ->action(function (ApiToken $record, array $data) {
+            ->action(function (AccessToken $record, array $data) {
                 $record->update([
                     'allowed_ips' => filled($data['allowed_ips']) ? $data['allowed_ips'] : null,
                 ]);
             })
             ->successNotificationTitle('IP restrictions updated')
             ->successNotification(
-                fn (ApiToken $record) => \Filament\Notifications\Notification::make()
+                fn (AccessToken $record) => \Filament\Notifications\Notification::make()
                     ->title('IP restrictions updated')
                     ->body(filled($record->allowed_ips)
                         ? 'Token is now restricted to ' . count($record->allowed_ips) . ' IP ' . Str::plural('address', count($record->allowed_ips))
                         : 'Token now accepts requests from any IP address')
                     ->success()
             )
-            ->visible(fn (ApiToken $record) => ApiTokenSchemas::isMutable($record));
+            ->visible(fn (AccessToken $record) => AccessTokenSchemas::isMutable($record));
     }
 }

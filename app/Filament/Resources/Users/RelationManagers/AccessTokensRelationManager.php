@@ -6,10 +6,10 @@ namespace App\Filament\Resources\Users\RelationManagers;
 
 use App\Domains\User\Enums\AuthTypeEnum;
 use App\Domains\User\Models\User;
-use App\Filament\Resources\ApiTokens\Actions\CreateApiTokenAction;
-use App\Filament\Resources\ApiTokens\Actions\EditApiTokenIpRestrictionsAction;
-use App\Filament\Resources\ApiTokens\Actions\RevokeApiTokenAction;
-use App\Filament\Resources\ApiTokens\Actions\RotateApiTokenAction;
+use App\Filament\Resources\AccessTokens\Actions\CreateAccessTokenAction;
+use App\Filament\Resources\AccessTokens\Actions\EditAccessTokenIpRestrictionsAction;
+use App\Filament\Resources\AccessTokens\Actions\RevokeAccessTokenAction;
+use App\Filament\Resources\AccessTokens\Actions\RotateAccessTokenAction;
 use Filament\Actions\ActionGroup;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -23,11 +23,11 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * @property User $ownerRecord
  */
-class ApiTokensRelationManager extends RelationManager
+class AccessTokensRelationManager extends RelationManager
 {
-    protected static string $relationship = 'api_tokens';
+    protected static string $relationship = 'access_tokens';
 
-    protected static ?string $title = 'API Tokens';
+    protected static ?string $title = 'Access Tokens';
 
     public function isReadOnly(): bool
     {
@@ -43,14 +43,14 @@ class ApiTokensRelationManager extends RelationManager
     public static function getTabComponent(Model $ownerRecord, string $pageClass): Tab
     {
         /** @var User $ownerRecord */
-        return Tab::make('API Tokens')
+        return Tab::make('Access Tokens')
             ->icon(Heroicon::OutlinedKey);
     }
 
     protected function getTableHeaderActions(): array
     {
         return [
-            CreateApiTokenAction::make(),
+            CreateAccessTokenAction::make(),
         ];
     }
 
@@ -114,9 +114,9 @@ class ApiTokensRelationManager extends RelationManager
             ])
             ->recordActions([
                 ActionGroup::make([
-                    RotateApiTokenAction::make(),
-                    EditApiTokenIpRestrictionsAction::make(),
-                    RevokeApiTokenAction::make(),
+                    RotateAccessTokenAction::make(),
+                    EditAccessTokenIpRestrictionsAction::make(),
+                    RevokeAccessTokenAction::make(),
                 ])->label('Actions')->button(),
             ])
             ->paginated(false);
