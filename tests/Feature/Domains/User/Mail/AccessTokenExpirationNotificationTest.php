@@ -31,7 +31,7 @@ class AccessTokenExpirationNotificationTest extends TestCase
         $user = User::factory()->make();
 
         $expirationDate = now()->addDays(5);
-        $token = AccessToken::factory()->make(['valid_to' => $expirationDate]);
+        $token = AccessToken::factory()->make(['name' => 'Expiring Token', 'expires_at' => $expirationDate]);
 
         $mailable = new AccessTokenExpirationNotification($user, $token, 5);
 

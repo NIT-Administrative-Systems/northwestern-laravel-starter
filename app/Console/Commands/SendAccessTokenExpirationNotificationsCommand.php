@@ -81,12 +81,12 @@ class SendAccessTokenExpirationNotificationsCommand extends Command
                     ->where('email', '!=', config('mail.from.address'));
             })
             ->whereNull('revoked_at')
-            ->whereNotNull('valid_to')
-            ->whereBetween('valid_to', [
+            ->whereNotNull('expires_at')
+            ->whereBetween('expires_at', [
                 $targetDate->copy()->startOfDay(),
                 $targetDate->copy()->endOfDay(),
             ])
-            ->where('valid_to', '>', $now)
+            ->where('expires_at', '>', $now)
             // Either never notified, or last notified more than 24 hours ago
             // This prevents spam if the command runs multiple times per day
             ->where(function ($query) use ($now) {

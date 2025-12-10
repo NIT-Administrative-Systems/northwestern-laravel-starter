@@ -9,7 +9,6 @@ use App\Domains\User\Enums\AuthTypeEnum;
 use App\Domains\User\Models\AccessToken;
 use App\Domains\User\Models\User;
 use Carbon\CarbonInterface;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -26,20 +25,20 @@ readonly class CreateApiUser
      *
      * @param  string  $username  The username for the API user (should be prefixed with 'api-')
      * @param  string  $firstName  The display label for this API user (will be suffixed with 'API')
+     * @param  string  $tokenName  Descriptive name for the initial access token
      * @param  string|null  $description  Optional description of the API user's purpose
      * @param  string|null  $email  Optional contact email for expiration notifications
-     * @param  CarbonInterface|null  $validFrom  When the token becomes valid (defaults to now)
-     * @param  CarbonInterface|null  $validTo  When the token expires (null for indefinite)
+     * @param  CarbonInterface|null  $expiresAt  When the token expires (null for no expiration)
      * @param  array<int, string>|null  $allowedIps  Optional list of allowed IP addresses or CIDR ranges
      * @return array{0: User, 1: string} The created user and the raw Bearer token
      */
     public function __invoke(
         string $username,
         string $firstName,
+        string $tokenName,
         ?string $description = null,
         ?string $email = null,
-        ?CarbonInterface $validFrom = null,
-        ?CarbonInterface $validTo = null,
+        ?CarbonInterface $expiresAt = null,
         ?array $allowedIps = null,
     ): array {
         $rawToken = Str::random(length: 64);
@@ -47,10 +46,10 @@ readonly class CreateApiUser
         $user = DB::transaction(static function () use (
             $username,
             $firstName,
+            $tokenName,
             $description,
             $email,
-            $validFrom,
-            $validTo,
+            $expiresAt,
             $allowedIps,
             $rawToken
         ) {
@@ -65,10 +64,10 @@ readonly class CreateApiUser
             ]);
 
             $user->access_tokens()->create([
+                'name' => $tokenName,
                 'token_prefix' => mb_substr($rawToken, 0, 5),
                 'token_hash' => AccessToken::hashFromPlain($rawToken),
-                'valid_from' => $validFrom ?? Carbon::now()->toImmutable(),
-                'valid_to' => $validTo,
+                'expires_at' => $expiresAt,
                 'allowed_ips' => $allowedIps,
             ]);
 

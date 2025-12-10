@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace App\Filament\Resources\AccessTokens\Schemas;
 
 use App\Domains\User\Enums\AccessTokenStatusEnum;
+use App\Domains\User\Enums\TokenExpirationEnum;
 use App\Domains\User\Models\AccessToken;
-use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Filament\Actions\Action;
-use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TagsInput;
+use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\CodeEntry;
 use Filament\Infolists\Components\ViewEntry;
 use Filament\Schemas\Components\Section;
@@ -18,6 +19,7 @@ use Filament\Schemas\Components\Wizard;
 use Filament\Support\Enums\IconPosition;
 use Filament\Support\Enums\IconSize;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\HtmlString;
 use Phiki\Grammar\Grammar;
 
 /**
@@ -46,20 +48,49 @@ class AccessTokenSchemas
     public static function tokenConfigurationSection(): Section
     {
         return Section::make()
-            ->columns()
+            ->columns(2)
             ->schema([
-                DatePicker::make('valid_from')
-                    ->label('Valid From')
-                    ->required()
-                    ->native(false)
-                    ->default(fn () => now()->timezone(auth()->user()->timezone)->startOfDay())
-                    ->minDate(fn () => now()->timezone(auth()->user()->timezone)->startOfDay()),
+                TextInput::make('name')
+                    ->label('Name')
+                    ->default(function ($record) {
+                        if ($record instanceof AccessToken) {
+                            return $record->name;
+                        }
 
-                DatePicker::make('valid_to')
-                    ->label('Valid To')
-                    ->placeholder('Indefinite')
-                    ->native(false)
-                    ->minDate(fn (callable $get) => $get('valid_from')),
+                        return null;
+                    })
+                    ->placeholder('e.g., Apigee Access Token')
+                    ->required()
+                    ->maxLength(255),
+
+                Select::make('expiration')
+                    ->label('Expiration')
+                    ->options(TokenExpirationEnum::class)
+                    ->placeholder('Select Date')
+                    ->required()
+                    ->live()
+                    ->helperText(function ($state) {
+                        if (blank($state)) {
+                            return null;
+                        }
+
+                        $expiration = $state instanceof TokenExpirationEnum
+                            ? $state
+                            : TokenExpirationEnum::tryFrom($state);
+
+                        if (! $expiration) {
+                            return null;
+                        }
+
+                        if ($expiration === TokenExpirationEnum::NEVER) {
+                            return new HtmlString('<span class="text-warning-600 dark:text-warning-400">This token will never expire.</span>');
+                        }
+
+                        $expiresAt = $expiration->expiresAt();
+                        $formattedDate = $expiresAt?->format('F j, Y');
+
+                        return new HtmlString("This token will expire on <strong class=\"text-black dark:text-white\">{$formattedDate}</strong>.");
+                    }),
 
                 TagsInput::make('allowed_ips')
                     ->label('Allowed IP Addresses')
@@ -82,31 +113,30 @@ class AccessTokenSchemas
     }
 
     /**
-     * Normalize token validity and IP restriction values from a {@see Wizard} step state.
+     * Normalize token configuration values from a {@see Wizard} step state.
      *
-     * This helper converts raw form values into concrete {@see CarbonInterface} instances
-     * in the authenticated user's timezone and normalizes IP data to a consistent format.
+     * This helper extracts the name, converts the selected {@see TokenExpirationEnum} into a concrete
+     * {@see CarbonInterface} expiration date (or null for no expiration), and normalizes
+     * IP data to a consistent format.
      *
      * @param  array{
-     *     valid_from: mixed,
-     *     valid_to?: mixed|null,
+     *     name: string,
+     *     expiration: TokenExpirationEnum|int,
      *     allowed_ips?: array<int,string>|null
      * }  $state
      * @return array{
-     *     valid_from: CarbonInterface,
-     *     valid_to: CarbonInterface|null,
+     *     name: string,
+     *     expires_at: CarbonInterface|null,
      *     allowed_ips: array<int,string>|null
      * }
      */
     public static function normalizeConfigurationState(array $state): array
     {
-        $userTimezone = auth()->user()->timezone;
+        $expiration = $state['expiration'] instanceof TokenExpirationEnum
+            ? $state['expiration']
+            : TokenExpirationEnum::from((int) $state['expiration']);
 
-        $validFrom = Carbon::parse($state['valid_from'], $userTimezone)->startOfDay();
-
-        $validTo = filled($state['valid_to'] ?? null)
-            ? Carbon::parse($state['valid_to'], $userTimezone)->endOfDay()
-            : null;
+        $expiresAt = $expiration->expiresAt();
 
         /** @var array<int,string>|null $allowedIps */
         $allowedIps = filled($state['allowed_ips'] ?? null)
@@ -114,8 +144,8 @@ class AccessTokenSchemas
             : null;
 
         return [
-            'valid_from' => $validFrom,
-            'valid_to' => $validTo,
+            'name' => $state['name'],
+            'expires_at' => $expiresAt,
             'allowed_ips' => $allowedIps,
         ];
     }
@@ -137,7 +167,7 @@ class AccessTokenSchemas
             ->icon(Heroicon::OutlinedExclamationTriangle)
             ->iconColor('warning')
             ->iconSize(IconSize::Large)
-            ->description('This token will not be shown again. Make sure to copy it now.')
+            ->description(new HtmlString('Please copy your token and store it securely.<br><strong class="text-black dark:text-white">For security reasons, it will not be shown again.</strong>'))
             ->schema([
                 CodeEntry::make('token')
                     ->label('Bearer Token')
@@ -200,15 +230,11 @@ class AccessTokenSchemas
     /**
      * Determine whether an Access Token is still mutable (e.g. may be rotated or revoked).
      *
-     * A token is considered mutable while it is in either the PENDING or ACTIVE state.
+     * A token is considered mutable while it is in the ACTIVE state.
      */
     public static function isMutable(AccessToken $token): bool
     {
-        return in_array(
-            $token->status,
-            [AccessTokenStatusEnum::PENDING, AccessTokenStatusEnum::ACTIVE],
-            true,
-        );
+        return $token->status === AccessTokenStatusEnum::ACTIVE;
     }
 
     /**

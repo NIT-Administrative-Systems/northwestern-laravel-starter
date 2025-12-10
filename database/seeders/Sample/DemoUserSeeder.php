@@ -85,6 +85,7 @@ class DemoUserSeeder extends Seeder
         User::factory()
             ->api()
             ->has(AccessToken::factory()->state([
+                'name' => 'Demo Access Token',
                 'token_prefix' => mb_substr($rawToken, 0, 5),
                 'token_hash' => AccessToken::hashFromPlain($rawToken),
             ]), 'access_tokens')

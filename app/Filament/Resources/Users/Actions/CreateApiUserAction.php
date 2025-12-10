@@ -124,10 +124,10 @@ class CreateApiUserAction extends Action
                         [$user, $token] = $createApiUser(
                             username: $username,
                             firstName: $state['first_name'],
+                            tokenName: $configuration['name'],
                             description: $state['description'] ?? null,
                             email: $state['email'] ?? null,
-                            validFrom: $configuration['valid_from'],
-                            validTo: $configuration['valid_to'],
+                            expiresAt: $configuration['expires_at'],
                             allowedIps: $configuration['allowed_ips'],
                         );
 

@@ -25,8 +25,8 @@ class AccessTokenFactory extends Factory
 
         return [
             'user_id' => User::factory(),
-            'valid_from' => now(),
-            'valid_to' => now()->addDays(90),
+            'name' => fake()->words(3, asText: true),
+            'expires_at' => now()->addDays(90),
             'allowed_ips' => null,
             'usage_count' => 0,
             'last_used_at' => null,

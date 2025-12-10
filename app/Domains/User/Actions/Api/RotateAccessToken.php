@@ -25,26 +25,26 @@ readonly class RotateAccessToken
      * Rotate the provided Access Token.
      *
      * @param  AccessToken  $previousAccessToken  The token being rotated.
+     * @param  string  $name  Descriptive name for the new token
      * @param  User|null  $rotatedBy  The user performing the rotation. Defaults to the current authenticated user.
-     * @param  CarbonInterface|null  $validFrom  When the replacement token becomes valid.
-     * @param  CarbonInterface|null  $validTo  When the replacement token expires (null = indefinite).
+     * @param  CarbonInterface|null  $expiresAt  When the replacement token expires (null = no expiration).
      * @param  array<int, string>|null  $allowedIps  Optional IP restrictions for the replacement token.
      * @return string The raw Bearer token string that must be shown to the operator.
      */
     public function __invoke(
         AccessToken $previousAccessToken,
+        string $name,
         ?User $rotatedBy = null,
-        ?CarbonInterface $validFrom = null,
-        ?CarbonInterface $validTo = null,
+        ?CarbonInterface $expiresAt = null,
         ?array $allowedIps = null,
     ): string {
         $rotatedBy ??= Auth::user();
 
-        return DB::transaction(function () use ($previousAccessToken, $validFrom, $validTo, $allowedIps, $rotatedBy) {
+        return DB::transaction(function () use ($previousAccessToken, $name, $expiresAt, $allowedIps, $rotatedBy) {
             [$rawToken, $newAccessToken] = ($this->issueAccessToken)(
                 user: $previousAccessToken->user,
-                validFrom: $validFrom ?: Carbon::now(),
-                validTo: $validTo ?? null,
+                name: $name,
+                expiresAt: $expiresAt ?? null,
                 allowedIps: $allowedIps ?? null,
             );
 

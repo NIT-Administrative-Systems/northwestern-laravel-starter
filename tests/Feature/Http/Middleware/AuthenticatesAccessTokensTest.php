@@ -60,10 +60,10 @@ class AuthenticatesAccessTokensTest extends TestCase
         unset($overrides['plain_token']);
 
         $attributes = array_merge([
+            'name' => 'Test Token',
             'token_prefix' => mb_substr((string) $plainToken, 0, 5),
             'token_hash' => AccessToken::hashFromPlain($plainToken),
-            'valid_from' => $this->testTime->subMinute(),
-            'valid_to' => null,
+            'expires_at' => null,
             'allowed_ips' => null,
         ], $overrides);
 
@@ -204,16 +204,9 @@ class AuthenticatesAccessTokensTest extends TestCase
         $now = CarbonImmutable::parse('2025-05-16 09:00');
 
         return [
-            'pending token' => [
-                [
-                    'valid_from' => $now->addHour(),
-                    'valid_to' => null,
-                ],
-            ],
             'expired token' => [
                 [
-                    'valid_from' => $now->subDays(2),
-                    'valid_to' => $now->subDay(),
+                    'expires_at' => $now->subDay(),
                 ],
             ],
             'revoked token' => [
@@ -250,7 +243,7 @@ class AuthenticatesAccessTokensTest extends TestCase
     {
         $user = User::factory()->api()->create();
         [$plainToken, $token] = $this->issueToken($user, [
-            'valid_to' => $this->testTime->addDays(10),
+            'expires_at' => $this->testTime->addDays(10),
         ]);
 
         $this->getJson(

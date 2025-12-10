@@ -19,6 +19,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\HtmlString;
 
 /**
  * @property User $ownerRecord
@@ -57,11 +58,16 @@ class AccessTokensRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('id')
+            ->recordTitleAttribute('name')
             ->columns([
                 TextColumn::make('id')
                     ->label('ID')
-                    ->fontFamily(FontFamily::Mono),
+                    ->fontFamily(FontFamily::Mono)
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('name')
+                    ->label('Name')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('rotated_from_token.id')
                     ->label('Rotated From')
                     ->fontFamily(FontFamily::Mono)
@@ -89,13 +95,10 @@ class AccessTokensRelationManager extends RelationManager
                     ->label('Uses')
                     ->tooltip('Total successful requests made with the token')
                     ->numeric(),
-                TextColumn::make('valid_from')
-                    ->label('Valid From')
-                    ->dateTime(),
-                TextColumn::make('valid_to')
-                    ->label('Valid To')
-                    ->placeholder('Indefinite')
-                    ->dateTime(),
+                TextColumn::make('expires_at')
+                    ->label('Expires')
+                    ->placeholder(new HtmlString('<span class="text-warning-600 dark:text-warning-400">Never</span>'))
+                    ->dateTime('F j, Y'),
                 TextColumn::make('allowed_ips')
                     ->label('IP Restrictions')
                     ->badge()

@@ -41,7 +41,7 @@ class AccessTokenExpirationNotification extends Mailable implements ShouldQueue
                 'user' => $this->user,
                 'token' => $this->token,
                 'daysUntilExpiration' => $this->daysUntilExpiration,
-                'expirationDate' => $this->token->valid_to?->format('F j, Y \a\t g:i A T'),
+                'expirationDate' => $this->token->expires_at?->format('F j, Y \a\t g:i A T'),
             ],
         );
     }

@@ -33,10 +33,10 @@ class CreateApiUserTest extends TestCase
         [$user, $token] = $action(
             username: 'api-service',
             firstName: 'My Service',
+            tokenName: 'Production Server',
             description: 'Test description',
             email: 'api@example.com',
-            validFrom: now()->addHour(),
-            validTo: now()->addDays(7),
+            expiresAt: now()->addDays(7),
             allowedIps: ['127.0.0.1']
         );
 
@@ -50,10 +50,10 @@ class CreateApiUserTest extends TestCase
 
         $accessToken = $user->access_tokens->first();
         $this->assertInstanceOf(AccessToken::class, $accessToken);
+        $this->assertSame('Production Server', $accessToken->name);
         $this->assertSame(mb_substr($token, 0, 5), $accessToken->token_prefix);
         $this->assertSame(AccessToken::hashFromPlain($token), $accessToken->token_hash);
-        $this->assertEquals(now()->addHour()->startOfSecond(), $accessToken->valid_from->startOfSecond());
-        $this->assertEquals(now()->addDays(7)->startOfSecond(), $accessToken->valid_to->startOfSecond());
+        $this->assertEquals(now()->addDays(7)->startOfSecond(), $accessToken->expires_at->startOfSecond());
         $this->assertSame(['127.0.0.1'], $accessToken->allowed_ips);
     }
 
@@ -63,7 +63,8 @@ class CreateApiUserTest extends TestCase
 
         [$user, $token] = $action(
             username: 'api-default',
-            firstName: 'Default Service'
+            firstName: 'Default Service',
+            tokenName: 'Default Token'
         );
 
         $this->assertSame('api-default', $user->username);
@@ -73,8 +74,7 @@ class CreateApiUserTest extends TestCase
         $this->assertNull($user->email);
 
         $accessToken = $user->access_tokens->first();
-        $this->assertEquals(now()->startOfSecond(), $accessToken->valid_from->startOfSecond());
-        $this->assertNull($accessToken->valid_to);
+        $this->assertNull($accessToken->expires_at);
         $this->assertNull($accessToken->allowed_ips);
     }
 }
