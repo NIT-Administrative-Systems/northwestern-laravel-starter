@@ -88,6 +88,7 @@ class DemoUserSeeder extends Seeder
                 'name' => 'Demo Access Token',
                 'token_prefix' => mb_substr($rawToken, 0, 5),
                 'token_hash' => AccessToken::hashFromPlain($rawToken),
+                'expires_at' => null,
             ]), 'access_tokens')
             ->state([
                 'username' => 'api-nuit',
