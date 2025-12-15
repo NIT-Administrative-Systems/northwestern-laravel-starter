@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Api\V1\AccessTokenApiController;
+use App\Http\Controllers\Api\V1\UserApiController;
 use App\Http\Middleware\AuthenticatesAccessTokens;
 use App\Http\Middleware\EnsureApiEnabled;
 use App\Http\Middleware\LogsApiRequests;
@@ -28,7 +30,13 @@ Route::middleware([EnsureApiEnabled::class])->group(function () {
 */
 
 Route::middleware([EnsureApiEnabled::class, LogsApiRequests::class, AuthenticatesAccessTokens::class])->group(function () {
-    //
+    Route::prefix('v1')->group(function () {
+        Route::get('me', [UserApiController::class, 'me']);
+        Route::get('me/tokens', [AccessTokenApiController::class, 'index']);
+        Route::post('me/tokens', [AccessTokenApiController::class, 'store']);
+        Route::get('me/tokens/{token}', [AccessTokenApiController::class, 'show']);
+        Route::delete('me/tokens/{token}', [AccessTokenApiController::class, 'destroy']);
+    });
 });
 
 /*
