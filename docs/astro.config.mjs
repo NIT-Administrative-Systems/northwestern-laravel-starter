@@ -3,6 +3,8 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import starlightLinksValidator from 'starlight-links-validator';
 import mermaid from 'astro-mermaid';
+import starlightOpenAPI, { openAPISidebarGroups } from 'starlight-openapi';
+
 
 // https://astro.build/config
 export default defineConfig({
@@ -27,33 +29,50 @@ export default defineConfig({
                 '@fontsource/poppins/400.css',
                 '@fontsource/poppins/600.css',
             ],
-			social: {
-				github: 'https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter',
-			},
-			sidebar: [
+			social: [
+                { label: 'GitHub', icon: 'github', href: 'https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter' },
+            ],
+            sidebar: [
                 {
-                    label: 'Getting Started',
+                    label: '🚀 Getting Started',
                     autogenerate: { directory: 'getting-started' },
                 },
                 {
-                    label: 'Architecture',
+                    label: '🏗️ Architecture',
                     autogenerate: { directory: 'architecture' },
                 },
                 {
-                    label: 'Features',
+                    label: '✨ Features',
                     autogenerate: { directory: 'features' },
                 },
                 {
-                    label: 'Guides',
+                    label: '📖 Guides',
                     autogenerate: { directory: 'guides' },
                 },
                 {
-                    label: 'Reference',
+                    label: '📋 Reference',
                     autogenerate: { directory: 'reference' },
-                }
-			],
+                },
+                ...openAPISidebarGroups,
+            ],
             plugins: [
-                starlightLinksValidator(),
+                starlightOpenAPI([
+                    {
+                        base: 'api',
+                        schema: './schemas/api-schema.yaml',
+                        sidebar: {
+                            label: '📘 API Specification',
+                          operations: {
+                              badges: true,
+                          }
+                        },
+                    }
+                ]),
+                starlightLinksValidator({
+                    exclude: [
+                        '/api/**',
+                    ],
+                }),
             ]
 		}),
 	],

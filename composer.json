@@ -35,7 +35,8 @@
         "spatie/laravel-db-snapshots": "^2.7",
         "spatie/laravel-health": "^1.34",
         "spatie/laravel-permission": "^6.16",
-        "spatie/security-advisories-health-check": "^1.3"
+        "spatie/security-advisories-health-check": "^1.3",
+        "zircote/swagger-php": "^5.7"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^3.5.5",
@@ -97,6 +98,8 @@
         "format:php": "vendor/bin/pint --ansi",
         "format:frontend": "pnpm run format",
         "analyse:php": "vendor/bin/phpstan analyse --memory-limit=2G",
+        "openapi:generate": "@php ./vendor/bin/openapi app/",
+        "openapi:generate:v1": "@composer openapi:generate -- --exclude app/Http/Controllers/Api/V2 --output docs/schemas/api-schema.yaml",
         "ide-helper:generate": [
             "@php artisan ide-helper:generate",
             "@php artisan ide-helper:meta",

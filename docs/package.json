@@ -8,13 +8,14 @@
         "start": "astro dev"
     },
     "dependencies": {
-        "@astrojs/starlight": "^0.32.6",
+        "@astrojs/starlight": "^0.37.1",
         "@fontsource/poppins": "^5.2.7",
-        "astro": "^5.15.2",
+        "astro": "^5.16.5",
         "astro-mermaid": "^1.2.0",
         "mermaid": "^11.12.2",
         "sharp": "^0.34.4",
-        "starlight-links-validator": "^0.14.3"
+        "starlight-links-validator": "^0.14.3",
+        "starlight-openapi": "^0.21.1"
     },
     "engines": {
         "node": ">= 24.0.0",

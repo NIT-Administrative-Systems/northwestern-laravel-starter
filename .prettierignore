@@ -16,6 +16,7 @@ storage/debugbar
 database/snapshots
 
 docs/.astro/
+docs/dist/
 
 .github/actions
 .github/workflows

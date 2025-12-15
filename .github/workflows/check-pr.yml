@@ -154,6 +154,16 @@ jobs:
     runs-on: ubuntu-latest
     environment: ci-cd
     timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: root
+          POSTGRES_DB: root
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
       - name: 📂 Checkout Repository
@@ -206,6 +216,10 @@ jobs:
       - name: ✨ Run Prettier
         run: composer format:frontend
 
+      - name: 📄 Regenerate OpenAPI Schemas
+        run: |
+          composer openapi:generate:v1
+
       - name: ❌ Remove Debug Code from Tests
         run: |
           # Remove it.only() from Cypress tests
@@ -235,6 +249,9 @@ jobs:
             done
           fi
 
+      - name: 🔄 Restore IDE Helper Annotations
+        run: git restore 'app/Domains/*/Models/*.php'
+
       - name: 🔍 Check for Uncommitted Changes
         id: file-changes
         run: echo "changes=$(if git diff --quiet; then echo 'false'; else echo 'true'; fi)" >> $GITHUB_OUTPUT
@@ -244,7 +261,7 @@ jobs:
         run: |
           git config --global user.name "ADOES Bot"
           git config --global user.email "DL_NUIT_ET_SysDev@e.northwestern.edu"
-          git commit -a -m "Apply code style changes"
+          git commit -a -m "style: apply automated formatting"
           git push
           exit 1
 
@@ -255,6 +272,16 @@ jobs:
     runs-on: ubuntu-latest
     environment: ci-cd
     timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: root
+          POSTGRES_DB: root
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
       - name: 📂 Checkout Repository
@@ -307,9 +334,9 @@ jobs:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: test
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: root
+          POSTGRES_DB: root
         ports:
           - 5432:5432
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
@@ -404,9 +431,9 @@ jobs:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: test
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: root
+          POSTGRES_DB: root
         ports:
           - 5432:5432
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5

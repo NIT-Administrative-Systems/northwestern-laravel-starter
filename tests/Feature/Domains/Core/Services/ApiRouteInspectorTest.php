@@ -14,6 +14,12 @@ use Tests\TestCase;
 #[CoversClass(ApiRouteInspector::class)]
 class ApiRouteInspectorTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Route::setRoutes(new RouteCollection());
+    }
+
     protected function tearDown(): void
     {
         Route::setRoutes(new RouteCollection());
