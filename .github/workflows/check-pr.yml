@@ -158,8 +158,8 @@ jobs:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: root
           POSTGRES_DB: test
         ports:
           - 5432:5432
@@ -206,14 +206,6 @@ jobs:
           restore-keys: |
             prettier-${{ hashFiles('package.json', 'pnpm-lock.yaml', '.prettierrc') }}-
             prettier-
-
-      - name: 🧹 Clear Bootstrap Cache
-        run: |
-          php artisan config:clear
-          php artisan cache:clear
-          rm -rf /tmp/phpstan
-          grep "DB_USERNAME" .env || echo "ERROR: DB_USERNAME not found in .env"
-          grep "DB_PASSWORD" .env || echo "ERROR: DB_PASSWORD not found in .env"
 
       - name: 🔧️ Run Rector
         run: composer rector
@@ -277,8 +269,8 @@ jobs:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: root
           POSTGRES_DB: test
         ports:
           - 5432:5432
@@ -335,8 +327,8 @@ jobs:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: root
           POSTGRES_DB: test
         ports:
           - 5432:5432
