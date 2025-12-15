@@ -3,7 +3,7 @@ title: API System
 description: Complete guide to the Access Token system and features
 ---
 
-import { Aside, Steps } from '@astrojs/starlight/components';
+import { Aside, Steps, Badge } from '@astrojs/starlight/components';
 
 The starter includes a comprehensive API system designed for secure, monitored programmatic access to your application. The system provides token-based authentication, IP allowlisting, request logging, and detailed analytics.
 
@@ -15,6 +15,19 @@ If your application does not require an API, you can disable the entire feature 
 API_ENABLED=false
 ```
 </Aside>
+
+## Default API Routes
+
+The starter ships with a minimal set of API endpoints to support access token management and viewing user information. They live in `routes/api.php` and can be removed or extended as needed.
+
+- <Badge text="GET" variant="note" /> `/api/health` — Unauthenticated health check, exposed when `API_ENABLED=true`
+- <Badge text="GET" variant="note" /> `/api/v1/me` — Returns the authenticated API user profile
+- <Badge text="GET" variant="note" /> `/api/v1/me/tokens` — Paginated list of the user’s access tokens
+- <Badge text="POST" variant="success" /> `/api/v1/me/tokens` — Create a new access token
+- <Badge text="GET" variant="note" /> `/api/v1/me/tokens/{token}` — Fetch a single access token
+- <Badge text="DELETE" variant="danger" /> `/api/v1/me/tokens/{token}` — Revoke an access token
+
+If your project does not need these defaults, delete or adjust the corresponding routes in `routes/api.php`.
 
 ## Core Concepts
 
