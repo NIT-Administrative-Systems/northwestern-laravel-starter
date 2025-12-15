@@ -110,7 +110,7 @@ runs:
         php artisan migrate --force
         php artisan ide-helper:generate
         php artisan ide-helper:meta
-        php artisan ide-helper:models -N
+        php artisan ide-helper:models --write --reset
 
     - name: 🏗️ Build Frontend Assets
       if: ${{ inputs.docs-only != 'true' && inputs['build-frontend-assets'] == 'true' }}

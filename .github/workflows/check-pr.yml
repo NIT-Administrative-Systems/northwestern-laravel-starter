@@ -245,6 +245,9 @@ jobs:
             done
           fi
 
+      - name: 🔄 Restore IDE Helper Annotations
+        run: git restore 'app/Domains/*/Models/*.php'
+
       - name: 🔍 Check for Uncommitted Changes
         id: file-changes
         run: echo "changes=$(if git diff --quiet; then echo 'false'; else echo 'true'; fi)" >> $GITHUB_OUTPUT

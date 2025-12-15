@@ -11,8 +11,6 @@ parameters:
         - database
         - config
         - tests
-        - _ide_helper_models.php
-        - _ide_helper.php
     level: 5
     editorUrl: 'phpstorm://open?file=%%file%%&line=%%line%%'
     tmpDir: /tmp/phpstan
