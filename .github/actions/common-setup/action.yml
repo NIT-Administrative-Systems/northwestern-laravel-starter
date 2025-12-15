@@ -107,6 +107,7 @@ runs:
       run: |
         cp .env.ci .env
         php artisan key:generate
+        php artisan migrate --force
         php artisan ide-helper:generate
         php artisan ide-helper:meta
         php artisan ide-helper:models -N
