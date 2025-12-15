@@ -68,7 +68,11 @@ export default defineConfig({
                         },
                     }
                 ]),
-                starlightLinksValidator(),
+                starlightLinksValidator({
+                    exclude: [
+                        '/api/**',
+                    ],
+                }),
             ]
 		}),
 	],
