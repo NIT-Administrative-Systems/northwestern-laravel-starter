@@ -397,15 +397,15 @@ components:
           id: 23145
           name: 'CI Deployments'
           status: active
-          last_used_at: '2024-04-11T14:35:05Z'
+          last_used_at: null
           usage_count: 0
-          expires_at: '2024-12-31T06:00:00Z'
-          created_at: '2024-03-01T18:11:00Z'
+          expires_at: null
+          created_at: '2025-03-01T18:11:00Z'
           allowed_ips:
             - 10.0.0.0/24
             - 203.0.113.12
         meta:
-          bearer_token: atkn_0zHQdCxFQYkz9O5qckK8v1F2c6kP2U7o
+          bearer_token: YiRqNBToe7EIXAnmtCB3a9gAwHNh0xXZUX3A9zARG5CWKUcDhRn4U9qGcG3q7TwB
           message: 'Token generated successfully. Store the bearer token immediately; it will not be shown again.'
     AccessTokenPage:
       required:
@@ -524,10 +524,10 @@ components:
             - application-admin
             - application-role
             - api-integration
-          example: application-role
+          example: api-integration
         label:
           type: string
-          example: 'Application Role'
+          example: 'API Integration'
       type: object
     Role:
       required:
@@ -550,12 +550,12 @@ components:
         created_at:
           type: string
           format: date-time
-          example: '2024-01-15T18:00:00Z'
+          example: '2025-01-15T18:00:00Z'
           nullable: true
         updated_at:
           type: string
           format: date-time
-          example: '2024-04-21T12:05:23Z'
+          example: '2025-04-21T12:05:23Z'
           nullable: true
         permissions:
           description: 'Included when permissions are eager loaded.'
@@ -596,17 +596,17 @@ components:
           example: api
         first_name:
           type: string
-          example: Willie
+          example: NUIT
         last_name:
           type: string
-          example: Wildcat
+          example: API
         full_name:
           type: string
-          example: 'Willie Wildcat'
+          example: 'NUIT API'
         email:
           type: string
           format: email
-          example: willie.wildcat@example.edu
+          example: nuit.api@example.edu
         primary_affiliation:
           description: 'Primary Northwestern affiliation for the user.'
           type: string
@@ -616,7 +616,7 @@ components:
             - staff
             - affiliate
             - not-matched
-          example: staff
+          example: not-matched
           nullable: true
         departments:
           type: array
@@ -659,19 +659,35 @@ components:
           id: 1
           username: waw1234
           auth_type: api
-          first_name: Willie
-          last_name: Wildcat
-          full_name: 'Willie Wildcat'
-          email: willie.wildcat@example.edu
-          primary_affiliation: staff
-          departments:
-            - 'IT Services'
-            - 'Information Security'
-          job_titles:
-            - 'Systems Administrator'
-          created_at: '2023-11-06T15:20:00Z'
-          updated_at: '2024-04-09T18:45:10Z'
-          roles: []
+          first_name: NUIT
+          last_name: API
+          full_name: 'NUIT API'
+          email: null
+          primary_affiliation: not-matched
+          departments: []
+          job_titles: []
+          created_at: '2025-11-06T15:20:00+00:00'
+          updated_at: '2025-04-09T18:45:10+00:00'
+          roles:
+            -
+              id: 1
+              name: 'API Role'
+              role_type:
+                slug: api-integration
+                label: 'API Integration'
+              created_at: '2025-11-06T15:20:00+00:00'
+              updated_at: '2025-11-06T15:20:00+00:00'
+              permissions:
+                -
+                  id: 1
+                  name: view-users
+                  label: 'View Users'
+                  description: 'Allows viewing all user profiles and their details.'
+                  scope: system-wide
+                  system_managed: false
+                  api_relevant: true
+                  created_at: '2025-11-06T15:20:00+00:00'
+                  updated_at: '2025-11-06T15:20:00+00:00'
     ProblemDetails:
       description: 'Standard RFC 9457 problem details envelope.'
       required:
