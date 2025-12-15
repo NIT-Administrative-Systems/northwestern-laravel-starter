@@ -8,6 +8,7 @@ use App\Domains\Core\ValueObjects\ApiRequestContext;
 use App\Domains\User\Models\ApiRequestLog;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Context;
+use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -15,6 +16,49 @@ use Symfony\Component\HttpFoundation\Response;
  *
  * @see https://datatracker.ietf.org/doc/html/rfc9457
  */
+#[OA\Schema(
+    schema: 'ProblemDetails',
+    description: 'Standard RFC 9457 problem details envelope.',
+    required: ['type', 'title', 'status', 'instance'],
+    properties: [
+        new OA\Property(property: 'type', type: 'string', format: 'uri', example: 'about:blank'),
+        new OA\Property(property: 'title', type: 'string', example: 'Unauthorized'),
+        new OA\Property(property: 'status', type: 'integer', example: 401),
+        new OA\Property(property: 'detail', type: 'string', example: 'Authentication failed', nullable: true),
+        new OA\Property(property: 'instance', type: 'string', format: 'uri-reference', example: '/api/v1/me'),
+        new OA\Property(
+            property: 'trace_id',
+            description: 'Unique identifier for the API request (if available).',
+            type: 'string',
+            example: 'b4f5aa7a-1470-4d92-8d3c-98e7c7de9f5f',
+            nullable: true
+        ),
+    ],
+    type: 'object'
+)]
+#[OA\Schema(
+    schema: 'ValidationProblemDetails',
+    allOf: [
+        new OA\Schema(ref: '#/components/schemas/ProblemDetails'),
+        new OA\Schema(
+            properties: [
+                new OA\Property(
+                    property: 'errors',
+                    description: 'Validation errors keyed by input field.',
+                    type: 'object',
+                    example: [
+                        'name' => ['The name field is required.'],
+                        'expires_at' => ['The expires at must be at least 24 hours from now.'],
+                    ],
+                    additionalProperties: new OA\AdditionalProperties(
+                        type: 'array',
+                        items: new OA\Items(type: 'string')
+                    )
+                ),
+            ]
+        ),
+    ]
+)]
 class ProblemDetails
 {
     /**

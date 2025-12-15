@@ -216,6 +216,10 @@ jobs:
       - name: ✨ Run Prettier
         run: composer format:frontend
 
+      - name: 📄 Regenerate OpenAPI Schemas
+        run: |
+          composer openapi:generate:v1
+
       - name: ❌ Remove Debug Code from Tests
         run: |
           # Remove it.only() from Cypress tests
@@ -257,7 +261,7 @@ jobs:
         run: |
           git config --global user.name "ADOES Bot"
           git config --global user.email "DL_NUIT_ET_SysDev@e.northwestern.edu"
-          git commit -a -m "Apply code style changes"
+          git commit -a -m "style: apply automated formatting"
           git push
           exit 1
 

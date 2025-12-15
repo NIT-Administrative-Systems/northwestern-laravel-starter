@@ -1,0 +1,738 @@
+openapi: 3.0.0
+info:
+  title: 'Northwestern Laravel Starter API'
+  description: 'Core API endpoints provided by the Northwestern Laravel Starter, including user profile information and access token management.'
+  version: 1.0.0
+paths:
+  /api/v1/me/tokens:
+    get:
+      tags:
+        - 'Access Tokens'
+      summary: 'List all access tokens'
+      operationId: list-access-tokens
+      parameters:
+        -
+          name: page
+          in: query
+          description: 'Page number of the results to fetch.'
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            example: 1
+      responses:
+        '200':
+          description: 'Paginated list of access tokens for the authenticated user.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessTokenPage'
+        '401':
+          description: 'Missing or invalid bearer token.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+      security:
+        -
+          bearerToken: []
+    post:
+      tags:
+        - 'Access Tokens'
+      summary: 'Create an access token'
+      operationId: create-access-token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccessTokenCreateInput'
+      responses:
+        '201':
+          description: 'Access token created. The plain bearer token is only returned once.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessTokenCreationResponse'
+        '401':
+          description: 'Missing or invalid bearer token.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '422':
+          description: 'Validation failed for the supplied token attributes.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblemDetails'
+      security:
+        -
+          bearerToken: []
+  '/api/v1/me/tokens/{token}':
+    get:
+      tags:
+        - 'Access Tokens'
+      summary: 'Get an access token'
+      operationId: get-access-token
+      parameters:
+        -
+          name: token
+          in: path
+          description: 'The ID of the access token.'
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 42
+      responses:
+        '200':
+          description: 'Access token details.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessTokenResponse'
+        '401':
+          description: 'Missing or invalid bearer token.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: 'The token does not belong to the authenticated user.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          description: 'Access token not found.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+      security:
+        -
+          bearerToken: []
+    delete:
+      tags:
+        - 'Access Tokens'
+      summary: 'Revoke an access token'
+      operationId: revoke-access-token
+      parameters:
+        -
+          name: token
+          in: path
+          description: 'The ID of the access token to revoke.'
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 42
+      responses:
+        '204':
+          description: 'Access token revoked.'
+        '401':
+          description: 'Missing or invalid bearer token.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: 'The token does not belong to the authenticated user.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '422':
+          description: 'Cannot revoke the token currently being used.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          description: 'Access token not found.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+      security:
+        -
+          bearerToken: []
+  /api/v1/me:
+    get:
+      tags:
+        - Users
+      summary: 'Get authenticated user details'
+      operationId: get-user-details
+      responses:
+        '200':
+          description: 'Authenticated user profile.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '401':
+          description: 'Missing or invalid bearer token.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+      security:
+        -
+          bearerToken: []
+components:
+  schemas:
+    PaginationLinks:
+      required:
+        - first
+        - last
+        - prev
+        - next
+      properties:
+        first:
+          type: string
+          format: uri
+          example: 'https://example.test/api/v1/me/tokens?page=1'
+        last:
+          type: string
+          format: uri
+          example: 'https://example.test/api/v1/me/tokens?page=1'
+        prev:
+          type: string
+          format: uri
+          example: null
+          nullable: true
+        next:
+          type: string
+          format: uri
+          example: null
+          nullable: true
+      type: object
+    PaginationLink:
+      required:
+        - label
+        - page
+        - active
+      properties:
+        url:
+          type: string
+          format: uri
+          example: 'https://example.test/api/v1/me/tokens?page=1'
+          nullable: true
+        label:
+          type: string
+          example: '&laquo; Previous'
+        page:
+          type: integer
+          example: null
+          nullable: true
+        active:
+          type: boolean
+          example: false
+      type: object
+    PaginationMeta:
+      required:
+        - current_page
+        - from
+        - last_page
+        - path
+        - per_page
+        - to
+        - total
+        - links
+      properties:
+        current_page:
+          type: integer
+          example: 1
+        from:
+          type: integer
+          example: 1
+          nullable: true
+        last_page:
+          type: integer
+          example: 1
+        path:
+          type: string
+          format: uri
+          example: 'https://example.test/api/v1/me/tokens'
+        per_page:
+          type: integer
+          example: 20
+        to:
+          type: integer
+          example: 15
+          nullable: true
+        total:
+          type: integer
+          example: 15
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaginationLink'
+          example:
+            -
+              url: null
+              label: '&laquo; Previous'
+              page: null
+              active: false
+            -
+              url: 'https://example.test/api/v1/me/tokens?page=1'
+              label: '1'
+              page: 1
+              active: true
+            -
+              url: null
+              label: 'Next &raquo;'
+              page: null
+              active: false
+      type: object
+    AccessToken:
+      required:
+        - id
+        - name
+        - status
+        - usage_count
+        - created_at
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 23145
+        name:
+          type: string
+          example: 'CI Deployments'
+        status:
+          description: 'Operational status of the token, derived from revocation and expiration timestamps.'
+          type: string
+          enum:
+            - active
+            - expired
+            - revoked
+          example: active
+        last_used_at:
+          description: 'When this token was last used (null if never used).'
+          type: string
+          format: date-time
+          example: '2024-04-11T14:35:05Z'
+          nullable: true
+        usage_count:
+          type: integer
+          example: 12
+        expires_at:
+          description: 'When this token expires. Null means the token does not expire.'
+          type: string
+          format: date-time
+          example: '2024-12-31T06:00:00Z'
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          example: '2024-03-01T18:11:00Z'
+        allowed_ips:
+          description: 'Optional list of IPs or CIDR ranges allowed to use this token.'
+          type: array
+          items:
+            type: string
+            example: 203.0.113.0/24
+          example:
+            - 10.0.0.0/24
+            - 203.0.113.12
+          nullable: true
+      type: object
+    AccessTokenResponse:
+      required:
+        - data
+      properties:
+        data:
+          $ref: '#/components/schemas/AccessToken'
+      type: object
+    AccessTokenCreateInput:
+      required:
+        - name
+      properties:
+        name:
+          description: 'Friendly name for the token so you can identify it later.'
+          type: string
+          example: 'CI deploy token'
+        expires_at:
+          description: 'UTC timestamp (seconds) for when the token should expire. Must be at least 24 hours in the future.'
+          type: integer
+          format: int64
+          example: 1751328000
+          nullable: true
+        allowed_ips:
+          description: 'Optional allowlist of IPs or CIDR ranges that can use this token.'
+          type: array
+          items:
+            type: string
+            example: 198.51.100.0/25
+          nullable: true
+      type: object
+    AccessTokenCreationMeta:
+      required:
+        - bearer_token
+        - message
+      properties:
+        bearer_token:
+          description: 'The full bearer token. This is only returned once and cannot be retrieved again.'
+          type: string
+          example: YiRqNBToe7EIXAnmtCB3a9gAwHNh0xXZUX3A9zARG5CWKUcDhRn4U9qGcG3q7TwB
+        message:
+          type: string
+          example: 'Token generated successfully. Store the bearer token immediately; it will not be shown again.'
+      type: object
+    AccessTokenCreationResponse:
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: '#/components/schemas/AccessToken'
+        meta:
+          $ref: '#/components/schemas/AccessTokenCreationMeta'
+      type: object
+      example:
+        data:
+          id: 23145
+          name: 'CI Deployments'
+          status: active
+          last_used_at: '2024-04-11T14:35:05Z'
+          usage_count: 0
+          expires_at: '2024-12-31T06:00:00Z'
+          created_at: '2024-03-01T18:11:00Z'
+          allowed_ips:
+            - 10.0.0.0/24
+            - 203.0.113.12
+        meta:
+          bearer_token: atkn_0zHQdCxFQYkz9O5qckK8v1F2c6kP2U7o
+          message: 'Token generated successfully. Store the bearer token immediately; it will not be shown again.'
+    AccessTokenPage:
+      required:
+        - data
+        - links
+        - meta
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccessToken'
+        links:
+          $ref: '#/components/schemas/PaginationLinks'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+      type: object
+      example:
+        data:
+          -
+            id: 1
+            name: 'Production Deploy'
+            status: active
+            last_used_at: '2024-04-11T14:35:05Z'
+            usage_count: 42
+            expires_at: null
+            created_at: '2024-03-01T18:11:00Z'
+            allowed_ips: null
+        links:
+          first: 'https://example.edu/api/v1/me/tokens?page=1'
+          last: 'https://example.edu/api/v1/me/tokens?page=1'
+          prev: null
+          next: null
+        meta:
+          current_page: 1
+          from: 1
+          last_page: 1
+          links:
+            -
+              url: null
+              label: '&laquo; Previous'
+              page: null
+              active: false
+            -
+              url: 'https://example.edu/api/v1/me/tokens?page=1'
+              label: '1'
+              page: 1
+              active: true
+            -
+              url: null
+              label: 'Next &raquo;'
+              page: null
+              active: false
+          path: 'https://example.edu/api/v1/me/tokens'
+          per_page: 20
+          to: 15
+          total: 15
+    Permission:
+      required:
+        - id
+        - name
+        - label
+        - scope
+        - system_managed
+        - api_relevant
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 17
+        name:
+          description: 'Machine-friendly permission name.'
+          type: string
+          example: manage-users
+        label:
+          description: 'Human readable permission label.'
+          type: string
+          example: 'Manage Users'
+        description:
+          type: string
+          example: 'Allows creating, editing, and disabling user accounts.'
+          nullable: true
+        scope:
+          description: "Whether this permission applies system-wide or only to the authenticated user's context."
+          type: string
+          enum:
+            - system-wide
+            - personal
+          example: system-wide
+        system_managed:
+          type: boolean
+          example: false
+        api_relevant:
+          description: 'Whether this permission impacts API access patterns.'
+          type: boolean
+          example: true
+        created_at:
+          type: string
+          format: date-time
+          example: '2024-02-10T16:22:00Z'
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+          example: '2024-04-02T19:43:12Z'
+          nullable: true
+      type: object
+    RoleType:
+      required:
+        - slug
+        - label
+      properties:
+        slug:
+          type: string
+          enum:
+            - system-managed
+            - application-admin
+            - application-role
+            - api-integration
+          example: application-role
+        label:
+          type: string
+          example: 'Application Role'
+      type: object
+    Role:
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 4
+        name:
+          type: string
+          example: 'Content Manager'
+        role_type:
+          oneOf:
+            -
+              $ref: '#/components/schemas/RoleType'
+          nullable: true
+          description: 'Included when the role_type relationship is loaded.'
+        created_at:
+          type: string
+          format: date-time
+          example: '2024-01-15T18:00:00Z'
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+          example: '2024-04-21T12:05:23Z'
+          nullable: true
+        permissions:
+          description: 'Included when permissions are eager loaded.'
+          type: array
+          items:
+            $ref: '#/components/schemas/Permission'
+          nullable: true
+        users_count:
+          description: 'Included when a user count aggregate is loaded.'
+          type: integer
+          example: 18
+          nullable: true
+      type: object
+    User:
+      required:
+        - id
+        - username
+        - auth_type
+        - first_name
+        - last_name
+        - full_name
+        - email
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1024
+        username:
+          type: string
+          example: abc123
+        auth_type:
+          description: 'How the user authenticates to the application.'
+          type: string
+          enum:
+            - sso
+            - local
+            - api
+          example: api
+        first_name:
+          type: string
+          example: Willie
+        last_name:
+          type: string
+          example: Wildcat
+        full_name:
+          type: string
+          example: 'Willie Wildcat'
+        email:
+          type: string
+          format: email
+          example: willie.wildcat@example.edu
+        primary_affiliation:
+          description: 'Primary Northwestern affiliation for the user.'
+          type: string
+          enum:
+            - student
+            - faculty
+            - staff
+            - affiliate
+            - not-matched
+          example: staff
+          nullable: true
+        departments:
+          type: array
+          items:
+            type: string
+          example:
+            - 'IT Services'
+            - 'Information Security'
+        job_titles:
+          type: array
+          items:
+            type: string
+          example:
+            - 'Systems Administrator'
+        created_at:
+          type: string
+          format: date-time
+          example: '2023-11-06T15:20:00Z'
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+          example: '2024-04-09T18:45:10Z'
+          nullable: true
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/Role'
+          nullable: true
+      type: object
+    UserResponse:
+      required:
+        - data
+      properties:
+        data:
+          $ref: '#/components/schemas/User'
+      type: object
+      example:
+        data:
+          id: 1
+          username: waw1234
+          auth_type: api
+          first_name: Willie
+          last_name: Wildcat
+          full_name: 'Willie Wildcat'
+          email: willie.wildcat@example.edu
+          primary_affiliation: staff
+          departments:
+            - 'IT Services'
+            - 'Information Security'
+          job_titles:
+            - 'Systems Administrator'
+          created_at: '2023-11-06T15:20:00Z'
+          updated_at: '2024-04-09T18:45:10Z'
+          roles: []
+    ProblemDetails:
+      description: 'Standard RFC 9457 problem details envelope.'
+      required:
+        - type
+        - title
+        - status
+        - instance
+      properties:
+        type:
+          description: 'RFC 9457 compliant problem details response builder.'
+          type: string
+          format: uri
+          example: 'about:blank'
+        title:
+          type: string
+          example: Unauthorized
+        status:
+          type: integer
+          example: 401
+        detail:
+          type: string
+          example: 'Authentication failed'
+          nullable: true
+        instance:
+          type: string
+          format: uri-reference
+          example: /api/v1/me
+        trace_id:
+          description: 'Unique identifier for the API request (if available).'
+          type: string
+          example: b4f5aa7a-1470-4d92-8d3c-98e7c7de9f5f
+          nullable: true
+      type: object
+    ValidationProblemDetails:
+      allOf:
+        -
+          $ref: '#/components/schemas/ProblemDetails'
+        -
+          properties:
+            errors:
+              description: 'Validation errors keyed by input field.'
+              type: object
+              example:
+                name:
+                  - 'The name field is required.'
+                expires_at:
+                  - 'The expires at must be at least 24 hours from now.'
+              additionalProperties:
+                type: array
+                items:
+                  type: string
+          type: object
+  securitySchemes:
+    bearerToken:
+      type: http
+      description: 'Bearer access token for authentication. Tokens are issued during API user provisioning or can be generated via the API.'
+      scheme: bearer
+tags:
+  -
+    name: 'Access Tokens'
+    description: 'Manage API access tokens for the authenticated user.'
+  -
+    name: Users
+    description: 'Retrieve information about the authenticated API user.'

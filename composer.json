@@ -98,6 +98,8 @@
         "format:php": "vendor/bin/pint --ansi",
         "format:frontend": "pnpm run format",
         "analyse:php": "vendor/bin/phpstan analyse --memory-limit=2G",
+        "openapi:generate": "@php ./vendor/bin/openapi app/",
+        "openapi:generate:v1": "@composer openapi:generate -- --exclude app/Http/Controllers/Api/V2 --output docs/schemas/api-schema.yaml",
         "ide-helper:generate": [
             "@php artisan ide-helper:generate",
             "@php artisan ide-helper:meta",
