@@ -207,6 +207,14 @@ jobs:
             prettier-${{ hashFiles('package.json', 'pnpm-lock.yaml', '.prettierrc') }}-
             prettier-
 
+      - name: 🧹 Clear Bootstrap Cache
+        run: |
+          php artisan config:clear
+          php artisan cache:clear
+          rm -rf /tmp/phpstan
+          grep "DB_USERNAME" .env || echo "ERROR: DB_USERNAME not found in .env"
+          grep "DB_PASSWORD" .env || echo "ERROR: DB_PASSWORD not found in .env"
+
       - name: 🔧️ Run Rector
         run: composer rector
 
