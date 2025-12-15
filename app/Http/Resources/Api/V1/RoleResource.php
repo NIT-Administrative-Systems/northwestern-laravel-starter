@@ -19,7 +19,7 @@ class RoleResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
+            'id' => $this->getKey(),
             'name' => $this->name,
             'role_type' => $this->when(
                 $this->relationLoaded('role_type'),
