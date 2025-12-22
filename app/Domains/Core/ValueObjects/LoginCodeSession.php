@@ -16,10 +16,10 @@ use App\Http\Controllers\Auth\Local\VerifyLoginCodeController;
  * so that the code form, verification, and resends stay in sync with the
  * challenge that was issued.
  *
- * - @see SendLoginCodeController::class
- * - @see ShowLoginCodeFormController::class
- * - @see VerifyLoginCodeController::class
- * - @see ResendLoginCodeController::class
+ * - @see SendLoginCodeController
+ * - @see ShowLoginCodeFormController
+ * - @see VerifyLoginCodeController
+ * - @see ResendLoginCodeController
  */
 final class LoginCodeSession
 {

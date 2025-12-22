@@ -15,7 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Timebox;
 use Illuminate\Validation\ValidationException;
-use RunTimeException;
+use RuntimeException;
 
 /**
  * Attempt to send a login code while enforcing a minimum response time.
@@ -78,7 +78,7 @@ class SendLoginCodeController extends Controller
                     $request->userAgent()
                 );
                 $timebox->returnEarly();
-            } catch (RunTimeException $e) {
+            } catch (RuntimeException $e) {
                 // Rate limit exceeded
                 throw ValidationException::withMessages([
                     'email' => $e->getMessage(),

@@ -47,7 +47,7 @@ class VerifyLoginCodeController extends Controller
         }
 
         if ($challenge->isLocked()) {
-            $lockoutMinutes = (int) config('auth.local.code.lockout_minutes', 15);
+            $lockoutMinutes = (int) config('auth.local.code.lock_minutes', 15);
             $lockoutDuration = CarbonInterval::minutes($lockoutMinutes)->forHumans();
 
             return back()->withErrors([
