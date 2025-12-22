@@ -8,9 +8,9 @@ use App\Domains\User\Mail\LoginVerificationCodeNotification;
 use App\Domains\User\Models\LoginChallenge;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterval;
+use Illuminate\Mail\SendQueuedMailable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -65,12 +65,12 @@ final readonly class IssueLoginChallenge
 
             RateLimiter::hit($rateLimitKey, (int) CarbonInterval::hour()->totalSeconds);
 
-            Mail::to($email)->queue(
+            dispatch(new SendQueuedMailable(
                 new LoginVerificationCodeNotification(
                     code: $code,
                     expiresAt: $challenge->expires_at,
-                )->afterCommit()
-            );
+                )->to($email)
+            ))->afterCommit();
 
             $challenge->update(['email_sent_at' => $now]);
 
