@@ -23,14 +23,14 @@ class LoginChallenge extends BaseModel
 
     public function isExpired(?CarbonImmutable $now = null): bool
     {
-        $now ??= new CarbonImmutable();
+        $now ??= CarbonImmutable::now();
 
         return $this->expires_at->lessThan($now);
     }
 
     public function isLocked(?CarbonImmutable $now = null): bool
     {
-        $now ??= new CarbonImmutable();
+        $now ??= CarbonImmutable::now();
 
         return $this->locked_until !== null && $this->locked_until->greaterThan($now);
     }
@@ -42,7 +42,7 @@ class LoginChallenge extends BaseModel
 
     public function isActive(?CarbonImmutable $now = null): bool
     {
-        $now ??= new CarbonImmutable();
+        $now ??= CarbonImmutable::now();
 
         return ! $this->isConsumed() && ! $this->isExpired($now) && ! $this->isLocked($now);
     }

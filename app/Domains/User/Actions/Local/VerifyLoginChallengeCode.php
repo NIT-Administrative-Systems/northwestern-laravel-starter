@@ -25,17 +25,17 @@ final class VerifyLoginChallengeCode
             $maxAttempts = (int) config('auth.local.code.max_attempts', 8);
             if ($challenge->attempts >= $maxAttempts) {
                 $lockMinutes = (int) config('auth.local.code.lock_minutes', 15);
-                $challenge->forceFill(['locked_until' => $now->addMinutes($lockMinutes)])->save();
+                $challenge->update(['locked_until' => $now->addMinutes($lockMinutes)]);
             }
 
             return false;
         }
 
-        $challenge->forceFill([
+        $challenge->update([
             'consumed_at' => $now,
             'consumed_ip' => $ip,
             'consumed_user_agent' => $userAgent ? Str::limit($userAgent, 512, '') : null,
-        ])->save();
+        ]);
 
         return true;
     }

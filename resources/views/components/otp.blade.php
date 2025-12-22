@@ -124,8 +124,13 @@
                     },
 
                     shouldShowSeparator(index) {
-                        return index > 0 && {{ $separator ?: 0 }} > 0 && index % {{ $separator ?: 0 }} ===
-                            0;
+                        const separator = {{ (int) $separator }};
+
+                        if (separator <= 0) {
+                            return false;
+                        }
+
+                        return index > 0 && index % separator === 0;
                     },
 
                     handleInput(e, index) {

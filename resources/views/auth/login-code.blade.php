@@ -83,7 +83,7 @@
         (function() {
             const btn = document.getElementById('resendBtn');
             const text = document.getElementById('resendText');
-            const availableAt = Number(@json($resendAvailableAt)) * 1000;
+            const availableAt = {{ (int) $resendAvailableAt }} * 1000;
 
             function tick() {
                 const ms = availableAt - Date.now();

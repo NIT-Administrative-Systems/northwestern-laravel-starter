@@ -103,13 +103,15 @@ class LoginCodeController extends Controller
             }
         }, $minimumTimeMs * 1000);
 
-        session([
-            'login_code.email' => $email,
-            'login_code.challenge_id' => $challenge?->id ? (string) $challenge->id : null,
-            'login_code.resend_available_at' => now()->addSeconds(
-                (int) config('auth.local.code.resend_cooldown_seconds', 30)
-            )->timestamp,
-        ]);
+        if ($challenge !== null) {
+            session([
+                'login_code.email' => $email,
+                'login_code.challenge_id' => (string) $challenge->id,
+                'login_code.resend_available_at' => now()->addSeconds(
+                    (int) config('auth.local.code.resend_cooldown_seconds', 30)
+                )->timestamp,
+            ]);
+        }
 
         return to_route('login-code.code');
     }
@@ -205,8 +207,9 @@ class LoginCodeController extends Controller
     {
         abort_unless(config('auth.local.enabled'), 404);
 
-        $email = (string) session('login_code.email');
-        if (blank($email)) {
+        $email = session('login_code.email');
+
+        if (! $email) {
             return redirect()->route('login-code.request');
         }
 
