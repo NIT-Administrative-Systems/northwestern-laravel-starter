@@ -68,14 +68,14 @@ final readonly class IssueLoginChallenge
 
             RateLimiter::hit($rateLimitKey, (int) CarbonInterval::hour()->totalSeconds);
 
-            DB::afterCommit(static function () use ($challenge, $encryptedCode, $email, $now) {
+            DB::afterCommit(static function () use ($challenge, $encryptedCode, $email) {
                 Mail::to($email)
                     ->queue(new LoginVerificationCodeNotification(
                         encryptedCode: $encryptedCode,
                         expiresAt: $challenge->expires_at,
                     ));
 
-                $challenge->update(['email_sent_at' => $now]);
+                $challenge->update(['email_sent_at' => CarbonImmutable::now()]);
             });
 
             return $challenge;

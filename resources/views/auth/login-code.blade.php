@@ -89,7 +89,7 @@
 
             const resendBtn = document.getElementById('resendBtn');
             const resendText = document.getElementById('resendText');
-            const availableAt = {{ (int) $resendAvailableAt }} * 1000;
+            const availableAt = @json((int) $resendAvailableAt) * 1000;
 
             let submitted = false;
 

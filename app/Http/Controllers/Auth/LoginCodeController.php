@@ -39,6 +39,20 @@ class LoginCodeController extends Controller
      */
     private const int MIN_TOTAL_RESPONSE_TIME_MS = 300;
 
+    private const string SESSION_PREFIX = 'login_code.';
+
+    public const string SESSION_EMAIL = self::SESSION_PREFIX . 'email';
+
+    public const string SESSION_CHALLENGE_ID = self::SESSION_PREFIX . 'challenge_id';
+
+    public const string SESSION_RESEND_AVAILABLE_AT = self::SESSION_PREFIX . 'resend_available_at';
+
+    public const array SESSION_KEYS = [
+        self::SESSION_EMAIL,
+        self::SESSION_CHALLENGE_ID,
+        self::SESSION_RESEND_AVAILABLE_AT,
+    ];
+
     public function __construct(
         private readonly IssueLoginChallenge $issueLoginChallenge,
         private readonly VerifyLoginChallengeCode $verifyLoginChallengeCode,
@@ -105,9 +119,9 @@ class LoginCodeController extends Controller
 
         if ($challenge !== null) {
             session([
-                'login_code.email' => $email,
-                'login_code.challenge_id' => (string) $challenge->id,
-                'login_code.resend_available_at' => now()->addSeconds(
+                self::SESSION_EMAIL => $email,
+                self::SESSION_CHALLENGE_ID => (string) $challenge->id,
+                self::SESSION_RESEND_AVAILABLE_AT => now()->addSeconds(
                     (int) config('auth.local.code.resend_cooldown_seconds', 30)
                 )->timestamp,
             ]);
@@ -120,23 +134,23 @@ class LoginCodeController extends Controller
     {
         abort_unless(config('auth.local.enabled'), 404);
 
-        $email = session('login_code.email');
+        $email = session(self::SESSION_EMAIL);
 
         if (! $email) {
             return redirect()->route('login-code.request');
         }
 
-        $challengeId = session('login_code.challenge_id');
+        $challengeId = session(self::SESSION_CHALLENGE_ID);
         $challenge = $challengeId ? LoginChallenge::find($challengeId) : null;
 
         if ($challenge && ($challenge->isConsumed() || $challenge->isExpired())) {
-            session()->forget('login_code.challenge_id');
+            session()->forget(self::SESSION_CHALLENGE_ID);
             $challenge = null;
         }
 
         return view('auth.login-code', [
             'email' => $email,
-            'resendAvailableAt' => (int) (session('login_code.resend_available_at') ?? 0),
+            'resendAvailableAt' => (int) (session(self::SESSION_RESEND_AVAILABLE_AT) ?? 0),
         ]);
     }
 
@@ -149,7 +163,7 @@ class LoginCodeController extends Controller
             'code' => ['required', 'string', 'size:' . $digits],
         ]);
 
-        $challengeId = session('login_code.challenge_id');
+        $challengeId = session(self::SESSION_CHALLENGE_ID);
 
         if (! $challengeId) {
             return back()->withErrors(['code' => 'Invalid code.'])->onlyInput('code');
@@ -198,7 +212,7 @@ class LoginCodeController extends Controller
             'segment' => ($this->determineUserSegment)($user),
         ]);
 
-        $request->session()->forget(['login_code.email', 'login_code.challenge_id', 'login_code.resend_available_at']);
+        $request->session()->forget(self::SESSION_KEYS);
 
         return redirect()->intended(config('auth.local.redirect_after_login'));
     }
@@ -207,13 +221,13 @@ class LoginCodeController extends Controller
     {
         abort_unless(config('auth.local.enabled'), 404);
 
-        $email = session('login_code.email');
+        $email = session(self::SESSION_EMAIL);
 
         if (! $email) {
             return redirect()->route('login-code.request');
         }
 
-        $resendAvailableAt = (int) (session('login_code.resend_available_at') ?? 0);
+        $resendAvailableAt = (int) (session(self::SESSION_RESEND_AVAILABLE_AT) ?? 0);
         if (time() < $resendAvailableAt) {
             return back()->with('status', 'Please wait before requesting another code.');
         }
@@ -221,7 +235,7 @@ class LoginCodeController extends Controller
         $user = User::firstLocalByEmail($email);
         if (! $user) {
             session([
-                'login_code.resend_available_at' => now()->addSeconds(
+                self::SESSION_RESEND_AVAILABLE_AT => now()->addSeconds(
                     (int) config('auth.local.code.resend_cooldown_seconds', 30)
                 )->timestamp,
             ]);
@@ -240,8 +254,8 @@ class LoginCodeController extends Controller
         }
 
         session([
-            'login_code.challenge_id' => (string) $challenge->id,
-            'login_code.resend_available_at' => now()->addSeconds(
+            self::SESSION_CHALLENGE_ID => (string) $challenge->id,
+            self::SESSION_RESEND_AVAILABLE_AT => now()->addSeconds(
                 (int) config('auth.local.code.resend_cooldown_seconds', 30)
             )->timestamp,
         ]);

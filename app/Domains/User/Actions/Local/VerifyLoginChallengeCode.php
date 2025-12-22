@@ -19,7 +19,7 @@ final class VerifyLoginChallengeCode
             return false;
         }
 
-        if (! Hash::check(trim($code), $challenge->code_hash)) {
+        if (! Hash::check($code, $challenge->code_hash)) {
             $challenge->increment('attempts');
 
             $maxAttempts = (int) config('auth.local.code.max_attempts', 8);

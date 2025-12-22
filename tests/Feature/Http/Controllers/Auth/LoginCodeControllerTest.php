@@ -60,11 +60,23 @@ class LoginCodeControllerTest extends TestCase
     {
         $user = User::factory()->affiliate()->create(['email' => 'test@example.com']);
 
-        $this->post(route('login-code.send'), [
+        $response = $this->post(route('login-code.send'), [
             'email' => 'test@example.com',
         ]);
 
-        $this->assertEquals(1, $user->login_challenges()->count());
+        $response->assertRedirect(route('login-code.code'));
+
+        $response->assertSessionHas(LoginCodeController::SESSION_EMAIL, 'test@example.com');
+        $response->assertSessionHas(LoginCodeController::SESSION_CHALLENGE_ID);
+        $response->assertSessionHas(LoginCodeController::SESSION_RESEND_AVAILABLE_AT);
+
+        $challengeId = session(LoginCodeController::SESSION_CHALLENGE_ID);
+        $this->assertIsString($challengeId);
+        $this->assertNotNull(LoginChallenge::find($challengeId));
+
+        $resendAt = session(LoginCodeController::SESSION_RESEND_AVAILABLE_AT);
+        $this->assertIsInt($resendAt);
+        $this->assertGreaterThan(time(), $resendAt);
     }
 
     public function test_send_code_returns_same_message_for_nonexistent_email(): void
@@ -74,6 +86,59 @@ class LoginCodeControllerTest extends TestCase
         ]);
 
         $response->assertRedirect(route('login-code.code'));
+
+        $response->assertSessionMissing(LoginCodeController::SESSION_EMAIL);
+        $response->assertSessionMissing(LoginCodeController::SESSION_CHALLENGE_ID);
+        $response->assertSessionMissing(LoginCodeController::SESSION_RESEND_AVAILABLE_AT);
+    }
+
+    public function test_show_code_form_clears_stale_challenge_id_when_expired(): void
+    {
+        $user = User::factory()->affiliate()->create(['email' => 'test@example.com']);
+
+        $expiredChallenge = LoginChallenge::create([
+            'email' => $user->email,
+            'code_hash' => Hash::make('123456'),
+            'expires_at' => now()->subMinute(),
+        ]);
+
+        $response = $this->withSession([
+            LoginCodeController::SESSION_EMAIL => $user->email,
+            LoginCodeController::SESSION_CHALLENGE_ID => (string) $expiredChallenge->id,
+            LoginCodeController::SESSION_RESEND_AVAILABLE_AT => now()->addSeconds(30)->timestamp,
+        ])->get(route('login-code.code'));
+
+        $response->assertOk();
+        $response->assertSessionHas(LoginCodeController::SESSION_EMAIL, $user->email);
+        $response->assertSessionMissing(LoginCodeController::SESSION_CHALLENGE_ID);
+    }
+
+    public function test_verify_clears_login_code_session_keys_on_success(): void
+    {
+        $user = User::factory()->affiliate()->create(['email' => 'test@example.com']);
+        $code = '123456';
+
+        $challenge = LoginChallenge::create([
+            'email' => $user->email,
+            'code_hash' => Hash::make($code),
+            'expires_at' => now()->addMinutes(10),
+        ]);
+
+        $response = $this->withSession([
+            LoginCodeController::SESSION_EMAIL => $user->email,
+            LoginCodeController::SESSION_CHALLENGE_ID => (string) $challenge->id,
+            LoginCodeController::SESSION_RESEND_AVAILABLE_AT => now()->addSeconds(30)->timestamp,
+        ])->post(route('login-code.verify'), [
+            'code' => $code,
+        ]);
+
+        $response->assertRedirect('/');
+
+        $response->assertSessionMissing(LoginCodeController::SESSION_EMAIL);
+        $response->assertSessionMissing(LoginCodeController::SESSION_CHALLENGE_ID);
+        $response->assertSessionMissing(LoginCodeController::SESSION_RESEND_AVAILABLE_AT);
+
+        $this->assertAuthenticatedAs($user);
     }
 
     public function test_send_code_validates_email_format(): void

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
 
             $table->string('email')->index();
-            $table->string('code_hash');
+            $table->string('code_hash')->index();
 
             $table->unsignedTinyInteger('attempts')->default(0);
             $table->timestamp('locked_until')->nullable();
