@@ -68,7 +68,9 @@
                                     disabled>
                                 Resend code
                             </button>
-                            <span class="text-muted small ms-1" id="resendText"></span>
+                            <span class="text-muted small ms-1"
+                                  id="resendText"
+                                  aria-live="polite"></span>
                         </form>
                     </div>
 

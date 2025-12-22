@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Tests\Feature\Domains\User\Actions\Local;
 
 use App\Domains\User\Actions\Local\IssueLoginChallenge;
-use App\Domains\User\Mail\LoginVerificationCodeNotification;
+use App\Domains\User\Jobs\SendLoginCodeEmailJob;
 use App\Domains\User\Models\LoginChallenge;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\RateLimiter;
 use PHPUnit\Framework\Attributes\CoversClass;
 use RuntimeException;
@@ -27,7 +27,7 @@ class IssueLoginChallengeTest extends TestCase
         config(['auth.local.code.expires_in_minutes' => 15]);
 
         CarbonImmutable::setTestNow();
-        Mail::fake();
+        Queue::fake();
         RateLimiter::clear('login-code:test@example.com');
     }
 
@@ -38,13 +38,12 @@ class IssueLoginChallengeTest extends TestCase
         $this->assertEquals('test@example.com', $challenge->email);
         $this->assertEquals('192.168.1.1', $challenge->requested_ip);
         $this->assertNotNull($challenge->code_hash);
-        $this->assertNotNull($challenge->email_sent_at);
         $this->assertTrue($challenge->expires_at->between(now()->addMinutes(15)->subSecond(), now()->addMinutes(15)->addSecond()));
 
-        Mail::assertQueued(LoginVerificationCodeNotification::class, function ($mail) use ($challenge) {
-            $code = Crypt::decryptString($mail->encryptedCode);
+        Queue::assertPushed(SendLoginCodeEmailJob::class, function ($job) use ($challenge) {
+            $code = Crypt::decryptString($job->encryptedCode);
 
-            return $mail->hasTo($challenge->email)
+            return $job->loginChallengeId === $challenge->id
                 && Hash::check($code, $challenge->code_hash);
         });
     }
@@ -109,14 +108,6 @@ class IssueLoginChallengeTest extends TestCase
 
         $this->assertNotEquals($challenge1->id, $challenge2->id);
         $this->assertNotEquals($challenge1->code_hash, $challenge2->code_hash);
-    }
-
-    public function test_mail_is_queued_not_sent_immediately(): void
-    {
-        $this->action()('queued@example.com', null, null);
-
-        Mail::assertQueued(LoginVerificationCodeNotification::class);
-        Mail::assertNothingSent();
     }
 
     public function test_rate_limiter_is_hit_after_successful_creation(): void

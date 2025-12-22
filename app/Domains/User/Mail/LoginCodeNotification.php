@@ -4,30 +4,21 @@ declare(strict_types=1);
 
 namespace App\Domains\User\Mail;
 
+use App\Domains\User\Enums\AuthTypeEnum;
+use App\Domains\User\Jobs\SendLoginCodeEmailJob;
 use Carbon\CarbonImmutable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Support\Facades\Crypt;
 
-class LoginVerificationCodeNotification extends Mailable implements ShouldQueue
+/**
+ * Notification email containing a login verification code for {@see AuthTypeEnum::LOCAL} users.
+ *
+ * @see SendLoginCodeEmailJob
+ */
+class LoginCodeNotification extends Mailable
 {
-    use Queueable;
-
-    /**
-     * @param  string  $encryptedCode  The verification code encrypted at the time the challenge is issued.
-     *
-     * Queued mailables are serialized and transported through the queue (e.g., SES), and the payload
-     * commonly becomes visible in multiple places:
-     * - The queue transport itself
-     * - Worker logs and retry/failure payloads
-     * - APM tools that capture job context
-     *
-     * While the verification code is short-lived, it is still a valid authentication factor during its
-     * lifetime. Encrypting it ensures the raw code is not exposed in any of these places.
-     */
     public function __construct(
         public readonly string $encryptedCode,
         public readonly CarbonImmutable $expiresAt,

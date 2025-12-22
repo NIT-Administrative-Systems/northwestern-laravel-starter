@@ -10,7 +10,7 @@ use App\Domains\User\Actions\Local\VerifyLoginChallengeCode;
 use App\Domains\User\Models\LoginChallenge;
 use App\Domains\User\Models\User;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Auth\SendLoginLinkRequest;
+use App\Http\Requests\Auth\SendLoginCodeRequest;
 use Carbon\CarbonInterval;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -84,7 +84,7 @@ class LoginCodeController extends Controller
      * In many contexts, the mere fact that an email address is registered here can be
      * sensitive information.
      */
-    public function sendCode(SendLoginLinkRequest $request): RedirectResponse
+    public function sendCode(SendLoginCodeRequest $request): RedirectResponse
     {
         abort_unless(config('auth.local.enabled'), 404);
 
@@ -176,8 +176,11 @@ class LoginCodeController extends Controller
         }
 
         if ($challenge->isLocked()) {
+            $lockoutMinutes = (int) config('auth.local.code.lockout_minutes', 15);
+            $lockoutDuration = CarbonInterval::minutes($lockoutMinutes)->forHumans();
+
             return back()->withErrors([
-                'code' => 'Too many attempts. Try again later.',
+                'code' => "Too many attempts. Please wait {$lockoutDuration} before trying again.",
             ])->onlyInput('code');
         }
 

@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace App\Domains\User\Actions\Local;
 
-use App\Domains\User\Mail\LoginVerificationCodeNotification;
+use App\Domains\User\Jobs\SendLoginCodeEmailJob;
 use App\Domains\User\Models\LoginChallenge;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterval;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -24,7 +23,7 @@ use RuntimeException;
  * - Enforces per-email rate limiting to reduce enumeration attempts
  * - Generates a numeric verification code and stores only its hash
  * - Persists a {@see LoginChallenge} record with an expiry and request metadata
- * - Queues a {@see LoginVerificationCodeNotification} email to the user
+ * - Queues a {@see SendLoginCodeEmailJob} for the user
  */
 final readonly class IssueLoginChallenge
 {
@@ -68,15 +67,10 @@ final readonly class IssueLoginChallenge
 
             RateLimiter::hit($rateLimitKey, (int) CarbonInterval::hour()->totalSeconds);
 
-            DB::afterCommit(static function () use ($challenge, $encryptedCode, $email) {
-                Mail::to($email)
-                    ->queue(new LoginVerificationCodeNotification(
-                        encryptedCode: $encryptedCode,
-                        expiresAt: $challenge->expires_at,
-                    ));
-
-                $challenge->update(['email_sent_at' => CarbonImmutable::now()]);
-            });
+            SendLoginCodeEmailJob::dispatch(
+                loginChallengeId: $challenge->id,
+                encryptedCode: $encryptedCode,
+            )->afterCommit();
 
             return $challenge;
         });
