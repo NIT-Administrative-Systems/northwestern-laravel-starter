@@ -26,12 +26,13 @@
                         </p>
                     </div>
 
-                    <form method="POST"
+                    <form id="otpVerifyForm"
+                          method="POST"
                           action="{{ route('login-code.verify') }}"
                           novalidate>
                         @csrf
 
-                        <div class="d-flex justify-content-center mb-4">
+                        <div class="d-flex justify-content-center mb-4" style="min-height: 5.5rem;">
                             <x-otp name="code"
                                    :length="config('auth.local.code.digits', 6)"
                                    autofocus
@@ -81,24 +82,62 @@
 @push('scripts')
     <script>
         (function() {
-            const btn = document.getElementById('resendBtn');
-            const text = document.getElementById('resendText');
+            const form = document.getElementById('otpVerifyForm');
+            if (!form) return;
+
+            const verifyBtn = form.querySelector('button[type="submit"]');
+
+            const resendBtn = document.getElementById('resendBtn');
+            const resendText = document.getElementById('resendText');
             const availableAt = {{ (int) $resendAvailableAt }} * 1000;
 
-            function tick() {
+            let submitted = false;
+
+            const setVerifyDisabled = (disabled) => {
+                if (!verifyBtn) return;
+                verifyBtn.disabled = disabled;
+                verifyBtn.classList.toggle('disabled', disabled);
+                verifyBtn.setAttribute('aria-disabled', disabled ? 'true' : 'false');
+            };
+
+            (function tick() {
+                if (!resendBtn || !resendText) return;
+
                 const ms = availableAt - Date.now();
                 if (ms <= 0) {
-                    btn.disabled = false;
-                    text.textContent = '';
+                    resendBtn.disabled = false;
+                    resendText.textContent = '';
                     return;
                 }
 
-                btn.disabled = true;
-                text.textContent = `(${Math.ceil(ms / 1000)}s)`;
+                resendBtn.disabled = true;
+                resendText.textContent = `(${Math.ceil(ms / 1000)}s)`;
                 requestAnimationFrame(() => setTimeout(tick, 250));
-            }
+            })();
 
-            tick();
+            form.addEventListener('submit', () => {
+                submitted = true;
+                setVerifyDisabled(true);
+            });
+
+            document.addEventListener('otp-completed', (e) => {
+                if (submitted) return;
+
+                const code = e?.detail ? String(e.detail) : '';
+                if (!code) return;
+
+                const hidden = form.querySelector('input[name="code"]');
+                if (hidden) hidden.value = code;
+
+                submitted = true;
+                setVerifyDisabled(true);
+
+                requestAnimationFrame(() => {
+                    if (typeof form.requestSubmit === 'function') form.requestSubmit();
+                    else form.submit();
+                });
+
+            });
         })();
     </script>
 @endpush

@@ -16,6 +16,7 @@
          autofocus: {{ $autofocus ? 'true' : 'false' }}
      })"
      x-modelable="value"
+     x-cloak
      {{ $attributes->whereStartsWith('wire:model') }}>
 
     <input name="{{ $attributes->get('name') }}"
@@ -36,7 +37,11 @@
                        type="{{ $private ? 'password' : 'text' }}"
                        inputmode="{{ $numeric ? 'numeric' : 'text' }}"
                        pattern="{{ $numeric ? '[0-9]*' : null }}"
-                       autocomplete="one-time-code"
+                       :autocomplete="index === 0 ? 'one-time-code' : 'off'"
+                       :maxlength="index === 0 ? length : 1"
+                       autocapitalize="none"
+                       autocorrect="off"
+                       spellcheck="false"
                        :aria-label="`Digit ${index + 1}`"
                        x-model="digits[index]"
                        @input="handleInput($event, index)"
@@ -93,25 +98,32 @@
                     numeric,
                     autofocus
                 }) => ({
-                    length: length,
+                    length,
+                    numeric,
                     digits: Array(length).fill(''),
                     value: '',
-                    numeric: numeric,
+                    isFilling: false,
 
                     init() {
                         this.$watch('value', (val) => {
                             if (val && val.length === this.length) {
-                                this.digits = val.split('');
+                                this.isFilling = true;
+                                this.digits = val.split('').slice(0, this.length);
+                                this.$nextTick(() => {
+                                    this.isFilling = false;
+                                    this.maybeDispatchCompleted();
+                                });
                             } else if (!val) {
                                 this.digits = Array(this.length).fill('');
                             }
                         });
 
-                        this.$watch('digits', (val) => {
-                            this.value = val.join('');
-                            if (this.value.length === this.length) {
-                                this.$dispatch('otp-completed', this.value);
-                            }
+                        this.$watch('digits', () => {
+                            this.value = this.digits.join('');
+
+                            if (this.isFilling) return;
+
+                            this.maybeDispatchCompleted();
                         });
 
                         if (autofocus) {
@@ -125,25 +137,34 @@
 
                     shouldShowSeparator(index) {
                         const separator = {{ (int) $separator }};
-
-                        if (separator <= 0) {
-                            return false;
-                        }
-
+                        if (separator <= 0) return false;
                         return index > 0 && index % separator === 0;
                     },
 
+                    isCompleteAndNormalized() {
+                        if (this.value.length !== this.length) return false;
+                        return this.digits.every((d) => typeof d === 'string' && d.length === 1);
+                    },
+
+                    maybeDispatchCompleted() {
+                        if (!this.isCompleteAndNormalized()) return;
+
+                        this.$nextTick(() => {
+                            if (this.isCompleteAndNormalized()) {
+                                this.$dispatch('otp-completed', this.value);
+                            }
+                        });
+                    },
+
                     handleInput(e, index) {
-                        let val = e.target.value;
+                        let val = e.target.value ?? '';
                         if (this.numeric) val = val.replace(/\D/g, '');
 
-                        if (val.length > 2) {
-                            const chars = val.split('').slice(0, this.length);
-                            this.fillValues(chars);
+                        if (val.length > 1) {
+                            this.fillValues(val.split(''));
                             return;
                         }
 
-                        if (val.length > 1) val = val.slice(-1);
                         this.digits[index] = val;
 
                         if (val && index < this.length - 1) {
@@ -153,43 +174,82 @@
 
                     handleKeyDown(e, index) {
                         const key = e.key;
+
                         if (key === 'Backspace') {
-                            if (!this.digits[index] && index > 0) {
-                                e.preventDefault();
-                                this.focusPrev(index);
-                            } else {
+                            e.preventDefault();
+
+                            if (this.digits[index]) {
                                 this.digits[index] = '';
                             }
-                        } else if (key === 'Delete') {
+
+                            if (index > 0) {
+                                this.focusPrev(index);
+                            }
+
+                            return;
+                        }
+
+                        if (key === 'Delete') {
+                            e.preventDefault();
                             this.digits[index] = '';
-                        } else if (key === 'ArrowLeft') {
+                            return;
+                        }
+
+                        if (key === 'ArrowLeft') {
                             e.preventDefault();
                             this.focusPrev(index);
-                        } else if (key === 'ArrowRight') {
+                            return;
+                        }
+
+                        if (key === 'ArrowRight') {
                             e.preventDefault();
                             this.focusNext(index);
+                            return;
                         }
                     },
 
                     handlePaste(e) {
                         e.preventDefault();
-                        let pasteData = (e.clipboardData || window.clipboardData).getData('text');
+
+                        let pasteData = (e.clipboardData || window.clipboardData).getData('text') ?? '';
                         if (this.numeric) pasteData = pasteData.replace(/\D/g, '');
+
                         this.fillValues(pasteData.split(''));
                     },
 
                     fillValues(chars) {
-                        chars.forEach((char, i) => {
-                            if (i < this.length) this.digits[i] = char;
+                        this.isFilling = true;
+
+                        const cleaned = chars
+                            .join('')
+                            .split('')
+                            .slice(0, this.length);
+
+                        this.digits = Array(this.length).fill('');
+                        cleaned.forEach((char, i) => {
+                            this.digits[i] = char;
                         });
 
-                        let nextIndex = Math.min(chars.length, this.length - 1);
-                        this.$nextTick(() => this.inputs()[nextIndex]?.focus());
+                        const nextIndex = Math.min(cleaned.length, this.length) - 1;
+                        const safeIndex = Math.max(0, Math.min(nextIndex, this.length - 1));
+
+                        this.$nextTick(() => {
+                            const input = this.inputs()[safeIndex];
+                            input?.focus();
+                            input?.select();
+
+                            this.isFilling = false;
+                            this.maybeDispatchCompleted();
+                        });
                     },
 
                     focusNext(index) {
                         if (index < this.length - 1) {
-                            this.$nextTick(() => this.inputs()[index + 1]?.focus());
+                            this.$nextTick(() => {
+                                const next = this.inputs()[index + 1];
+                                next?.focus();
+                                next?.select();
+                            });
                         }
                     },
 
@@ -201,7 +261,7 @@
                                 prev?.select();
                             });
                         }
-                    }
+                    },
                 }));
             });
         </script>

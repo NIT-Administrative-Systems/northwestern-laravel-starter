@@ -50,7 +50,7 @@
                         </div>
 
                         <button class="btn btn-primary btn-lg w-100 mb-3" type="submit">
-                            <span>Continue with email</span>
+                            <span>Continue</span>
                         </button>
 
                         <div class="text-center">
