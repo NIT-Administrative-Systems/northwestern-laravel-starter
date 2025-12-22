@@ -19,7 +19,7 @@ enum AuthTypeEnum: string implements HasColor, HasIcon, HasLabel
     {
         return match ($this) {
             self::SSO => 'NetID',
-            self::LOCAL => 'Login Link',
+            self::LOCAL => 'Verification Code',
             self::API => 'API',
         };
     }
@@ -28,7 +28,7 @@ enum AuthTypeEnum: string implements HasColor, HasIcon, HasLabel
     {
         return match ($this) {
             self::SSO => Heroicon::OutlinedShieldCheck,
-            self::LOCAL => Heroicon::OutlinedEnvelope,
+            self::LOCAL => Heroicon::OutlinedKey,
             self::API => Heroicon::OutlinedCodeBracket,
         };
     }

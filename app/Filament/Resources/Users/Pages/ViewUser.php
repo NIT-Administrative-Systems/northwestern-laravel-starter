@@ -6,7 +6,7 @@ namespace App\Filament\Resources\Users\Pages;
 
 use App\Domains\User\Enums\AuthTypeEnum;
 use App\Domains\User\Models\User;
-use App\Filament\Resources\Users\Actions\SendLoginLinkAction;
+use App\Filament\Resources\Users\Actions\SendLoginCodeAction;
 use App\Filament\Resources\Users\Schemas\ApiUserInfolist;
 use App\Filament\Resources\Users\Schemas\LocalUserInfolist;
 use App\Filament\Resources\Users\Schemas\NorthwesternUserInfolist;
@@ -38,7 +38,7 @@ class ViewUser extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            SendLoginLinkAction::make(),
+            SendLoginCodeAction::make(),
             LinkAction::make()
                 ->name('impersonate')
                 ->color('warning')

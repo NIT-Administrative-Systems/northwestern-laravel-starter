@@ -76,6 +76,21 @@ class AppServiceProvider extends ServiceProvider
                 ->by($request->user()?->id ?: $request->ip())
                 ->response(fn () => ProblemDetails::tooManyRequests());
         });
+
+        RateLimiter::for('login-code-request', static function (Request $request) {
+            $email = mb_strtolower((string) $request->input('email', $request->session()->get('login_code.email', '')));
+
+            return [
+                Limit::perMinute(5)->by($request->ip() ?? 'ip:none'),
+                Limit::perMinute(3)->by('login-code:req:' . $email),
+            ];
+        });
+
+        RateLimiter::for('login-code-verify', static function (Request $request) {
+            $ip = $request->ip() ?? 'ip:none';
+
+            return Limit::perMinute(10)->by('login-code:verify:' . $ip);
+        });
     }
 
     public function configureExceptions(): void

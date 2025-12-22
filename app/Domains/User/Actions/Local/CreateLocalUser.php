@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 /**
  * Creates a new local user account for external (non-Northwestern) users.
  *
- * Local users authenticate via login links sent to their email.
+ * Local users authenticate via one-time verification codes sent to their email.
  */
 readonly class CreateLocalUser
 {
@@ -43,7 +43,7 @@ readonly class CreateLocalUser
         });
 
         if ($sendLoginLink) {
-            resolve(SendLoginLink::class)($user, request()->ip());
+            resolve(IssueLoginChallenge::class)($user->email, request()->ip(), request()->userAgent());
         }
 
         return $user;

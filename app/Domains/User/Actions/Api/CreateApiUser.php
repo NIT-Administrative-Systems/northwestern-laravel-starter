@@ -16,7 +16,7 @@ use Illuminate\Support\Str;
  * Creates a new API user account with an initial Bearer token.
  *
  * API users are service accounts used for programmatic access to the application.
- * They authenticate using Bearer tokens instead of SSO or login links.
+ * They authenticate using Bearer tokens instead of SSO or verification codes.
  */
 readonly class CreateApiUser
 {

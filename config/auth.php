@@ -34,8 +34,8 @@ return [
     |--------------------------------------------------------------------------
     |
     | Enable passwordless authentication for external (non-Northwestern) users.
-    | When enabled, administrators can create local user accounts and invite
-    | them via email with magic links for secure, password-free access.
+    | When enabled, administrators can create local user accounts that can
+    | authenticate using a verification code sent via email.
     |
     | Use Case: External collaborators, clients, or partners who don't have
     | Northwestern credentials but need to access specific features.
@@ -46,14 +46,28 @@ return [
         // Enable/disable local authentication system
         'enabled' => env('LOCAL_AUTH_ENABLED', true),
 
-        // How long login links remain valid
-        'login_link_expiration_minutes' => env('LOCAL_AUTH_LOGIN_LINK_EXPIRATION_MINUTES', 15),
-
-        // Maximum requests per hour (applies to both form submissions and login link sends)
+        // Maximum requests per hour (applies to both form submissions and code sends)
         'rate_limit_per_hour' => env('LOCAL_AUTH_RATE_LIMIT_PER_HOUR', 10),
 
         // Where to send users after a successful login (route name or path)
         'redirect_after_login' => env('LOCAL_AUTH_REDIRECT_AFTER_LOGIN', '/'),
+
+        'code' => [
+            // Number of digits in the verification code
+            'digits' => 6,
+
+            // Minutes before the code expires
+            'expires_in_minutes' => 10,
+
+            // Maximum failed attempts before lockout
+            'max_attempts' => 8,
+
+            // Minutes a challenge stays locked after max attempts
+            'lock_minutes' => 15,
+
+            // Cooldown before resending another code
+            'resend_cooldown_seconds' => 30,
+        ],
     ],
 
     /*
