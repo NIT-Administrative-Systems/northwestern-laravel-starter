@@ -8,9 +8,10 @@ use App\Domains\User\Mail\LoginVerificationCodeNotification;
 use App\Domains\User\Models\LoginChallenge;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterval;
-use Illuminate\Mail\SendQueuedMailable;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -35,7 +36,6 @@ final readonly class IssueLoginChallenge
 
     public function __invoke(string $email, ?string $ip, ?string $userAgent): LoginChallenge
     {
-        $now = new CarbonImmutable();
         $email = mb_strtolower(trim($email));
 
         $rateLimitKey = "login-code:{$email}";
@@ -53,8 +53,11 @@ final readonly class IssueLoginChallenge
         $digits = (int) config('auth.local.code.digits', 6);
         $expires = (int) config('auth.local.code.expires_in_minutes', 10);
         $code = ($this->generateOneTimeCode)($digits);
+        $encryptedCode = Crypt::encryptString($code);
 
-        return DB::transaction(function () use ($email, $code, $expires, $now, $ip, $userAgent, $rateLimitKey) {
+        return DB::transaction(function () use ($email, $code, $encryptedCode, $expires, $ip, $userAgent, $rateLimitKey) {
+            $now = CarbonImmutable::now();
+
             $challenge = LoginChallenge::create([
                 'email' => $email,
                 'code_hash' => Hash::make($code),
@@ -65,14 +68,15 @@ final readonly class IssueLoginChallenge
 
             RateLimiter::hit($rateLimitKey, (int) CarbonInterval::hour()->totalSeconds);
 
-            dispatch(new SendQueuedMailable(
-                new LoginVerificationCodeNotification(
-                    code: $code,
-                    expiresAt: $challenge->expires_at,
-                )->to($email)
-            ))->afterCommit();
+            DB::afterCommit(static function () use ($challenge, $encryptedCode, $email, $now) {
+                Mail::to($email)
+                    ->queue(new LoginVerificationCodeNotification(
+                        encryptedCode: $encryptedCode,
+                        expiresAt: $challenge->expires_at,
+                    ));
 
-            $challenge->update(['email_sent_at' => $now]);
+                $challenge->update(['email_sent_at' => $now]);
+            });
 
             return $challenge;
         });

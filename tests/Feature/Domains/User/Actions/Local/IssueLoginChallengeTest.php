@@ -8,6 +8,7 @@ use App\Domains\User\Actions\Local\IssueLoginChallenge;
 use App\Domains\User\Mail\LoginVerificationCodeNotification;
 use App\Domains\User\Models\LoginChallenge;
 use Carbon\CarbonImmutable;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
@@ -41,7 +42,10 @@ class IssueLoginChallengeTest extends TestCase
         $this->assertTrue($challenge->expires_at->between(now()->addMinutes(15)->subSecond(), now()->addMinutes(15)->addSecond()));
 
         Mail::assertQueued(LoginVerificationCodeNotification::class, function ($mail) use ($challenge) {
-            return $mail->hasTo($challenge->email) && Hash::check($mail->code, $challenge->code_hash);
+            $code = Crypt::decryptString($mail->encryptedCode);
+
+            return $mail->hasTo($challenge->email)
+                && Hash::check($code, $challenge->code_hash);
         });
     }
 

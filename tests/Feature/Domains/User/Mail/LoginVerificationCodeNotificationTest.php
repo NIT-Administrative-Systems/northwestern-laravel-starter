@@ -6,6 +6,7 @@ namespace Tests\Feature\Domains\User\Mail;
 
 use App\Domains\User\Mail\LoginVerificationCodeNotification;
 use Carbon\CarbonImmutable;
+use Illuminate\Support\Facades\Crypt;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
@@ -15,12 +16,12 @@ class LoginVerificationCodeNotificationTest extends TestCase
     public function test_envelope_has_correct_subject(): void
     {
         config(['app.name' => 'Test App']);
-        $mailable = new LoginVerificationCodeNotification('123456', CarbonImmutable::now()->addMinutes(10));
-
-        $this->assertEquals(
-            sprintf('123456 - %s Verification Code', 'Test App'),
-            $mailable->envelope()->subject
+        $mailable = new LoginVerificationCodeNotification(
+            Crypt::encryptString('123456'),
+            CarbonImmutable::now()->addMinutes(10)
         );
+
+        $this->assertEquals('Sign in to Test App', $mailable->envelope()->subject);
     }
 
     public function test_content_includes_code_and_expiration(): void
@@ -29,7 +30,10 @@ class LoginVerificationCodeNotificationTest extends TestCase
         $expiresAt = CarbonImmutable::now()->addMinutes(12);
         $expectedMinutes = 12;
 
-        $mailable = new LoginVerificationCodeNotification('654321', $expiresAt);
+        $mailable = new LoginVerificationCodeNotification(
+            Crypt::encryptString('654321'),
+            $expiresAt
+        );
 
         $content = $mailable->content();
 
