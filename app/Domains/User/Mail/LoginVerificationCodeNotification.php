@@ -37,10 +37,8 @@ class LoginVerificationCodeNotification extends Mailable implements ShouldQueue
 
     public function envelope(): Envelope
     {
-        $code = Crypt::decryptString($this->encryptedCode);
-
         return new Envelope(
-            subject: sprintf('%s - %s Verification Code', $code, config('app.name')),
+            subject: sprintf('Sign in to %s', config('app.name')),
         );
     }
 
