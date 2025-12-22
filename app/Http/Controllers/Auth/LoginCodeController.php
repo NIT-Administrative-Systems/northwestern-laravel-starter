@@ -105,7 +105,7 @@ class LoginCodeController extends Controller
 
         session([
             'login_code.email' => $email,
-            'login_code.challenge_id' => $challenge?->id,
+            'login_code.challenge_id' => $challenge?->id !== null ? (string) $challenge->id : null,
             'login_code.resend_available_at' => now()->addSeconds(
                 (int) config('auth.local.code.resend_cooldown_seconds', 30)
             )->timestamp,

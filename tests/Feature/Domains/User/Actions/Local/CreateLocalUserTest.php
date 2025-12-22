@@ -164,7 +164,8 @@ class CreateLocalUserTest extends TestCase
             ->where('email', $user->email)
             ->first();
 
-        $this->assertEquals('203.0.113.42', $loginChallenge?->requested_ip);
+        $this->assertNotNull($loginChallenge);
+        $this->assertEquals('203.0.113.42', $loginChallenge->requested_ip);
     }
 
     protected function action(): CreateLocalUser

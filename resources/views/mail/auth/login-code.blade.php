@@ -16,6 +16,6 @@ To continue, please enter the verification code below in the original sign-in wi
 </table>
 
 <x-slot:subcopy>
-If you did not initiate this request, you may disregard this email. For your security, do not share this verification code with anyone.
+If you did not initiate this request, you may disregard this email. For your security, do not share this verification code with anyone. This code expires in {{ $expiresInMinutes }} minutes.
 </x-slot:subcopy>
 </x-mail::message>
