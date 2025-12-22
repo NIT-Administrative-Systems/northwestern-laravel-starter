@@ -5,8 +5,20 @@ declare(strict_types=1);
 namespace App\Domains\User\Models;
 
 use App\Domains\Core\Models\BaseModel;
+use App\Domains\User\Actions\Local\IssueLoginChallenge;
+use App\Domains\User\Actions\Local\VerifyLoginChallengeCode;
+use App\Domains\User\Jobs\SendLoginCodeEmailJob;
+use App\Http\Controllers\Auth\LoginCodeController;
 use Carbon\CarbonImmutable;
 
+/**
+ * Represents the OTP challenge state for a local user authentication attempt.
+ *
+ * @see LoginCodeController
+ * @see IssueLoginChallenge
+ * @see VerifyLoginChallengeCode
+ * @see SendLoginCodeEmailJob
+ */
 class LoginChallenge extends BaseModel
 {
     protected $casts = [

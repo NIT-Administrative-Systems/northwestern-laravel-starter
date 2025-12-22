@@ -9,6 +9,13 @@ use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
+/**
+ * Verifies a provided OTP code against a {@see LoginChallenge}.
+ *
+ * This checks if the challenge is active, validates the code hash,
+ * handles attempt increments/locking on failure, and marks the
+ * challenge as consumed upon a successful match.
+ */
 final class VerifyLoginChallengeCode
 {
     public function __invoke(LoginChallenge $challenge, string $code, ?string $ip, ?string $userAgent): bool

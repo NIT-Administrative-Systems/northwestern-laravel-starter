@@ -11,6 +11,10 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Mail;
 
+/**
+ * Responsible for sending the {@see LoginCodeNotification} email containing the OTP, and recording
+ * the {@see LoginChallenge::$email_sent_at} timestamp.
+ */
 class SendLoginCodeEmailJob implements ShouldQueue
 {
     use Queueable;
