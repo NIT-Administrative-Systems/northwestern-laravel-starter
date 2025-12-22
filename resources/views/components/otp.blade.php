@@ -125,7 +125,7 @@
 
                     shouldShowSeparator(index) {
                         return index > 0 && {{ $separator ?: 0 }} > 0 && index % {{ $separator ?: 0 }} ===
-                        0;
+                            0;
                     },
 
                     handleInput(e, index) {
