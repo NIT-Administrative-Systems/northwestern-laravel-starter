@@ -58,7 +58,6 @@
             font-weight: 500;
             line-height: 3.5rem;
             padding: 0;
-            border-radius: 8px;
         }
 
         .otp-separator {
