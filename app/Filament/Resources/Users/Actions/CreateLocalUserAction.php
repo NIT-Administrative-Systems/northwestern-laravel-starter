@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users\Actions;
 
+use App\Domains\Auth\Enums\PermissionEnum;
 use App\Domains\User\Actions\Local\CreateLocalUser;
-use App\Domains\User\Enums\PermissionEnum;
 use App\Filament\Resources\Users\UserResource;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Checkbox;

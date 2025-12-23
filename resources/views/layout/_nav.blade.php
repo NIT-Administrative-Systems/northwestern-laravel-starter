@@ -1,6 +1,5 @@
 @php
-    use App\Domains\User\Enums\PermissionEnum;
-    use App\Domains\User\Enums\AuthTypeEnum;
+    use App\Domains\Auth\Enums\PermissionEnum;
     use App\Providers\Filament\AdministrationPanelProvider;
     use Filament\Facades\Filament;
 @endphp

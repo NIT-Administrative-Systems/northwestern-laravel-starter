@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Domains\User\Events;
 
 use App\Domains\User\Enums\NetIdUpdateActionEnum;
-use App\Http\Controllers\Webhooks\NetIdUpdateController;
+use App\Domains\User\Http\Controllers\Webhooks\NetIdUpdateController;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;

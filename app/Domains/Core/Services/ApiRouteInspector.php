@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Core\Services;
 
-use App\Http\Middleware\AuthenticatesAccessTokens;
+use App\Domains\Auth\Http\Middleware\AuthenticatesAccessTokens;
 use Illuminate\Routing\Router;
 
 /**

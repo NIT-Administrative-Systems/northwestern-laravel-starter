@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\ApiRequestLogs;
 
-use App\Domains\User\Enums\PermissionEnum;
-use App\Domains\User\Models\ApiRequestLog;
+use App\Domains\Auth\Enums\PermissionEnum;
+use App\Domains\Auth\Models\ApiRequestLog;
 use App\Filament\Navigation\AdministrationNavGroup;
 use App\Filament\Resources\ApiRequestLogs\Pages\ListApiRequestLogs;
 use App\Filament\Resources\ApiRequestLogs\Tables\ApiRequestLogsTable;

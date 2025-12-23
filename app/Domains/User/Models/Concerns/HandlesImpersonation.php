@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domains\User\Models\Concerns;
 
-use App\Domains\User\Enums\AuthTypeEnum;
-use App\Domains\User\Enums\PermissionEnum;
+use App\Domains\Auth\Enums\AuthTypeEnum;
+use App\Domains\Auth\Enums\PermissionEnum;
 use App\Domains\User\Models\User;
 
 /**

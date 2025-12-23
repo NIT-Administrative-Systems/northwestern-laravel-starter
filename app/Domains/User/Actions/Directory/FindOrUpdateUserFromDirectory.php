@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domains\User\Actions\Directory;
 
+use App\Domains\Auth\Enums\AuthTypeEnum;
 use App\Domains\User\Actions\PersistUserWithUniqueUsername;
-use App\Domains\User\Enums\AuthTypeEnum;
 use App\Domains\User\Enums\DirectorySearchType;
 use App\Domains\User\Exceptions\BadDirectoryEntry;
 use App\Domains\User\Jobs\DownloadWildcardPhotoJob;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests;
 
-use App\Domains\User\Models\AccessToken;
+use App\Domains\Auth\Models\AccessToken;
 use App\Domains\User\Models\User;
 use Illuminate\Testing\TestResponse;
 

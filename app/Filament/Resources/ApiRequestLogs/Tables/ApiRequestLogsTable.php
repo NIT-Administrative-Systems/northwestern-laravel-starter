@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\ApiRequestLogs\Tables;
 
+use App\Domains\Auth\Models\ApiRequestLog;
 use App\Domains\Core\Enums\ApiRequestFailureEnum;
-use App\Domains\User\Models\ApiRequestLog;
 use App\Filament\Resources\Users\RelationManagers\ApiRequestLogsRelationManager;
 use App\Filament\Resources\Users\UserResource;
 use Filament\Actions\Action;

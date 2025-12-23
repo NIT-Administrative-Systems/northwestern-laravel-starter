@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Domains\Core\Exceptions;
 
+use App\Domains\Auth\Http\Middleware\LogsApiRequests;
 use App\Domains\Core\Enums\ApiRequestFailureEnum;
 use App\Domains\Core\ValueObjects\ApiRequestContext;
-use App\Http\Middleware\LogsApiRequests;
 use App\Http\Responses\ProblemDetails;
 use ErrorException;
 use Illuminate\Auth\Access\AuthorizationException;

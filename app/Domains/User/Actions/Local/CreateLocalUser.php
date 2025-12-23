@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace App\Domains\User\Actions\Local;
 
+use App\Domains\Auth\Actions\Local\IssueLoginChallenge;
+use App\Domains\Auth\Enums\AuthTypeEnum;
 use App\Domains\User\Enums\AffiliationEnum;
-use App\Domains\User\Enums\AuthTypeEnum;
 use App\Domains\User\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;

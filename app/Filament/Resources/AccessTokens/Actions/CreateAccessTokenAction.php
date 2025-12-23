@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\AccessTokens\Actions;
 
-use App\Domains\User\Actions\Api\IssueAccessToken;
-use App\Domains\User\Enums\PermissionEnum;
+use App\Domains\Auth\Actions\Api\IssueAccessToken;
+use App\Domains\Auth\Enums\PermissionEnum;
 use App\Domains\User\Models\User;
 use App\Filament\Resources\AccessTokens\Schemas\AccessTokenSchemas;
 use App\Filament\Resources\Users\RelationManagers\AccessTokensRelationManager;

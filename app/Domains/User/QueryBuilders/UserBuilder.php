@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\User\QueryBuilders;
 
-use App\Domains\User\Enums\AuthTypeEnum;
+use App\Domains\Auth\Enums\AuthTypeEnum;
 use App\Domains\User\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 

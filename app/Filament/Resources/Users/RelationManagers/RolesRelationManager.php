@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users\RelationManagers;
 
-use App\Domains\User\Enums\PermissionEnum;
-use App\Domains\User\Enums\RoleModificationOriginEnum;
-use App\Domains\User\Enums\RoleTypeEnum;
-use App\Domains\User\Models\Role;
+use App\Domains\Auth\Enums\PermissionEnum;
+use App\Domains\Auth\Enums\RoleModificationOriginEnum;
+use App\Domains\Auth\Enums\RoleTypeEnum;
+use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\User;
 use App\Filament\Resources\Roles\RoleResource;
 use Filament\Actions\AttachAction;

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Http\Middleware;
 
-use App\Domains\User\Enums\SystemRoleEnum;
-use App\Domains\User\Models\Role;
+use App\Domains\Auth\Enums\SystemRoleEnum;
+use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\User;
 use App\Http\Middleware\EnvironmentLockdown;
 use Illuminate\Support\Facades\Route;

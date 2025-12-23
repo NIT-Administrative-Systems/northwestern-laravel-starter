@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\AccessTokens\Actions;
 
-use App\Domains\User\Actions\Api\RotateAccessToken;
-use App\Domains\User\Enums\PermissionEnum;
-use App\Domains\User\Models\AccessToken;
+use App\Domains\Auth\Actions\Api\RotateAccessToken;
+use App\Domains\Auth\Enums\PermissionEnum;
+use App\Domains\Auth\Models\AccessToken;
 use App\Filament\Resources\AccessTokens\Schemas\AccessTokenSchemas;
 use Filament\Actions\Action;
 use Filament\Infolists\Components\TextEntry;

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Domains\Auth\Enums\PermissionEnum;
 use App\Domains\Core\Database\ConfigurableDbDumperFactory;
 use App\Domains\Core\Exceptions\ProblemDetailsRenderer;
-use App\Domains\User\Enums\PermissionEnum;
 use App\Domains\User\Models\User;
 use App\Http\Responses\ProblemDetails;
 use Illuminate\Cache\RateLimiting\Limit;

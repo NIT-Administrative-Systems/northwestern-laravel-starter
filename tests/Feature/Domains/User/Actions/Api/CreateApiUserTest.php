@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\User\Actions\Api;
 
+use App\Domains\Auth\Enums\AuthTypeEnum;
+use App\Domains\Auth\Models\AccessToken;
 use App\Domains\User\Actions\Api\CreateApiUser;
 use App\Domains\User\Enums\AffiliationEnum;
-use App\Domains\User\Enums\AuthTypeEnum;
-use App\Domains\User\Models\AccessToken;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use PHPUnit\Framework\Attributes\CoversClass;

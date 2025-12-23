@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Roles\Schemas;
 
-use App\Domains\User\Enums\PermissionEnum;
-use App\Domains\User\Enums\PermissionScopeEnum;
-use App\Domains\User\Enums\RoleTypeEnum;
-use App\Domains\User\Models\Permission;
-use App\Domains\User\Models\RoleType;
+use App\Domains\Auth\Enums\PermissionEnum;
+use App\Domains\Auth\Enums\PermissionScopeEnum;
+use App\Domains\Auth\Enums\RoleTypeEnum;
+use App\Domains\Auth\Models\Permission;
+use App\Domains\Auth\Models\RoleType;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;

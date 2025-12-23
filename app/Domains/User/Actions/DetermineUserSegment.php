@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domains\User\Actions;
 
-use App\Domains\User\Enums\AuthTypeEnum;
-use App\Domains\User\Enums\PermissionEnum;
+use App\Domains\Auth\Enums\AuthTypeEnum;
+use App\Domains\Auth\Enums\PermissionEnum;
 use App\Domains\User\Enums\UserSegmentEnum;
 use App\Domains\User\Models\User;
 use App\Domains\User\Models\UserLoginRecord;

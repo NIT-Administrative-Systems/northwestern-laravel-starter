@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Database\Seeders\Sample;
 
-use App\Domains\User\Enums\RoleTypeEnum;
-use App\Domains\User\Models\AccessToken;
-use App\Domains\User\Models\Role;
+use App\Domains\Auth\Enums\RoleTypeEnum;
+use App\Domains\Auth\Models\AccessToken;
+use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;

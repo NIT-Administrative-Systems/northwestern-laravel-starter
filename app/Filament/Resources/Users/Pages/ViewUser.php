@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users\Pages;
 
-use App\Domains\User\Enums\AuthTypeEnum;
+use App\Domains\Auth\Enums\AuthTypeEnum;
 use App\Domains\User\Models\User;
 use App\Filament\Resources\Users\Actions\SendLoginCodeAction;
 use App\Filament\Resources\Users\Schemas\ApiUserInfolist;

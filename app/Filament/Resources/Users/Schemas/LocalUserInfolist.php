@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users\Schemas;
 
-use App\Domains\User\Enums\PermissionEnum;
+use App\Domains\Auth\Enums\PermissionEnum;
 use App\Domains\User\Models\User;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;
