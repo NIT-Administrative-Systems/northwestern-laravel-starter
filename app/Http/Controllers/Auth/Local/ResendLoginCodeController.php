@@ -44,7 +44,7 @@ class ResendLoginCodeController extends Controller
                 )->timestamp,
             ]);
 
-            return back();
+            return back()->with('status', 'Verification code resent.');
         }
 
         try {
