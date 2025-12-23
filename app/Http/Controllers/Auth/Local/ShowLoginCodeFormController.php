@@ -41,10 +41,6 @@ class ShowLoginCodeFormController extends Controller
             session()->forget(LoginCodeSession::CHALLENGE_ID);
         }
 
-        if (! $challenge) {
-            session()->forget(LoginCodeSession::CHALLENGE_ID);
-        }
-
         if ($challenge && ($challenge->isConsumed() || $challenge->isExpired())) {
             session()->forget(LoginCodeSession::CHALLENGE_ID);
             $challenge = null;
