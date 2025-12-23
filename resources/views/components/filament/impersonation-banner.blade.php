@@ -68,11 +68,14 @@
             </div>
         </div>
         <div class="flex-shrink-0">
-            <a class="inline-flex items-center gap-2 rounded-md bg-white px-3.5 py-2 text-sm font-semibold text-red-600 shadow-sm transition-colors duration-150 hover:bg-red-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-               href="{{ $leaveUrl }}">
-                <x-filament::icon class="h-4 w-4" :icon="\Filament\Support\Icons\Heroicon::ArrowRightEndOnRectangle" />
-                Leave Impersonation
-            </a>
+            <form method="POST" action="{{ $leaveUrl }}">
+                @csrf
+                <button class="inline-flex items-center gap-2 rounded-md bg-white px-3.5 py-2 text-sm font-semibold text-red-600 shadow-sm transition-colors duration-150 hover:bg-red-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                        type="submit">
+                    <x-filament::icon class="h-4 w-4" :icon="\Filament\Support\Icons\Heroicon::ArrowRightEndOnRectangle" />
+                    Leave Impersonation
+                </button>
+            </form>
         </div>
     </div>
 </div>

@@ -44,10 +44,15 @@
             </li>
             <li class='nav-item d-flex align-items-center'>
                 @impersonating
-                    <a class="nav-link" href="{{ route('impersonate.leave') }}">
-                        Leave Impersonation
-                        <i class="fas fa-sign-out-alt fa-fw ms-1" aria-hidden="true"></i>
-                    </a>
+                    <form class="mb-0"
+                          method="POST"
+                          action="{{ route('impersonate.leave') }}">
+                        @csrf
+                        <button class="nav-link btn btn-link p-0" type="submit">
+                            Leave Impersonation
+                            <i class="fas fa-sign-out-alt fa-fw ms-1" aria-hidden="true"></i>
+                        </button>
+                    </form>
                 @else
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf

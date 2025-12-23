@@ -9,6 +9,7 @@ use App\Domains\User\Actions\Impersonation\StopImpersonation;
 use App\Domains\User\Enums\PermissionEnum;
 use App\Domains\User\Models\User;
 use App\Http\Controllers\Auth\ImpersonationController;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Session;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
@@ -16,12 +17,19 @@ use Tests\TestCase;
 #[CoversClass(ImpersonationController::class)]
 class ImpersonationControllerTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->withoutMiddleware(VerifyCsrfToken::class);
+    }
+
     public function test_take_impersonation_requires_authorization(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        $response = $this->get('/impersonate/take/2/web');
+        $response = $this->post('/impersonate/take/2/web');
 
         $response->assertForbidden();
     }
@@ -38,7 +46,7 @@ class ImpersonationControllerTest extends TestCase
                 ->andReturns('https://example.com/dashboard');
         });
 
-        $response = $this->get('/impersonate/take/2/web');
+        $response = $this->post('/impersonate/take/2/web');
 
         $response->assertRedirect('https://example.com/dashboard');
     }
@@ -54,7 +62,7 @@ class ImpersonationControllerTest extends TestCase
                 ->andReturns('/admin/users');
         });
 
-        $response = $this->get('/impersonate/take/2/web');
+        $response = $this->post('/impersonate/take/2/web');
 
         $response->assertRedirect('/admin/users');
     }
@@ -70,7 +78,7 @@ class ImpersonationControllerTest extends TestCase
                 ->andReturns('back');
         });
 
-        $response = $this->get('/impersonate/take/2/web');
+        $response = $this->post('/impersonate/take/2/web');
 
         $response->assertRedirect('/');
     }
@@ -82,7 +90,7 @@ class ImpersonationControllerTest extends TestCase
                 ->andReturns('https://example.com/dashboard');
         });
 
-        $response = $this->get('/impersonate/leave');
+        $response = $this->post('/impersonate/leave');
 
         $response->assertRedirect('https://example.com/dashboard');
     }
@@ -94,7 +102,7 @@ class ImpersonationControllerTest extends TestCase
                 ->andReturns('back');
         });
 
-        $response = $this->get('/impersonate/leave');
+        $response = $this->post('/impersonate/leave');
 
         $response->assertRedirect();
     }
@@ -103,7 +111,7 @@ class ImpersonationControllerTest extends TestCase
     {
         auth()->logout();
 
-        $response = $this->get(route('impersonate', 2));
+        $response = $this->post(route('impersonate', 2));
 
         $response->assertRedirect('/auth/type');
 
@@ -123,7 +131,7 @@ class ImpersonationControllerTest extends TestCase
                 ->andReturns('/');
         });
 
-        $response = $this->get('/impersonate/take/2/web', [
+        $response = $this->post('/impersonate/take/2/web', [], [
             'Referer' => $referer,
         ]);
 
@@ -143,7 +151,7 @@ class ImpersonationControllerTest extends TestCase
             $mock->expects('__invoke')->andReturns('back');
         });
 
-        $this->get('/impersonate/take/2/web', ['Referer' => $referer]);
+        $this->post('/impersonate/take/2/web', [], ['Referer' => $referer]);
 
         $this->assertSame($referer, session('impersonation.return_url'));
     }
@@ -161,7 +169,7 @@ class ImpersonationControllerTest extends TestCase
             $mock->expects('__invoke')->andReturns('back');
         });
 
-        $this->get('/impersonate/take/2/web', ['Referer' => $referer]);
+        $this->post('/impersonate/take/2/web', [], ['Referer' => $referer]);
 
         $this->assertNull(session('impersonation.return_url'));
     }
