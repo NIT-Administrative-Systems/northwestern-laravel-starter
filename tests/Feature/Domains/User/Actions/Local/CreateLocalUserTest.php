@@ -6,6 +6,7 @@ namespace Tests\Feature\Domains\User\Actions\Local;
 
 use App\Domains\User\Actions\Local\CreateLocalUser;
 use App\Domains\User\Enums\AuthTypeEnum;
+use App\Domains\User\Models\LoginChallenge;
 use Illuminate\Support\Facades\Mail;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
@@ -95,7 +96,7 @@ class CreateLocalUserTest extends TestCase
         $this->assertStringStartsWith('test-', $user2->username);
     }
 
-    public function test_sends_login_link_by_default(): void
+    public function test_sends_login_code_by_default(): void
     {
         $user = $this->action()(
             email: 'withlink@example.com',
@@ -106,10 +107,10 @@ class CreateLocalUserTest extends TestCase
             // sendLoginLink defaults to true
         );
 
-        $this->assertEquals(1, $user->login_links()->count());
+        $this->assertEquals(1, $user->login_challenges()->count());
     }
 
-    public function test_does_not_send_login_link_when_disabled(): void
+    public function test_does_not_send_login_code_when_disabled(): void
     {
         $user = $this->action()(
             email: 'nolink@example.com',
@@ -120,7 +121,7 @@ class CreateLocalUserTest extends TestCase
             sendLoginLink: false
         );
 
-        $this->assertEquals(0, $user->login_links()->count());
+        $this->assertEquals(0, $user->login_challenges()->count());
     }
 
     public function test_username_collision_generates_new_random_suffix(): void
@@ -146,7 +147,7 @@ class CreateLocalUserTest extends TestCase
         $this->assertNotEquals($user1->username, $user2->username);
     }
 
-    public function test_login_link_uses_request_ip_when_available(): void
+    public function test_login_code_uses_request_ip_when_available(): void
     {
         request()->server->set('REMOTE_ADDR', '203.0.113.42');
 
@@ -159,8 +160,12 @@ class CreateLocalUserTest extends TestCase
             sendLoginLink: true
         );
 
-        $loginLink = $user->login_links()->first();
-        $this->assertEquals('203.0.113.42', $loginLink->requested_ip_address);
+        $loginChallenge = LoginChallenge::query()
+            ->where('email', $user->email)
+            ->first();
+
+        $this->assertNotNull($loginChallenge);
+        $this->assertEquals('203.0.113.42', $loginChallenge->requested_ip);
     }
 
     protected function action(): CreateLocalUser

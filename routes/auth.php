@@ -8,9 +8,17 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function () {
     Route::middleware('guest')->group(function () {
-        Route::get('login', [Controllers\Auth\LoginLinkController::class, 'showRequestForm'])->name('login-link.request');
-        Route::post('login/email', [Controllers\Auth\LoginLinkController::class, 'sendLink'])->name('login-link.send');
-        Route::get('login/verify/{token}', [Controllers\Auth\LoginLinkController::class, 'verify'])->name('login-link.verify');
+        Route::get('login', Controllers\Auth\Local\ShowLoginCodeRequestController::class)->name('login-code.request');
+        Route::post('login/request', Controllers\Auth\Local\SendLoginCodeController::class)
+            ->middleware('throttle:login-code-request')
+            ->name('login-code.send');
+        Route::post('login/resend', Controllers\Auth\Local\ResendLoginCodeController::class)
+            ->middleware('throttle:login-code-request')
+            ->name('login-code.resend');
+        Route::get('login/code', Controllers\Auth\Local\ShowLoginCodeFormController::class)->name('login-code.code');
+        Route::post('login/verify', Controllers\Auth\Local\VerifyLoginCodeController::class)
+            ->middleware('throttle:login-code-verify')
+            ->name('login-code.verify');
     });
 
     Route::get('type', Controllers\Auth\LoginSelectionController::class)->name('login-selection');

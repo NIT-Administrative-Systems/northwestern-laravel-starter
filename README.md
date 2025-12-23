@@ -62,7 +62,7 @@ The **Northwestern Laravel Starter** provides a cohesive solution that takes car
 
 ### 🔐 Authentication & Authorization
 
-- **Multi-Authentication Methods**: Support for Entra ID SSO, Access Tokens, and passwordless email-based login links.
+- **Multi-Authentication Methods**: Support for Entra ID SSO, Access Tokens, and passwordless email-based verification codes.
 - **Role-Based Access Control**: Fine-grained role and permissions system managed through an intuitive interface.
 - **User Impersonation**: Secure ability to troubleshoot user-specific issues and simulate user experiences.
 

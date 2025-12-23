@@ -18,15 +18,15 @@
                         </div>
 
                         <h2 class="h4 fw-semibold mb-2">
-                            Request a sign-in link
+                            Request a verification code
                         </h2>
                         <p class="text-muted mb-0">
-                            Enter the email address associated with your account to receive a secure sign-in link.
+                            Enter the email address associated with your account to receive a verification code.
                         </p>
                     </div>
 
                     <form method="POST"
-                          action="{{ route('login-link.send') }}"
+                          action="{{ route('login-code.send') }}"
                           novalidate>
                         @csrf
 
@@ -49,10 +49,8 @@
                             @enderror
                         </div>
 
-                        <button class="btn btn-primary btn-lg w-100 d-inline-flex align-items-center justify-content-center mb-3"
-                                type="submit">
-                            <i class="fas fa-paper-plane fa-fw me-2" aria-hidden="true"></i>
-                            <span>Send sign-in link</span>
+                        <button class="btn btn-primary btn-lg w-100 mb-3" type="submit">
+                            <span>Continue</span>
                         </button>
 
                         <div class="text-center">

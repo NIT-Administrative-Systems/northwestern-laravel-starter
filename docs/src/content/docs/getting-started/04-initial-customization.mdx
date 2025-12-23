@@ -59,7 +59,7 @@ The `StakeholderSeeder` requires a valid **Directory Search API key**. Ensure `D
 ## 2. Local Authentication (Passwordless)
 
 <Aside type="note">
-Local authentication allows external users (non-Northwestern) to access your application via email-based magic links after they are invited by an administrator. Disable this if your app is only intended for Northwestern users.
+Local authentication allows external users (non-Northwestern) to access your application via emailed verification codes after they are invited by an administrator. Disable this if your app is only intended for Northwestern users.
 </Aside>
 
 ### Configuration Options
@@ -71,10 +71,7 @@ Edit `config/auth.php` or set environment variables:
 # Enable/disable local authentication
 LOCAL_AUTH_ENABLED=true
 
-# How long login links remain valid (minutes)
-LOCAL_AUTH_LOGIN_LINK_EXPIRATION_MINUTES=15
-
-# Rate limit for login link requests (per hour)
+# Rate limit for login code requests (per hour)
 LOCAL_AUTH_RATE_LIMIT_PER_HOUR=10
 
 # Redirect destination after successful login
@@ -95,14 +92,30 @@ LOCAL_AUTH_REDIRECT_AFTER_LOGIN=/
   </Card>
 </CardGrid>
 
+### Passwordless Code Settings
+
+Edit the local auth configuration in `config/auth.php` to tune the OTP length, expiration, and lockout behavior.
+
+```php
+'local' => [
+    'code' => [
+        'digits' => 6,
+        'expires_in_minutes' => 10,
+        'max_attempts' => 8,
+        'lock_minutes' => 15,
+        'resend_cooldown_seconds' => 30,
+    ],
+],
+```
+
 ### How Local Auth Works
 
 <Steps>
 1. Admin creates a local user account through the Filament panel
-2. Admin can trigger an immediate login link email, or the user can request one themselves
-3. User receives an email with a login link valid for a limited time
-4. User clicks link and is authenticated (no password needed)
-5. Link expires and becomes invalid after use
+2. Admin can trigger an immediate verification code, or the user can request one themselves
+3. User receives an email with a verification code valid for a limited time
+4. User enters the code and is authenticated (no password needed)
+5. Code expires and becomes invalid after use
 </Steps>
 
 ---
@@ -245,7 +258,7 @@ PRODUCTION_URL=https://your-app.northwestern.edu
 
 The following routes are always accessible, regardless of lockdown status:
 
-- Authentication routes (OAuth, login links, logout)
+- Authentication routes (OAuth, verification codes, logout)
 - Impersonation routes (take/leave impersonation)
 - The lockdown page itself
 
@@ -287,4 +300,3 @@ If you want to remove the documentation module, follow these steps:
 rm .github/workflows/deploy-docs.yml
 rm -rf docs/
 ```
-

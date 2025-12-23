@@ -38,9 +38,11 @@ class EnvironmentLockdown
         'login-oauth-logout',
         'login-selection',
         'logout',
-        'login-link.request',
-        'login-link.send',
-        'login-link.verify',
+        'login-code.request',
+        'login-code.send',
+        'login-code.verify',
+        'login-code.code',
+        'login-code.resend',
 
         // Impersonation
         'impersonate',

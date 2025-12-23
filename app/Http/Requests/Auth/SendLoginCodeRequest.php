@@ -7,7 +7,7 @@ namespace App\Http\Requests\Auth;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
 
-class SendLoginLinkRequest extends FormRequest
+class SendLoginCodeRequest extends FormRequest
 {
     public function authorize(): bool
     {

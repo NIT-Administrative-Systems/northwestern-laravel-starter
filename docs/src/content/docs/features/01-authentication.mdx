@@ -5,7 +5,7 @@ description: Multi-method authentication system for Northwestern users and exter
 
 import { Card, CardGrid, Aside, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
 
-The Northwestern Laravel Starter provides a flexible, multi-method authentication system designed to handle both Northwestern users (via NetID/SSO) and external collaborators (via passwordless login links or Access Tokens).
+The Northwestern Laravel Starter provides a flexible, multi-method authentication system designed to handle both Northwestern users (via NetID/SSO) and external collaborators (via passwordless verification codes or Access Tokens).
 
 ## Authentication Methods
 
@@ -21,13 +21,13 @@ The Northwestern Laravel Starter provides a flexible, multi-method authenticatio
     - Session-based authentication
   </Card>
 
-  <Card title="Passwordless Login Links" icon="external">
-    **Magic Link Authentication**
+  <Card title="Passwordless Verification Codes" icon="external">
+    **Email OTP Authentication**
 
     Email-based passwordless authentication for external users.
 
     - No password management
-    - Time-limited login links
+    - Time-limited verification codes
     - Rate limiting protection
     - Invite-only access
   </Card>
@@ -96,9 +96,9 @@ Subsequent logins update the user's demographic data to keep it synchronized.
 
 ---
 
-## Passwordless Login Links
+## Passwordless Verification Codes
 
-External users (non-Northwestern) can access the application via time-limited magic links sent to their email.
+External users (non-Northwestern) can access the application via time-limited verification codes sent to their email.
 
 ### How It Works
 
@@ -108,21 +108,21 @@ External users (non-Northwestern) can access the application via time-limited ma
 
    Administrator creates a local user account in the Filament panel
 
-2. **Invite link sent**
+2. **Verification code sent**
 
-   Admin triggers login link email or user requests one themselves
+   Admin triggers a code email or user requests one themselves
 
 3. **User receives email**
 
-   Email contains time-limited magic link (valid for 15 minutes by default)
+   Email contains a time-limited verification code (valid for 10 minutes by default)
 
-4. **User clicks link**
+4. **User enters code**
 
-   Link authenticates user and establishes session
+   Code authenticates the user and establishes a session
 
-5. **Link expires**
+5. **Code expires**
 
-   Link becomes invalid after use or expiration
+   Code becomes invalid after use or expiration
 
 </Steps>
 
@@ -134,10 +134,7 @@ External users (non-Northwestern) can access the application via time-limited ma
 # Enable/disable local authentication
 LOCAL_AUTH_ENABLED=true
 
-# How long login links remain valid (minutes)
-LOCAL_AUTH_LOGIN_LINK_EXPIRATION_MINUTES=15
-
-# Rate limit for login link requests (per hour)
+# Rate limit for login code requests (per hour)
 LOCAL_AUTH_RATE_LIMIT_PER_HOUR=10
 
 # Where to redirect after successful login
@@ -159,7 +156,7 @@ LOCAL_AUTH_REDIRECT_AFTER_LOGIN=/
     use App\Domains\User\Models\User;
     use App\Domains\User\Enums\AffiliationEnum;
     use App\Domains\User\Enums\AuthTypeEnum;
-    use App\Domains\User\Actions\Local\SendLoginLink;
+    use App\Domains\User\Actions\Local\IssueLoginChallenge;
 
     $user = User::create([
         'username' => 'jdoe',
@@ -170,8 +167,8 @@ LOCAL_AUTH_REDIRECT_AFTER_LOGIN=/
         'last_name' => 'Doe',
     ]);
 
-    // Send login link
-    resolve(SendLoginLink::class)($user, request()->ip());
+    // Send verification code
+    resolve(IssueLoginChallenge::class)($user->email, request()->ip(), request()->userAgent());
     ```
   </TabItem>
 </Tabs>
@@ -179,16 +176,16 @@ LOCAL_AUTH_REDIRECT_AFTER_LOGIN=/
 ### Security Features
 
 <CardGrid>
-  <Card title="Time-Limited Links" icon="approve-check">
-    Links automatically expire after configured duration (default: 15 minutes)
+  <Card title="Time-Limited Codes" icon="approve-check">
+    Codes automatically expire after configured duration (default: 10 minutes)
   </Card>
 
-  <Card title="Single-Use Tokens" icon="approve-check">
-    Each link can only be used once, preventing replay attacks
+  <Card title="Single-Use Codes" icon="approve-check">
+    Each code can only be used once, preventing replay attacks
   </Card>
 
   <Card title="Rate Limiting" icon="warning">
-    Limits login link requests to prevent abuse and enumeration attacks
+    Limits login code requests to prevent abuse and enumeration attacks
   </Card>
 
   <Card title="Timing Attack Protection" icon="approve-check">
