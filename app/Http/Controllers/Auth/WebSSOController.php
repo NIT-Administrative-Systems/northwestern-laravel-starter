@@ -65,6 +65,9 @@ class WebSSOController extends Controller
      */
     protected function authenticated(Request $request, $user): void
     {
+        $request->session()->regenerate();
+        $request->session()->regenerateToken();
+
         $user->login_records()->create([
             'logged_in_at' => Carbon::now(),
             'segment' => ($this->determineUserSegment)($user),
@@ -83,6 +86,10 @@ class WebSSOController extends Controller
             return redirect()->route('login-selection');
         }
 
-        return $this->webSSOAuthOauthLogout(route('login-selection'));
+        $response = $this->webSSOAuthOauthLogout(route('login-selection'));
+        session()->invalidate();
+        session()->regenerateToken();
+
+        return $response;
     }
 }
