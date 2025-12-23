@@ -65,3 +65,9 @@ a[aria-current="true"] {
     border-bottom-style: solid;
     text-decoration: none;
 }
+
+@media (max-width: 425px) {
+    .site-title {
+        font-size: 0.75rem;
+    }
+}

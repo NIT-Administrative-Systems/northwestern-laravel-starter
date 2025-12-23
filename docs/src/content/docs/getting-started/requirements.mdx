@@ -1,16 +1,17 @@
 ---
 title: Requirements
 description: System requirements for the Northwestern Laravel Starter
+order: 2
 ---
 
 import { Card, CardGrid, Aside } from '@astrojs/starlight/components';
 
 ## System Requirements
 
-- **🐘 PHP**: `^8.4`
-- **🟢 Node.js**: `v24.x`
-- **🟠 pnpm**: `^10.0`
-- **🗄️ PostgreSQL**: `16+`
+- **PHP**: `^8.4`
+- **Node.js**: `v24.x`
+- **pnpm**: `^10.0`
+- **PostgreSQL**: `16+`
 
 ### PHP Extensions
 
@@ -41,7 +42,7 @@ If you choose to use a different database driver, expect to modify migrations, s
 ## Local Development Setup
 
 <CardGrid>
-  <Card title="🚀 Laravel Herd" icon="rocket">
+  <Card title="Laravel Herd" icon="rocket">
     **Recommended**
 
     [Laravel Herd](https://herd.laravel.com/) provides an all-in-one development environment for macOS and Windows:
@@ -51,7 +52,7 @@ If you choose to use a different database driver, expect to modify migrations, s
     - Automatic site provisioning
   </Card>
 
-  <Card title="⋈ Laravel Valet" icon="seti:config">
+  <Card title="Laravel Valet" icon="seti:config">
     **Alternative**
 
     [Laravel Valet](https://laravel.com/docs/valet) is a lightweight macOS environment requiring manual installation of PHP, PostgreSQL, and other dependencies.
@@ -69,25 +70,25 @@ Access to Northwestern integrations requires approval and credentials through th
 To make the most of this project, you'll need access to the following integrations:
 
 <CardGrid stagger>
-  <Card title="🔐 WebSSO / Entra ID" icon="approve-check">
+  <Card title="WebSSO / Entra ID" icon="approve-check">
     SSO configuration for Northwestern authentication. Credentials must be obtained through the Entra ID application registration process.
 
     **Required** for user authentication via NetID.
   </Card>
 
-  <Card title="📚 Directory Search" icon="magnifier">
+  <Card title="Directory Search" icon="magnifier">
     Service responsible for user lookups, demographic sync, and organizational data.
 
     **Required** for Northwestern user provisioning.
   </Card>
 
-  <Card title="📡 EventHub" icon="rocket">
+  <Card title="EventHub" icon="rocket">
     Webhook configuration and HMAC shared secret for event subscriptions.
 
     **Optional** - Only needed if consuming or publishing events.
   </Card>
 
-  <Card title="📬 NetID Updates Event Message" icon="information">
+  <Card title="NetID Updates Event Message" icon="information">
     Subscription to the `etidentity.ldap.netid.term` topic for receiving NetID lifecycle events.
 
     **Optional** - Enables automatic role removal when users leave Northwestern. Requires EventHub access.

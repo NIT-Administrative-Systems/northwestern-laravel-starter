@@ -34,23 +34,23 @@ export default defineConfig({
             ],
             sidebar: [
                 {
-                    label: '🚀 Getting Started',
+                    label: 'Getting Started',
                     autogenerate: { directory: 'getting-started' },
                 },
                 {
-                    label: '🏗️ Architecture',
+                    label: 'Architecture',
                     autogenerate: { directory: 'architecture' },
                 },
                 {
-                    label: '✨ Features',
+                    label: 'Features',
                     autogenerate: { directory: 'features' },
                 },
                 {
-                    label: '📖 Guides',
+                    label: 'Guides',
                     autogenerate: { directory: 'guides' },
                 },
                 {
-                    label: '📋 Reference',
+                    label: 'Reference',
                     autogenerate: { directory: 'reference' },
                 },
                 ...openAPISidebarGroups,
@@ -61,7 +61,7 @@ export default defineConfig({
                         base: 'api',
                         schema: './schemas/api-schema.yaml',
                         sidebar: {
-                            label: '📘 API Specification',
+                            label: 'API Specification',
                           operations: {
                               badges: true,
                           }

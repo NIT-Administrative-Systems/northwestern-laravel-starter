@@ -1,6 +1,7 @@
 ---
 title: Artisan Commands
 description: Reference guide for custom Artisan commands in the starter
+order: 2
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -65,7 +66,7 @@ php artisan db:seed:list
 - Troubleshoot seeding order issues
 - Document available seeders for your team
 
-**See also:** [Idempotent Seeding](/architecture/03-idempotent-seeding/) documentation
+**See also:** [Idempotent Seeding](/architecture/idempotent-seeding/) documentation
 
 ---
 
@@ -98,7 +99,7 @@ Use descriptive snapshot names like `clean-test-data` or `before-feature-x` to m
 - Creating test data fixtures
 - Preserving demo data
 
-**See also:** [Database Snapshots](/features/04-database-snapshots/) documentation
+**See also:** [Database Snapshots](/features/database-snapshots/) documentation
 
 ---
 
@@ -211,7 +212,7 @@ php artisan access-tokens:notify-expiration
 2. Checks which tokens are due for notifications (30, 14, 7, 3, 1 days before)
 3. Sends reminder emails to token owners
 
-**See also:** [API Documentation](/features/03-api/#expiration-notifications)
+**See also:** [API Documentation](/features/api/#expiration-notifications)
 
 ---
 
