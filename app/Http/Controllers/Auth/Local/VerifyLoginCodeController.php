@@ -11,9 +11,11 @@ use App\Domains\User\Models\LoginChallenge;
 use App\Domains\User\Models\User;
 use App\Http\Controllers\Controller;
 use Carbon\CarbonInterval;
+use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 
 class VerifyLoginCodeController extends Controller
@@ -34,9 +36,17 @@ class VerifyLoginCodeController extends Controller
             'code' => ['required', 'string', 'size:' . $digits],
         ]);
 
-        $challengeId = session(LoginCodeSession::CHALLENGE_ID);
+        $encryptedChallengeId = session(LoginCodeSession::CHALLENGE_ID);
 
-        if (! $challengeId) {
+        if (! $encryptedChallengeId) {
+            return back()->withErrors(['code' => 'Invalid code.'])->onlyInput('code');
+        }
+
+        try {
+            $challengeId = Crypt::decryptString($encryptedChallengeId);
+        } catch (DecryptException) {
+            session()->forget(LoginCodeSession::CHALLENGE_ID);
+
             return back()->withErrors(['code' => 'Invalid code.'])->onlyInput('code');
         }
 

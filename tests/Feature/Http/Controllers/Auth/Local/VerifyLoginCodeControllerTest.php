@@ -10,6 +10,7 @@ use App\Domains\User\Models\LoginChallenge;
 use App\Domains\User\Models\User;
 use App\Domains\User\Models\UserLoginRecord;
 use App\Http\Controllers\Auth\Local\VerifyLoginCodeController;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -42,7 +43,7 @@ class VerifyLoginCodeControllerTest extends TestCase
 
         $this->withSession([
             LoginCodeSession::EMAIL => $user->email,
-            LoginCodeSession::CHALLENGE_ID => (string) $challenge->id,
+            LoginCodeSession::CHALLENGE_ID => Crypt::encryptString((string) $challenge->id),
         ]);
 
         $response = $this->post(route('login-code.verify'), ['code' => $code]);
@@ -68,7 +69,7 @@ class VerifyLoginCodeControllerTest extends TestCase
 
         $this->withSession([
             LoginCodeSession::EMAIL => $user->email,
-            LoginCodeSession::CHALLENGE_ID => (string) $challenge->id,
+            LoginCodeSession::CHALLENGE_ID => Crypt::encryptString((string) $challenge->id),
         ]);
 
         $response = $this->post(route('login-code.verify'), ['code' => '000000']);

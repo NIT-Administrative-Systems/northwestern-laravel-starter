@@ -8,6 +8,7 @@ use App\Domains\Core\ValueObjects\LoginCodeSession;
 use App\Domains\User\Models\LoginChallenge;
 use App\Domains\User\Models\User;
 use App\Http\Controllers\Auth\Local\SendLoginCodeController;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Mail;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
@@ -40,9 +41,11 @@ class SendLoginCodeControllerTest extends TestCase
         $response->assertSessionHas(LoginCodeSession::CHALLENGE_ID);
         $response->assertSessionHas(LoginCodeSession::RESEND_AVAILABLE_AT);
 
-        $challengeId = session(LoginCodeSession::CHALLENGE_ID);
-        $this->assertIsString($challengeId);
-        $this->assertNotNull(LoginChallenge::find($challengeId));
+        $challengeIdEncrypted = session(LoginCodeSession::CHALLENGE_ID);
+        $this->assertIsString($challengeIdEncrypted);
+        $challenge = LoginChallenge::latest('id')->where('email', 'test@example.com')->first();
+        $this->assertNotNull($challenge);
+        $this->assertEquals($challenge->id, (int) Crypt::decryptString($challengeIdEncrypted));
     }
 
     public function test_sends_code_for_nonexistent_email_without_session(): void
@@ -53,9 +56,9 @@ class SendLoginCodeControllerTest extends TestCase
 
         $response->assertRedirect(route('login-code.code'));
 
-        $response->assertSessionMissing(LoginCodeSession::EMAIL);
-        $response->assertSessionMissing(LoginCodeSession::CHALLENGE_ID);
-        $response->assertSessionMissing(LoginCodeSession::RESEND_AVAILABLE_AT);
+        $this->assertEquals('missing@example.com', session(LoginCodeSession::EMAIL));
+        $this->assertIsString(session(LoginCodeSession::CHALLENGE_ID));
+        $this->assertIsInt(session(LoginCodeSession::RESEND_AVAILABLE_AT));
     }
 
     public function test_validation_errors_for_invalid_email(): void

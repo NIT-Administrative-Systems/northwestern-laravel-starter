@@ -8,6 +8,7 @@ use App\Domains\Core\ValueObjects\LoginCodeSession;
 use App\Domains\User\Models\LoginChallenge;
 use App\Domains\User\Models\User;
 use App\Http\Controllers\Auth\Local\ShowLoginCodeFormController;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
@@ -40,7 +41,7 @@ class ShowLoginCodeFormControllerTest extends TestCase
 
         $response = $this->withSession([
             LoginCodeSession::EMAIL => $user->email,
-            LoginCodeSession::CHALLENGE_ID => (string) $expiredChallenge->id,
+            LoginCodeSession::CHALLENGE_ID => Crypt::encryptString((string) $expiredChallenge->id),
             LoginCodeSession::RESEND_AVAILABLE_AT => now()->addSeconds(30)->timestamp,
         ])->get(route('login-code.code'));
 

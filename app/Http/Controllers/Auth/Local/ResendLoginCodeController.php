@@ -10,6 +10,7 @@ use App\Domains\User\Models\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 use RuntimeException;
 
 class ResendLoginCodeController extends Controller
@@ -57,7 +58,7 @@ class ResendLoginCodeController extends Controller
         }
 
         session([
-            LoginCodeSession::CHALLENGE_ID => (string) $challenge->id,
+            LoginCodeSession::CHALLENGE_ID => Crypt::encryptString((string) $challenge->id),
             LoginCodeSession::RESEND_AVAILABLE_AT => now()->addSeconds(
                 (int) config('auth.local.code.resend_cooldown_seconds', 30)
             )->timestamp,

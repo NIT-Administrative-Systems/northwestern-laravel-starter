@@ -7,8 +7,10 @@ namespace App\Http\Controllers\Auth\Local;
 use App\Domains\Core\ValueObjects\LoginCodeSession;
 use App\Domains\User\Models\LoginChallenge;
 use App\Http\Controllers\Controller;
+use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Crypt;
 
 class ShowLoginCodeFormController extends Controller
 {
@@ -22,8 +24,26 @@ class ShowLoginCodeFormController extends Controller
             return redirect()->route('login-code.request');
         }
 
-        $challengeId = session(LoginCodeSession::CHALLENGE_ID);
+        $challengeId = null;
+        $encryptedId = session(LoginCodeSession::CHALLENGE_ID);
+
+        if ($encryptedId) {
+            try {
+                $challengeId = Crypt::decryptString($encryptedId);
+            } catch (DecryptException) {
+                session()->forget(LoginCodeSession::CHALLENGE_ID);
+            }
+        }
+
         $challenge = $challengeId ? LoginChallenge::find($challengeId) : null;
+
+        if (! $challenge) {
+            session()->forget(LoginCodeSession::CHALLENGE_ID);
+        }
+
+        if (! $challenge) {
+            session()->forget(LoginCodeSession::CHALLENGE_ID);
+        }
 
         if ($challenge && ($challenge->isConsumed() || $challenge->isExpired())) {
             session()->forget(LoginCodeSession::CHALLENGE_ID);

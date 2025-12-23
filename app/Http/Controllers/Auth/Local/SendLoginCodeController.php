@@ -12,7 +12,9 @@ use App\Http\Requests\Auth\SendLoginCodeRequest;
 use Carbon\CarbonInterval;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 use Illuminate\Support\Timebox;
 use Illuminate\Validation\ValidationException;
 use RuntimeException;
@@ -86,15 +88,16 @@ class SendLoginCodeController extends Controller
             }
         }, $minimumTimeMs * 1000);
 
-        if ($challenge !== null) {
-            session([
-                LoginCodeSession::EMAIL => $email,
-                LoginCodeSession::CHALLENGE_ID => (string) $challenge->id,
-                LoginCodeSession::RESEND_AVAILABLE_AT => now()->addSeconds(
-                    (int) config('auth.local.code.resend_cooldown_seconds', 30)
-                )->timestamp,
-            ]);
-        }
+        $challengeId = $challenge ? (string) $challenge->id : Str::uuid()->toString();
+        $encryptedId = Crypt::encryptString($challengeId);
+
+        session([
+            LoginCodeSession::EMAIL => $email,
+            LoginCodeSession::CHALLENGE_ID => $encryptedId,
+            LoginCodeSession::RESEND_AVAILABLE_AT => now()->addSeconds(
+                (int) config('auth.local.code.resend_cooldown_seconds', 30)
+            )->timestamp,
+        ]);
 
         return to_route('login-code.code');
     }
