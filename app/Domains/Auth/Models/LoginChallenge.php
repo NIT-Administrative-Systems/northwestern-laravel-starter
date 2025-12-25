@@ -11,6 +11,8 @@ use App\Domains\Auth\Http\Controllers\Local\VerifyLoginCodeController;
 use App\Domains\Auth\Jobs\SendLoginCodeEmailJob;
 use App\Domains\Core\Models\BaseModel;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\MassPrunable;
 
 /**
  * Represents the OTP challenge state for a local user authentication attempt.
@@ -23,6 +25,8 @@ use Carbon\CarbonImmutable;
  */
 class LoginChallenge extends BaseModel
 {
+    use MassPrunable;
+
     protected $casts = [
         'attempts' => 'int',
         'locked_until' => 'immutable_datetime',
@@ -34,6 +38,28 @@ class LoginChallenge extends BaseModel
     protected $hidden = ['code_hash'];
 
     protected array $auditExclude = ['code_hash'];
+
+    /**
+     * Automatically deletes records older than the configured retention period.
+     *
+     * @return Builder<static>
+     */
+    public function prunable(): Builder
+    {
+        $retentionDays = config('auth.local.code.retention_days');
+
+        if ($retentionDays === null) {
+            return static::query()->whereRaw('1 = 0');
+        }
+
+        if (! is_numeric($retentionDays) || $retentionDays < 0) {
+            throw new \InvalidArgumentException(
+                'Login challenge retention days must be a positive integer or null.'
+            );
+        }
+
+        return static::query()->where('created_at', '<', now()->subDays((int) $retentionDays));
+    }
 
     public function isExpired(?CarbonImmutable $now = null): bool
     {
