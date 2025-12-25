@@ -15,6 +15,14 @@ import { FileTree } from '@astrojs/starlight/components';
     - Console
         - Commands/
     - Domains
+        - Auth
+            - Actions/
+            - Enums/
+            - Http/
+            - Models/
+            - Policies/
+            - Seeders/
+            - ...
         - Core
             - Enums/
             - Models/
@@ -62,21 +70,36 @@ The **Core** domain contains foundational functionality that applies across the 
 - Base classes and traits
 - Framework extensions
 
+### Auth Domain
+
+The **Auth** domain handles everything related to authentication and authorization:
+
+**Location:** `app/Domains/Auth/`
+
+**Responsibilities:**
+
+- Authentication (WebSSO, Access Tokens, local login challenges)
+- Authorization (roles, permissions, scopes)
+- Access token management and expiration
+- Login code generation and validation
+- Impersonation functionality
+- API request logging
+- Role and permission seeding
+
 ### User Domain
 
-The **User** domain handles everything related to users, authentication, and authorization:
+The **User** domain handles everything related to user data and management:
 
 **Location:** `app/Domains/User/`
 
 **Responsibilities:**
 
-- User management
-- Authentication (WebSSO, Access Tokens, local)
-- Authorization (roles, permissions)
-- Audit logging
+- User management and profile data
+- User segmentation and affiliation
+- Directory integration (searching, syncing)
+- Audit logging of user actions
 - User login tracking
-- Impersonation
-- API request logging
+- Wildcard photo management
 
 ## Component Types
 
@@ -129,7 +152,7 @@ class DetermineUserSegment
 **Example:**
 
 ```php
-namespace App\Domains\User\Enums;
+namespace App\Domains\Auth\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
