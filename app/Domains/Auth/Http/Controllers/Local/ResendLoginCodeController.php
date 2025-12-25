@@ -11,11 +11,29 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Timebox;
 use RuntimeException;
 
+/**
+ * Resend a login code while enforcing a minimum response time.
+ *
+ * This method uses the same timing equalization strategy as {@see SendLoginCodeController}
+ * to prevent user enumeration via response-time differences. By ensuring both
+ * "user exists" and "user does not exist" paths take the same amount of time,
+ * we prevent attackers from determining whether an email is registered.
+ */
 class ResendLoginCodeController extends Controller
 {
+    /**
+     * Minimum total time (in milliseconds) the route should take to execute.
+     *
+     * This matches {@see SendLoginCodeController} to ensure consistent timing
+     * protection across both the initial send and resend endpoints.
+     */
+    private const int MIN_TOTAL_RESPONSE_TIME_MS = 300;
+
     public function __construct(
+        private readonly Timebox $timebox,
         private readonly IssueLoginChallenge $issueLoginChallenge,
     ) {
         //
@@ -36,29 +54,38 @@ class ResendLoginCodeController extends Controller
             return back()->with('status', 'Please wait before requesting another code.');
         }
 
-        $user = User::firstLocalByEmail($email);
-        if (! $user) {
-            session([
-                LoginCodeSession::RESEND_AVAILABLE_AT => now()->addSeconds(
-                    (int) config('auth.local.code.resend_cooldown_seconds', 30)
-                )->timestamp,
-            ]);
+        $jitterMs = random_int(0, 50);
+        $minimumTimeMs = self::MIN_TOTAL_RESPONSE_TIME_MS + $jitterMs;
+        $challenge = null;
+        $rateLimitError = null;
 
-            return back()->with('status', 'Verification code resent.');
-        }
+        $this->timebox->call(function (Timebox $timebox) use ($email, $request, &$challenge, &$rateLimitError) {
+            $user = User::firstLocalByEmail($email);
 
-        try {
-            $challenge = ($this->issueLoginChallenge)(
-                $email,
-                $request->ip(),
-                $request->userAgent()
-            );
-        } catch (RuntimeException $e) {
-            return back()->withErrors(['email' => $e->getMessage()]);
+            if (! $user) {
+                return;
+            }
+
+            try {
+                $challenge = ($this->issueLoginChallenge)(
+                    $email,
+                    $request->ip(),
+                    $request->userAgent()
+                );
+                $timebox->returnEarly();
+            } catch (RuntimeException $e) {
+                $rateLimitError = $e->getMessage();
+            }
+        }, $minimumTimeMs * 1000);
+
+        if ($rateLimitError) {
+            return back()->withErrors(['email' => $rateLimitError]);
         }
 
         session([
-            LoginCodeSession::CHALLENGE_ID => Crypt::encryptString((string) $challenge->id),
+            LoginCodeSession::CHALLENGE_ID => $challenge
+                ? Crypt::encryptString((string) $challenge->id)
+                : session(LoginCodeSession::CHALLENGE_ID),
             LoginCodeSession::RESEND_AVAILABLE_AT => now()->addSeconds(
                 (int) config('auth.local.code.resend_cooldown_seconds', 30)
             )->timestamp,

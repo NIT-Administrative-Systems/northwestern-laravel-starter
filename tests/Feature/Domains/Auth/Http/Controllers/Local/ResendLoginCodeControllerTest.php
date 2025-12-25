@@ -64,4 +64,71 @@ class ResendLoginCodeControllerTest extends TestCase
         $response->assertSessionHas(LoginCodeSession::RESEND_AVAILABLE_AT);
         $response->assertSessionHas('status', 'Verification code resent.');
     }
+
+    public function test_returns_identical_response_for_existing_and_nonexisting_users(): void
+    {
+        $existingUser = User::factory()->affiliate()->create(['email' => 'existing@example.com']);
+
+        $existingResponse = $this->withSession([
+            LoginCodeSession::EMAIL => 'existing@example.com',
+            LoginCodeSession::RESEND_AVAILABLE_AT => 0,
+        ])->post(route('login-code.resend'));
+
+        $nonExistingResponse = $this->withSession([
+            LoginCodeSession::EMAIL => 'nonexisting@example.com',
+            LoginCodeSession::RESEND_AVAILABLE_AT => 0,
+        ])->post(route('login-code.resend'));
+
+        $this->assertEquals(
+            $existingResponse->getStatusCode(),
+            $nonExistingResponse->getStatusCode(),
+            'Status codes should be identical for existing and non-existing users'
+        );
+
+        $this->assertEquals(
+            $existingResponse->headers->get('Location'),
+            $nonExistingResponse->headers->get('Location'),
+            'Redirect locations should be identical for existing and non-existing users'
+        );
+    }
+
+    public function test_timing_difference_between_existing_and_nonexisting_users_is_minimal(): void
+    {
+        User::factory()->affiliate()->create(['email' => 'existing@example.com']);
+
+        $startExisting = microtime(true);
+        $this->withSession([
+            LoginCodeSession::EMAIL => 'existing@example.com',
+            LoginCodeSession::RESEND_AVAILABLE_AT => 0,
+        ])->post(route('login-code.resend'));
+        $existingMs = (microtime(true) - $startExisting) * 1000;
+
+        $startNonExisting = microtime(true);
+        $this->withSession([
+            LoginCodeSession::EMAIL => 'nonexisting@example.com',
+            LoginCodeSession::RESEND_AVAILABLE_AT => 0,
+        ])->post(route('login-code.resend'));
+        $nonExistingMs = (microtime(true) - $startNonExisting) * 1000;
+
+        $timingDifference = abs($existingMs - $nonExistingMs);
+        $this->assertLessThan(
+            50,
+            $timingDifference,
+            "Timing difference between existing and non-existing users should be minimal (was {$timingDifference}ms)"
+        );
+    }
+
+    public function test_nonexistent_user_receives_same_message_as_existing_user(): void
+    {
+        User::factory()->affiliate()->create(['email' => 'existing@example.com']);
+
+        $response = $this->withSession([
+            LoginCodeSession::EMAIL => 'nonexisting@example.com',
+            LoginCodeSession::RESEND_AVAILABLE_AT => 0,
+        ])->post(route('login-code.resend'));
+
+        $response->assertRedirect();
+        $response->assertSessionHas('status', 'Verification code resent.');
+        $response->assertSessionHas(LoginCodeSession::RESEND_AVAILABLE_AT);
+    }
 }

@@ -83,4 +83,57 @@ class SendLoginCodeControllerTest extends TestCase
 
         $response->assertNotFound();
     }
+
+    public function test_returns_identical_response_for_existing_and_nonexisting_users(): void
+    {
+        User::factory()->affiliate()->create(['email' => 'existing@example.com']);
+
+        $existingResponse = $this->post(route('login-code.send'), [
+            'email' => 'existing@example.com',
+        ]);
+
+        $nonExistingResponse = $this->post(route('login-code.send'), [
+            'email' => 'nonexisting@example.com',
+        ]);
+
+        $this->assertEquals(
+            $existingResponse->getStatusCode(),
+            $nonExistingResponse->getStatusCode(),
+            'Status codes should be identical for existing and non-existing users'
+        );
+
+        $this->assertEquals(
+            $existingResponse->headers->get('Location'),
+            $nonExistingResponse->headers->get('Location'),
+            'Redirect locations should be identical for existing and non-existing users'
+        );
+
+        $existingResponse->assertSessionHas(LoginCodeSession::EMAIL);
+        $existingResponse->assertSessionHas(LoginCodeSession::CHALLENGE_ID);
+        $existingResponse->assertSessionHas(LoginCodeSession::RESEND_AVAILABLE_AT);
+
+        $nonExistingResponse->assertSessionHas(LoginCodeSession::EMAIL);
+        $nonExistingResponse->assertSessionHas(LoginCodeSession::CHALLENGE_ID);
+        $nonExistingResponse->assertSessionHas(LoginCodeSession::RESEND_AVAILABLE_AT);
+    }
+
+    public function test_timing_difference_between_existing_and_nonexisting_users_is_minimal(): void
+    {
+        User::factory()->affiliate()->create(['email' => 'existing@example.com']);
+
+        $startExisting = microtime(true);
+        $this->post(route('login-code.send'), ['email' => 'existing@example.com']);
+        $existingMs = (microtime(true) - $startExisting) * 1000;
+
+        $startNonExisting = microtime(true);
+        $this->post(route('login-code.send'), ['email' => 'nonexisting@example.com']);
+        $nonExistingMs = (microtime(true) - $startNonExisting) * 1000;
+
+        $timingDifference = abs($existingMs - $nonExistingMs);
+        $this->assertLessThan(
+            50,
+            $timingDifference,
+            "Timing difference between existing and non-existing users should be minimal (was {$timingDifference}ms)"
+        );
+    }
 }
