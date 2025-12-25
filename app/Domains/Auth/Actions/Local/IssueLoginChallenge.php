@@ -49,18 +49,15 @@ final readonly class IssueLoginChallenge
             );
         }
 
-        $digits = (int) config('auth.local.code.digits', 6);
-        $expires = (int) config('auth.local.code.expires_in_minutes', 10);
-        $code = ($this->generateOneTimeCode)($digits);
-        $encryptedCode = Crypt::encryptString($code);
-
-        return DB::transaction(function () use ($email, $code, $encryptedCode, $expires, $ip, $userAgent, $rateLimitKey) {
-            $now = CarbonImmutable::now();
+        return DB::transaction(function () use ($email, $ip, $userAgent, $rateLimitKey) {
+            $digits = (int) config('auth.local.code.digits', 6);
+            $expires = (int) config('auth.local.code.expires_in_minutes', 10);
+            $code = ($this->generateOneTimeCode)($digits);
 
             $challenge = LoginChallenge::create([
                 'email' => $email,
                 'code_hash' => Hash::make($code),
-                'expires_at' => $now->addMinutes($expires),
+                'expires_at' => CarbonImmutable::now()->addMinutes($expires),
                 'requested_ip' => $ip,
                 'requested_user_agent' => $userAgent ? Str::limit($userAgent, 512, '') : null,
             ]);
@@ -69,7 +66,7 @@ final readonly class IssueLoginChallenge
 
             SendLoginCodeEmailJob::dispatch(
                 loginChallengeId: $challenge->id,
-                encryptedCode: $encryptedCode,
+                encryptedCode: Crypt::encryptString($code),
             )->afterCommit();
 
             return $challenge;
