@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Domains\Auth\ValueObjects;
 
-use App\Domains\Auth\Http\Controllers\Local\ResendLoginCodeController;
 use App\Domains\Auth\Http\Controllers\Local\SendLoginCodeController;
 use App\Domains\Auth\Http\Controllers\Local\ShowLoginCodeFormController;
 use App\Domains\Auth\Http\Controllers\Local\VerifyLoginCodeController;
@@ -20,7 +19,6 @@ use App\Domains\Auth\Http\Controllers\Local\VerifyLoginCodeController;
  * - @see SendLoginCodeController
  * - @see ShowLoginCodeFormController
  * - @see VerifyLoginCodeController
- * - @see ResendLoginCodeController
  */
 final class LoginCodeSession
 {
@@ -34,12 +32,9 @@ final class LoginCodeSession
      */
     public const string CHALLENGE_ID = self::PREFIX . 'challenge_id';
 
-    public const string RESEND_AVAILABLE_AT = self::PREFIX . 'resend_available_at';
-
     /** @var array<int, string> */
     public const array KEYS = [
         self::EMAIL,
         self::CHALLENGE_ID,
-        self::RESEND_AVAILABLE_AT,
     ];
 }

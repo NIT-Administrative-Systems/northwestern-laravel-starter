@@ -5,17 +5,20 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Domains\Auth\Enums\PermissionEnum;
+use App\Domains\Auth\ValueObjects\LoginCodeSession;
 use App\Domains\Core\Database\ConfigurableDbDumperFactory;
 use App\Domains\Core\Exceptions\ProblemDetailsRenderer;
 use App\Domains\User\Models\User;
 use App\Http\Responses\ProblemDetails;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
@@ -78,7 +81,12 @@ class AppServiceProvider extends ServiceProvider
         });
 
         RateLimiter::for('login-code-request', static function (Request $request) {
-            $email = mb_strtolower((string) $request->input('email', $request->session()->get('login_code.email', '')));
+            $email = mb_strtolower(
+                (string) $request->input(
+                    key: 'email',
+                    default: $request->session()->get(LoginCodeSession::EMAIL, '')
+                )
+            );
 
             return [
                 Limit::perMinute(5)->by($request->ip() ?? 'ip:none'),
@@ -88,8 +96,21 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('login-code-verify', static function (Request $request) {
             $ip = $request->ip() ?? 'ip:none';
+            $encryptedChallengeId = $request->session()->get(LoginCodeSession::CHALLENGE_ID);
 
-            return Limit::perMinute(10)->by('login-code:verify:' . $ip);
+            $challengeId = 'no-challenge';
+            if ($encryptedChallengeId) {
+                try {
+                    $challengeId = Crypt::decryptString($encryptedChallengeId);
+                } catch (DecryptException) {
+                    $challengeId = 'invalid:' . substr(md5($encryptedChallengeId), 0, 16);
+                }
+            }
+
+            return [
+                Limit::perMinute(10)->by('login-code:verify:' . $ip),
+                Limit::perMinute(5)->by('login-code:verify:challenge:' . $challengeId),
+            ];
         });
     }
 

@@ -11,6 +11,7 @@ use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\RateLimiter;
 
 class ShowLoginCodeFormController extends Controller
 {
@@ -46,9 +47,14 @@ class ShowLoginCodeFormController extends Controller
             $challenge = null;
         }
 
+        $cooldownKey = "login-code-resend:{$email}";
+        $resendAvailableAt = RateLimiter::tooManyAttempts($cooldownKey, 1)
+            ? now()->addSeconds(RateLimiter::availableIn($cooldownKey))->timestamp
+            : 0;
+
         return view('auth.login-code', [
             'email' => $email,
-            'resendAvailableAt' => (int) (session(LoginCodeSession::RESEND_AVAILABLE_AT) ?? 0),
+            'resendAvailableAt' => $resendAvailableAt,
         ]);
     }
 }

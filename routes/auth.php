@@ -9,10 +9,10 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('auth')->group(function () {
     Route::middleware('guest')->group(function () {
         Route::get('login', Controllers\Local\ShowLoginCodeRequestController::class)->name('login-code.request');
-        Route::post('login/request', Controllers\Local\SendLoginCodeController::class)
+        Route::post('login/request', [Controllers\Local\SendLoginCodeController::class, 'send'])
             ->middleware('throttle:login-code-request')
             ->name('login-code.send');
-        Route::post('login/resend', Controllers\Local\ResendLoginCodeController::class)
+        Route::post('login/resend', [Controllers\Local\SendLoginCodeController::class, 'resend'])
             ->middleware('throttle:login-code-request')
             ->name('login-code.resend');
         Route::get('login/code', Controllers\Local\ShowLoginCodeFormController::class)->name('login-code.code');
