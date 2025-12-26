@@ -30,7 +30,7 @@ class ResendLoginCodeController extends Controller
      * This matches {@see SendLoginCodeController} to ensure consistent timing
      * protection across both the initial send and resend endpoints.
      */
-    private const int MIN_TOTAL_RESPONSE_TIME_MS = 300;
+    private const int MIN_TOTAL_RESPONSE_TIME_MS = 750;
 
     public function __construct(
         private readonly Timebox $timebox,
@@ -60,6 +60,7 @@ class ResendLoginCodeController extends Controller
         $rateLimitError = null;
 
         $this->timebox->call(function (Timebox $timebox) use ($email, $request, &$challenge, &$rateLimitError) {
+            $timebox->dontReturnEarly();
             $user = User::firstLocalByEmail($email);
 
             if (! $user) {
@@ -72,7 +73,6 @@ class ResendLoginCodeController extends Controller
                     $request->ip(),
                     $request->userAgent()
                 );
-                $timebox->returnEarly();
             } catch (RuntimeException $e) {
                 $rateLimitError = $e->getMessage();
             }

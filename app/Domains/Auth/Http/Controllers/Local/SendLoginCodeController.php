@@ -46,7 +46,7 @@ class SendLoginCodeController extends Controller
      * distribute requests across many sessions, machine, or proxies and perform
      * analysis on response times.
      */
-    private const int MIN_TOTAL_RESPONSE_TIME_MS = 300;
+    private const int MIN_TOTAL_RESPONSE_TIME_MS = 750;
 
     public function __construct(
         private readonly Timebox $timebox,
@@ -67,6 +67,7 @@ class SendLoginCodeController extends Controller
         $challenge = null;
 
         $this->timebox->call(function (Timebox $timebox) use ($email, $request, &$challenge) {
+            $timebox->dontReturnEarly();
             $user = User::firstLocalByEmail($email);
 
             if (! $user) {
@@ -79,7 +80,6 @@ class SendLoginCodeController extends Controller
                     $request->ip(),
                     $request->userAgent()
                 );
-                $timebox->returnEarly();
             } catch (RuntimeException $e) {
                 // Rate limit exceeded
                 throw ValidationException::withMessages([

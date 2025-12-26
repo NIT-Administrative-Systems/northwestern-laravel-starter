@@ -28,12 +28,12 @@ final class LoginCodeSession
 
     public const string EMAIL = self::PREFIX . 'email';
 
-    public const string CHALLENGE_ID = self::PREFIX . 'challenge_id';
-
     /**
      * Stored encrypted, so the stored value is indistinguishable from a real
      * challenge ID for locally known users.
      */
+    public const string CHALLENGE_ID = self::PREFIX . 'challenge_id';
+
     public const string RESEND_AVAILABLE_AT = self::PREFIX . 'resend_available_at';
 
     /** @var array<int, string> */
