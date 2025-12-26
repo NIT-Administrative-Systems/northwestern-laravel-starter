@@ -56,9 +56,8 @@ class AuditInfolist
                             ->label('Object')
                             ->formatStateUsing(function (Audit $record) {
                                 $className = Relation::getMorphedModel($record->auditable_type) ?? $record->auditable_type;
-                                $short = Str::afterLast($className, '\\') ?: $className;
 
-                                return Str::headline($short);
+                                return Str::afterLast($className, '\\') ?: $className;
                             })
                             ->badge()
                             ->size(TextSize::Large)

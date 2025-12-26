@@ -73,6 +73,8 @@ class ConfigurationPage extends Page implements HasTable
         };
 
         return [
+            'PHP Version' => phpversion(),
+            'Laravel Version' => app()->version(),
             'Platform URL' => url('/'),
             'Environment Lockdown' => config('platform.lockdown.enabled')
                 ? 'Enabled: Non-default roles required for access'
