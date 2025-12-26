@@ -17,6 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class VerifyLoginCodeController extends Controller
 {
@@ -50,52 +51,59 @@ class VerifyLoginCodeController extends Controller
             return back()->withErrors(['code' => 'Invalid code.'])->onlyInput('code');
         }
 
-        $challenge = LoginChallenge::find($challengeId);
+        try {
+            $user = DB::transaction(function () use ($challengeId, $validated, $request) {
+                $challenge = LoginChallenge::query()
+                    ->lockForUpdate()
+                    ->find($challengeId);
 
-        if (! $challenge) {
-            return back()->withErrors(['code' => 'Invalid code.'])->onlyInput('code');
+                if (! $challenge) {
+                    throw ValidationException::withMessages(['code' => 'Invalid code.']);
+                }
+
+                if ($challenge->isLocked()) {
+                    $lockoutMinutes = (int) config('auth.local.code.lock_minutes', 15);
+                    $lockoutDuration = CarbonInterval::minutes($lockoutMinutes)->forHumans();
+
+                    throw ValidationException::withMessages([
+                        'code' => "Too many attempts. Please wait {$lockoutDuration} before trying again.",
+                    ]);
+                }
+
+                $codeVerified = ($this->verifyLoginChallengeCode)(
+                    $challenge,
+                    $validated['code'],
+                    $request->ip(),
+                    $request->userAgent()
+                );
+
+                if (! $codeVerified) {
+                    throw ValidationException::withMessages(['code' => 'Invalid code.']);
+                }
+
+                $user = User::firstLocalByEmail($challenge->email);
+
+                if (! $user) {
+                    throw ValidationException::withMessages(['code' => 'Invalid code.']);
+                }
+
+                if (! $user->email_verified_at) {
+                    $user->forceFill(['email_verified_at' => now()])->save();
+                }
+
+                $user->login_records()->create([
+                    'logged_in_at' => now(),
+                    'segment' => ($this->determineUserSegment)($user),
+                ]);
+
+                return $user;
+            });
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors())->onlyInput('code');
         }
 
-        if ($challenge->isLocked()) {
-            $lockoutMinutes = (int) config('auth.local.code.lock_minutes', 15);
-            $lockoutDuration = CarbonInterval::minutes($lockoutMinutes)->forHumans();
-
-            return back()->withErrors([
-                'code' => "Too many attempts. Please wait {$lockoutDuration} before trying again.",
-            ])->onlyInput('code');
-        }
-
-        $codeVerified = ($this->verifyLoginChallengeCode)(
-            $challenge,
-            $validated['code'],
-            $request->ip(),
-            $request->userAgent()
-        );
-
-        if (! $codeVerified) {
-            return back()->withErrors(['code' => 'Invalid code.'])->onlyInput('code');
-        }
-
-        $user = User::firstLocalByEmail($challenge->email);
-
-        if (! $user) {
-            return back()->withErrors(['code' => 'Invalid code.'])->onlyInput('code');
-        }
-
-        DB::transaction(static function () use ($user, $request) {
-            if (! $user->email_verified_at) {
-                $user->update(['email_verified_at' => now()]);
-            }
-
-            Auth::login($user, remember: true);
-            $request->session()->regenerate();
-        });
-
-        $user->login_records()->create([
-            'logged_in_at' => now(),
-            'segment' => ($this->determineUserSegment)($user),
-        ]);
-
+        Auth::login($user, remember: true);
+        $request->session()->regenerate();
         $request->session()->forget(LoginCodeSession::KEYS);
 
         return redirect()->intended(config('auth.local.redirect_after_login'));
