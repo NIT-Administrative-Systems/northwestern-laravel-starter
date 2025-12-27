@@ -20,7 +20,7 @@
                     </div>
 
                     <p class="text-uppercase text-muted small fw-semibold mb-1">
-                        Northwestern single sign-on
+                        single sign-on
                     </p>
 
                     <h2 class="card-title h4 fw-bold mb-3">
@@ -28,7 +28,7 @@
                     </h2>
 
                     <p class="text-muted flex-grow-1 mb-4">
-                        For Northwestern students, faculty, staff, and affiliates with a valid NetID.
+                        For students, faculty, staff, and affiliates with a NetID.
                     </p>
 
                     <a class="btn btn-primary btn-lg w-100 d-inline-flex align-items-center justify-content-center mt-auto"
@@ -62,7 +62,7 @@
                     </h2>
 
                     <p class="text-muted flex-grow-1 mb-4">
-                        For approved external users and partners who do not have a Northwestern NetID.
+                        For approved external users and partners who do not have a NetID.
                     </p>
 
                     <a class="btn btn-outline-secondary btn-lg w-100 d-inline-flex align-items-center justify-content-center mt-auto"
