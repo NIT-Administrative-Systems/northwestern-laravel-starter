@@ -73,32 +73,34 @@ function initPlugins(on, config) {
 
     plugin(customOn, config);
 
-    new GenerateCtrfReport({
-        on: customOn,
-        outputDir: ".build",
-        outputFile: "ctrf-report.json",
-        minimal: false,
-        testType: "e2e",
-        appName:
-            process.env.GITHUB_REPOSITORY?.split("/")[1]
-                .split("-")
-                .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                .join(" ") || "",
-        buildNumber: process.env.GITHUB_RUN_NUMBER || "",
-        buildUrl:
-            process.env.GITHUB_SERVER_URL &&
-            process.env.GITHUB_REPOSITORY &&
-            process.env.GITHUB_RUN_ID
-                ? `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`
-                : "",
-        repositoryName: process.env.GITHUB_REPOSITORY?.split("/")[1] || "",
-        repositoryUrl:
-            process.env.GITHUB_SERVER_URL && process.env.GITHUB_REPOSITORY
-                ? `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}`
-                : "",
-        branchName: process.env.GITHUB_REF_NAME || "",
-        osPlatform: process.env.RUNNER_OS || "",
-        osRelease: process.env.RUNNER_ARCH || "",
-        osVersion: process.env.RUNNER_ENVIRONMENT || "",
-    });
+    if (process.env.CI || process.env.GITHUB_ACTIONS) {
+        new GenerateCtrfReport({
+            on: customOn,
+            outputDir: ".build",
+            outputFile: "ctrf-report.json",
+            minimal: false,
+            testType: "e2e",
+            appName:
+                process.env.GITHUB_REPOSITORY?.split("/")[1]
+                    .split("-")
+                    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(" ") || "",
+            buildNumber: process.env.GITHUB_RUN_NUMBER || "",
+            buildUrl:
+                process.env.GITHUB_SERVER_URL &&
+                process.env.GITHUB_REPOSITORY &&
+                process.env.GITHUB_RUN_ID
+                    ? `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`
+                    : "",
+            repositoryName: process.env.GITHUB_REPOSITORY?.split("/")[1] || "",
+            repositoryUrl:
+                process.env.GITHUB_SERVER_URL && process.env.GITHUB_REPOSITORY
+                    ? `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}`
+                    : "",
+            branchName: process.env.GITHUB_REF_NAME || "",
+            osPlatform: process.env.RUNNER_OS || "",
+            osRelease: process.env.RUNNER_ARCH || "",
+            osVersion: process.env.RUNNER_ENVIRONMENT || "",
+        });
+    }
 }

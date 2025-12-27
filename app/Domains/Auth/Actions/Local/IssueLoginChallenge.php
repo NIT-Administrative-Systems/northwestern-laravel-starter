@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Auth\Actions\Local;
 
+use App\Domains\Auth\Contracts\OneTimeCodeGenerator;
 use App\Domains\Auth\Jobs\SendLoginCodeEmailJob;
 use App\Domains\Auth\Models\LoginChallenge;
 use Carbon\CarbonImmutable;
@@ -28,7 +29,7 @@ use RuntimeException;
 final readonly class IssueLoginChallenge
 {
     public function __construct(
-        private GenerateOneTimeCode $generateOneTimeCode,
+        private OneTimeCodeGenerator $codeGenerator,
     ) {
         //
     }
@@ -52,7 +53,7 @@ final readonly class IssueLoginChallenge
         return DB::transaction(function () use ($email, $ip, $userAgent, $rateLimitKey) {
             $digits = (int) config('auth.local.code.digits', 6);
             $expires = (int) config('auth.local.code.expires_in_minutes', 10);
-            $code = ($this->generateOneTimeCode)($digits);
+            $code = ($this->codeGenerator)($digits);
 
             $challenge = LoginChallenge::create([
                 'email' => $email,

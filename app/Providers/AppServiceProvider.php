@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Domains\Auth\Actions\Local\FixedNumericOneTimeCodeGenerator;
+use App\Domains\Auth\Actions\Local\RandomNumericOneTimeCodeGenerator;
+use App\Domains\Auth\Contracts\OneTimeCodeGenerator;
 use App\Domains\Auth\Enums\PermissionEnum;
 use App\Domains\Auth\ValueObjects\LoginCodeSession;
 use App\Domains\Core\Database\ConfigurableDbDumperFactory;
@@ -35,6 +38,13 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(ProblemDetailsRenderer::class);
         $this->app->bind(DbDumperFactory::class, function (): ConfigurableDbDumperFactory {
             return new ConfigurableDbDumperFactory();
+        });
+        $this->app->singleton(OneTimeCodeGenerator::class, function () {
+            if ($this->app->environment('ci')) {
+                return new FixedNumericOneTimeCodeGenerator();
+            }
+
+            return new RandomNumericOneTimeCodeGenerator();
         });
     }
 

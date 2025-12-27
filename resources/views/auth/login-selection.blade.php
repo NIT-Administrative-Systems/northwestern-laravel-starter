@@ -32,6 +32,7 @@
                     </p>
 
                     <a class="btn btn-primary btn-lg w-100 d-inline-flex align-items-center justify-content-center mt-auto"
+                       data-cy="netid-login"
                        href="{{ route('login-oauth-redirect') }}">
                         <i class="fas fa-sign-in-alt fa-fw me-2" aria-hidden="true"></i>
                         <span>Sign in with NetID</span>
@@ -65,7 +66,7 @@
                     </p>
 
                     <a class="btn btn-outline-secondary btn-lg w-100 d-inline-flex align-items-center justify-content-center mt-auto"
-                       data-cy="partner-login"
+                       data-cy="email-login"
                        href="{{ route('login-code.request') }}">
                         <i class="fas fa-paper-plane fa-fw me-2" aria-hidden="true"></i>
                         <span>Sign in with Email</span>

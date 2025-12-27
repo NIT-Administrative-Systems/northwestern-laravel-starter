@@ -17,7 +17,9 @@
     @auth
         @can(PermissionEnum::ACCESS_ADMINISTRATION_PANEL)
             <li class="nav-item px-md-1">
-                <a class="nav-link" href="{{ Filament::getPanel(AdministrationPanelProvider::ID)->getUrl() }}">
+                <a class="nav-link"
+                   data-cy="admin-panel-link"
+                   href="{{ Filament::getPanel(AdministrationPanelProvider::ID)->getUrl() }}">
                     <i class="fas fa-wrench fa-fw me-1" aria-hidden="true"></i>
                     Administration
                 </a>
@@ -55,7 +57,7 @@
                 @else
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button class="nav-link btn btn-link" data-cy="logout-link">
+                        <button class="nav-link btn btn-link" data-cy="sign-out-link">
                             Sign out
                             <i class="fas fa-sign-out-alt fa-fw ms-1" aria-hidden="true"></i>
                         </button>
