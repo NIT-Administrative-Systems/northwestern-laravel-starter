@@ -183,110 +183,6 @@ paths:
           bearerToken: []
 components:
   schemas:
-    PaginationLinks:
-      required:
-        - first
-        - last
-        - prev
-        - next
-      properties:
-        first:
-          type: string
-          format: uri
-          example: 'https://example.test/api/v1/me/tokens?page=1'
-        last:
-          type: string
-          format: uri
-          example: 'https://example.test/api/v1/me/tokens?page=1'
-        prev:
-          type: string
-          format: uri
-          example: null
-          nullable: true
-        next:
-          type: string
-          format: uri
-          example: null
-          nullable: true
-      type: object
-    PaginationLink:
-      required:
-        - label
-        - page
-        - active
-      properties:
-        url:
-          type: string
-          format: uri
-          example: 'https://example.test/api/v1/me/tokens?page=1'
-          nullable: true
-        label:
-          type: string
-          example: '&laquo; Previous'
-        page:
-          type: integer
-          example: null
-          nullable: true
-        active:
-          type: boolean
-          example: false
-      type: object
-    PaginationMeta:
-      required:
-        - current_page
-        - from
-        - last_page
-        - path
-        - per_page
-        - to
-        - total
-        - links
-      properties:
-        current_page:
-          type: integer
-          example: 1
-        from:
-          type: integer
-          example: 1
-          nullable: true
-        last_page:
-          type: integer
-          example: 1
-        path:
-          type: string
-          format: uri
-          example: 'https://example.test/api/v1/me/tokens'
-        per_page:
-          type: integer
-          example: 20
-        to:
-          type: integer
-          example: 15
-          nullable: true
-        total:
-          type: integer
-          example: 15
-        links:
-          type: array
-          items:
-            $ref: '#/components/schemas/PaginationLink'
-          example:
-            -
-              url: null
-              label: '&laquo; Previous'
-              page: null
-              active: false
-            -
-              url: 'https://example.test/api/v1/me/tokens?page=1'
-              label: '1'
-              page: 1
-              active: true
-            -
-              url: null
-              label: 'Next &raquo;'
-              page: null
-              active: false
-      type: object
     AccessToken:
       required:
         - id
@@ -688,6 +584,110 @@ components:
                   api_relevant: true
                   created_at: '2025-11-06T15:20:00+00:00'
                   updated_at: '2025-11-06T15:20:00+00:00'
+    PaginationLinks:
+      required:
+        - first
+        - last
+        - prev
+        - next
+      properties:
+        first:
+          type: string
+          format: uri
+          example: 'https://example.test/api/v1/me/tokens?page=1'
+        last:
+          type: string
+          format: uri
+          example: 'https://example.test/api/v1/me/tokens?page=1'
+        prev:
+          type: string
+          format: uri
+          example: null
+          nullable: true
+        next:
+          type: string
+          format: uri
+          example: null
+          nullable: true
+      type: object
+    PaginationLink:
+      required:
+        - label
+        - page
+        - active
+      properties:
+        url:
+          type: string
+          format: uri
+          example: 'https://example.test/api/v1/me/tokens?page=1'
+          nullable: true
+        label:
+          type: string
+          example: '&laquo; Previous'
+        page:
+          type: integer
+          example: null
+          nullable: true
+        active:
+          type: boolean
+          example: false
+      type: object
+    PaginationMeta:
+      required:
+        - current_page
+        - from
+        - last_page
+        - path
+        - per_page
+        - to
+        - total
+        - links
+      properties:
+        current_page:
+          type: integer
+          example: 1
+        from:
+          type: integer
+          example: 1
+          nullable: true
+        last_page:
+          type: integer
+          example: 1
+        path:
+          type: string
+          format: uri
+          example: 'https://example.test/api/v1/me/tokens'
+        per_page:
+          type: integer
+          example: 20
+        to:
+          type: integer
+          example: 15
+          nullable: true
+        total:
+          type: integer
+          example: 15
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaginationLink'
+          example:
+            -
+              url: null
+              label: '&laquo; Previous'
+              page: null
+              active: false
+            -
+              url: 'https://example.test/api/v1/me/tokens?page=1'
+              label: '1'
+              page: 1
+              active: true
+            -
+              url: null
+              label: 'Next &raquo;'
+              page: null
+              active: false
+      type: object
     ProblemDetails:
       description: 'Standard RFC 9457 problem details envelope.'
       required:
