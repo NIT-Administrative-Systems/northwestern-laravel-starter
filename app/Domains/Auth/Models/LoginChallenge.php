@@ -13,6 +13,7 @@ use App\Domains\Core\Models\BaseModel;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\MassPrunable;
+use InvalidArgumentException;
 
 /**
  * Represents the OTP challenge state for a local user authentication attempt.
@@ -53,7 +54,7 @@ class LoginChallenge extends BaseModel
         }
 
         if (! is_numeric($retentionDays) || $retentionDays < 0) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'Login challenge retention days must be a positive integer or null.'
             );
         }

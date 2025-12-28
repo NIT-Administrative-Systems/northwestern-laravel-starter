@@ -29,7 +29,7 @@ use RuntimeException;
 final readonly class IssueLoginChallenge
 {
     public function __construct(
-        private OneTimeCodeGenerator $codeGenerator,
+        private OneTimeCodeGenerator $oneTimeCodeGenerator,
     ) {
         //
     }
@@ -53,7 +53,7 @@ final readonly class IssueLoginChallenge
         return DB::transaction(function () use ($email, $ip, $userAgent, $rateLimitKey) {
             $digits = (int) config('auth.local.code.digits', 6);
             $expires = (int) config('auth.local.code.expires_in_minutes', 10);
-            $code = ($this->codeGenerator)($digits);
+            $code = ($this->oneTimeCodeGenerator)($digits);
 
             $challenge = LoginChallenge::create([
                 'email' => $email,

@@ -45,7 +45,7 @@ class SendLoginCodeController extends Controller
      * distribute requests across many sessions, machines, or proxies and perform
      * analysis on response times.
      */
-    private const int MIN_TOTAL_RESPONSE_TIME_MS = 750;
+    private const int MIN_TOTAL_RESPONSE_TIME_MS = 500;
 
     public function __construct(
         private readonly Timebox $timebox,
