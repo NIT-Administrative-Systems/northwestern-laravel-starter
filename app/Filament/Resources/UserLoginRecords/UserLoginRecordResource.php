@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\UserLoginRecords;
 
-use App\Domains\User\Enums\PermissionEnum;
+use App\Domains\Auth\Enums\PermissionEnum;
 use App\Domains\User\Models\UserLoginRecord;
 use App\Filament\Navigation\AdministrationNavGroup;
 use App\Filament\Resources\UserLoginRecords\Pages\ListUserLoginRecords;

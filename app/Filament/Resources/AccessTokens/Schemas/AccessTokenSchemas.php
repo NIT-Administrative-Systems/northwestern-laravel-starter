@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\AccessTokens\Schemas;
 
-use App\Domains\User\Enums\AccessTokenStatusEnum;
-use App\Domains\User\Enums\TokenExpirationEnum;
-use App\Domains\User\Models\AccessToken;
+use App\Domains\Auth\Enums\AccessTokenStatusEnum;
+use App\Domains\Auth\Enums\TokenExpirationEnum;
+use App\Domains\Auth\Models\AccessToken;
 use Carbon\CarbonInterface;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;

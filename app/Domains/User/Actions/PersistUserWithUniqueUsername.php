@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Domains\User\Actions;
 
+use App\Domains\Auth\Enums\AuthTypeEnum;
+use App\Domains\Auth\Enums\SystemRoleEnum;
 use App\Domains\User\Actions\Directory\FindOrUpdateUserFromDirectory;
-use App\Domains\User\Enums\AuthTypeEnum;
-use App\Domains\User\Enums\SystemRoleEnum;
 use App\Domains\User\Models\User;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;

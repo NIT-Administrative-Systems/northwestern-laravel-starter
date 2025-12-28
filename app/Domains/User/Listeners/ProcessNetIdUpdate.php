@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Domains\User\Listeners;
 
-use App\Domains\User\Enums\RoleModificationOriginEnum;
-use App\Domains\User\Enums\SystemRoleEnum;
+use App\Domains\Auth\Enums\RoleModificationOriginEnum;
+use App\Domains\Auth\Enums\SystemRoleEnum;
+use App\Domains\Auth\Models\Role;
 use App\Domains\User\Events\NetIdUpdated;
-use App\Domains\User\Models\Role;
 use App\Domains\User\Models\User;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\DB;

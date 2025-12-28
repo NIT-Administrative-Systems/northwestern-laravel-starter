@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Pages\Platform;
 
-use App\Domains\User\Enums\PermissionEnum;
+use App\Domains\Auth\Enums\PermissionEnum;
 use App\Filament\Navigation\AdministrationNavGroup;
 use BackedEnum;
 use Filament\Pages\Page;
@@ -73,6 +73,8 @@ class ConfigurationPage extends Page implements HasTable
         };
 
         return [
+            'PHP Version' => phpversion(),
+            'Laravel Version' => app()->version(),
             'Platform URL' => url('/'),
             'Environment Lockdown' => config('platform.lockdown.enabled')
                 ? 'Enabled: Non-default roles required for access'

@@ -6,6 +6,7 @@
         "dev": "vite",
         "format": "prettier --write --cache \"**/*.{blade.php,ts,js,css,md,json,yml,xml,astro}\"",
         "test:e2e": "cypress open",
+        "test:e2e:headless": "cypress run --env SKIP_DATABASE_REBUILD=true",
         "test:e2e:skip-rebuild": "cypress open --env SKIP_DATABASE_REBUILD=true"
     },
     "dependencies": {

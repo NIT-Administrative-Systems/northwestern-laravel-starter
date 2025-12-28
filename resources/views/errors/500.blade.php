@@ -1,6 +1,5 @@
 @php
-    use App\Domains\User\Enums\PermissionEnum;
-    use App\Domains\User\Models\User;
+    use App\Domains\Auth\Enums\PermissionEnum;
 @endphp
 
 @extends('northwestern::purple-container')

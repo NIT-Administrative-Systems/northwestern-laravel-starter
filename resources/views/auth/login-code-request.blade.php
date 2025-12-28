@@ -34,6 +34,7 @@
                             <input class="form-control form-control-lg @error('email') is-invalid @enderror bg-white"
                                    id="email"
                                    name="email"
+                                   data-cy="email-input"
                                    type="email"
                                    value="{{ old('email') }}"
                                    required
@@ -49,7 +50,9 @@
                             @enderror
                         </div>
 
-                        <button class="btn btn-primary btn-lg w-100 mb-3" type="submit">
+                        <button class="btn btn-primary btn-lg w-100 mb-3"
+                                data-cy="continue-button"
+                                type="submit">
                             <span>Continue</span>
                         </button>
 

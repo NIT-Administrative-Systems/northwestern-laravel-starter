@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\Core\Services;
 
+use App\Domains\Auth\Http\Middleware\AuthenticatesAccessTokens;
 use App\Domains\Core\Services\ApiRouteInspector;
-use App\Http\Middleware\AuthenticatesAccessTokens;
 use Illuminate\Routing\RouteCollection;
 use Illuminate\Support\Facades\Route;
 use PHPUnit\Framework\Attributes\CoversClass;

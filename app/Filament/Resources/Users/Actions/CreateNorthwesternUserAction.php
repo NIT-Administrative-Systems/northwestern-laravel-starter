@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users\Actions;
 
+use App\Domains\Auth\Enums\PermissionEnum;
 use App\Domains\User\Actions\Directory\FindOrUpdateUserFromDirectory;
-use App\Domains\User\Enums\PermissionEnum;
 use App\Domains\User\Exceptions\BadDirectoryEntry;
 use App\Filament\Resources\Users\UserResource;
 use Exception;

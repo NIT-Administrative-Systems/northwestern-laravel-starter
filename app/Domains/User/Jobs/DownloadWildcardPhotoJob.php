@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\User\Jobs;
 
-use App\Domains\User\Enums\AuthTypeEnum;
+use App\Domains\Auth\Enums\AuthTypeEnum;
 use App\Domains\User\Models\User;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;

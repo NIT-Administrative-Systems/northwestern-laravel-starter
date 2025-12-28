@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Tests\Feature\Commands;
 
 use App\Console\Commands\SendAccessTokenExpirationNotificationsCommand;
-use App\Domains\User\Mail\AccessTokenExpirationNotification;
-use App\Domains\User\Models\AccessToken;
+use App\Domains\Auth\Mail\AccessTokenExpirationNotification;
+use App\Domains\Auth\Models\AccessToken;
 use App\Domains\User\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;

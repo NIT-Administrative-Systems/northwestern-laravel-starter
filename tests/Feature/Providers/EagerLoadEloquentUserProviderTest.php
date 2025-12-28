@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Providers;
 
-use App\Domains\User\Models\Role;
+use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\User;
 use App\Providers\EagerLoadEloquentUserProvider;
 use Illuminate\Contracts\Hashing\Hasher;

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\User\Listeners;
 
-use App\Domains\User\Enums\AuthTypeEnum;
-use App\Domains\User\Enums\SystemRoleEnum;
+use App\Domains\Auth\Enums\AuthTypeEnum;
+use App\Domains\Auth\Enums\SystemRoleEnum;
+use App\Domains\Auth\Models\Role;
 use App\Domains\User\Events\NetIdUpdated;
 use App\Domains\User\Listeners\ProcessNetIdUpdate;
-use App\Domains\User\Models\Role;
 use App\Domains\User\Models\User;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;

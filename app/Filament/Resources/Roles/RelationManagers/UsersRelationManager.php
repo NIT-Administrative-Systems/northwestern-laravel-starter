@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Roles\RelationManagers;
 
+use App\Domains\Auth\Enums\AuthTypeEnum;
+use App\Domains\Auth\Enums\RoleModificationOriginEnum;
+use App\Domains\Auth\Enums\RoleTypeEnum;
+use App\Domains\Auth\Models\Role;
 use App\Domains\User\Enums\AffiliationEnum;
-use App\Domains\User\Enums\AuthTypeEnum;
-use App\Domains\User\Enums\RoleModificationOriginEnum;
-use App\Domains\User\Enums\RoleTypeEnum;
-use App\Domains\User\Models\Role;
 use App\Domains\User\Models\User;
 use App\Filament\Resources\Users\UserResource;
 use Filament\Actions\AttachAction;

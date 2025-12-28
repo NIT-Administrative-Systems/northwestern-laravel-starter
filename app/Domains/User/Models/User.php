@@ -4,11 +4,15 @@ declare(strict_types=1);
 
 namespace App\Domains\User\Models;
 
+use App\Domains\Auth\Enums\AuthTypeEnum;
+use App\Domains\Auth\Enums\PermissionEnum;
+use App\Domains\Auth\Enums\SystemRoleEnum;
+use App\Domains\Auth\Models\AccessToken;
+use App\Domains\Auth\Models\ApiRequestLog;
+use App\Domains\Auth\Models\LoginChallenge;
+use App\Domains\Auth\Models\Role;
 use App\Domains\Core\Models\Concerns\Auditable as AuditableConcern;
 use App\Domains\User\Enums\AffiliationEnum;
-use App\Domains\User\Enums\AuthTypeEnum;
-use App\Domains\User\Enums\PermissionEnum;
-use App\Domains\User\Enums\SystemRoleEnum;
 use App\Domains\User\Models\Concerns\AuditsRoles;
 use App\Domains\User\Models\Concerns\HandlesImpersonation;
 use App\Domains\User\QueryBuilders\UserBuilder;

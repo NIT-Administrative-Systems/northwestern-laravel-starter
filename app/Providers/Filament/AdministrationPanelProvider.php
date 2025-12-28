@@ -49,7 +49,9 @@ class AdministrationPanelProvider extends PanelProvider
                 'logout' => fn (Action $action) => $action
                     ->label('Sign out')
                     ->icon(Heroicon::OutlinedArrowRightOnRectangle)
-                    ->postToUrl(false)
+                    ->extraAttributes([
+                        'data-cy' => 'sign-out-menu-link',
+                    ])
                     ->url(route('logout')),
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')

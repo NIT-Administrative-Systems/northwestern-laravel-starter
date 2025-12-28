@@ -74,6 +74,7 @@ class AuditsTable
                     ->sortable(),
                 TextColumn::make('auditable_type')
                     ->label('Type')
+                    ->badge()
                     ->formatStateUsing(function (string $state) {
                         $className = Relation::getMorphedModel($state) ?? $state;
 

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domains\User\Models\Concerns;
 
-use App\Domains\User\Enums\RoleModificationOriginEnum;
-use App\Domains\User\Models\Role;
+use App\Domains\Auth\Enums\RoleModificationOriginEnum;
+use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\User;
 use Illuminate\Support\Collection as BaseCollection;
 use Illuminate\Support\Facades\Event;

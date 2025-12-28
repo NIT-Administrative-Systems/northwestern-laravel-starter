@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domains\User\Models\Concerns;
 
-use App\Domains\User\Models\Permission;
-use App\Domains\User\Models\Role;
+use App\Domains\Auth\Models\Permission;
+use App\Domains\Auth\Models\Role;
 use Illuminate\Support\Collection as BaseCollection;
 use Illuminate\Support\Facades\Event;
 use OwenIt\Auditing\Events\AuditCustom;

@@ -1,6 +1,5 @@
 @php
-    use App\Domains\User\Enums\PermissionEnum;
-    use App\Domains\User\Enums\AuthTypeEnum;
+    use App\Domains\Auth\Enums\PermissionEnum;
     use App\Providers\Filament\AdministrationPanelProvider;
     use Filament\Facades\Filament;
 @endphp
@@ -18,7 +17,9 @@
     @auth
         @can(PermissionEnum::ACCESS_ADMINISTRATION_PANEL)
             <li class="nav-item px-md-1">
-                <a class="nav-link" href="{{ Filament::getPanel(AdministrationPanelProvider::ID)->getUrl() }}">
+                <a class="nav-link"
+                   data-cy="admin-panel-link"
+                   href="{{ Filament::getPanel(AdministrationPanelProvider::ID)->getUrl() }}">
                     <i class="fas fa-wrench fa-fw me-1" aria-hidden="true"></i>
                     Administration
                 </a>
@@ -44,14 +45,19 @@
             </li>
             <li class='nav-item d-flex align-items-center'>
                 @impersonating
-                    <a class="nav-link" href="{{ route('impersonate.leave') }}">
-                        Leave Impersonation
-                        <i class="fas fa-sign-out-alt fa-fw ms-1" aria-hidden="true"></i>
-                    </a>
+                    <form class="mb-0"
+                          method="POST"
+                          action="{{ route('impersonate.leave') }}">
+                        @csrf
+                        <button class="nav-link btn btn-link p-0" type="submit">
+                            Leave Impersonation
+                            <i class="fas fa-sign-out-alt fa-fw ms-1" aria-hidden="true"></i>
+                        </button>
+                    </form>
                 @else
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button class="nav-link btn btn-link" data-cy="logout-link">
+                        <button class="nav-link btn btn-link" data-cy="sign-out-link">
                             Sign out
                             <i class="fas fa-sign-out-alt fa-fw ms-1" aria-hidden="true"></i>
                         </button>

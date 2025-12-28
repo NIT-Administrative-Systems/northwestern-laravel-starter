@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users\Actions;
 
-use App\Domains\User\Actions\Local\IssueLoginChallenge;
-use App\Domains\User\Enums\PermissionEnum;
+use App\Domains\Auth\Actions\Local\IssueLoginChallenge;
+use App\Domains\Auth\Enums\PermissionEnum;
 use App\Domains\User\Models\User;
 use Exception;
 use Filament\Actions\Action;

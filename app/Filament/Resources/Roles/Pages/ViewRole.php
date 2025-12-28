@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Roles\Pages;
 
-use App\Domains\User\Enums\PermissionEnum;
-use App\Domains\User\Models\Role;
+use App\Domains\Auth\Enums\PermissionEnum;
+use App\Domains\Auth\Models\Role;
 use App\Filament\Resources\Roles\RoleResource;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\TextEntry;

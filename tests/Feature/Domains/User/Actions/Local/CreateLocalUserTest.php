@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\User\Actions\Local;
 
+use App\Domains\Auth\Enums\AuthTypeEnum;
+use App\Domains\Auth\Models\LoginChallenge;
 use App\Domains\User\Actions\Local\CreateLocalUser;
-use App\Domains\User\Enums\AuthTypeEnum;
-use App\Domains\User\Models\LoginChallenge;
 use Illuminate\Support\Facades\Mail;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;

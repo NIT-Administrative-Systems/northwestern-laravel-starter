@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Responses;
 
+use App\Domains\Auth\Models\ApiRequestLog;
 use App\Domains\Core\ValueObjects\ApiRequestContext;
-use App\Domains\User\Models\ApiRequestLog;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Context;
 use OpenApi\Attributes as OA;

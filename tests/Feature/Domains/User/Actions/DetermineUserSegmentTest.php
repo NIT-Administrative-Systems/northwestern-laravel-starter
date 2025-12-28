@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\User\Actions;
 
+use App\Domains\Auth\Enums\PermissionEnum;
+use App\Domains\Auth\Models\Role;
 use App\Domains\User\Actions\DetermineUserSegment;
-use App\Domains\User\Enums\PermissionEnum;
 use App\Domains\User\Enums\UserSegmentEnum;
-use App\Domains\User\Models\Role;
 use App\Domains\User\Models\User;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domains\Core\GlobalAlerts;
 
 use App\Domains\User\Models\User;
+use Illuminate\Support\HtmlString;
 use Northwestern\SysDev\UI\Services\GlobalAlerts\GlobalAlert;
 use Northwestern\SysDev\UI\Services\GlobalAlerts\GlobalAlertDetails;
 
@@ -22,6 +23,14 @@ class UserImpersonated extends GlobalAlert
         $username = $user->full_name ?? $user->username;
 
         $leaveUrl = route('impersonate.leave');
+        $leaveForm = <<<HTML
+            <form method="POST" action="{$leaveUrl}">
+                {$this->csrfField()}
+                <button class="btn btn-outline-danger" type="submit">
+                    Leave Impersonation
+                </button>
+            </form>
+        HTML;
         $message = <<<HTML
             <div class="row g-2">
                 <div class="col-12">
@@ -29,9 +38,7 @@ class UserImpersonated extends GlobalAlert
                     Impersonating user • <span class="fw-bold">{$username}</span>
                 </div>
                 <div class="col-12">
-                    <a class="btn btn-outline-danger" href="{$leaveUrl}">
-                        Leave Impersonation
-                    </a>
+                    {$leaveForm}
                 </div>
             </div>
         HTML;
@@ -40,5 +47,10 @@ class UserImpersonated extends GlobalAlert
             message: $message,
             style: 'danger',
         );
+    }
+
+    private function csrfField(): HtmlString
+    {
+        return csrf_field();
     }
 }

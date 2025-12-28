@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Roles\Pages;
 
-use App\Domains\User\Models\Role;
+use App\Domains\Auth\Models\Role;
 use App\Filament\Resources\Roles\RoleResource;
 use Filament\Resources\Pages\CreateRecord;
 

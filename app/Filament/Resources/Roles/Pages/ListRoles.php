@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Roles\Pages;
 
-use App\Domains\User\Enums\PermissionEnum;
+use App\Domains\Auth\Enums\PermissionEnum;
 use App\Filament\Resources\Roles\RoleResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;

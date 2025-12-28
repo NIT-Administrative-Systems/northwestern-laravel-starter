@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users\Schemas;
 
+use App\Domains\Auth\Enums\PermissionEnum;
 use App\Domains\User\Actions\Directory\FindOrUpdateUserFromDirectory;
-use App\Domains\User\Enums\PermissionEnum;
 use App\Domains\User\Models\User;
 use App\Filament\Resources\Users\Support\NetIdStatus;
 use App\Filament\Resources\Users\UserResource;

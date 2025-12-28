@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users\RelationManagers;
 
-use App\Domains\User\Enums\AuthTypeEnum;
+use App\Domains\Auth\Enums\AuthTypeEnum;
 use App\Domains\User\Models\User;
 use App\Filament\Resources\AccessTokens\Actions\CreateAccessTokenAction;
 use App\Filament\Resources\AccessTokens\Actions\EditAccessTokenIpRestrictionsAction;

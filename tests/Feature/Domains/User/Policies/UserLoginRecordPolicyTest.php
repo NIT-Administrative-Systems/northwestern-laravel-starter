@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\User\Policies;
 
-use App\Domains\User\Enums\PermissionEnum;
+use App\Domains\Auth\Enums\PermissionEnum;
 use App\Domains\User\Models\User;
 use App\Domains\User\Policies\UserLoginRecordPolicy;
 use PHPUnit\Framework\Attributes\CoversClass;

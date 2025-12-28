@@ -56,32 +56,6 @@
 - **Long-running operations:** Data migrations affecting large tables should be converted into queued jobs or artisan commands instead of bulky migrations. Migrations should only define schema changes.
 - **Column order:** Group columns logically - primary key first, foreign keys together, timestamps last. This improves readability and maintainability.
 
-**Example migration pattern:**
-
-```php
-public function up(): void
-{
-    Schema::create('access_tokens', function (Blueprint $table) {
-        $table->id();
-        $table->foreignId('user_id')->index();
-
-        $table->string('name');
-        $table->string('token', 64)->unique();
-        $table->text('abilities')->nullable();
-        $table->timestamp('last_used_at')->nullable();
-        $table->timestamp('expires_at')->nullable();
-
-        $table->timestamps();
-        $table->softDeletes();
-    });
-}
-
-public function down(): void
-{
-    throw new NoRollback();
-}
-```
-
 ---
 
 ## Seeders & factories
@@ -152,35 +126,6 @@ This application uses **two separate and distinct UI stacks** optimized for diff
 - **Styling:** Bootstrap 5 (utility classes like `btn`, `card`, `row`, `col-*`)
 - **Icons:** Font Awesome (`<i class="fas fa-icon">`)
 - **Components:** Custom Blade components in `resources/views/components/`
-
-**Example patterns:**
-
-```blade
-@extends("northwestern::purple-container")
-
-@section("content")
-    <div class="row">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-body">
-                    <h1 class="h3">Title</h1>
-                    <p class="lead">Content</p>
-                    <button class="btn btn-primary">
-                        <i class="fas fa-check me-2"></i>Submit
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-@endsection
-```
-
-**Available custom components:**
-
-- `<x-breadcrumbs :breadcrumbs="$array">` - Bootstrap breadcrumb navigation
-- `<x-clipboard text="...">` - Copy-to-clipboard with feedback
-- `<x-default-profile-photo>` - Placeholder profile images
-- `<x-not-yet-implemented>` - Placeholder for WIP features
 
 ### Filament (Administration Interface)
 

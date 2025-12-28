@@ -67,6 +67,10 @@ return [
 
             // Cooldown before resending another code
             'resend_cooldown_seconds' => 30,
+
+            // Days to retain login challenge records before pruning
+            // Set to null to disable automatic pruning
+            'retention_days' => (int) env('LOGIN_CHALLENGE_RETENTION_DAYS', 30),
         ],
     ],
 

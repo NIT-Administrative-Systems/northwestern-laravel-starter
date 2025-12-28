@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Http\Controllers\Platform;
 
-use App\Domains\User\Enums\SystemRoleEnum;
-use App\Domains\User\Models\Role;
+use App\Domains\Auth\Enums\SystemRoleEnum;
+use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\User;
 use App\Http\Controllers\Platform\EnvironmentLockdownController;
 use PHPUnit\Framework\Attributes\CoversClass;

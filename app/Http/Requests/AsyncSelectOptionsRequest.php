@@ -16,8 +16,6 @@ use Illuminate\Http\Exceptions\HttpResponseException;
  *
  * The response from this request is expected to be a JSON array of objects with `text` and `value` keys.
  * `text` should be the option label, and `value` should be the option value.
- *
- * TODO link to documentation
  */
 class AsyncSelectOptionsRequest extends FormRequest
 {

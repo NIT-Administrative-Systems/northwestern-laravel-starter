@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\Api\V1\AccessTokenApiController;
-use App\Http\Controllers\Api\V1\UserApiController;
-use App\Http\Middleware\AuthenticatesAccessTokens;
+use App\Domains\Auth\Http\Controllers\Api\V1\AccessTokenApiController;
+use App\Domains\Auth\Http\Middleware\AuthenticatesAccessTokens;
+use App\Domains\Auth\Http\Middleware\LogsApiRequests;
+use App\Domains\User\Http\Controllers\Api\V1\UserApiController;
 use App\Http\Middleware\EnsureApiEnabled;
-use App\Http\Middleware\LogsApiRequests;
 use Illuminate\Support\Facades\Route;
 
 /*

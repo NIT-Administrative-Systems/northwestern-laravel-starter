@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Domains\User\Mail\AccessTokenExpirationNotification;
-use App\Domains\User\Models\AccessToken;
+use App\Domains\Auth\Mail\AccessTokenExpirationNotification;
+use App\Domains\Auth\Models\AccessToken;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
