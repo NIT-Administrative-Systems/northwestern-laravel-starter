@@ -378,7 +378,7 @@ jobs:
           --teamcity
 
       - name: 📦 Upload Test Results
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: Test Results PR${{ github.event.pull_request.number }} Run${{ github.run_id }} Shard${{ matrix.shard }}
