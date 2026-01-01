@@ -394,7 +394,7 @@ jobs:
 
     steps:
       - name: 📥 Download Test Results
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           path: artifacts
           pattern: Test Results PR${{ github.event.pull_request.number }} Run${{ github.run_id }}*
