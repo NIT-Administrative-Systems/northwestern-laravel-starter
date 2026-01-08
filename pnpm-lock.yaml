@@ -58,8 +58,8 @@ importers:
         specifier: ^1.7.0
         version: 1.7.0(axe-core@4.10.3)(cypress@14.5.4)
       cypress-ctrf-json-reporter:
-        specifier: ^0.0.11
-        version: 0.0.11
+        specifier: ^0.0.13
+        version: 0.0.13
       cypress-wait-until:
         specifier: ^3.0.2
         version: 3.0.2
@@ -953,8 +953,8 @@ packages:
       axe-core: ^3 || ^4
       cypress: ^10 || ^11 || ^12 || ^13 || ^14 || ^15
 
-  cypress-ctrf-json-reporter@0.0.11:
-    resolution: {integrity: sha512-fckUaYDEfulf8o86WZIHP760VNwMKg8g1DnR64afxryzgGRhN5n6/XpNfMfHggjO/yrRQdZb3d1X5tI6FXoMXg==}
+  cypress-ctrf-json-reporter@0.0.13:
+    resolution: {integrity: sha512-k+LzL96HtIbyxuo62iCdMaWvxxEjWW5KdEy7uoioWRC9jrYd6wc2E9QOCZd+63hIhbPBn9H4EmmVGV4Oo6NBlQ==}
 
   cypress-wait-until@3.0.2:
     resolution: {integrity: sha512-iemies796dD5CgjG5kV0MnpEmKSH+s7O83ZoJLVzuVbZmm4lheMsZqAVT73hlMx4QlkwhxbyUzhOBUOZwoOe0w==}
@@ -2895,7 +2895,7 @@ snapshots:
       axe-core: 4.10.3
       cypress: 14.5.4
 
-  cypress-ctrf-json-reporter@0.0.11: {}
+  cypress-ctrf-json-reporter@0.0.13: {}
 
   cypress-wait-until@3.0.2: {}
 
