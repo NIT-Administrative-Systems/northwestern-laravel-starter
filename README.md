@@ -40,7 +40,7 @@
   </table>
 </div>
 
-## 📘 Overview
+## Overview
 
 Modern web development involves far more than building routes, controllers, and views. Before any business logic can take shape, teams must establish authentication flows, authorization layers, API conventions, auditing, CI/CD pipelines, frontend patterns, monitoring, and a maintainable project structure. These foundational concerns are essential, yet they consume significant time and often lead to duplicated effort across projects.
 
@@ -50,9 +50,9 @@ The **Northwestern Laravel Starter** provides a cohesive solution that takes car
 >
 > This starter kit is designed primarily for applications built within [Northwestern University](https://www.northwestern.edu)’s ecosystem. If you're outside Northwestern, you may not be able to use the project as-is. However, the architecture, patterns, and modules implemented here may still be valuable as reference material or inspiration. Contributions from the broader community are welcome.
 
-## ✨ Features
+## Features
 
-### 🏗️ Architectural Foundation
+### Architectural Foundation
 
 - **Domain-Driven Design**: Code is logically grouped by business concerns for enhanced modularity and maintainability.
 - **Action-Based Business Logic**: Single-responsibility action classes encapsulate discrete operations for reusability
@@ -60,13 +60,13 @@ The **Northwestern Laravel Starter** provides a cohesive solution that takes car
 - **Flexible Configuration**: Fine-grained settings for authentication methods, API features, Northwestern integrations,
   and application behavior.
 
-### 🔐 Authentication & Authorization
+### Authentication & Authorization
 
 - **Multi-Authentication Methods**: Support for Entra ID SSO, Access Tokens, and passwordless email-based verification codes.
 - **Role-Based Access Control**: Fine-grained role and permissions system managed through an intuitive interface.
 - **User Impersonation**: Secure ability to troubleshoot user-specific issues and simulate user experiences.
 
-### 🔌 API Features
+### API Features
 
 - **Advanced Access Token Management**: Cryptographically secure tokens with CIDR-based IP restrictions, rotation,
   time-bound validity, and automatic expiration notifications.
@@ -76,18 +76,18 @@ The **Northwestern Laravel Starter** provides a cohesive solution that takes car
 - **Standardized Error Responses**: [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457.html) compliant machine-readable
   error response formats.
 
-### 📊 Auditing & Compliance
+### Auditing & Compliance
 
 - **Full Audit Trail**: Automatically logs all model changes and user actions with a complete before/after history.
 - **Secure Data Handling**: Sensitive information is properly hashed or encrypted to limit the risk of data exposure.
 
-### 🎓 Northwestern Integrations
+### Northwestern Integrations
 
 - **Northwestern Directory**: Just-in-time user provisioning, automatic data synchronization, and monitoring with the
   Northwestern Directory service.
 - **EventHub**: Seamless integration for publishing events or registering webhooks with the EventHub system.
 
-### 🎨 Frontend & UX
+### Frontend & UX
 
 - **Modular Filament UI**: Ready-to-use administration panel with pre-built tables, forms, and dashboards for managing
   application data.
@@ -95,7 +95,7 @@ The **Northwestern Laravel Starter** provides a cohesive solution that takes car
 - **Responsive Design**: Consistent user experience across devices with various screen sizes.
 - **WCAG 2.1 Accessibility**: Built with accessibility best practices to ensure inclusivity for all users.
 
-### 🧑‍💻 Developer Experience
+### Developer Experience
 
 - **Streamlined Local Development**: Schema-validated database snapshots, configuration validation, and database rebuild
   utilities.
@@ -103,23 +103,17 @@ The **Northwestern Laravel Starter** provides a cohesive solution that takes car
   with [Cypress](https://www.cypress.io).
 - **CI/CD Ready**: Pre-configured GitHub Actions workflows for static analysis, formatting, and automated testing.
 
-### 📈 Monitoring & Operations
+### Monitoring & Operations
 
 - **Health Checks & Monitoring**: Built-in health checks to monitor critical system components.
 - **Analytics Dashboards**: Pre-built dashboards for API request metrics and login activity.
 
-## 📋 System Requirements
-
-- [PHP](https://www.php.net/) `^8.4`
-- [Node.js](https://nodejs.org/en) `v24.x`
-- [pnpm](https://pnpm.io/installation) `^10.0`
-
-## 🚀 Getting Started
+## Getting Started
 
 Visit the [documentation](https://laravel-starter.entapp.northwestern.edu) for complete installation, configuration, and
 usage guides.
 
-## 🤝 Acknowledgements
+## Acknowledgements
 
 This starter kit is built upon the contributions of numerous open-source packages. Special thanks to the Laravel
 community and [Northwestern University IT](https://www.it.northwestern.edu) for making this project possible.
