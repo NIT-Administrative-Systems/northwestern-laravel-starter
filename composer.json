@@ -18,7 +18,6 @@
         "ext-tokenizer": "*",
         "ext-xml": "*",
         "filament/filament": "^4.0",
-        "flowframe/laravel-trend": "^0.4.0",
         "lab404/laravel-impersonate": "^1.7",
         "laravel/framework": "^12.0",
         "laravel/telescope": "^5.5",
@@ -80,6 +79,7 @@
         "post-update-cmd": [
             "@php artisan ide-helper:generate",
             "@php artisan ide-helper:meta",
+            "@php artisan ide-helper:models -N",
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
         ],
         "post-root-package-install": [

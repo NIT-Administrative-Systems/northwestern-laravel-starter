@@ -17,9 +17,6 @@ importers:
       clipboard:
         specifier: ^2.0.11
         version: 2.0.11
-      sass:
-        specifier: ^1.94.2
-        version: 1.94.2
       tom-select:
         specifier: ^2.4.3
         version: 2.4.3
@@ -81,6 +78,9 @@ importers:
       prettier-plugin-packagejson:
         specifier: ^2.5.20
         version: 2.5.20(prettier@3.7.4)
+      sass:
+        specifier: ^1.94.2
+        version: 1.94.2
       tailwindcss:
         specifier: ^4.1.17
         version: 4.1.17
