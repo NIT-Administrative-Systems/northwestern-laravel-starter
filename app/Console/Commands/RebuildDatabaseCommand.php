@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Console\Commands\Concerns\RunsSteps;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Queue;
 use Throwable;
-
-use function Laravel\Prompts\spin;
 
 /**
  * Rebuilds the database from scratch with fresh migrations and seeders.
@@ -20,12 +19,11 @@ use function Laravel\Prompts\spin;
  */
 class RebuildDatabaseCommand extends Command
 {
+    use RunsSteps;
+
     protected $signature = 'db:rebuild';
 
     protected $description = 'Rebuild the database and regenerate IDE helper files';
-
-    /** @var list<array{passed: bool}> */
-    protected array $results = [];
 
     public function handle(): int
     {
@@ -62,6 +60,11 @@ class RebuildDatabaseCommand extends Command
         return $this->allPassed() ? self::SUCCESS : self::FAILURE;
     }
 
+    protected function successMessage(): string
+    {
+        return 'Database rebuild complete';
+    }
+
     /**
      * Clear the application cache, ignoring errors if the cache table doesn't exist.
      */
@@ -72,61 +75,6 @@ class RebuildDatabaseCommand extends Command
         } catch (Throwable) {
             // Ignore - database cache table may not exist yet
         }
-    }
-
-    /**
-     * Run a step with a spinner, display the result immediately, and track it.
-     *
-     * @param  callable(): mixed  $callback
-     */
-    protected function runStep(string $name, callable $callback): bool
-    {
-        $error = null;
-
-        $passed = spin(
-            callback: function () use ($callback, &$error): bool {
-                try {
-                    $callback();
-
-                    return true;
-                } catch (Throwable $e) {
-                    $error = $e->getMessage();
-
-                    return false;
-                }
-            },
-            message: "{$name}..."
-        );
-
-        if ($passed) {
-            $this->line("  <fg=green>✓</> {$name}");
-        } else {
-            $this->line("  <fg=red>✗</> {$name}");
-            if ($error) {
-                $this->line("    <fg=red>{$error}</>");
-            }
-        }
-
-        $this->results[] = ['passed' => $passed];
-
-        return $passed;
-    }
-
-    protected function displaySummary(): void
-    {
-        $this->newLine();
-        $this->line('  <fg=gray>─────────────────────────────────────────────────</>');
-        $this->newLine();
-
-        if ($this->allPassed()) {
-            $this->line('  <fg=green>✓</> Database rebuild complete');
-        } else {
-            $passed = collect($this->results)->where('passed', true)->count();
-            $failed = collect($this->results)->where('passed', false)->count();
-            $this->line("  <fg=green>{$passed} passed</>, <fg=red>{$failed} failed</>");
-        }
-
-        $this->newLine();
     }
 
     protected function displayPostBuildInfo(): void
@@ -151,10 +99,5 @@ class RebuildDatabaseCommand extends Command
             $this->line('    <fg=magenta>API_DEMO_USER_ACCESS_TOKEN=<fg=white>your-value-here</>');
             $this->newLine();
         }
-    }
-
-    protected function allPassed(): bool
-    {
-        return collect($this->results)->every(fn (array $result): bool => $result['passed']);
     }
 }

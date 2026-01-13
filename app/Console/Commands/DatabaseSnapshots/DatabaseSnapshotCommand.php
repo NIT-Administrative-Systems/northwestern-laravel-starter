@@ -18,7 +18,7 @@ abstract class DatabaseSnapshotCommand extends Command
 {
     use ConfirmableTrait;
 
-    public const DEFAULT_SNAPSHOT_NAME = 'database-dump';
+    public const string DEFAULT_SNAPSHOT_NAME = 'database-dump';
 
     /**
      * Get the full path to a snapshot file.
@@ -75,6 +75,26 @@ abstract class DatabaseSnapshotCommand extends Command
                 ->timezone(config('app.schedule_timezone'))
                 ->format('M jS Y g:i A'),
         ])->toArray());
+    }
+
+    /**
+     * Build select options for snapshot selection with detailed labels.
+     *
+     * @param  Collection<int, SnapshotListItem>  $snapshots
+     * @return array<string, string>
+     */
+    protected function buildSnapshotSelectOptions(Collection $snapshots): array
+    {
+        return $snapshots->mapWithKeys(function (SnapshotListItem $snapshot): array {
+            $label = sprintf(
+                '%s (%s, %s)',
+                $snapshot->name,
+                Format::humanReadableSize($snapshot->size),
+                $snapshot->createdAt->diffForHumans(),
+            );
+
+            return [$snapshot->name => $label];
+        })->toArray();
     }
 
     /**
