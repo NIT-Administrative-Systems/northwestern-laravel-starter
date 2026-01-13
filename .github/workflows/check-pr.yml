@@ -69,7 +69,7 @@ jobs:
           cache: pnpm
 
       - name: 📷 pnpm Dependencies Cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             docs/node_modules
@@ -181,7 +181,7 @@ jobs:
           build-frontend-assets: false
 
       - name: 📷 Rector Cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: /tmp/rector
           key: ${{ runner.os }}-rector-${{ hashFiles('rector.php', 'composer.lock') }}
@@ -189,7 +189,7 @@ jobs:
             ${{ runner.os }}-rector-
 
       - name: 📷 Pint Cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ./storage/pint.cache
           key: ${{ runner.os }}-pint-${{ hashFiles('pint.json', 'composer.lock') }}
@@ -197,7 +197,7 @@ jobs:
             ${{ runner.os }}-pint-
 
       - name: 📷 Prettier Cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             node_modules/.cache/prettier
@@ -298,7 +298,7 @@ jobs:
           build-frontend-assets: false
 
       - name: 📷 PHPStan Result Cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: tmp
           key: phpstan-results-${{ hashFiles('phpstan.neon', 'composer.lock') }}
@@ -354,7 +354,7 @@ jobs:
           pnpm-version: ${{ env.PNPM_VERSION }}
 
       - name: 📷 PHPUnit Cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ./.phpunit.cache
           key: ${{ runner.os }}-phpunit-${{ hashFiles('phpunit.xml', 'composer.lock') }}
@@ -377,7 +377,7 @@ jobs:
           --teamcity
 
       - name: 📦 Upload Test Results
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: Test Results PR${{ github.event.pull_request.number }} Run${{ github.run_id }} Shard${{ matrix.shard }}
@@ -393,7 +393,7 @@ jobs:
 
     steps:
       - name: 📥 Download Test Results
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           path: artifacts
           pattern: Test Results PR${{ github.event.pull_request.number }} Run${{ github.run_id }}*
