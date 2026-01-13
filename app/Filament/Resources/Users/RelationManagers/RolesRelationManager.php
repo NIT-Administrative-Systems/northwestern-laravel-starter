@@ -22,6 +22,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Collection;
 use Illuminate\Support\HtmlString;
 
 class RolesRelationManager extends RelationManager
@@ -33,6 +34,34 @@ class RolesRelationManager extends RelationManager
     public function isReadOnly(): bool
     {
         return false;
+    }
+
+    /**
+     * Get roles available for assignment to the owner user.
+     *
+     * Results are cached within the request to avoid duplicate queries
+     * across disabled(), tooltip(), and schema() callbacks.
+     *
+     * @return Collection<int, Role>
+     */
+    private function getAvailableRolesForAssignment(): Collection
+    {
+        return once(function () {
+            /** @var User $user */
+            $user = $this->getOwnerRecord();
+            $assignedRoleIds = $user->roles()->pluck('id')->toArray();
+
+            return Role::query()
+                ->with('role_type')
+                ->whereNotIn('id', $assignedRoleIds)
+                ->when(
+                    $user->is_api_user,
+                    fn ($query) => $query->whereHas('role_type', fn ($q) => $q->where('slug', RoleTypeEnum::API_INTEGRATION)),
+                    fn ($query) => $query->whereHas('role_type', fn ($q) => $q->where('slug', '!=', RoleTypeEnum::API_INTEGRATION))
+                )
+                ->get()
+                ->filter(fn (Role $role) => $role->canBeManaged());
+        });
     }
 
     public static function getTabComponent(Model $ownerRecord, string $pageClass): Tab
@@ -74,69 +103,20 @@ class RolesRelationManager extends RelationManager
                     ->modalHeading('Assign Role to User')
                     ->modalSubmitActionLabel('Add Role')
                     ->attachAnother(false)
-                    ->disabled(function (RelationManager $livewire) {
+                    ->disabled(fn () => $this->getAvailableRolesForAssignment()->isEmpty())
+                    ->tooltip(
+                        fn () => $this->getAvailableRolesForAssignment()->isEmpty()
+                        ? 'This user already has all available roles assigned.'
+                        : 'Assign a role to this user'
+                    )
+                    ->schema(function () {
                         /** @var User $user */
-                        $user = $livewire->getOwnerRecord();
-                        $assignedRoleIds = $user->roles()->pluck('id')->toArray();
-
-                        $availableRoles = Role::query()
-                            ->with('role_type')
-                            ->whereNotIn('id', $assignedRoleIds)
-                            ->when(
-                                $user->is_api_user,
-                                fn ($query) => $query->whereHas('role_type', fn ($q) => $q->where('slug', RoleTypeEnum::API_INTEGRATION)),
-                                fn ($query) => $query->whereHas('role_type', fn ($q) => $q->where('slug', '!=', RoleTypeEnum::API_INTEGRATION))
-                            )
-                            ->get()
-                            ->filter(fn (Role $role) => $role->canBeManaged())
-                            ->count();
-
-                        return $availableRoles === 0;
-                    })
-                    ->tooltip(function (RelationManager $livewire) {
-                        /** @var User $user */
-                        $user = $livewire->getOwnerRecord();
-                        $assignedRoleIds = $user->roles()->pluck('id')->toArray();
-
-                        $availableRoles = Role::query()
-                            ->with('role_type')
-                            ->whereNotIn('id', $assignedRoleIds)
-                            ->when(
-                                $user->is_api_user,
-                                fn ($query) => $query->whereHas('role_type', fn ($q) => $q->where('slug', RoleTypeEnum::API_INTEGRATION)),
-                                fn ($query) => $query->whereHas('role_type', fn ($q) => $q->where('slug', '!=', RoleTypeEnum::API_INTEGRATION))
-                            )
-                            ->get()
-                            ->filter(fn (Role $role) => $role->canBeManaged())
-                            ->count();
-
-                        if ($availableRoles === 0) {
-                            return 'This user already has all available roles assigned.';
-                        }
-
-                        return 'Assign a role to this user';
-                    })
-                    ->schema(function (RelationManager $livewire) {
-                        /** @var User $user */
-                        $user = $livewire->getOwnerRecord();
-                        $assignedRoleIds = $user->roles()->pluck('id')->toArray();
-
-                        $availableRoles = Role::query()
-                            ->with('role_type')
-                            ->whereNotIn('id', $assignedRoleIds)
-                            ->when(
-                                $user->is_api_user,
-                                fn ($query) => $query->whereHas('role_type', fn ($q) => $q->where('slug', RoleTypeEnum::API_INTEGRATION)),
-                                fn ($query) => $query->whereHas('role_type', fn ($q) => $q->where('slug', '!=', RoleTypeEnum::API_INTEGRATION))
-                            )
-                            ->get()
-                            ->filter(fn (Role $role) => $role->canBeManaged())
-                            ->pluck('name', 'id');
+                        $user = $this->getOwnerRecord();
 
                         return [
                             Select::make('recordId')
                                 ->label('Role')
-                                ->options($availableRoles)
+                                ->options($this->getAvailableRolesForAssignment()->pluck('name', 'id'))
                                 ->searchable()
                                 ->required()
                                 ->helperText(
