@@ -18,7 +18,7 @@
         "starlight-openapi": "^0.21.1"
     },
     "engines": {
-        "node": ">= 24.0.0",
+        "node": ">= 25.0.0",
         "npm": "please-use-pnpm",
         "pnpm": ">= 10.0.0",
         "yarn": "please-use-pnpm"
