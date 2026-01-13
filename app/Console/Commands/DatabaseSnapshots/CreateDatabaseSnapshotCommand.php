@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Console\Commands\DatabaseSnapshots;
 
+use App\Console\Commands\Concerns\RunsSteps;
 use App\Domains\Core\Database\SchemaChecksumManager;
 use App\Domains\Core\Database\ValueObjects\SchemaSnapshot;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\File;
 use RuntimeException;
-use Throwable;
 
 /**
  * Creates a database snapshot with schema validation.
@@ -21,14 +22,13 @@ use Throwable;
  */
 class CreateDatabaseSnapshotCommand extends DatabaseSnapshotCommand
 {
-    public const DEFAULT_SNAPSHOT_NAME = 'database-dump';
+    use RunsSteps;
 
     protected $signature = 'db:snapshot:create
                             {filename? : The name of the snapshot file to generate}
-                            {--force : Skip confirmations}
                             {--skip-schema-validation : Skip schema validation checks}';
 
-    protected $description = 'Creates a database snapshot with schema validation.';
+    protected $description = 'Creates a database snapshot with schema validation';
 
     public function __construct(
         private readonly SchemaChecksumManager $schemaManager,
@@ -36,78 +36,103 @@ class CreateDatabaseSnapshotCommand extends DatabaseSnapshotCommand
         parent::__construct();
     }
 
+    protected function successMessage(): string
+    {
+        return 'Snapshot created successfully';
+    }
+
     public function handle(): int
     {
-        if (! $this->option('force') && ! $this->confirmToProceed()) {
+        if (App::isProduction()) {
+            $this->components->error('This command cannot be run in production.');
+
             return self::FAILURE;
         }
 
         $snapshotName = $this->normalizeSnapshotName($this->argument('filename'));
         $snapshotPath = self::snapshotPath($snapshotName);
 
-        $this->components->info('Creating database snapshot...');
+        $this->newLine();
+        $this->components->info('Creating Database Snapshot');
 
-        try {
-            // Collect schema information and calculate checksum
-            $schemaFiles = null;
-            $checksum = null;
+        $schemaFiles = null;
+        $checksum = null;
 
-            if (! $this->option('skip-schema-validation')) {
-                $this->components->task('Collecting schema information', function () use (&$schemaFiles): bool {
-                    $schemaFiles = $this->schemaManager->collectSchemaFiles();
+        if (! $this->option('skip-schema-validation')) {
+            if (! $this->runStep('Collecting schema information', function () use (&$schemaFiles): void {
+                $schemaFiles = $this->schemaManager->collectSchemaFiles();
+            })) {
+                $this->displaySummary();
 
-                    return true;
-                });
-
-                $this->components->task('Calculating schema checksum', function () use (&$checksum): bool {
-                    $checksum = $this->schemaManager->calculateCurrentCodebaseChecksum();
-
-                    return true;
-                });
+                return self::FAILURE;
             }
 
-            // Create the snapshot directory if it doesn't exist
+            if (! $this->runStep('Calculating schema checksum', function () use (&$checksum): void {
+                $checksum = $this->schemaManager->calculateCurrentCodebaseChecksum();
+            })) {
+                $this->displaySummary();
+
+                return self::FAILURE;
+            }
+        }
+
+        if (! $this->runStep('Creating snapshot directory', function () use ($snapshotPath): void {
             $snapshotDir = dirname($snapshotPath);
             if (! File::exists($snapshotDir) && ! File::makeDirectory($snapshotDir, recursive: true)) {
                 throw new RuntimeException("Unable to create snapshot directory: {$snapshotDir}");
             }
-
-            // Create the database dump
-            $this->components->task('Creating database dump', function () use ($snapshotName): bool {
-                return $this->callSilent('snapshot:create', ['name' => $snapshotName]) === self::SUCCESS;
-            });
-
-            // Save schema metadata if validation is enabled
-            if (! $this->option('skip-schema-validation')) {
-                $this->components->task('Saving schema metadata', function () use ($snapshotName, $checksum, $schemaFiles): bool {
-                    $snapshot = new SchemaSnapshot(
-                        name: $snapshotName,
-                        checksum: $checksum,
-                        createdAt: now(),
-                        migrationCount: count($schemaFiles->migrations),
-                        seederCount: count($schemaFiles->seeders)
-                    );
-
-                    $this->schemaManager->saveSnapshot($snapshotName, $snapshot);
-
-                    return true;
-                });
-            }
-
-            $this->components->success('Database snapshot created successfully.');
-            $this->displaySnapshotInfo($snapshotPath, $checksum);
-
-            return self::SUCCESS;
-        } catch (Throwable $e) {
-            $this->components->error('Error generating database snapshot: ' . $e->getMessage());
-            $this->error($e->getTraceAsString());
-
-            // Attempt to clean up failed snapshot
-            if (File::exists($snapshotPath)) {
-                File::delete($snapshotPath);
-            }
+        })) {
+            $this->displaySummary();
 
             return self::FAILURE;
+        }
+
+        if (! $this->runStep('Creating database dump', function () use ($snapshotName): void {
+            $result = $this->callSilently('snapshot:create', ['name' => $snapshotName]);
+            if ($result !== self::SUCCESS) {
+                throw new RuntimeException('Database dump failed');
+            }
+        })) {
+            $this->cleanupFailedSnapshot($snapshotPath);
+            $this->displaySummary();
+
+            return self::FAILURE;
+        }
+
+        if (! $this->option('skip-schema-validation') && ! $this->runStep(
+            'Saving schema metadata',
+            function () use ($snapshotName, $checksum, $schemaFiles): void {
+                $snapshot = new SchemaSnapshot(
+                    name: $snapshotName,
+                    checksum: $checksum,
+                    createdAt: now(),
+                    migrationCount: count($schemaFiles->migrations),
+                    seederCount: count($schemaFiles->seeders)
+                );
+
+                $this->schemaManager->saveSnapshot($snapshotName, $snapshot);
+            }
+        )) {
+            $this->cleanupFailedSnapshot($snapshotPath);
+            $this->displaySummary();
+
+            return self::FAILURE;
+        }
+
+        $this->displaySummary();
+        $this->newLine();
+        $this->displaySnapshotInfo($snapshotPath, $checksum);
+
+        return self::SUCCESS;
+    }
+
+    /**
+     * Clean up a failed snapshot by removing the SQL file if it exists.
+     */
+    private function cleanupFailedSnapshot(string $snapshotPath): void
+    {
+        if (File::exists($snapshotPath)) {
+            File::delete($snapshotPath);
         }
     }
 }

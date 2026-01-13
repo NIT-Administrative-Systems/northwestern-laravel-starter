@@ -58,6 +58,42 @@ Restore a snapshot by name:
 php artisan db:snapshot:restore my-snapshot-name
 ```
 
+Create an automatic backup before restoring:
+
+```bash
+php artisan db:snapshot:restore my-snapshot-name --backup
+```
+
 :::caution[Destructive Operation]
 Restoring a snapshot will **completely replace** your current database with the snapshot data. All current data will be lost.
 :::
+
+## Viewing Snapshot Details
+
+Get detailed information about a specific snapshot:
+
+```bash
+php artisan db:snapshot:info my-snapshot-name
+```
+
+This displays:
+- File path and size
+- Creation timestamp
+- Schema checksum and migration/seeder counts
+- Comparison with current codebase schema
+
+## Deleting Snapshots
+
+Delete a single snapshot:
+
+```bash
+php artisan db:snapshot:delete my-snapshot-name
+```
+
+Delete all snapshots:
+
+```bash
+php artisan db:snapshot:delete --all
+```
+
+Both the SQL file and any associated metadata will be removed.

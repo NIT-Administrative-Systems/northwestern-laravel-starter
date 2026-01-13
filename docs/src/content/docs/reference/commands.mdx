@@ -81,13 +81,14 @@ php artisan db:snapshot:create my-snapshot-name
 
 **Options:**
 
-- `{name}` - (required) Descriptive name for the snapshot
+- `{name}` - (optional) Descriptive name for the snapshot. Defaults to `database-dump` if omitted.
+- `--skip-schema-validation` - Skip schema validation checks
 
 **What it does:**
 
-1. Validates database schema matches current migrations
+1. Validates database schema matches current migrations (unless skipped)
 2. Dumps database to `database/snapshots/{name}.sql`
-3. Stores metadata about the snapshot (timestamp, schema version)
+3. Stores metadata about the snapshot (checksum, timestamp, migration/seeder counts)
 
 <Aside type="tip">
 Use descriptive snapshot names like `clean-test-data` or `before-feature-x` to make them easier to identify later.
@@ -114,14 +115,17 @@ php artisan db:snapshot:restore my-snapshot-name
 
 **Options:**
 
-- `{name}` - (required) Name of the snapshot to restore
+- `{name}` - (optional) Name of the snapshot to restore. Defaults to `database-dump` if omitted.
+- `--skip-schema-validation` - Skip schema validation checks
+- `--backup` - Create a backup of the current database before restoring
 
 **What it does:**
 
 1. Validates snapshot exists
-2. Checks schema compatibility
-3. Drops all current database tables
-4. Restores data from snapshot SQL file
+2. Checks schema compatibility (unless skipped)
+3. Creates a backup if requested
+4. Drops all current database tables
+5. Restores data from snapshot SQL file
 
 <Aside type="caution" title="Destructive Operation">
 Restoring a snapshot will **completely replace** your current database. All current data will be lost.
@@ -142,6 +146,58 @@ List all available database snapshots.
 ```bash
 php artisan db:snapshot:list
 ```
+
+---
+
+### `db:snapshot:info {name}`
+
+Display detailed information about a specific snapshot.
+
+```bash
+php artisan db:snapshot:info my-snapshot-name
+```
+
+**Options:**
+
+- `{name}` - (optional) Name of the snapshot to inspect. If omitted, an interactive selector is shown.
+
+**What it does:**
+
+1. Displays file information (path, size, modification date)
+2. Shows schema metadata (checksum, migration/seeder counts)
+3. Compares snapshot schema with current codebase
+
+**When to use:**
+
+- Verifying a snapshot's contents before restoring
+- Checking if a snapshot is compatible with current code
+- Reviewing snapshot metadata
+
+---
+
+### `db:snapshot:delete {name}`
+
+Delete a database snapshot and its associated metadata.
+
+```bash
+php artisan db:snapshot:delete my-snapshot-name
+```
+
+**Options:**
+
+- `{name}` - (optional) Name of the snapshot to delete. If omitted, an interactive selector is shown.
+- `--all` - Delete all snapshots
+
+**What it does:**
+
+1. Removes the SQL snapshot file from `database/snapshots/`
+2. Cleans up associated metadata from the checksum map
+
+**When to use:**
+
+- Removing old or unused snapshots
+- Freeing up disk space
+- Cleaning up after testing
 
 ---
 

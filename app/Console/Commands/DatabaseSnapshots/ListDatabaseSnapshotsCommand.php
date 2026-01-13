@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Console\Commands\DatabaseSnapshots;
 
 use App\Domains\Core\Database\SchemaChecksumManager;
-use App\Domains\Core\Database\ValueObjects\SnapshotListItem;
-use Illuminate\Support\Collection;
-use Spatie\DbSnapshots\Helpers\Format;
 
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\select;
 
+/**
+ * Lists all available database snapshots and optionally restores one.
+ */
 class ListDatabaseSnapshotsCommand extends DatabaseSnapshotCommand
 {
     protected $signature = 'db:snapshot:list';
@@ -28,42 +28,38 @@ class ListDatabaseSnapshotsCommand extends DatabaseSnapshotCommand
     {
         $snapshots = $this->schemaManager->getSnapshots();
 
+        $this->newLine();
+        $this->components->info('Available Database Snapshots');
+
         if ($snapshots->isEmpty()) {
-            $this->components->error('No database snapshots found.');
+            $this->newLine();
+            $this->components->warn('No database snapshots found.');
+            $this->newLine();
+            $this->line('  <fg=gray>→</> Create a snapshot with: <comment>php artisan db:snapshot:create</comment>');
+            $this->newLine();
 
-            return self::FAILURE;
-        }
-
-        $this->displayAllSnapshotsTable($snapshots);
-
-        if (! confirm('Would you like to restore a snapshot?')) {
             return self::SUCCESS;
         }
 
-        return $this->presentAvailableSnapshotsForRestoration($snapshots);
+        $this->newLine();
+        $this->displayAllSnapshotsTable($snapshots);
+        $this->newLine();
+
+        if (! confirm('Would you like to restore a snapshot?', default: false)) {
+            return self::SUCCESS;
+        }
+
+        return $this->presentAvailableSnapshotsForRestoration();
     }
 
     /**
-     * Present the user with an interactive selection of available {@see SnapshotListItem}s for restoration.
-     *
-     * @param  Collection<int, SnapshotListItem>  $snapshots
+     * Present the user with an interactive selection of available snapshots for restoration.
      */
-    private function presentAvailableSnapshotsForRestoration(Collection $snapshots): int
+    private function presentAvailableSnapshotsForRestoration(): int
     {
-        $choices = $snapshots->mapWithKeys(function (SnapshotListItem $snapshot): array {
-            $label = sprintf(
-                '%s (%s, %s)',
-                $snapshot->name,
-                Format::humanReadableSize($snapshot->size),
-                $snapshot->createdAt->diffForHumans(),
-            );
-
-            return [$snapshot->name => $label];
-        })->toArray();
-
         $selectedName = select(
             label: 'Select a snapshot to restore',
-            options: ['cancel' => 'Cancel'] + $choices,
+            options: ['cancel' => 'Cancel'] + $this->buildSnapshotSelectOptions($this->schemaManager->getSnapshots()),
             default: 'cancel'
         );
 
@@ -71,13 +67,9 @@ class ListDatabaseSnapshotsCommand extends DatabaseSnapshotCommand
             return self::SUCCESS;
         }
 
-        if (! confirm("Are you sure you want to restore snapshot '{$selectedName}'?")) {
-            return self::SUCCESS;
-        }
-
         $this->call('db:snapshot:restore', [
             'filename' => $selectedName,
-            '--force' => true,
+            '--skip-schema-validation' => true,
         ]);
 
         return self::SUCCESS;

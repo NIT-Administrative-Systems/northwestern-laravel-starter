@@ -5,55 +5,74 @@ declare(strict_types=1);
 namespace App\Domains\Core\Services\ConfigValidation;
 
 use App\Domains\Core\Contracts\ConfigValidator;
-use Exception;
 use Illuminate\Support\Facades\DB;
+use Throwable;
 
+/**
+ * Validates the database connection is configured and accessible.
+ */
 class DatabaseValidator implements ConfigValidator
 {
+    protected ?string $errorReason = null;
+
+    public function name(): string
+    {
+        return 'Database Connection';
+    }
+
     public function validate(): bool
     {
         $connection = config('database.default');
         $databaseName = config("database.connections.{$connection}.database");
 
         if (blank($databaseName)) {
+            $this->errorReason = 'not_configured';
+
             return false;
         }
 
         try {
-            $pdo = DB::connection()->getPdo();
-
+            DB::connection()->getPdo();
             DB::select('SELECT 1');
 
             return true;
-        } catch (Exception) {
+        } catch (Throwable) {
+            $this->errorReason = 'connection_failed';
+
             return false;
         }
     }
 
     public function successMessage(): string
     {
-        $connection = config('database.default');
-        $databaseName = DB::connection()->getDatabaseName();
+        $driver = strtoupper((string) config('database.default'));
+        $database = DB::connection()->getDatabaseName();
 
-        return sprintf(
-            'Database connection successful (Using %s: <fg=yellow>%s</>).',
-            strtoupper((string) $connection),
-            $databaseName
-        );
+        return "Connected via <comment>{$driver}</comment> to <comment>{$database}</comment>";
     }
 
     public function errorMessage(): string
     {
+        return match ($this->errorReason) {
+            'not_configured' => 'Database name is not configured',
+            default => 'Unable to establish database connection',
+        };
+    }
+
+    public function hints(): array
+    {
         $connection = config('database.default');
-        $databaseName = config("database.connections.{$connection}.database");
+        $database = config("database.connections.{$connection}.database");
 
-        if (blank($databaseName)) {
-            return 'Database name is not configured. Please set <fg=yellow>DB_DATABASE</> in your .env file.';
-        }
-
-        return sprintf(
-            'Unable to establish a connection to the database <fg=yellow>%s</>. Ensure your database exists and configuration settings are correct.',
-            $databaseName,
-        );
+        return match ($this->errorReason) {
+            'not_configured' => [
+                'Set <comment>DB_DATABASE</comment> in your .env file',
+            ],
+            default => [
+                "Verify the database <comment>{$database}</comment> exists",
+                'Check <comment>DB_HOST</comment>, <comment>DB_PORT</comment>, <comment>DB_USERNAME</comment>, and <comment>DB_PASSWORD</comment> in your .env file',
+                'Ensure the database server is running and accessible',
+            ],
+        };
     }
 }

@@ -5,18 +5,36 @@ declare(strict_types=1);
 namespace App\Domains\Core\Services\ConfigValidation;
 
 use App\Domains\Core\Contracts\ConfigValidator;
-use Exception;
 use Illuminate\Support\Facades\Storage;
+use Throwable;
 
+/**
+ * Validates the S3 filesystem connection is configured and accessible.
+ */
 class FilesystemValidator implements ConfigValidator
 {
+    protected ?string $errorReason = null;
+
+    public function name(): string
+    {
+        return 'S3 Storage';
+    }
+
     public function validate(): bool
     {
+        if (! $this->hasRequiredS3Config()) {
+            $this->errorReason = 'not_configured';
+
+            return false;
+        }
+
         try {
             Storage::disk('s3')->files();
 
             return true;
-        } catch (Exception) {
+        } catch (Throwable) {
+            $this->errorReason = 'connection_failed';
+
             return false;
         }
     }
@@ -25,27 +43,34 @@ class FilesystemValidator implements ConfigValidator
     {
         $bucket = config('filesystems.disks.s3.bucket');
 
-        return sprintf(
-            'S3 connection successful (Bucket: <fg=yellow>%s</>).',
-            $bucket,
-        );
+        return "Connected to S3 bucket <comment>{$bucket}</comment>";
     }
 
     public function errorMessage(): string
     {
-        if (! $this->hasRequiredS3Config()) {
-            return 'S3 configuration is incomplete. Please check your <fg=yellow>.env</> file for ' .
-                '<fg=yellow>AWS_ACCESS_KEY_ID</>, <fg=yellow>AWS_SECRET_ACCESS_KEY</>, ' .
-                '<fg=yellow>AWS_DEFAULT_REGION</>, and <fg=yellow>AWS_BUCKET</> values.';
-        }
+        return match ($this->errorReason) {
+            'not_configured' => 'S3 configuration is incomplete',
+            default => 'Unable to access S3 bucket',
+        };
+    }
 
+    public function hints(): array
+    {
         $bucket = config('filesystems.disks.s3.bucket');
 
-        return sprintf(
-            'S3 connection failed for bucket <fg=yellow>%s</>. ' .
-            'Verify your credentials and ensure the bucket exists and is accessible.',
-            $bucket ?? '(undefined)',
-        );
+        return match ($this->errorReason) {
+            'not_configured' => [
+                'Set <comment>AWS_ACCESS_KEY_ID</comment> in your .env file',
+                'Set <comment>AWS_SECRET_ACCESS_KEY</comment> in your .env file',
+                'Set <comment>AWS_DEFAULT_REGION</comment> in your .env file',
+                'Set <comment>AWS_BUCKET</comment> in your .env file',
+            ],
+            default => [
+                "Verify the bucket <comment>{$bucket}</comment> exists and is accessible",
+                'Check that your AWS credentials have the correct permissions',
+                'Ensure <comment>AWS_DEFAULT_REGION</comment> matches your bucket location',
+            ],
+        };
     }
 
     /**

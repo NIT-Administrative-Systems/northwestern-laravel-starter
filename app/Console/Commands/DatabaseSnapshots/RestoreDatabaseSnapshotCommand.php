@@ -4,18 +4,20 @@ declare(strict_types=1);
 
 namespace App\Console\Commands\DatabaseSnapshots;
 
+use App\Console\Commands\Concerns\RunsSteps;
 use App\Domains\Core\Database\ConfigurableDbDumperFactory;
 use App\Domains\Core\Database\SchemaChecksumManager;
 use App\Domains\Core\Database\ValueObjects\SchemaSnapshot;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use RuntimeException;
 use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Process;
-use Throwable;
+
+use function Laravel\Prompts\confirm;
 
 /**
  * Restores a database snapshot with schema validation.
@@ -28,9 +30,10 @@ use Throwable;
  */
 class RestoreDatabaseSnapshotCommand extends DatabaseSnapshotCommand
 {
+    use RunsSteps;
+
     protected $signature = 'db:snapshot:restore
                             {filename? : The snapshot file name (without extension) to restore}
-                            {--force : Skip confirmations}
                             {--skip-schema-validation : Skip schema validation checks}
                             {--backup : Create a backup before restoring}';
 
@@ -43,9 +46,16 @@ class RestoreDatabaseSnapshotCommand extends DatabaseSnapshotCommand
         parent::__construct();
     }
 
+    protected function successMessage(): string
+    {
+        return 'Snapshot restored successfully';
+    }
+
     public function handle(): int
     {
-        if (! $this->option('force') && ! $this->confirmToProceed()) {
+        if (App::isProduction()) {
+            $this->components->error('This command cannot be run in production.');
+
             return self::FAILURE;
         }
 
@@ -58,110 +68,106 @@ class RestoreDatabaseSnapshotCommand extends DatabaseSnapshotCommand
             return self::FAILURE;
         }
 
-        $this->components->info('Restoring database snapshot...');
+        $this->newLine();
+        $this->components->info('Restoring Database Snapshot');
         $this->displaySnapshotInfo($snapshotPath);
         $this->newLine();
 
-        try {
-            // Create backup if requested
-            if ($this->option('backup')) {
-                $backupName = $snapshotName . '-pre-restore-' . now()->format('Y-m-d-His');
-                if (! $this->createBackup($backupName)) {
-                    return self::FAILURE;
-                }
-            }
+        // Validate schema unless skipped
+        if (! $this->option('skip-schema-validation') && ! $this->validateSnapshotSchema($snapshotName)) {
+            return self::FAILURE;
+        }
 
-            // Validate schema unless skipped
-            if (! $this->option('skip-schema-validation') && ! $this->validateSnapshotSchema($snapshotName)) {
-                return self::FAILURE;
-            }
-
-            // Perform the restore
-            $this->dropAllTables();
-            $this->loadSnapshot($snapshotPath);
-
-            $this->components->success('Database snapshot restored successfully.');
+        // Confirm before destructive operation
+        if (! confirm('This will replace your current database. Continue?', default: false)) {
+            $this->components->warn('Restore cancelled.');
 
             return self::SUCCESS;
-        } catch (Throwable $e) {
-            Log::error('Failed to restore database snapshot', [
-                'snapshot' => $snapshotName,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
+        }
 
-            $this->components->error('Error restoring database snapshot: ' . $e->getMessage());
-            $this->error($e->getTraceAsString());
+        // Create backup if requested
+        if ($this->option('backup')) {
+            $backupName = $snapshotName . '-pre-restore-' . now()->format('Y-m-d-His');
+            if (! $this->runStep('Creating backup before restore', fn () => $this->createBackup($backupName))) {
+                $this->displaySummary();
+
+                return self::FAILURE;
+            }
+        }
+
+        // Perform the restore steps
+        if (! $this->runStep('Dropping all tables', fn () => $this->dropAllTables())) {
+            $this->displaySummary();
 
             return self::FAILURE;
         }
+
+        if (! $this->runStep('Loading database snapshot', fn () => $this->loadSnapshot($snapshotPath))) {
+            $this->displaySummary();
+
+            return self::FAILURE;
+        }
+
+        $this->displaySummary();
+
+        return self::SUCCESS;
     }
 
     /**
-     * Validate the schema compatibility of the given snapshot. An "invalid" schema does not necessarily mean
-     * that the snapshot cannot be restored, but it may indicate that certain features or data types may not
-     * function as expected.
+     * Validate the schema compatibility of the given snapshot.
      *
-     * For example, a user creates a database snapshot. Then, they update their branch from the remote repository
-     * which contains new migrations or seeder changes. If they try to restore their old snapshot, it may cause
-     * unexpected behaviour or exceptions if the updated codebase relies on the new schema changes.
+     * An "invalid" schema does not necessarily mean that the snapshot cannot be restored,
+     * but it may indicate that certain features or data types may not function as expected.
      */
     private function validateSnapshotSchema(string $snapshotName): bool
     {
-        try {
-            $snapshot = $this->schemaManager->getSnapshotInfo($snapshotName);
+        $snapshot = $this->schemaManager->getSnapshotInfo($snapshotName);
 
-            if (! $snapshot instanceof SchemaSnapshot) {
-                $this->newLine();
-                $this->components->warn('⚠️ No schema information found for this snapshot.');
-                $this->components->info('This snapshot was likely created without schema validation or using an older version.');
-
-                return $this->confirm('Continue without schema validation?');
-            }
-
-            $files = $this->schemaManager->collectSchemaFiles();
-            $currentChecksum = $this->schemaManager->calculateCurrentCodebaseChecksum();
-            $fileCounts = $files->counts();
-
-            if ($snapshot->checksum !== $currentChecksum) {
-                $this->newLine();
-                $this->components->warn('<options=bold>⚠️ SCHEMA MISMATCH DETECTED ⚠️</>');
-                $this->components->bulletList([
-                    "Snapshot checksum: <fg=yellow>{$snapshot->checksum}</>",
-                    "Current schema checksum: <fg=yellow>{$currentChecksum}</>",
-                    "Created at: <fg=yellow>{$snapshot->createdAt->format('M jS Y g:i A')}</>",
-                    "Current schema files: <fg=yellow>{$fileCounts['migrations']} migrations</> and <fg=yellow>{$fileCounts['seeders']} seeders</>",
-                    "Snapshot schema files: <fg=yellow>{$snapshot->migrationCount} migrations</> and <fg=yellow>{$snapshot->seederCount} seeders</>",
-                ]);
-
-                return $this->confirm(
-                    'The database schema or seeders have been modified since this snapshot was created. This could result in unexpected behavior. Continue anyway?',
-                );
-            }
-
-            return true;
-        } catch (Throwable $e) {
+        if (! $snapshot instanceof SchemaSnapshot) {
             $this->newLine();
-            $this->components->error('Schema validation failed: ' . $e->getMessage());
+            $this->components->warn('No schema information found for this snapshot.');
+            $this->components->info('This snapshot was likely created without schema validation or using an older version.');
 
-            return false;
+            return confirm('Continue without schema validation?');
         }
+
+        $files = $this->schemaManager->collectSchemaFiles();
+        $currentChecksum = $this->schemaManager->calculateCurrentCodebaseChecksum();
+        $fileCounts = $files->counts();
+
+        if ($snapshot->checksum !== $currentChecksum) {
+            $this->newLine();
+            $this->components->warn('<options=bold>SCHEMA MISMATCH DETECTED</>');
+            $this->components->bulletList([
+                "Snapshot checksum: <fg=yellow>{$snapshot->checksum}</>",
+                "Current schema checksum: <fg=yellow>{$currentChecksum}</>",
+                "Created at: <fg=yellow>{$snapshot->createdAt->format('M jS Y g:i A')}</>",
+                "Current schema files: <fg=yellow>{$fileCounts['migrations']} migrations</> and <fg=yellow>{$fileCounts['seeders']} seeders</>",
+                "Snapshot schema files: <fg=yellow>{$snapshot->migrationCount} migrations</> and <fg=yellow>{$snapshot->seederCount} seeders</>",
+            ]);
+
+            return confirm(
+                'The database schema or seeders have been modified since this snapshot was created. This could result in unexpected behavior. Continue anyway?',
+                default: false,
+            );
+        }
+
+        return true;
     }
 
     /**
      * Create a backup of the current database state.
      */
-    private function createBackup(string $backupName): bool
+    private function createBackup(string $backupName): void
     {
-        $success = false;
-        $this->components->task(
-            'Creating backup before restore',
-            function () use ($backupName, &$success): void {
-                $success = $this->callSilent('db:snapshot:create', ['filename' => $backupName]) === self::SUCCESS;
-            }
-        );
+        $result = $this->callSilently('db:snapshot:create', [
+            'filename' => $backupName,
+            '--skip-schema-validation' => true,
+        ]);
 
-        return $success;
+        if ($result !== self::SUCCESS) {
+            throw new RuntimeException('Failed to create backup snapshot');
+        }
     }
 
     /**
@@ -169,13 +175,11 @@ class RestoreDatabaseSnapshotCommand extends DatabaseSnapshotCommand
      */
     private function dropAllTables(): void
     {
-        $this->components->task('Dropping all tables', function (): void {
-            DB::connection(DB::getDefaultConnection())
-                ->getSchemaBuilder()
-                ->dropAllTables();
+        DB::connection(DB::getDefaultConnection())
+            ->getSchemaBuilder()
+            ->dropAllTables();
 
-            DB::reconnect();
-        });
+        DB::reconnect();
     }
 
     /**
@@ -183,31 +187,29 @@ class RestoreDatabaseSnapshotCommand extends DatabaseSnapshotCommand
      */
     private function loadSnapshot(string $snapshotPath): void
     {
-        $this->components->task('Loading database snapshot', function () use ($snapshotPath): void {
-            $processFactory = function (...$arguments): Process {
-                $quote = ConfigurableDbDumperFactory::determineQuoteForPlatform();
-                $pgBinDir = ConfigurableDbDumperFactory::findPostgresDirectory();
+        $processFactory = function (...$arguments): Process {
+            $quote = ConfigurableDbDumperFactory::determineQuoteForPlatform();
+            $pgBinDir = ConfigurableDbDumperFactory::findPostgresDirectory();
 
-                $originalCommand = (string) Arr::first($arguments);
-                $util = Str::before($originalCommand, ' ');
-                $commandPath = $this->executableFinder->find($util, extraDirs: array_filter([$pgBinDir]));
+            $originalCommand = (string) Arr::first($arguments);
+            $util = Str::before($originalCommand, ' ');
+            $commandPath = $this->executableFinder->find($util, extraDirs: array_filter([$pgBinDir]));
 
-                if ($commandPath === null) {
-                    throw new RuntimeException("Required utility not found: {$util}");
-                }
+            if ($commandPath === null) {
+                throw new RuntimeException("Required utility not found: {$util}");
+            }
 
-                $arguments[0] = "{$quote}{$commandPath}{$quote}" . ' ' . Str::after($originalCommand, ' ');
+            $arguments[0] = "{$quote}{$commandPath}{$quote}" . ' ' . Str::after($originalCommand, ' ');
 
-                return Process::fromShellCommandline(...$arguments)->setTimeout(null);
-            };
+            return Process::fromShellCommandline(...$arguments)->setTimeout(null);
+        };
 
-            /** @phpstan-ignore-next-line getSchemaState exists but Larastan's stub doesn't seem to have it */
-            DB::connection(DB::getDefaultConnection())
-                ->getSchemaState(processFactory: $processFactory)
-                ->handleOutputUsing(function ($type, $buffer): void {
-                    $this->output->write($buffer);
-                })
-                ->load($snapshotPath);
-        });
+        /** @phpstan-ignore-next-line getSchemaState exists but Larastan's stub doesn't seem to have it */
+        DB::connection(DB::getDefaultConnection())
+            ->getSchemaState(processFactory: $processFactory)
+            ->handleOutputUsing(function ($type, $buffer): void {
+                $this->output->write($buffer);
+            })
+            ->load($snapshotPath);
     }
 }

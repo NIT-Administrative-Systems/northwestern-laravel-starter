@@ -187,6 +187,43 @@ class SchemaChecksumManager
     }
 
     /**
+     * Remove metadata for a specific snapshot.
+     *
+     * @throws RuntimeException If file operations fail
+     */
+    public function removeSnapshotMetadata(string $snapshotName): void
+    {
+        $mapPath = $this->getMetadataPath();
+
+        if (! File::exists($mapPath)) {
+            return;
+        }
+
+        try {
+            $checksumMap = json_decode(File::get($mapPath), true, 512, JSON_THROW_ON_ERROR);
+
+            if (! isset($checksumMap[$snapshotName])) {
+                return;
+            }
+
+            unset($checksumMap[$snapshotName]);
+
+            if (count($checksumMap) === 0) {
+                File::delete($mapPath);
+            } else {
+                if (! File::put(
+                    $mapPath,
+                    json_encode($checksumMap, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT)
+                )) {
+                    throw new RuntimeException("Failed to write metadata to: {$mapPath}");
+                }
+            }
+        } catch (JsonException $e) {
+            throw new RuntimeException("Failed to process snapshot metadata: {$e->getMessage()}", $e->getCode(), previous: $e);
+        }
+    }
+
+    /**
      * Get the path to the checksum map file.
      */
     private function getMetadataPath(): string
