@@ -5,56 +5,74 @@ declare(strict_types=1);
 namespace App\Domains\Core\Services\ConfigValidation;
 
 use App\Domains\Core\Contracts\ConfigValidator;
-use Exception;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Redis;
+use Throwable;
 
+/**
+ * Validates the queue connection is configured and accessible.
+ */
 class QueueValidator implements ConfigValidator
 {
+    public function name(): string
+    {
+        return 'Queue Connection';
+    }
+
     public function validate(): bool
     {
         $queueConnection = config('queue.default');
 
-        // For Redis, check if the connection is successful
         if ($queueConnection === 'redis') {
             try {
                 return Redis::connection()->client()->ping();
-            } catch (Exception) {
+            } catch (Throwable) {
                 return false;
             }
         }
 
-        // For other drivers, check if they're configured
         try {
             Queue::size();
 
             return true;
-        } catch (Exception) {
+        } catch (Throwable) {
             return false;
         }
     }
 
     public function successMessage(): string
     {
-        $queueConnection = config('queue.default');
+        $driver = strtoupper((string) config('queue.default'));
 
-        return sprintf(
-            'Queue connection successful (Using connection: <fg=yellow>%s</>).',
-            strtoupper((string) $queueConnection)
-        );
+        return "Queue driver <comment>{$driver}</comment> is operational";
     }
 
     public function errorMessage(): string
     {
-        $queueConnection = config('queue.default');
+        $driver = config('queue.default');
 
-        if ($queueConnection === 'redis') {
-            return 'Unable to establish a connection to Redis for queue processing. Ensure your Redis server is running and properly configured.';
-        }
+        return match ($driver) {
+            'redis' => 'Unable to connect to Redis for queue processing',
+            default => 'Queue connection failed',
+        };
+    }
 
-        return sprintf(
-            'Queue connection failed for connection <fg=yellow>%s</>. Please check your configuration settings.',
-            strtoupper((string) $queueConnection)
-        );
+    public function hints(): array
+    {
+        $driver = config('queue.default');
+
+        return match ($driver) {
+            'redis' => [
+                'Ensure Redis is running: <comment>brew services start redis</comment> or <comment>docker-compose up -d redis</comment>',
+                'Verify <comment>REDIS_HOST</comment> and <comment>REDIS_PORT</comment> in your .env file',
+            ],
+            'database' => [
+                'Ensure the database is accessible and the jobs table exists',
+                'Run <comment>php artisan queue:table && php artisan migrate</comment> if needed',
+            ],
+            default => [
+                "Check your <comment>QUEUE_CONNECTION</comment> setting (currently: {$driver})",
+            ],
+        };
     }
 }
