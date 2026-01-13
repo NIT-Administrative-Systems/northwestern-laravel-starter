@@ -55,9 +55,10 @@ class NetIdUpdateController extends Controller
 
         $user = User::query()
             ->sso()
-            ->firstWhere('username', $event->netId);
+            ->where('username', $event->netId)
+            ->exists();
 
-        if ($user === null) {
+        if (! $user) {
             return response()->json([
                 'status' => self::STATUS_IGNORED,
                 'reason' => self::REASON_UNKNOWN_USER,

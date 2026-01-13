@@ -2,7 +2,7 @@ name: Check PR
 
 # Define the targeted versions to be used throughout the workflow.
 env:
-  NODE_VERSION: '24'
+  NODE_VERSION: '25'
   PNPM_VERSION: '10.x.x'
   PHP_VERSION: '8.4'
 
@@ -170,7 +170,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           ref: ${{ github.head_ref }}
-          token: ${{ secrets.EACD_BOT_FOR_COMMIT_PAT }}
+          token: ${{ secrets.EACD_BOT_FOR_COMMIT_PAT || github.token }}
 
       - name: 🔁 Setup Environment
         uses: ./.github/actions/common-setup
@@ -288,7 +288,6 @@ jobs:
         uses: actions/checkout@v6
         with:
           ref: ${{ github.head_ref }}
-          token: ${{ secrets.EACD_BOT_FOR_COMMIT_PAT }}
 
       - name: 🔁 Setup Environment
         uses: ./.github/actions/common-setup
@@ -443,7 +442,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           ref: ${{ github.head_ref }}
-          token: ${{ secrets.EACD_BOT_FOR_COMMIT_PAT }}
+          token: ${{ secrets.EACD_BOT_FOR_COMMIT_PAT || github.token }}
 
       - name: 🔁 Setup Environment
         uses: ./.github/actions/common-setup

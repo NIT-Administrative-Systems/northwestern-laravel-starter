@@ -63,16 +63,8 @@
 ### Factory patterns
 
 - **Foreign key relationships:** Columns ending with `_id` should call the related model's `factory()` method instead of using Faker.
-- **Faker methods:** Always use Faker methods (not properties):
-    ```php
-    'description' => fake()->text(),  // ✓ Correct
-    'description' => fake()->text,  // ✗ Wrong
-    ```
+- **Faker methods:** Always use Faker methods (not properties): `fake()->text()` instead of `fake()->text`.
 - **Factory states:** Use states for variations of the same model:
-    ```php
-    User::factory()->affiliate()->create();
-    User::factory()->api()->create();
-    ```
 
 ### Idempotent seeding
 
@@ -88,18 +80,6 @@ This starter uses a custom **idempotent seeding pattern** that allows seeders to
 
 - **Eager loading:** Always eager load relationships to avoid N+1 queries using `with()`, `load()` or `loadMissing()`:
 - **Query scopes:** Define reusable query logic as scopes on models or custom query builders:
-
-    ```php
-    // In UserBuilder.php
-    public function sso(): self
-    {
-        return $this->where('auth_type', AuthTypeEnum::SSO);
-    }
-
-    // Usage
-    User::query()->sso()->get();
-    ```
-
 - **Select specific columns:** Only select columns you need if applicable to avoid hydrating full models unnecessarily.
 - **Chunk large datasets:** For processing large result sets, use `chunk()` or `lazy()`.
 
