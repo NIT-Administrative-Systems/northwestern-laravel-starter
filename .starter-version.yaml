@@ -1,0 +1,10 @@
+# Northwestern Laravel Starter
+#
+# This file tracks the version of the starter template that this project
+# was originally cloned from. It serves as a reference point to compare
+# against newer releases of the upstream template.
+#
+# To see changes introduced since this version, visit:
+# https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/releases
+
+version: 1.1.0
