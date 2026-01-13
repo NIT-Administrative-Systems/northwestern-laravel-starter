@@ -1,6 +1,15 @@
 // Sass helpers
 @use "sass:map";
 
+// Font Awesome 7 - @use rules must come before @import
+@use '/node_modules/@fortawesome/fontawesome-free/scss/variables' as fa-vars with (
+    $font-path: '/node_modules/@fortawesome/fontawesome-free/webfonts'
+);
+@use '/node_modules/@fortawesome/fontawesome-free/scss/fontawesome';
+@use '/node_modules/@fortawesome/fontawesome-free/scss/regular';
+@use '/node_modules/@fortawesome/fontawesome-free/scss/solid';
+@use '/node_modules/@fortawesome/fontawesome-free/scss/brands';
+
 // Variables
 @import 'variables';
 
@@ -10,11 +19,6 @@
 @import "social_icons";
 @import "nu_purple_layout";
 
-$fa-font-path: '/node_modules/@fortawesome/fontawesome-free/webfonts';
-@import '/node_modules/@fortawesome/fontawesome-free/scss/fontawesome';
-@import '/node_modules/@fortawesome/fontawesome-free/scss/regular';
-@import '/node_modules/@fortawesome/fontawesome-free/scss/solid';
-@import '/node_modules/@fortawesome/fontawesome-free/scss/brands';
 @import '/node_modules/tom-select/dist/css/tom-select.bootstrap5.min.css';
 @import 'tom-select';
 
