@@ -1,7 +1,6 @@
 // Sass helpers
 @use "sass:map";
 
-// Font Awesome 7 - @use rules must come before @import
 @use '/node_modules/@fortawesome/fontawesome-free/scss/variables' as fa-vars with (
     $font-path: '/node_modules/@fortawesome/fontawesome-free/webfonts'
 );
@@ -82,4 +81,16 @@ code {
         background-color: $danger !important;
         color: black !important;
     }
+}
+
+// Screen reader only class (removed in FontAwesome 7)
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
 }
