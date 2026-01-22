@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Roles\Tables;
 
 use App\Domains\Auth\Enums\PermissionEnum;
+use App\Domains\Auth\Models\Role;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -23,6 +25,32 @@ class RolesTable
                     ->label('Role Type')
                     ->badge()
                     ->searchable(),
+                TextColumn::make('permissions_count')
+                    ->label('Permissions')
+                    ->badge()
+                    ->color(fn (int $state): string => $state === 0 ? 'gray' : 'success')
+                    ->formatStateUsing(fn (int $state): string => $state === 1 ? '1 permission' : "{$state} permissions")
+                    ->tooltip(function (Role $record): string {
+                        if ($record->permissions->isEmpty()) {
+                            return 'No permissions assigned';
+                        }
+
+                        $permissionLabels = $record->permissions
+                            ->take(5)
+                            ->pluck('label')
+                            ->toArray();
+
+                        $remaining = $record->permissions->count() - 5;
+                        $tooltip = implode(', ', $permissionLabels);
+
+                        if ($remaining > 0) {
+                            $tooltip .= ", +{$remaining} more";
+                        }
+
+                        return $tooltip;
+                    })
+                    ->weight(FontWeight::Medium)
+                    ->sortable(),
                 TextColumn::make('users_count')
                     ->label('Assigned Users')
                     ->counts('users')
