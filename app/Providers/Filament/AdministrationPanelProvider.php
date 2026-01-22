@@ -71,6 +71,7 @@ class AdministrationPanelProvider extends PanelProvider
                     ->visible(! app()->isProduction())
                     ->color(Color::Yellow),
             ])
+            ->databaseNotifications()
             ->navigationItems([
                 NavigationItem::make('Telescope')
                     ->url('/telescope', shouldOpenInNewTab: true)

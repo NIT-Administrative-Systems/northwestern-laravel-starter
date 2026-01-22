@@ -52,7 +52,8 @@ class ApiRequestLogsTable
                 TextColumn::make('access_token.name')
                     ->label('Token Name')
                     ->placeholder('N/A')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('method')
                     ->badge()
