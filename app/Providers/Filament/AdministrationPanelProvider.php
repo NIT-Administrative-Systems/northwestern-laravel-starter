@@ -72,6 +72,7 @@ class AdministrationPanelProvider extends PanelProvider
                     ->color(Color::Yellow),
             ])
             ->databaseNotifications()
+            ->databaseNotificationsPolling('30s')
             ->navigationItems([
                 NavigationItem::make('Telescope')
                     ->url('/telescope', shouldOpenInNewTab: true)
