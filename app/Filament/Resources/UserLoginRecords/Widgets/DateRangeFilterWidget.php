@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\UserLoginRecords\Widgets;
 
+use App\Domains\User\Models\UserLoginRecord;
 use Carbon\Carbon;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -59,6 +60,7 @@ class DateRangeFilterWidget extends Widget implements HasForms
                         'this_month' => 'This Month',
                         'last_month' => 'Last Month',
                         'this_year' => 'This Year',
+                        'all_time' => 'All Time',
                         'custom' => 'Custom Range',
                     ])
                     ->default('last_30_days')
@@ -132,6 +134,12 @@ class DateRangeFilterWidget extends Widget implements HasForms
             'this_month' => [$now->copy()->startOfMonth(), $now->copy()->endOfDay()],
             'last_month' => [$now->copy()->subMonth()->startOfMonth(), $now->copy()->subMonth()->endOfMonth()],
             'this_year' => [$now->copy()->startOfYear(), $now->copy()->endOfDay()],
+            'all_time' => [
+                UserLoginRecord::query()->min('logged_in_at')
+                    ? Carbon::parse(UserLoginRecord::query()->min('logged_in_at'))->startOfDay()
+                    : $now->copy()->subYear()->startOfDay(),
+                $now->copy()->endOfDay(),
+            ],
             default => [$now->copy()->subDays(29)->startOfDay(), $now->copy()->endOfDay()],
         };
 
