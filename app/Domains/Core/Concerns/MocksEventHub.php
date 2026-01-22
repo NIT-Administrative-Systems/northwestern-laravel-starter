@@ -85,7 +85,7 @@ trait MocksEventHub
         $algorithm = config('nusoa.eventHub.hmacVerificationAlgorithmForPHPHashHmac');
         $headerName = config('nusoa.eventHub.hmacVerificationHeader');
 
-        $hmacHash = hash_hmac((string) $algorithm, $message, $sharedSecret, true);
+        $hmacHash = hash_hmac((string) $algorithm, $message, (string) $sharedSecret, true);
         $encodedHash = base64_encode($hmacHash);
 
         return [$headerName => $encodedHash];

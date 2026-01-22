@@ -39,29 +39,30 @@ trait RunsSteps
      */
     protected function runStep(string $name, callable $callback): bool
     {
-        $error = null;
+        $exception = null;
 
         $passed = spin(
-            callback: function () use ($callback, &$error): bool {
+            callback: function () use ($callback, &$exception): bool {
                 try {
                     $callback();
 
                     return true;
                 } catch (Throwable $e) {
-                    $error = $e->getMessage();
+                    $exception = $e;
 
                     return false;
                 }
             },
-            message: "{$name}..."
+            message: " {$name}..."
         );
 
         if ($passed) {
             $this->line("  <fg=green>✓</> {$name}");
         } else {
             $this->line("  <fg=red>✗</> {$name}");
-            if ($error) {
-                $this->line("    <fg=red>{$error}</>");
+            if ($exception) {
+                $this->newLine();
+                $this->renderException($exception);
             }
         }
 
@@ -80,14 +81,12 @@ trait RunsSteps
         $this->newLine();
 
         if ($this->allPassed()) {
-            $this->line("  <fg=green>✓</> {$this->successMessage()}");
+            $this->components->success($this->successMessage());
         } else {
             $passed = collect($this->results)->where('passed', true)->count();
             $failed = collect($this->results)->where('passed', false)->count();
-            $this->line("  <fg=green>{$passed} passed</>, <fg=red>{$failed} failed</>");
+            $this->components->error("{$passed} passed, {$failed} failed");
         }
-
-        $this->newLine();
     }
 
     /**
@@ -96,5 +95,35 @@ trait RunsSteps
     protected function allPassed(): bool
     {
         return collect($this->results)->every(fn (array $result): bool => $result['passed']);
+    }
+
+    /**
+     * Render an exception with its full stack trace.
+     */
+    protected function renderException(Throwable $exception): void
+    {
+        $class = $exception::class;
+        $message = $exception->getMessage();
+        $file = $exception->getFile();
+        $line = $exception->getLine();
+
+        $this->line("  <fg=red;options=bold>{$class}</>");
+        $this->line("  <fg=red>{$message}</>");
+        $this->newLine();
+        $this->line("  <fg=gray>at {$file}:{$line}</>");
+        $this->newLine();
+
+        foreach ($exception->getTrace() as $index => $frame) {
+            $frameFile = $frame['file'] ?? 'unknown';
+            $frameLine = $frame['line'] ?? '?';
+            $frameClass = $frame['class'] ?? '';
+            $frameType = $frame['type'] ?? '';
+            $frameFunction = $frame['function'] ?? '';
+
+            $call = $frameClass ? "{$frameClass}{$frameType}{$frameFunction}()" : "{$frameFunction}()";
+
+            $this->line("  <fg=gray>{$index}. {$frameFile}:{$frameLine}</>");
+            $this->line("     <fg=white>{$call}</>");
+        }
     }
 }
