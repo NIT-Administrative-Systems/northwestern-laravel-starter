@@ -15,6 +15,7 @@ use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -39,6 +40,7 @@ class AdministrationPanelProvider extends PanelProvider
             ])
             ->id(self::ID)
             ->path(self::ID)
+            ->maxContentWidth(Width::Full)
             ->colors([
                 'primary' => Color::Purple,
             ])
@@ -56,6 +58,7 @@ class AdministrationPanelProvider extends PanelProvider
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
+            ->discoverClusters(in: app_path('Filament/Clusters'), for: 'App\Filament\Clusters')
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->pages([
                 Dashboard::class,
@@ -72,19 +75,19 @@ class AdministrationPanelProvider extends PanelProvider
                 NavigationItem::make('Telescope')
                     ->url('/telescope', shouldOpenInNewTab: true)
                     ->visible(fn (): bool => auth()->user()->can('viewTelescope'))
-                    ->group(AdministrationNavGroup::DEBUG)
+                    ->group(AdministrationNavGroup::DEVELOPER_TOOLS)
                     ->icon(Heroicon::OutlinedEye)
                     ->sort(1000),
                 NavigationItem::make('MinIO')
                     ->url(config('filesystems.disks.s3.minio_console'), shouldOpenInNewTab: true)
                     ->visible(fn (): bool => auth()->user()->can('viewTelescope'))
-                    ->group(AdministrationNavGroup::DEBUG)
+                    ->group(AdministrationNavGroup::DEVELOPER_TOOLS)
                     ->icon(Heroicon::OutlinedCloud)
                     ->sort(1000),
                 NavigationItem::make('MailPit')
                     ->url(config('platform.mail-capture.url'))
                     ->visible(fn (): bool => filled(config('platform.mail-capture.url')))
-                    ->group(AdministrationNavGroup::DEBUG)
+                    ->group(AdministrationNavGroup::DEVELOPER_TOOLS)
                     ->icon(Heroicon::OutlinedInbox)
                     ->sort(1000),
             ])

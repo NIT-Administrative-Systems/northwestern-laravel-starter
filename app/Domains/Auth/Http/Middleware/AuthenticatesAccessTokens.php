@@ -83,10 +83,10 @@ class AuthenticatesAccessTokens
             $this->fail(ApiRequestFailureEnum::IP_DENIED);
         }
 
-        $accessToken->increment(
+        AccessToken::withoutAuditing(fn () => $accessToken->increment(
             column: 'usage_count',
             extra: ['last_used_at' => now()]
-        );
+        ));
 
         Auth::onceUsingId($user->getKey());
 

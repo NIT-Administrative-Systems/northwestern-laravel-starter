@@ -73,7 +73,7 @@ class AuditsTable
                     })
                     ->sortable(),
                 TextColumn::make('auditable_type')
-                    ->label('Type')
+                    ->label('Record')
                     ->badge()
                     ->formatStateUsing(function (string $state) {
                         $className = Relation::getMorphedModel($state) ?? $state;
@@ -82,7 +82,7 @@ class AuditsTable
                     })
                     ->searchable(),
                 TextColumn::make('auditable_id')
-                    ->label('Type ID')
+                    ->label('Record ID')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('url')
@@ -151,7 +151,7 @@ class AuditsTable
                         'permissions_modified' => 'Permissions Modified',
                     ]),
                 SelectFilter::make('auditable_type')
-                    ->label('Type')
+                    ->label('Record')
                     ->multiple()
                     ->options(self::modelTypeOptionsGrouped())
                     ->searchable()
@@ -166,7 +166,7 @@ class AuditsTable
                         $map = self::modelTypeValueToLabelMap();
                         $labels = collect($values)->map(fn ($v) => $map[$v] ?? $v)->all();
 
-                        return 'Type: ' . implode(', ', $labels);
+                        return 'Record: ' . implode(', ', $labels);
                     }),
 
                 Filter::make('created_at_range')

@@ -29,7 +29,6 @@ class RolesTable
                     ->label('Permissions')
                     ->badge()
                     ->color(fn (int $state): string => $state === 0 ? 'gray' : 'success')
-                    ->formatStateUsing(fn (int $state): string => $state === 1 ? '1 permission' : "{$state} permissions")
                     ->tooltip(function (Role $record): string {
                         if ($record->permissions->isEmpty()) {
                             return 'No permissions assigned';
