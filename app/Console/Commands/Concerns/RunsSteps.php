@@ -102,7 +102,7 @@ trait RunsSteps
      */
     protected function renderException(Throwable $exception): void
     {
-        $class = get_class($exception);
+        $class = $exception::class;
         $message = $exception->getMessage();
         $file = $exception->getFile();
         $line = $exception->getLine();
