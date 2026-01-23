@@ -1,0 +1,168 @@
+---
+title: Health Checks
+description: Monitoring application health and receiving alerts when services fail
+sidebar:
+    order: 5
+---
+
+The application uses [`spatie/laravel-health`](https://github.com/spatie/laravel-health) for monitoring system health. Health checks run every minute through the scheduler and monitor critical application services.
+
+## Registered Health Checks
+
+The following health checks are registered by default in `HealthServiceProvider`:
+
+| Check | Description | Environment |
+|-------|-------------|-------------|
+| Database | Verifies database connectivity | Production only |
+| Queue | Verifies queue system is operational | All |
+| Cache | Verifies cache system is operational | All |
+| Schedule | Verifies scheduled tasks have run recently | All |
+| Debug Mode | Ensures debug mode is disabled | Non-local |
+| Optimized App | Ensures app is optimized | Non-local |
+| Security Advisories | Checks for known package vulnerabilities | All |
+| Directory Search | Verifies Northwestern Directory Search API | All |
+
+Additional checks are available for services like Redis, Horizon, Octane, and more. See the [available checks documentation](https://spatie.be/docs/laravel-health/v1/available-checks/overview) for a complete list. To add a check, register it in the `HealthServiceProvider`.
+
+
+## API Endpoint
+
+A public health check endpoint is available for external monitoring systems.
+
+**Endpoint:** `GET /api/health`
+
+**Authentication:** None
+
+**Response:**
+
+```json
+{
+  "finishedAt": 1703299200,
+  "checkResults": [
+    {
+      "name": "database",
+      "label": "Database",
+      "notificationMessage": "Database is operational",
+      "shortSummary": "OK",
+      "status": "ok",
+      "meta": {}
+    }
+  ]
+}
+```
+
+**HTTP Status Codes:**
+
+| Code | Meaning |
+|------|---------|
+| `200` | All health checks passing |
+| `503` | One or more health checks failing |
+
+**Check Status Values:**
+
+| Status | Description |
+|--------|-------------|
+| `ok` | Check passed |
+| `warning` | Check passed with warnings |
+| `failed` | Check failed |
+| `crashed` | Check threw an exception |
+| `skipped` | Check was conditionally skipped |
+
+## Notifications
+
+Health checks run every minute through the scheduler, but email notifications are disabled by default. To receive alerts when checks fail, enable notifications and configure a recipient email address.
+
+### Enabling Notifications
+
+Add the following to your `.env` file:
+
+```bash
+HEALTH_NOTIFICATIONS_ENABLED=true
+HEALTH_NOTIFICATION_EMAIL=your-team@northwestern.edu
+```
+
+## Result Storage
+
+The application uses `InMemoryHealthResultStore` by default because:
+
+- Health check results are ephemeral and typically don't require historical persistence
+- Notifications are the primary alerting mechanism
+- Reduces database writes since checks run every minute
+
+If historical tracking is needed for trend analysis or compliance, publish the migration with `php artisan vendor:publish --tag="health-migrations"` and switch to `EloquentHealthResultStore` in the configuration.
+
+## Adding Custom Health Checks
+
+### Creating a Check
+
+Create a new check class extending `Spatie\Health\Checks\Check`:
+
+```php
+<?php
+
+namespace App\Domains\Core\Health;
+
+use Spatie\Health\Checks\Check;
+use Spatie\Health\Checks\Result;
+
+class CustomServiceCheck extends Check
+{
+    protected ?string $label = 'Custom Service';
+
+    public function run(): Result
+    {
+        $result = Result::make();
+
+        try {
+            $isHealthy = $this->checkService();
+
+            if ($isHealthy) {
+                return $result
+                    ->ok()
+                    ->shortSummary('Service operational');
+            }
+
+            return $result
+                ->failed('Service unavailable')
+                ->shortSummary('Service down');
+        } catch (\Exception $e) {
+            return $result
+                ->failed($e->getMessage())
+                ->shortSummary('Check failed');
+        }
+    }
+
+    private function checkService(): bool
+    {
+        // Your health check logic here
+        return true;
+    }
+}
+```
+
+### Registering the Check
+
+Add your check to `HealthServiceProvider`:
+
+```php
+Health::checks([
+    // ... existing checks
+    CustomServiceCheck::new(),
+]);
+```
+
+### Conditional Checks
+
+Run checks only in specific environments:
+
+```php
+CustomServiceCheck::new()
+    ->if(App::isProduction()),
+```
+
+Or skip checks in certain environments:
+
+```php
+CustomServiceCheck::new()
+    ->unless(App::isLocal()),
+```

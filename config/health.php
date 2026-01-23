@@ -7,6 +7,13 @@ return [
      * A result store is responsible for saving the results of the checks. The
      * `EloquentHealthResultStore` will save results in the database. You
      * can use multiple stores at the same time.
+     *
+     * InMemoryHealthResultStore is used here because:
+     * - Health check results are ephemeral and don't require historical persistence
+     * - Notifications are the primary alerting mechanism, not result history
+     * - Reduces database writes (checks run every minute)
+     *
+     * If historical tracking is needed, switch to EloquentHealthResultStore.
      */
     'result_stores' => [
         Spatie\Health\ResultStores\InMemoryHealthResultStore::class,
@@ -37,7 +44,7 @@ return [
         /*
          * Notifications will only get sent if this option is set to `true`.
          */
-        'enabled' => false,
+        'enabled' => (bool) env('HEALTH_NOTIFICATIONS_ENABLED', false),
 
         'notifications' => [
             Spatie\Health\Notifications\CheckFailedNotification::class => ['mail'],
@@ -60,7 +67,7 @@ return [
         'throttle_notifications_key' => 'health:latestNotificationSentAt:',
 
         'mail' => [
-            'to' => 'your@example.com',
+            'to' => env('HEALTH_NOTIFICATION_EMAIL'),
 
             'from' => [
                 'address' => env('MAIL_FROM_ADDRESS'),
