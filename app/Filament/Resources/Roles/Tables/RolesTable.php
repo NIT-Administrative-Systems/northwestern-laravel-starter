@@ -6,7 +6,9 @@ namespace App\Filament\Resources\Roles\Tables;
 
 use App\Domains\Auth\Enums\PermissionEnum;
 use App\Domains\Auth\Models\Role;
+use App\Filament\Exports\RoleExporter;
 use Filament\Actions\EditAction;
+use Filament\Actions\ExportAction;
 use Filament\Actions\ViewAction;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Columns\TextColumn;
@@ -89,7 +91,9 @@ class RolesTable
                     }),
             ])
             ->toolbarActions([
-                //
+                ExportAction::make()
+                    ->label('Export')
+                    ->exporter(RoleExporter::class),
             ]);
     }
 }

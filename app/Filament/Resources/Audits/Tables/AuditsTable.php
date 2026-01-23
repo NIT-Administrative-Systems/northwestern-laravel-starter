@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Audits\Tables;
 
 use App\Domains\User\Models\Audit;
+use App\Filament\Exports\AuditExporter;
 use Carbon\Carbon;
+use Filament\Actions\ExportAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -243,7 +245,9 @@ class AuditsTable
                 ViewAction::make(),
             ])
             ->toolbarActions([
-                //
+                ExportAction::make()
+                    ->label('Export')
+                    ->exporter(AuditExporter::class),
             ]);
     }
 

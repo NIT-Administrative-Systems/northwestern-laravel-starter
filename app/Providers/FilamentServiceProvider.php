@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Domains\User\Models\Export;
+use Filament\Actions\ExportAction;
+use Filament\Actions\Exports\Enums\ExportFormat;
+use Filament\Actions\Exports\Models\Export as BaseExport;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Infolists\Components\TextEntry;
@@ -17,6 +21,11 @@ use Illuminate\Support\ServiceProvider;
 
 class FilamentServiceProvider extends ServiceProvider
 {
+    public function register(): void
+    {
+        $this->app->bind(BaseExport::class, Export::class);
+    }
+
     public function boot(): void
     {
         FilamentView::registerRenderHook(
@@ -65,5 +74,11 @@ class FilamentServiceProvider extends ServiceProvider
                 return null;
             });
         });
+
+        ExportAction::configureUsing(
+            fn (ExportAction $action) => $action
+                ->fileDisk('s3')
+                ->formats([ExportFormat::Csv])
+        );
     }
 }

@@ -6,9 +6,11 @@ namespace App\Filament\Resources\ApiRequestLogs\Tables;
 
 use App\Domains\Auth\Models\ApiRequestLog;
 use App\Domains\Core\Enums\ApiRequestFailureEnum;
+use App\Filament\Exports\ApiRequestLogExporter;
 use App\Filament\Resources\Users\RelationManagers\ApiRequestLogsRelationManager;
 use App\Filament\Resources\Users\UserResource;
 use Filament\Actions\Action;
+use Filament\Actions\ExportAction;
 use Filament\Actions\ViewAction;
 use Filament\Support\Enums\FontFamily;
 use Filament\Support\Enums\FontWeight;
@@ -184,7 +186,10 @@ class ApiRequestLogsTable
                     ->hidden($isRelationManager),
             ])
             ->toolbarActions([
-                //
+                ExportAction::make()
+                    ->label('Export')
+                    ->exporter(ApiRequestLogExporter::class)
+                    ->hidden(fn () => $table->getLivewire() instanceof ApiRequestLogsRelationManager),
             ]);
     }
 }

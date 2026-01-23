@@ -6,8 +6,10 @@ namespace App\Filament\Resources\UserLoginRecords\Tables;
 
 use App\Domains\User\Enums\UserSegmentEnum;
 use App\Domains\User\Models\UserLoginRecord;
+use App\Filament\Exports\UserLoginRecordExporter;
 use App\Filament\Resources\Users\RelationManagers\LoginRecordsRelationManager;
 use App\Filament\Resources\Users\UserResource;
+use Filament\Actions\ExportAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -59,7 +61,10 @@ class UserLoginRecordsTable
                     ->hidden($isRelationManager),
             ])
             ->toolbarActions([
-                //
+                ExportAction::make()
+                    ->label('Export')
+                    ->exporter(UserLoginRecordExporter::class)
+                    ->hidden(fn () => $table->getLivewire() instanceof LoginRecordsRelationManager),
             ]);
     }
 }
