@@ -23,7 +23,7 @@ class ApiCluster extends Cluster
 
     protected static string|null|UnitEnum $navigationGroup = AdministrationNavGroup::PLATFORM;
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 2;
 
     public static function canAccess(): bool
     {

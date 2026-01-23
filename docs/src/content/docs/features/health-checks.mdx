@@ -83,13 +83,13 @@ HEALTH_NOTIFICATION_EMAIL=your-team@northwestern.edu
 
 ## Result Storage
 
-The application uses `InMemoryHealthResultStore` by default because:
+The application uses `EloquentHealthResultStore` to persist health check results in the database. This enables:
 
-- Health check results are ephemeral and typically don't require historical persistence
-- Notifications are the primary alerting mechanism
-- Reduces database writes since checks run every minute
+- Viewing health status in the admin panel's Platform Overview page
+- Historical tracking for trend analysis
+- Results available immediately after scheduler runs
 
-If historical tracking is needed for trend analysis or compliance, publish the migration with `php artisan vendor:publish --tag="health-migrations"` and switch to `EloquentHealthResultStore` in the configuration.
+Results are automatically pruned after 5 days to prevent unbounded database growth.
 
 ## Adding Custom Health Checks
 

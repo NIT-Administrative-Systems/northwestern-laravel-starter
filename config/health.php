@@ -7,33 +7,13 @@ return [
      * A result store is responsible for saving the results of the checks. The
      * `EloquentHealthResultStore` will save results in the database. You
      * can use multiple stores at the same time.
-     *
-     * InMemoryHealthResultStore is used here because:
-     * - Health check results are ephemeral and don't require historical persistence
-     * - Notifications are the primary alerting mechanism, not result history
-     * - Reduces database writes (checks run every minute)
-     *
-     * If historical tracking is needed, switch to EloquentHealthResultStore.
      */
     'result_stores' => [
-        Spatie\Health\ResultStores\InMemoryHealthResultStore::class,
-
-        /*
         Spatie\Health\ResultStores\EloquentHealthResultStore::class => [
             'connection' => env('HEALTH_DB_CONNECTION', env('DB_CONNECTION')),
             'model' => Spatie\Health\Models\HealthCheckResultHistoryItem::class,
             'keep_history_for_days' => 5,
         ],
-
-        Spatie\Health\ResultStores\CacheHealthResultStore::class => [
-            'store' => 'file',
-        ],
-
-        Spatie\Health\ResultStores\JsonFileHealthResultStore::class => [
-            'disk' => 's3',
-            'path' => 'health.json',
-        ],
-        */
     ],
 
     /*

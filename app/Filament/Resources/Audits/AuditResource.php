@@ -29,7 +29,7 @@ class AuditResource extends Resource
 
     protected static string|null|UnitEnum $navigationGroup = AdministrationNavGroup::PLATFORM;
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 3;
 
     public static function infolist(Schema $schema): Schema
     {
