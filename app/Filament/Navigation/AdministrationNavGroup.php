@@ -12,14 +12,14 @@ enum AdministrationNavGroup implements HasLabel
 
     case PLATFORM;
 
-    case DEBUG;
+    case DEVELOPER_TOOLS;
 
     public function getLabel(): string
     {
         return match ($this) {
             self::USER_MANAGEMENT => 'User Management',
             self::PLATFORM => 'Platform',
-            self::DEBUG => 'Debug',
+            self::DEVELOPER_TOOLS => 'Developer Tools',
         };
     }
 }

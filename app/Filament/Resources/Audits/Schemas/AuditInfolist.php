@@ -53,7 +53,7 @@ class AuditInfolist
                             }),
 
                         TextEntry::make('auditable_type')
-                            ->label('Object')
+                            ->label('Record')
                             ->formatStateUsing(function (Audit $record) {
                                 $className = Relation::getMorphedModel($record->auditable_type) ?? $record->auditable_type;
 

@@ -7,8 +7,10 @@ namespace App\Filament\Resources\Users\Tables;
 use App\Domains\Auth\Enums\AuthTypeEnum;
 use App\Domains\User\Enums\AffiliationEnum;
 use App\Domains\User\Models\User;
+use App\Filament\Exports\UserExporter;
 use App\Filament\Resources\Users\Support\NetIdStatus;
 use Filament\Actions\Action;
+use Filament\Actions\ExportAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -133,7 +135,9 @@ class UsersTable
                 ViewAction::make(),
             ])
             ->toolbarActions([
-                //
+                ExportAction::make()
+                    ->label('Export')
+                    ->exporter(UserExporter::class),
             ]);
     }
 }

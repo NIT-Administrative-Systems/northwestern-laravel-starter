@@ -10,6 +10,7 @@ use App\Filament\Resources\Users\Actions\CreateNorthwesternUserAction;
 use App\Filament\Resources\Users\UserResource;
 use Filament\Actions\ActionGroup;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Support\Icons\Heroicon;
 
 class ListUsers extends ListRecords
 {
@@ -23,7 +24,8 @@ class ListUsers extends ListRecords
                 CreateLocalUserAction::make(),
                 CreateApiUserAction::make(),
             ])
-                ->label('Actions')
+                ->label('Add User')
+                ->icon(Heroicon::OutlinedUserPlus)
                 ->button(),
         ];
     }

@@ -104,8 +104,8 @@ class RoleResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->with('role_type')
-            ->withCount('users');
+            ->with(['role_type', 'permissions'])
+            ->withCount(['users', 'permissions']);
     }
 
     public static function getRecordRouteBindingEloquentQuery(): Builder

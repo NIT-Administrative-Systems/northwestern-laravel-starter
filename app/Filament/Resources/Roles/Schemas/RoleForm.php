@@ -72,7 +72,9 @@ class RoleForm
                                         column: 'name',
                                         ignorable: fn ($record) => $record,
                                     )
-                                    ->maxLength(255),
+                                    ->maxLength(255)
+                                    ->hint('Must be unique across all roles')
+                                    ->hintIcon(Heroicon::OutlinedInformationCircle),
 
                                 Select::make('role_type_id')
                                     ->label('Role Type')

@@ -23,6 +23,12 @@ class ListApiRequestLogs extends ListRecords
 
     protected ?string $subheading = 'Inbound API activity and request metrics';
 
+    /** @return array<string, string> */
+    public function getBreadcrumbs(): array
+    {
+        return [];
+    }
+
     public ?string $tableStartDate = null;
 
     public ?string $tableEndDate = null;

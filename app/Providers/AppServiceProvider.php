@@ -14,6 +14,7 @@ use App\Domains\Core\Exceptions\ProblemDetailsRenderer;
 use App\Domains\User\Models\User;
 use App\Http\Responses\ProblemDetails;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Client\RequestException;
@@ -33,8 +34,7 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        Paginator::useBootstrapFive();
-
+        $this->app->bind(Authenticatable::class, User::class);
         $this->app->singleton(ProblemDetailsRenderer::class);
         $this->app->bind(DbDumperFactory::class, function (): ConfigurableDbDumperFactory {
             return new ConfigurableDbDumperFactory();
@@ -46,6 +46,8 @@ class AppServiceProvider extends ServiceProvider
 
             return new RandomNumericOneTimeCodeGenerator();
         });
+
+        Paginator::useBootstrapFive();
     }
 
     public function boot(): void

@@ -26,7 +26,7 @@ class CreateNorthwesternUserAction extends Action
         parent::setUp();
 
         $this->authorize(PermissionEnum::CREATE_USERS)
-            ->label('Create NU User')
+            ->label('Add NU User')
             ->name('create-nu-user')
             ->icon(Heroicon::OutlinedIdentification)
             ->color('primary')
