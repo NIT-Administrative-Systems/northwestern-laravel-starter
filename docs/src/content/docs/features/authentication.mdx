@@ -272,3 +272,19 @@ These users:
 <Aside type="caution">
 Super administrators should be limited to core IT staff and developers. Their NetIDs bypass all authorization checks, granting them unrestricted access to the entire application.
 </Aside>
+
+### Role-Specific Permission Checks
+
+The starter includes a `TracksPermissionSources` trait that enables fine-grained permission source checking. This is useful when you need to know not just *if* a user has a permission, but *which role* grants it.
+
+#### Available Methods
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `hasPermissionFromRole($permission, $role)` | `bool` | Check if a specific role grants a specific permission to the user |
+| `getRolesWithPermission($permission)` | `Collection<int, Role>` | Get all of the user's roles that grant a specific permission |
+| `getPermissionsFromRole($role)` | `Collection<int, PermissionEnum>` | Get all permissions the user has from a specific role |
+
+<Aside type="tip">
+All role permission lookups are memoized per-role for the lifetime of the `User` model instance, so you can call these methods multiple times without additional database queries.
+</Aside>

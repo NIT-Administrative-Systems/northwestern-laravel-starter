@@ -15,6 +15,7 @@ use App\Domains\Core\Models\Concerns\Auditable as AuditableConcern;
 use App\Domains\User\Enums\AffiliationEnum;
 use App\Domains\User\Models\Concerns\AuditsRoles;
 use App\Domains\User\Models\Concerns\HandlesImpersonation;
+use App\Domains\User\Models\Concerns\TracksPermissionSources;
 use App\Domains\User\QueryBuilders\UserBuilder;
 use App\Http\Middleware\EnvironmentLockdown;
 use App\Providers\Filament\AdministrationPanelProvider;
@@ -49,7 +50,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable implements Auditable, FilamentUser, HasName
 {
     /** @use HasFactory<UserFactory> */
-    use AuditableConcern, AuditsRoles, HandlesImpersonation, HasFactory, HasRoles, Notifiable, SoftDeletes;
+    use AuditableConcern, AuditsRoles, HandlesImpersonation, HasFactory, HasRoles, Notifiable, SoftDeletes, TracksPermissionSources;
 
     /** @var list<string> */
     protected array $auditExclude = [
