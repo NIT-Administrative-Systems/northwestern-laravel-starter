@@ -132,7 +132,7 @@ class CreateApiUserAction extends Action
                             allowedIps: $configuration['allowed_ips'],
                         );
 
-                        session([
+                        Session::put([
                             AccessTokenSchemas::SESSION_KEY => [
                                 'token' => $token,
                                 'user_id' => $user->getKey(),

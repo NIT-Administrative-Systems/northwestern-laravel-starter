@@ -97,7 +97,7 @@ class SendLoginCodeController extends Controller
 
         $challenge = $this->processLoginCodeRequest($email, $request);
 
-        session([
+        Session::put([
             LoginCodeSession::CHALLENGE_ID => $challenge
                 ? Crypt::encryptString((string) $challenge->id)
                 : session(LoginCodeSession::CHALLENGE_ID),
