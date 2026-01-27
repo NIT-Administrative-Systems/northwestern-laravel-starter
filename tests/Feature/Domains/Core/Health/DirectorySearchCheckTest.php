@@ -56,7 +56,7 @@ class DirectorySearchCheckTest extends TestCase
 
         $this->assertInstanceOf(Result::class, $result);
         $this->assertEquals(Status::ok(), $result->status);
-        $this->assertEquals('API operational', $result->getShortSummary());
+        $this->assertEquals('Ok', $result->getShortSummary());
         $this->assertArrayHasKey('tested_netid', $result->meta);
         $this->assertEquals($this->testNetId, $result->meta['tested_netid']);
     }
@@ -75,7 +75,7 @@ class DirectorySearchCheckTest extends TestCase
         $result = $this->check->run();
 
         $this->assertEquals(Status::failed(), $result->status);
-        $this->assertEquals('API error', $result->getShortSummary());
+        $this->assertEquals('Failed', $result->getShortSummary());
         $this->assertEquals("Directory Search API error - {$apiError}", $result->getNotificationMessage());
     }
 
@@ -92,7 +92,7 @@ class DirectorySearchCheckTest extends TestCase
         $result = $this->check->run();
 
         $this->assertEquals(Status::failed(), $result->status);
-        $this->assertEquals('Empty response received', $result->getShortSummary());
+        $this->assertEquals('Failed', $result->getShortSummary());
         $this->assertEquals("Directory Search API returned no data for test NetID: {$this->testNetId}", $result->getNotificationMessage());
     }
 
@@ -110,7 +110,7 @@ class DirectorySearchCheckTest extends TestCase
         $result = $this->check->run();
 
         $this->assertEquals(Status::failed(), $result->status);
-        $this->assertEquals('Invalid response structure', $result->getShortSummary());
+        $this->assertEquals('Failed', $result->getShortSummary());
         $this->assertEquals("Directory Search API response missing required 'uid' field for NetID: {$this->testNetId}", $result->getNotificationMessage());
     }
 
