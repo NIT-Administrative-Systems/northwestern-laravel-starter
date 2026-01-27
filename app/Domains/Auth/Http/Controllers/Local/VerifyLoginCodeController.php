@@ -17,6 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\ValidationException;
 
 class VerifyLoginCodeController extends Controller
@@ -46,7 +47,7 @@ class VerifyLoginCodeController extends Controller
         try {
             $challengeId = Crypt::decryptString($encryptedChallengeId);
         } catch (DecryptException) {
-            session()->forget(LoginCodeSession::CHALLENGE_ID);
+            Session::forget(LoginCodeSession::CHALLENGE_ID);
 
             return back()->withErrors(['code' => 'Invalid code.'])->onlyInput('code');
         }
@@ -103,8 +104,9 @@ class VerifyLoginCodeController extends Controller
         }
 
         Auth::login($user, remember: true);
-        $request->session()->regenerate();
-        $request->session()->forget(LoginCodeSession::KEYS);
+        Session::regenerate();
+        Session::regenerateToken();
+        Session::forget(LoginCodeSession::KEYS);
 
         return redirect()->intended(config('auth.local.redirect_after_login'));
     }

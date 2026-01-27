@@ -17,6 +17,7 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Wizard;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Facades\Session;
 
 class CreateApiUserAction extends Action
 {
@@ -65,7 +66,7 @@ class CreateApiUserAction extends Action
                                                 function () {
                                                     return function (string $attribute, $value, $fail) {
                                                         // Skip validation if we already created a user in this session
-                                                        if (session()->has(AccessTokenSchemas::SESSION_KEY . '.user_id')) {
+                                                        if (Session::has(AccessTokenSchemas::SESSION_KEY . '.user_id')) {
                                                             return;
                                                         }
 

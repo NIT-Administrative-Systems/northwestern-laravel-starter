@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Spatie\DbSnapshots\DbDumperFactory;
@@ -54,6 +55,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureAuthentication();
         $this->configureCommands();
+        $this->configureRateLimiting();
         $this->configureRoutes();
         $this->configureExceptions();
     }
@@ -80,12 +82,8 @@ class AppServiceProvider extends ServiceProvider
         DB::prohibitDestructiveCommands(App::isProduction());
     }
 
-    public function configureRoutes(): void
+    protected function configureRateLimiting(): void
     {
-        if (! App::environment(['ci', 'testing'])) {
-            URL::forceScheme('https');
-        }
-
         RateLimiter::for('api', static function (Request $request) {
             return Limit::perMinute((int) config('auth.api.rate_limit.max_attempts'))
                 ->by($request->user()?->id ?: $request->ip())
@@ -96,7 +94,7 @@ class AppServiceProvider extends ServiceProvider
             $email = mb_strtolower(
                 (string) $request->input(
                     key: 'email',
-                    default: $request->session()->get(LoginCodeSession::EMAIL, '')
+                    default: Session::get(LoginCodeSession::EMAIL, '')
                 )
             );
 
@@ -108,22 +106,29 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('login-code-verify', static function (Request $request) {
             $ip = $request->ip() ?? 'ip:none';
-            $encryptedChallengeId = $request->session()->get(LoginCodeSession::CHALLENGE_ID);
+            $encryptedChallengeId = Session::get(LoginCodeSession::CHALLENGE_ID);
 
-            $challengeId = 'no-challenge';
+            $challengeKey = $ip;
             if ($encryptedChallengeId) {
                 try {
-                    $challengeId = Crypt::decryptString($encryptedChallengeId);
+                    $challengeKey = Crypt::decryptString($encryptedChallengeId);
                 } catch (DecryptException) {
-                    $challengeId = 'invalid:' . substr(md5($encryptedChallengeId), 0, 16);
+                    //
                 }
             }
 
             return [
                 Limit::perMinute(10)->by('login-code:verify:' . $ip),
-                Limit::perMinute(5)->by('login-code:verify:challenge:' . $challengeId),
+                Limit::perMinute(5)->by('login-code:verify:challenge:' . $challengeKey),
             ];
         });
+    }
+
+    public function configureRoutes(): void
+    {
+        if (! App::environment(['ci', 'testing'])) {
+            URL::forceScheme('https');
+        }
     }
 
     public function configureExceptions(): void

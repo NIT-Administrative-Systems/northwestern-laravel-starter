@@ -18,6 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 use Northwestern\SysDev\SOA\Auth\WebSSOAuthentication;
 
 class WebSSOController extends Controller
@@ -65,8 +66,8 @@ class WebSSOController extends Controller
      */
     protected function authenticated(Request $request, $user): void
     {
-        $request->session()->regenerate();
-        $request->session()->regenerateToken();
+        Session::regenerate();
+        Session::regenerateToken();
 
         $user->login_records()->create([
             'logged_in_at' => Carbon::now(),
@@ -80,15 +81,15 @@ class WebSSOController extends Controller
     {
         if (App::environment('ci')) {
             Auth::logout();
-            session()->invalidate();
-            session()->regenerateToken();
+            Session::invalidate();
+            Session::regenerateToken();
 
             return redirect()->route('login-selection');
         }
 
         $response = $this->webSSOAuthOauthLogout(route('login-selection'));
-        session()->invalidate();
-        session()->regenerateToken();
+        Session::invalidate();
+        Session::regenerateToken();
 
         return $response;
     }

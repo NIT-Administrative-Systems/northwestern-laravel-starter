@@ -19,6 +19,7 @@ use Filament\Schemas\Components\Wizard;
 use Filament\Support\Enums\IconPosition;
 use Filament\Support\Enums\IconSize;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\HtmlString;
 use Phiki\Grammar\Grammar;
 
@@ -266,6 +267,6 @@ class AccessTokenSchemas
      */
     public static function clearTokenSession(): void
     {
-        session()->forget(self::SESSION_KEY);
+        Session::forget(self::SESSION_KEY);
     }
 }
