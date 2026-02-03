@@ -12,6 +12,7 @@ use App\Filament\Resources\Users\RelationManagers\AccessTokensRelationManager;
 use Filament\Actions\Action;
 use Filament\Schemas\Components\Wizard;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Facades\Session;
 
 class CreateAccessTokenAction extends Action
 {
@@ -52,7 +53,7 @@ class CreateAccessTokenAction extends Action
                             allowedIps: $configuration['allowed_ips'],
                         );
 
-                        session([
+                        Session::put([
                             AccessTokenSchemas::SESSION_KEY => [
                                 'token' => $rawToken,
                                 'record_id' => $accessToken->getKey(),

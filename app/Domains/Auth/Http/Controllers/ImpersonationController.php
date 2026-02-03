@@ -10,6 +10,7 @@ use App\Domains\Auth\Enums\PermissionEnum;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
 
 class ImpersonationController extends Controller
 {
@@ -33,7 +34,7 @@ class ImpersonationController extends Controller
             $currentHost = parse_url((string) config('app.url'), PHP_URL_HOST);
 
             if (isset($parsedUrl['host']) && $parsedUrl['host'] === $currentHost) {
-                session()->put('impersonation.return_url', $returnUrl);
+                Session::put('impersonation.return_url', $returnUrl);
             }
         }
 

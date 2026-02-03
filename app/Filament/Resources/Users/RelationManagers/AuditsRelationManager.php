@@ -31,7 +31,6 @@ class AuditsRelationManager extends RelationManager
 
     public static function getTabComponent(Model $ownerRecord, string $pageClass): Tab
     {
-        /** @var User $ownerRecord */
         return Tab::make('Audit Logs')
             ->icon(Heroicon::OutlinedExclamationTriangle);
     }

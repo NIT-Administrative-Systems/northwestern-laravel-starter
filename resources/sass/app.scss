@@ -67,22 +67,6 @@ code {
     }
 }
 
-// Fix accessibility issues with `laravel-telescope-toolbar`
-.sf-toolbar-icon {
-    color: #F2F2F2 !important;
-    .sf-toolbar-status-green {
-        background-color: #00744C !important;
-    }
-    .sf-toolbar-status-yellow {
-        background-color: $warning !important;
-        color: black !important;
-    }
-    .sf-toolbar-status-red {
-        background-color: $danger !important;
-        color: black !important;
-    }
-}
-
 // Screen reader only class (removed in FontAwesome 7)
 .sr-only {
     position: absolute;

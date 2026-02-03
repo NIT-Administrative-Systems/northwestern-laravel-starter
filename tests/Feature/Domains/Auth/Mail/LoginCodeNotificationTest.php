@@ -26,7 +26,7 @@ class LoginCodeNotificationTest extends TestCase
 
     public function test_content_includes_code_and_expiration(): void
     {
-        CarbonImmutable::setTestNow(CarbonImmutable::parse('2024-01-01 12:00:00'));
+        $this->travelTo(CarbonImmutable::parse('2024-01-01 12:00:00'));
         $expiresAt = CarbonImmutable::now()->addMinutes(12);
         $expectedMinutes = 12;
 

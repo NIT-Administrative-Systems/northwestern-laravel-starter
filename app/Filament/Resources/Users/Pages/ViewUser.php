@@ -28,6 +28,7 @@ class ViewUser extends ViewRecord
 
         $schema->record($record);
 
+        /** @phpstan-ignore match.unhandled (all AuthTypeEnum cases are covered) */
         return match ($record->auth_type) {
             AuthTypeEnum::SSO => NorthwesternUserInfolist::configure($schema),
             AuthTypeEnum::LOCAL => LocalUserInfolist::configure($schema),

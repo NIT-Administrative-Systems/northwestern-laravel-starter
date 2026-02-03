@@ -7,7 +7,6 @@ namespace Tests\Feature\Domains\Auth\Actions\Api;
 use App\Domains\Auth\Actions\Api\IssueAccessToken;
 use App\Domains\Auth\Models\AccessToken;
 use App\Domains\User\Models\User;
-use Carbon\Carbon;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
@@ -17,7 +16,7 @@ class IssueAccessTokenTest extends TestCase
 {
     public function test_issues_token_for_api_user(): void
     {
-        Carbon::setTestNow(now());
+        $this->travelTo(now());
 
         $user = User::factory()->api()->create();
 
@@ -51,7 +50,7 @@ class IssueAccessTokenTest extends TestCase
 
     public function test_defaults_are_used_when_optional_parameters_are_omitted(): void
     {
-        Carbon::setTestNow(now());
+        $this->travelTo(now());
 
         $user = User::factory()->api()->create();
 

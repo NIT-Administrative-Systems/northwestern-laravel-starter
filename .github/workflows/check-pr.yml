@@ -207,6 +207,9 @@ jobs:
             prettier-${{ hashFiles('package.json', 'pnpm-lock.yaml', '.prettierrc') }}-
             prettier-
 
+      - name: 🔧 Generate IDE Helper Files
+        run: composer ide-helper:generate
+
       - name: 🔧️ Run Rector
         run: composer rector
 
@@ -463,7 +466,7 @@ jobs:
           php artisan migrate
 
       - name: 🌲 Cypress
-        uses: cypress-io/github-action@v6
+        uses: cypress-io/github-action@v7
         with:
           config: baseUrl=http://localhost:8000
           start: php artisan serve --port=8000 --no-reload

@@ -27,8 +27,7 @@ class EnsureApiEnabledTest extends TestCase
     {
         config(['auth.api.enabled' => false]);
 
-        $this->getJson($this->endpoint)
-            ->assertStatus(503)
+        $this->getJson($this->endpoint)->assertServiceUnavailable()
             ->assertJson([
                 'type' => 'about:blank',
                 'title' => 'Service Unavailable',

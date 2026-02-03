@@ -7,7 +7,6 @@ namespace Tests\Feature\Domains\Auth\Actions\Local;
 use App\Domains\Auth\Actions\Local\IssueLoginChallenge;
 use App\Domains\Auth\Jobs\SendLoginCodeEmailJob;
 use App\Domains\Auth\Models\LoginChallenge;
-use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Queue;
@@ -26,7 +25,7 @@ class IssueLoginChallengeTest extends TestCase
         config(['auth.local.rate_limit_per_hour' => 5]);
         config(['auth.local.code.expires_in_minutes' => 15]);
 
-        CarbonImmutable::setTestNow();
+        $this->travelTo(null);
         Queue::fake();
         RateLimiter::clear('login-code:test@example.com');
     }

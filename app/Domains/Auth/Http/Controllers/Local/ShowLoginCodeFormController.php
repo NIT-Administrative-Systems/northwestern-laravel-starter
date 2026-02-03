@@ -12,6 +12,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Session;
 
 class ShowLoginCodeFormController extends Controller
 {
@@ -26,24 +27,24 @@ class ShowLoginCodeFormController extends Controller
         }
 
         $challengeId = null;
-        $encryptedId = session(LoginCodeSession::CHALLENGE_ID);
+        $encryptedId = Session::get(LoginCodeSession::CHALLENGE_ID);
 
         if ($encryptedId) {
             try {
                 $challengeId = Crypt::decryptString($encryptedId);
             } catch (DecryptException) {
-                session()->forget(LoginCodeSession::CHALLENGE_ID);
+                Session::forget(LoginCodeSession::CHALLENGE_ID);
             }
         }
 
         $challenge = $challengeId ? LoginChallenge::find($challengeId) : null;
 
         if (! $challenge) {
-            session()->forget(LoginCodeSession::CHALLENGE_ID);
+            Session::forget(LoginCodeSession::CHALLENGE_ID);
         }
 
         if ($challenge && ($challenge->isConsumed() || $challenge->isExpired())) {
-            session()->forget(LoginCodeSession::CHALLENGE_ID);
+            Session::forget(LoginCodeSession::CHALLENGE_ID);
             $challenge = null;
         }
 

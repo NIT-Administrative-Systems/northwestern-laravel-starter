@@ -22,7 +22,7 @@ class SentryExceptionHandler
         }
 
         $this->addSentryContext();
-        app('sentry')->captureException($exception);
+        resolve('sentry')->captureException($exception);
     }
 
     private function addSentryContext(): void

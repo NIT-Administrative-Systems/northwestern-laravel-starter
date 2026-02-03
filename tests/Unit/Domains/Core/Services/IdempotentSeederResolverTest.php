@@ -94,7 +94,7 @@ class IdempotentSeederResolverTest extends TestCase
         $resolver = new IdempotentSeederResolver();
         $seeders = $resolver->discover($this->testSeedersPath);
 
-        $order = array_map(fn ($s) => $s->getShortName(), $seeders);
+        $order = array_map(fn (\App\Domains\Core\Database\ValueObjects\SeederInfo $s) => $s->getShortName(), $seeders);
 
         $aIndex = array_search('A', $order, true);
         $bIndex = array_search('B', $order, true);
@@ -122,7 +122,7 @@ class IdempotentSeederResolverTest extends TestCase
         $resolver = new IdempotentSeederResolver();
         $seeders = $resolver->discover($this->testSeedersPath);
 
-        $order = array_map(fn ($s) => $s->getShortName(), $seeders);
+        $order = array_map(fn (\App\Domains\Core\Database\ValueObjects\SeederInfo $s) => $s->getShortName(), $seeders);
 
         $aIndex = array_search('DiamondA', $order, true);
         $bIndex = array_search('DiamondB', $order, true);
@@ -153,7 +153,7 @@ class IdempotentSeederResolverTest extends TestCase
 
         $this->assertCount(4, $seeders);
 
-        $order = array_map(fn ($s) => $s->getShortName(), $seeders);
+        $order = array_map(fn (\App\Domains\Core\Database\ValueObjects\SeederInfo $s) => $s->getShortName(), $seeders);
 
         // Within each chain, order must be preserved
         $this->assertLessThan(
@@ -352,7 +352,7 @@ class IdempotentSeederResolverTest extends TestCase
 
         $this->assertCount(5, $seeders);
 
-        $order = array_map(fn ($s) => $s->getShortName(), $seeders);
+        $order = array_map(fn (\App\Domains\Core\Database\ValueObjects\SeederInfo $s) => $s->getShortName(), $seeders);
 
         // Verify complete chain order
         $this->assertSame('DeepA', $order[0]);

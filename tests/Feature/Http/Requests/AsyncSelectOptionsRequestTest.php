@@ -106,7 +106,7 @@ class AsyncSelectOptionsRequestTest extends TestCase
 
         $response = $this->postJson('/async-select', ['q' => Str::random(101), 'l' => -1]);
 
-        $response->assertStatus(422);
+        $response->assertUnprocessable();
         $response->assertJsonStructure([
             'message',
             'errors' => ['q', 'l'],

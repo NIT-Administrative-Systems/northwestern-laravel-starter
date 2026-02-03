@@ -204,7 +204,7 @@ class IdempotentSeederResolver
         foreach ($seederClasses as $className) {
             $seederInfo = $this->extractSeederMetadata($className);
 
-            if ($seederInfo !== null) {
+            if ($seederInfo instanceof SeederInfo) {
                 $this->seeders[$className] = $seederInfo;
             }
         }

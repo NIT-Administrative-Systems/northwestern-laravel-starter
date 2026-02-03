@@ -76,7 +76,7 @@ class SendAccessTokenExpirationNotificationsCommand extends Command
 
         return AccessToken::query()
             ->with(['user'])
-            ->whereHas('user', function ($query) {
+            ->whereHas('user', function (\Illuminate\Contracts\Database\Query\Builder $query) {
                 $query->whereNotNull('email')
                     ->where('email', '!=', config('mail.from.address'));
             })
@@ -89,7 +89,7 @@ class SendAccessTokenExpirationNotificationsCommand extends Command
             ->where('expires_at', '>', $now)
             // Either never notified, or last notified more than 24 hours ago
             // This prevents spam if the command runs multiple times per day
-            ->where(function ($query) use ($now) {
+            ->where(function (\Illuminate\Contracts\Database\Query\Builder $query) use ($now) {
                 $query->whereNull('expiration_notified_at')
                     ->orWhere('expiration_notified_at', '<', $now->copy()->subHours(24));
             })

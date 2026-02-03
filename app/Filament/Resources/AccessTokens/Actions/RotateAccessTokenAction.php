@@ -14,6 +14,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Wizard;
 use Filament\Support\Enums\Size;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\HtmlString;
 
 class RotateAccessTokenAction extends Action
@@ -59,7 +60,7 @@ HTML))
                         AccessToken $record,
                     ) {
                         // If we've already rotated this token in this wizard session, don't do it again.
-                        if (session()->has(AccessTokenSchemas::SESSION_KEY)) {
+                        if (Session::has(AccessTokenSchemas::SESSION_KEY)) {
                             return;
                         }
 
@@ -73,7 +74,7 @@ HTML))
                             allowedIps: $configuration['allowed_ips'],
                         );
 
-                        session([
+                        Session::put([
                             AccessTokenSchemas::SESSION_KEY => [
                                 'token' => $newToken,
                                 'record_id' => $record->getKey(),

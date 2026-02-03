@@ -153,7 +153,7 @@ readonly class FindOrUpdateUserFromDirectory
      */
     private function handleInvalidDirectoryData(?User $existingUser, string $searchValue, array|false|null $directoryData): User
     {
-        if ($existingUser) {
+        if ($existingUser instanceof User) {
             if ($existingUser->auth_type === AuthTypeEnum::SSO) {
                 $existingUser->update([
                     'netid_inactive' => true,

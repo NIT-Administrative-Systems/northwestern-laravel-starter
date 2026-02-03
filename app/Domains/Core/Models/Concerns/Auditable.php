@@ -33,7 +33,7 @@ trait Auditable
         }
 
         // Attach impersonation information if available
-        $data['impersonator_user_id'] = app('impersonate')->getImpersonatorId();
+        $data['impersonator_user_id'] = resolve('impersonate')->getImpersonatorId();
 
         // Modify the URL for Livewire requests to include component information
         if (Str::contains(

@@ -2,20 +2,40 @@ version: 2
 updates:
   - package-ecosystem: composer
     directory: "/"
+    groups:
+      patch:
+        update-types:
+          - patch
+          - minor
     schedule:
       interval: monthly
 
   - package-ecosystem: npm
     directory: "/"
+    groups:
+      patch:
+        update-types:
+          - patch
+          - minor
     schedule:
       interval: monthly
 
   - package-ecosystem: npm
     directory: "/docs"
+    groups:
+      patch:
+        update-types:
+          - patch
+          - minor
     schedule:
       interval: monthly
 
   - package-ecosystem: "github-actions"
     directory: "/"
+    groups:
+      patch:
+        update-types:
+          - patch
+          - minor
     schedule:
       interval: "monthly"

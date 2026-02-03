@@ -106,6 +106,7 @@
             "@php artisan ide-helper:models -N"
         ],
         "all": [
+            "@ide-helper:generate",
             "@rector",
             "@format:php",
             "@format:frontend",

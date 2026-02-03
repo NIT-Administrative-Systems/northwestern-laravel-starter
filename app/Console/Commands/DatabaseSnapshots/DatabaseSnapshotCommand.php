@@ -74,7 +74,7 @@ abstract class DatabaseSnapshotCommand extends Command
             $snapshot->createdAt
                 ->timezone(config('app.schedule_timezone'))
                 ->format('M jS Y g:i A'),
-        ])->toArray());
+        ])->all());
     }
 
     /**
@@ -94,7 +94,7 @@ abstract class DatabaseSnapshotCommand extends Command
             );
 
             return [$snapshot->name => $label];
-        })->toArray();
+        })->all();
     }
 
     /**

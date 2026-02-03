@@ -101,8 +101,8 @@ class Overview extends Page
         return [
             'Sentry' => ['value' => $sentryEnabled ? 'Enabled' : 'Disabled'],
             'Sample Rate' => ['value' => $sentryEnabled ? (string) config('sentry.sample_rate', 1.0) : 'N/A', 'mono' => $sentryEnabled],
-            'Traces Sample Rate' => ['value' => $sentryEnabled ? (string) (config('sentry.traces_sample_rate') ?? 'Disabled') : 'N/A', 'mono' => $sentryEnabled],
-            'Profiles Sample Rate' => ['value' => $sentryEnabled ? (string) (config('sentry.profiles_sample_rate') ?? 'Disabled') : 'N/A', 'mono' => $sentryEnabled],
+            'Traces Sample Rate' => ['value' => $sentryEnabled ? (string) (config('sentry.traces_sample_rate', 'Disabled')) : 'N/A', 'mono' => $sentryEnabled],
+            'Profiles Sample Rate' => ['value' => $sentryEnabled ? (string) (config('sentry.profiles_sample_rate', 'Disabled')) : 'N/A', 'mono' => $sentryEnabled],
         ];
     }
 
@@ -169,7 +169,7 @@ class Overview extends Page
 
     public function getHealthResults(): ?StoredCheckResults
     {
-        return app(EloquentHealthResultStore::class)->latestResults();
+        return resolve(EloquentHealthResultStore::class)->latestResults();
     }
 
     /**
@@ -181,7 +181,7 @@ class Overview extends Page
 
         $summary = ['ok' => 0, 'warning' => 0, 'failed' => 0, 'skipped' => 0];
 
-        if (! $results) {
+        if (! $results instanceof StoredCheckResults) {
             return $summary;
         }
 
@@ -201,7 +201,7 @@ class Overview extends Page
     {
         $results = $this->getHealthResults();
 
-        if (! $results) {
+        if (! $results instanceof StoredCheckResults) {
             return null;
         }
 

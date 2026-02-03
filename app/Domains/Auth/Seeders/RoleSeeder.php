@@ -25,7 +25,7 @@ class RoleSeeder extends Seeder implements IdempotentSeederInterface
 {
     public function run(): void
     {
-        app(PermissionRegistrar::class)->forgetCachedPermissions();
+        resolve(PermissionRegistrar::class)->forgetCachedPermissions();
 
         $systemManagedRoleId = RoleType::where('slug', RoleTypeEnum::SYSTEM_MANAGED)->value('id');
 

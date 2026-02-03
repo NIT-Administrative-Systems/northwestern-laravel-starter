@@ -31,7 +31,7 @@ class SendLoginCodeControllerTest extends TestCase
 
     public function test_send_creates_challenge_and_sets_session_for_existing_user(): void
     {
-        $user = User::factory()->affiliate()->create(['email' => 'test@example.com']);
+        User::factory()->affiliate()->create(['email' => 'test@example.com']);
 
         $response = $this->post(route('login-code.send'), [
             'email' => 'test@example.com',

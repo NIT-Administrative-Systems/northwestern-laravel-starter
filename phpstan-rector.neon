@@ -1,0 +1,5 @@
+parameters:
+    scanFiles:
+        - _ide_helper_models.php
+    scanDirectories:
+        - app

@@ -14,6 +14,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 use Illuminate\Support\Timebox;
 use Illuminate\Validation\ValidationException;
@@ -64,9 +65,9 @@ class SendLoginCodeController extends Controller
         $email = $request->email();
         $challenge = $this->processLoginCodeRequest($email, $request);
 
-        session([
+        Session::put([
             LoginCodeSession::EMAIL => $email,
-            LoginCodeSession::CHALLENGE_ID => $challenge
+            LoginCodeSession::CHALLENGE_ID => $challenge instanceof LoginChallenge
                 ? Crypt::encryptString((string) $challenge->id)
                 : Crypt::encryptString(Str::uuid()->toString()),
         ]);
@@ -81,7 +82,7 @@ class SendLoginCodeController extends Controller
     {
         abort_unless(config('auth.local.enabled'), 404);
 
-        $email = session(LoginCodeSession::EMAIL);
+        $email = Session::get(LoginCodeSession::EMAIL);
 
         if (! $email) {
             return redirect()->route('login-code.request');
@@ -96,8 +97,8 @@ class SendLoginCodeController extends Controller
 
         $challenge = $this->processLoginCodeRequest($email, $request);
 
-        session([
-            LoginCodeSession::CHALLENGE_ID => $challenge
+        Session::put([
+            LoginCodeSession::CHALLENGE_ID => $challenge instanceof LoginChallenge
                 ? Crypt::encryptString((string) $challenge->id)
                 : session(LoginCodeSession::CHALLENGE_ID),
         ]);

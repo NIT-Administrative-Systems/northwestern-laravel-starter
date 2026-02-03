@@ -52,7 +52,7 @@ class SendAccessTokenExpirationNotificationsCommandTest extends TestCase
     public function test_command_successfully_sends_notifications_for_expiring_tokens(): void
     {
         $now = Carbon::create(2025, 10, 20, 10, 0, 0, 'UTC');
-        Carbon::setTestNow($now);
+        $this->travelTo($now);
 
         $sevenDaysFromNow = $now->copy()->addDays(7)->endOfDay();
         $thirtyDaysFromNow = $now->copy()->addDays(30)->startOfDay();
@@ -83,13 +83,13 @@ class SendAccessTokenExpirationNotificationsCommandTest extends TestCase
         $this->assertNotNull($token1->fresh()->expiration_notified_at);
         $this->assertNotNull($token2->fresh()->expiration_notified_at);
 
-        Carbon::setTestNow();
+        $this->travelTo(null);
     }
 
     public function test_command_ignores_already_notified_tokens_within_24_hours(): void
     {
         $now = Carbon::create(2025, 10, 20, 10, 0, 0, 'UTC');
-        Carbon::setTestNow($now);
+        $this->travelTo($now);
 
         $sevenDaysFromNow = $now->copy()->addDays(7)->endOfDay();
 
@@ -115,13 +115,13 @@ class SendAccessTokenExpirationNotificationsCommandTest extends TestCase
 
         Mail::assertQueued(AccessTokenExpirationNotification::class, 1);
 
-        Carbon::setTestNow();
+        $this->travelTo(null);
     }
 
     public function test_command_handles_exceptions_during_notification_process(): void
     {
         $now = Carbon::create(2025, 10, 20, 10, 0, 0, 'UTC');
-        Carbon::setTestNow($now);
+        $this->travelTo($now);
 
         $sevenDaysFromNow = $now->copy()->addDays(7)->endOfDay();
         $failingToken = AccessToken::factory()->for(User::factory())->create(['name' => 'Failing Token', 'expires_at' => $sevenDaysFromNow, 'expiration_notified_at' => null]);
@@ -136,13 +136,13 @@ class SendAccessTokenExpirationNotificationsCommandTest extends TestCase
 
         $this->assertNull($failingToken->fresh()->expiration_notified_at);
 
-        Carbon::setTestNow();
+        $this->travelTo(null);
     }
 
     public function test_command_excludes_tokens_for_system_email_and_revoked_tokens(): void
     {
         $now = Carbon::create(2025, 10, 20, 10, 0, 0, 'UTC');
-        Carbon::setTestNow($now);
+        $this->travelTo($now);
         $sevenDaysFromNow = $now->copy()->addDays(7)->endOfDay();
 
         $validToken = AccessToken::factory()->for(User::factory())->create(['name' => 'Valid Token', 'expires_at' => $sevenDaysFromNow, 'revoked_at' => null]);
@@ -160,6 +160,6 @@ class SendAccessTokenExpirationNotificationsCommandTest extends TestCase
 
         Mail::assertQueued(AccessTokenExpirationNotification::class, 1);
 
-        Carbon::setTestNow();
+        $this->travelTo(null);
     }
 }

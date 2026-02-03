@@ -43,7 +43,6 @@ class AccessTokensRelationManager extends RelationManager
 
     public static function getTabComponent(Model $ownerRecord, string $pageClass): Tab
     {
-        /** @var User $ownerRecord */
         return Tab::make('Access Tokens')
             ->icon(Heroicon::OutlinedKey);
     }

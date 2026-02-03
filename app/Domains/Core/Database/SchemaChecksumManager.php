@@ -53,7 +53,7 @@ class SchemaChecksumManager
             ->notPath('vendor');
 
         $seeders = array_map(
-            fn ($file) => $file->getRealPath(),
+            fn (\Symfony\Component\Finder\SplFileInfo $file) => $file->getRealPath(),
             iterator_to_array($seederFinder, false)
         );
 
@@ -210,13 +210,11 @@ class SchemaChecksumManager
 
             if (count($checksumMap) === 0) {
                 File::delete($mapPath);
-            } else {
-                if (! File::put(
-                    $mapPath,
-                    json_encode($checksumMap, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT)
-                )) {
-                    throw new RuntimeException("Failed to write metadata to: {$mapPath}");
-                }
+            } elseif (! File::put(
+                $mapPath,
+                json_encode($checksumMap, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT)
+            )) {
+                throw new RuntimeException("Failed to write metadata to: {$mapPath}");
             }
         } catch (JsonException $e) {
             throw new RuntimeException("Failed to process snapshot metadata: {$e->getMessage()}", $e->getCode(), previous: $e);

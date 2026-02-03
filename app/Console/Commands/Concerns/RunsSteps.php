@@ -60,7 +60,7 @@ trait RunsSteps
             $this->line("  <fg=green>✓</> {$name}");
         } else {
             $this->line("  <fg=red>✗</> {$name}");
-            if ($exception) {
+            if ($exception instanceof Throwable) {
                 $this->newLine();
                 $this->renderException($exception);
             }

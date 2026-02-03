@@ -54,7 +54,7 @@ class CreateNorthwesternUserAction extends Action
                             try {
                                 $user = $findOrUpdateUserFromDirectory($searchValue, immediate: true);
 
-                                if (! $user) {
+                                if (! $user instanceof \App\Domains\User\Models\User) {
                                     $fail('Not found in the directory. You can search by a Northwestern email address or NetID.');
                                 }
                             } catch (BadDirectoryEntry) {
@@ -71,7 +71,7 @@ class CreateNorthwesternUserAction extends Action
                 try {
                     $user = ($findOrUpdateUserFromDirectory)($searchValue, immediate: true);
 
-                    if (! $user) {
+                    if (! $user instanceof \App\Domains\User\Models\User) {
                         // This shouldn't happen since validation passed, but handle it
                         Notification::make()
                             ->title('User not found')

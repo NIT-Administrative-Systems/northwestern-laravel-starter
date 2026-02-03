@@ -9,7 +9,6 @@ use App\Domains\Auth\Actions\Api\RotateAccessToken;
 use App\Domains\Auth\Models\AccessToken;
 use App\Domains\User\Models\User;
 use Auth;
-use Carbon\Carbon;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
@@ -18,7 +17,7 @@ class RotateAccessTokenTest extends TestCase
 {
     public function test_it_rotates_a_token(): void
     {
-        Carbon::setTestNow(now());
+        $this->travelTo(now());
 
         $user = User::factory()->api()->create();
 

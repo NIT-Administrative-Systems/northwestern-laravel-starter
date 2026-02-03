@@ -22,28 +22,28 @@ class ApiRequestLogFactory extends Factory
      */
     public function definition(): array
     {
-        $failureReason = $this->faker->boolean(70)
+        $failureReason = fake()->boolean(70)
             ? null
             : Arr::random(ApiRequestFailureEnum::cases());
 
         return [
-            'trace_id' => $this->faker->uuid(),
+            'trace_id' => fake()->uuid(),
             'user_id' => User::factory()->api(),
             'access_token_id' => null,
-            'method' => $this->faker->randomElement(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']),
-            'path' => $this->faker->randomElement([
+            'method' => fake()->randomElement(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']),
+            'path' => fake()->randomElement([
                 '/api/v1/data',
                 '/api/v1/users/123/profile',
                 '/api/v2/reports/summary',
             ]),
-            'route_name' => $this->faker->slug(nbWords: random_int(0, 3)),
-            'response_bytes' => $this->faker->boolean(80) ? $this->faker->numberBetween(100, 5000) : null,
-            'ip_address' => $this->faker->ipv4(),
-            'status_code' => $failureReason ? 401 : $this->faker->randomElement([200, 201, 204]),
-            'duration_ms' => $this->faker->numberBetween(10, 800),
-            'user_agent' => $this->faker->userAgent(),
+            'route_name' => fake()->slug(nbWords: random_int(0, 3)),
+            'response_bytes' => fake()->boolean(80) ? fake()->numberBetween(100, 5000) : null,
+            'ip_address' => fake()->ipv4(),
+            'status_code' => $failureReason ? 401 : fake()->randomElement([200, 201, 204]),
+            'duration_ms' => fake()->numberBetween(10, 800),
+            'user_agent' => fake()->userAgent(),
             'failure_reason' => $failureReason,
-            'created_at' => $this->faker->dateTimeBetween('-1 month', 'now'),
+            'created_at' => fake()->dateTimeBetween('-1 month', 'now'),
         ];
     }
 
@@ -51,7 +51,7 @@ class ApiRequestLogFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'access_token_id' => $accessTokenId,
-            'status_code' => $this->faker->randomElement([200, 201, 204]),
+            'status_code' => fake()->randomElement([200, 201, 204]),
             'failure_reason' => null,
         ]);
     }

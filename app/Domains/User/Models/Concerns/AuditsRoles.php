@@ -149,7 +149,7 @@ trait AuditsRoles
             'id' => (int) $role->id,
             'name' => $role->name,
             'role_type' => $role->role_type->slug->getLabel(),
-        ])->toArray();
+        ])->all();
     }
 
     /**

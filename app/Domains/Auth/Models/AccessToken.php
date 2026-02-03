@@ -64,7 +64,7 @@ class AccessToken extends BaseModel
             // Used tokens before never used ones
             ->orderByRaw('last_used_at IS NOT NULL DESC')
             // For used tokens, most recently used first
-            ->orderByDesc('last_used_at')
+            ->latest('last_used_at')
             // Tie-breaker by ID (newest first)
             ->orderByDesc('id');
     }
@@ -78,7 +78,7 @@ class AccessToken extends BaseModel
             ->whereNull('revoked_at')
             ->whereNotNull('token_hash')
             ->where(
-                fn ($q) => $q->whereNull('expires_at')
+                fn (\Illuminate\Contracts\Database\Query\Builder $q) => $q->whereNull('expires_at')
                     ->orWhere('expires_at', '>=', $at)
             );
     }
