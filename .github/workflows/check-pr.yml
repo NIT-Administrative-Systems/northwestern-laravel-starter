@@ -466,7 +466,7 @@ jobs:
           php artisan migrate
 
       - name: 🌲 Cypress
-        uses: cypress-io/github-action@v6
+        uses: cypress-io/github-action@v7
         with:
           config: baseUrl=http://localhost:8000
           start: php artisan serve --port=8000 --no-reload
