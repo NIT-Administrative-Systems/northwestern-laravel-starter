@@ -205,7 +205,7 @@ class AutoSeedListCommandTest extends TestCase
     {
         $this->mock(IdempotentSeederResolver::class, function (MockInterface $mock) {
             /** @phpstan-ignore-next-line  */
-            $mock->expects('discover')->andReturnUsing(function () {
+            $mock->expects('discover')->andReturnUsing(function (): never {
                 throw new \RuntimeException('Foo');
             });
         });

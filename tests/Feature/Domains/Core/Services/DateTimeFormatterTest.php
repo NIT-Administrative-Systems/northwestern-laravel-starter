@@ -30,7 +30,7 @@ class DateTimeFormatterTest extends TestCase
 
         $this->formatter = new DateTimeFormatter();
 
-        Carbon::setTestNow(Carbon::parse('2024-01-01 10:00:00', 'UTC'));
+        $this->travelTo(Carbon::parse('2024-01-01 10:00:00', 'UTC'));
     }
 
     public function test_datetime_returns_na_for_null_input(): void

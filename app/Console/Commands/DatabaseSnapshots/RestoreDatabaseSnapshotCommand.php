@@ -214,7 +214,7 @@ class RestoreDatabaseSnapshotCommand extends DatabaseSnapshotCommand
         /** @phpstan-ignore-next-line getSchemaState exists but Larastan's stub doesn't seem to have it */
         DB::connection(DB::getDefaultConnection())
             ->getSchemaState(processFactory: $processFactory)
-            ->handleOutputUsing(function ($type, $buffer): void {
+            ->handleOutputUsing(function ($type, string|iterable $buffer): void {
                 $this->output->write($buffer);
             })
             ->load($snapshotPath);
@@ -225,6 +225,6 @@ class RestoreDatabaseSnapshotCommand extends DatabaseSnapshotCommand
      */
     private function clearPermissionCache(): void
     {
-        app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+        resolve(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
     }
 }

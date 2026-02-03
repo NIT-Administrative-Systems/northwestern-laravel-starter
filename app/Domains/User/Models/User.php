@@ -36,6 +36,7 @@ use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\Permission\Traits\HasRoles;
 
 /**
+ * @property string $username The Northwestern NetID for the user. For external users, this will be automatically generated.
  * @property string|null $hr_employee_id The myHR employee ID for the user. This will be populated if the user has a different
  *                                       employee ID and a student ID.
  * @property string|null $employee_id The student/employee ID for the user. In cases where the user has a difference between
@@ -49,6 +50,16 @@ use Spatie\Permission\Traits\HasRoles;
  */
 class User extends Authenticatable implements Auditable, FilamentUser, HasName
 {
+    public $first_name;
+
+    public $last_name;
+
+    public $auth_type;
+
+    public $roles;
+
+    public $full_name;
+
     /** @use HasFactory<UserFactory> */
     use AuditableConcern, AuditsRoles, HandlesImpersonation, HasFactory, HasRoles, Notifiable, SoftDeletes, TracksPermissionSources;
 

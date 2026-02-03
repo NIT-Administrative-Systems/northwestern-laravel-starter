@@ -69,7 +69,7 @@ class UserBuilderTest extends TestCase
 
     public function test_search_by_name_matches_various_formats(): void
     {
-        $user = User::factory()->create([
+        User::factory()->create([
             'first_name' => 'John',
             'last_name' => 'Doe',
         ]);

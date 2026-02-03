@@ -81,7 +81,7 @@ trait MocksEventHub
      */
     private function makeHmacHeader(string $message): array
     {
-        $sharedSecret = config('nusoa.eventHub.hmacVerificationSharedSecret') ?? '';
+        $sharedSecret = config('nusoa.eventHub.hmacVerificationSharedSecret', '');
         $algorithm = config('nusoa.eventHub.hmacVerificationAlgorithmForPHPHashHmac');
         $headerName = config('nusoa.eventHub.hmacVerificationHeader');
 

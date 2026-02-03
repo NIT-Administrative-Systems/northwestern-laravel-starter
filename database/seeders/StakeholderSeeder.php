@@ -43,7 +43,7 @@ class StakeholderSeeder extends Seeder
          */
         $userNetIds = $this->parseStakeholderConfig(config('platform.stakeholders.super_admins', []));
 
-        if (empty($userNetIds)) {
+        if ($userNetIds === []) {
             $this->command->warn('No NetIDs have been configured in "SUPER_ADMIN_NETIDS"');
 
             return;
@@ -92,7 +92,7 @@ class StakeholderSeeder extends Seeder
 
         return array_values(array_filter(
             array_map('trim', $config),
-            fn ($netId) => filled($netId),
+            fn (string $netId) => filled($netId),
         ));
     }
 }

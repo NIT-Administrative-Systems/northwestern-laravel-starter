@@ -56,8 +56,8 @@ class RolesRelationManager extends RelationManager
                 ->whereNotIn('id', $assignedRoleIds)
                 ->when(
                     $user->is_api_user,
-                    fn ($query) => $query->whereHas('role_type', fn ($q) => $q->where('slug', RoleTypeEnum::API_INTEGRATION)),
-                    fn ($query) => $query->whereHas('role_type', fn ($q) => $q->where('slug', '!=', RoleTypeEnum::API_INTEGRATION))
+                    fn ($query) => $query->whereHas('role_type', fn (\Illuminate\Contracts\Database\Query\Builder $q) => $q->where('slug', RoleTypeEnum::API_INTEGRATION)),
+                    fn ($query) => $query->whereHas('role_type', fn (\Illuminate\Contracts\Database\Query\Builder $q) => $q->where('slug', '!=', RoleTypeEnum::API_INTEGRATION))
                 )
                 ->get()
                 ->filter(fn (Role $role) => $role->canBeManaged());
@@ -66,7 +66,6 @@ class RolesRelationManager extends RelationManager
 
     public static function getTabComponent(Model $ownerRecord, string $pageClass): Tab
     {
-        /** @var User $ownerRecord */
         return Tab::make('Roles')
             ->icon(Heroicon::OutlinedShieldCheck);
     }

@@ -360,7 +360,7 @@ class LogsApiRequestsTest extends TestCase
         Context::add(ApiRequestContext::TRACE_ID, Str::uuid()->toString());
 
         Route::middleware(LogsApiRequests::class)->get('/api/slow', function () {
-            usleep(10000); // 10ms delay
+            \Illuminate\Support\Sleep::usleep(10000); // 10ms delay
 
             return response()->json(['ok' => true]);
         });

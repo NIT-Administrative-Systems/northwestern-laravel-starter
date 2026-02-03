@@ -95,7 +95,7 @@ class Select extends Component
         ?string $optionCountPluralNoun = null,
         public string|int|null $maxOptions = self::DEFAULT_MAX_OPTIONS,
     ) {
-        if ($optionCountPluralNoun === null || $optionCountPluralNoun === '' || $optionCountPluralNoun === '0') {
+        if (in_array($optionCountPluralNoun, [null, '', '0'], true)) {
             $optionCountPluralNoun = Str::plural($this->optionCountSingularNoun);
         }
 

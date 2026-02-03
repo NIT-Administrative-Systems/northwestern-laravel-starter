@@ -70,7 +70,7 @@ class RoleFactory extends Factory
             $this->roleTypes = RoleType::all()->pluck('id', 'slug.value')->all();
         }
 
-        if (! $type) {
+        if (! $type instanceof RoleTypeEnum) {
             return fake()->randomElement($this->roleTypes);
         }
 

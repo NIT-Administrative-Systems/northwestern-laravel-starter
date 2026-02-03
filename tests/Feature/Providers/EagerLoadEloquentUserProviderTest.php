@@ -16,7 +16,7 @@ class EagerLoadEloquentUserProviderTest extends TestCase
 {
     public function test_eager_loads_user_relationships(): void
     {
-        $hasher = app(Hasher::class);
+        $hasher = resolve(Hasher::class);
         $mockUser = User::factory()->create();
         $mockUser->roles()->attach(Role::factory()->create());
 

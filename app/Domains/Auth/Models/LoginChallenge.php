@@ -26,6 +26,12 @@ use InvalidArgumentException;
  */
 class LoginChallenge extends BaseModel
 {
+    public $expires_at;
+
+    public $locked_until;
+
+    public $consumed_at;
+
     use MassPrunable;
 
     protected $casts = [

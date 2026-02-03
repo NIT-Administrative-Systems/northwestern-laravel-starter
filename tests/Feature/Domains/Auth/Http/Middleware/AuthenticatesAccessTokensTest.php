@@ -34,7 +34,7 @@ class AuthenticatesAccessTokensTest extends TestCase
         });
 
         $this->testTime = CarbonImmutable::parse('2025-05-16 09:00');
-        CarbonImmutable::setTestNow($this->testTime);
+        $this->travelTo($this->testTime);
 
         Context::flush();
     }
@@ -42,7 +42,7 @@ class AuthenticatesAccessTokensTest extends TestCase
     protected function tearDown(): void
     {
         Context::flush();
-        CarbonImmutable::setTestNow();
+        $this->travelTo(null);
         parent::tearDown();
     }
 
@@ -274,7 +274,7 @@ class AuthenticatesAccessTokensTest extends TestCase
             'usage_count' => 1,
         ]);
 
-        CarbonImmutable::setTestNow($this->testTime = $this->testTime->addSecond());
+        $this->travelTo($this->testTime = $this->testTime->addSecond());
 
         $this->getJson($this->endpoint, $this->bearerHeader($plainToken))
             ->assertOk()

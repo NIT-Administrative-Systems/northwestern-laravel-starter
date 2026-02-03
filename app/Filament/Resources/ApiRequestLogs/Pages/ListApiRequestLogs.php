@@ -86,7 +86,7 @@ class ListApiRequestLogs extends ListRecords
             SlowestApiRequestsByEndpointChartWidget::class,
         ];
 
-        if (! app(ApiRouteInspector::class)->hasProtectedRoutes()) {
+        if (! resolve(ApiRouteInspector::class)->hasProtectedRoutes()) {
             array_unshift($widgets, NoProtectedApiRoutesBanner::class);
         }
 

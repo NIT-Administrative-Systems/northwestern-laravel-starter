@@ -8,7 +8,6 @@ use App\Domains\Auth\Enums\AuthTypeEnum;
 use App\Domains\Auth\Models\AccessToken;
 use App\Domains\User\Actions\Api\CreateApiUser;
 use App\Domains\User\Enums\AffiliationEnum;
-use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
@@ -22,8 +21,8 @@ class CreateApiUserTest extends TestCase
 
         $now = CarbonImmutable::parse('2025-12-03 00:00:00');
 
-        CarbonImmutable::setTestNow($now);
-        Carbon::setTestNow($now);
+        $this->travelTo($now);
+        $this->travelTo($now);
     }
 
     public function test_it_creates_api_user_with_token(): void

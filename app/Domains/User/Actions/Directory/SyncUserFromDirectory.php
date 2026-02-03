@@ -121,8 +121,10 @@ class SyncUserFromDirectory
             }
 
             $value = $data[$key];
-
-            if ($value === null || $value === '') {
+            if ($value === null) {
+                continue;
+            }
+            if ($value === '') {
                 continue;
             }
 

@@ -123,7 +123,7 @@ class UserBuilder extends Builder
 
         $existing = $this->firstByEmailSsoThenLocal($normalized);
 
-        if ($existing) {
+        if ($existing instanceof User) {
             return $existing;
         }
 

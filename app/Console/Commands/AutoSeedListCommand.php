@@ -102,7 +102,7 @@ class AutoSeedListCommand extends Command
 
         // Show first 2 and indicate if there are more
         $shown = array_slice($dependencies, 0, 2);
-        $formatted = array_map(fn ($dep) => "<fg=yellow>{$dep}</>", $shown);
+        $formatted = array_map(fn (string $dep) => "<fg=yellow>{$dep}</>", $shown);
 
         if (count($dependencies) > 2) {
             $remaining = count($dependencies) - 2;

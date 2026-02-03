@@ -21,7 +21,7 @@ class SendLoginCodeEmailJobTest extends TestCase
     {
         parent::setUp();
 
-        CarbonImmutable::setTestNow(CarbonImmutable::now()->startOfSecond());
+        $this->travelTo(CarbonImmutable::now()->startOfSecond());
         Mail::fake();
     }
 

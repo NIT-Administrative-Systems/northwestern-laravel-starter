@@ -79,7 +79,7 @@ class ApiRequestFilterWidget extends Widget implements HasForms
                     ->default('last_30_days')
                     ->selectablePlaceholder(false)
                     ->live()
-                    ->afterStateUpdated(function ($state) {
+                    ->afterStateUpdated(function (?string $state) {
                         $this->preset = $state;
                         $this->applyPreset($state);
                     }),

@@ -49,11 +49,13 @@ class WebSSOController extends Controller
             callback: function () use ($findOrUpdateUserFromDirectory, $netid): User {
                 $user = $findOrUpdateUserFromDirectory($netid);
 
-                throw_unless($user, new ServiceDownError(
+                throw_unless(
+                    $user,
+                    ServiceDownError::class,
                     service: ExternalServiceEnum::DIRECTORY_SEARCH,
                     additionalMessage: $findOrUpdateUserFromDirectory->getLastError(),
-                    retryAttempted: self::RETRY_LOOKUP_TIMES,
-                ));
+                    retryAttempted: self::RETRY_LOOKUP_TIMES
+                );
 
                 return $user;
             },

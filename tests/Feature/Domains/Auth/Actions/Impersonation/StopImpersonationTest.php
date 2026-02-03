@@ -27,13 +27,13 @@ class StopImpersonationTest extends TestCase
         $studentUser = User::factory()->student()->createOne();
 
         // Start impersonating
-        $startImpersonation = new StartImpersonation(app('impersonate'));
+        $startImpersonation = new StartImpersonation(resolve('impersonate'));
         $startImpersonation($staffUser, $studentUser->id);
 
         // Give it a session so it can pass the path check
         $this->withSession([])->get('/');
 
-        $stopImpersonation = new StopImpersonation(app('impersonate'));
+        $stopImpersonation = new StopImpersonation(resolve('impersonate'));
         $redirectTo = $stopImpersonation();
 
         $this->assertEquals('/', $redirectTo);

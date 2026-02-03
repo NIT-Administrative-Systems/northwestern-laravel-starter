@@ -67,7 +67,7 @@ class SendLoginCodeController extends Controller
 
         Session::put([
             LoginCodeSession::EMAIL => $email,
-            LoginCodeSession::CHALLENGE_ID => $challenge
+            LoginCodeSession::CHALLENGE_ID => $challenge instanceof LoginChallenge
                 ? Crypt::encryptString((string) $challenge->id)
                 : Crypt::encryptString(Str::uuid()->toString()),
         ]);
@@ -98,7 +98,7 @@ class SendLoginCodeController extends Controller
         $challenge = $this->processLoginCodeRequest($email, $request);
 
         Session::put([
-            LoginCodeSession::CHALLENGE_ID => $challenge
+            LoginCodeSession::CHALLENGE_ID => $challenge instanceof LoginChallenge
                 ? Crypt::encryptString((string) $challenge->id)
                 : session(LoginCodeSession::CHALLENGE_ID),
         ]);

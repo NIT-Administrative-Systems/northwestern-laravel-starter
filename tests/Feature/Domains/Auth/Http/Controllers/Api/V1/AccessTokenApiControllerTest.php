@@ -26,16 +26,16 @@ class AccessTokenApiControllerTest extends ApiTestCase
 
     public function test_requires_authentication(): void
     {
-        $this->json('get', $this->endpoint())->assertUnauthorized();
+        $this->getJson($this->endpoint())->assertUnauthorized();
 
-        $this->json('post', $this->endpoint())->assertUnauthorized();
+        $this->postJson($this->endpoint())->assertUnauthorized();
     }
 
     public function test_show_requires_authentication(): void
     {
         $token = AccessToken::factory()->for($this->apiUser)->create();
 
-        $this->json('get', $this->endpoint() . '/' . $token->id)
+        $this->getJson($this->endpoint() . '/' . $token->id)
             ->assertUnauthorized();
     }
 
@@ -43,7 +43,7 @@ class AccessTokenApiControllerTest extends ApiTestCase
     {
         $token = AccessToken::factory()->for($this->apiUser)->create();
 
-        $this->json('delete', $this->endpoint() . '/' . $token->id)
+        $this->deleteJson($this->endpoint() . '/' . $token->id)
             ->assertUnauthorized();
     }
 
@@ -85,17 +85,17 @@ class AccessTokenApiControllerTest extends ApiTestCase
 
     public function test_index_returns_tokens_ordered_by_relevance(): void
     {
-        $activeToken = AccessToken::factory()->for($this->apiUser)->create([
+        AccessToken::factory()->for($this->apiUser)->create([
             'name' => 'Active Token',
             'last_used_at' => now()->subHour(),
         ]);
 
-        $expiredToken = AccessToken::factory()->for($this->apiUser)->create([
+        AccessToken::factory()->for($this->apiUser)->create([
             'name' => 'Expired Token',
             'expires_at' => now()->subDay(),
         ]);
 
-        $revokedToken = AccessToken::factory()->for($this->apiUser)->create([
+        AccessToken::factory()->for($this->apiUser)->create([
             'name' => 'Revoked Token',
             'revoked_at' => now()->subDay(),
         ]);
@@ -295,7 +295,7 @@ class AccessTokenApiControllerTest extends ApiTestCase
             $this->bearerAuthenticationHeader()
         );
 
-        $response->assertStatus(422);
+        $response->assertUnprocessable();
         $response->assertJsonValidationErrors(['token']);
         $response->assertJson([
             'errors' => [

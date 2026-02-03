@@ -117,7 +117,7 @@ class CreateApiUserAction extends Action
                     ->schema([
                         AccessTokenSchemas::tokenConfigurationSection(),
                     ])
-                    ->afterValidation(function ($state, $set, CreateApiUser $createApiUser) {
+                    ->afterValidation(function (array $state, $set, CreateApiUser $createApiUser) {
                         $username = 'api-' . ltrim(strtolower((string) $state['username']), 'api-');
 
                         $configuration = AccessTokenSchemas::normalizeConfigurationState($state);

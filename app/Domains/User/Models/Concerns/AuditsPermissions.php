@@ -74,7 +74,7 @@ trait AuditsPermissions
             'label' => $permission->label,
             'system_managed' => $permission->system_managed,
             'api_relevant' => $permission->api_relevant,
-        ])->toArray();
+        ])->all();
     }
 
     /**

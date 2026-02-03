@@ -23,6 +23,6 @@ class RoleTypeSeeder extends IdempotentSeeder
                 'slug' => $roleType->value,
                 'label' => $roleType->getLabel(),
             ];
-        })->toArray();
+        })->all();
     }
 }

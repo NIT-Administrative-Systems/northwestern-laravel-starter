@@ -60,7 +60,7 @@ class RoleExporter extends Exporter
         $count = number_format($export->successful_rows);
         $body = sprintf('Exported %s %s.', $count, Str::plural('role', $export->successful_rows));
 
-        if ($failedRowsCount = $export->getFailedRowsCount()) {
+        if (($failedRowsCount = $export->getFailedRowsCount()) !== 0) {
             $body .= sprintf(' %s %s failed.', number_format($failedRowsCount), Str::plural('row', $failedRowsCount));
         }
 

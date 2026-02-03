@@ -71,7 +71,7 @@ class ApiRequestLogExporter extends Exporter
         $count = number_format($export->successful_rows);
         $body = sprintf('Exported %s API %s.', $count, Str::plural('request', $export->successful_rows));
 
-        if ($failedRowsCount = $export->getFailedRowsCount()) {
+        if (($failedRowsCount = $export->getFailedRowsCount()) !== 0) {
             $body .= sprintf(' %s %s failed.', number_format($failedRowsCount), Str::plural('row', $failedRowsCount));
         }
 

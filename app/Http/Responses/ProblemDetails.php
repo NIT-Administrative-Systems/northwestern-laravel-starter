@@ -194,7 +194,7 @@ class ProblemDetails
             status: Response::HTTP_UNPROCESSABLE_ENTITY,
             title: 'Unprocessable Entity',
             detail: $detail,
-            extensions: $errors ? ['errors' => $errors] : [],
+            extensions: $errors !== [] ? ['errors' => $errors] : [],
             headers: $headers
         );
     }
@@ -215,13 +215,9 @@ class ProblemDetails
      */
     public static function methodNotAllowed(array|string $allowedMethods = [], string $detail = 'Method not allowed', array $headers = []): JsonResponse
     {
-        if (is_array($allowedMethods)) {
-            $allow = implode(', ', $allowedMethods);
-        } else {
-            $allow = $allowedMethods;
-        }
+        $allow = is_array($allowedMethods) ? implode(', ', $allowedMethods) : $allowedMethods;
 
-        $allowHeaders = $allow ? ['Allow' => $allow] : [];
+        $allowHeaders = $allow !== '' && $allow !== '0' ? ['Allow' => $allow] : [];
 
         return self::response(
             status: Response::HTTP_METHOD_NOT_ALLOWED,

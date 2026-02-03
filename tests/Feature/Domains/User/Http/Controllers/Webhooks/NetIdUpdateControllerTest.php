@@ -45,11 +45,8 @@ class NetIdUpdateControllerTest extends TestCase
                 'action' => NetIdUpdateActionEnum::DEACTIVATE->value,
             ]);
 
-        Event::assertDispatched(
-            NetIdUpdated::class,
-            fn (NetIdUpdated $event) => $event->netId === 'abc123'
-                && $event->action === NetIdUpdateActionEnum::DEACTIVATE,
-        );
+        Event::assertDispatched(fn (NetIdUpdated $event) => $event->netId === 'abc123'
+            && $event->action === NetIdUpdateActionEnum::DEACTIVATE);
     }
 
     public function test_it_dispatches_event_for_deprovision_action(): void
@@ -66,11 +63,8 @@ class NetIdUpdateControllerTest extends TestCase
                 'action' => NetIdUpdateActionEnum::DEPROVISION->value,
             ]);
 
-        Event::assertDispatched(
-            NetIdUpdated::class,
-            fn (NetIdUpdated $event) => $event->netId === 'test123'
-                && $event->action === NetIdUpdateActionEnum::DEPROVISION,
-        );
+        Event::assertDispatched(fn (NetIdUpdated $event) => $event->netId === 'test123'
+            && $event->action === NetIdUpdateActionEnum::DEPROVISION);
     }
 
     public function test_it_dispatches_event_for_security_hold_action(): void
@@ -87,11 +81,8 @@ class NetIdUpdateControllerTest extends TestCase
                 'action' => NetIdUpdateActionEnum::SECURITY_HOLD->value,
             ]);
 
-        Event::assertDispatched(
-            NetIdUpdated::class,
-            fn (NetIdUpdated $event) => $event->netId === 'sec456'
-                && $event->action === NetIdUpdateActionEnum::SECURITY_HOLD,
-        );
+        Event::assertDispatched(fn (NetIdUpdated $event) => $event->netId === 'sec456'
+            && $event->action === NetIdUpdateActionEnum::SECURITY_HOLD);
     }
 
     public function test_it_returns_ignored_for_unknown_users(): void
