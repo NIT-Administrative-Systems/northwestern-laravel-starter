@@ -50,16 +50,6 @@ use Spatie\Permission\Traits\HasRoles;
  */
 class User extends Authenticatable implements Auditable, FilamentUser, HasName
 {
-    public $first_name;
-
-    public $last_name;
-
-    public $auth_type;
-
-    public $roles;
-
-    public $full_name;
-
     /** @use HasFactory<UserFactory> */
     use AuditableConcern, AuditsRoles, HandlesImpersonation, HasFactory, HasRoles, Notifiable, SoftDeletes, TracksPermissionSources;
 

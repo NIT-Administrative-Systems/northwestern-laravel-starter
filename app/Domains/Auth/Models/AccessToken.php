@@ -22,10 +22,6 @@ use SensitiveParameter;
  */
 class AccessToken extends BaseModel
 {
-    public $revoked_at;
-
-    public $expires_at;
-
     /** @use HasFactory<AccessTokenFactory> */
     use HasFactory;
 
