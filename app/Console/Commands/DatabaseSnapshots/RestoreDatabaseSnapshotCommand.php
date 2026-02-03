@@ -35,7 +35,8 @@ class RestoreDatabaseSnapshotCommand extends DatabaseSnapshotCommand
     protected $signature = 'db:snapshot:restore
                             {filename? : The snapshot file name (without extension) to restore}
                             {--skip-schema-validation : Skip schema validation checks}
-                            {--backup : Create a backup before restoring}';
+                            {--backup : Create a backup before restoring}
+                            {--force : Skip confirmation prompt}';
 
     protected $description = 'Safely restores a database snapshot with schema validation';
 
@@ -78,8 +79,8 @@ class RestoreDatabaseSnapshotCommand extends DatabaseSnapshotCommand
             return self::FAILURE;
         }
 
-        // Confirm before destructive operation
-        if (! confirm('This will replace your current database. Continue?', default: false)) {
+        // Confirm before destructive operation (skip if --force is passed)
+        if (! $this->option('force') && ! confirm('This will replace your current database. Continue?', default: false)) {
             $this->components->warn('Restore cancelled.');
 
             return self::SUCCESS;
@@ -103,6 +104,12 @@ class RestoreDatabaseSnapshotCommand extends DatabaseSnapshotCommand
         }
 
         if (! $this->runStep('Loading database snapshot', fn () => $this->loadSnapshot($snapshotPath))) {
+            $this->displaySummary();
+
+            return self::FAILURE;
+        }
+
+        if (! $this->runStep('Clearing permission cache', fn () => $this->clearPermissionCache())) {
             $this->displaySummary();
 
             return self::FAILURE;
@@ -211,5 +218,13 @@ class RestoreDatabaseSnapshotCommand extends DatabaseSnapshotCommand
                 $this->output->write($buffer);
             })
             ->load($snapshotPath);
+    }
+
+    /**
+     * Clear the permission cache after restoring the database.
+     */
+    private function clearPermissionCache(): void
+    {
+        app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
     }
 }

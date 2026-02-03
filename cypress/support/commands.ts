@@ -44,7 +44,11 @@ Cypress.Commands.add("getBySelLike", (selector, ...args) => {
 
 Cypress.Commands.add("loadDatabaseSnapshot", () => {
     cy.log("Loading DB snapshot...");
-    cy.artisan("db:snapshot:restore", {}, { log: false });
+    cy.artisan(
+        "db:snapshot:restore",
+        { "--force": true, "--skip-schema-validation": true },
+        { log: false },
+    );
 });
 
 Cypress.Commands.add("checkAxeViolations", () => {
