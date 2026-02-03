@@ -207,6 +207,9 @@ jobs:
             prettier-${{ hashFiles('package.json', 'pnpm-lock.yaml', '.prettierrc') }}-
             prettier-
 
+      - name: 🔧 Generate IDE Helper Files
+        run: composer ide-helper:generate
+
       - name: 🔧️ Run Rector
         run: composer rector
 
