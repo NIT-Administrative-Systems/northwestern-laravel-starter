@@ -11,8 +11,7 @@
     </style>
     <div class="row justify-content-center">
         <div class="col-sm-12 main-content text-center">
-            <h1 class="slashes fade-up fade-up-delay-1"
-                style="font-family: 'Poppins'; font-weight: 700; font-size: 2.7rem; margin-bottom: 0;">
+            <h1 class="slashes fade-up fade-up-delay-1 font-poppins-bold" style="font-size: 2.7rem; margin-bottom: 0;">
                 Northwestern Laravel Starter
             </h1>
 
@@ -20,8 +19,8 @@
                 A comprehensive starter kit for Laravel projects at Northwestern University
             </p>
 
-            <hr class="fade-up fade-up-delay-3 mb-4 mt-3"
-                style="width: 90%; max-width: 500px; margin-left: auto; margin-right: auto;">
+            <hr class="fade-up fade-up-delay-3 my-4"
+                style="width: 90%; max-width: 500px; margin-left: auto; margin-right: auto; opacity: 0.15;">
 
             <div class="row justify-content-center">
                 <div class="col-md-10 col-lg-8">
