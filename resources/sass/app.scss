@@ -25,6 +25,19 @@ code {
   color: #b00d42; // darken for a11y contrast
 }
 
+a:focus-visible,
+button:focus-visible,
+.btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 0.25rem rgba($purple, 0.25);
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: lighten($purple, 25%);
+  box-shadow: 0 0 0 0.25rem rgba($purple, 0.25);
+}
+
 [x-cloak] {
     display: none !important;
 }

@@ -1,7 +1,7 @@
 @import 'variables';
 
 .ts-control {
-    border: var(--bs-border-width) solid #ccc;
+    border: var(--bs-border-width) solid $input-border-color;
     color: var(--bs-body-color);
     font-size: 0.9rem;
     font-weight: 400;
@@ -9,6 +9,7 @@
     -moz-appearance: none;
     appearance: none;
     line-height: 1.6;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
 .card-body .ts-control {

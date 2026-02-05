@@ -8,15 +8,15 @@
 }
 
 .btn {
-    transition: .2s ease-in-out;
+    transition: 0.15s ease-in-out;
 }
 
 .btn-primary {
     @include button-variant(
         $background: $primary,
         $border: $primary,
-        $hover-background: #b6acd1,
-        $hover-border: #b6acd1
+        $hover-background: $purple-dark,
+        $hover-border: $purple-dark
     );
 
     font-family: "Akkurat Pro Bold", "Arial Black", sans-serif;
@@ -167,12 +167,18 @@ h4.head-section .btn-sm {
     pointer-events: none;
 }
 
-//This overrides bootstrap default [color: hsla(0,0%,100%,.5);] for accessibility reasons
+// This overrides bootstrap default [color: hsla(0,0%,100%,.5);] for accessibility reasons
 .navbar-dark .navbar-nav .nav-link {
     color: hsla(0,0%,100%,.6);
+    padding-bottom: 0.5rem;
+    transition: color 0.15s ease-in-out, border-color 0.15s ease-in-out;
 
     &.active {
         color: #fff;
+    }
+
+    &:hover:not(.active) {
+        color: hsla(0,0%,100%,.85);
     }
 }
 
@@ -229,4 +235,10 @@ h4.head-section .btn-sm {
 
 .font-poppins-light {
     font-family: "Poppins Light", sans-serif;
+}
+
+.focus-ring-purple:focus,
+.focus-ring-purple:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 0.25rem rgba($purple, 0.25);
 }
