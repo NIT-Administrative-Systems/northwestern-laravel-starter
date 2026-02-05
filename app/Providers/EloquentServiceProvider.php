@@ -6,6 +6,7 @@ namespace App\Providers;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\ServiceProvider;
 use RuntimeException;
 
@@ -14,9 +15,9 @@ class EloquentServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Identify N+1 queries earlier in the development process.
-        Model::preventLazyLoading(! app()->isProduction());
+        Model::preventLazyLoading(! App::isProduction());
 
-        Model::preventAccessingMissingAttributes(! app()->isProduction());
+        Model::preventAccessingMissingAttributes(! App::isProduction());
 
         /*
         * Ideally, lazy loading violations should be identified and fixed during the development and testing
@@ -24,7 +25,7 @@ class EloquentServiceProvider extends ServiceProvider
         * want to present exceptions to users in non-local environments. Instead, we'll report them
         * to the exception handler.
         */
-        if (! app()->hasDebugModeEnabled()) {
+        if (! App::hasDebugModeEnabled()) {
             Model::handleLazyLoadingViolationUsing(static function (Model $model, string $relation) {
                 $class = $model::class;
 

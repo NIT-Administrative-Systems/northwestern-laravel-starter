@@ -25,9 +25,11 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Spatie\DbSnapshots\DbDumperFactory;
 
@@ -53,11 +55,17 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        $this->configureVite();
         $this->configureAuthentication();
         $this->configureCommands();
         $this->configureRateLimiting();
         $this->configureRoutes();
-        $this->configureExceptions();
+        $this->configureRequests();
+    }
+
+    protected function configureVite(): void
+    {
+        Vite::useAggressivePrefetching();
     }
 
     public function configureAuthentication(): void
@@ -131,10 +139,12 @@ class AppServiceProvider extends ServiceProvider
         }
     }
 
-    public function configureExceptions(): void
+    public function configureRequests(): void
     {
         if (App::environment(['local', 'ci', 'testing'])) {
             RequestException::dontTruncate();
         }
+
+        Http::preventStrayRequests();
     }
 }
