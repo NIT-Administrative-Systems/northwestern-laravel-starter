@@ -37,7 +37,11 @@ class ShowLoginCodeFormController extends Controller
             }
         }
 
-        $challenge = $challengeId ? LoginChallenge::find($challengeId) : null;
+        // Only query if challengeId is numeric. Non-numeric IDs are decoy values
+        // stored for non-existent users to prevent timing enumeration.
+        $challenge = $challengeId && ctype_digit($challengeId)
+            ? LoginChallenge::find($challengeId)
+            : null;
 
         if (! $challenge) {
             Session::forget(LoginCodeSession::CHALLENGE_ID);

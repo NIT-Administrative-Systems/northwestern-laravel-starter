@@ -11,6 +11,7 @@ use App\Domains\User\Models\User;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
@@ -125,5 +126,35 @@ class ShowLoginCodeFormControllerTest extends TestCase
 
         $this->assertGreaterThan(0, $resendAvailableAt);
         $this->assertGreaterThan(now()->timestamp, $resendAvailableAt);
+    }
+
+    public function test_handles_uuid_decoy_challenge_id_gracefully(): void
+    {
+        $email = 'nonexistent@example.com';
+        $uuidDecoy = Str::uuid()->toString();
+
+        $response = $this->withSession([
+            LoginCodeSession::EMAIL => $email,
+            LoginCodeSession::CHALLENGE_ID => Crypt::encryptString($uuidDecoy),
+        ])->get(route('login-code.code'));
+
+        $response->assertOk();
+        $response->assertViewIs('auth.login-code');
+        $response->assertViewHas('email', $email);
+        $response->assertSessionMissing(LoginCodeSession::CHALLENGE_ID);
+    }
+
+    public function test_handles_non_numeric_challenge_id_without_database_error(): void
+    {
+        $email = 'test@example.com';
+        $invalidId = 'not-a-number';
+
+        $response = $this->withSession([
+            LoginCodeSession::EMAIL => $email,
+            LoginCodeSession::CHALLENGE_ID => Crypt::encryptString($invalidId),
+        ])->get(route('login-code.code'));
+
+        $response->assertOk();
+        $response->assertViewIs('auth.login-code');
     }
 }

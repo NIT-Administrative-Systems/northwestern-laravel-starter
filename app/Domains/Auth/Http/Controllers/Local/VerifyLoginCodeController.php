@@ -54,9 +54,11 @@ class VerifyLoginCodeController extends Controller
 
         try {
             $user = DB::transaction(function () use ($challengeId, $validated, $request) {
-                $challenge = LoginChallenge::query()
-                    ->lockForUpdate()
-                    ->find($challengeId);
+                // Only query if challengeId is numeric. Non-numeric IDs are decoy values
+                // stored for non-existent users to prevent timing enumeration.
+                $challenge = ctype_digit($challengeId)
+                    ? LoginChallenge::query()->lockForUpdate()->find($challengeId)
+                    : null;
 
                 if (! $challenge) {
                     throw ValidationException::withMessages(['code' => 'Invalid code.']);

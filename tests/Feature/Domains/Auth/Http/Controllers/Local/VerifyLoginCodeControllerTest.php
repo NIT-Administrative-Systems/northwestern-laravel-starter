@@ -13,6 +13,7 @@ use App\Domains\User\Models\UserLoginRecord;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
@@ -85,5 +86,33 @@ class VerifyLoginCodeControllerTest extends TestCase
         $response = $this->post(route('login-code.verify'), ['code' => '123456']);
 
         $response->assertNotFound();
+    }
+
+    public function test_handles_uuid_decoy_challenge_id_gracefully(): void
+    {
+        $uuidDecoy = Str::uuid()->toString();
+
+        $this->withSession([
+            LoginCodeSession::EMAIL => 'nonexistent@example.com',
+            LoginCodeSession::CHALLENGE_ID => Crypt::encryptString($uuidDecoy),
+        ]);
+
+        $response = $this->post(route('login-code.verify'), ['code' => '123456']);
+
+        $response->assertSessionHasErrors('code');
+        $this->assertGuest();
+    }
+
+    public function test_handles_non_numeric_challenge_id_without_database_error(): void
+    {
+        $this->withSession([
+            LoginCodeSession::EMAIL => 'test@example.com',
+            LoginCodeSession::CHALLENGE_ID => Crypt::encryptString('not-a-valid-id'),
+        ]);
+
+        $response = $this->post(route('login-code.verify'), ['code' => '123456']);
+
+        $response->assertSessionHasErrors('code');
+        $this->assertGuest();
     }
 }
