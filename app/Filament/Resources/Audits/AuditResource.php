@@ -31,6 +31,8 @@ class AuditResource extends Resource
 
     protected static ?int $navigationSort = 3;
 
+    protected static ?string $description = 'Track all changes made to records with full audit history.';
+
     public static function infolist(Schema $schema): Schema
     {
         return AuditInfolist::configure($schema);

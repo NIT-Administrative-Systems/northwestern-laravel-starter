@@ -23,13 +23,15 @@ class ApiRequestLogResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'id';
 
-    protected static ?string $navigationLabel = 'Activity';
+    protected static ?string $navigationLabel = 'API Requests';
 
-    protected static ?string $label = 'Request';
+    protected static ?string $modelLabel = 'API Request';
 
-    protected static ?string $pluralLabel = 'Requests';
+    protected static ?string $pluralModelLabel = 'API Requests';
 
-    protected static ?string $slug = 'activity';
+    protected static ?string $slug = 'requests';
+
+    protected static ?string $description = 'View and analyze API request logs, response times, and error patterns.';
 
     protected static ?int $navigationSort = 1;
 

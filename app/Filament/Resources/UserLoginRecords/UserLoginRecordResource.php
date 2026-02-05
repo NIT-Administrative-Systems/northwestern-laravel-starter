@@ -23,13 +23,17 @@ class UserLoginRecordResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'id';
 
-    protected static ?string $label = 'Login Records';
+    protected static ?string $modelLabel = 'Login Record';
+
+    protected static ?string $pluralModelLabel = 'Login Records';
 
     protected static ?string $slug = 'login-records';
 
     protected static string|null|UnitEnum $navigationGroup = AdministrationNavGroup::PLATFORM;
 
     protected static ?int $navigationSort = 4;
+
+    protected static ?string $description = 'Monitor user login activity and authentication patterns.';
 
     public static function canAccess(): bool
     {

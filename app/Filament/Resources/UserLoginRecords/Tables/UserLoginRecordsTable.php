@@ -9,6 +9,7 @@ use App\Domains\User\Models\UserLoginRecord;
 use App\Filament\Exports\UserLoginRecordExporter;
 use App\Filament\Resources\Users\RelationManagers\LoginRecordsRelationManager;
 use App\Filament\Resources\Users\UserResource;
+use Filament\Actions\Action;
 use Filament\Actions\ExportAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
@@ -54,6 +55,11 @@ class UserLoginRecordsTable
                     ->options(UserSegmentEnum::class)
                     ->hiddenOn(LoginRecordsRelationManager::class),
             ])
+            ->filtersTriggerAction(
+                fn (Action $action) => $action
+                    ->button()
+                    ->label('Filters'),
+            )
             ->recordActions([
                 ViewAction::make()
                     ->label('View User')
@@ -65,6 +71,9 @@ class UserLoginRecordsTable
                     ->label('Export')
                     ->exporter(UserLoginRecordExporter::class)
                     ->hidden(fn () => $table->getLivewire() instanceof LoginRecordsRelationManager),
-            ]);
+            ])
+            ->emptyStateHeading('No login activity')
+            ->emptyStateDescription('Login records will appear here as users authenticate.')
+            ->emptyStateIcon('heroicon-o-arrow-right-on-rectangle');
     }
 }

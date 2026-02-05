@@ -35,6 +35,8 @@ class RoleResource extends Resource
 
     protected static ?int $navigationSort = 2;
 
+    protected static ?string $description = 'Define roles and assign permissions to control user access.';
+
     public static function form(Schema $schema): Schema
     {
         return RoleForm::configure($schema);

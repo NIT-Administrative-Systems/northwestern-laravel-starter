@@ -7,6 +7,7 @@ namespace App\Filament\Resources\Roles\Tables;
 use App\Domains\Auth\Enums\PermissionEnum;
 use App\Domains\Auth\Models\Role;
 use App\Filament\Exports\RoleExporter;
+use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Actions\ExportAction;
 use Filament\Actions\ViewAction;
@@ -70,6 +71,11 @@ class RolesTable
             ->filters([
                 TrashedFilter::make(),
             ])
+            ->filtersTriggerAction(
+                fn (Action $action) => $action
+                    ->button()
+                    ->label('Filters'),
+            )
             ->recordActions([
                 ViewAction::make()
                     ->visible(function ($record) {
@@ -94,6 +100,9 @@ class RolesTable
                 ExportAction::make()
                     ->label('Export')
                     ->exporter(RoleExporter::class),
-            ]);
+            ])
+            ->emptyStateHeading('No roles defined')
+            ->emptyStateDescription('Create roles to organize user permissions and access levels.')
+            ->emptyStateIcon('heroicon-o-shield-check');
     }
 }

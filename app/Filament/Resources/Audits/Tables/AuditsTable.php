@@ -172,7 +172,7 @@ class AuditsTable
                     }),
 
                 Filter::make('created_at_range')
-                    ->label('Date Range')
+                    ->label('Custom Date Range')
                     ->schema([
                         DatePicker::make('from')
                             ->label('From')
@@ -248,7 +248,10 @@ class AuditsTable
                 ExportAction::make()
                     ->label('Export')
                     ->exporter(AuditExporter::class),
-            ]);
+            ])
+            ->emptyStateHeading('No audit logs yet')
+            ->emptyStateDescription('Audit logs will appear here as users make changes to records.')
+            ->emptyStateIcon('heroicon-o-clipboard-document-list');
     }
 
     /**

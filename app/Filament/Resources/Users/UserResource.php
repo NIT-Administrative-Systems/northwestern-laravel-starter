@@ -36,6 +36,8 @@ class UserResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
+    protected static ?string $description = 'Manage users, their roles, and authentication settings.';
+
     public static function table(Table $table): Table
     {
         return UsersTable::configure($table);

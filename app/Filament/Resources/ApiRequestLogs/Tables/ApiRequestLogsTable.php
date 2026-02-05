@@ -9,6 +9,7 @@ use App\Domains\Core\Enums\ApiRequestFailureEnum;
 use App\Filament\Exports\ApiRequestLogExporter;
 use App\Filament\Resources\Users\RelationManagers\ApiRequestLogsRelationManager;
 use App\Filament\Resources\Users\UserResource;
+use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Actions\ExportAction;
 use Filament\Actions\ViewAction;
@@ -139,6 +140,22 @@ class ApiRequestLogsTable
             ->searchable(! $isRelationManager)
             ->defaultPaginationPageOption(10)
             ->filters([
+                SelectFilter::make('date_preset')
+                    ->label('Date Range')
+                    ->options([
+                        'today' => 'Today',
+                        '7days' => 'Last 7 Days',
+                        '30days' => 'Last 30 Days',
+                        '90days' => 'Last 90 Days',
+                    ])
+                    ->query(fn (Builder $query, array $data): Builder => match ($data['value'] ?? null) {
+                        'today' => $query->whereDate('api_request_logs.created_at', Carbon::today()),
+                        '7days' => $query->where('api_request_logs.created_at', '>=', Carbon::now()->subDays(7)),
+                        '30days' => $query->where('api_request_logs.created_at', '>=', Carbon::now()->subDays(30)),
+                        '90days' => $query->where('api_request_logs.created_at', '>=', Carbon::now()->subDays(90)),
+                        default => $query,
+                    }),
+
                 Filter::make('slow_requests')
                     ->label('Slow Requests (> ' . config('auth.api.request_logging.slow_request_threshold_ms') . ' ms)')
                     ->query(fn (Builder $query) => $query->where('duration_ms', '>', (int) config('auth.api.request_logging.slow_request_threshold_ms')))
@@ -190,6 +207,9 @@ class ApiRequestLogsTable
                     ->label('Export')
                     ->exporter(ApiRequestLogExporter::class)
                     ->hidden(fn () => $table->getLivewire() instanceof ApiRequestLogsRelationManager),
-            ]);
+            ])
+            ->emptyStateHeading('No API requests recorded')
+            ->emptyStateDescription('API request logs will appear here as protected endpoints are called.')
+            ->emptyStateIcon('heroicon-o-globe-alt');
     }
 }

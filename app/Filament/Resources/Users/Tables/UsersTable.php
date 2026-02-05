@@ -66,7 +66,7 @@ class UsersTable
                     ->searchable()
                     ->badge(),
                 TextColumn::make('auth_type')
-                    ->label('Auth Type')
+                    ->label('Authentication')
                     ->badge()
                     ->searchable()
                     ->toggleable(),
@@ -116,7 +116,7 @@ class UsersTable
                     ->options(AffiliationEnum::class)
                     ->multiple(),
                 SelectFilter::make('auth_type')
-                    ->label('Auth Type')
+                    ->label('Authentication')
                     ->options(AuthTypeEnum::class)
                     ->multiple(),
                 SelectFilter::make('role')
@@ -138,6 +138,8 @@ class UsersTable
                 ExportAction::make()
                     ->label('Export')
                     ->exporter(UserExporter::class),
-            ]);
+            ])
+            ->emptyStateHeading('No users found')
+            ->emptyStateIcon('heroicon-o-users');
     }
 }
