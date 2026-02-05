@@ -63,6 +63,13 @@
             font-weight: 500;
             line-height: 3.5rem;
             padding: 0;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        .otp-input:focus {
+            border-color: #a795c2;
+            box-shadow: 0 0 0 0.25rem rgba(78, 42, 132, 0.25);
+            outline: none;
         }
 
         .otp-separator {
@@ -87,6 +94,33 @@
 
         .otp-input[type=number] {
             -moz-appearance: textfield;
+        }
+
+        @media (max-width: 420px) {
+            .otp-input {
+                width: 2.75rem;
+                height: 4rem;
+                font-size: 2rem;
+                line-height: 2.5rem;
+            }
+
+            .otp-separator {
+                width: 0.5rem;
+                margin-right: 0.25rem;
+            }
+
+            .otp-wrapper {
+                gap: 0.25rem !important;
+            }
+        }
+
+        @media (max-width: 340px) {
+            .otp-input {
+                width: 2.25rem;
+                height: 3.5rem;
+                font-size: 1.5rem;
+                line-height: 2rem;
+            }
         }
     </style>
 
