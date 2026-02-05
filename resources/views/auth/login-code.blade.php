@@ -47,9 +47,12 @@
                         @enderror
 
                         <button class="btn btn-primary btn-lg w-100 d-inline-flex align-items-center justify-content-center mb-3"
+                                id="verifyBtn"
                                 type="submit">
-                            <i class="fas fa-lock-open fa-fw me-2" aria-hidden="true"></i>
-                            <span>Verify</span>
+                            <i class="fas fa-lock-open fa-fw me-2"
+                               id="verifyIcon"
+                               aria-hidden="true"></i>
+                            <span id="verifyText">Verify</span>
                         </button>
                     </form>
 
@@ -60,7 +63,9 @@
                             <span>Use a different email</span>
                         </a>
 
-                        <form method="POST" action="{{ route('login-code.resend') }}">
+                        <form class="d-flex align-items-center gap-2"
+                              method="POST"
+                              action="{{ route('login-code.resend') }}">
                             @csrf
                             <button class="btn btn-link text-decoration-none p-0"
                                     id="resendBtn"
@@ -68,9 +73,10 @@
                                     disabled>
                                 Resend code
                             </button>
-                            <span class="text-muted small ms-1"
+                            <span class="badge bg-light text-muted border"
                                   id="resendText"
-                                  aria-live="polite"></span>
+                                  aria-live="polite"
+                                  style="font-variant-numeric: tabular-nums; min-width: 3rem;"></span>
                         </form>
                     </div>
 
@@ -87,7 +93,9 @@
             const form = document.getElementById('otpVerifyForm');
             if (!form) return;
 
-            const verifyBtn = form.querySelector('button[type="submit"]');
+            const verifyBtn = document.getElementById('verifyBtn');
+            const verifyIcon = document.getElementById('verifyIcon');
+            const verifyText = document.getElementById('verifyText');
 
             const resendBtn = document.getElementById('resendBtn');
             const resendText = document.getElementById('resendText');
@@ -95,11 +103,19 @@
 
             let submitted = false;
 
-            const setVerifyDisabled = (disabled) => {
+            const setVerifyLoading = (loading) => {
                 if (!verifyBtn) return;
-                verifyBtn.disabled = disabled;
-                verifyBtn.classList.toggle('disabled', disabled);
-                verifyBtn.setAttribute('aria-disabled', disabled ? 'true' : 'false');
+                verifyBtn.disabled = loading;
+                verifyBtn.classList.toggle('disabled', loading);
+                verifyBtn.setAttribute('aria-disabled', loading ? 'true' : 'false');
+
+                if (loading) {
+                    verifyIcon.className = 'fas fa-circle-notch fa-spin fa-fw me-2';
+                    verifyText.textContent = 'Verifying...';
+                } else {
+                    verifyIcon.className = 'fas fa-lock-open fa-fw me-2';
+                    verifyText.textContent = 'Verify';
+                }
             };
 
             (function tick() {
@@ -108,18 +124,19 @@
                 const ms = availableAt - Date.now();
                 if (ms <= 0) {
                     resendBtn.disabled = false;
-                    resendText.textContent = '';
+                    resendText.style.display = 'none';
                     return;
                 }
 
                 resendBtn.disabled = true;
-                resendText.textContent = `(${Math.ceil(ms / 1000)}s)`;
+                resendText.style.display = 'inline-block';
+                resendText.textContent = `${Math.ceil(ms / 1000)}s`;
                 requestAnimationFrame(() => setTimeout(tick, 250));
             })();
 
             form.addEventListener('submit', () => {
                 submitted = true;
-                setVerifyDisabled(true);
+                setVerifyLoading(true);
             });
 
             document.addEventListener('otp-completed', (e) => {
@@ -132,7 +149,7 @@
                 if (hidden) hidden.value = code;
 
                 submitted = true;
-                setVerifyDisabled(true);
+                setVerifyLoading(true);
 
                 requestAnimationFrame(() => {
                     if (typeof form.requestSubmit === 'function') form.requestSubmit();

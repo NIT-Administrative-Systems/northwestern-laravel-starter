@@ -12,7 +12,7 @@
                 <div class="card-body p-md-5 p-4">
 
                     <div class="mb-4 text-center">
-                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center bg-secondary mb-3 bg-opacity-10"
+                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center bg-secondary bg-opacity-10 mb-3"
                              style="width: 80px; height: 80px;">
                             <i class="fas fa-envelope-open-text fa-2x text-secondary" aria-hidden="true"></i>
                         </div>
