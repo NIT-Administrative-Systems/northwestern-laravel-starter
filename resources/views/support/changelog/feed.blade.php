@@ -1,0 +1,39 @@
+<?php
+// Otherwise IDEs or PHP runtimes with short tags enabled will think <? means it's PHP time.
+// {{-- prettier-ignore --}}
+echo '<?xml version="1.0" encoding="UTF-8"?>';
+
+$title = config('app.name') . ' Change Log';
+if (!app()->environment('production')) {
+    $title .= sprintf(' (%s)', config('app.env'));
+}
+?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <atom:link type="application/rss+xml"
+                   href="{{ url()->signedRoute('support.changelog.feed') }}"
+                   rel="self" />
+        <title>
+            <![CDATA[{{ $title }}]]>
+        </title>
+        <link>{{ route('support.changelog.index') }}</link>
+        <description>
+            <![CDATA[Platform release notes and updates.]]>
+        </description>
+        <language>en</language>
+        <pubDate>{{ now()->toRssString() }}</pubDate>
+
+        @foreach ($entries as $entry)
+            <item>
+                <title>
+                    <![CDATA[{{ $entry->title ?? $entry->slug }}]]>
+                </title>
+                <link>{{ route('support.changelog.show', $entry) }}</link>
+                <description><![CDATA[<x-markdown :anchors="false">{!! $entry->body !!}</x-markdown>]]>
+                </description>
+                <guid>{{ route('support.changelog.show', $entry) }}</guid>
+                <pubDate>{{ $entry->created_at->toRssString() }}</pubDate>
+            </item>
+        @endforeach
+    </channel>
+</rss>

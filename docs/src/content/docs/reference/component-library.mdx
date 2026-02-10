@@ -133,6 +133,13 @@ A feature-rich copy-to-clipboard component with visual feedback, tooltips, and f
 <td>Bootstrap button variant for the success state</td>
 </tr>
 <tr>
+<td><code>icon</code></td>
+<td><code>string</code></td>
+<td>No</td>
+<td><code>fa-copy</code></td>
+<td>Font Awesome icon class for the default state (e.g. <code>fa-copy</code>, <code>fa-rss</code>)</td>
+</tr>
+<tr>
 <td><code>iconPosition</code></td>
 <td><code>string</code></td>
 <td>No</td>
@@ -195,6 +202,17 @@ The component accepts any standard Bootstrap 5 button variant:
     label="Share Link"
     icon-position="right"
     button-variant="success"
+/>
+```
+
+**Custom Icon:**
+
+```blade
+<x-clipboard
+    :text="$feedUrl"
+    label="RSS Feed"
+    icon="fa-rss"
+    button-size="sm"
 />
 ```
 
