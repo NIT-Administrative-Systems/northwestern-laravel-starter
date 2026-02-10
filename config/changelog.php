@@ -64,6 +64,7 @@ return [
     */
 
     'feed' => [
+        // Maximum number of entries included in the RSS feed
         'limit' => 20,
     ],
 

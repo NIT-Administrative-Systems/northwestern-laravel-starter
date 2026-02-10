@@ -8,10 +8,12 @@ if (!app()->environment('production')) {
     $title .= sprintf(' (%s)', config('app.env'));
 }
 ?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<rss version="2.0"
+     xmlns:atom="http://www.w3.org/2005/Atom"
+     xmlns:content="http://purl.org/rss/1.0/modules/content/">
     <channel>
         <atom:link type="application/rss+xml"
-                   href="{{ url()->signedRoute('support.changelog.feed') }}"
+                   href="{{ route('support.changelog.feed') }}"
                    rel="self" />
         <title>
             <![CDATA[{{ $title }}]]>
@@ -21,7 +23,11 @@ if (!app()->environment('production')) {
             <![CDATA[Platform release notes and updates.]]>
         </description>
         <language>en</language>
-        <pubDate>{{ now()->toRssString() }}</pubDate>
+        <copyright>{{ date('Y') }} {{ config('app.name') }}</copyright>
+        <pubDate>{{ ($entries->first()?->created_at ?? now())->toRssString() }}</pubDate>
+        <lastBuildDate>{{ now()->toRssString() }}</lastBuildDate>
+        <generator>{{ config('app.name') }}</generator>
+        <docs>https://www.rssboard.org/rss-specification</docs>
 
         @foreach ($entries as $entry)
             <item>
@@ -31,7 +37,7 @@ if (!app()->environment('production')) {
                 <link>{{ route('support.changelog.show', $entry) }}</link>
                 <description><![CDATA[<x-markdown :anchors="false">{!! $entry->body !!}</x-markdown>]]>
                 </description>
-                <guid>{{ route('support.changelog.show', $entry) }}</guid>
+                <guid isPermaLink="true">{{ route('support.changelog.show', $entry) }}</guid>
                 <pubDate>{{ $entry->created_at->toRssString() }}</pubDate>
             </item>
         @endforeach

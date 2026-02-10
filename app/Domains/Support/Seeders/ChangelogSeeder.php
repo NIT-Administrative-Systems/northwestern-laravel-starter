@@ -9,6 +9,8 @@ use App\Domains\Core\Seeders\IdempotentSeeder;
 use App\Domains\Support\Models\Changelog;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 use League\CommonMark\Environment\Environment;
 use League\CommonMark\Exception\CommonMarkException;
@@ -43,6 +45,17 @@ class ChangelogSeeder extends IdempotentSeeder
         $environment->addExtension(new FrontMatterExtension());
 
         $this->markdownConverter = new MarkdownConverter($environment);
+    }
+
+    public function run(): void
+    {
+        parent::run();
+
+        // In local/testing, backdate created_at so entries display realistic
+        // dates instead of all showing today's date after a fresh seed.
+        if (App::environment('local', 'ci', 'testing')) {
+            Changelog::query()->update(['created_at' => DB::raw('authored_at')]);
+        }
     }
 
     /**
