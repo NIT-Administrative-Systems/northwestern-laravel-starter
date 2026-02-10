@@ -6,7 +6,7 @@
             <div class="changelog-show-layout">
                 <div class="align-self-start">
                     <div class="sticky-top small fw-semibold text-md-end text-nowrap text-start" style="top: 1.5rem;">
-                        <a class="text-muted text-decoration-none" href="{{ route('support.changelog.index') }}">
+                        <a class="text-primary text-decoration-none" href="{{ route('support.changelog.index') }}">
                             <i class="fas fa-arrow-left fa-fw me-1" aria-hidden="true"></i>Changelog
                         </a>
                         <div class="text-muted mt-3">

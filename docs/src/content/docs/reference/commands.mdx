@@ -310,6 +310,34 @@ curl https://your-app.northwestern.edu/api/health
 
 ---
 
+## Changelog Commands
+
+### `make:changelog`
+
+Scaffold a new changelog Markdown file in `resources/changelogs/`.
+
+```bash
+php artisan make:changelog
+```
+
+In interactive mode, the command prompts for a slug, date, and title with sensible defaults. Arguments and options can also be passed directly:
+
+```bash
+php artisan make:changelog 2026-03-01 --date=2026-03-01 --title="Search Improvements"
+```
+
+**Options:**
+
+- `{slug}` - (optional) URL-safe identifier. Defaults to today's date.
+- `--date` - Authored date in `YYYY-MM-DD` format. Defaults to today.
+- `--title` - Human-readable title. Defaults to "Month Year Release" when the slug is a date.
+
+If a file with the same slug already exists, a numeric suffix is appended automatically.
+
+**See also:** [Changelog](/features/changelog/) documentation
+
+---
+
 ## IDE Helper Commands
 
 The starter uses `laravel-ide-helper` to generate IDE autocomplete files. These commands are automatically run after `db:rebuild`:
