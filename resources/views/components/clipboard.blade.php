@@ -6,6 +6,7 @@
     'buttonVariant' => 'outline-secondary',
     'successVariant' => 'outline-success',
     'iconPosition' => 'left',
+    'icon' => 'fa-copy',
 ])
 
 @php
@@ -53,7 +54,7 @@
         {{-- Icon on the left --}}
         @if ($iconPosition === 'left')
             <div class="position-relative d-inline-flex">
-                <i class="fas fa-fw fa-copy copy-icon"
+                <i class="fas fa-fw {{ $icon }} copy-icon"
                    aria-hidden="true"
                    :class="{ 'copy-icon-hide': copied }"></i>
                 <i class="fas fa-fw fa-check copy-icon copy-icon-check position-absolute"
@@ -74,7 +75,7 @@
         {{-- Icon on the right --}}
         @if ($iconPosition === 'right')
             <div class="position-relative d-inline-flex">
-                <i class="fas fa-fw fa-copy copy-icon"
+                <i class="fas fa-fw {{ $icon }} copy-icon"
                    aria-hidden="true"
                    :class="{ 'copy-icon-hide': copied }"></i>
                 <i class="fas fa-fw fa-check copy-icon copy-icon-check position-absolute"

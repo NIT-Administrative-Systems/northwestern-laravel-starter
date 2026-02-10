@@ -1,0 +1,13 @@
+---
+slug: "{{ slug }}"
+date: "{{ date }}"
+title: "{{ title }}"
+---
+
+### Enhancements
+
+- **Feature Name** — Brief description of what was added or improved.
+
+### Fixes
+
+- Description of what was broken and how it was corrected.

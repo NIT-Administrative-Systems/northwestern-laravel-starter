@@ -1,0 +1,150 @@
+---
+title: Changelog
+description: Public changelog for communicating releases and updates to users
+sidebar:
+    order: 6
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+
+The starter includes a public-facing changelog for communicating release notes and updates to your users. Entries are authored as Markdown files in the codebase and synced to the database when seeders run (e.g. `php artisan db:seed`), making your changelog version-controlled and reviewable through pull requests.
+
+The changelog is disabled by default and can be enabled with a single environment variable.
+
+## How It Works
+
+Changelog entries follow a code-driven workflow. Markdown files are the single source of truth, and the database is treated as a read cache that is rebuilt whenever seeders are executed.
+
+<Steps>
+
+1. **Author a Markdown file**
+
+   Run `php artisan make:changelog` to scaffold a new entry in `resources/changelogs/`. The command prompts for a slug, date, and title, then generates a Markdown file with YAML front matter.
+
+2. **Commit and open a pull request**
+
+   The Markdown file is committed alongside the code changes it documents. Reviewers can read the changelog entry as part of the PR.
+
+3. **Run seeders**
+
+   The `ChangelogSeeder` reads every Markdown file in `resources/changelogs/`, parses the front matter, and upserts each entry into the `changelogs` table. Entries whose files have been removed are soft-deleted automatically. This happens as part of `php artisan db:seed`, which is typically included in your deployment pipeline.
+
+4. **Users view the changelog**
+
+   The changelog index, individual entry pages, and RSS feed are available at `/support/changelog`.
+
+</Steps>
+
+---
+
+## Enabling the Changelog
+
+Add the following to your `.env` file:
+
+```bash
+CHANGELOG_ENABLED=true
+```
+
+When enabled, the changelog routes are registered and a "Changelog" link appears in the navigation. When disabled, the routes are not registered and the nav item is hidden. Entries can still be seeded regardless of this setting.
+
+---
+
+## Markdown File Format
+
+Each file in `resources/changelogs/` must contain YAML front matter with `slug`, `date`, and `title` fields, followed by Markdown content:
+
+```markdown
+---
+slug: "2026-02-10"
+date: "2026-02-10"
+title: "Changelog & Notification Preferences"
+---
+
+### New
+
+- **Changelog** — Public changelog for communicating releases. (`GSTS-4401`)
+
+### Fixes
+
+- Corrected a rendering issue in notification emails. (`GSTS-4395`)
+```
+
+| Front matter | Required | Description |
+|--------------|----------|-------------|
+| `slug` | Yes | URL-safe identifier used as the filename and URL path segment |
+| `date` | Yes | Authored date in `YYYY-MM-DD` format |
+| `title` | Yes | Human-readable title displayed in the changelog header |
+
+Common section headings include `### New`, `### Enhancements`, `### Fixes`, `### Security`, `### Deprecations`, and `### Known Issues`. Use whichever are relevant to the release.
+
+### Jira Issue References
+
+When the Jira integration is configured, issue references wrapped in backticks (e.g. `` `GSTS-1234` ``) are automatically converted to clickable links in the rendered output. Only references matching the configured project identifier are linked.
+
+```bash
+JIRA_URL=https://nuitadminsystems.atlassian.net
+JIRA_ISSUE_IDENTIFIER=GSTS
+```
+
+---
+
+## Creating an Entry
+
+The `make:changelog` Artisan command scaffolds a new Markdown file:
+
+```bash
+php artisan make:changelog
+```
+
+In interactive mode, the command prompts for a slug, date, and title with sensible defaults. You can also pass arguments directly:
+
+```bash
+php artisan make:changelog 2026-03-01 --date=2026-03-01 --title="Search Improvements"
+```
+
+If a file with the same slug already exists, the command appends a numeric suffix to avoid overwriting it.
+
+---
+
+## Date Handling
+
+The changelog tracks two dates for each entry:
+
+| Column | Source | Purpose |
+|--------|--------|---------|
+| `authored_at` | Front matter `date` field | The date the entry was written, stored as a stable reference |
+| `created_at` | Set by the database on first seed | The date the entry was deployed to the current environment |
+
+The UI displays `created_at` because it accurately reflects when users in each environment can first see the entry. A changelog authored on February 10 but not promoted to production until February 24 will display February 24 for production users.
+
+In local and testing environments, the seeder backdates `created_at` to match `authored_at` so that entries display realistic historical dates after a fresh `db:rebuild`.
+
+---
+
+## RSS Feed
+
+An RSS 2.0 feed is available at `/support/changelog/feed.rss`. The feed includes an Atom self-link, copyright notice, and conforms to the [RSS 2.0 specification](https://www.rssboard.org/rss-specification). A copy-to-clipboard button for the feed URL is displayed on the changelog index page.
+
+---
+
+## Routes
+
+All changelog routes are registered under the `/support/changelog` prefix when the feature is enabled:
+
+| Route | Description |
+|-------|-------------|
+| `GET /support/changelog` | Paginated changelog index |
+| `GET /support/changelog/feed.rss` | RSS 2.0 feed |
+| `GET /support/changelog/{slug}` | Individual entry |
+
+The changelog is public and does not require authentication.
+
+---
+
+### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `CHANGELOG_ENABLED` | `false` | Enable changelog routes and navigation |
+| `JIRA_URL` | `https://nuitadminsystems.atlassian.net` | Base URL of your Jira instance |
+| `JIRA_ISSUE_IDENTIFIER` | — | Jira project key for auto-linking (e.g. `GSTS`) |

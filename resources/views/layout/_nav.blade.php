@@ -26,6 +26,28 @@
             </li>
         @endcan
     @endauth
+
+    <li class="nav-item dropdown px-md-1">
+        <a class="nav-link dropdown-toggle {{ Route::is('support.changelog.*') ? 'active' : '' }}"
+           data-bs-toggle="dropdown"
+           href="#"
+           role="button"
+           aria-expanded="false">
+            <i class="fas fa-question-circle fa-fw me-1" aria-hidden="true"></i>
+            Help
+        </a>
+        <ul class="dropdown-menu">
+            @if (config('changelog.enabled'))
+                <li>
+                    <a class="dropdown-item {{ Route::is('support.changelog.*') ? 'active' : '' }}"
+                       href="{{ route('support.changelog.index') }}">
+                        <i class="fas fa-newspaper fa-fw me-2" aria-hidden="true"></i>
+                        Changelog
+                    </a>
+                </li>
+            @endif
+        </ul>
+    </li>
 </ul>
 
 <div class='mt-md-0 ms-auto mt-2'>
