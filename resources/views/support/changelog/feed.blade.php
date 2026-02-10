@@ -3,7 +3,7 @@
 // {{-- prettier-ignore --}}
 echo '<?xml version="1.0" encoding="UTF-8"?>';
 
-$title = config('app.name') . ' Change Log';
+$title = config('app.name') . ' Changelog';
 if (!app()->environment('production')) {
     $title .= sprintf(' (%s)', config('app.env'));
 }

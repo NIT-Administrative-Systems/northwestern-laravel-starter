@@ -42,7 +42,7 @@
                     <a class="dropdown-item {{ Route::is('support.changelog.*') ? 'active' : '' }}"
                        href="{{ route('support.changelog.index') }}">
                         <i class="fas fa-newspaper fa-fw me-2" aria-hidden="true"></i>
-                        Change Log
+                        Changelog
                     </a>
                 </li>
             @endif
