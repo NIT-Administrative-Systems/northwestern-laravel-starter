@@ -32,7 +32,7 @@ class MakeChangelogCommand extends Command
         {--title= : Human-readable title for the entry}';
 
     /** @var string */
-    protected $description = 'Create a new changelog markdown file in resources/changelogs/';
+    protected $description = 'Create a new changelog Markdown file in resources/changelogs/';
 
     public function handle(): int
     {
