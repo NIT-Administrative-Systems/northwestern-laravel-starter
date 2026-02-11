@@ -28,7 +28,7 @@
     @endauth
 
     <li class="nav-item dropdown px-md-1">
-        <a class="nav-link dropdown-toggle {{ Route::is('support.changelog.*') ? 'active' : '' }}"
+        <a class="nav-link dropdown-toggle {{ Route::is('support.changelog.*', 'support.contact.*') ? 'active' : '' }}"
            data-bs-toggle="dropdown"
            href="#"
            role="button"
@@ -45,6 +45,17 @@
                         Changelog
                     </a>
                 </li>
+            @endif
+            @if (config('support.enabled'))
+                @auth
+                    <li>
+                        <a class="dropdown-item {{ Route::is('support.contact.*') ? 'active' : '' }}"
+                           href="{{ route('support.contact.create') }}">
+                            <i class="fas fa-headset fa-fw me-2" aria-hidden="true"></i>
+                            Contact Support
+                        </a>
+                    </li>
+                @endauth
             @endif
         </ul>
     </li>

@@ -9,6 +9,7 @@ return [
     App\Providers\IntegrationServiceProvider::class,
     App\Providers\ViewServiceProvider::class,
     App\Providers\HealthServiceProvider::class,
+    App\Providers\SupportServiceProvider::class,
     App\Providers\FilamentServiceProvider::class,
     App\Providers\Filament\AdministrationPanelProvider::class,
 ];
