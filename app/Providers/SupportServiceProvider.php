@@ -24,8 +24,8 @@ class SupportServiceProvider extends ServiceProvider
             return;
         }
 
-        $this->app->bind(TicketSystemGateway::class, function () {
-            return new TicketSystemGatewayFactory()->default();
+        $this->app->bind(TicketSystemGateway::class, function ($app) {
+            return $app->make(TicketSystemGatewayFactory::class)->default();
         });
     }
 

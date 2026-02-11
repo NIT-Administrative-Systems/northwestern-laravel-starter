@@ -10,6 +10,7 @@ use App\Domains\Support\Exceptions\TdxLookupFailed;
 use App\Domains\Support\Gateway\CreationResult;
 use App\Domains\Support\Models\SupportTicket;
 use Exception;
+use InvalidArgumentException;
 use Northwestern\Sysdev\TeamDynamix\Api\Entity\Ticket\CreateTicket;
 use Northwestern\Sysdev\TeamDynamix\Api\Entity\Ticket\TicketResponse;
 use Northwestern\Sysdev\TeamDynamix\Laravel\TeamDynamixService;
@@ -77,8 +78,8 @@ class TeamDynamixGateway implements TicketSystemGateway
             description: is_array($ticket->details) ? json_encode($ticket->details) : (string) $ticket->details,
             statusId: $this->cache->findTicketStatusId(config('support.team-dynamix.ticket_status')),
             priorityId: $this->cache->findTicketPriorityId(config('support.team-dynamix.ticket_priority')),
-            requestorEmail: $ticket->user->email,
-            responsibleGroupId: (int) config('support.team-dynamix.assign_to_group'),
+            requestorEmail: $ticket->requester_email,
+            responsibleGroupId: $this->resolveAssigneeGroupId(),
             serviceId: $this->cache->findServiceId(config('support.team-dynamix.service')),
             isRichHtml: true,
         );
@@ -90,5 +91,23 @@ class TeamDynamixGateway implements TicketSystemGateway
             notifyResponsible: true,
             allowRequestorCreation: false,
         );
+    }
+
+    /**
+     * Resolve the TDX assignee group ID from configuration.
+     *
+     * @throws InvalidArgumentException If the group ID is missing or not a positive integer.
+     */
+    private function resolveAssigneeGroupId(): int
+    {
+        $groupId = config('support.team-dynamix.assign_to_group');
+
+        if (empty($groupId) || (int) $groupId <= 0) {
+            throw new InvalidArgumentException(
+                'TDX_ASSIGNEE_ID is required and must be a positive integer when using the TeamDynamix driver.'
+            );
+        }
+
+        return (int) $groupId;
     }
 }

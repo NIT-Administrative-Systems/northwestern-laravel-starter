@@ -49,7 +49,7 @@ class MailGateway implements TicketSystemGateway
             Mail::to(config('support.mail.to'))
                 ->send(new SupportTicketMessage($ticket, $referenceNumber, $this->isFallbackStrategy));
 
-            Mail::to($ticket->user->email)
+            Mail::to($ticket->requester_email)
                 ->send(new SupportTicketConfirmation($ticket, $referenceNumber));
 
             return new CreationResult(

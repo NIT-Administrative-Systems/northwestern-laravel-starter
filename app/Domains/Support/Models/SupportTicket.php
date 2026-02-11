@@ -9,7 +9,6 @@ use App\Domains\Support\Enums\TicketSystemEnum;
 use App\Domains\User\Models\User;
 use Database\Factories\Domains\Support\Models\SupportTicketFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Mews\Purifier\Casts\CleanHtml;
