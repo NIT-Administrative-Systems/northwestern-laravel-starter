@@ -38,7 +38,7 @@ class MailGatewayTest extends TestCase
         });
 
         Mail::assertQueued(SupportTicketConfirmation::class, function (SupportTicketConfirmation $mailable) use ($ticket) {
-            return $mailable->hasTo($ticket->user->email);
+            return $mailable->hasTo($ticket->requester_email);
         });
     }
 
