@@ -149,6 +149,10 @@ enum PermissionEnum: string implements HasLabel
     public function scope(): PermissionScopeEnum
     {
         return match ($this) {
+            // When adding personal-scoped permissions, add them here:
+            // self::VIEW_OWN_PROFILE,
+            // self::EDIT_OWN_PROFILE => PermissionScopeEnum::PERSONAL,
+
             // All permissions are SYSTEM_WIDE (system-wide) by default
             default => PermissionScopeEnum::SYSTEM_WIDE,
         };
