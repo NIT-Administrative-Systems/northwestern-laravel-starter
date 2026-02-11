@@ -32,6 +32,9 @@ enum PermissionEnum: string implements HasLabel
     case VIEW_AUDIT_LOGS = 'view-audit-logs';
     case VIEW_LOGIN_RECORDS = 'view-login-records';
 
+    // Support
+    case VIEW_SUPPORT_TICKETS = 'view-support-tickets';
+
     /**
      * A human-readable label of the permission.
      */
@@ -73,6 +76,9 @@ enum PermissionEnum: string implements HasLabel
             // Audit & Monitoring
             self::VIEW_AUDIT_LOGS => 'Allows viewing system audit logs and change history.',
             self::VIEW_LOGIN_RECORDS => 'Allows viewing user authentication history and login records.',
+
+            // Support
+            self::VIEW_SUPPORT_TICKETS => 'Allows viewing submitted support tickets in the admin panel.',
         };
     }
 
@@ -89,7 +95,8 @@ enum PermissionEnum: string implements HasLabel
             self::MANAGE_IMPERSONATION,
             self::DELETE_ROLES,
             self::VIEW_AUDIT_LOGS,
-            self::VIEW_LOGIN_RECORDS => true,
+            self::VIEW_LOGIN_RECORDS,
+            self::VIEW_SUPPORT_TICKETS => true,
             default => false,
         };
     }
@@ -142,10 +149,6 @@ enum PermissionEnum: string implements HasLabel
     public function scope(): PermissionScopeEnum
     {
         return match ($this) {
-            // When adding personal-scoped permissions, add them here:
-            // self::VIEW_OWN_PROFILE,
-            // self::EDIT_OWN_PROFILE => PermissionScopeEnum::PERSONAL,
-
             // All permissions are SYSTEM_WIDE (system-wide) by default
             default => PermissionScopeEnum::SYSTEM_WIDE,
         };

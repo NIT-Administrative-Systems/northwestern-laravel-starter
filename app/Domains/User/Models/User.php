@@ -12,6 +12,7 @@ use App\Domains\Auth\Models\ApiRequestLog;
 use App\Domains\Auth\Models\LoginChallenge;
 use App\Domains\Auth\Models\Role;
 use App\Domains\Core\Models\Concerns\Auditable as AuditableConcern;
+use App\Domains\Support\Models\SupportTicket;
 use App\Domains\User\Enums\AffiliationEnum;
 use App\Domains\User\Models\Concerns\AuditsRoles;
 use App\Domains\User\Models\Concerns\HandlesImpersonation;
@@ -130,6 +131,12 @@ class User extends Authenticatable implements Auditable, FilamentUser, HasName
     public function api_request_logs(): HasMany
     {
         return $this->hasMany(ApiRequestLog::class);
+    }
+
+    /** @return HasMany<SupportTicket, $this> */
+    public function support_tickets(): HasMany
+    {
+        return $this->hasMany(SupportTicket::class);
     }
 
     /**

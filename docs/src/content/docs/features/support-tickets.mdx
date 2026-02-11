@@ -1,0 +1,309 @@
+---
+title: Support Tickets
+description: Contact form with pluggable gateway architecture and automatic email fallback
+sidebar:
+    order: 5
+---
+
+import { Card, CardGrid, Aside, Steps, Tabs, TabItem, FileTree, Badge } from '@astrojs/starlight/components';
+
+The starter includes a user-facing contact support form that submits tickets to a configurable backend. Out of the box, it ships with two gateway drivers - **Email** and **TeamDynamix** - and an automatic email fallback that ensures user requests are never silently lost.
+
+The feature is disabled by default and can be enabled with a single environment variable.
+
+## Overview
+
+The system follows a layered architecture:
+
+- **Contract** — `TicketSystemGateway` interface decouples the orchestration from gateway implementations
+- **Enum-driven resolution** — `TicketSystemEnum::gatewayClass()` maps each driver to its concrete class
+- **Immutable value object** — `CreationResult` carries the outcome of every gateway call
+- **Repository** — Keeps persistence concerns out of the action
+- **Action** — `CreateSupportTicket` orchestrates the full workflow in one place
+
+---
+
+## Enabling the Feature
+
+```bash
+# .env
+SUPPORT_ENABLED=true
+SUPPORT_DRIVER=mail
+SUPPORT_MAIL_TO=your-team@northwestern.edu
+```
+
+When enabled, the contact form routes are registered and the submission log appears in the Filament admin panel. When disabled, no routes are registered and the feature is completely inert.
+
+---
+
+## How It Works
+
+<Steps>
+
+1. **User visits the contact form**
+
+   Authenticated users access `/support/contact` and fill in a subject and details.
+
+2. **Ticket is persisted**
+
+   The `SupportTicketRepository` saves the submission to the `support_tickets` table, recording the user's email at the time of submission for audit purposes.
+
+3. **Primary gateway submits the ticket**
+
+   The `CreateSupportTicket` action dispatches the ticket to the configured gateway (Email or TeamDynamix). The gateway returns an immutable `CreationResult` indicating success or failure.
+
+4. **Result is recorded**
+
+   The repository updates the ticket with the gateway's response — ticket number, system type, and any error message.
+
+5. **Fallback fires if needed**
+
+   If the primary gateway is **not** the email driver and it fails, the system automatically falls back to the `MailGateway` so the user's request is still delivered. The `fallback_sent_at` timestamp is only set if the fallback actually succeeds.
+
+6. **User receives feedback**
+
+   The controller returns a contextual message:
+   - **Success** — includes the ticket reference number
+   - **Fallback sent** — confirms submission without exposing internal details
+   - **Both failed** — generic confirmation that the team will follow up
+
+</Steps>
+
+---
+
+## Gateway Drivers
+
+<CardGrid>
+  <Card title="Email" icon="email">
+    **Default driver**
+
+    Sends ticket details to the support team mailbox and a confirmation to the requester.
+
+    - Generates `SUP-{id}` style references
+    - Queued via Laravel's mail system
+    - Also serves as the automatic fallback
+  </Card>
+
+  <Card title="TeamDynamix" icon="external">
+    **External ticketing system**
+
+    Creates tickets directly in TeamDynamix via the REST API.
+
+    - 3-attempt retry with 250ms backoff
+    - Caches metadata IDs for one week
+    - Returns native TDX ticket references
+  </Card>
+</CardGrid>
+
+### Email Gateway
+
+The email gateway dispatches two queued emails per submission:
+
+1. **Team notification** (`SupportTicketMessage`) — Contains the full request body, submitter metadata, and a fallback warning when operating in fallback mode.
+2. **User confirmation** (`SupportTicketConfirmation`) — A clean, user-facing email with the reference number and next-step expectations. No internal details are exposed.
+
+The reference prefix is configurable and only applies to the email gateway. External gateways like TeamDynamix return their own native ticket references.
+
+```bash
+# .env
+SUPPORT_MAIL_TO=your-team@northwestern.edu
+SUPPORT_REFERENCE_PREFIX=SUP
+```
+
+When the email gateway is used as a fallback after a primary gateway failure, the team notification includes a warning banner instructing the team to check Sentry for the corresponding error.
+
+### TeamDynamix Gateway
+
+The TeamDynamix gateway submits tickets to the TDX REST API using the [northwestern-sysdev/tdx-php-sdk](https://github.com/NIT-Administrative-Systems/tdx-php-sdk) package. It resolves metadata IDs (ticket type, form, status, priority, service) through the `TeamDynamixCacheRepository`, which caches API lookups for one week.
+
+```bash
+# .env
+SUPPORT_DRIVER=team-dynamix
+TDX_ASSIGNEE_ID=12345
+TDX_TICKET_TYPE=Default
+TDX_FORM_TYPE="NU Base Service Request"
+TDX_TICKET_STATUS=New
+TDX_TICKET_PRIORITY="Low (P4)"
+TDX_SERVICE="My Application"
+```
+
+<Aside type="caution">
+`TDX_ASSIGNEE_ID` is required when using the TeamDynamix driver. This is the numeric ID of the TDX group that tickets should be assigned to.
+</Aside>
+
+---
+
+## Automatic Fallback
+
+When the primary gateway is **not** the email driver and it fails, the system automatically dispatches the ticket via the `MailGateway` in fallback mode. This is a safety net — it cannot be disabled — ensuring that user requests are never silently lost.
+
+The fallback only fires when:
+
+1. The primary gateway returned an error (`creationError: true`)
+2. The primary gateway is not the email driver itself (to avoid infinite loops)
+
+The `fallback_sent_at` timestamp on the ticket is only set when the fallback actually succeeds. If the fallback also fails (e.g. mail server is down), the timestamp remains `null`, giving administrators a clear signal that both delivery paths failed.
+
+---
+
+## Contact Form
+
+The contact form is available at `/support/contact` for authenticated users. It collects a subject and details.
+
+### Limited Support Warning
+
+In non-production environments, a warning banner is displayed indicating that support is limited and the form may behave differently. This is controlled by:
+
+```bash
+# .env
+# Defaults to true for all non-production environments
+SUPPORT_LIMITED_WARNING=false
+```
+
+---
+
+## Implementing a Custom Driver
+
+Adding a new gateway requires three steps: add an enum case, implement the interface, and add configuration.
+
+<Steps>
+
+1. **Add a case to `TicketSystemEnum`**
+
+   ```php
+   // app/Domains/Support/Enums/TicketSystemEnum.php
+
+   enum TicketSystemEnum: string implements HasLabel
+   {
+       case TEAM_DYNAMIX = 'team-dynamix';
+       case MAIL = 'mail';
+       case JIRA = 'jira'; // New case
+
+       public function getLabel(): string
+       {
+           return match ($this) {
+               self::TEAM_DYNAMIX => 'TeamDynamix',
+               self::MAIL => 'Email',
+               self::JIRA => 'Jira',
+           };
+       }
+
+       public function gatewayClass(): string
+       {
+           return match ($this) {
+               self::TEAM_DYNAMIX => TeamDynamixGateway::class,
+               self::MAIL => MailGateway::class,
+               self::JIRA => JiraGateway::class,
+           };
+       }
+   }
+   ```
+
+   The enum value (e.g. `'jira'`) is what users set in `SUPPORT_DRIVER` and what gets stored in the `ticketing_system` database column.
+
+2. **Create the gateway class**
+
+   Implement the `TicketSystemGateway` interface. Your gateway **must never throw** — capture errors and return them via `CreationResult`.
+
+   ```php
+   // app/Domains/Support/Gateways/Jira/JiraGateway.php
+
+   namespace App\Domains\Support\Gateways\Jira;
+
+   use App\Domains\Support\Contracts\TicketSystemGateway;
+   use App\Domains\Support\Enums\TicketSystemEnum;
+   use App\Domains\Support\Gateway\CreationResult;
+   use App\Domains\Support\Models\SupportTicket;
+   use Exception;
+
+   class JiraGateway implements TicketSystemGateway
+   {
+       public function create(SupportTicket $ticket): CreationResult
+       {
+           try {
+               // Submit to Jira API...
+               $issueKey = $this->submitToJira($ticket);
+
+               return new CreationResult(
+                   ticketSystemType: TicketSystemEnum::JIRA,
+                   creationError: false,
+                   ticketNumber: $issueKey,
+                   errorMessage: null,
+               );
+           } catch (Exception $e) {
+               if (app()->bound('sentry')) {
+                   resolve('sentry')->captureException($e);
+               }
+
+               return new CreationResult(
+                   ticketSystemType: TicketSystemEnum::JIRA,
+                   creationError: true,
+                   ticketNumber: null,
+                   errorMessage: $e->getMessage(),
+               );
+           }
+       }
+   }
+   ```
+
+   <Aside type="caution">
+   The gateway contract requires that implementations **never throw exceptions**. Errors must be captured internally and returned via the `CreationResult` value object. If your gateway throws, the automatic fallback mechanism will not fire and the user's request may be lost.
+   </Aside>
+
+3. **Add configuration**
+
+   Add a section for your driver in `config/support.php` and update `.env.example`:
+
+   ```php
+   // config/support.php
+   'jira' => [
+       'base_url' => env('JIRA_BASE_URL'),
+       'project_key' => env('JIRA_PROJECT_KEY'),
+       'issue_type' => env('JIRA_ISSUE_TYPE', 'Task'),
+   ],
+   ```
+
+   ```bash
+   # .env
+   SUPPORT_DRIVER=jira
+   JIRA_BASE_URL=https://your-org.atlassian.net
+   JIRA_PROJECT_KEY=SUP
+   ```
+
+</Steps>
+
+That's it. The factory resolves gateways through the enum, so no additional wiring is needed. The automatic email fallback, admin panel, and submission recording all work with your new driver immediately.
+
+### Alternative: Rebinding the Interface
+
+If you need a completely custom gateway that doesn't fit the enum-driven pattern, you can bypass the factory entirely by rebinding the `TicketSystemGateway` interface in your `AppServiceProvider`:
+
+```php
+// app/Providers/AppServiceProvider.php
+
+use App\Domains\Support\Contracts\TicketSystemGateway;
+
+$this->app->bind(TicketSystemGateway::class, function () {
+    return new MyCustomGateway();
+});
+```
+
+This overrides the binding registered by `SupportServiceProvider` and gives you full control over gateway resolution.
+
+---
+
+## Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `SUPPORT_ENABLED` | `false` | Enable the contact form and submission routes |
+| `SUPPORT_LIMITED_WARNING` | `true` (non-production) | Show limited support warning banner |
+| `SUPPORT_DRIVER` | `mail` | Gateway driver (`mail`, `team-dynamix`) |
+| `SUPPORT_MAIL_TO` | `your-team@northwestern.edu` | Support team email address |
+| `SUPPORT_REFERENCE_PREFIX` | `SUP` | Reference prefix for mail gateway (e.g. `SUP-47`) |
+| `TDX_ASSIGNEE_ID` | — | TDX group ID for ticket assignment (required for TDX driver) |
+| `TDX_TICKET_TYPE` | `Default` | TDX ticket type name |
+| `TDX_FORM_TYPE` | `NU Base Service Request` | TDX form type name |
+| `TDX_TICKET_STATUS` | `New` | TDX ticket status name |
+| `TDX_TICKET_PRIORITY` | `Low (P4)` | TDX ticket priority name |
+| `TDX_SERVICE` | `APP_NAME` | TDX service name (defaults to application name) |

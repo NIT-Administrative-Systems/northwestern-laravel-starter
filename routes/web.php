@@ -19,6 +19,13 @@ Route::prefix('support')->name('support.')->group(function () {
             Route::get('{changelog}', [Controllers\Support\ChangelogController::class, 'show'])->name('show');
         });
     }
+
+    if (config('support.enabled')) {
+        Route::middleware('auth')->group(function () {
+            Route::get('contact', [Controllers\Support\ContactController::class, 'create'])->name('contact.create');
+            Route::post('contact', [Controllers\Support\ContactController::class, 'store'])->middleware('throttle:support-submission')->name('contact.store');
+        });
+    }
 });
 
 Route::prefix('platform')->name('platform.')->group(function () {

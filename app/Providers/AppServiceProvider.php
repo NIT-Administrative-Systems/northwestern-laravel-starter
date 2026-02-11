@@ -112,6 +112,16 @@ class AppServiceProvider extends ServiceProvider
             ];
         });
 
+        RateLimiter::for('support-submission', static function (Request $request) {
+            $key = $request->user()?->id ?: $request->ip();
+
+            return [
+                Limit::perMinute(2)->by('support:min:' . $key),
+                Limit::perHour(5)->by('support:hr:' . $key),
+                Limit::perDay(10)->by('support:day:' . $key),
+            ];
+        });
+
         RateLimiter::for('login-code-verify', static function (Request $request) {
             $ip = $request->ip() ?? 'ip:none';
             $encryptedChallengeId = Session::get(LoginCodeSession::CHALLENGE_ID);
