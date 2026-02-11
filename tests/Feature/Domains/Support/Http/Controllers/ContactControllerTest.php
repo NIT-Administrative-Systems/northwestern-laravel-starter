@@ -20,7 +20,6 @@ class ContactControllerTest extends TestCase
     {
         parent::setUp();
 
-        config(['support.enabled' => true]);
         config(['support.driver' => 'mail']);
         config(['support.mail.to' => 'support@northwestern.edu']);
     }

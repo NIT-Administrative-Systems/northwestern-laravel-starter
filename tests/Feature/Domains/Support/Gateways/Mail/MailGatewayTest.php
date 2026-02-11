@@ -20,7 +20,6 @@ class MailGatewayTest extends TestCase
     {
         parent::setUp();
 
-        config(['support.enabled' => true]);
         config(['support.mail.to' => 'support@northwestern.edu']);
         config(['support.mail.reference_prefix' => 'TEST']);
     }
