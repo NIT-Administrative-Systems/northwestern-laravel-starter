@@ -117,22 +117,6 @@ return [
 
         /*
         |--------------------------------------------------------------------------
-        | API Rate Limiting Configuration
-        |--------------------------------------------------------------------------
-        |
-        | Settings for global API request rate limiting to mitigate abuse and ensure
-        | consistent service availability. Applied via the 'api' middleware group.
-        |
-        | 'max_attempts': The maximum number of requests permitted per time window.
-        |
-        */
-
-        'rate_limit' => [
-            'max_attempts' => env('API_RATE_LIMIT_ATTEMPTS', 1800),
-        ],
-
-        /*
-        |--------------------------------------------------------------------------
         | API Request Logging
         |--------------------------------------------------------------------------
         |

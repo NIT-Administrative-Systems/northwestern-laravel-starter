@@ -123,7 +123,7 @@ class Overview extends Page
             'failed_requests_24h' => $failedRequests24h,
             'success_rate_24h' => $successRate24h,
             'avg_response_time_24h' => $avgResponseTime24h !== null ? round((float) $avgResponseTime24h, 1) : null,
-            'rate_limit' => (int) config('auth.api.rate_limit.max_attempts', 1800),
+            'rate_limit' => (int) config('rate-limiting.api.per_minute', 1800),
             'logging_enabled' => (bool) config('auth.api.request_logging.enabled', true),
             'slow_threshold_ms' => (int) config('auth.api.request_logging.slow_request_threshold_ms', 500),
             'retention_days' => (int) config('auth.api.request_logging.retention_days', 90),

@@ -23,7 +23,7 @@ Route::prefix('support')->name('support.')->group(function () {
     if (config('support.enabled')) {
         Route::middleware('auth')->group(function () {
             Route::get('contact', [Controllers\Support\ContactController::class, 'create'])->name('contact.create');
-            Route::post('contact', [Controllers\Support\ContactController::class, 'store'])->middleware('throttle:support-submission')->name('contact.store');
+            Route::post('contact', [Controllers\Support\ContactController::class, 'store'])->middleware('throttle:support:contact')->name('contact.store');
         });
     }
 });
