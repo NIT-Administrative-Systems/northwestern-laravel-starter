@@ -8,26 +8,18 @@ use App\Domains\Auth\Actions\Local\FixedNumericOneTimeCodeGenerator;
 use App\Domains\Auth\Actions\Local\RandomNumericOneTimeCodeGenerator;
 use App\Domains\Auth\Contracts\OneTimeCodeGenerator;
 use App\Domains\Auth\Enums\PermissionEnum;
-use App\Domains\Auth\ValueObjects\LoginCodeSession;
 use App\Domains\Core\Database\ConfigurableDbDumperFactory;
 use App\Domains\Core\Exceptions\ProblemDetailsRenderer;
 use App\Domains\User\Models\User;
-use App\Http\Responses\ProblemDetails;
-use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Contracts\Auth\Authenticatable;
-use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Client\RequestException;
-use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
@@ -58,7 +50,6 @@ class AppServiceProvider extends ServiceProvider
         $this->configureVite();
         $this->configureAuthentication();
         $this->configureCommands();
-        $this->configureRateLimiting();
         $this->configureRoutes();
         $this->configureRequests();
     }
@@ -88,58 +79,6 @@ class AppServiceProvider extends ServiceProvider
     public function configureCommands(): void
     {
         DB::prohibitDestructiveCommands(App::isProduction());
-    }
-
-    protected function configureRateLimiting(): void
-    {
-        RateLimiter::for('api', static function (Request $request) {
-            return Limit::perMinute((int) config('auth.api.rate_limit.max_attempts'))
-                ->by($request->user()?->id ?: $request->ip())
-                ->response(fn () => ProblemDetails::tooManyRequests());
-        });
-
-        RateLimiter::for('login-code-request', static function (Request $request) {
-            $email = mb_strtolower(
-                (string) $request->input(
-                    key: 'email',
-                    default: Session::get(LoginCodeSession::EMAIL, '')
-                )
-            );
-
-            return [
-                Limit::perMinute(5)->by($request->ip() ?? 'ip:none'),
-                Limit::perMinute(3)->by('login-code:req:' . $email),
-            ];
-        });
-
-        RateLimiter::for('support-submission', static function (Request $request) {
-            $key = $request->user()?->id ?: $request->ip();
-
-            return [
-                Limit::perMinute(2)->by('support:min:' . $key),
-                Limit::perHour(5)->by('support:hr:' . $key),
-                Limit::perDay(10)->by('support:day:' . $key),
-            ];
-        });
-
-        RateLimiter::for('login-code-verify', static function (Request $request) {
-            $ip = $request->ip() ?? 'ip:none';
-            $encryptedChallengeId = Session::get(LoginCodeSession::CHALLENGE_ID);
-
-            $challengeKey = $ip;
-            if ($encryptedChallengeId) {
-                try {
-                    $challengeKey = Crypt::decryptString($encryptedChallengeId);
-                } catch (DecryptException) {
-                    //
-                }
-            }
-
-            return [
-                Limit::perMinute(10)->by('login-code:verify:' . $ip),
-                Limit::perMinute(5)->by('login-code:verify:challenge:' . $challengeKey),
-            ];
-        });
     }
 
     public function configureRoutes(): void
