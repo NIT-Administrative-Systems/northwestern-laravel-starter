@@ -14,7 +14,9 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use UnitEnum;
 
 class SupportTicketResource extends Resource
@@ -57,6 +59,39 @@ class SupportTicketResource extends Resource
     public static function getNavigationBadgeColor(): ?string
     {
         return 'danger';
+    }
+
+    public static function getGlobalSearchResultTitle(Model $record): string|Htmlable
+    {
+        /** @var SupportTicket $record */
+        return $record->subject;
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        /** @var SupportTicket $record */
+        return array_filter([
+            'Ticket' => $record->ticket_number,
+            'Submitted by' => $record->user?->full_name,
+            'Email' => $record->requester_email,
+        ]);
+    }
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return [
+            'subject',
+            'ticket_number',
+            'requester_email',
+            'user.first_name',
+            'user.last_name',
+            'user.username',
+        ];
+    }
+
+    public static function getGlobalSearchEloquentQuery(): Builder
+    {
+        return parent::getGlobalSearchEloquentQuery()->with('user');
     }
 
     public static function getEloquentQuery(): Builder

@@ -21,6 +21,8 @@ class ApiRequestLogResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChartBar;
 
+    protected static bool $isGloballySearchable = false;
+
     protected static ?string $recordTitleAttribute = 'id';
 
     protected static ?string $navigationLabel = 'API Requests';
