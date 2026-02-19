@@ -32,7 +32,7 @@
                         </h2>
 
                         <div class="text-body">
-                            <x-markdown :anchors="false">
+                            <x-markdown :anchors="false" :options="['html_input' => 'allow']">
                                 {!! $entry->body !!}
                             </x-markdown>
                         </div>
@@ -52,7 +52,7 @@
     <style>
         .changelog-entry {
             display: grid;
-            grid-template-columns: auto auto 1fr;
+            grid-template-columns: 10rem auto 1fr;
             gap: 0 1.25rem;
             padding-bottom: 3rem;
         }
