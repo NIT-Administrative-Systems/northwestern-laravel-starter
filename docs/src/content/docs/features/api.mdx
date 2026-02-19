@@ -117,6 +117,10 @@ In production environments, it is best practice to issue a unique token for ever
        After the response is sent, the system logs the request details for monitoring and analytics.
 </Steps>
 
+<Aside type="caution" title="APP_KEY Rotation Invalidates Tokens">
+Access tokens are stored as HMAC-SHA256 hashes derived from `APP_KEY`. If you rotate `APP_KEY`, **all existing API tokens will stop working** because their hashes will no longer match. Before rotating `APP_KEY`, coordinate with all API consumers to rotate their tokens immediately afterward using the administration panel.
+</Aside>
+
 ## Expiration Notifications
 
 To prevent service interruptions, the system automatically sends email notifications when a token is approaching its expiration date and the API User has an email address configured.

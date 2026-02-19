@@ -7,6 +7,7 @@ namespace App\Filament\Resources\AccessTokens\Schemas;
 use App\Domains\Auth\Enums\AccessTokenStatusEnum;
 use App\Domains\Auth\Enums\TokenExpirationEnum;
 use App\Domains\Auth\Models\AccessToken;
+use App\Domains\Core\Rules\ValidIpOrCidrRule;
 use Carbon\CarbonInterface;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
@@ -108,6 +109,7 @@ class AccessTokenSchemas
                     ->hintIconTooltip(
                         'For integrations routed through an API gateway (e.g., Apigee), network filtering can typically be managed by the proxy and this field is unnecessary. Only define IPs here for direct, external integrations requiring an extra layer of application-level security.'
                     )
+                    ->nestedRecursiveRules([new ValidIpOrCidrRule()])
                     ->columnSpanFull()
                     ->reorderable(),
             ]);
