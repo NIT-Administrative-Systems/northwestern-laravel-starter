@@ -124,7 +124,7 @@ class ImpersonationControllerTest extends TestCase
         $user->givePermissionTo(PermissionEnum::MANAGE_IMPERSONATION);
         $this->actingAs($user);
 
-        $referer = 'https://my-app.test/current/page';
+        $referer = config('app.url') . '/current/page';
 
         $this->mock(StartImpersonation::class, function ($mock) {
             $mock->expects('__invoke')
