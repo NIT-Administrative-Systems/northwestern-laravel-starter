@@ -4,12 +4,45 @@ declare(strict_types=1);
 
 namespace App\Domains\Auth\Enums;
 
+use App\Domains\Auth\Models\Role;
+use App\Providers\AppServiceProvider;
 use Filament\Support\Contracts\HasLabel;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 
 enum PermissionEnum: string implements HasLabel
 {
     // System Administration
+
+    /**
+     * Super-administrator permission that bypasses all authorization checks.
+     *
+     * A {@see Gate::before()} callback in {@see AppServiceProvider} returns `true` for
+     * any user holding this permission, short-circuiting every Gate and Policy check.
+     *
+     * You never need to check for MANAGE_ALL inside a Policy. The `Gate::before` hook
+     * fires first and grants access automatically. Adding an explicit check would be
+     * redundant and misleading.
+     *
+     * Use `$user->can(PermissionEnum::MANAGE_ALL)` (which flows through the Gate) to
+     * restrict features to super-administrators only - things that no other permission
+     * should ever grant. Examples from this codebase:
+     *
+     * - **Blade/Livewire conditionals:** `@can(PermissionEnum::MANAGE_ALL)` to show
+     *   controls that only super-admins should see.
+     * - **Filament visibility:** `->visible(fn () => auth()->user()->can(...))` to
+     *   gate an action or page to super-admins.
+     * - **Telescope access:** The `viewTelescope` gate is defined as
+     *   `$user->can(PermissionEnum::MANAGE_ALL)`.
+     *
+     * In these cases, `can()` is preferred because it goes through the Gate and is
+     * consistent with how the rest of the authorization system works.
+     *
+     * Use `$user->hasPermissionTo(PermissionEnum::MANAGE_ALL)` (Spatie direct check,
+     * bypasses the Gate) only in infrastructure code where using `can()` would cause
+     * recursion — e.g., in {@see Role::canBeManageBy()} where the check must not
+     * trigger the before hook.
+     */
     case MANAGE_ALL = 'manage-all';
     case ACCESS_ADMINISTRATION_PANEL = 'access-administration-panel';
     case MANAGE_IMPERSONATION = 'manage-impersonation';

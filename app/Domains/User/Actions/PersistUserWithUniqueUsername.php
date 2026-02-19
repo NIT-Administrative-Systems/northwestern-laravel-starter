@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Domains\User\Actions;
 
 use App\Domains\Auth\Enums\AuthTypeEnum;
+use App\Domains\Auth\Enums\RoleModificationOriginEnum;
 use App\Domains\Auth\Enums\SystemRoleEnum;
+use App\Domains\Auth\Models\Role;
 use App\Domains\User\Actions\Directory\FindOrUpdateUserFromDirectory;
 use App\Domains\User\Models\User;
 use Illuminate\Database\UniqueConstraintViolationException;
@@ -28,7 +30,8 @@ final class PersistUserWithUniqueUsername
                 $user->save();
 
                 if ($user->auth_type === AuthTypeEnum::SSO) {
-                    $user->assignRole(SystemRoleEnum::NORTHWESTERN_USER);
+                    $role = Role::findByName(SystemRoleEnum::NORTHWESTERN_USER->value);
+                    $user->assignRoleWithAudit($role, RoleModificationOriginEnum::SSO_PROVISIONING);
                 }
 
                 return $user;

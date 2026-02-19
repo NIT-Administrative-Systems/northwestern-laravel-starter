@@ -52,7 +52,16 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable implements Auditable, FilamentUser, HasName
 {
     /** @use HasFactory<UserFactory> */
-    use AuditableConcern, AuditsRoles, HandlesImpersonation, HasFactory, HasRoles, Notifiable, SoftDeletes, TracksPermissionSources;
+    use AuditableConcern, HandlesImpersonation, HasFactory, Notifiable, SoftDeletes, TracksPermissionSources;
+
+    use AuditsRoles, HasRoles {
+        AuditsRoles::assignRole insteadof HasRoles;
+        AuditsRoles::removeRole insteadof HasRoles;
+        AuditsRoles::syncRoles insteadof HasRoles;
+        HasRoles::assignRole as private baseAssignRole;
+        HasRoles::removeRole as private baseRemoveRole;
+        HasRoles::syncRoles as private baseSyncRoles;
+    }
 
     /** @var list<string> */
     protected array $auditExclude = [

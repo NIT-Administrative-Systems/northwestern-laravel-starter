@@ -42,7 +42,7 @@ trait AuditsRoles
         $this->loadMissing('roles.role_type');
         $oldRoles = $this->mapRolesToArray($this->roles);
 
-        $this->assignRole($roles);
+        $this->baseAssignRole($roles);
 
         $normalizedRoles = $this->normalizeRolesToCollection($roles);
         $this->auditRoleChange('role_assigned', $oldRoles, $normalizedRoles, $origin, $context);
@@ -74,7 +74,7 @@ trait AuditsRoles
         $this->loadMissing('roles.role_type');
         $oldRoles = $this->mapRolesToArray($this->roles);
 
-        $this->removeRole($roles);
+        $this->baseRemoveRole($roles);
 
         $normalizedRoles = $this->normalizeRolesToCollection($roles);
         $this->auditRoleChange('role_removed', $oldRoles, $normalizedRoles, $origin, $context);
@@ -169,5 +169,23 @@ trait AuditsRoles
         }
 
         return collect($roles);
+    }
+
+    /** @deprecated Use {@see assignRoleWithAudit()} to ensure role changes are audited. */
+    public function assignRole(...$roles)
+    {
+        return $this->baseAssignRole(...$roles);
+    }
+
+    /** @deprecated Use {@see removeRoleWithAudit()} to ensure role changes are audited. */
+    public function removeRole(...$roles)
+    {
+        return $this->baseRemoveRole(...$roles);
+    }
+
+    /** @deprecated Use {@see assignRoleWithAudit()} and {@see removeRoleWithAudit()} to ensure role changes are audited. */
+    public function syncRoles(...$roles)
+    {
+        return $this->baseSyncRoles(...$roles);
     }
 }
