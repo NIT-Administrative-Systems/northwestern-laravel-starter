@@ -50,8 +50,9 @@ class ImpersonationController extends Controller
         }
 
         // If it's the default root redirect ('/'), stay on the current page instead
-        if ($redirectTo === '/' && $returnUrl) {
-            return redirect()->to($returnUrl);
+        $validatedReturnUrl = Session::get('impersonation.return_url');
+        if ($redirectTo === '/' && $validatedReturnUrl) {
+            return redirect()->to($validatedReturnUrl);
         }
 
         // Otherwise use the specified redirect
