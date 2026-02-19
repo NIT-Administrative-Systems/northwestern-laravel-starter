@@ -29,6 +29,9 @@ use App\Domains\User\Listeners\ProcessNetIdUpdate;
  * **SSO_PROVISIONING** — A role was assigned during first-time SSO login when
  * the user is provisioned from directory data.
  * - Triggered by: User creation in {@see PersistUserWithUniqueUsername}.
+ *
+ * **SYSTEM** — A role was assigned or removed by a programmatic or automated
+ * operation without a specific contextual origin (e.g., seeders, test setup).
  */
 enum RoleModificationOriginEnum: string
 {
@@ -36,4 +39,5 @@ enum RoleModificationOriginEnum: string
     case REMOVED_BY_DELETION = 'removed-by-deletion';
     case NETID_STATUS_CHANGE = 'netid-status-change';
     case SSO_PROVISIONING = 'sso-provisioning';
+    case SYSTEM = 'system';
 }

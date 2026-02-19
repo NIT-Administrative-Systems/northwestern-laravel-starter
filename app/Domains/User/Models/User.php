@@ -55,12 +55,9 @@ class User extends Authenticatable implements Auditable, FilamentUser, HasName
     use AuditableConcern, HandlesImpersonation, HasFactory, Notifiable, SoftDeletes, TracksPermissionSources;
 
     use AuditsRoles, HasRoles {
-        AuditsRoles::assignRole insteadof HasRoles;
-        AuditsRoles::removeRole insteadof HasRoles;
-        AuditsRoles::syncRoles insteadof HasRoles;
-        HasRoles::assignRole as private baseAssignRole;
-        HasRoles::removeRole as private baseRemoveRole;
-        HasRoles::syncRoles as private baseSyncRoles;
+        HasRoles::assignRole as private;
+        HasRoles::removeRole as private;
+        HasRoles::syncRoles as private;
     }
 
     /** @var list<string> */

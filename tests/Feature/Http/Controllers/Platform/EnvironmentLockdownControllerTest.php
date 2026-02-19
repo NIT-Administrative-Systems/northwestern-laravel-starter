@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Http\Controllers\Platform;
 
+use App\Domains\Auth\Enums\RoleModificationOriginEnum;
 use App\Domains\Auth\Enums\SystemRoleEnum;
 use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\User;
@@ -16,11 +17,14 @@ class EnvironmentLockdownControllerTest extends TestCase
 {
     private Role $adminRole;
 
+    private Role $nuRole;
+
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->adminRole = Role::factory()->create(['name' => 'Admin']);
+        $this->nuRole = Role::query()->where('name', SystemRoleEnum::NORTHWESTERN_USER->value)->firstOrFail();
     }
 
     public function test_unauthenticated_users_are_redirected_to_login(): void
@@ -32,7 +36,7 @@ class EnvironmentLockdownControllerTest extends TestCase
     public function test_shows_lockdown_page_for_users_with_only_northwestern_user_role(): void
     {
         $user = User::factory()->create();
-        $user->assignRole(SystemRoleEnum::NORTHWESTERN_USER);
+        $user->assignRoleWithAudit($this->nuRole, RoleModificationOriginEnum::SYSTEM);
 
         $this->actingAs($user)
             ->get(route('platform.environment-lockdown'))
@@ -53,7 +57,7 @@ class EnvironmentLockdownControllerTest extends TestCase
     public function test_redirects_to_home_for_users_with_non_default_roles(): void
     {
         $user = User::factory()->create();
-        $user->assignRole([$this->adminRole, SystemRoleEnum::NORTHWESTERN_USER]);
+        $user->assignRoleWithAudit([$this->adminRole, $this->nuRole], RoleModificationOriginEnum::SYSTEM);
 
         $this->actingAs($user)
             ->get(route('platform.environment-lockdown'))
@@ -63,7 +67,7 @@ class EnvironmentLockdownControllerTest extends TestCase
     public function test_redirects_to_home_for_users_with_only_non_default_roles(): void
     {
         $user = User::factory()->create();
-        $user->assignRole($this->adminRole);
+        $user->assignRoleWithAudit($this->adminRole, RoleModificationOriginEnum::SYSTEM);
 
         $this->actingAs($user)
             ->get(route('platform.environment-lockdown'))
@@ -74,7 +78,7 @@ class EnvironmentLockdownControllerTest extends TestCase
     {
         $editorRole = Role::factory()->create(['name' => 'Editor']);
         $user = User::factory()->create();
-        $user->assignRole([$this->adminRole, $editorRole, SystemRoleEnum::NORTHWESTERN_USER]);
+        $user->assignRoleWithAudit([$this->adminRole, $editorRole, $this->nuRole], RoleModificationOriginEnum::SYSTEM);
 
         $this->actingAs($user)
             ->get(route('platform.environment-lockdown'))

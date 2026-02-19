@@ -30,7 +30,7 @@ final class PersistUserWithUniqueUsername
                 $user->save();
 
                 if ($user->auth_type === AuthTypeEnum::SSO) {
-                    $role = Role::findByName(SystemRoleEnum::NORTHWESTERN_USER->value);
+                    $role = Role::query()->where('name', SystemRoleEnum::NORTHWESTERN_USER->value)->firstOrFail();
                     $user->assignRoleWithAudit($role, RoleModificationOriginEnum::SSO_PROVISIONING);
                 }
 
