@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Database\Factories\Domains\User\Models;
 
 use App\Domains\Auth\Enums\AuthTypeEnum;
+use App\Domains\Auth\Enums\RoleModificationOriginEnum;
 use App\Domains\Auth\Enums\SystemRoleEnum;
+use App\Domains\Auth\Models\Role;
 use App\Domains\User\Enums\AffiliationEnum;
 use App\Domains\User\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -42,7 +44,8 @@ class UserFactory extends Factory
     {
         return $this->afterCreating(function (User $user) {
             if ($user->auth_type === AuthTypeEnum::SSO) {
-                $user->assignRole(SystemRoleEnum::NORTHWESTERN_USER);
+                $role = Role::query()->where('name', SystemRoleEnum::NORTHWESTERN_USER->value)->firstOrFail();
+                $user->assignRoleWithAudit($role, RoleModificationOriginEnum::SSO_PROVISIONING);
             }
         });
     }

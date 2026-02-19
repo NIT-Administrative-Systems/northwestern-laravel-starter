@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Domains\User\Actions;
 
 use App\Domains\Auth\Enums\PermissionEnum;
+use App\Domains\Auth\Enums\RoleModificationOriginEnum;
 use App\Domains\Auth\Models\Role;
 use App\Domains\User\Actions\DetermineUserSegment;
 use App\Domains\User\Enums\UserSegmentEnum;
@@ -24,7 +25,7 @@ class DetermineUserSegmentTest extends TestCase
 
         $user = User::factory()->create();
 
-        $user->assignRole($systemManagedRole);
+        $user->assignRoleWithAudit($systemManagedRole, RoleModificationOriginEnum::SYSTEM);
 
         $segment = $this->action()($user);
 

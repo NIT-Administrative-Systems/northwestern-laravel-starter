@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Http\Middleware;
 
+use App\Domains\Auth\Enums\RoleModificationOriginEnum;
 use App\Domains\Auth\Enums\SystemRoleEnum;
 use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\User;
@@ -20,6 +21,8 @@ class EnvironmentLockdownTest extends TestCase
 
     private Role $adminRole;
 
+    private Role $nuRole;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -29,6 +32,7 @@ class EnvironmentLockdownTest extends TestCase
         });
 
         $this->adminRole = Role::factory()->create(['name' => 'Admin']);
+        $this->nuRole = Role::query()->where('name', SystemRoleEnum::NORTHWESTERN_USER->value)->firstOrFail();
     }
 
     public function test_allows_request_when_lockdown_is_disabled(): void
@@ -36,7 +40,7 @@ class EnvironmentLockdownTest extends TestCase
         config(['platform.lockdown.enabled' => false]);
 
         $user = User::factory()->create();
-        $user->assignRole(SystemRoleEnum::NORTHWESTERN_USER);
+        $user->assignRoleWithAudit($this->nuRole, RoleModificationOriginEnum::SYSTEM);
 
         $this->actingAs($user)
             ->get($this->endpoint)
@@ -58,7 +62,7 @@ class EnvironmentLockdownTest extends TestCase
         config(['platform.lockdown.enabled' => true]);
 
         $user = User::factory()->create();
-        $user->assignRole(SystemRoleEnum::NORTHWESTERN_USER);
+        $user->assignRoleWithAudit($this->nuRole, RoleModificationOriginEnum::SYSTEM);
 
         $this->actingAs($user)
             ->get($this->endpoint)
@@ -81,7 +85,7 @@ class EnvironmentLockdownTest extends TestCase
         config(['platform.lockdown.enabled' => true]);
 
         $user = User::factory()->create();
-        $user->assignRole([$this->adminRole, SystemRoleEnum::NORTHWESTERN_USER]);
+        $user->assignRoleWithAudit([$this->adminRole, $this->nuRole], RoleModificationOriginEnum::SYSTEM);
 
         $this->actingAs($user)
             ->get($this->endpoint)
@@ -94,7 +98,7 @@ class EnvironmentLockdownTest extends TestCase
         config(['platform.lockdown.enabled' => true]);
 
         $user = User::factory()->create();
-        $user->assignRole($this->adminRole);
+        $user->assignRoleWithAudit($this->adminRole, RoleModificationOriginEnum::SYSTEM);
 
         $this->actingAs($user)
             ->get($this->endpoint)
@@ -108,7 +112,7 @@ class EnvironmentLockdownTest extends TestCase
 
         $editorRole = Role::factory()->create(['name' => 'Editor']);
         $user = User::factory()->create();
-        $user->assignRole([$this->adminRole, $editorRole]);
+        $user->assignRoleWithAudit([$this->adminRole, $editorRole], RoleModificationOriginEnum::SYSTEM);
 
         $this->actingAs($user)
             ->get($this->endpoint)
@@ -121,7 +125,7 @@ class EnvironmentLockdownTest extends TestCase
         config(['platform.lockdown.enabled' => true]);
 
         $impersonator = User::factory()->create();
-        $impersonator->assignRole($this->adminRole);
+        $impersonator->assignRoleWithAudit($this->adminRole, RoleModificationOriginEnum::SYSTEM);
 
         $target = User::factory()->create();
 

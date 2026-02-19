@@ -7,6 +7,7 @@ use Rector\CodeQuality\Rector\Class_\CompleteDynamicPropertiesRector;
 use Rector\Config\RectorConfig;
 use Rector\DeadCode\Rector\StaticCall\RemoveParentCallWithoutParentRector;
 use Rector\EarlyReturn\Rector\Return_\ReturnBinaryOrToEarlyReturnRector;
+use Rector\Php84\Rector\Class_\DeprecatedAnnotationToDeprecatedAttributeRector;
 use Rector\PHPUnit;
 use Rector\Set\ValueObject\SetList;
 use Rector\TypeDeclaration\Rector\ArrowFunction\AddArrowFunctionReturnTypeRector;
@@ -46,6 +47,7 @@ return RectorConfig::configure()
         AddArrowFunctionReturnTypeRector::class,
         RemoveParentCallWithoutParentRector::class,
         CompleteDynamicPropertiesRector::class,
+        DeprecatedAnnotationToDeprecatedAttributeRector::class,
         // toArray() -> all() change breaks PHPStan type checking for Filament's HtmlString options
         RectorLaravel\Rector\MethodCall\ConvertEnumerableToArrayToAllRector::class => [
             __DIR__ . '/app/Filament/*/*',

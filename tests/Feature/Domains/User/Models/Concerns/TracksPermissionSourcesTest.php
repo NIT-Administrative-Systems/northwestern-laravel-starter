@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Domains\User\Models\Concerns;
 
 use App\Domains\Auth\Enums\PermissionEnum;
+use App\Domains\Auth\Enums\RoleModificationOriginEnum;
 use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\Concerns\TracksPermissionSources;
 use App\Domains\User\Models\User;
@@ -19,7 +20,7 @@ class TracksPermissionSourcesTest extends TestCase
         $user = User::factory()->createOne();
         $role = Role::factory()->createOne();
         $role->givePermissionTo(PermissionEnum::VIEW_USERS);
-        $user->assignRole($role);
+        $user->assignRoleWithAudit($role, RoleModificationOriginEnum::SYSTEM);
 
         $this->assertTrue($user->hasPermissionFromRole(PermissionEnum::VIEW_USERS, $role));
     }
@@ -28,7 +29,7 @@ class TracksPermissionSourcesTest extends TestCase
     {
         $user = User::factory()->createOne();
         $role = Role::factory()->createOne();
-        $user->assignRole($role);
+        $user->assignRoleWithAudit($role, RoleModificationOriginEnum::SYSTEM);
 
         $this->assertFalse($user->hasPermissionFromRole(PermissionEnum::VIEW_USERS, $role));
     }
@@ -51,7 +52,7 @@ class TracksPermissionSourcesTest extends TestCase
 
         $roleWithoutPermission = Role::factory()->createOne(['name' => 'role-without-permission']);
 
-        $user->assignRole([$roleWithPermission, $roleWithoutPermission]);
+        $user->assignRoleWithAudit([$roleWithPermission, $roleWithoutPermission], RoleModificationOriginEnum::SYSTEM);
 
         $this->assertTrue($user->hasPermissionTo(PermissionEnum::VIEW_USERS));
         $this->assertFalse($user->hasPermissionFromRole(PermissionEnum::VIEW_USERS, $roleWithoutPermission));
@@ -66,7 +67,7 @@ class TracksPermissionSourcesTest extends TestCase
             PermissionEnum::VIEW_USERS,
             PermissionEnum::EDIT_USERS,
         ]);
-        $user->assignRole($role);
+        $user->assignRoleWithAudit($role, RoleModificationOriginEnum::SYSTEM);
 
         $this->assertTrue($user->hasPermissionFromRole(PermissionEnum::VIEW_USERS, $role));
 
@@ -92,7 +93,7 @@ class TracksPermissionSourcesTest extends TestCase
 
         $basicRole = Role::factory()->createOne(['name' => 'basic']);
 
-        $user->assignRole([$adminRole, $managerRole, $basicRole]);
+        $user->assignRoleWithAudit([$adminRole, $managerRole, $basicRole], RoleModificationOriginEnum::SYSTEM);
 
         $roles = $user->getRolesWithPermission(PermissionEnum::VIEW_USERS);
 
@@ -106,7 +107,7 @@ class TracksPermissionSourcesTest extends TestCase
     {
         $user = User::factory()->createOne();
         $role = Role::factory()->createOne();
-        $user->assignRole($role);
+        $user->assignRoleWithAudit($role, RoleModificationOriginEnum::SYSTEM);
 
         $roles = $user->getRolesWithPermission(PermissionEnum::VIEW_USERS);
 
@@ -131,7 +132,7 @@ class TracksPermissionSourcesTest extends TestCase
             PermissionEnum::EDIT_USERS,
             PermissionEnum::VIEW_ROLES,
         ]);
-        $user->assignRole($role);
+        $user->assignRoleWithAudit($role, RoleModificationOriginEnum::SYSTEM);
 
         $permissions = $user->getPermissionsFromRole($role);
 
@@ -156,7 +157,7 @@ class TracksPermissionSourcesTest extends TestCase
     {
         $user = User::factory()->createOne();
         $role = Role::factory()->createOne();
-        $user->assignRole($role);
+        $user->assignRoleWithAudit($role, RoleModificationOriginEnum::SYSTEM);
 
         $permissions = $user->getPermissionsFromRole($role);
 
@@ -168,7 +169,7 @@ class TracksPermissionSourcesTest extends TestCase
         $user = User::factory()->createOne();
         $role = Role::factory()->createOne();
         $role->givePermissionTo(PermissionEnum::VIEW_USERS);
-        $user->assignRole($role);
+        $user->assignRoleWithAudit($role, RoleModificationOriginEnum::SYSTEM);
 
         $permissions = $user->getPermissionsFromRole($role);
 
