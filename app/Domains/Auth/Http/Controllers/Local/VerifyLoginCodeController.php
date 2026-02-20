@@ -31,9 +31,9 @@ class VerifyLoginCodeController extends Controller
 
     public function __invoke(Request $request): RedirectResponse
     {
-        abort_unless(config('auth.local.enabled'), 404);
+        abort_unless(config('local-auth.enabled'), 404);
 
-        $digits = (int) config('auth.local.code.digits', 6);
+        $digits = (int) config('local-auth.code.digits', 6);
         $validated = $request->validate([
             'code' => ['required', 'string', 'size:' . $digits],
         ]);
@@ -65,7 +65,7 @@ class VerifyLoginCodeController extends Controller
                 }
 
                 if ($challenge->isLocked()) {
-                    $lockoutMinutes = (int) config('auth.local.code.lock_minutes', 15);
+                    $lockoutMinutes = (int) config('local-auth.code.lock_minutes', 15);
                     $lockoutDuration = CarbonInterval::minutes($lockoutMinutes)->forHumans();
 
                     throw ValidationException::withMessages([
@@ -110,6 +110,6 @@ class VerifyLoginCodeController extends Controller
         Session::regenerateToken();
         Session::forget(LoginCodeSession::KEYS);
 
-        return redirect()->intended(config('auth.local.redirect_after_login'));
+        return redirect()->intended(config('local-auth.redirect_after_login'));
     }
 }

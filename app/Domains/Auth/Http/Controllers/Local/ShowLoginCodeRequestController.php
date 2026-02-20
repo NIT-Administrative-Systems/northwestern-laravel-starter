@@ -11,7 +11,7 @@ class ShowLoginCodeRequestController extends Controller
 {
     public function __invoke(): View
     {
-        abort_unless(config('auth.local.enabled'), 404);
+        abort_unless(config('local-auth.enabled'), 404);
 
         return view('auth.login-code-request');
     }

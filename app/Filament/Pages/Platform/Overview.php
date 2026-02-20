@@ -47,7 +47,7 @@ class Overview extends Page
         return [
             'PHP Version' => ['value' => phpversion(), 'mono' => true],
             'Laravel Version' => ['value' => app()->version(), 'mono' => true],
-            'Production URL' => ['value' => config('app.production_url'), 'mono' => true],
+            'Production URL' => ['value' => config('platform.production_url'), 'mono' => true],
             'Lockdown Mode' => [
                 'value' => config('platform.lockdown.enabled')
                     ? 'Enabled: Non-default roles required for access'

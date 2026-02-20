@@ -30,7 +30,7 @@ class ApiRequestLogsTable
 
         return $table
             ->poll()
-            ->recordClasses(fn (ApiRequestLog $record): ?string => $record->duration_ms > (int) config('auth.api.request_logging.slow_request_threshold_ms')
+            ->recordClasses(fn (ApiRequestLog $record): ?string => $record->duration_ms > (int) config('api.request_logging.slow_request_threshold_ms')
                 ? 'bg-red-50/50 dark:bg-red-900/10'
                 : null)
             ->columns([
@@ -109,8 +109,8 @@ class ApiRequestLogsTable
                 TextColumn::make('duration_ms')
                     ->label('Duration')
                     ->suffix(' ms')
-                    ->color(fn (int $state): string => $state > config('auth.api.request_logging.slow_request_threshold_ms') ? 'danger' : 'gray')
-                    ->weight(fn (int $state) => $state > config('auth.api.request_logging.slow_request_threshold_ms') ? FontWeight::Bold : FontWeight::Normal)
+                    ->color(fn (int $state): string => $state > config('api.request_logging.slow_request_threshold_ms') ? 'danger' : 'gray')
+                    ->weight(fn (int $state) => $state > config('api.request_logging.slow_request_threshold_ms') ? FontWeight::Bold : FontWeight::Normal)
                     ->numeric()
                     ->sortable(),
 
@@ -157,8 +157,8 @@ class ApiRequestLogsTable
                     }),
 
                 Filter::make('slow_requests')
-                    ->label('Slow Requests (> ' . config('auth.api.request_logging.slow_request_threshold_ms') . ' ms)')
-                    ->query(fn (Builder $query) => $query->where('duration_ms', '>', (int) config('auth.api.request_logging.slow_request_threshold_ms')))
+                    ->label('Slow Requests (> ' . config('api.request_logging.slow_request_threshold_ms') . ' ms)')
+                    ->query(fn (Builder $query) => $query->where('duration_ms', '>', (int) config('api.request_logging.slow_request_threshold_ms')))
                     ->toggle(),
 
                 SelectFilter::make('status_range')

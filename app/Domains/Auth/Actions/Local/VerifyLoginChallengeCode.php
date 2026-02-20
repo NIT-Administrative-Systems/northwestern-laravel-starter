@@ -29,9 +29,9 @@ final class VerifyLoginChallengeCode
         if (! Hash::check($code, $challenge->code_hash)) {
             $challenge->increment('attempts');
 
-            $maxAttempts = (int) config('auth.local.code.max_attempts', 8);
+            $maxAttempts = (int) config('local-auth.code.max_attempts', 8);
             if ($challenge->attempts >= $maxAttempts) {
-                $lockMinutes = (int) config('auth.local.code.lock_minutes', 15);
+                $lockMinutes = (int) config('local-auth.code.lock_minutes', 15);
                 $challenge->update(['locked_until' => $now->addMinutes($lockMinutes)]);
             }
 

@@ -22,8 +22,8 @@ class IssueLoginChallengeTest extends TestCase
     {
         parent::setUp();
 
-        config(['auth.local.rate_limit_per_hour' => 5]);
-        config(['auth.local.code.expires_in_minutes' => 15]);
+        config(['local-auth.rate_limit_per_hour' => 5]);
+        config(['local-auth.code.expires_in_minutes' => 15]);
 
         $this->travelTo(null);
         Queue::fake();
@@ -49,7 +49,7 @@ class IssueLoginChallengeTest extends TestCase
 
     public function test_rate_limiting_prevents_multiple_requests(): void
     {
-        config(['auth.local.rate_limit_per_hour' => 2]);
+        config(['local-auth.rate_limit_per_hour' => 2]);
 
         RateLimiter::clear('login-code:ratelimit@example.com');
 
@@ -64,7 +64,7 @@ class IssueLoginChallengeTest extends TestCase
 
     public function test_rate_limit_message_includes_minutes(): void
     {
-        config(['auth.local.rate_limit_per_hour' => 1]);
+        config(['local-auth.rate_limit_per_hour' => 1]);
 
         RateLimiter::clear('login-code:ratelimit@example.com');
 
@@ -81,7 +81,7 @@ class IssueLoginChallengeTest extends TestCase
 
     public function test_rate_limiting_does_not_affect_different_emails(): void
     {
-        config(['auth.local.rate_limit_per_hour' => 1]);
+        config(['local-auth.rate_limit_per_hour' => 1]);
 
         RateLimiter::clear('login-code:user1@example.com');
         RateLimiter::clear('login-code:user2@example.com');

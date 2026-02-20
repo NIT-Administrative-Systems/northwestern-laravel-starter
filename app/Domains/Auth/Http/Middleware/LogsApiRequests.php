@@ -34,7 +34,7 @@ class LogsApiRequests
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (! config('auth.api.request_logging.enabled')) {
+        if (! config('api.request_logging.enabled')) {
             return $next($request);
         }
 
@@ -109,7 +109,7 @@ class LogsApiRequests
      */
     private function shouldLogRequest(int $statusCode, ?string $failureReason): bool
     {
-        $samplingEnabled = (bool) config('auth.api.request_logging.sampling.enabled');
+        $samplingEnabled = (bool) config('api.request_logging.sampling.enabled');
 
         if (! $samplingEnabled) {
             return true;
@@ -120,7 +120,7 @@ class LogsApiRequests
             return true;
         }
 
-        $sampleRate = config('auth.api.request_logging.sampling.rate');
+        $sampleRate = config('api.request_logging.sampling.rate');
         $sampleRate = max(0.0, min(1.0, $sampleRate));
 
         if ($sampleRate <= 0.0) {

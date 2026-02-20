@@ -30,7 +30,7 @@ class ApiCluster extends Cluster
 
     public static function canAccess(): bool
     {
-        if (! config('auth.api.enabled')) {
+        if (! config('api.enabled')) {
             return false;
         }
 

@@ -23,8 +23,8 @@ class SendAccessTokenExpirationNotificationsCommandTest extends TestCase
         Mail::fake();
 
         config([
-            'auth.api.expiration_notifications.enabled' => true,
-            'auth.api.expiration_notifications.intervals' => [7, 30],
+            'api.expiration_notifications.enabled' => true,
+            'api.expiration_notifications.intervals' => [7, 30],
             'app.timezone' => 'UTC',
             'mail.from.address' => 'system@example.com',
         ]);
@@ -32,7 +32,7 @@ class SendAccessTokenExpirationNotificationsCommandTest extends TestCase
 
     public function test_command_exits_successfully_when_notifications_are_disabled(): void
     {
-        config(['auth.api.expiration_notifications.enabled' => false]);
+        config(['api.expiration_notifications.enabled' => false]);
 
         $this->artisan(SendAccessTokenExpirationNotificationsCommand::class)
             ->expectsOutputToContain('Access Token expiration notifications are disabled in the configuration')

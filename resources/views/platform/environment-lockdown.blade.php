@@ -2,7 +2,7 @@
 
 @php
     $page_title = 'Access Restricted';
-    $productionUrl = config('app.production_url');
+    $productionUrl = config('platform.production_url');
 @endphp
 
 @section('content')

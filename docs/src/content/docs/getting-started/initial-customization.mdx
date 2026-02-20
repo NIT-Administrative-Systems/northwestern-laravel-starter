@@ -66,10 +66,10 @@ Local authentication allows external users (non-Northwestern) to access your app
 
 ### Configuration Options
 
-Edit `config/auth.php` or set environment variables:
+Edit `config/local-auth.php` or set environment variables:
 
 ```bash
-// config/auth.php
+// config/local-auth.php
 # Enable/disable local authentication
 LOCAL_AUTH_ENABLED=true
 
@@ -96,17 +96,15 @@ LOCAL_AUTH_REDIRECT_AFTER_LOGIN=/
 
 ### Passwordless Code Settings
 
-Edit the local auth configuration in `config/auth.php` to tune the OTP length, expiration, and lockout behavior.
+Edit `config/local-auth.php` to tune the OTP length, expiration, and lockout behavior.
 
 ```php
-'local' => [
-    'code' => [
-        'digits' => 6,
-        'expires_in_minutes' => 10,
-        'max_attempts' => 8,
-        'lock_minutes' => 15,
-        'resend_cooldown_seconds' => 30,
-    ],
+'code' => [
+    'digits' => 6,
+    'expires_in_minutes' => 10,
+    'max_attempts' => 8,
+    'lock_minutes' => 15,
+    'resend_cooldown_seconds' => 30,
 ],
 ```
 
@@ -240,9 +238,9 @@ If you plan to use Environment Lockdown in your lower environments, you **must**
 
 **Option 1: Update Config Default (Recommended)**
 
-Edit `config/app.php` to replace the default value:
+Edit `config/platform.php` to replace the default value:
 
-```diff title="config/app.php"
+```diff title="config/platform.php"
 - 'production_url' => env('PRODUCTION_URL', 'https://northwestern.edu'),
 + 'production_url' => env('PRODUCTION_URL', 'https://your-app.northwestern.edu'),
 ```

@@ -60,7 +60,7 @@ class SendLoginCodeController extends Controller
      */
     public function send(SendLoginCodeRequest $request): RedirectResponse
     {
-        abort_unless(config('auth.local.enabled'), 404);
+        abort_unless(config('local-auth.enabled'), 404);
 
         $email = $request->email();
         $challenge = $this->processLoginCodeRequest($email, $request);
@@ -80,7 +80,7 @@ class SendLoginCodeController extends Controller
      */
     public function resend(Request $request): RedirectResponse
     {
-        abort_unless(config('auth.local.enabled'), 404);
+        abort_unless(config('local-auth.enabled'), 404);
 
         $email = Session::get(LoginCodeSession::EMAIL);
 
@@ -105,7 +105,7 @@ class SendLoginCodeController extends Controller
 
         RateLimiter::hit(
             $cooldownKey,
-            (int) config('auth.local.code.resend_cooldown_seconds', 30)
+            (int) config('local-auth.code.resend_cooldown_seconds', 30)
         );
 
         return back()->with('status', 'Verification code resent.');

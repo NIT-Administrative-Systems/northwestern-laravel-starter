@@ -21,10 +21,10 @@ class SendLoginCodeControllerTest extends TestCase
     {
         parent::setUp();
 
-        config(['auth.local.enabled' => true]);
-        config(['auth.local.rate_limit_per_hour' => 5]);
-        config(['auth.local.code.digits' => 6]);
-        config(['auth.local.code.resend_cooldown_seconds' => 30]);
+        config(['local-auth.enabled' => true]);
+        config(['local-auth.rate_limit_per_hour' => 5]);
+        config(['local-auth.code.digits' => 6]);
+        config(['local-auth.code.resend_cooldown_seconds' => 30]);
 
         Mail::fake();
     }
@@ -77,7 +77,7 @@ class SendLoginCodeControllerTest extends TestCase
 
     public function test_send_returns_404_when_disabled(): void
     {
-        config(['auth.local.enabled' => false]);
+        config(['local-auth.enabled' => false]);
 
         $response = $this->post(route('login-code.send'), ['email' => 'test@example.com']);
 
@@ -260,7 +260,7 @@ class SendLoginCodeControllerTest extends TestCase
 
     public function test_resend_returns_404_when_disabled(): void
     {
-        config(['auth.local.enabled' => false]);
+        config(['local-auth.enabled' => false]);
 
         $response = $this->withSession([
             LoginCodeSession::EMAIL => 'test@example.com',

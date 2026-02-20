@@ -16,7 +16,7 @@ class DateTimeFormatter
             return 'n/a';
         }
 
-        $format ??= (string) config('app.datetime_display_format');
+        $format ??= (string) config('platform.datetime_display_format');
 
         /**
          * Intended to handle `format()` on a column in a Livewire DataTable, since the query returns string from the

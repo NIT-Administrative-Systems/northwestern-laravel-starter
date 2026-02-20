@@ -34,7 +34,7 @@
 
                         <div class="d-flex justify-content-center mb-4" style="min-height: 5.5rem;">
                             <x-otp name="code"
-                                   :length="config('auth.local.code.digits', 6)"
+                                   :length="config('local-auth.code.digits', 6)"
                                    autofocus
                                    numeric />
                         </div>

@@ -39,7 +39,7 @@ class ApiRequestLogResource extends Resource
 
     public static function canAccess(): bool
     {
-        if (! config('auth.api.request_logging.enabled')) {
+        if (! config('api.request_logging.enabled')) {
             return false;
         }
 

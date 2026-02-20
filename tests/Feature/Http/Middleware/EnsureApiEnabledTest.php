@@ -25,7 +25,7 @@ class EnsureApiEnabledTest extends TestCase
 
     public function test_request_is_blocked_with_503_when_api_is_disabled(): void
     {
-        config(['auth.api.enabled' => false]);
+        config(['api.enabled' => false]);
 
         $this->getJson($this->endpoint)->assertServiceUnavailable()
             ->assertJson([
@@ -38,7 +38,7 @@ class EnsureApiEnabledTest extends TestCase
 
     public function test_request_passes_through_when_api_is_enabled(): void
     {
-        config(['auth.api.enabled' => true]);
+        config(['api.enabled' => true]);
 
         $this->getJson($this->endpoint)
             ->assertOk()

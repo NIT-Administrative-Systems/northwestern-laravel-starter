@@ -18,7 +18,7 @@ class ShowLoginCodeFormController extends Controller
 {
     public function __invoke(): View|RedirectResponse
     {
-        abort_unless(config('auth.local.enabled'), 404);
+        abort_unless(config('local-auth.enabled'), 404);
 
         $email = session(LoginCodeSession::EMAIL);
 
