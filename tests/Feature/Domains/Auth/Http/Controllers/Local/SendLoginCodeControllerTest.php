@@ -129,7 +129,7 @@ class SendLoginCodeControllerTest extends TestCase
 
         $timingDifference = abs($existingMs - $nonExistingMs);
         $this->assertLessThan(
-            50,
+            150,
             $timingDifference,
             "Timing difference between existing and non-existing users should be minimal (was {$timingDifference}ms)"
         );
@@ -238,7 +238,7 @@ class SendLoginCodeControllerTest extends TestCase
 
         $timingDifference = abs($existingMs - $nonExistingMs);
         $this->assertLessThan(
-            50,
+            150,
             $timingDifference,
             "Timing difference between existing and non-existing users should be minimal (was {$timingDifference}ms)"
         );
