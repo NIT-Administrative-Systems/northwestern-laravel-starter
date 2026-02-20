@@ -38,6 +38,10 @@ inputs:
     description: "Whether to install the Cypress binary (true|false)"
     required: false
     default: "false"
+  run-ide-helper:
+    description: "Whether to run ide-helper commands during setup (true|false)"
+    required: false
+    default: "true"
 runs:
   using: "composite"
   steps:
@@ -121,6 +125,11 @@ runs:
         cp .env.ci .env
         php artisan key:generate
         php artisan migrate --force
+
+    - name: 🔧 Generate IDE Helper Files
+      if: ${{ inputs.docs-only != 'true' && inputs['run-ide-helper'] == 'true' }}
+      shell: bash
+      run: |
         php artisan ide-helper:generate
         php artisan ide-helper:meta
         php artisan ide-helper:models --write --reset

@@ -28,6 +28,7 @@ export default defineConfig({
     retries: {
         runMode: 2,
     },
+    video: false,
     watchForFileChanges: false,
     videosFolder: "cypress/videos",
     screenshotsFolder: "cypress/screenshots",

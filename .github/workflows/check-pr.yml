@@ -320,6 +320,7 @@ jobs:
           php-version: ${{ env.PHP_VERSION }}
           node-version: ${{ env.NODE_VERSION }}
           pnpm-version: ${{ env.PNPM_VERSION }}
+          run-ide-helper: false
 
       - name: 📷 PHPUnit Cache
         uses: actions/cache@v5
@@ -419,6 +420,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           pnpm-version: ${{ env.PNPM_VERSION }}
           install-cypress: true
+          run-ide-helper: false
 
       - name: 📷 Minio Client Cache
         id: mc-cache
@@ -435,10 +437,6 @@ jobs:
           chmod +x ./mc
           ./mc alias set gha http://localhost:9000 s3admin s3secret
           ./mc mb gha/northwestern-laravel-starter
-
-      - name: 🔧 Prepare Application Environment
-        run: |
-          php artisan migrate
 
       - name: 🌲 Cypress
         uses: cypress-io/github-action@v7
