@@ -30,6 +30,14 @@ inputs:
     description: "Whether to build the documentation site in ./docs (true|false)"
     required: false
     default: "false"
+  php-only:
+    description: "If true, skip all Node/pnpm steps (true|false)"
+    required: false
+    default: "false"
+  install-cypress:
+    description: "Whether to install the Cypress binary (true|false)"
+    required: false
+    default: "false"
 runs:
   using: "composite"
   steps:
@@ -46,18 +54,20 @@ runs:
         ini-values: memory_limit=-1
 
     - name: 📦 Setup pnpm
+      if: ${{ inputs['php-only'] != 'true' }}
       uses: pnpm/action-setup@v4
       with:
         version: ${{ inputs['pnpm-version'] }}
 
     - name: 🟢 Setup Node.js
+      if: ${{ inputs['php-only'] != 'true' }}
       uses: actions/setup-node@v6
       with:
         node-version: ${{ inputs['node-version'] }}
         cache: pnpm
 
     - name: 📷 pnpm Dependencies Cache
-      if: ${{ inputs.docs-only != 'true' }}
+      if: ${{ inputs.docs-only != 'true' && inputs['php-only'] != 'true' }}
       uses: actions/cache@v5
       with:
         path: |
@@ -68,11 +78,14 @@ runs:
           ${{ runner.os }}-pnpm-
 
     - name: 💾 Install pnpm Dependencies
-      if: ${{ inputs.docs-only != 'true' }}
+      if: ${{ inputs.docs-only != 'true' && inputs['php-only'] != 'true' }}
       shell: bash
-      run: |
-        pnpm install --frozen-lockfile --prefer-offline
-        pnpm exec cypress install
+      run: pnpm install --frozen-lockfile --prefer-offline
+
+    - name: 🌲 Install Cypress Binary
+      if: ${{ inputs['install-cypress'] == 'true' }}
+      shell: bash
+      run: pnpm exec cypress install
 
     - name: 🔑 Compute composer.lock hash
       if: ${{ inputs.docs-only != 'true' }}
@@ -113,7 +126,7 @@ runs:
         php artisan ide-helper:models --write --reset
 
     - name: 🏗️ Build Frontend Assets
-      if: ${{ inputs.docs-only != 'true' && inputs['build-frontend-assets'] == 'true' }}
+      if: ${{ inputs.docs-only != 'true' && inputs['php-only'] != 'true' && inputs['build-frontend-assets'] == 'true' }}
       shell: bash
       run: pnpm build
 

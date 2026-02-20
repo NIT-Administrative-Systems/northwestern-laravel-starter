@@ -148,7 +148,7 @@ jobs:
 #          exit 1
 
   lint-and-format:
-    name: 🔍 Lint and Format
+    name: 🔍 Lint, Format & Analyse
     needs: determine-scope
     if: needs.determine-scope.outputs.code == 'true'
     runs-on: ubuntu-latest
@@ -207,9 +207,6 @@ jobs:
             prettier-${{ hashFiles('package.json', 'pnpm-lock.yaml', '.prettierrc') }}-
             prettier-
 
-      - name: 🔧 Generate IDE Helper Files
-        run: composer ide-helper:generate
-
       - name: 🔧️ Run Rector
         run: composer rector
 
@@ -255,51 +252,6 @@ jobs:
       - name: 🔄 Restore IDE Helper Annotations
         run: git restore 'app/Domains/*/Models/*.php'
 
-      - name: 🔍 Check for Uncommitted Changes
-        id: file-changes
-        run: echo "changes=$(if git diff --quiet; then echo 'false'; else echo 'true'; fi)" >> $GITHUB_OUTPUT
-
-      - name: 📝 Auto-Commit Code Style Fixes
-        if: steps.file-changes.outputs.changes == 'true'
-        run: |
-          git config --global user.name "ADOES Bot"
-          git config --global user.email "DL_NUIT_ET_SysDev@e.northwestern.edu"
-          git commit -a -m "style: apply automated formatting"
-          git push
-          exit 1
-
-  static-analysis:
-    name: 🔬 Static Analysis
-    needs: [determine-scope]
-    if: needs.determine-scope.outputs.code == 'true'
-    runs-on: ubuntu-latest
-    environment: ci-cd
-    timeout-minutes: 10
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_USER: root
-          POSTGRES_PASSWORD: root
-          POSTGRES_DB: root
-        ports:
-          - 5432:5432
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
-
-    steps:
-      - name: 📂 Checkout Repository
-        uses: actions/checkout@v6
-        with:
-          ref: ${{ github.head_ref }}
-
-      - name: 🔁 Setup Environment
-        uses: ./.github/actions/common-setup
-        with:
-          php-version: ${{ env.PHP_VERSION }}
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
-          build-frontend-assets: false
-
       - name: 📷 PHPStan Result Cache
         uses: actions/cache@v5
         with:
@@ -320,6 +272,19 @@ jobs:
           name: "📊 PHPStan Analysis Report"
           path: "phpstan-report.xml"
           title: "PHPStan Analysis Report"
+
+      - name: 🔍 Check for Uncommitted Changes
+        id: file-changes
+        run: echo "changes=$(if git diff --quiet; then echo 'false'; else echo 'true'; fi)" >> $GITHUB_OUTPUT
+
+      - name: 📝 Auto-Commit Code Style Fixes
+        if: steps.file-changes.outputs.changes == 'true'
+        run: |
+          git config --global user.name "ADOES Bot"
+          git config --global user.email "DL_NUIT_ET_SysDev@e.northwestern.edu"
+          git commit -a -m "style: apply automated formatting"
+          git push
+          exit 1
 
   unit-tests:
     name: 🧪 Unit Tests (${{ matrix.shard }}/3)
@@ -453,10 +418,20 @@ jobs:
           php-version: ${{ env.PHP_VERSION }}
           node-version: ${{ env.NODE_VERSION }}
           pnpm-version: ${{ env.PNPM_VERSION }}
+          install-cypress: true
+
+      - name: 📷 Minio Client Cache
+        id: mc-cache
+        uses: actions/cache@v5
+        with:
+          path: ./mc
+          key: minio-mc-linux-amd64
 
       - name: 🪣 Create Minio Bucket
         run: |
-          curl -o ./mc -# https://dl.min.io/client/mc/release/linux-amd64/mc
+          if [ ! -f ./mc ]; then
+            curl -o ./mc -# https://dl.min.io/client/mc/release/linux-amd64/mc
+          fi
           chmod +x ./mc
           ./mc alias set gha http://localhost:9000 s3admin s3secret
           ./mc mb gha/northwestern-laravel-starter
