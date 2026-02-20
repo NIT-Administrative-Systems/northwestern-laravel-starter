@@ -1,0 +1,83 @@
+---
+title: Directory Search
+description: User provisioning and profile synchronization via Northwestern's LDAP Directory Search API
+sidebar:
+    order: 1
+---
+
+import { Aside, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
+
+The Directory Search integration looks up Northwestern users by NetID, email, or employee ID via the LDAP-backed Directory Search API. It is the primary mechanism for user provisioning during SSO login and for keeping user profile data synchronized with Northwestern's identity system.
+
+The underlying API client is provided by the [`northwestern-sysdev/laravel-soa`](https://github.com/NIT-Administrative-Systems/SysDev-laravel-soa) package.
+
+## How It Works
+
+<Steps>
+
+1. **Search type detection**
+
+   `DirectorySearchType::fromSearchValue()` auto-detects whether the input is an email address, employee ID (numeric), or NetID (fallback).
+
+2. **API lookup**
+
+   The `DirectorySearch` class from `laravel-soa` calls Northwestern's Directory Search API with a `basic` detail level.
+
+3. **Validation**
+
+   The response is validated to ensure required fields are present — `eduPersonPrimaryAffiliation` and `mail` must exist for the entry to be considered valid.
+
+4. **Field mapping**
+
+   `SyncUserFromDirectory` maps raw LDAP attributes onto the User model, handling multi-value arrays and student-specific field priority.
+
+5. **Persistence**
+
+   `PersistUserWithUniqueUsername` saves the user record and assigns the default `Northwestern User` role.
+
+</Steps>
+
+---
+
+## Key Classes
+
+| Class | Purpose |
+|-------|---------|
+| `FindOrUpdateUserFromDirectory` | Orchestrates the full lookup-validate-sync-persist flow |
+| `SyncUserFromDirectory` | Maps LDAP attributes to User model fields |
+| `DirectorySearchType` | Auto-detects search input type (email, employee ID, NetID) |
+| `PersistUserWithUniqueUsername` | Saves/updates user with unique username generation |
+
+---
+
+## Invalid Directory Data
+
+When a directory lookup returns invalid data (missing required fields), the behavior depends on whether the user already exists:
+
+- **Existing user** — The account is marked with `netid_inactive = true` and `directory_sync_last_failed_at` is recorded. The user is not deleted.
+- **New user** — A `BadDirectoryEntry` exception is thrown, preventing account creation with incomplete data.
+
+This ensures that transient directory issues don't destroy existing accounts while still preventing invalid new accounts.
+
+---
+
+## Health Check
+
+The `DirectorySearchCheck` class provides a [Spatie Health](https://spatie.be/docs/laravel-health) check for the Directory Search API. It performs a test lookup against a configured NetID and validates the response structure.
+
+---
+
+## Configuration
+
+```bash
+# .env
+DIRECTORY_SEARCH_URL=https://northwestern-prod.apigee.net/directory-search
+DIRECTORY_SEARCH_API_KEY=your-api-key
+DIRECTORY_SEARCH_HEALTH_CHECK_NETID=swd2981
+```
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `DIRECTORY_SEARCH_URL` | `https://northwestern-prod.apigee.net/directory-search` | Directory Search API base URL |
+| `DIRECTORY_SEARCH_API_KEY` | — | Apigee API key for Directory Search |
+| `DIRECTORY_SEARCH_HEALTH_CHECK_NETID` | `swd2981` | NetID used for health check lookups |

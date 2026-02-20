@@ -114,11 +114,22 @@ When the email gateway is used as a fallback after a primary gateway failure, th
 
 ### TeamDynamix Gateway
 
-The TeamDynamix gateway submits tickets to the TDX REST API using the [northwestern-sysdev/tdx-php-sdk](https://github.com/NIT-Administrative-Systems/tdx-php-sdk) package. It resolves metadata IDs (ticket type, form, status, priority, service) through the `TeamDynamixCacheRepository`, which caches API lookups for one week.
+The [TeamDynamix](https://services.northwestern.edu/TDNext) (TDX) gateway submits tickets to the TDX REST API using the [`northwestern-sysdev/tdx-php-sdk`](https://github.com/NIT-Administrative-Systems/tdx-php-sdk) package. The SDK handles authentication and token management internally, and covers a broad surface beyond ticket creation — including people/group lookups, service catalog queries, and metadata management. Configuration is published to `config/team-dynamix.php`.
+
+The gateway resolves metadata IDs (ticket type, form, status, priority, service) through the `TeamDynamixCacheRepository`, which caches name-to-ID lookups for one week to avoid repeated API round-trips:
 
 ```bash
 # .env
 SUPPORT_DRIVER=team-dynamix
+
+# TDX SDK credentials
+TDX_API_BASE_URL=https://solutions.teamdynamix.com/TDWebApi/
+TDX_USERNAME=your-service-account
+TDX_PASSWORD=your-password
+TDX_TICKET_APP_NAME=your-app-name
+TDX_CLIENT_APP_NAME=your-client-app
+
+# TDX ticket defaults
 TDX_ASSIGNEE_ID=12345
 TDX_TICKET_TYPE=Default
 TDX_FORM_TYPE="NU Base Service Request"
@@ -128,7 +139,7 @@ TDX_SERVICE="My Application"
 ```
 
 <Aside type="caution">
-`TDX_ASSIGNEE_ID` is required when using the TeamDynamix driver. This is the numeric ID of the TDX group that tickets should be assigned to.
+`TDX_ASSIGNEE_ID` is required when using the TeamDynamix driver. This is the numeric ID of the TDX group that tickets should be assigned to — not a user ID.
 </Aside>
 
 ---
@@ -143,6 +154,16 @@ The fallback only fires when:
 2. The primary gateway is not the email driver itself (to avoid infinite loops)
 
 The `fallback_sent_at` timestamp on the ticket is only set when the fallback actually succeeds. If the fallback also fails (e.g. mail server is down), the timestamp remains `null`, giving administrators a clear signal that both delivery paths failed.
+
+---
+
+## Filament Admin Panel
+
+The `SupportTicketResource` provides a **read-only** view of all submitted tickets in the Filament admin panel. It requires the `VIEW_SUPPORT_TICKETS` permission and is only visible when `SUPPORT_ENABLED=true`.
+
+The resource displays a red badge on the navigation item showing the count of tickets where `post_error = true`, giving administrators immediate visibility into failed submissions.
+
+Tickets are globally searchable by subject, ticket number, requester email, and submitter name/username.
 
 ---
 
@@ -301,6 +322,11 @@ This overrides the binding registered by `SupportServiceProvider` and gives you 
 | `SUPPORT_DRIVER` | `mail` | Gateway driver (`mail`, `team-dynamix`) |
 | `SUPPORT_MAIL_TO` | `your-team@northwestern.edu` | Support team email address |
 | `SUPPORT_REFERENCE_PREFIX` | `SUP` | Reference prefix for mail gateway (e.g. `SUP-47`) |
+| `TDX_API_BASE_URL` | — | TDX REST API base URL |
+| `TDX_USERNAME` | — | TDX service account username |
+| `TDX_PASSWORD` | — | TDX service account password |
+| `TDX_TICKET_APP_NAME` | — | TDX application name |
+| `TDX_CLIENT_APP_NAME` | — | TDX client application name |
 | `TDX_ASSIGNEE_ID` | — | TDX group ID for ticket assignment (required for TDX driver) |
 | `TDX_TICKET_TYPE` | `Default` | TDX ticket type name |
 | `TDX_FORM_TYPE` | `NU Base Service Request` | TDX form type name |
