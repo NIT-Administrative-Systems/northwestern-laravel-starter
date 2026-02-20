@@ -31,7 +31,7 @@ class ApiRequestLogsRelationManager extends RelationManager
 
     public static function canViewForRecord(Model $ownerRecord, string $pageClass): bool
     {
-        if (! config('auth.api.request_logging.enabled')) {
+        if (! config('api.request_logging.enabled')) {
             return false;
         }
 

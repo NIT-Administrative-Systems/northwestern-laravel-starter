@@ -112,7 +112,7 @@ class Overview extends Page
             ->avg('duration_ms');
 
         return [
-            'api_enabled' => (bool) config('auth.api.enabled', true),
+            'api_enabled' => (bool) config('api.enabled', true),
             'active_api_users' => $activeApiUsers,
             'active_tokens' => $activeTokens,
             'expired_tokens' => $expiredTokens,
@@ -124,13 +124,13 @@ class Overview extends Page
             'success_rate_24h' => $successRate24h,
             'avg_response_time_24h' => $avgResponseTime24h !== null ? round((float) $avgResponseTime24h, 1) : null,
             'rate_limit' => (int) config('rate-limiting.api.per_minute', 1800),
-            'logging_enabled' => (bool) config('auth.api.request_logging.enabled', true),
-            'slow_threshold_ms' => (int) config('auth.api.request_logging.slow_request_threshold_ms', 500),
-            'retention_days' => (int) config('auth.api.request_logging.retention_days', 90),
-            'sampling_enabled' => (bool) config('auth.api.request_logging.sampling.enabled', false),
-            'sampling_rate' => (float) config('auth.api.request_logging.sampling.rate', 1.0),
-            'notifications_enabled' => (bool) config('auth.api.expiration_notifications.enabled', true),
-            'notification_intervals' => config('auth.api.expiration_notifications.intervals', []),
+            'logging_enabled' => (bool) config('api.request_logging.enabled', true),
+            'slow_threshold_ms' => (int) config('api.request_logging.slow_request_threshold_ms', 500),
+            'retention_days' => (int) config('api.request_logging.retention_days', 90),
+            'sampling_enabled' => (bool) config('api.request_logging.sampling.enabled', false),
+            'sampling_rate' => (float) config('api.request_logging.sampling.rate', 1.0),
+            'notifications_enabled' => (bool) config('api.expiration_notifications.enabled', true),
+            'notification_intervals' => config('api.expiration_notifications.intervals', []),
         ];
     }
 

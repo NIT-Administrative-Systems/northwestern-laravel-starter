@@ -130,7 +130,7 @@ By default, notifications are sent 30, 14, 7, and 3 days before expiration, as w
 You can adjust these intervals in the configuration:
 
 ```php
-// config/auth.php
+// config/api.php
 'expiration_notifications' => [
     'enabled' => env('API_ACCESS_TOKEN_EXPIRATION_NOTIFICATIONS_ENABLED', true),
     'intervals' => [30, 14, 7, 3, 1],

@@ -37,7 +37,7 @@ class FilamentServiceProvider extends ServiceProvider
 
         Table::configureUsing(
             fn (Table $table) => $table
-                ->defaultDateTimeDisplayFormat(config('app.datetime_display_format'))
+                ->defaultDateTimeDisplayFormat(config('platform.datetime_display_format'))
                 ->deferFilters(false)
                 ->paginationPageOptions([10, 25, 50, 100])
                 ->defaultPaginationPageOption(25)
@@ -45,7 +45,7 @@ class FilamentServiceProvider extends ServiceProvider
 
         Schema::configureUsing(fn (Schema $infolist) => $infolist
             ->defaultDateTimeDisplayFormat(
-                (config('app.datetime_display_format'))
+                (config('platform.datetime_display_format'))
             ));
 
         Select::configureUsing(fn (Select $component) => $component->native(false));

@@ -22,7 +22,7 @@ class ShowLoginCodeFormControllerTest extends TestCase
     {
         parent::setUp();
 
-        config(['auth.local.enabled' => true]);
+        config(['local-auth.enabled' => true]);
     }
 
     public function test_redirects_to_request_when_no_email_in_session(): void

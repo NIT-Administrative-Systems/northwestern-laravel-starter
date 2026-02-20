@@ -21,13 +21,13 @@ class SendAccessTokenExpirationNotificationsCommand extends Command
 
     public function handle(): int
     {
-        if (! config('auth.api.expiration_notifications.enabled')) {
+        if (! config('api.expiration_notifications.enabled')) {
             $this->components->info('Access Token expiration notifications are disabled in the configuration');
 
             return self::SUCCESS;
         }
 
-        $intervals = config('auth.api.expiration_notifications.intervals');
+        $intervals = config('api.expiration_notifications.intervals');
 
         $this->components->info('Checking for tokens expiring in: ' . implode(', ', $intervals) . ' days');
         $this->newLine();

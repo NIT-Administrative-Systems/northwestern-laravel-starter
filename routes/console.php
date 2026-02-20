@@ -54,7 +54,7 @@ Schedule::command(TelescopePruneCommand::class)->daily();
 Schedule::command(CleanTemporaryS3FilesCommand::class)->daily();
 Schedule::command(PruneCommand::class, ['--path' => glob('app/Domains/*/Models')])->daily();
 
-if (config('auth.api.expiration_notifications.enabled')) {
+if (config('api.expiration_notifications.enabled')) {
     Schedule::command(SendAccessTokenExpirationNotificationsCommand::class)
         ->dailyAt('09:00');
 }

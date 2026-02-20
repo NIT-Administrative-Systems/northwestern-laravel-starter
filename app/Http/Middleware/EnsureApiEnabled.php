@@ -20,7 +20,7 @@ class EnsureApiEnabled
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (! config('auth.api.enabled')) {
+        if (! config('api.enabled')) {
             throw new ServiceUnavailableHttpException();
         }
 

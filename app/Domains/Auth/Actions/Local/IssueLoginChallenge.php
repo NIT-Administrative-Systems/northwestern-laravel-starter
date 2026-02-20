@@ -39,7 +39,7 @@ final readonly class IssueLoginChallenge
         $email = mb_strtolower(trim($email));
 
         $rateLimitKey = "login-code:{$email}";
-        $maxAttempts = (int) config('auth.local.rate_limit_per_hour');
+        $maxAttempts = (int) config('local-auth.rate_limit_per_hour');
 
         if (RateLimiter::tooManyAttempts($rateLimitKey, $maxAttempts)) {
             $seconds = RateLimiter::availableIn($rateLimitKey);
@@ -51,8 +51,8 @@ final readonly class IssueLoginChallenge
         }
 
         return DB::transaction(function () use ($email, $ip, $userAgent, $rateLimitKey) {
-            $digits = (int) config('auth.local.code.digits', 6);
-            $expires = (int) config('auth.local.code.expires_in_minutes', 10);
+            $digits = (int) config('local-auth.code.digits', 6);
+            $expires = (int) config('local-auth.code.expires_in_minutes', 10);
             $code = ($this->oneTimeCodeGenerator)($digits);
 
             $challenge = LoginChallenge::create([

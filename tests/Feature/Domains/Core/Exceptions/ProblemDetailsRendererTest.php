@@ -39,7 +39,7 @@ class ProblemDetailsRendererTest extends TestCase
     {
         parent::setUp();
 
-        config()->set('auth.api.auth_realm', 'Test Realm');
+        config()->set('api.auth_realm', 'Test Realm');
         $this->renderer = resolve(ProblemDetailsRenderer::class);
     }
 

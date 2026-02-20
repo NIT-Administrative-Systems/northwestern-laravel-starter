@@ -13,7 +13,7 @@ class ShowLoginCodeRequestControllerTest extends TestCase
 {
     public function test_displays_request_view_when_enabled(): void
     {
-        config(['auth.local.enabled' => true]);
+        config(['local-auth.enabled' => true]);
 
         $response = $this->get(route('login-code.request'));
 
@@ -23,7 +23,7 @@ class ShowLoginCodeRequestControllerTest extends TestCase
 
     public function test_returns_404_when_disabled(): void
     {
-        config(['auth.local.enabled' => false]);
+        config(['local-auth.enabled' => false]);
 
         $response = $this->get(route('login-code.request'));
 

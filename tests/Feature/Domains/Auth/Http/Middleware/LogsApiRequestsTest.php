@@ -29,8 +29,8 @@ class LogsApiRequestsTest extends TestCase
             return response()->json(['success' => true]);
         });
 
-        config()->set('auth.api.request_logging.enabled', true);
-        config()->set('auth.api.request_logging.sampling.enabled', false);
+        config()->set('api.request_logging.enabled', true);
+        config()->set('api.request_logging.sampling.enabled', false);
 
         Context::flush();
     }
@@ -43,7 +43,7 @@ class LogsApiRequestsTest extends TestCase
 
     public function test_logging_disabled_via_config_skips_all_logging(): void
     {
-        config()->set('auth.api.request_logging.enabled', false);
+        config()->set('api.request_logging.enabled', false);
 
         $user = User::factory()->api()->create();
         Context::add(ApiRequestContext::USER_ID, $user->id);
@@ -149,7 +149,7 @@ class LogsApiRequestsTest extends TestCase
 
     public function test_sampling_disabled_logs_all_successful_requests(): void
     {
-        config()->set('auth.api.request_logging.sampling.enabled', false);
+        config()->set('api.request_logging.sampling.enabled', false);
 
         $user = User::factory()->api()->create();
 
@@ -166,8 +166,8 @@ class LogsApiRequestsTest extends TestCase
 
     public function test_sampling_enabled_with_zero_rate_logs_no_successful_requests(): void
     {
-        config()->set('auth.api.request_logging.sampling.enabled', true);
-        config()->set('auth.api.request_logging.sampling.rate', 0.0);
+        config()->set('api.request_logging.sampling.enabled', true);
+        config()->set('api.request_logging.sampling.rate', 0.0);
 
         $user = User::factory()->api()->create();
 
@@ -184,8 +184,8 @@ class LogsApiRequestsTest extends TestCase
 
     public function test_sampling_enabled_with_100_percent_logs_all_successful_requests(): void
     {
-        config()->set('auth.api.request_logging.sampling.enabled', true);
-        config()->set('auth.api.request_logging.sampling.rate', 1.0);
+        config()->set('api.request_logging.sampling.enabled', true);
+        config()->set('api.request_logging.sampling.rate', 1.0);
 
         $user = User::factory()->api()->create();
 
@@ -202,8 +202,8 @@ class LogsApiRequestsTest extends TestCase
 
     public function test_sampling_always_logs_errors_regardless_of_sample_rate(): void
     {
-        config()->set('auth.api.request_logging.sampling.enabled', true);
-        config()->set('auth.api.request_logging.sampling.rate', 0.0);
+        config()->set('api.request_logging.sampling.enabled', true);
+        config()->set('api.request_logging.sampling.rate', 0.0);
 
         $user = User::factory()->api()->create();
 
@@ -225,8 +225,8 @@ class LogsApiRequestsTest extends TestCase
 
     public function test_sampling_always_logs_failures_regardless_of_sample_rate(): void
     {
-        config()->set('auth.api.request_logging.sampling.enabled', true);
-        config()->set('auth.api.request_logging.sampling.rate', 0.0);
+        config()->set('api.request_logging.sampling.enabled', true);
+        config()->set('api.request_logging.sampling.rate', 0.0);
 
         $user = User::factory()->api()->create();
 
@@ -245,8 +245,8 @@ class LogsApiRequestsTest extends TestCase
 
     public function test_sampling_with_50_percent_logs_approximately_half_of_successful_requests(): void
     {
-        config()->set('auth.api.request_logging.sampling.enabled', true);
-        config()->set('auth.api.request_logging.sampling.rate', 0.5);
+        config()->set('api.request_logging.sampling.enabled', true);
+        config()->set('api.request_logging.sampling.rate', 0.5);
 
         $user = User::factory()->api()->create();
 

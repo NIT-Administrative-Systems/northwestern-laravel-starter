@@ -8,7 +8,7 @@ describe("Authentication - Login", () => {
             cy.visit("/auth/type");
             cy.getBySel("netid-login").should("be.visible");
 
-            cy.php("config('auth.local.enabled')").then((enabled) => {
+            cy.php("config('local-auth.enabled')").then((enabled) => {
                 if (enabled) {
                     cy.getBySel("email-login").should("be.visible");
                 }
@@ -20,7 +20,7 @@ describe("Authentication - Login", () => {
 
     context("Local login", () => {
         beforeEach(() => {
-            cy.php("config('auth.local.enabled')").then((enabled) => {
+            cy.php("config('local-auth.enabled')").then((enabled) => {
                 if (!enabled) {
                     cy.log("Local auth disabled, skipping test");
                     this.skip();

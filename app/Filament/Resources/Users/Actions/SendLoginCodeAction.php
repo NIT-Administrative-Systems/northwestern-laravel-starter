@@ -27,7 +27,7 @@ class SendLoginCodeAction extends Action
             ->label('Send Verification Code')
             ->color('info')
             ->outlined()
-            ->visible(fn (User $record) => $record->is_local_user && config('auth.local.enabled'))
+            ->visible(fn (User $record) => $record->is_local_user && config('local-auth.enabled'))
             ->icon(Heroicon::OutlinedPaperAirplane)
             ->requiresConfirmation()
             ->modalDescription('This will send a new verification code to the user\'s email address.')

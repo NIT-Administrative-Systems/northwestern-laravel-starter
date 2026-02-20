@@ -22,11 +22,11 @@ class DemoUserSeeder extends Seeder
         $this->genericUser();
         $this->systemAdmin();
 
-        if (config('auth.local.enabled')) {
+        if (config('local-auth.enabled')) {
             $this->localUser();
         }
 
-        if (config('auth.api.enabled')) {
+        if (config('api.enabled')) {
             $this->apiUser();
         }
     }
@@ -79,7 +79,7 @@ class DemoUserSeeder extends Seeder
 
     private function apiUser(): void
     {
-        $demoToken = config('auth.api.demo_user_token');
+        $demoToken = config('api.demo_user_token');
         $rawToken = blank($demoToken) ? Str::random(64) : $demoToken;
 
         User::factory()
