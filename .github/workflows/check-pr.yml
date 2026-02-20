@@ -270,7 +270,7 @@ jobs:
 
   static-analysis:
     name: 🔬 Static Analysis
-    needs: [determine-scope, lint-and-format]
+    needs: [determine-scope]
     if: needs.determine-scope.outputs.code == 'true'
     runs-on: ubuntu-latest
     environment: ci-cd
@@ -323,7 +323,7 @@ jobs:
 
   unit-tests:
     name: 🧪 Unit Tests (${{ matrix.shard }}/3)
-    needs: [determine-scope, lint-and-format]
+    needs: [determine-scope]
     if: needs.determine-scope.outputs.code == 'true'
     runs-on: ubuntu-latest
     environment: ci-cd
@@ -411,7 +411,7 @@ jobs:
 
   end-to-end-tests:
     name: 🌲 Cypress Tests
-    needs: [determine-scope, lint-and-format]
+    needs: [determine-scope]
     if: needs.determine-scope.outputs.code == 'true'
     runs-on: ubuntu-latest
     environment: ci-cd
