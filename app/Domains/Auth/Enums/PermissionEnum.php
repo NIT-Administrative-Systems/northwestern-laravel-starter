@@ -26,17 +26,7 @@ enum PermissionEnum: string implements HasLabel
      *
      * Use `$user->can(PermissionEnum::MANAGE_ALL)` (which flows through the Gate) to
      * restrict features to super-administrators only - things that no other permission
-     * should ever grant. Examples from this codebase:
-     *
-     * - **Blade/Livewire conditionals:** `@can(PermissionEnum::MANAGE_ALL)` to show
-     *   controls that only super-admins should see.
-     * - **Filament visibility:** `->visible(fn () => auth()->user()->can(...))` to
-     *   gate an action or page to super-admins.
-     * - **Telescope access:** The `viewTelescope` gate is defined as
-     *   `$user->can(PermissionEnum::MANAGE_ALL)`.
-     *
-     * In these cases, `can()` is preferred because it goes through the Gate and is
-     * consistent with how the rest of the authorization system works.
+     * should ever grant.
      *
      * Use `$user->hasPermissionTo(PermissionEnum::MANAGE_ALL)` (Spatie direct check,
      * bypasses the Gate) only in infrastructure code where using `can()` would cause
