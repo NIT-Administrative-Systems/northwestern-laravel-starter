@@ -84,7 +84,7 @@ class AuthenticatesAccessTokensTest extends TestCase
 
         $this->getJson($this->endpoint, $headers)
             ->assertUnauthorized()
-            ->assertHeader('WWW-Authenticate', 'Bearer realm="' . config('auth.api.auth_realm') . '"')
+            ->assertHeader('WWW-Authenticate', 'Bearer realm="' . config('api.auth_realm') . '"')
             ->assertJson([
                 'type' => 'about:blank',
                 'title' => 'Unauthorized',

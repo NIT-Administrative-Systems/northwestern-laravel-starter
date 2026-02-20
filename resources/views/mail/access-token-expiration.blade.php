@@ -3,7 +3,7 @@
 
 Hello,
 
-An access token for **{{ config('auth.api.auth_realm') }}** associated with **{{ $user->full_name }}** (`{{ $user->username }}`) is nearing its expiration date.
+An access token for **{{ config('api.auth_realm') }}** associated with **{{ $user->full_name }}** (`{{ $user->username }}`) is nearing its expiration date.
 
 ## Token Details
 

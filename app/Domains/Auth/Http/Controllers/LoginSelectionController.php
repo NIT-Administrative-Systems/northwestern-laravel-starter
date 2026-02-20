@@ -19,7 +19,7 @@ class LoginSelectionController extends Controller
 
     public function __invoke(Request $request): RedirectResponse|View
     {
-        if (config('auth.local.enabled')) {
+        if (config('local-auth.enabled')) {
             return view('auth.login-selection');
         }
 

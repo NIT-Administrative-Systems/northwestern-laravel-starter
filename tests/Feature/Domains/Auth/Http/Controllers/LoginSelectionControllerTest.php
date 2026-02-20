@@ -13,7 +13,7 @@ class LoginSelectionControllerTest extends TestCase
 {
     public function test_renders_login_selection_view_when_local_auth_enabled(): void
     {
-        config(['auth.local.enabled' => true]);
+        config(['local-auth.enabled' => true]);
 
         $response = $this->get(route('login-selection'));
 
@@ -23,7 +23,7 @@ class LoginSelectionControllerTest extends TestCase
 
     public function test_redirects_to_oauth_when_local_auth_disabled_and_not_ci_env(): void
     {
-        config(['auth.local.enabled' => false]);
+        config(['local-auth.enabled' => false]);
 
         $response = $this->get(route('login-selection'));
 
@@ -32,7 +32,7 @@ class LoginSelectionControllerTest extends TestCase
 
     public function test_renders_login_selection_view_when_local_auth_disabled_but_env_is_ci(): void
     {
-        config(['auth.local.enabled' => false]);
+        config(['local-auth.enabled' => false]);
 
         $this->app->detectEnvironment(fn () => 'ci');
 

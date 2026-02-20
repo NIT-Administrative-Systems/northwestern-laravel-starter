@@ -31,7 +31,7 @@ class CreateApiUserAction extends Action
         parent::setUp();
 
         $this->authorize(PermissionEnum::MANAGE_API_USERS)
-            ->visible(config('auth.api.enabled'))
+            ->visible(config('api.enabled'))
             ->label('Add API User')
             ->icon(Heroicon::OutlinedKey)
             ->color('warning')

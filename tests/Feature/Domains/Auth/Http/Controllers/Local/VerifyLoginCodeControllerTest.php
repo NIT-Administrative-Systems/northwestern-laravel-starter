@@ -24,9 +24,9 @@ class VerifyLoginCodeControllerTest extends TestCase
     {
         parent::setUp();
 
-        config(['auth.local.enabled' => true]);
-        config(['auth.local.code.max_attempts' => 5]);
-        config(['auth.local.code.digits' => 6]);
+        config(['local-auth.enabled' => true]);
+        config(['local-auth.code.max_attempts' => 5]);
+        config(['local-auth.code.digits' => 6]);
 
         RateLimiter::clear('login-code:form:' . session()->getId());
     }
@@ -81,7 +81,7 @@ class VerifyLoginCodeControllerTest extends TestCase
 
     public function test_route_returns_404_when_disabled(): void
     {
-        config(['auth.local.enabled' => false]);
+        config(['local-auth.enabled' => false]);
 
         $response = $this->post(route('login-code.verify'), ['code' => '123456']);
 

@@ -27,7 +27,7 @@ class CreateLocalUserAction extends Action
         parent::setUp();
 
         $this->authorize(PermissionEnum::CREATE_USERS)
-            ->visible(fn () => config('auth.local.enabled'))
+            ->visible(fn () => config('local-auth.enabled'))
             ->label('Add Local User')
             ->icon(Heroicon::OutlinedUserPlus)
             ->outlined()

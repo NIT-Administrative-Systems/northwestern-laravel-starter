@@ -24,7 +24,7 @@ class DateTimeFormatterTest extends TestCase
     {
         parent::setUp();
 
-        Config::set('app.datetime_display_format', $this->defaultFormat);
+        Config::set('platform.datetime_display_format', $this->defaultFormat);
 
         $this->user = User::factory()->make(['timezone' => 'America/Los_Angeles']);
 

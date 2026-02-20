@@ -60,7 +60,7 @@ class ProblemDetailsTest extends TestCase
 
     public function test_unauthorized_response(): void
     {
-        config(['auth.api.auth_realm' => 'TestRealm']);
+        config(['api.auth_realm' => 'TestRealm']);
 
         $response = ProblemDetails::unauthorized();
         $json = $response->getData(true);

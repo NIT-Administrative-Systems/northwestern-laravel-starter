@@ -32,7 +32,7 @@ class ApiRequestLog extends Model
      */
     public function prunable(): Builder
     {
-        $retentionDays = config('auth.api.request_logging.retention_days');
+        $retentionDays = config('api.request_logging.retention_days');
 
         if ($retentionDays === null) {
             return static::query()->whereRaw('1 = 0');

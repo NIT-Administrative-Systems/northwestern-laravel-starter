@@ -19,7 +19,7 @@ class CreateLocalUserTest extends TestCase
         parent::setUp();
 
         Mail::fake();
-        config(['auth.local.enabled' => true]);
+        config(['local-auth.enabled' => true]);
     }
 
     public function test_creates_local_user_with_basic_information(): void

@@ -135,7 +135,7 @@ class ProblemDetails
     {
         // Default WWW-Authenticate header (can be overridden by passing same key in $headers)
         $defaultHeaders = [
-            'WWW-Authenticate' => 'Bearer realm="' . config('auth.api.auth_realm') . '"',
+            'WWW-Authenticate' => 'Bearer realm="' . config('api.auth_realm') . '"',
         ];
 
         return self::response(

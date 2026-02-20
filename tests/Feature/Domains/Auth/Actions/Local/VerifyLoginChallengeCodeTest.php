@@ -46,8 +46,8 @@ class VerifyLoginChallengeCodeTest extends TestCase
 
     public function test_locks_challenge_after_max_attempts(): void
     {
-        config(['auth.local.code.max_attempts' => 2]);
-        config(['auth.local.code.lock_minutes' => 15]);
+        config(['local-auth.code.max_attempts' => 2]);
+        config(['local-auth.code.lock_minutes' => 15]);
 
         $challenge = LoginChallenge::create([
             'email' => 'test@example.com',

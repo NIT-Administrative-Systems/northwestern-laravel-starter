@@ -47,7 +47,7 @@ class LoginChallenge extends BaseModel
      */
     public function prunable(): Builder
     {
-        $retentionDays = config('auth.local.code.retention_days');
+        $retentionDays = config('local-auth.code.retention_days');
 
         if ($retentionDays === null) {
             return static::query()->whereRaw('1 = 0');
