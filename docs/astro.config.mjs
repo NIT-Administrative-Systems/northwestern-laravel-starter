@@ -46,6 +46,10 @@ export default defineConfig({
                     autogenerate: { directory: 'features' },
                 },
                 {
+                    label: 'Northwestern Integrations',
+                    autogenerate: { directory: 'northwestern-integrations' },
+                },
+                {
                     label: 'Guides',
                     autogenerate: { directory: 'guides' },
                 },

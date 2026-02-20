@@ -1,0 +1,71 @@
+---
+title: Overview
+description: Northwestern-specific service integrations
+sidebar:
+    order: 0
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+The starter integrates with several Northwestern-specific services to handle identity management, user provisioning, lifecycle events, and ticketing. Most of these integrations are powered by the [`northwestern-sysdev/laravel-soa`](https://github.com/NIT-Administrative-Systems/SysDev-laravel-soa) package, which provides Laravel bindings for Northwestern's SOA APIs.
+
+## Integrations
+
+<CardGrid>
+  <Card title="Directory Search" icon="magnifier">
+    Look up Northwestern users by NetID, email, or employee ID via the LDAP-backed Directory Search API. Used during SSO login for automatic user provisioning and profile synchronization.
+
+    [Directory Search →](/northwestern-integrations/directory-search/)
+  </Card>
+
+  <Card title="WebSSO / Entra ID" icon="approve-check">
+    Single sign-on authentication for Northwestern users. Ships with Microsoft Entra ID (Azure AD) by default, with support for Online Passport (agentless WebSSO via ForgeRock) as an alternative.
+
+    [WebSSO →](/northwestern-integrations/websso/)
+  </Card>
+
+  <Card title="EventHub" icon="rocket">
+    Consume event messages from Northwestern's EventHub enterprise messaging platform. The starter listens for NetID lifecycle events to automatically deactivate users.
+
+    [EventHub →](/northwestern-integrations/eventhub/)
+  </Card>
+
+  <Card title="Wildcard Photos" icon="star">
+    Download Northwestern Wildcard ID card photos from Directory Search and serve them via presigned S3 URLs.
+
+    [Wildcard Photos →](/northwestern-integrations/wildcard-photos/)
+  </Card>
+
+</CardGrid>
+
+---
+
+## The `laravel-soa` Package
+
+The [`northwestern-sysdev/laravel-soa`](https://github.com/NIT-Administrative-Systems/SysDev-laravel-soa) package provides:
+
+- **Directory Search** — LDAP user lookup by NetID, email, or employee ID
+- **WebSSO Authentication** — Entra ID (Azure AD) OAuth2 flow and Online Passport (agentless WebSSO via ForgeRock/Apigee)
+- **EventHub** — Webhook registration, HMAC verification middleware, and queue integration
+- **Apigee API Keys** — Middleware for verifying inbound Apigee API key headers
+
+Full package documentation is available at [nit-administrative-systems.github.io/SysDev-laravel-soa](https://nit-administrative-systems.github.io/SysDev-laravel-soa/).
+
+### Configuration
+
+All `laravel-soa` settings live in `config/nusoa.php`. The package publishes this config file during installation.
+
+```bash
+# .env — Core API credentials
+DIRECTORY_SEARCH_URL=https://northwestern-prod.apigee.net/directory-search
+DIRECTORY_SEARCH_API_KEY=your-api-key
+
+# Entra ID (default auth method)
+AZURE_CLIENT_ID=your-client-id
+AZURE_CLIENT_SECRET=your-client-secret
+AZURE_REDIRECT_URI=https://your-app.northwestern.edu/auth/azure-ad/callback
+
+EVENT_HUB_BASE_URL=https://northwestern-prod.apigee.net/event-hub
+EVENT_HUB_API_KEY=your-api-key
+EVENT_HUB_HMAC_VERIFICATION_SHARED_SECRET=your-shared-secret
+```

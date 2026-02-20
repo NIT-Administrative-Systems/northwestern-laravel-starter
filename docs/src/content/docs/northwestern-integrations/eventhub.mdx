@@ -1,0 +1,123 @@
+---
+title: EventHub
+description: Consume event messages from Northwestern's EventHub enterprise messaging platform
+sidebar:
+    order: 3
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+
+EventHub is Northwestern's enterprise messaging platform, combining an Amazon MQ (Apache ActiveMQ) message broker with a RESTful Messaging Center API. It enables loosely-coupled, platform-independent communication between applications through **topics** (one-to-many message distribution), **queues** (per-consumer message storage), and **webhooks** (automated HTTP delivery).
+
+EventHub supports a wide range of event types across Northwestern — identity lifecycle changes, student record updates, employee data changes, and custom application events, among others. Access to specific topics is managed through the [API Service Registry](https://apiserviceregistry.northwestern.edu/).
+
+The starter includes a webhook endpoint that listens for **NetID status changes** from the `etidentity.ldap.netid.term` topic — deactivation, deprovisioning, and security holds — and automatically adjusts user access in response.
+
+The EventHub integration is provided by the [`northwestern-sysdev/laravel-soa`](https://github.com/NIT-Administrative-Systems/SysDev-laravel-soa) package, which handles webhook route registration, HMAC signature verification, and queue integration.
+
+## How It Works
+
+<Steps>
+
+1. **EventHub sends a webhook**
+
+   When a NetID is deactivated, deprovisioned, or placed on security hold, Northwestern's EventHub pushes a signed HTTP POST to the application's webhook endpoint.
+
+2. **HMAC verification**
+
+   The `eventhub_hmac` middleware validates the `X-HMAC-Signature` header against the shared secret, rejecting tampered or unsigned requests.
+
+3. **Payload parsing**
+
+   `NetIdUpdateController` reads the URL-encoded body (`netid=abc123&action=deactivate`) and constructs a `NetIdUpdated` event object, which validates the action against known values.
+
+4. **User lookup**
+
+   The controller checks if the NetID belongs to an SSO user. Non-SSO users (local auth, API users) are ignored since their accounts are managed independently.
+
+5. **Asynchronous processing**
+
+   The `NetIdUpdated` event is dispatched, and `ProcessNetIdUpdate` handles it on the queue:
+   - All roles except `Northwestern User` are removed
+   - The user is marked as `netid_inactive = true`
+
+</Steps>
+
+---
+
+## Enabling the Webhook
+
+The EventHub webhook route is commented out by default in `routes/api.php`. To enable it:
+
+```php
+// routes/api.php
+
+Route::middleware(['eventhub_hmac'])->prefix('eventhub')->group(function () {
+    Route::post('netid-update', NetIdUpdateController::class)
+        ->eventHubWebhook('etidentity.ldap.netid.term')
+        ->name('netid-update');
+});
+```
+
+The `->eventHubWebhook()` macro registers the route with EventHub's webhook discovery system and associates it with the `etidentity.ldap.netid.term` topic. The `eventhub_hmac` middleware ensures all incoming requests carry a valid HMAC signature.
+
+<Aside type="caution">
+After uncommenting the route, you must subscribe to the `etidentity.ldap.netid.term` topic and register your application's webhook URL through the [API Service Registry](https://apiserviceregistry.northwestern.edu/). The `laravel-soa` package provides Artisan commands for managing webhook subscriptions — see the [package documentation](https://nit-administrative-systems.github.io/SysDev-laravel-soa/) for details.
+</Aside>
+
+---
+
+## Testing
+
+The `MocksEventHub` trait allows you to send synthetic webhook payloads through the HTTP kernel with valid HMAC signatures in tests and Artisan commands:
+
+```php
+use App\Domains\Core\Concerns\MocksEventHub;
+
+class MyTest extends TestCase
+{
+    use MocksEventHub;
+
+    public function test_handles_netid_deactivation(): void
+    {
+        $user = User::factory()->create([
+            'username' => 'abc123',
+            'auth_type' => AuthTypeEnum::SSO,
+        ]);
+
+        $this->send(
+            queue: 'etidentity.ldap.netid.term',
+            message: 'netid=abc123&action=deactivate',
+        );
+
+        $user->refresh();
+        $this->assertTrue($user->netid_inactive);
+    }
+}
+```
+
+The trait reads HMAC configuration from `config/nusoa.php` to generate the correct signature header, matching the verification the `eventhub_hmac` middleware performs.
+
+---
+
+## Configuration
+
+```bash
+# .env
+EVENT_HUB_BASE_URL=https://northwestern-prod.apigee.net/event-hub
+EVENT_HUB_API_KEY=your-api-key
+EVENT_HUB_HMAC_VERIFICATION_SHARED_SECRET=your-shared-secret
+
+# Local development — mock mode (default: true on local)
+EVENT_HUB_MOCK_ENABLED=true
+```
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `EVENT_HUB_BASE_URL` | — | EventHub API base URL |
+| `EVENT_HUB_API_KEY` | — | Apigee API key for EventHub |
+| `EVENT_HUB_HMAC_VERIFICATION_SHARED_SECRET` | — | Shared secret for HMAC signature verification |
+| `EVENT_HUB_HMAC_VERIFICATION_HEADER` | `X-HMAC-Signature` | HTTP header containing the HMAC signature |
+| `EVENT_HUB_HMAC_VERIFICATION_ALGORITHM_TYPE_REGISTRATION` | `HmacSHA256` | Algorithm name sent to EventHub during registration |
+| `EVENT_HUB_HMAC_VERIFICATION_ALGORITHM_TYPE_PHP` | `sha256` | PHP `hash_hmac` algorithm name |
+| `EVENT_HUB_MOCK_ENABLED` | `true` (local) | Enable mock mode for local development |
