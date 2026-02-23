@@ -86,6 +86,8 @@
             <file>app/Http/Controllers/Controller.php</file>
             <file>app/Http/Controllers/Api/BaseApiController.php</file>
             <file>app/Http/Controllers/Api/V1/ApiController.php</file>
+            <file>app/View/Components/Breadcrumbs.php</file>
+            <file>app/View/Components/ErrorLayout.php</file>
 
             <!-- Service Providers (bootstrap wiring, no domain logic) -->
             <file>app/Providers/EloquentServiceProvider.php</file>
