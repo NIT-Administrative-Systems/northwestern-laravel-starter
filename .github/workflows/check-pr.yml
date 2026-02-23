@@ -255,12 +255,11 @@ jobs:
       - name: 📷 PHPStan Result Cache
         uses: actions/cache@v5
         with:
-          path: tmp
+          path: /tmp/phpstan
           key: phpstan-results-${{ hashFiles('phpstan.neon', 'composer.lock') }}
           restore-keys: |
             phpstan-results-${{ hashFiles('phpstan.neon') }}-
             phpstan-results-
-            ${{ runner.os }}-phpstan-results-
 
       - name: 🔬 PHPStan
         run: ./vendor/bin/phpstan analyse --no-progress --error-format=checkstyle > phpstan-report.xml
