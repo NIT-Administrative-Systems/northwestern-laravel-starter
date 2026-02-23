@@ -418,6 +418,8 @@ jobs:
         with:
           filename: .build/clover.xml
           artifact_download_workflow_names: "Check PR"
+          with_base_coverage_template: .github/coverage-with-base.hbs
+          without_base_coverage_template: .github/coverage-without-base.hbs
 
       - name: 💬 Coverage PR Comment
         if: github.event_name == 'pull_request' && steps.coverage.outputs.file != ''
