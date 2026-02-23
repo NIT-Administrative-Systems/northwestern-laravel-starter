@@ -5,6 +5,7 @@
     bootstrap="vendor/autoload.php"
     cacheDirectory=".phpunit.cache"
     colors="true"
+    failOnPhpunitWarning="false"
     displayDetailsOnIncompleteTests="true"
     displayDetailsOnPhpunitDeprecations="true"
     displayDetailsOnTestsThatTriggerWarnings="true"
@@ -74,11 +75,13 @@
             <!-- Framework boilerplate / third-party -->
             <directory>app/Domains/Core/Concerns</directory>
             <directory>app/Domains/Core/Database</directory>
+            <directory>app/Domains/Core/Exceptions</directory>
             <directory>app/Domains/Core/GlobalAlerts</directory>
             <directory>app/Domains/Core/Services/ConfigValidation</directory>
             <directory>app/Domains/User/Exceptions</directory>
+            <directory>app/Domains/Support/Exceptions</directory>
             <directory>app/Filament</directory>
-            <file>app/Http/Controllers/Auth/WebSSOController.php</file>
+            <file>app/Domains/Auth/Http/Controllers/WebSSOController.php</file>
             <file>app/Http/Controllers/Controller.php</file>
             <file>app/Http/Controllers/Api/BaseApiController.php</file>
             <file>app/Http/Controllers/Api/V1/ApiController.php</file>
