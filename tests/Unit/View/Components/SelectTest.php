@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Unit\View\Components;
 
-use App\Domains\User\Models\User;
 use App\View\Components\Select;
 use PHPUnit\Framework\Attributes\CoversClass;
-use Tests\TestCase;
+use PHPUnit\Framework\TestCase;
 
 #[CoversClass(Select::class)]
 class SelectTest extends TestCase
@@ -124,10 +123,7 @@ class SelectTest extends TestCase
 
     public function test_model_collection_id_and_label(): void
     {
-        User::factory()->create(['id' => 1, 'first_name' => 'Foo']);
-        User::factory()->create(['id' => 2, 'first_name' => 'Bar']);
-
-        $users = User::pluck('first_name', 'id');
+        $users = collect([1 => 'Foo', 2 => 'Bar']);
 
         $expected = [
             1 => 'Foo',
@@ -233,10 +229,7 @@ class SelectTest extends TestCase
 
     public function test_collection_of_models_directly(): void
     {
-        User::factory()->create(['id' => 1, 'first_name' => 'Alice']);
-        User::factory()->create(['id' => 2, 'first_name' => 'Bob']);
-
-        $users = User::all()->mapWithKeys(fn ($user) => [$user->id => $user->first_name]);
+        $users = collect([1 => 'Alice', 2 => 'Bob']);
 
         $expected = [
             1 => 'Alice',

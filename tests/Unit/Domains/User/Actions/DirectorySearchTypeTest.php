@@ -8,7 +8,7 @@ use App\Domains\User\Enums\DirectorySearchType;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use Tests\TestCase;
+use PHPUnit\Framework\TestCase;
 
 #[CoversClass(DirectorySearchType::class)]
 class DirectorySearchTypeTest extends TestCase

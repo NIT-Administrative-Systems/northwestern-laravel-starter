@@ -17,25 +17,31 @@ use Tests\TestCase;
 #[CoversClass(ProcessNetIdUpdate::class)]
 class ProcessNetIdUpdateTest extends TestCase
 {
-    private Role $adminRole;
+    private ?Role $adminRole = null;
 
-    private Role $editorRole;
+    private ?Role $editorRole = null;
 
-    private Role $nuRole;
+    private ?Role $nuRole = null;
 
-    protected function setUp(): void
+    private function adminRole(): Role
     {
-        parent::setUp();
+        return $this->adminRole ??= Role::factory()->create(['name' => 'admin']);
+    }
 
-        $this->adminRole = Role::factory()->create(['name' => 'admin']);
-        $this->editorRole = Role::factory()->create(['name' => 'editor']);
-        $this->nuRole = Role::query()->where('name', SystemRoleEnum::NORTHWESTERN_USER->value)->firstOrFail();
+    private function editorRole(): Role
+    {
+        return $this->editorRole ??= Role::factory()->create(['name' => 'editor']);
+    }
+
+    private function nuRole(): Role
+    {
+        return $this->nuRole ??= Role::query()->where('name', SystemRoleEnum::NORTHWESTERN_USER->value)->firstOrFail();
     }
 
     public function test_it_removes_all_roles_except_northwestern_on_deactivate(): void
     {
         $user = User::factory()->create(['username' => 'abc123', 'auth_type' => AuthTypeEnum::SSO]);
-        $user->assignRoleWithAudit([$this->adminRole, $this->editorRole, $this->nuRole], RoleModificationOriginEnum::SYSTEM);
+        $user->assignRoleWithAudit([$this->adminRole(), $this->editorRole(), $this->nuRole()], RoleModificationOriginEnum::SYSTEM);
 
         $event = new NetIdUpdated('netid=abc123&action=deactivate');
         $listener = new ProcessNetIdUpdate();
@@ -51,7 +57,7 @@ class ProcessNetIdUpdateTest extends TestCase
     public function test_it_removes_all_roles_except_northwestern_on_deprovision(): void
     {
         $user = User::factory()->create(['username' => 'test123', 'auth_type' => AuthTypeEnum::SSO]);
-        $user->assignRoleWithAudit([$this->adminRole, $this->editorRole, $this->nuRole], RoleModificationOriginEnum::SYSTEM);
+        $user->assignRoleWithAudit([$this->adminRole(), $this->editorRole(), $this->nuRole()], RoleModificationOriginEnum::SYSTEM);
 
         $event = new NetIdUpdated('netid=test123&action=deprovision');
         $listener = new ProcessNetIdUpdate();
@@ -67,7 +73,7 @@ class ProcessNetIdUpdateTest extends TestCase
     public function test_it_removes_all_roles_except_northwestern_on_security_hold(): void
     {
         $user = User::factory()->create(['username' => 'sec123', 'auth_type' => AuthTypeEnum::SSO]);
-        $user->assignRoleWithAudit([$this->adminRole, $this->editorRole, $this->nuRole], RoleModificationOriginEnum::SYSTEM);
+        $user->assignRoleWithAudit([$this->adminRole(), $this->editorRole(), $this->nuRole()], RoleModificationOriginEnum::SYSTEM);
 
         $event = new NetIdUpdated('netid=sec123&action=sechold');
         $listener = new ProcessNetIdUpdate();
@@ -134,7 +140,7 @@ class ProcessNetIdUpdateTest extends TestCase
     public function test_it_handles_user_with_only_northwestern_role(): void
     {
         $user = User::factory()->create(['username' => 'abc123', 'auth_type' => AuthTypeEnum::SSO]);
-        $user->assignRoleWithAudit($this->nuRole, RoleModificationOriginEnum::SYSTEM);
+        $user->assignRoleWithAudit($this->nuRole(), RoleModificationOriginEnum::SYSTEM);
 
         $event = new NetIdUpdated('netid=abc123&action=deactivate');
         $listener = new ProcessNetIdUpdate();
@@ -164,7 +170,7 @@ class ProcessNetIdUpdateTest extends TestCase
         $role3 = Role::factory()->create(['name' => 'role3']);
 
         $user = User::factory()->create(['username' => 'abc123', 'auth_type' => AuthTypeEnum::SSO]);
-        $user->assignRoleWithAudit([$role1, $role2, $role3, $this->nuRole], RoleModificationOriginEnum::SYSTEM);
+        $user->assignRoleWithAudit([$role1, $role2, $role3, $this->nuRole()], RoleModificationOriginEnum::SYSTEM);
 
         $event = new NetIdUpdated('netid=abc123&action=deactivate');
         $listener = new ProcessNetIdUpdate();
@@ -185,7 +191,7 @@ class ProcessNetIdUpdateTest extends TestCase
             'auth_type' => AuthTypeEnum::LOCAL,
             'netid_inactive' => false,
         ]);
-        $user->assignRoleWithAudit($this->adminRole, RoleModificationOriginEnum::SYSTEM);
+        $user->assignRoleWithAudit($this->adminRole(), RoleModificationOriginEnum::SYSTEM);
 
         $event = new NetIdUpdated('netid=local123&action=deactivate');
         $listener = new ProcessNetIdUpdate();
@@ -204,7 +210,7 @@ class ProcessNetIdUpdateTest extends TestCase
             'auth_type' => AuthTypeEnum::API,
             'netid_inactive' => false,
         ]);
-        $user->assignRoleWithAudit($this->adminRole, RoleModificationOriginEnum::SYSTEM);
+        $user->assignRoleWithAudit($this->adminRole(), RoleModificationOriginEnum::SYSTEM);
 
         $event = new NetIdUpdated('netid=api123&action=deactivate');
         $listener = new ProcessNetIdUpdate();
