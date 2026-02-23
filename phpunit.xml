@@ -11,7 +11,7 @@
     displayDetailsOnTestsThatTriggerNotices="true"
     displayDetailsOnTestsThatTriggerDeprecations="true"
     displayDetailsOnTestsThatTriggerErrors="true"
-    failOnRisky="false"
+    beStrictAboutCoverageMetadata="false"
 >
     <testsuites>
         <testsuite name="Unit">
