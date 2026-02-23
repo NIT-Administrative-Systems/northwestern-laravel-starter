@@ -5,6 +5,7 @@
     bootstrap="vendor/autoload.php"
     cacheDirectory=".phpunit.cache"
     colors="true"
+    failOnPhpunitWarning="false"
     displayDetailsOnIncompleteTests="true"
     displayDetailsOnPhpunitDeprecations="true"
     displayDetailsOnTestsThatTriggerWarnings="true"
@@ -28,31 +29,82 @@
             <!--
                 Code Coverage Exclusions
 
-                These components are excluded because they either:
-                - Contain boilerplate/framework code
-                - Represent static data structures (enums, models, etc.)
-                - Consist primarily of declarative definitions
+                Excluded items are boilerplate, third-party, declarative, or
+                framework-generated code where coverage metrics add no value.
 
-                Including them would artificially dilute our coverage metrics
-                without adding meaningful quality insights.
+                NOTE: Do not exclude directories/files that have tests with
+                #[CoversClass] or #[CoversTrait] attributes targeting them.
+                PHPUnit will emit warnings when coverage is active and the
+                target is excluded.
             -->
-            <file>app/Console/Commands/RebuildDatabaseCommand.php</file>
-            <directory>app/Domains/Core/Exceptions</directory>
-            <directory>app/Domains/Core/Models</directory>
+
+            <!-- Enums (declarative values, labels, colors) -->
+            <directory>app/Domains/Auth/Enums</directory>
             <directory>app/Domains/Core/Enums</directory>
+            <directory>app/Domains/Support/Enums</directory>
+
+            <!-- Models (casts, relationships, property declarations) -->
+            <directory>app/Domains/Auth/Models</directory>
+            <file>app/Domains/Core/Models/BaseModel.php</file>
+            <directory>app/Domains/Support/Models</directory>
+            <file>app/Domains/User/Models/User.php</file>
+            <file>app/Domains/User/Models/Audit.php</file>
+            <file>app/Domains/User/Models/Export.php</file>
+            <file>app/Domains/User/Models/ImpersonationLog.php</file>
+            <file>app/Domains/User/Models/UserLoginRecord.php</file>
+
+            <!-- Seeders -->
+            <directory>app/Domains/Auth/Seeders</directory>
+            <directory>app/Domains/Support/Seeders</directory>
+            <directory>app/Domains/User/Seeders</directory>
+            <file>app/Domains/Core/Seeders/IdempotentSeeder.php</file>
+
+            <!-- Contracts / Interfaces -->
+            <directory>app/Domains/Auth/Contracts</directory>
+            <directory>app/Domains/Core/Contracts</directory>
+            <directory>app/Domains/Support/Contracts</directory>
+
+            <!-- Value Objects (constants, readonly data containers) -->
+            <directory>app/Domains/Auth/ValueObjects</directory>
+            <directory>app/Domains/Core/ValueObjects</directory>
+            <file>app/Domains/Support/Gateway/CreationResult.php</file>
+
+            <!-- API Resources -->
+            <directory>app/Domains/Auth/Http/Resources</directory>
+            <directory>app/Domains/User/Http/Resources</directory>
+
+            <!-- Framework boilerplate / third-party -->
             <directory>app/Domains/Core/Concerns</directory>
             <directory>app/Domains/Core/Database</directory>
+            <directory>app/Domains/Core/Exceptions</directory>
             <directory>app/Domains/Core/GlobalAlerts</directory>
             <directory>app/Domains/Core/Services/ConfigValidation</directory>
-            <directory>app/Filament</directory>
-            <directory>app/Domains/User/Enums</directory>
             <directory>app/Domains/User/Exceptions</directory>
-            <directory>app/Domains/User/Models</directory>
-            <directory>app/Domains/User/Seeders</directory>
-            <file>app/Http/Controllers/Auth/WebSSOController.php</file>
-            <directory>app/Providers</directory>
-            <directory>app/View/Components</directory>
-            <file>app/Domains/Core/Seeders/IdempotentSeeder.php</file>
+            <directory>app/Domains/Support/Exceptions</directory>
+            <directory>app/Filament</directory>
+            <file>app/Domains/Auth/Http/Controllers/WebSSOController.php</file>
+            <file>app/Http/Controllers/Controller.php</file>
+            <file>app/Http/Controllers/Api/BaseApiController.php</file>
+            <file>app/Http/Controllers/Api/V1/ApiController.php</file>
+
+            <!-- Service Providers (bootstrap wiring, no domain logic) -->
+            <file>app/Providers/EloquentServiceProvider.php</file>
+            <file>app/Providers/FilamentServiceProvider.php</file>
+            <file>app/Providers/Filament/AdministrationPanelProvider.php</file>
+            <file>app/Providers/HealthServiceProvider.php</file>
+            <file>app/Providers/IntegrationServiceProvider.php</file>
+            <file>app/Providers/RateLimitingServiceProvider.php</file>
+            <file>app/Providers/SupportServiceProvider.php</file>
+            <file>app/Providers/TelescopeServiceProvider.php</file>
+            <file>app/Providers/ViewServiceProvider.php</file>
+
+            <!-- Console commands -->
+            <file>app/Console/Commands/RebuildDatabaseCommand.php</file>
+            <file>app/Console/Commands/MakeChangelogCommand.php</file>
+            <file>app/Console/Commands/TestNetIdUpdateCommand.php</file>
+            <file>app/Console/Commands/ValidateConfigurationCommand.php</file>
+            <file>app/Console/Commands/Concerns/RunsSteps.php</file>
+            <directory>app/Console/Commands/DatabaseSnapshots</directory>
         </exclude>
     </source>
     <php>

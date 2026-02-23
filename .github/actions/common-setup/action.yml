@@ -7,9 +7,13 @@ inputs:
     required: false
     default: "8.4"
   coverage:
-    description: "Coverage driver for setup-php (none|xdebug)"
+    description: "Coverage driver for setup-php (none|pcov|xdebug)"
     required: false
     default: "none"
+  tools:
+    description: "Comma-separated tools for setup-php (e.g. phpunit/phpcov)"
+    required: false
+    default: ""
   node-version:
     description: "Node.js version"
     required: false
@@ -51,6 +55,7 @@ runs:
       with:
         php-version: ${{ inputs['php-version'] }}
         coverage: ${{ inputs.coverage }}
+        tools: ${{ inputs.tools }}
         extensions: >-
           ctype, curl, dom, fileinfo, filter, hash, iconv, intl, json, libxml,
           mbstring, openssl, pcre, pdo, pdo_pgsql, phar, reflection, session,

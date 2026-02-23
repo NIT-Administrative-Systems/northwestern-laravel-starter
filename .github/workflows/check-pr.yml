@@ -13,6 +13,8 @@ concurrency:
 on:
   pull_request:
     branches: [ main ]
+  push:
+    branches: [ main ]
 
 jobs:
   determine-scope:
@@ -319,6 +321,7 @@ jobs:
           php-version: ${{ env.PHP_VERSION }}
           php-only: true
           run-ide-helper: false
+          coverage: pcov
 
       - name: 📷 PHPUnit Cache
         uses: actions/cache@v5
@@ -333,14 +336,13 @@ jobs:
 
       # If you need to debug tests or follow the execution order more clearly, replace `--teamcity` with `--verbose`
       - name: 🧪 PHPUnit
-        env:
-          XDEBUG_MODE: coverage
         run: >
           ./vendor/bin/pest --parallel
           --shard ${{ matrix.shard }}/3
           --cache-result
           --cache-directory=.phpunit.cache
           --log-junit .build/junit-pr${{ github.event.pull_request.number }}-run${{ github.run_id }}-shard${{ matrix.shard }}.xml
+          --coverage-php .build/coverage-shard${{ matrix.shard }}.cov
           --teamcity
 
       - name: 📦 Upload Test Results
@@ -349,6 +351,14 @@ jobs:
         with:
           name: Test Results PR${{ github.event.pull_request.number }} Run${{ github.run_id }} Shard${{ matrix.shard }}
           path: .build/junit-pr${{ github.event.pull_request.number }}-run${{ github.run_id }}-shard${{ matrix.shard }}.xml
+          retention-days: 1
+
+      - name: 📦 Upload Coverage Data
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: Coverage Shard${{ matrix.shard }}
+          path: .build/coverage-shard${{ matrix.shard }}.cov
           retention-days: 1
 
   publish-test-results:
@@ -372,6 +382,51 @@ jobs:
           check_name: "📊 PHPUnit Test Results"
           github_token: ${{ secrets.GITHUB_TOKEN }}
           files: "artifacts/**/*.xml"
+
+  coverage-report:
+    name: 📈 Coverage Report
+    needs: [unit-tests, determine-scope]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: always() && github.actor != 'dependabot[bot]' && needs.determine-scope.outputs.code == 'true'
+    steps:
+      - name: 📂 Checkout Repository
+        uses: actions/checkout@v6
+
+      - name: 🐘 Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          coverage: pcov
+          tools: phpunit/phpcov
+
+      - name: 📥 Download Coverage Shards
+        uses: actions/download-artifact@v7
+        with:
+          path: .build/coverage-shards
+          pattern: Coverage Shard*
+          merge-multiple: true
+
+      - name: 🔀 Merge Coverage Shards
+        run: |
+          mkdir -p .build
+          phpcov merge --clover .build/clover.xml .build/coverage-shards
+
+      - name: 📊 Generate Coverage Report
+        id: coverage
+        uses: clearlyip/code-coverage-report-action@v6
+        with:
+          filename: .build/clover.xml
+          artifact_download_workflow_names: "Check PR"
+          with_base_coverage_template: .github/coverage-with-base.hbs
+          without_base_coverage_template: .github/coverage-without-base.hbs
+
+      - name: 💬 Coverage PR Comment
+        if: github.event_name == 'pull_request' && steps.coverage.outputs.file != ''
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          recreate: true
+          path: code-coverage-results.md
 
   end-to-end-tests:
     name: 🌲 Cypress Tests

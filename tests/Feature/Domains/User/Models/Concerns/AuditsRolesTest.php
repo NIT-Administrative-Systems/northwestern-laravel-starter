@@ -9,10 +9,10 @@ use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\Audit;
 use App\Domains\User\Models\Concerns\AuditsRoles;
 use App\Domains\User\Models\User;
-use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversTrait;
 use Tests\TestCase;
 
-#[CoversClass(AuditsRoles::class)]
+#[CoversTrait(AuditsRoles::class)]
 class AuditsRolesTest extends TestCase
 {
     public function test_assign_role_with_audit_creates_audit_record(): void

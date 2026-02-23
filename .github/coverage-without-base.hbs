@@ -1,0 +1,20 @@
+# 📊 Code Coverage Report
+
+{{#with overall_coverage}}
+| Metric | Coverage |
+| ------ | -------- |
+| **{{package}}** | **{{base_coverage}}** |
+{{/with}}
+
+{{#if show_package_coverage}}
+<details>
+<summary>Coverage by File</summary>
+
+| File | Coverage |
+| ---- | -------- |
+{{#each coverage}}
+| {{package}} | {{base_coverage}} |
+{{/each}}
+
+</details>
+{{/if}}

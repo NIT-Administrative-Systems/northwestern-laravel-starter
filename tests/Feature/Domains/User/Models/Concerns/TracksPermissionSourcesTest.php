@@ -9,10 +9,10 @@ use App\Domains\Auth\Enums\RoleModificationOriginEnum;
 use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\Concerns\TracksPermissionSources;
 use App\Domains\User\Models\User;
-use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversTrait;
 use Tests\TestCase;
 
-#[CoversClass(TracksPermissionSources::class)]
+#[CoversTrait(TracksPermissionSources::class)]
 class TracksPermissionSourcesTest extends TestCase
 {
     public function test_has_permission_from_role_returns_true_when_user_has_role_with_permission(): void
