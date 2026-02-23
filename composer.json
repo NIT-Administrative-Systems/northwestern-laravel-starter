@@ -58,8 +58,7 @@
         "phpunit/phpunit": "^12.0",
         "rector/rector": "^2.0",
         "roave/security-advisories": "dev-latest",
-        "spatie/laravel-ray": "^1.39",
-        "tomasvotruba/bladestan": "^0.11.2"
+        "spatie/laravel-ray": "^1.39"
     },
     "autoload": {
         "psr-4": {
