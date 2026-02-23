@@ -33,6 +33,7 @@ enum AuthTypeEnum: string implements HasColor, HasIcon, HasLabel
         };
     }
 
+    /** @return 'primary'|'gray'|'info' */
     public function getColor(): string
     {
         return match ($this) {

@@ -19,7 +19,7 @@ use Illuminate\Database\Seeder;
 readonly class SeederInfo
 {
     /**
-     * @param  string  $className  Fully qualified class name
+     * @param  class-string<IdempotentSeederInterface>  $className  Fully qualified class name
      * @param  list<class-string<IdempotentSeederInterface>>  $dependsOn  Array of seeder classes that must run first
      */
     public function __construct(

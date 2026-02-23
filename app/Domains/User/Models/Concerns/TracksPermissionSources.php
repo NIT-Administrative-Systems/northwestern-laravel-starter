@@ -18,6 +18,8 @@ use Illuminate\Support\Collection;
  * - Building authorization logic that depends on the context of how access was granted
  *
  * @mixin User
+ *
+ * @phpstan-require-extends \Illuminate\Foundation\Auth\User
  */
 trait TracksPermissionSources
 {

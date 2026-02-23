@@ -13,6 +13,10 @@ use OwenIt\Auditing\Events\AuditCustom;
 
 /**
  * @mixin User
+ *
+ * @phpstan-require-extends \Illuminate\Database\Eloquent\Model
+ *
+ * @phpstan-type RoleData array{id: int, name: string, role_type: string}
  */
 trait AuditsRoles
 {
@@ -88,7 +92,7 @@ trait AuditsRoles
      * attribute changes, this creates a structured snapshot of the entire role collection.
      *
      * @param  'role_assigned'|'role_removed'  $event  The specific audit event type
-     * @param  array<int, array{id: int, name: string, role_type: string}>  $oldRoles  The collection of roles before modification
+     * @param  list<RoleData>  $oldRoles  The collection of roles before modification
      * @param  BaseCollection<int, Role>  $roles  The role(s) that were assigned or removed
      * @param  RoleModificationOriginEnum  $origin  The source/reason for this role change
      * @param  array<string, mixed>  $context  Additional contextual information
@@ -141,7 +145,7 @@ trait AuditsRoles
      * Converts a collection of roles to a simplified array format.
      *
      * @param  BaseCollection<int, Role>  $roles
-     * @return array<int, array{id: int, name: string, role_type: string}> Array of simplified role data
+     * @return list<RoleData> Array of simplified role data
      */
     private function mapRolesToArray(BaseCollection $roles): array
     {

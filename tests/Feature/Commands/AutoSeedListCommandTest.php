@@ -29,7 +29,7 @@ class AutoSeedListCommandTest extends TestCase
     public function test_format_dependencies_with_zero_dependencies(): void
     {
         $seederInfo = new SeederInfo(
-            className: 'App\\Seeders\\FooSeeder',
+            className: 'App\\Seeders\\FooSeeder', // @phpstan-ignore argument.type
             dependsOn: []
         );
 
@@ -49,9 +49,8 @@ class AutoSeedListCommandTest extends TestCase
     public function test_format_dependencies_with_one_dependency(): void
     {
         $seederInfo = new SeederInfo(
-            className: 'App\\Seeders\\FooSeeder',
-            /** @phpstan-ignore-next-line  */
-            dependsOn: ['App\\Seeders\\DepASeeder']
+            className: 'App\\Seeders\\FooSeeder', // @phpstan-ignore argument.type
+            dependsOn: ['App\\Seeders\\DepASeeder'] // @phpstan-ignore argument.type
         );
 
         $this->mock(IdempotentSeederResolver::class, function (MockInterface $mock) use ($seederInfo) {
@@ -70,9 +69,8 @@ class AutoSeedListCommandTest extends TestCase
     public function test_format_dependencies_with_two_dependencies(): void
     {
         $seederInfo = new SeederInfo(
-            className: 'App\\Seeders\\FooSeeder',
-            /** @phpstan-ignore-next-line  */
-            dependsOn: [
+            className: 'App\\Seeders\\FooSeeder', // @phpstan-ignore argument.type
+            dependsOn: [ // @phpstan-ignore argument.type
                 'App\\Seeders\\DepASeeder',
                 'App\\Seeders\\DepBSeeder',
             ]
@@ -96,9 +94,8 @@ class AutoSeedListCommandTest extends TestCase
     public function test_format_dependencies_with_more_than_two_dependencies(): void
     {
         $seederInfo = new SeederInfo(
-            className: 'App\\Seeders\\FooSeeder',
-            /** @phpstan-ignore-next-line  */
-            dependsOn: [
+            className: 'App\\Seeders\\FooSeeder', // @phpstan-ignore argument.type
+            dependsOn: [ // @phpstan-ignore argument.type
                 'App\\Seeders\\DepASeeder',
                 'App\\Seeders\\DepBSeeder',
                 'App\\Seeders\\DepCSeeder',
@@ -126,9 +123,8 @@ class AutoSeedListCommandTest extends TestCase
     public function test_outputs_seeders_as_json(): void
     {
         $seederInfo = new SeederInfo(
-            className: 'App\\Seeders\\FooSeeder',
-            /** @phpstan-ignore-next-line  */
-            dependsOn: ['App\\Seeders\\BarSeeder']
+            className: 'App\\Seeders\\FooSeeder', // @phpstan-ignore argument.type
+            dependsOn: ['App\\Seeders\\BarSeeder'] // @phpstan-ignore argument.type
         );
 
         $this->mock(IdempotentSeederResolver::class, function (MockInterface $mock) use ($seederInfo) {
@@ -184,7 +180,7 @@ class AutoSeedListCommandTest extends TestCase
 
     public function test_outputs_table_and_hint_by_default(): void
     {
-        $seederInfo = new SeederInfo(className: 'App\\Seeders\\FooSeeder', dependsOn: []);
+        $seederInfo = new SeederInfo(className: 'App\\Seeders\\FooSeeder', dependsOn: []); // @phpstan-ignore argument.type
 
         $this->mock(IdempotentSeederResolver::class, function (MockInterface $mock) use ($seederInfo) {
             $mock->expects('discover')->andReturn([$seederInfo]);

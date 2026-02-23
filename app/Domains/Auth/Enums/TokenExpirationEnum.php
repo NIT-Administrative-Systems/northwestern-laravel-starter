@@ -35,6 +35,8 @@ enum TokenExpirationEnum: int implements HasLabel
     /**
      * Calculate the expiration date from now.
      * Returns null for NEVER.
+     *
+     * @return ($this is self::NEVER ? null : Carbon)
      */
     public function expiresAt(?Carbon $from = null): ?Carbon
     {
