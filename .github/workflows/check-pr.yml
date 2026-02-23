@@ -163,7 +163,7 @@ jobs:
           POSTGRES_DB: root
         ports:
           - 5432:5432
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+        options: --health-cmd pg_isready --health-interval 3s --health-timeout 3s --health-retries 5
 
     steps:
       - name: 📂 Checkout Repository
@@ -306,7 +306,7 @@ jobs:
           POSTGRES_DB: root
         ports:
           - 5432:5432
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+        options: --health-cmd pg_isready --health-interval 3s --health-timeout 3s --health-retries 5
 
     steps:
       - name: 📂 Checkout Repository
@@ -403,7 +403,7 @@ jobs:
           POSTGRES_DB: root
         ports:
           - 5432:5432
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+        options: --health-cmd pg_isready --health-interval 3s --health-timeout 3s --health-retries 5
 
     steps:
       - name: 📂 Checkout Repository
