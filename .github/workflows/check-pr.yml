@@ -412,20 +412,19 @@ jobs:
           mkdir -p .build
           phpcov merge --clover .build/clover.xml .build/coverage-shards
 
-      - name: 📊 Coverage PR Comment (Per-File Table)
-        if: github.event_name == 'pull_request'
-        uses: lucassabreu/comment-coverage-clover@v0.15.7
-        with:
-          file: .build/clover.xml
-          min-line-coverage: 0
-          min-method-coverage: 0
-          signature: "📊 **Code Coverage Report**"
-
-      - name: 📈 Coverage Delta Report
+      - name: 📊 Generate Coverage Report
+        id: coverage
         uses: clearlyip/code-coverage-report-action@v6
         with:
           filename: .build/clover.xml
           artifact_download_workflow_names: "Check PR"
+
+      - name: 💬 Coverage PR Comment
+        if: github.event_name == 'pull_request' && steps.coverage.outputs.file != ''
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          recreate: true
+          path: code-coverage-results.md
 
   end-to-end-tests:
     name: 🌲 Cypress Tests
