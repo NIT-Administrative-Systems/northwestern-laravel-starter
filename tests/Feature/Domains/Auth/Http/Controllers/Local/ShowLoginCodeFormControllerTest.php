@@ -157,4 +157,38 @@ class ShowLoginCodeFormControllerTest extends TestCase
         $response->assertOk();
         $response->assertViewIs('auth.login-code');
     }
+
+    public function test_clears_challenge_when_encrypted_id_cannot_be_decrypted(): void
+    {
+        $email = 'test@example.com';
+
+        $response = $this->withSession([
+            LoginCodeSession::EMAIL => $email,
+            LoginCodeSession::CHALLENGE_ID => 'invalid-ciphertext',
+        ])->get(route('login-code.code'));
+
+        $response->assertOk();
+        $response->assertViewIs('auth.login-code');
+        $response->assertSessionMissing(LoginCodeSession::CHALLENGE_ID);
+    }
+
+    public function test_clears_consumed_challenge_id(): void
+    {
+        $user = User::factory()->affiliate()->create(['email' => 'consumed@example.com']);
+        $consumedChallenge = LoginChallenge::create([
+            'email' => $user->email,
+            'code_hash' => Hash::make('123456'),
+            'expires_at' => now()->addMinutes(10),
+            'consumed_at' => now()->subMinute(),
+        ]);
+
+        $response = $this->withSession([
+            LoginCodeSession::EMAIL => $user->email,
+            LoginCodeSession::CHALLENGE_ID => Crypt::encryptString((string) $consumedChallenge->id),
+        ])->get(route('login-code.code'));
+
+        $response->assertOk();
+        $response->assertViewIs('auth.login-code');
+        $response->assertSessionMissing(LoginCodeSession::CHALLENGE_ID);
+    }
 }

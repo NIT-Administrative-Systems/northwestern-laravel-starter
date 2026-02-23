@@ -115,4 +115,85 @@ class VerifyLoginCodeControllerTest extends TestCase
         $response->assertSessionHasErrors('code');
         $this->assertGuest();
     }
+
+    public function test_returns_error_when_challenge_id_is_missing_from_session(): void
+    {
+        $response = $this->post(route('login-code.verify'), ['code' => '123456']);
+
+        $response->assertSessionHasErrors('code');
+        $this->assertGuest();
+    }
+
+    public function test_clears_session_and_returns_error_when_challenge_id_cannot_be_decrypted(): void
+    {
+        $response = $this->withSession([
+            LoginCodeSession::EMAIL => 'test@example.com',
+            LoginCodeSession::CHALLENGE_ID => 'invalid-ciphertext',
+        ])->post(route('login-code.verify'), ['code' => '123456']);
+
+        $response->assertSessionHasErrors('code');
+        $response->assertSessionMissing(LoginCodeSession::CHALLENGE_ID);
+        $this->assertGuest();
+    }
+
+    public function test_returns_lockout_error_when_challenge_is_locked(): void
+    {
+        config(['local-auth.code.lock_minutes' => 15]);
+
+        $user = User::factory()->affiliate()->create(['email' => 'locked@example.com']);
+        $challenge = LoginChallenge::create([
+            'email' => $user->email,
+            'code_hash' => Hash::make('123456'),
+            'expires_at' => now()->addMinutes(10),
+            'locked_until' => now()->addMinutes(5),
+        ]);
+
+        $response = $this->withSession([
+            LoginCodeSession::EMAIL => $user->email,
+            LoginCodeSession::CHALLENGE_ID => Crypt::encryptString((string) $challenge->id),
+        ])->post(route('login-code.verify'), ['code' => '123456']);
+
+        $response->assertSessionHasErrors('code');
+        $this->assertStringContainsString('Too many attempts', (string) session('errors')->first('code'));
+        $this->assertGuest();
+    }
+
+    public function test_returns_invalid_code_when_challenge_user_no_longer_exists(): void
+    {
+        $challenge = LoginChallenge::create([
+            'email' => 'missing-user@example.com',
+            'code_hash' => Hash::make('123456'),
+            'expires_at' => now()->addMinutes(10),
+        ]);
+
+        $response = $this->withSession([
+            LoginCodeSession::EMAIL => 'missing-user@example.com',
+            LoginCodeSession::CHALLENGE_ID => Crypt::encryptString((string) $challenge->id),
+        ])->post(route('login-code.verify'), ['code' => '123456']);
+
+        $response->assertSessionHasErrors('code');
+        $this->assertGuest();
+    }
+
+    public function test_valid_code_marks_email_as_verified_when_missing(): void
+    {
+        $user = User::factory()->affiliate()->create([
+            'email' => 'unverified@example.com',
+            'email_verified_at' => null,
+        ]);
+
+        $challenge = LoginChallenge::create([
+            'email' => $user->email,
+            'code_hash' => Hash::make('123456'),
+            'expires_at' => now()->addMinutes(10),
+        ]);
+
+        $response = $this->withSession([
+            LoginCodeSession::EMAIL => $user->email,
+            LoginCodeSession::CHALLENGE_ID => Crypt::encryptString((string) $challenge->id),
+        ])->post(route('login-code.verify'), ['code' => '123456']);
+
+        $response->assertRedirect('/');
+        $this->assertNotNull($user->fresh()->email_verified_at);
+    }
 }
