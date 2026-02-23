@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domains\Core\Concerns;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Testing\TestResponse;
 use InvalidArgumentException;
 use Northwestern\SysDev\SOA\EventHub;
@@ -22,7 +23,7 @@ trait MocksEventHub
      * @param  string  $queue  The EventHub topic/queue name (e.g., 'etidentity.ldap.netid.term')
      * @param  string  $message  The raw message payload to send (typically URL-encoded or JSON)
      * @param  bool  $viaQueue  Whether to send via EventHub queue instead of direct HTTP (default: false)
-     * @return ($viaQueue is true ? mixed : TestResponse|\Symfony\Component\HttpFoundation\Response)
+     * @return ($viaQueue is true ? mixed : TestResponse<Response>)
      *
      * @throws InvalidArgumentException When no webhook route is registered for the specified queue
      */

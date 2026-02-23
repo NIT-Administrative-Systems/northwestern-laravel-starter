@@ -43,6 +43,7 @@ class ProblemDetailsRendererTest extends TestCase
         $this->renderer = resolve(ProblemDetailsRenderer::class);
     }
 
+    /** @param array<string, string> $server */
     private function renderForRequest(Throwable $e, string $uri, array $server = []): ?JsonResponse
     {
         $request = Request::create($uri, 'GET', [], [], [], $server);
@@ -84,6 +85,7 @@ class ProblemDetailsRendererTest extends TestCase
         $this->assertSame('about:blank', $data['type']);
     }
 
+    /** @return array<string, array{0: Throwable, 1: int, 2: string}> */
     public static function simpleExceptionMappingProvider(): array
     {
         return [

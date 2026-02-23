@@ -15,6 +15,7 @@ use App\Filament\Resources\Users\RelationManagers\LoginRecordsRelationManager;
 use App\Filament\Resources\Users\RelationManagers\RolesRelationManager;
 use App\Filament\Resources\Users\Tables\UsersTable;
 use BackedEnum;
+use Filament\Resources\Pages\PageRegistration;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
@@ -43,6 +44,7 @@ class UserResource extends Resource
         return UsersTable::configure($table);
     }
 
+    /** @return array<int, class-string> */
     public static function getRelations(): array
     {
         return [
@@ -54,6 +56,7 @@ class UserResource extends Resource
         ];
     }
 
+    /** @return array<string, PageRegistration> */
     public static function getPages(): array
     {
         return [
@@ -73,6 +76,7 @@ class UserResource extends Resource
         return sprintf('%s (%s)', $record->clerical_name, $record->username);
     }
 
+    /** @return array<string, string> */
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         /** @var User $record */
@@ -82,6 +86,7 @@ class UserResource extends Resource
         ];
     }
 
+    /** @return list<string> */
     public static function getGloballySearchableAttributes(): array
     {
         return [
@@ -94,6 +99,7 @@ class UserResource extends Resource
         ];
     }
 
+    /** @return Builder<User> */
     public static function getRecordRouteBindingEloquentQuery(): Builder
     {
         return parent::getRecordRouteBindingEloquentQuery()

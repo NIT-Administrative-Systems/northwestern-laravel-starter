@@ -11,7 +11,7 @@ parameters:
         - database
         - config
         - tests
-    level: 5
+    level: 6
     editorUrl: 'phpstorm://open?file=%%file%%&line=%%line%%'
     tmpDir: /tmp/phpstan
     treatPhpDocTypesAsCertain: false

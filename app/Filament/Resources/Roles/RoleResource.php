@@ -14,6 +14,7 @@ use App\Filament\Resources\Roles\RelationManagers\UsersRelationManager;
 use App\Filament\Resources\Roles\Schemas\RoleForm;
 use App\Filament\Resources\Roles\Tables\RolesTable;
 use BackedEnum;
+use Filament\Resources\Pages\PageRegistration;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -47,6 +48,7 @@ class RoleResource extends Resource
         return RolesTable::configure($table);
     }
 
+    /** @return array<int, class-string> */
     public static function getRelations(): array
     {
         return [
@@ -54,6 +56,7 @@ class RoleResource extends Resource
         ];
     }
 
+    /** @return array<string, PageRegistration> */
     public static function getPages(): array
     {
         return [
@@ -69,6 +72,7 @@ class RoleResource extends Resource
         return number_format(static::getModel()::count());
     }
 
+    /** @return array<string, string> */
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         /** @var Role $record */
@@ -88,6 +92,7 @@ class RoleResource extends Resource
         return $details;
     }
 
+    /** @return list<string> */
     public static function getGloballySearchableAttributes(): array
     {
         return [
@@ -96,6 +101,7 @@ class RoleResource extends Resource
         ];
     }
 
+    /** @return Builder<Role> */
     public static function getGlobalSearchEloquentQuery(): Builder
     {
         return parent::getGlobalSearchEloquentQuery()
@@ -103,6 +109,7 @@ class RoleResource extends Resource
             ->withCount(['users', 'permissions']);
     }
 
+    /** @return Builder<Role> */
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
@@ -110,6 +117,7 @@ class RoleResource extends Resource
             ->withCount(['users', 'permissions']);
     }
 
+    /** @return Builder<Role> */
     public static function getRecordRouteBindingEloquentQuery(): Builder
     {
         return parent::getRecordRouteBindingEloquentQuery()

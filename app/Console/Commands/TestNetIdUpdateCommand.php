@@ -76,6 +76,7 @@ class TestNetIdUpdateCommand extends Command implements PromptsForMissingInput
         return self::SUCCESS;
     }
 
+    /** @return array<string, mixed> */
     protected function promptForMissingArgumentsUsing(): array
     {
         return [

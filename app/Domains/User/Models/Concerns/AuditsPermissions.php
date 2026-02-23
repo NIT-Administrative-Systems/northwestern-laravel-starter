@@ -7,6 +7,7 @@ namespace App\Domains\User\Models\Concerns;
 use App\Domains\Auth\Enums\PermissionEnum;
 use App\Domains\Auth\Models\Permission;
 use App\Domains\Auth\Models\Role;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection as BaseCollection;
 use Illuminate\Support\Facades\Event;
 use OwenIt\Auditing\Events\AuditCustom;
@@ -41,9 +42,10 @@ trait AuditsPermissions
 
         $this->syncPermissions($permissions);
 
-        $newPermissions = $this->mapPermissionsToArray(
-            $this->fresh('permissions')->permissions
-        );
+        $freshModel = $this->fresh('permissions');
+        $newPermissions = $freshModel
+            ? $this->mapPermissionsToArray($freshModel->permissions)
+            : [];
 
         $oldPermissionNames = collect($oldPermissions)->pluck('name')->toArray();
         $newPermissionNames = collect($newPermissions)->pluck('name')->toArray();
@@ -70,16 +72,18 @@ trait AuditsPermissions
     /**
      * Converts a collection of permissions to a simplified array format.
      *
+     * @param  BaseCollection<array-key, Permission|Model>  $permissions
      * @return list<PermissionData> Array of simplified permission data
      */
     private function mapPermissionsToArray(BaseCollection $permissions): array
     {
-        return $permissions->map(fn (Permission $permission): array => [
+        /** @var BaseCollection<int, Permission> $permissions */
+        return array_values($permissions->map(fn (Permission $permission): array => [
             'name' => $permission->name,
             'label' => $permission->label,
             'system_managed' => $permission->system_managed,
             'api_relevant' => $permission->api_relevant,
-        ])->all();
+        ])->all());
     }
 
     /**

@@ -166,7 +166,8 @@ class AuditsTable
                         }
 
                         $map = self::modelTypeValueToLabelMap();
-                        $labels = collect($values)->map(fn ($v) => $map[$v] ?? $v)->all();
+                        /** @var list<string> $values */
+                        $labels = collect($values)->map(fn (string $v) => $map[$v] ?? $v)->all();
 
                         return 'Record: ' . implode(', ', $labels);
                     }),
@@ -234,7 +235,8 @@ class AuditsTable
                         }
 
                         $map = self::modelTypeValueToLabelMap();
-                        $labels = collect($types)->map(fn ($v) => $map[$v] ?? $v)->all();
+                        /** @var list<string> $types */
+                        $labels = collect($types)->map(fn (string $v) => $map[$v] ?? $v)->all();
 
                         return 'Ignored: ' . implode(', ', $labels);
                     }),

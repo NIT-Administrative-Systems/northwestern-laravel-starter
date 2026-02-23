@@ -118,7 +118,7 @@ class AuthenticatesAccessTokens
          * a client IP.
          */
         if (blank($requestIp)) {
-            report(new MissingRequestIpForRestrictedToken($allowedIps));
+            report(new MissingRequestIpForRestrictedToken(array_values($allowedIps)));
 
             return false;
         }

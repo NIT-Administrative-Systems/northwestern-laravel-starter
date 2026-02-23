@@ -40,6 +40,7 @@ class MarkdownWithJiraLinksCast implements CastsAttributes
 
         $pattern = sprintf('/`(%s-\d+)`/', preg_quote($identifier, '/'));
 
+        /** @var string */
         return Str::replaceMatches($pattern, static function (array $match) use ($baseUrl): string {
             $issueId = $match[1];
 
@@ -49,7 +50,7 @@ class MarkdownWithJiraLinksCast implements CastsAttributes
                 $issueId,
                 $issueId,
             );
-        }, $value ?? '');
+        }, (string) ($value ?? ''));
     }
 
     /**

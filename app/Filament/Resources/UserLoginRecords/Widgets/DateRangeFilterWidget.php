@@ -154,7 +154,7 @@ class DateRangeFilterWidget extends Widget implements HasForms
         $this->broadcastDateRange();
     }
 
-    public function handleStartDateChange($state): void
+    public function handleStartDateChange(mixed $state): void
     {
         if ($state) {
             $date = Carbon::parse($state, auth()->user()->timezone)->startOfDay();
@@ -165,7 +165,7 @@ class DateRangeFilterWidget extends Widget implements HasForms
         }
     }
 
-    public function handleEndDateChange($state): void
+    public function handleEndDateChange(mixed $state): void
     {
         if ($state) {
             $date = Carbon::parse($state, auth()->user()->timezone)->endOfDay();

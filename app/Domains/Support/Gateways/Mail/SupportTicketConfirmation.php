@@ -38,7 +38,7 @@ class SupportTicketConfirmation extends Mailable implements ShouldQueue
         ))
             ->markdown('mail.support.ticket-confirmation')
             ->with([
-                'submitter' => $this->ticket->user->first_name,
+                'submitter' => $this->ticket->user->first_name ?? 'User',
                 'subject' => $this->ticket->subject,
                 'referenceNumber' => $this->referenceNumber,
             ]);

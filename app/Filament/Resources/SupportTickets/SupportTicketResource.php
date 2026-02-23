@@ -10,6 +10,7 @@ use App\Filament\Navigation\AdministrationNavGroup;
 use App\Filament\Resources\SupportTickets\Schemas\SupportTicketInfolist;
 use App\Filament\Resources\SupportTickets\Tables\SupportTicketsTable;
 use BackedEnum;
+use Filament\Resources\Pages\PageRegistration;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -67,6 +68,7 @@ class SupportTicketResource extends Resource
         return $record->subject;
     }
 
+    /** @return array<string, string|null> */
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         /** @var SupportTicket $record */
@@ -77,6 +79,7 @@ class SupportTicketResource extends Resource
         ]);
     }
 
+    /** @return list<string> */
     public static function getGloballySearchableAttributes(): array
     {
         return [
@@ -89,16 +92,19 @@ class SupportTicketResource extends Resource
         ];
     }
 
+    /** @return Builder<SupportTicket> */
     public static function getGlobalSearchEloquentQuery(): Builder
     {
         return parent::getGlobalSearchEloquentQuery()->with('user');
     }
 
+    /** @return Builder<SupportTicket> */
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()->with('user');
     }
 
+    /** @return array<string, PageRegistration> */
     public static function getPages(): array
     {
         return [

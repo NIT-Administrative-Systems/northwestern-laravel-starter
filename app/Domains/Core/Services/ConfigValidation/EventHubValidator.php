@@ -64,11 +64,12 @@ class EventHubValidator implements ConfigValidator
         return "{$count} required EventHub " . ($count === 1 ? 'variable is' : 'variables are') . ' not set';
     }
 
+    /** @return list<string> */
     public function hints(): array
     {
-        $hints = $this->missingVariables
+        $hints = array_values($this->missingVariables
             ->map(fn (string $variable): string => "Set <comment>{$variable}</comment> in your .env file")
-            ->all();
+            ->all());
 
         $hints[] = 'Or set <comment>EVENT_HUB_MOCK_ENABLED=true</comment> for local development';
 

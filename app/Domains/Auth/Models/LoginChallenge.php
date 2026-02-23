@@ -38,6 +38,7 @@ class LoginChallenge extends BaseModel
 
     protected $hidden = ['code_hash'];
 
+    /** @var list<string> */
     protected array $auditExclude = ['code_hash'];
 
     /**

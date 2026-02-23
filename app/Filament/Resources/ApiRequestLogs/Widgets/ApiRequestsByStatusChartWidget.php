@@ -87,7 +87,7 @@ class ApiRequestsByStatusChartWidget extends BaseApiRequestChartWidget
             $periodMap = [];
 
             foreach (range(0, 23) as $hour) {
-                $labels[] = date('g A', mktime($hour, 0));
+                $labels[] = date('g A', (int) mktime($hour, 0));
                 $periodMap[(string) $hour] = array_key_last($labels);
             }
         } else {

@@ -71,7 +71,9 @@ readonly class CreateApiUser
                 'allowed_ips' => $allowedIps,
             ]);
 
-            return $user->fresh('access_tokens');
+            $user->refresh()->load('access_tokens');
+
+            return $user;
         });
 
         return [$user, $rawToken];

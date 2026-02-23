@@ -6,6 +6,7 @@ namespace Tests;
 
 use App\Domains\Auth\Models\AccessToken;
 use App\Domains\User\Models\User;
+use Illuminate\Http\Response;
 use Illuminate\Testing\TestResponse;
 
 abstract class ApiTestCase extends TestCase
@@ -46,6 +47,7 @@ abstract class ApiTestCase extends TestCase
      */
     abstract public static function methods(): array;
 
+    /** @return array<string, string> */
     protected function bearerAuthenticationHeader(): array
     {
         return ['Authorization' => 'Bearer ' . $this->rawAccessToken];
@@ -56,6 +58,7 @@ abstract class ApiTestCase extends TestCase
      *
      * @param  array<string, mixed>  $data
      * @param  array<string, string>  $headers
+     * @return TestResponse<Response>
      */
     protected function authenticatedJson(string $method, array $data = [], array $headers = []): TestResponse
     {
@@ -72,6 +75,7 @@ abstract class ApiTestCase extends TestCase
      *
      * @param  array<string, mixed>  $query
      * @param  array<string, string>  $headers
+     * @return TestResponse<Response>
      */
     protected function authenticatedGet(array $query = [], array $headers = []): TestResponse
     {
@@ -89,6 +93,7 @@ abstract class ApiTestCase extends TestCase
      *
      * @param  array<string, mixed>  $data
      * @param  array<string, string>  $headers
+     * @return TestResponse<Response>
      */
     protected function authenticatedPost(array $data = [], array $headers = []): TestResponse
     {
@@ -104,6 +109,7 @@ abstract class ApiTestCase extends TestCase
      *
      * @param  array<string, mixed>  $data
      * @param  array<string, string>  $headers
+     * @return TestResponse<Response>
      */
     protected function authenticatedPut(array $data = [], array $headers = []): TestResponse
     {
@@ -119,6 +125,7 @@ abstract class ApiTestCase extends TestCase
      *
      * @param  array<string, mixed>  $data
      * @param  array<string, string>  $headers
+     * @return TestResponse<Response>
      */
     protected function authenticatedPatch(array $data = [], array $headers = []): TestResponse
     {
@@ -134,6 +141,7 @@ abstract class ApiTestCase extends TestCase
      *
      * @param  array<string, mixed>  $data
      * @param  array<string, string>  $headers
+     * @return TestResponse<Response>
      */
     protected function authenticatedDelete(array $data = [], array $headers = []): TestResponse
     {

@@ -46,12 +46,14 @@ class AuthenticatesAccessTokensTest extends TestCase
         parent::tearDown();
     }
 
+    /** @return array<string, string> */
     private function bearerHeader(string $token): array
     {
         return ['Authorization' => 'Bearer ' . $token];
     }
 
     /**
+     * @param  array<string, mixed>  $overrides
      * @return array{0: string, 1: AccessToken} Tuple of plain token and the created {@see AccessToken}
      */
     private function issueToken(User $user, array $overrides = []): array
@@ -99,6 +101,7 @@ class AuthenticatesAccessTokensTest extends TestCase
         );
     }
 
+    /** @return array<string, array{0: string|null, 1: ApiRequestFailureEnum}> */
     public static function malformedAuthHeaderProvider(): array
     {
         return [
@@ -173,6 +176,7 @@ class AuthenticatesAccessTokensTest extends TestCase
             ]);
     }
 
+    /** @param array<string, mixed> $tokenData */
     #[DataProvider('invalidTokenProvider')]
     public function test_invalid_tokens_are_rejected(array $tokenData): void
     {
@@ -199,6 +203,7 @@ class AuthenticatesAccessTokensTest extends TestCase
         ]);
     }
 
+    /** @return array<string, array{0: array<string, mixed>}> */
     public static function invalidTokenProvider(): array
     {
         $now = CarbonImmutable::parse('2025-05-16 09:00');

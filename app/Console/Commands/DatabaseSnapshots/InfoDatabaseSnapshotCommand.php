@@ -46,7 +46,7 @@ class InfoDatabaseSnapshotCommand extends DatabaseSnapshotCommand
         $snapshotName = $this->argument('filename');
 
         if ($snapshotName === null) {
-            $snapshotName = select(
+            $snapshotName = (string) select(
                 label: 'Select a snapshot to inspect',
                 options: $this->buildSnapshotSelectOptions($snapshots),
             );

@@ -79,7 +79,9 @@ class AccessTokenApiControllerTest extends ApiTestCase
 
         $response->assertOk();
 
-        $tokenNames = collect($response->json('data'))->pluck('name')->toArray();
+        /** @var list<array<string, mixed>> $data */
+        $data = $response->json('data');
+        $tokenNames = collect($data)->pluck('name')->toArray();
         $this->assertNotContains('Other User Token', $tokenNames);
     }
 
@@ -104,8 +106,11 @@ class AccessTokenApiControllerTest extends ApiTestCase
 
         $response->assertOk();
 
-        $tokens = collect($response->json('data'));
+        /** @var list<array<string, mixed>> $tokenData */
+        $tokenData = $response->json('data');
+        $tokens = collect($tokenData);
         $firstToken = $tokens->first();
+        $this->assertNotNull($firstToken);
 
         $this->assertEquals(AccessTokenStatusEnum::ACTIVE->value, $firstToken['status']);
     }
@@ -173,7 +178,8 @@ class AccessTokenApiControllerTest extends ApiTestCase
 
         $response->assertCreated();
 
-        $token = AccessToken::find($response->json('data.id'));
+        /** @var AccessToken $token */
+        $token = AccessToken::findOrFail($response->json('data.id'));
         $this->assertNotNull($token->expires_at);
         $this->assertEquals($expiresAt->timestamp, $token->expires_at->timestamp);
     }
@@ -186,7 +192,8 @@ class AccessTokenApiControllerTest extends ApiTestCase
 
         $response->assertCreated();
 
-        $token = AccessToken::find($response->json('data.id'));
+        /** @var AccessToken $token */
+        $token = AccessToken::findOrFail($response->json('data.id'));
         $this->assertNull($token->expires_at);
     }
 
@@ -202,7 +209,8 @@ class AccessTokenApiControllerTest extends ApiTestCase
         $response->assertCreated();
         $response->assertJsonPath('data.allowed_ips', $allowedIps);
 
-        $token = AccessToken::find($response->json('data.id'));
+        /** @var AccessToken $token */
+        $token = AccessToken::findOrFail($response->json('data.id'));
         $this->assertEquals($allowedIps, $token->allowed_ips);
     }
 
@@ -288,6 +296,7 @@ class AccessTokenApiControllerTest extends ApiTestCase
     public function test_destroy_prevents_revoking_current_token(): void
     {
         $currentToken = $this->apiUser->access_tokens()->first();
+        $this->assertNotNull($currentToken);
 
         $response = $this->deleteJson(
             $this->endpoint() . '/' . $currentToken->id,

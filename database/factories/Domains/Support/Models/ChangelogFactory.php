@@ -40,7 +40,7 @@ class ChangelogFactory extends Factory
         for ($i = 0; $i < fake()->numberBetween(1, 3); $i++) {
             $enhancements[] = sprintf(
                 '- **%s** — %s',
-                fake()->words(3, true),
+                implode(' ', fake()->words(3)),
                 fake()->sentence(),
             );
         }

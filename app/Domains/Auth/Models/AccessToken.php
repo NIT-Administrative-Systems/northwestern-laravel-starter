@@ -35,6 +35,7 @@ class AccessToken extends BaseModel
 
     protected $hidden = ['token_hash'];
 
+    /** @var list<string> */
     protected array $auditExclude = ['token_hash'];
 
     protected $appends = ['status'];
@@ -44,7 +45,9 @@ class AccessToken extends BaseModel
      *
      * This is a useful default for UI presentation, so that most relevant tokens are shown first.
      *
+     * @param  Builder<static>  $query
      * @param  Carbon|null  $at  Optional reference time for determining token validity. Defaults to now.
+     * @return Builder<static>
      */
     #[Scope]
     protected function orderByRelevance(Builder $query, ?Carbon $at = null): Builder
@@ -69,6 +72,10 @@ class AccessToken extends BaseModel
             ->orderByDesc('id');
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     #[Scope]
     protected function active(Builder $query, ?Carbon $at = null): Builder
     {

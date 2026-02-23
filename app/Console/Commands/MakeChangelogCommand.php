@@ -58,10 +58,16 @@ class MakeChangelogCommand extends Command
             throw new RuntimeException(sprintf('Directory "%s" was not created', $basePath));
         }
 
+        $stub = file_get_contents(base_path('stubs/changelog.stub'));
+
+        if ($stub === false) {
+            throw new RuntimeException('Unable to read stubs/changelog.stub');
+        }
+
         $content = str_replace(
             ['{{ slug }}', '{{ date }}', '{{ title }}'],
             [$slug, $date, $title],
-            file_get_contents(base_path('stubs/changelog.stub')),
+            $stub,
         );
 
         file_put_contents($filepath, $content);

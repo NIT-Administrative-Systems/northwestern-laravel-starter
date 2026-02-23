@@ -103,6 +103,12 @@ class SendAccessTokenExpirationNotificationsCommand extends Command
     {
         $user = $token->user;
 
+        if (! $user) {
+            $this->components->warn("Skipping token #{$token->id}: user no longer exists");
+
+            return;
+        }
+
         $this->line("⏳ Processing token for {$user->username} ({$user->email})");
 
         Mail::to($user->email)->queue(
@@ -121,13 +127,13 @@ class SendAccessTokenExpirationNotificationsCommand extends Command
      */
     private function handleError(AccessToken $token, Throwable $e): void
     {
-        $user = $token->user;
+        $identifier = $token->user->username ?? "token #{$token->id}";
 
-        $this->components->error("Failed to send notification for {$user->username}: {$e->getMessage()}");
+        $this->components->error("Failed to send notification for {$identifier}: {$e->getMessage()}");
 
         Log::error('Failed to send access token expiration notification', [
-            'user_id' => $user->id,
-            'username' => $user->username,
+            'user_id' => $token->user?->id,
+            'username' => $token->user?->username,
             'token_id' => $token->id,
             'error' => $e->getMessage(),
             'trace' => $e->getTraceAsString(),

@@ -60,9 +60,12 @@ class AuditsPermissionsTest extends TestCase
             ->first();
 
         $this->assertNotNull($audit);
+        $this->assertNotNull($audit->new_values);
         $this->assertArrayHasKey('added_permissions', $audit->new_values);
 
-        $addedPermission = collect($audit->new_values['added_permissions'])->firstWhere('name', PermissionEnum::VIEW_USERS->value);
+        /** @var list<array<string, mixed>> $addedPermissions */
+        $addedPermissions = $audit->new_values['added_permissions'];
+        $addedPermission = collect($addedPermissions)->firstWhere('name', PermissionEnum::VIEW_USERS->value);
         $this->assertNotNull($addedPermission);
         $this->assertArrayHasKey('name', $addedPermission);
         $this->assertArrayHasKey('label', $addedPermission);
@@ -83,9 +86,12 @@ class AuditsPermissionsTest extends TestCase
             ->first();
 
         $this->assertNotNull($audit);
+        $this->assertNotNull($audit->new_values);
         $this->assertArrayHasKey('removed_permissions', $audit->new_values);
 
-        $removedNames = collect($audit->new_values['removed_permissions'])->pluck('name')->all();
+        /** @var list<array<string, mixed>> $removedPermissions */
+        $removedPermissions = $audit->new_values['removed_permissions'];
+        $removedNames = collect($removedPermissions)->pluck('name')->all();
         $this->assertContains(PermissionEnum::VIEW_USERS->value, $removedNames);
     }
 
@@ -102,12 +108,18 @@ class AuditsPermissionsTest extends TestCase
             ->first();
 
         $this->assertNotNull($audit);
+        $this->assertNotNull($audit->old_values);
+        $this->assertNotNull($audit->new_values);
 
-        $beforeNames = collect($audit->old_values['permissions_before_change'])->pluck('name')->all();
+        /** @var list<array<string, mixed>> $beforePermissions */
+        $beforePermissions = $audit->old_values['permissions_before_change'];
+        $beforeNames = collect($beforePermissions)->pluck('name')->all();
         $this->assertContains(PermissionEnum::VIEW_USERS->value, $beforeNames);
         $this->assertNotContains(PermissionEnum::EDIT_USERS->value, $beforeNames);
 
-        $afterNames = collect($audit->new_values['permissions_after_change'])->pluck('name')->all();
+        /** @var list<array<string, mixed>> $afterPermissions */
+        $afterPermissions = $audit->new_values['permissions_after_change'];
+        $afterNames = collect($afterPermissions)->pluck('name')->all();
         $this->assertContains(PermissionEnum::EDIT_USERS->value, $afterNames);
         $this->assertNotContains(PermissionEnum::VIEW_USERS->value, $afterNames);
     }
