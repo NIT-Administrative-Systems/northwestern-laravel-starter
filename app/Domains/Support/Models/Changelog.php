@@ -7,6 +7,7 @@ namespace App\Domains\Support\Models;
 use App\Domains\Core\Models\BaseModel;
 use App\Domains\Foundation\Casts\MarkdownWithJiraLinksCast;
 use App\Domains\Support\Seeders\ChangelogSeeder;
+use Database\Factories\Domains\Support\Models\ChangelogFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -20,6 +21,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Changelog extends BaseModel
 {
+    /** @use HasFactory<ChangelogFactory> */
     use HasFactory, SoftDeletes;
 
     /** @var array<string, string> */

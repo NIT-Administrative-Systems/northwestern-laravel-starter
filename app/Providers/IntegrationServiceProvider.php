@@ -45,8 +45,8 @@ class IntegrationServiceProvider extends ServiceProvider
         }
 
         $this->app->instance(Topic::class, \Mockery::mock(Topic::class, static function (MockInterface $mock) {
-            $mock->allows('writeMessage')->andReturn((string) Str::uuid());
-            $mock->allows('writeJsonMessage')->andReturn((string) Str::uuid());
+            $mock->shouldReceive('writeMessage')->andReturn((string) Str::uuid());
+            $mock->shouldReceive('writeJsonMessage')->andReturn((string) Str::uuid());
         }));
     }
 }

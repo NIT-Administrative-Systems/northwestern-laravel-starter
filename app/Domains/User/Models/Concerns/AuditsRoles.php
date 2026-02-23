@@ -108,9 +108,10 @@ trait AuditsRoles
         array $context = []
     ): void {
         // Get latest roles after the modification
-        $newRoles = $this->mapRolesToArray(
-            $this->fresh(['roles.role_type'])->roles
-        );
+        $freshModel = $this->fresh(['roles.role_type']);
+        $newRoles = $freshModel
+            ? $this->mapRolesToArray($freshModel->roles)
+            : [];
 
         $isAssignment = $event === 'role_assigned';
         $modifiedRoles = $this->mapRolesToArray($roles);
@@ -149,11 +150,11 @@ trait AuditsRoles
      */
     private function mapRolesToArray(BaseCollection $roles): array
     {
-        return $roles->map(fn (Role $role): array => [
+        return array_values($roles->map(fn (Role $role): array => [
             'id' => (int) $role->id,
             'name' => $role->name,
-            'role_type' => $role->role_type->slug->getLabel(),
-        ])->all();
+            'role_type' => $role->role_type?->slug->getLabel() ?? 'Unknown',
+        ])->all());
     }
 
     /**

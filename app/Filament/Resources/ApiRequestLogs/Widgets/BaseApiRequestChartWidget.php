@@ -67,9 +67,10 @@ abstract class BaseApiRequestChartWidget extends ChartWidget
             return (string) $number;
         }
 
-        return Number::abbreviate($number, precision: 1);
+        return (string) Number::abbreviate($number, precision: 1);
     }
 
+    /** @return Builder<ApiRequestLog> */
     protected function baseQuery(): Builder
     {
         return ApiRequestLog::query()

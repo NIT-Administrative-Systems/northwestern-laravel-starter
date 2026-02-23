@@ -31,6 +31,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use OwenIt\Auditing\Contracts\Auditable;
@@ -86,11 +87,16 @@ class User extends Authenticatable implements Auditable, FilamentUser, HasName
         'directory_sync_last_failed_at' => 'datetime',
     ];
 
+    /**
+     * @param  Builder  $query
+     * @return UserBuilder<self>
+     */
     public function newEloquentBuilder($query): UserBuilder
     {
         return new UserBuilder($query);
     }
 
+    /** @return UserBuilder<static> */
     public static function query(): UserBuilder
     {
         /** @var UserBuilder<static> $builder */

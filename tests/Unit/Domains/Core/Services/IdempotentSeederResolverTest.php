@@ -424,17 +424,19 @@ PHP;
 
     // Helper methods
 
+    /** @param list<string> $dependencies */
     private function createTestSeeder(string $name, array $dependencies = []): void
     {
         $this->createTestSeederInPath($this->testSeedersPath, $name, $dependencies);
     }
 
+    /** @param list<string> $dependencies */
     private function createTestSeederInPath(string $path, string $name, array $dependencies = []): void
     {
         $dependsOnStr = '';
         if (filled($dependencies)) {
             // Dependencies without namespace are already in TestSeeders namespace
-            $deps = array_map(function ($dep) {
+            $deps = array_map(function (string $dep) {
                 // If dependency contains namespace, prefix with \ to make it absolute
                 // Otherwise, just use the class name (will resolve in current namespace)
                 if (str_contains($dep, '\\')) {

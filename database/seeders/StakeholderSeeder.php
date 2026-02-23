@@ -7,6 +7,7 @@ namespace Database\Seeders;
 use App\Domains\Auth\Enums\RoleTypeEnum;
 use App\Domains\Auth\Models\Role;
 use App\Domains\User\Actions\Directory\FindOrUpdateUserFromDirectory;
+use App\Domains\User\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Collection;
 use Throwable;
@@ -68,6 +69,15 @@ class StakeholderSeeder extends Seeder
         foreach ($netIds as $netId) {
             try {
                 $user = retry(3, fn () => ($this->findOrUpdateUserFromDirectory)($netId));
+
+                if (! $user instanceof User) {
+                    $this->command->getOutput()->writeln(
+                        "<comment>User not found in directory, skipping:</comment> {$netId}"
+                    );
+
+                    continue;
+                }
+
                 $user->roles()->sync($roles->map->id);
             } catch (Throwable) {
                 $this->command->getOutput()->writeln(
@@ -81,8 +91,8 @@ class StakeholderSeeder extends Seeder
      * Parses a stakeholder configuration value, which can be either a comma-separated string
      * of NetIDs or an array of NetIDs, into a clean array of NetIDs.
      *
-     * @param  string|array  $config  The configuration value from `config/platform.php`.
-     * @return array<int, string> A cleaned array of NetIDs.
+     * @param  string|list<string>  $config  The configuration value from `config/platform.php`.
+     * @return list<string> A cleaned array of NetIDs.
      */
     protected function parseStakeholderConfig(string|array $config): array
     {

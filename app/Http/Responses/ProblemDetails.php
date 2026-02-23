@@ -130,6 +130,8 @@ class ProblemDetails
 
     /**
      * Common problem details responses.
+     *
+     * @param  array<string, string>  $headers
      */
     public static function unauthorized(string $detail = 'Authentication failed', array $headers = []): JsonResponse
     {
@@ -146,6 +148,7 @@ class ProblemDetails
         );
     }
 
+    /** @param array<string, string> $headers */
     public static function forbidden(string $detail = 'Access forbidden', array $headers = []): JsonResponse
     {
         return self::response(
@@ -156,6 +159,7 @@ class ProblemDetails
         );
     }
 
+    /** @param array<string, string> $headers */
     public static function notFound(string $detail = 'Resource not found', array $headers = []): JsonResponse
     {
         return self::response(
@@ -166,9 +170,10 @@ class ProblemDetails
         );
     }
 
+    /** @param array<string, string> $headers */
     public static function serviceUnavailable(string $detail = 'Service temporarily unavailable', int $retryAfter = 3600, array $headers = []): JsonResponse
     {
-        $defaultHeaders = ['Retry-After' => $retryAfter];
+        $defaultHeaders = ['Retry-After' => (string) $retryAfter];
 
         return self::response(
             status: Response::HTTP_SERVICE_UNAVAILABLE,
@@ -178,16 +183,21 @@ class ProblemDetails
         );
     }
 
+    /** @param array<string, string> $headers */
     public static function tooManyRequests(string $detail = 'Too many requests', int $retryAfter = 60, array $headers = []): JsonResponse
     {
         return self::response(
             status: Response::HTTP_TOO_MANY_REQUESTS,
             title: 'Too Many Requests',
             detail: $detail,
-            headers: array_merge(['Retry-After' => $retryAfter], $headers)
+            headers: array_merge(['Retry-After' => (string) $retryAfter], $headers)
         );
     }
 
+    /**
+     * @param  array<string, list<string>>  $errors
+     * @param  array<string, string>  $headers
+     */
     public static function unprocessableEntity(string $detail = 'Validation failed', array $errors = [], array $headers = []): JsonResponse
     {
         return self::response(
@@ -199,6 +209,10 @@ class ProblemDetails
         );
     }
 
+    /**
+     * @param  array<string, mixed>  $extensions
+     * @param  array<string, string>  $headers
+     */
     public static function badRequest(string $detail = 'Bad request', array $extensions = [], array $headers = []): JsonResponse
     {
         return self::response(
@@ -211,7 +225,8 @@ class ProblemDetails
     }
 
     /**
-     * @param  array|string  $allowedMethods  Array of methods ['GET', 'POST'] or comma-separated string "GET,POST"
+     * @param  list<string>|string  $allowedMethods  Array of methods ['GET', 'POST'] or comma-separated string "GET,POST"
+     * @param  array<string, string>  $headers
      */
     public static function methodNotAllowed(array|string $allowedMethods = [], string $detail = 'Method not allowed', array $headers = []): JsonResponse
     {
@@ -227,6 +242,10 @@ class ProblemDetails
         );
     }
 
+    /**
+     * @param  array<string, mixed>  $extensions
+     * @param  array<string, string>  $headers
+     */
     public static function conflict(string $detail = 'Conflict', array $extensions = [], array $headers = []): JsonResponse
     {
         return self::response(
@@ -238,6 +257,7 @@ class ProblemDetails
         );
     }
 
+    /** @param array<string, string> $headers */
     public static function payloadTooLarge(
         string $detail = 'Payload too large',
         array $headers = []
@@ -250,6 +270,7 @@ class ProblemDetails
         );
     }
 
+    /** @param array<string, string> $headers */
     public static function internalServerError(string $detail = 'An unexpected error occurred', array $headers = []): JsonResponse
     {
         return self::response(

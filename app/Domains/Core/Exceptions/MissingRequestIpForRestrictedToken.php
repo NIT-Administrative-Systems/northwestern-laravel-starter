@@ -8,6 +8,7 @@ use RuntimeException;
 
 class MissingRequestIpForRestrictedToken extends RuntimeException
 {
+    /** @param list<string> $allowedIps */
     public function __construct(
         public readonly array $allowedIps = [],
         string $message = 'Request IP missing for IP-restricted Access Token.',

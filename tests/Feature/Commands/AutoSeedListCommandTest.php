@@ -18,7 +18,7 @@ class AutoSeedListCommandTest extends TestCase
     public function test_outputs_warning_if_no_seeders_found(): void
     {
         $this->mock(IdempotentSeederResolver::class, function (MockInterface $mock) {
-            $mock->expects('discover')->andReturn();
+            $mock->shouldReceive('discover')->once()->andReturn();
         });
 
         $this->artisan('db:seed:list')
@@ -34,7 +34,7 @@ class AutoSeedListCommandTest extends TestCase
         );
 
         $this->mock(IdempotentSeederResolver::class, function (MockInterface $mock) use ($seederInfo) {
-            $mock->expects('discover')->andReturn([$seederInfo]);
+            $mock->shouldReceive('discover')->once()->andReturn([$seederInfo]);
         });
 
         $this->withoutMockingConsoleOutput()
@@ -54,7 +54,7 @@ class AutoSeedListCommandTest extends TestCase
         );
 
         $this->mock(IdempotentSeederResolver::class, function (MockInterface $mock) use ($seederInfo) {
-            $mock->expects('discover')->andReturn([$seederInfo]);
+            $mock->shouldReceive('discover')->once()->andReturn([$seederInfo]);
         });
 
         $this->withoutMockingConsoleOutput()
@@ -77,7 +77,7 @@ class AutoSeedListCommandTest extends TestCase
         );
 
         $this->mock(IdempotentSeederResolver::class, function (MockInterface $mock) use ($seederInfo) {
-            $mock->expects('discover')->andReturn([$seederInfo]);
+            $mock->shouldReceive('discover')->once()->andReturn([$seederInfo]);
         });
 
         $this->withoutMockingConsoleOutput()
@@ -103,7 +103,7 @@ class AutoSeedListCommandTest extends TestCase
         );
 
         $this->mock(IdempotentSeederResolver::class, function (MockInterface $mock) use ($seederInfo) {
-            $mock->expects('discover')->andReturn([$seederInfo]);
+            $mock->shouldReceive('discover')->once()->andReturn([$seederInfo]);
         });
 
         $this->withoutMockingConsoleOutput()
@@ -128,7 +128,7 @@ class AutoSeedListCommandTest extends TestCase
         );
 
         $this->mock(IdempotentSeederResolver::class, function (MockInterface $mock) use ($seederInfo) {
-            $mock->expects('discover')->andReturn([$seederInfo]);
+            $mock->shouldReceive('discover')->once()->andReturn([$seederInfo]);
         });
 
         $this->withoutMockingConsoleOutput()
@@ -150,7 +150,7 @@ class AutoSeedListCommandTest extends TestCase
         $seederInfo = new SeederInfo(className: 'App\\Seeders\\FooSeeder', dependsOn: ['App\\Seeders\\BarSeeder']);
 
         $this->mock(IdempotentSeederResolver::class, function (MockInterface $mock) use ($seederInfo) {
-            $mock->expects('discover')->andReturn([$seederInfo]);
+            $mock->shouldReceive('discover')->once()->andReturn([$seederInfo]);
         });
 
         $this->artisan('db:seed:list', ['--mermaid' => true])
@@ -168,7 +168,7 @@ class AutoSeedListCommandTest extends TestCase
         $seederInfo = new SeederInfo(className: 'App\\Seeders\\FooSeeder', dependsOn: ['App\\Seeders\\BarSeeder']);
 
         $this->mock(IdempotentSeederResolver::class, function (MockInterface $mock) use ($seederInfo) {
-            $mock->expects('discover')->andReturn([$seederInfo]);
+            $mock->shouldReceive('discover')->once()->andReturn([$seederInfo]);
         });
 
         $this->artisan('db:seed:list', ['--show-dependencies' => true])
@@ -183,7 +183,7 @@ class AutoSeedListCommandTest extends TestCase
         $seederInfo = new SeederInfo(className: 'App\\Seeders\\FooSeeder', dependsOn: []); // @phpstan-ignore argument.type
 
         $this->mock(IdempotentSeederResolver::class, function (MockInterface $mock) use ($seederInfo) {
-            $mock->expects('discover')->andReturn([$seederInfo]);
+            $mock->shouldReceive('discover')->once()->andReturn([$seederInfo]);
         });
 
         $this->withoutMockingConsoleOutput()
@@ -201,7 +201,7 @@ class AutoSeedListCommandTest extends TestCase
     {
         $this->mock(IdempotentSeederResolver::class, function (MockInterface $mock) {
             /** @phpstan-ignore-next-line  */
-            $mock->expects('discover')->andReturnUsing(function (): never {
+            $mock->shouldReceive('discover')->once()->andReturnUsing(function (): never {
                 throw new \RuntimeException('Foo');
             });
         });

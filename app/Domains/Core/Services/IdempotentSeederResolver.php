@@ -122,6 +122,7 @@ class IdempotentSeederResolver
             return collect();
         }
 
+        /** @var Collection<int, SeederClass> */
         return collect(File::allFiles($path))
             ->filter(fn (SplFileInfo $file): bool => $file->getExtension() === 'php')
             ->map(fn (SplFileInfo $file): ?string => $this->extractFullyQualifiedClassName($file))
@@ -132,7 +133,8 @@ class IdempotentSeederResolver
     /**
      * Extract the fully qualified class name from a PHP file.
      *
-     * @return SeederClass|null
+     * Note: Returns a raw string since the class hasn't been validated yet.
+     * The caller ({@see scanDirectory()}) filters through {@see isValidSeederClass()}.
      */
     private function extractFullyQualifiedClassName(SplFileInfo $file): ?string
     {
@@ -181,8 +183,6 @@ class IdempotentSeederResolver
 
     /**
      * Check if a class is a valid, instantiable seeder.
-     *
-     * @param  class-string  $className
      */
     private function isValidSeederClass(string $className): bool
     {

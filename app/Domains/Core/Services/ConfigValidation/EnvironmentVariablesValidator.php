@@ -49,10 +49,11 @@ class EnvironmentVariablesValidator implements ConfigValidator
         return "{$count} required " . ($count === 1 ? 'variable is' : 'variables are') . ' not set';
     }
 
+    /** @return list<string> */
     public function hints(): array
     {
-        return $this->missingVariables
+        return array_values($this->missingVariables
             ->map(fn (string $variable): string => "Set <comment>{$variable}</comment> in your .env file")
-            ->all();
+            ->all());
     }
 }

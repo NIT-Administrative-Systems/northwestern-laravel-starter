@@ -26,7 +26,7 @@ trait TracksPermissionSources
     /**
      * Memoization cache for role permission lookups.
      *
-     * @var array<int, Collection<int, string>>
+     * @var array<int|string, Collection<int, string>>
      */
     private array $rolePermissionsCache = [];
 

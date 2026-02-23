@@ -83,8 +83,8 @@ class RoleResource extends JsonResource
             'role_type' => $this->when(
                 $this->relationLoaded('role_type'),
                 fn () => [
-                    'slug' => $this->role_type->slug->value,
-                    'label' => $this->role_type->label,
+                    'slug' => $this->role_type?->slug->value,
+                    'label' => $this->role_type?->label,
                 ]
             ),
             'created_at' => $this->created_at?->toIso8601String(),

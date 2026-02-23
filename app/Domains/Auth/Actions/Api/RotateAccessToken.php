@@ -40,6 +40,10 @@ readonly class RotateAccessToken
     ): string {
         $rotatedBy ??= Auth::user();
 
+        if (! $rotatedBy instanceof User) {
+            throw new \InvalidArgumentException('A user performing the rotation must be provided or an authenticated session must be active.');
+        }
+
         return DB::transaction(function () use ($previousAccessToken, $name, $expiresAt, $allowedIps, $rotatedBy) {
             [$rawToken, $newAccessToken] = ($this->issueAccessToken)(
                 user: $previousAccessToken->user,

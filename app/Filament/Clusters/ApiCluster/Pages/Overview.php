@@ -136,6 +136,6 @@ class Overview extends Page
 
     public function formatNumber(int $value): string
     {
-        return Number::abbreviate($value);
+        return (string) Number::abbreviate($value);
     }
 }

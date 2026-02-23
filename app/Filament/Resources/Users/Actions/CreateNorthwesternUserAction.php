@@ -82,7 +82,7 @@ class CreateNorthwesternUserAction extends Action
                         return;
                     }
 
-                    $wasJustCreated = $user->created_at->gt(now()->subSeconds(30));
+                    $wasJustCreated = $user->created_at?->gt(now()->subSeconds(30)) ?? false;
 
                     if ($wasJustCreated) {
                         Notification::make()

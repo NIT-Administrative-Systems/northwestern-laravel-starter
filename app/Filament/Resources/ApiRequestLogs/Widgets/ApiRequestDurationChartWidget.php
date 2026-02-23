@@ -100,7 +100,7 @@ class ApiRequestDurationChartWidget extends BaseApiRequestChartWidget
             $periodMap = [];
 
             for ($hour = 0; $hour < 24; $hour++) {
-                $labels[] = date('g A', mktime($hour, 0));
+                $labels[] = date('g A', (int) mktime($hour, 0));
                 $periodMap[(string) $hour] = count($labels) - 1;
             }
         } else {

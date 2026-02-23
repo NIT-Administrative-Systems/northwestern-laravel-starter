@@ -18,7 +18,7 @@ class DirectorySearchCheckTest extends TestCase
 {
     private DirectorySearchCheck $check;
 
-    private Mockery\MockInterface|DirectorySearch $directorySearchMock;
+    private Mockery\MockInterface&DirectorySearch $directorySearchMock;
 
     private string $testNetId = 'testnetid';
 

@@ -6,7 +6,6 @@ namespace App\Domains\Support\Gateways\TeamDynamix;
 
 use App\Domains\Support\Exceptions\TdxLookupFailed;
 use Carbon\CarbonInterval;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Northwestern\Sysdev\TeamDynamix\Laravel\TeamDynamixService;
@@ -90,8 +89,9 @@ class TeamDynamixCacheRepository
      */
     private function find(string $apiName, string $rawBody, string $value): int
     {
-        /** @var Collection<int, TdxRecord> $types */
-        $types = collect(json_decode($rawBody, true));
+        /** @var array<int, TdxRecord> $decoded */
+        $decoded = json_decode($rawBody, true);
+        $types = collect($decoded);
 
         $type = $types->filter(fn (array $type) => strtolower($type['Name']) === strtolower($value))->first();
         throw_unless($type, TdxLookupFailed::for($apiName, $value));

@@ -133,6 +133,10 @@ readonly class FindOrUpdateUserFromDirectory
      * - Unmatriculated students
      * - Certain affiliates
      * - Students whose admission was canceled/revoked
+     *
+     * @param  array<string, mixed>|false|null  $directoryData
+     *
+     * @phpstan-assert-if-false array<string, mixed> $directoryData
      */
     private function isDirectoryDataInvalid(array|false|null $directoryData): bool
     {
@@ -148,6 +152,8 @@ readonly class FindOrUpdateUserFromDirectory
      *
      * If no existing user is found, a {@see BadDirectoryEntry} exception is thrown so that callers can surface
      * or log the invalid directory state.
+     *
+     * @param  array<string, mixed>|false|null  $directoryData
      *
      * @throws BadDirectoryEntry
      */
@@ -172,6 +178,8 @@ readonly class FindOrUpdateUserFromDirectory
 
     /**
      * Synchronizes directory data into a {@see User} model and persists it.
+     *
+     * @param  array<string, mixed>  $directoryData
      */
     private function syncAndPersistUser(array $directoryData, DirectorySearchType $searchType): User
     {

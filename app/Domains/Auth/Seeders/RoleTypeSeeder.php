@@ -16,6 +16,7 @@ class RoleTypeSeeder extends IdempotentSeeder
 
     protected string $model = RoleType::class;
 
+    /** @return array<int, array<string, string>> */
     public function data(): array
     {
         return collect(RoleTypeEnum::cases())->map(function (RoleTypeEnum $roleType): array {

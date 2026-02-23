@@ -78,7 +78,7 @@ class LoginTrendsChartWidget extends ChartWidget
 
             for ($hour = 0; $hour < 24; $hour++) {
                 // Format hour directly - the hour from DB is already in user's timezone
-                $dates[] = date('g A', mktime($hour, 0));
+                $dates[] = date('g A', (int) mktime($hour, 0));
                 $stats = $hourlyStats->get((string) $hour) ?? (object) [
                     'total_count' => 0,
                     'unique_count' => 0,

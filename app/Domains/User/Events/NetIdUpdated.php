@@ -34,7 +34,10 @@ class NetIdUpdated
     {
         parse_str($rawPayload, $parsed);
 
-        if (! isset($parsed['netid'], $parsed['action'])) {
+        if (! isset($parsed['netid'], $parsed['action'])
+            || ! is_string($parsed['netid'])
+            || ! is_string($parsed['action'])
+        ) {
             throw new InvalidArgumentException('Webhook payload missing required fields: netid and action');
         }
 
