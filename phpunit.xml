@@ -11,7 +11,6 @@
     displayDetailsOnTestsThatTriggerNotices="true"
     displayDetailsOnTestsThatTriggerDeprecations="true"
     displayDetailsOnTestsThatTriggerErrors="true"
-    beStrictAboutCoverageMetadata="false"
 >
     <testsuites>
         <testsuite name="Unit">
@@ -25,36 +24,6 @@
         <include>
             <directory>app</directory>
         </include>
-        <exclude>
-            <!--
-                Code Coverage Exclusions
-
-                These components are excluded because they either:
-                - Contain boilerplate/framework code
-                - Represent static data structures (enums, models, etc.)
-                - Consist primarily of declarative definitions
-
-                Including them would artificially dilute our coverage metrics
-                without adding meaningful quality insights.
-            -->
-            <file>app/Console/Commands/RebuildDatabaseCommand.php</file>
-            <directory>app/Domains/Core/Exceptions</directory>
-            <directory>app/Domains/Core/Models</directory>
-            <directory>app/Domains/Core/Enums</directory>
-            <directory>app/Domains/Core/Concerns</directory>
-            <directory>app/Domains/Core/Database</directory>
-            <directory>app/Domains/Core/GlobalAlerts</directory>
-            <directory>app/Domains/Core/Services/ConfigValidation</directory>
-            <directory>app/Filament</directory>
-            <directory>app/Domains/User/Enums</directory>
-            <directory>app/Domains/User/Exceptions</directory>
-            <directory>app/Domains/User/Models</directory>
-            <directory>app/Domains/User/Seeders</directory>
-            <file>app/Http/Controllers/Auth/WebSSOController.php</file>
-            <directory>app/Providers</directory>
-            <directory>app/View/Components</directory>
-            <file>app/Domains/Core/Seeders/IdempotentSeeder.php</file>
-        </exclude>
     </source>
     <php>
         <env name="APP_ENV" value="testing" />
