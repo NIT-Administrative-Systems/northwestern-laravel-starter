@@ -19,7 +19,7 @@ class WildcardPhoto extends Component
     public function render(): View
     {
         $imageUrl = filled($this->user->wildcard_photo_s3_key ?? '')
-            ? route('users.wildcard-photo', ['user' => $this->user, 'c' => md5($this->user->wildcard_photo_last_synced_at?->toString() ?? '')])
+            ? route('users.wildcard-photo', ['user' => $this->user, 'c' => md5($this->user->wildcard_photo_last_synced_at->toString())])
             : route('users.wildcard-photo', $this->user);
 
         return view('components.wildcard-photo', [

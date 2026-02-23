@@ -64,7 +64,7 @@ class NorthwesternUserInfolist
                                                     if (filled($record->wildcard_photo_s3_key)) {
                                                         return route('users.wildcard-photo', [
                                                             'user' => $record,
-                                                            'c' => md5((string) $record->wildcard_photo_last_synced_at?->toString()),
+                                                            'c' => md5($record->wildcard_photo_last_synced_at->toString()),
                                                         ]);
                                                     }
 
