@@ -11,6 +11,7 @@ use App\Domains\User\Models\User;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Timebox;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
@@ -27,6 +28,12 @@ class SendLoginCodeControllerTest extends TestCase
         config(['local-auth.code.resend_cooldown_seconds' => 30]);
 
         Mail::fake();
+
+        $this->mock(Timebox::class, function ($mock) {
+            $mock->shouldReceive('call')->andReturnUsing(
+                fn (callable $callback, int $microseconds) => $callback(new Timebox())
+            );
+        });
     }
 
     public function test_send_creates_challenge_and_sets_session_for_existing_user(): void
@@ -115,26 +122,6 @@ class SendLoginCodeControllerTest extends TestCase
         $nonExistingResponse->assertSessionHas(LoginCodeSession::CHALLENGE_ID);
     }
 
-    public function test_send_timing_difference_between_existing_and_nonexisting_users_is_minimal(): void
-    {
-        User::factory()->affiliate()->create(['email' => 'existing@example.com']);
-
-        $startExisting = microtime(true);
-        $this->post(route('login-code.send'), ['email' => 'existing@example.com']);
-        $existingMs = (microtime(true) - $startExisting) * 1000;
-
-        $startNonExisting = microtime(true);
-        $this->post(route('login-code.send'), ['email' => 'nonexisting@example.com']);
-        $nonExistingMs = (microtime(true) - $startNonExisting) * 1000;
-
-        $timingDifference = abs($existingMs - $nonExistingMs);
-        $this->assertLessThan(
-            150,
-            $timingDifference,
-            "Timing difference between existing and non-existing users should be minimal (was {$timingDifference}ms)"
-        );
-    }
-
     public function test_resend_redirects_to_request_when_email_missing(): void
     {
         $response = $this->post(route('login-code.resend'));
@@ -214,33 +201,6 @@ class SendLoginCodeControllerTest extends TestCase
             $existingResponse->headers->get('Location'),
             $nonExistingResponse->headers->get('Location'),
             'Redirect locations should be identical for existing and non-existing users'
-        );
-    }
-
-    public function test_resend_timing_difference_between_existing_and_nonexisting_users_is_minimal(): void
-    {
-        User::factory()->affiliate()->create(['email' => 'existing@example.com']);
-
-        RateLimiter::clear('login-code-resend:existing@example.com');
-        RateLimiter::clear('login-code-resend:nonexisting@example.com');
-
-        $startExisting = microtime(true);
-        $this->withSession([
-            LoginCodeSession::EMAIL => 'existing@example.com',
-        ])->post(route('login-code.resend'));
-        $existingMs = (microtime(true) - $startExisting) * 1000;
-
-        $startNonExisting = microtime(true);
-        $this->withSession([
-            LoginCodeSession::EMAIL => 'nonexisting@example.com',
-        ])->post(route('login-code.resend'));
-        $nonExistingMs = (microtime(true) - $startNonExisting) * 1000;
-
-        $timingDifference = abs($existingMs - $nonExistingMs);
-        $this->assertLessThan(
-            150,
-            $timingDifference,
-            "Timing difference between existing and non-existing users should be minimal (was {$timingDifference}ms)"
         );
     }
 

@@ -7,8 +7,8 @@ namespace Tests\Unit\Domains\Core\Attributes;
 use App\Domains\Core\Attributes\AutoSeed;
 use App\Domains\Core\Contracts\IdempotentSeederInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\TestCase;
 use ReflectionClass;
-use Tests\TestCase;
 
 #[CoversClass(AutoSeed::class)]
 class AutoSeedTest extends TestCase

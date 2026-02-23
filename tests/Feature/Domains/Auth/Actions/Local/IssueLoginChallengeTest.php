@@ -32,12 +32,14 @@ class IssueLoginChallengeTest extends TestCase
 
     public function test_issues_login_challenge_and_queues_mail(): void
     {
+        $this->freezeTime();
+
         $challenge = $this->action()('test@example.com', '192.168.1.1', 'TestAgent/1.0');
 
         $this->assertEquals('test@example.com', $challenge->email);
         $this->assertEquals('192.168.1.1', $challenge->requested_ip);
         $this->assertNotNull($challenge->code_hash);
-        $this->assertTrue($challenge->expires_at->between(now()->addMinutes(15)->subSecond(), now()->addMinutes(15)->addSecond()));
+        $this->assertSame(now()->addMinutes(15)->toDateTimeString(), $challenge->expires_at->toDateTimeString());
 
         Queue::assertPushed(SendLoginCodeEmailJob::class, function ($job) use ($challenge) {
             $code = Crypt::decryptString($job->encryptedCode);

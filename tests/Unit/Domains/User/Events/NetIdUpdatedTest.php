@@ -8,7 +8,7 @@ use App\Domains\User\Enums\NetIdUpdateActionEnum;
 use App\Domains\User\Events\NetIdUpdated;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
-use Tests\TestCase;
+use PHPUnit\Framework\TestCase;
 
 #[CoversClass(NetIdUpdated::class)]
 class NetIdUpdatedTest extends TestCase
