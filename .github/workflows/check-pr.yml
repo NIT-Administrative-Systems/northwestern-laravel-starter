@@ -318,8 +318,7 @@ jobs:
         uses: ./.github/actions/common-setup
         with:
           php-version: ${{ env.PHP_VERSION }}
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
+          php-only: true
           run-ide-helper: false
 
       - name: 📷 PHPUnit Cache
@@ -395,7 +394,7 @@ jobs:
         env:
           MINIO_ROOT_USER: s3admin
           MINIO_ROOT_PASSWORD: s3secret
-        options: --health-cmd "curl -s http://localhost:9000/minio/health/live"
+        options: --health-cmd "curl -s http://localhost:9000/minio/health/live" --health-interval 3s --health-timeout 3s --health-retries 5
       postgres:
         image: postgres:16
         env:
