@@ -127,7 +127,7 @@ class AuthenticatesAccessTokens
         return IpUtils::checkIp($requestIp, $allowedIps);
     }
 
-    private function fail(ApiRequestFailureEnum $reason): void
+    private function fail(ApiRequestFailureEnum $reason): never
     {
         Context::add(ApiRequestContext::FAILURE_REASON, $reason->value);
 

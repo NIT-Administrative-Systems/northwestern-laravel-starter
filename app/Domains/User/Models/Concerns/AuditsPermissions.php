@@ -12,6 +12,10 @@ use OwenIt\Auditing\Events\AuditCustom;
 
 /**
  * @mixin Role
+ *
+ * @phpstan-require-extends \Spatie\Permission\Models\Role
+ *
+ * @phpstan-type PermissionData array{name: string, label: string, system_managed: bool, api_relevant: bool}
  */
 trait AuditsPermissions
 {
@@ -65,7 +69,7 @@ trait AuditsPermissions
     /**
      * Converts a collection of permissions to a simplified array format.
      *
-     * @return array<int, array{name: string, label: string, system_managed: bool, api_relevant: bool}> Array of simplified permission data
+     * @return list<PermissionData> Array of simplified permission data
      */
     private function mapPermissionsToArray(BaseCollection $permissions): array
     {
@@ -84,10 +88,10 @@ trait AuditsPermissions
      * of a permission sync operation. Unlike standard model audits that only track column
      * changes, this creates a structured snapshot of the permission collection with a diff.
      *
-     * @param  array<int, array{name: string, label: string, system_managed: bool, api_relevant: bool}>  $oldPermissions  Permissions before modification
-     * @param  array<int, array{name: string, label: string, system_managed: bool, api_relevant: bool}>  $newPermissions  Permissions after modification
-     * @param  array<int, array{name: string, label: string, system_managed: bool, api_relevant: bool}>  $addedPermissions  The permissions that were added
-     * @param  array<int, array{name: string, label: string, system_managed: bool, api_relevant: bool}>  $removedPermissions  The permissions that were removed
+     * @param  list<PermissionData>  $oldPermissions  Permissions before modification
+     * @param  list<PermissionData>  $newPermissions  Permissions after modification
+     * @param  list<PermissionData>  $addedPermissions  The permissions that were added
+     * @param  list<PermissionData>  $removedPermissions  The permissions that were removed
      *
      * @see syncPermissionsWithAudit()
      */

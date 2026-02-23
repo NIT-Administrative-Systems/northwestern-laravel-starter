@@ -19,21 +19,23 @@ use SplFileInfo;
  * Automatically scans directories for seeders decorated with #[AutoSeed], validates
  * their dependencies, and returns them in topologically sorted execution order using
  * depth-first search. Detects circular dependencies and missing references.
+ *
+ * @phpstan-type SeederClass class-string<IdempotentSeederInterface>
  */
 class IdempotentSeederResolver
 {
     /**
-     * @var array<class-string<IdempotentSeederInterface>, SeederInfo>
+     * @var array<SeederClass, SeederInfo>
      */
     private array $seeders = [];
 
     /**
-     * @var array<class-string<IdempotentSeederInterface>>
+     * @var array<SeederClass>
      */
     private array $resolved = [];
 
     /**
-     * @var array<class-string<IdempotentSeederInterface>>
+     * @var array<SeederClass>
      */
     private array $resolving = [];
 
@@ -112,7 +114,7 @@ class IdempotentSeederResolver
     /**
      * Scan a directory for seeder class files.
      *
-     * @return Collection<int, class-string<IdempotentSeederInterface>>
+     * @return Collection<int, SeederClass>
      */
     private function scanDirectory(string $path): Collection
     {
@@ -130,7 +132,7 @@ class IdempotentSeederResolver
     /**
      * Extract the fully qualified class name from a PHP file.
      *
-     * @return class-string<IdempotentSeederInterface>|null
+     * @return SeederClass|null
      */
     private function extractFullyQualifiedClassName(SplFileInfo $file): ?string
     {
@@ -197,7 +199,7 @@ class IdempotentSeederResolver
     /**
      * Build the internal registry of seeders with their metadata.
      *
-     * @param  Collection<int, class-string<IdempotentSeederInterface>>  $seederClasses
+     * @param  Collection<int, SeederClass>  $seederClasses
      */
     private function buildSeederRegistry(Collection $seederClasses): void
     {
@@ -213,7 +215,7 @@ class IdempotentSeederResolver
     /**
      * Extract seeder metadata from the AutoSeed attribute.
      *
-     * @param  class-string<IdempotentSeederInterface>  $className
+     * @param  SeederClass  $className
      */
     private function extractSeederMetadata(string $className): ?SeederInfo
     {
@@ -287,7 +289,7 @@ class IdempotentSeederResolver
      * we ensure dependencies always appear earlier in the final list. This is the key insight
      * of topological sorting via DFS.
      *
-     * @param  class-string<IdempotentSeederInterface>  $seederClass  The seeder to visit
+     * @param  SeederClass  $seederClass  The seeder to visit
      * @param  array<SeederInfo>  $ordered  The output array being built (passed by reference)
      *
      * @throws RuntimeException If circular dependency or missing seeder is detected

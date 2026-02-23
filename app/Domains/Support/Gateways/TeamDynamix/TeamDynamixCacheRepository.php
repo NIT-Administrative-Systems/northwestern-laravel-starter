@@ -19,6 +19,8 @@ use Throwable;
  * available by name through API list endpoints. This repository caches those
  * lookups for one week to avoid repeated API calls on ticket submission.
  *
+ * @phpstan-type TdxRecord array{ID: int, Name: string, ...}
+ *
  * @see TeamDynamixGateway
  */
 class TeamDynamixCacheRepository
@@ -88,7 +90,7 @@ class TeamDynamixCacheRepository
      */
     private function find(string $apiName, string $rawBody, string $value): int
     {
-        /** @var Collection<int, array{ID: int, Name: string, ...}> $types */
+        /** @var Collection<int, TdxRecord> $types */
         $types = collect(json_decode($rawBody, true));
 
         $type = $types->filter(fn (array $type) => strtolower($type['Name']) === strtolower($value))->first();

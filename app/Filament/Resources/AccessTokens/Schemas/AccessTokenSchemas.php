@@ -89,7 +89,7 @@ class AccessTokenSchemas
                         }
 
                         $expiresAt = $expiration->expiresAt();
-                        $formattedDate = $expiresAt?->format('F j, Y');
+                        $formattedDate = $expiresAt->format('F j, Y');
 
                         return new HtmlString("This token will expire on <strong class=\"text-black dark:text-white\">{$formattedDate}</strong>.");
                     }),

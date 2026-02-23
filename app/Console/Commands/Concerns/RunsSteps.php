@@ -16,6 +16,8 @@ use function Laravel\Prompts\spin;
  * the success summary message (e.g., "Database rebuild complete").
  *
  * @mixin Command
+ *
+ * @phpstan-require-extends Command
  */
 trait RunsSteps
 {

@@ -22,7 +22,7 @@ trait MocksEventHub
      * @param  string  $queue  The EventHub topic/queue name (e.g., 'etidentity.ldap.netid.term')
      * @param  string  $message  The raw message payload to send (typically URL-encoded or JSON)
      * @param  bool  $viaQueue  Whether to send via EventHub queue instead of direct HTTP (default: false)
-     * @return mixed Returns TestResponse during PHPUnit tests, Response during console commands, or queue result when viaQueue=true
+     * @return ($viaQueue is true ? mixed : TestResponse|\Symfony\Component\HttpFoundation\Response)
      *
      * @throws InvalidArgumentException When no webhook route is registered for the specified queue
      */

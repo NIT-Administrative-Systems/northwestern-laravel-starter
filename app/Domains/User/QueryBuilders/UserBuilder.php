@@ -20,7 +20,7 @@ class UserBuilder extends Builder
     /**
      * Restrict the query to SSO authenticated users.
      */
-    public function sso(): self
+    public function sso(): static
     {
         return $this->where('auth_type', AuthTypeEnum::SSO);
     }
@@ -28,7 +28,7 @@ class UserBuilder extends Builder
     /**
      * Restrict the query to locally authenticated users.
      */
-    public function local(): self
+    public function local(): static
     {
         return $this->where('auth_type', AuthTypeEnum::LOCAL);
     }
@@ -36,7 +36,7 @@ class UserBuilder extends Builder
     /**
      * Restrict the query to API users.
      */
-    public function api(): self
+    public function api(): static
     {
         return $this->where('auth_type', AuthTypeEnum::API);
     }
@@ -44,7 +44,7 @@ class UserBuilder extends Builder
     /**
      * Add a case-insensitive constraint on the user's email address.
      */
-    public function whereEmailEquals(string $email): self
+    public function whereEmailEquals(string $email): static
     {
         $normalized = strtolower(trim($email));
 
@@ -54,7 +54,7 @@ class UserBuilder extends Builder
     /**
      * Add a case-insensitive constraint on the user's username.
      */
-    public function whereUsernameEquals(string $username): self
+    public function whereUsernameEquals(string $username): static
     {
         $normalized = strtolower(trim($username));
 
@@ -70,7 +70,7 @@ class UserBuilder extends Builder
      * - "First Last"
      * - "Last, First"
      */
-    public function searchByName(string $term): self
+    public function searchByName(string $term): static
     {
         return $this->where(function (Builder $query) use ($term) {
             $query->where('first_name', 'ilike', "%{$term}%")

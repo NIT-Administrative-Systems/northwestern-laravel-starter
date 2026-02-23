@@ -11,6 +11,11 @@ use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 
+/**
+ * @phpstan-require-extends \Illuminate\Database\Eloquent\Model
+ *
+ * @phpstan-require-implements \OwenIt\Auditing\Contracts\Auditable
+ */
 trait Auditable
 {
     use \OwenIt\Auditing\Auditable;

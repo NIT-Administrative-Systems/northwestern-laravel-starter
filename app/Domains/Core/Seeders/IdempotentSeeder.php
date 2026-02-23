@@ -23,6 +23,8 @@ use Illuminate\Database\Seeder;
  * - Optionally deletes records that are no longer in the seed data
  * - Production-safe (can run on existing databases without breaking anything)
  *
+ * @template TModel of BaseModel
+ *
  * @see IdempotentSeederInterface
  * @see \App\Domains\Core\Attributes\AutoSeed
  */
@@ -31,7 +33,7 @@ abstract class IdempotentSeeder extends Seeder implements IdempotentSeederInterf
     /**
      * Model to use for select/update/insert/delete operations.
      *
-     * @return class-string<BaseModel>
+     * @var class-string<TModel>
      */
     protected string $model;
 
@@ -40,6 +42,8 @@ abstract class IdempotentSeeder extends Seeder implements IdempotentSeederInterf
      *
      * This column should contain unique identifiers that remain
      * stable across environments (e.g., 'slug', 'code', 'name').
+     *
+     * @var non-empty-string
      */
     protected string $slugColumn;
 
@@ -50,16 +54,16 @@ abstract class IdempotentSeeder extends Seeder implements IdempotentSeederInterf
         foreach ($this->data() as $row) {
             $row = collect($row);
 
-            /** @var Builder<BaseModel> $builder */
+            /** @var Builder<TModel> $builder */
             $builder = $this->model::query();
 
             // For models using SoftDelete, un-deleting requires some special handling: the query needs to include
             // soft-deleted models, and the update needs to reset the deleted_at key.
             if (in_array(SoftDeletes::class, (array) class_uses($this->model), true)) {
-                /** @var Builder<BaseModel> $builder */
-                $builder = $this->model::withTrashed();
+                /** @var Builder<TModel> $builder */
+                $builder = $this->model::withTrashed(); // @phpstan-ignore staticMethod.notFound
 
-                /** @var BaseModel $modelInstance */
+                /** @var TModel $modelInstance */
                 $modelInstance = new $this->model();
 
                 $deletedColumn = method_exists($modelInstance, 'getDeletedAtColumn')

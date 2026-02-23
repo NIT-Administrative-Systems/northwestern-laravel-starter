@@ -104,6 +104,8 @@ class ConfigurableDbDumperFactory extends DbDumperFactory
 
     /**
      * Get the current platform identifier (win, darwin).
+     *
+     * @phpstan-pure
      */
     private static function getPlatform(): string
     {
@@ -120,11 +122,13 @@ class ConfigurableDbDumperFactory extends DbDumperFactory
         return $os;
     }
 
+    /** @phpstan-pure */
     public static function isWindowsPlatform(): bool
     {
         return self::getPlatform() === 'win';
     }
 
+    /** @phpstan-pure */
     public static function determineQuoteForPlatform(): string
     {
         return self::isWindowsPlatform() ? '"' : "'";

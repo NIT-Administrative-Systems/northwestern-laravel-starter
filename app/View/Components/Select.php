@@ -235,7 +235,7 @@ class Select extends Component
      * Get default configuration for a specific plugin.
      *
      * @param  string  $plugin  Plugin name
-     * @return array<string, mixed>|bool Default configuration
+     * @return array<string, mixed>|true Default configuration, or true if no plugin-specific defaults exist
      */
     private function getDefaultPluginConfig(string $plugin): array|bool
     {

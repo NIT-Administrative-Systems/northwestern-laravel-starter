@@ -16,6 +16,7 @@ class ValidIpOrCidrRule implements ValidationRule
         }
     }
 
+    /** @phpstan-pure */
     public static function isValid(string $value): bool
     {
         if (filter_var($value, FILTER_VALIDATE_IP)) {

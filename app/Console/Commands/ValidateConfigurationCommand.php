@@ -21,6 +21,8 @@ use function Laravel\Prompts\spin;
  *
  * This command runs a series of validators to ensure the application
  * is properly configured and all required services are accessible.
+ *
+ * @phpstan-type ValidationResult array{validator: ConfigValidator, passed: bool}
  */
 class ValidateConfigurationCommand extends Command
 {
@@ -28,7 +30,7 @@ class ValidateConfigurationCommand extends Command
 
     protected $description = 'Validate application configuration and system dependencies';
 
-    /** @var array<int, array{validator: ConfigValidator, passed: bool}> */
+    /** @var list<ValidationResult> */
     protected array $results = [];
 
     /**

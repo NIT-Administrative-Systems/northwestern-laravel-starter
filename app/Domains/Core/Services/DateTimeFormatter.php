@@ -7,6 +7,7 @@ namespace App\Domains\Core\Services;
 use App\Domains\User\Models\User;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
+use Closure;
 
 class DateTimeFormatter
 {
@@ -31,7 +32,10 @@ class DateTimeFormatter
             ->format($format);
     }
 
-    public function buildDatetimeDirective(): callable
+    /**
+     * @return Closure(string): string
+     */
+    public function buildDatetimeDirective(): Closure
     {
         return function ($expression): string {
             $class = '\\' . self::class;
