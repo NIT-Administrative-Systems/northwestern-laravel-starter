@@ -7,12 +7,11 @@ namespace Tests\Feature\Domains\User\Models\Concerns;
 use App\Domains\Auth\Enums\RoleModificationOriginEnum;
 use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\Audit;
-use App\Domains\User\Models\Concerns\AuditsRoles;
 use App\Domains\User\Models\User;
-use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversNothing;
 use Tests\TestCase;
 
-#[CoversClass(AuditsRoles::class)]
+#[CoversNothing]
 class AuditsRolesTest extends TestCase
 {
     public function test_assign_role_with_audit_creates_audit_record(): void

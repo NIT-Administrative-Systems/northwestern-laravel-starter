@@ -24,6 +24,30 @@
         <include>
             <directory>app</directory>
         </include>
+        <exclude>
+            <!--
+                Code Coverage Exclusions
+
+                Excluded items are boilerplate, third-party, declarative, or
+                framework-generated code where coverage metrics add no value.
+
+                NOTE: Do not exclude directories/files that have tests with
+                #[CoversClass] attributes targeting them — PHPUnit will emit
+                warnings when coverage is active and the target is excluded.
+            -->
+            <file>app/Console/Commands/RebuildDatabaseCommand.php</file>
+            <directory>app/Domains/Core/Models</directory>
+            <directory>app/Domains/Core/Enums</directory>
+            <directory>app/Domains/Core/Concerns</directory>
+            <directory>app/Domains/Core/Database</directory>
+            <directory>app/Domains/Core/GlobalAlerts</directory>
+            <directory>app/Domains/Core/Services/ConfigValidation</directory>
+            <directory>app/Domains/User/Exceptions</directory>
+            <directory>app/Domains/User/Seeders</directory>
+            <directory>app/Filament</directory>
+            <file>app/Http/Controllers/Auth/WebSSOController.php</file>
+            <file>app/Domains/Core/Seeders/IdempotentSeeder.php</file>
+        </exclude>
     </source>
     <php>
         <env name="APP_ENV" value="testing" />

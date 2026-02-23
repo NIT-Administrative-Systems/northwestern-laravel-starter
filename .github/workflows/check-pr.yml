@@ -342,7 +342,7 @@ jobs:
           --cache-result
           --cache-directory=.phpunit.cache
           --log-junit .build/junit-pr${{ github.event.pull_request.number }}-run${{ github.run_id }}-shard${{ matrix.shard }}.xml
-          --coverage-php .build/coverage-shard${{ matrix.shard }}.php
+          --coverage-php .build/coverage-shard${{ matrix.shard }}.cov
           --teamcity
 
       - name: 📦 Upload Test Results
@@ -358,7 +358,7 @@ jobs:
         if: always()
         with:
           name: Coverage Shard${{ matrix.shard }}
-          path: .build/coverage-shard${{ matrix.shard }}.php
+          path: .build/coverage-shard${{ matrix.shard }}.cov
           retention-days: 1
 
   publish-test-results:
