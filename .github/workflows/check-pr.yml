@@ -163,7 +163,7 @@ jobs:
           POSTGRES_DB: root
         ports:
           - 5432:5432
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+        options: --health-cmd pg_isready --health-interval 3s --health-timeout 3s --health-retries 5
 
     steps:
       - name: 📂 Checkout Repository
@@ -255,12 +255,11 @@ jobs:
       - name: 📷 PHPStan Result Cache
         uses: actions/cache@v5
         with:
-          path: tmp
+          path: /tmp/phpstan
           key: phpstan-results-${{ hashFiles('phpstan.neon', 'composer.lock') }}
           restore-keys: |
             phpstan-results-${{ hashFiles('phpstan.neon') }}-
             phpstan-results-
-            ${{ runner.os }}-phpstan-results-
 
       - name: 🔬 PHPStan
         run: ./vendor/bin/phpstan analyse --no-progress --error-format=checkstyle > phpstan-report.xml
@@ -306,7 +305,7 @@ jobs:
           POSTGRES_DB: root
         ports:
           - 5432:5432
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+        options: --health-cmd pg_isready --health-interval 3s --health-timeout 3s --health-retries 5
 
     steps:
       - name: 📂 Checkout Repository
@@ -318,8 +317,7 @@ jobs:
         uses: ./.github/actions/common-setup
         with:
           php-version: ${{ env.PHP_VERSION }}
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
+          php-only: true
           run-ide-helper: false
 
       - name: 📷 PHPUnit Cache
@@ -395,7 +393,7 @@ jobs:
         env:
           MINIO_ROOT_USER: s3admin
           MINIO_ROOT_PASSWORD: s3secret
-        options: --health-cmd "curl -s http://localhost:9000/minio/health/live"
+        options: --health-cmd "curl -s http://localhost:9000/minio/health/live" --health-interval 3s --health-timeout 3s --health-retries 5
       postgres:
         image: postgres:16
         env:
@@ -404,7 +402,7 @@ jobs:
           POSTGRES_DB: root
         ports:
           - 5432:5432
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+        options: --health-cmd pg_isready --health-interval 3s --health-timeout 3s --health-retries 5
 
     steps:
       - name: 📂 Checkout Repository

@@ -91,27 +91,12 @@ runs:
       shell: bash
       run: pnpm exec cypress install
 
-    - name: 🔑 Compute composer.lock hash
-      if: ${{ inputs.docs-only != 'true' }}
-      id: comp-hash
-      shell: bash
-      run: |
-        echo "hash=${{ hashFiles('composer.lock') }}" >> "$GITHUB_OUTPUT"
-
-    - name: 🔍 Determine Composer Cache Directory
-      if: ${{ inputs.docs-only != 'true' }}
-      shell: bash
-      id: composer-cache-dir
-      run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-
     - name: 📷 Composer Dependencies Cache
       if: ${{ inputs.docs-only != 'true' }}
       uses: actions/cache@v5
       with:
-        path: ${{ steps.composer-cache-dir.outputs.dir }}
-        key: ${{ runner.os }}-composer-${{ steps.comp-hash.outputs.hash }}
-        restore-keys: |
-          ${{ runner.os }}-composer-
+        path: vendor
+        key: ${{ runner.os }}-vendor-${{ hashFiles('composer.lock') }}
 
     - name: 💾 Install Composer Dependencies
       if: ${{ inputs.docs-only != 'true' }}
