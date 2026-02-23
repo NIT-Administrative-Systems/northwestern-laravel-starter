@@ -47,6 +47,7 @@
             <directory>app/Domains/Auth/Models</directory>
             <file>app/Domains/Core/Models/BaseModel.php</file>
             <directory>app/Domains/Support/Models</directory>
+            <file>app/Domains/User/Models/User.php</file>
             <file>app/Domains/User/Models/Audit.php</file>
             <file>app/Domains/User/Models/Export.php</file>
             <file>app/Domains/User/Models/ImpersonationLog.php</file>
