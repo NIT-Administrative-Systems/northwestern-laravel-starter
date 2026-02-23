@@ -7,10 +7,11 @@ namespace Tests\Feature\Domains\User\Models\Concerns;
 use App\Domains\Auth\Enums\PermissionEnum;
 use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\Audit;
-use PHPUnit\Framework\Attributes\CoversNothing;
+use App\Domains\User\Models\Concerns\AuditsPermissions;
+use PHPUnit\Framework\Attributes\CoversTrait;
 use Tests\TestCase;
 
-#[CoversNothing]
+#[CoversTrait(AuditsPermissions::class)]
 class AuditsPermissionsTest extends TestCase
 {
     public function test_sync_permissions_creates_audit_when_permissions_change(): void
