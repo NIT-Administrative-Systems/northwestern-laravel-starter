@@ -6,11 +6,18 @@ namespace Tests\Unit\View\Components;
 
 use App\View\Components\Select;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 
 #[CoversClass(Select::class)]
 class SelectTest extends TestCase
 {
+    public function test_renders_select_view(): void
+    {
+        $component = new Select('test', []);
+
+        $this->assertSame('components.select', $component->render()->name());
+    }
+
     public function test_plugin_validation_with_default_config(): void
     {
         $component = new Select(

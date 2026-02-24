@@ -103,12 +103,6 @@ class SendAccessTokenExpirationNotificationsCommand extends Command
     {
         $user = $token->user;
 
-        if (! $user) {
-            $this->components->warn("Skipping token #{$token->id}: user no longer exists");
-
-            return;
-        }
-
         $this->line("⏳ Processing token for {$user->username} ({$user->email})");
 
         Mail::to($user->email)->queue(

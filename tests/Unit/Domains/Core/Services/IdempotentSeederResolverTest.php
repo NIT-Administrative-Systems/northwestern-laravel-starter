@@ -404,6 +404,46 @@ PHP;
         $this->assertSame('ValidSeeder', $seeders[0]->getShortName());
     }
 
+    public function test_ignores_file_where_class_name_does_not_match_filename(): void
+    {
+        // File is named NonExistentClass.php but contains a different class
+        $code = <<<'PHP'
+<?php
+
+namespace TestSeeders;
+
+class WrongClassName {}
+PHP;
+
+        file_put_contents($this->testSeedersPath . '/NonExistentClass.php', $code);
+        $this->createTestSeeder('ActualSeeder', []);
+
+        $resolver = new IdempotentSeederResolver();
+        $seeders = $resolver->discover($this->testSeedersPath);
+
+        $this->assertCount(1, $seeders);
+        $this->assertSame('ActualSeeder', $seeders[0]->getShortName());
+    }
+
+    public function test_handles_unreadable_file(): void
+    {
+        $this->createTestSeeder('ReadableSeeder', []);
+
+        $unreadableFile = $this->testSeedersPath . '/UnreadableSeeder.php';
+        file_put_contents($unreadableFile, '<?php namespace TestSeeders; class UnreadableSeeder {}');
+        chmod($unreadableFile, 0000);
+
+        try {
+            $resolver = new IdempotentSeederResolver();
+            $seeders = $resolver->discover($this->testSeedersPath);
+
+            $this->assertCount(1, $seeders);
+            $this->assertSame('ReadableSeeder', $seeders[0]->getShortName());
+        } finally {
+            chmod($unreadableFile, 0644);
+        }
+    }
+
     public function test_reset_state_between_discoveries(): void
     {
         $this->createTestSeeder('FirstRun', []);
