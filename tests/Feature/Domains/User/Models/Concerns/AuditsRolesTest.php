@@ -150,6 +150,40 @@ class AuditsRolesTest extends TestCase
         $this->assertSame(['reason' => 'test'], $audit->new_values['context']);
     }
 
+    public function test_assign_role_with_audit_accepts_array_of_roles(): void
+    {
+        $user = User::factory()->createOne();
+        $roles = Role::factory()->count(2)->create()->all();
+
+        $user->assignRoleWithAudit($roles, RoleModificationOriginEnum::SYSTEM);
+
+        $audit = Audit::where('event', 'role_assigned')
+            ->where('auditable_id', $user->id)
+            ->latest('id')
+            ->first();
+
+        $this->assertNotNull($audit);
+        $assignedRoles = $audit->new_values['assigned_roles'];
+        $this->assertCount(2, $assignedRoles);
+    }
+
+    public function test_assign_role_with_audit_accepts_collection_of_roles(): void
+    {
+        $user = User::factory()->createOne();
+        $roles = Role::factory()->count(2)->create();
+
+        $user->assignRoleWithAudit($roles, RoleModificationOriginEnum::SYSTEM);
+
+        $audit = Audit::where('event', 'role_assigned')
+            ->where('auditable_id', $user->id)
+            ->latest('id')
+            ->first();
+
+        $this->assertNotNull($audit);
+        $assignedRoles = $audit->new_values['assigned_roles'];
+        $this->assertCount(2, $assignedRoles);
+    }
+
     public function test_audit_excludes_context_when_empty(): void
     {
         $user = User::factory()->createOne();

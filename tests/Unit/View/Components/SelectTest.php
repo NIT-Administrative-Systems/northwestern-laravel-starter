@@ -238,6 +238,79 @@ class SelectTest extends TestCase
 
         $this->assertSame($expected, Select::processOptions($users));
     }
+
+    public function test_max_options_returns_null_when_set_to_null(): void
+    {
+        $component = new Select('test', [], maxOptions: null);
+
+        $this->assertNull($component->maxOptions());
+        $this->assertNull($component->getTomSelectConfig()['maxOptions']);
+    }
+
+    public function test_max_options_casts_string_to_int(): void
+    {
+        $component = new Select('test', [], maxOptions: '75');
+
+        $this->assertSame(75, $component->maxOptions());
+    }
+
+    public function test_plugin_with_true_value_applies_default_config(): void
+    {
+        $component = new Select(
+            id: 'test',
+            options: [],
+            plugins: ['checkbox_options' => true],
+        );
+
+        $this->assertTrue($component->getTomSelectConfig()['plugins']['checkbox_options']);
+    }
+
+    public function test_plugin_config_override_with_non_array_default(): void
+    {
+        $component = new Select(
+            id: 'test',
+            options: [],
+            plugins: ['no_active_items' => ['custom' => 'value']],
+        );
+
+        $this->assertSame(['custom' => 'value'], $component->getTomSelectConfig()['plugins']['no_active_items']);
+    }
+
+    public function test_enum_without_label_method_uses_name_fallback(): void
+    {
+        $options = FakeEnumWithoutLabel::cases();
+
+        $expected = [
+            'SOME_VALUE' => 'Some Value',
+            'ANOTHER_ITEM' => 'Another Item',
+        ];
+
+        $this->assertSame($expected, Select::processOptions($options));
+    }
+
+    public function test_backed_enum_without_label_method_uses_name_fallback(): void
+    {
+        $options = FakeBackedEnumWithoutLabel::cases();
+
+        $expected = [
+            'sv' => 'Some Value',
+            'ai' => 'Another Item',
+        ];
+
+        $this->assertSame($expected, Select::processOptions($options));
+    }
+}
+
+enum FakeEnumWithoutLabel
+{
+    case SOME_VALUE;
+    case ANOTHER_ITEM;
+}
+
+enum FakeBackedEnumWithoutLabel: string
+{
+    case SOME_VALUE = 'sv';
+    case ANOTHER_ITEM = 'ai';
 }
 
 enum FakeEnum

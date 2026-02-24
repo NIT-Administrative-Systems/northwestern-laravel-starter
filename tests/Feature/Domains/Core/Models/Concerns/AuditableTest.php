@@ -80,6 +80,24 @@ class AuditableTest extends TestCase
         $this->assertSame('/api/v1/users', $result['url']);
     }
 
+    public function test_transform_audit_does_not_append_component_when_livewire_url_but_no_snapshot(): void
+    {
+        $this->bindImpersonateService(null);
+
+        request()->replace([
+            'components' => [
+                ['other_key' => 'value'],
+            ],
+        ]);
+
+        $user = User::factory()->make();
+        $result = $user->transformAudit([
+            'url' => Livewire::getUpdateUri(),
+        ]);
+
+        $this->assertSame(Livewire::getUpdateUri(), $result['url']);
+    }
+
     private function bindImpersonateService(?int $impersonatorId): void
     {
         $impersonate = Mockery::mock();

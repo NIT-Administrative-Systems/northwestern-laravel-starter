@@ -481,6 +481,30 @@ class AuthenticatesAccessTokensTest extends TestCase
             ]);
     }
 
+    public function test_null_request_ip_with_ip_restrictions_rejects_and_reports(): void
+    {
+        $user = User::factory()->api()->create();
+        [$plainToken, $token] = $this->issueToken($user, [
+            'allowed_ips' => ['192.168.1.100'],
+        ]);
+
+        $this->withServerVariables(['REMOTE_ADDR' => ''])
+            ->getJson($this->endpoint, $this->bearerHeader($plainToken))
+            ->assertUnauthorized()
+            ->assertJson([
+                'type' => 'about:blank',
+                'title' => 'Unauthorized',
+                'status' => 401,
+                'detail' => 'Authentication failed',
+                'instance' => '/api/test',
+            ]);
+
+        $this->assertSame(
+            ApiRequestFailureEnum::IP_DENIED->value,
+            Context::get(ApiRequestContext::FAILURE_REASON),
+        );
+    }
+
     public function test_ip_restriction_does_not_prevent_last_used_update_on_failure(): void
     {
         $user = User::factory()->api()->create();

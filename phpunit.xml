@@ -42,6 +42,9 @@
             <directory>app/Domains/Auth/Enums</directory>
             <directory>app/Domains/Core/Enums</directory>
             <directory>app/Domains/Support/Enums</directory>
+            <file>app/Domains/User/Enums/AffiliationEnum.php</file>
+            <file>app/Domains/User/Enums/NetIdUpdateActionEnum.php</file>
+            <file>app/Domains/User/Enums/UserSegmentEnum.php</file>
 
             <!-- Models (casts, relationships, property declarations) -->
             <directory>app/Domains/Auth/Models</directory>
@@ -90,6 +93,7 @@
             <file>app/View/Components/ErrorLayout.php</file>
 
             <!-- Service Providers (bootstrap wiring, no domain logic) -->
+            <file>app/Providers/AppServiceProvider.php</file>
             <file>app/Providers/EloquentServiceProvider.php</file>
             <file>app/Providers/FilamentServiceProvider.php</file>
             <file>app/Providers/Filament/AdministrationPanelProvider.php</file>
