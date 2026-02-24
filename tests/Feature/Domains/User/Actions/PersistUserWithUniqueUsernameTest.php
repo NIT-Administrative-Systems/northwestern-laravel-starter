@@ -40,4 +40,21 @@ class PersistUserWithUniqueUsernameTest extends TestCase
 
         $this->assertTrue($savedUser->hasRole(SystemRoleEnum::NORTHWESTERN_USER));
     }
+
+    public function test_it_returns_existing_user_when_username_conflicts(): void
+    {
+        $existingUser = User::factory()->api()->create([
+            'username' => 'duplicate_user',
+        ]);
+
+        $duplicateUser = User::factory()->api()->make([
+            'username' => 'duplicate_user',
+        ]);
+
+        $action = new PersistUserWithUniqueUsername();
+        $savedUser = $action($duplicateUser);
+
+        $this->assertSame($existingUser->id, $savedUser->id);
+        $this->assertSame(1, User::query()->where('username', 'duplicate_user')->count());
+    }
 }

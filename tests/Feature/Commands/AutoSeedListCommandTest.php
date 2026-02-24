@@ -197,6 +197,20 @@ class AutoSeedListCommandTest extends TestCase
         $this->assertStringContainsString('Use the --show-dependencies option', $output);
     }
 
+    public function test_dependency_tree_shows_no_dependencies_marker(): void
+    {
+        $seederInfo = new SeederInfo(className: 'App\\Seeders\\StandaloneSeeder', dependsOn: []); // @phpstan-ignore argument.type
+
+        $this->mock(IdempotentSeederResolver::class, function (MockInterface $mock) use ($seederInfo) {
+            $mock->shouldReceive('discover')->once()->andReturn([$seederInfo]);
+        });
+
+        $this->artisan('db:seed:list', ['--show-dependencies' => true])
+            ->expectsOutputToContain('Dependency Tree:')
+            ->expectsOutputToContain('(no dependencies)')
+            ->assertExitCode(0);
+    }
+
     public function test_outputs_error_on_exception(): void
     {
         $this->mock(IdempotentSeederResolver::class, function (MockInterface $mock) {

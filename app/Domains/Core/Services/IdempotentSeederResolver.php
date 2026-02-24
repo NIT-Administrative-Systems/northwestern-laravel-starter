@@ -118,10 +118,6 @@ class IdempotentSeederResolver
      */
     private function scanDirectory(string $path): Collection
     {
-        if (! is_dir($path)) {
-            return collect();
-        }
-
         /** @var Collection<int, SeederClass> */
         return collect(File::allFiles($path))
             ->filter(fn (SplFileInfo $file): bool => $file->getExtension() === 'php')
@@ -154,7 +150,7 @@ class IdempotentSeederResolver
      */
     private function parseNamespaceFromFile(string $filePath): ?string
     {
-        $handle = fopen($filePath, 'rb');
+        $handle = @fopen($filePath, 'rb');
 
         if ($handle === false) {
             return null;
@@ -220,10 +216,6 @@ class IdempotentSeederResolver
     private function extractSeederMetadata(string $className): ?SeederInfo
     {
         $reflection = new ReflectionClass($className);
-
-        if ($reflection->isAbstract()) {
-            return null;
-        }
 
         $attributes = $reflection->getAttributes(AutoSeed::class);
 

@@ -25,8 +25,8 @@ final class PersistUserWithUniqueUsername
 {
     public function __invoke(User $user): User
     {
-        return DB::transaction(function () use ($user) {
-            try {
+        try {
+            return DB::transaction(function () use ($user) {
                 $user->save();
 
                 if ($user->auth_type === AuthTypeEnum::SSO) {
@@ -35,12 +35,12 @@ final class PersistUserWithUniqueUsername
                 }
 
                 return $user;
-            } catch (UniqueConstraintViolationException) {
-                return User::query()
-                    ->where('auth_type', $user->auth_type)
-                    ->where('username', $user->username)
-                    ->firstOrFail();
-            }
-        });
+            });
+        } catch (UniqueConstraintViolationException) {
+            return User::query()
+                ->where('auth_type', $user->auth_type)
+                ->where('username', $user->username)
+                ->firstOrFail();
+        }
     }
 }

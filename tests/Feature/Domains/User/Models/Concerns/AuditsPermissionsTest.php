@@ -8,6 +8,8 @@ use App\Domains\Auth\Enums\PermissionEnum;
 use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\Audit;
 use App\Domains\User\Models\Concerns\AuditsPermissions;
+use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\CoversTrait;
 use Tests\TestCase;
 
@@ -93,6 +95,36 @@ class AuditsPermissionsTest extends TestCase
         $removedPermissions = $audit->new_values['removed_permissions'];
         $removedNames = collect($removedPermissions)->pluck('name')->all();
         $this->assertContains(PermissionEnum::VIEW_USERS->value, $removedNames);
+    }
+
+    public function test_sync_permissions_handles_model_deleted_during_sync(): void
+    {
+        $role = Role::factory()->createOne();
+        $role->givePermissionTo(PermissionEnum::VIEW_USERS);
+        $role->load('permissions');
+
+        $intercepted = false;
+
+        DB::listen(function (QueryExecuted $query) use ($role, &$intercepted) {
+            if (! $intercepted && str_contains($query->sql, 'insert') && str_contains($query->sql, 'role_has_permissions')) {
+                $intercepted = true;
+                DB::table('roles')->where('id', $role->id)->delete();
+            }
+        });
+
+        $role->syncPermissionsWithAudit([PermissionEnum::EDIT_USERS]);
+
+        $this->assertTrue($intercepted);
+
+        $audit = Audit::where('event', 'permissions_modified')
+            ->where('auditable_id', $role->id)
+            ->latest('id')
+            ->first();
+
+        $this->assertNotNull($audit);
+        $this->assertArrayHasKey('removed_permissions', $audit->new_values);
+        // permissions_after_change is filtered by array_filter since it's an empty array
+        $this->assertArrayNotHasKey('permissions_after_change', $audit->new_values);
     }
 
     public function test_sync_permissions_audit_captures_before_and_after_state(): void

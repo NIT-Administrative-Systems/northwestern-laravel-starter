@@ -92,10 +92,6 @@ class AutoSeedListCommand extends Command
      */
     private function formatDependencies(array $dependencies): string
     {
-        if (count($dependencies) === 0) {
-            return '<fg=gray>none</>';
-        }
-
         if (count($dependencies) === 1) {
             return "<fg=yellow>{$dependencies[0]}</>";
         }

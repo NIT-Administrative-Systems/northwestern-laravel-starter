@@ -228,4 +228,22 @@ class SendLoginCodeControllerTest extends TestCase
 
         $response->assertNotFound();
     }
+
+    public function test_send_returns_validation_error_when_challenge_issue_fails(): void
+    {
+        config(['local-auth.rate_limit_per_hour' => 1]);
+        User::factory()->affiliate()->create(['email' => 'test@example.com']);
+
+        RateLimiter::hit('login-code:test@example.com', 3600);
+
+        $response = $this->post(route('login-code.send'), [
+            'email' => 'test@example.com',
+        ]);
+
+        $response->assertSessionHasErrors('email');
+        $this->assertStringContainsString(
+            'Too many login attempts',
+            (string) session('errors')->first('email')
+        );
+    }
 }

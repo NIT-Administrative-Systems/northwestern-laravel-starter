@@ -9,6 +9,8 @@ use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\Audit;
 use App\Domains\User\Models\Concerns\AuditsRoles;
 use App\Domains\User\Models\User;
+use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\CoversTrait;
 use Tests\TestCase;
 
@@ -148,6 +150,67 @@ class AuditsRolesTest extends TestCase
         $this->assertNotNull($audit->new_values);
         $this->assertArrayHasKey('context', $audit->new_values);
         $this->assertSame(['reason' => 'test'], $audit->new_values['context']);
+    }
+
+    public function test_assign_role_with_audit_accepts_array_of_roles(): void
+    {
+        $user = User::factory()->createOne();
+        $roles = Role::factory()->count(2)->create()->all();
+
+        $user->assignRoleWithAudit($roles, RoleModificationOriginEnum::SYSTEM);
+
+        $audit = Audit::where('event', 'role_assigned')
+            ->where('auditable_id', $user->id)
+            ->latest('id')
+            ->first();
+
+        $this->assertNotNull($audit);
+        $assignedRoles = $audit->new_values['assigned_roles'];
+        $this->assertCount(2, $assignedRoles);
+    }
+
+    public function test_assign_role_with_audit_accepts_collection_of_roles(): void
+    {
+        $user = User::factory()->createOne();
+        $roles = Role::factory()->count(2)->create();
+
+        $user->assignRoleWithAudit($roles, RoleModificationOriginEnum::SYSTEM);
+
+        $audit = Audit::where('event', 'role_assigned')
+            ->where('auditable_id', $user->id)
+            ->latest('id')
+            ->first();
+
+        $this->assertNotNull($audit);
+        $assignedRoles = $audit->new_values['assigned_roles'];
+        $this->assertCount(2, $assignedRoles);
+    }
+
+    public function test_audit_handles_model_deleted_during_role_change(): void
+    {
+        $user = User::factory()->createOne();
+        $role = Role::factory()->createOne();
+
+        $intercepted = false;
+
+        DB::listen(function (QueryExecuted $query) use ($user, &$intercepted) {
+            if (! $intercepted && str_contains($query->sql, 'model_has_roles') && str_contains($query->sql, 'insert')) {
+                $intercepted = true;
+                DB::table('users')->where('id', $user->id)->delete();
+            }
+        });
+
+        $user->assignRoleWithAudit($role, RoleModificationOriginEnum::SYSTEM);
+
+        $this->assertTrue($intercepted);
+
+        $audit = Audit::where('event', 'role_assigned')
+            ->where('auditable_id', $user->id)
+            ->latest('id')
+            ->first();
+
+        $this->assertNotNull($audit);
+        $this->assertSame([], $audit->new_values['roles_after_change']);
     }
 
     public function test_audit_excludes_context_when_empty(): void
