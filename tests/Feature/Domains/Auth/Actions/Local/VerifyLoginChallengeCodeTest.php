@@ -44,10 +44,9 @@ class VerifyLoginChallengeCodeTest extends TestCase
         $this->assertEquals(1, $challenge->fresh()->attempts);
     }
 
-    public function test_locks_challenge_after_max_attempts(): void
+    public function test_does_not_lock_challenge_below_max_attempts(): void
     {
-        config(['local-auth.code.max_attempts' => 2]);
-        config(['local-auth.code.lock_minutes' => 15]);
+        config(['local-auth.code.max_attempts' => 3]);
 
         $challenge = LoginChallenge::create([
             'email' => 'test@example.com',
@@ -59,8 +58,50 @@ class VerifyLoginChallengeCodeTest extends TestCase
         $this->action()($challenge, '000000', null, null);
 
         $fresh = $challenge->fresh();
+        $this->assertEquals(2, $fresh->attempts);
+        $this->assertNull($fresh->locked_until);
+    }
+
+    public function test_locks_challenge_exactly_at_max_attempts(): void
+    {
+        config(['local-auth.code.max_attempts' => 3]);
+        config(['local-auth.code.lock_minutes' => 15]);
+
+        $challenge = LoginChallenge::create([
+            'email' => 'test@example.com',
+            'code_hash' => Hash::make('123456'),
+            'expires_at' => now()->addMinutes(10),
+        ]);
+
+        // 3 failures — exactly at the threshold
+        $this->action()($challenge, '000000', null, null);
+        $this->action()($challenge, '000000', null, null);
+        $this->action()($challenge, '000000', null, null);
+
+        $fresh = $challenge->fresh();
+        $this->assertEquals(3, $fresh->attempts);
         $this->assertNotNull($fresh->locked_until);
         $this->assertTrue($fresh->locked_until->isFuture());
+    }
+
+    public function test_lock_duration_uses_configured_minutes(): void
+    {
+        config(['local-auth.code.max_attempts' => 1]);
+        config(['local-auth.code.lock_minutes' => 30]);
+
+        $challenge = LoginChallenge::create([
+            'email' => 'test@example.com',
+            'code_hash' => Hash::make('123456'),
+            'expires_at' => now()->addMinutes(10),
+        ]);
+
+        $this->action()($challenge, '000000', null, null);
+
+        $fresh = $challenge->fresh();
+        $this->assertNotNull($fresh->locked_until);
+
+        $this->assertTrue($fresh->locked_until->isAfter(now()->addMinutes(29)));
+        $this->assertTrue($fresh->locked_until->isBefore(now()->addMinutes(31)));
     }
 
     public function test_returns_false_for_expired_challenge(): void

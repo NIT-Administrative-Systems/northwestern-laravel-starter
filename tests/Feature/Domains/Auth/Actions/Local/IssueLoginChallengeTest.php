@@ -38,6 +38,7 @@ class IssueLoginChallengeTest extends TestCase
 
         $this->assertEquals('test@example.com', $challenge->email);
         $this->assertEquals('192.168.1.1', $challenge->requested_ip);
+        $this->assertEquals('TestAgent/1.0', $challenge->requested_user_agent);
         $this->assertNotNull($challenge->code_hash);
         $this->assertSame(now()->addMinutes(15)->toDateTimeString(), $challenge->expires_at->toDateTimeString());
 
@@ -47,6 +48,13 @@ class IssueLoginChallengeTest extends TestCase
             return $job->loginChallengeId === $challenge->id
                 && Hash::check($code, $challenge->code_hash);
         });
+    }
+
+    public function test_trims_and_lowercases_email(): void
+    {
+        $challenge = $this->action()('  Test@Example.COM  ', '127.0.0.1', null);
+
+        $this->assertEquals('test@example.com', $challenge->email);
     }
 
     public function test_rate_limiting_prevents_multiple_requests(): void
