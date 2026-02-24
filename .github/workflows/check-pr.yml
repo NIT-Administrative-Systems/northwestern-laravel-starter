@@ -428,6 +428,11 @@ jobs:
           recreate: true
           path: code-coverage-results.md
 
+      - name: 📤 Upload to Coveralls
+        uses: coverallsapp/github-action@v2
+        with:
+          file: .build/clover.xml
+
   end-to-end-tests:
     name: 🌲 Cypress Tests
     needs: [determine-scope]
