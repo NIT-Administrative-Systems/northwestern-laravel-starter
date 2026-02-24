@@ -150,7 +150,7 @@ class IdempotentSeederResolver
      */
     private function parseNamespaceFromFile(string $filePath): ?string
     {
-        $handle = fopen($filePath, 'rb');
+        $handle = @fopen($filePath, 'rb');
 
         if ($handle === false) {
             return null;
