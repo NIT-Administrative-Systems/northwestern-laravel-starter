@@ -429,6 +429,7 @@ jobs:
           path: code-coverage-results.md
 
       - name: 📤 Upload to Coveralls
+        if: github.repository == 'NIT-Administrative-Systems/northwestern-laravel-starter'
         uses: coverallsapp/github-action@v2
         with:
           file: .build/clover.xml
