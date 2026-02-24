@@ -428,6 +428,8 @@ jobs:
           recreate: true
           path: code-coverage-results.md
 
+      # This step can be removed entirely if your project does not use Coveralls. If you do, make sure to set
+      # the COVERALLS_REPO_TOKEN secret in your repository settings and remove the `if` condition below.
       - name: 📤 Upload to Coveralls
         if: github.repository == 'NIT-Administrative-Systems/northwestern-laravel-starter'
         uses: coverallsapp/github-action@v2
