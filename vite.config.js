@@ -2,6 +2,7 @@ import tailwindcss from "@tailwindcss/vite";
 import autoprefixer from "autoprefixer";
 import laravel from "laravel-vite-plugin";
 import { defineConfig } from "vite";
+import { shikiMinimalBundle } from "./resources/js/shiki/vite-plugin.mjs";
 
 export default defineConfig({
     build: {
@@ -14,6 +15,7 @@ export default defineConfig({
         },
     },
     plugins: [
+        shikiMinimalBundle(),
         tailwindcss(),
         laravel({
             input: [
