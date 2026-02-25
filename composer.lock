@@ -7736,31 +7736,31 @@
         },
         {
             "name": "spatie/laravel-db-snapshots",
-            "version": "2.7.2",
+            "version": "2.8.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/spatie/laravel-db-snapshots.git",
-                "reference": "deb86a53a30cb852e82b491dd3f493fc002fe9f2"
+                "reference": "d15f6dccfb914e4bb6fd7b63561be9f7aa1ad45a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/spatie/laravel-db-snapshots/zipball/deb86a53a30cb852e82b491dd3f493fc002fe9f2",
-                "reference": "deb86a53a30cb852e82b491dd3f493fc002fe9f2",
+                "url": "https://api.github.com/repos/spatie/laravel-db-snapshots/zipball/d15f6dccfb914e4bb6fd7b63561be9f7aa1ad45a",
+                "reference": "d15f6dccfb914e4bb6fd7b63561be9f7aa1ad45a",
                 "shasum": ""
             },
             "require": {
-                "illuminate/support": "^10.0|^11.0|^12.0",
+                "illuminate/support": "^11.0|^12.0|^13.0",
                 "league/flysystem": "^3.0",
-                "php": "^8.1",
+                "php": "^8.2",
                 "spatie/db-dumper": "^3.3",
                 "spatie/laravel-package-tools": "^1.6",
                 "spatie/temporary-directory": "^2.0"
             },
             "require-dev": {
                 "mockery/mockery": "^1.4",
-                "orchestra/testbench": "^8.22.3|^9.0.4|^10.0",
-                "pestphp/pest-plugin-laravel": "^2.4|^3.1",
-                "phpunit/phpunit": "^10.5|^11.5.3"
+                "orchestra/testbench": "^9.0.4|^10.0|^11.0",
+                "pestphp/pest-plugin-laravel": "^3.1|^4.0",
+                "phpunit/phpunit": "^10.5|^11.5.3|^12.5.12"
             },
             "type": "library",
             "extra": {
@@ -7794,7 +7794,7 @@
                 "spatie"
             ],
             "support": {
-                "source": "https://github.com/spatie/laravel-db-snapshots/tree/2.7.2"
+                "source": "https://github.com/spatie/laravel-db-snapshots/tree/2.8.0"
             },
             "funding": [
                 {
@@ -7806,7 +7806,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-01-28T22:38:12+00:00"
+            "time": "2026-02-21T15:58:54+00:00"
         },
         {
             "name": "spatie/laravel-health",
