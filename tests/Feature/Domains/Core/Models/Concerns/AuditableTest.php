@@ -98,6 +98,54 @@ class AuditableTest extends TestCase
         $this->assertSame(Livewire::getUpdateUri(), $result['url']);
     }
 
+    public function test_transform_audit_merges_custom_tags(): void
+    {
+        $this->bindImpersonateService(null);
+
+        $user = User::factory()->make();
+        $user->auditCustomTags = ['ui-action'];
+
+        $result = $user->transformAudit(['url' => '/test']);
+
+        $this->assertSame('ui-action', $result['tags']);
+    }
+
+    public function test_transform_audit_merges_custom_tags_with_existing_tags(): void
+    {
+        $this->bindImpersonateService(null);
+
+        $user = User::factory()->make();
+        $user->auditCustomTags = ['ui-action'];
+
+        $result = $user->transformAudit(['url' => '/test', 'tags' => 'existing-tag']);
+
+        $this->assertSame('existing-tag,ui-action', $result['tags']);
+    }
+
+    public function test_transform_audit_appends_context_entries_as_tags(): void
+    {
+        $this->bindImpersonateService(null);
+
+        $user = User::factory()->make();
+        $user->auditCustomTags = ['system'];
+        $user->auditCustomContext = ['reason' => 'promoted'];
+
+        $result = $user->transformAudit(['url' => '/test']);
+
+        $this->assertSame('system,reason: promoted', $result['tags']);
+    }
+
+    public function test_transform_audit_ignores_custom_tags_when_not_set(): void
+    {
+        $this->bindImpersonateService(null);
+
+        $user = User::factory()->make();
+
+        $result = $user->transformAudit(['url' => '/test', 'tags' => null]);
+
+        $this->assertNull($result['tags']);
+    }
+
     private function bindImpersonateService(?int $impersonatorId): void
     {
         $impersonate = Mockery::mock();

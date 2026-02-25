@@ -48,8 +48,7 @@ trait AuditsRoles
 
         $this->assignRole($roles);
 
-        $normalizedRoles = $this->normalizeRolesToCollection($roles);
-        $this->auditRoleChange('role_assigned', $oldRoles, $normalizedRoles, $origin, $context);
+        $this->auditRoleChange('role_assigned', $oldRoles, $origin, $context);
     }
 
     /**
@@ -80,20 +79,18 @@ trait AuditsRoles
 
         $this->removeRole($roles);
 
-        $normalizedRoles = $this->normalizeRolesToCollection($roles);
-        $this->auditRoleChange('role_removed', $oldRoles, $normalizedRoles, $origin, $context);
+        $this->auditRoleChange('role_removed', $oldRoles, $origin, $context);
     }
 
     /**
      * Creates a custom audit log entry for role changes with before/after snapshots.
      *
-     * This method constructs a specialized audit event that captures the complete context
-     * of a role assignment or removal. Unlike standard model audits that only track
-     * attribute changes, this creates a structured snapshot of the entire role collection.
+     * The modification origin is stored as a tag, and optional context entries are
+     * appended as tags (e.g., "reason: promoted"). The diff between old and new
+     * values uses an identical structure for clean visual comparison.
      *
      * @param  'role_assigned'|'role_removed'  $event  The specific audit event type
      * @param  list<RoleData>  $oldRoles  The collection of roles before modification
-     * @param  BaseCollection<int, Role>  $roles  The role(s) that were assigned or removed
      * @param  RoleModificationOriginEnum  $origin  The source/reason for this role change
      * @param  array<string, mixed>  $context  Additional contextual information
      *
@@ -103,7 +100,6 @@ trait AuditsRoles
     private function auditRoleChange(
         string $event,
         array $oldRoles,
-        BaseCollection $roles,
         RoleModificationOriginEnum $origin,
         array $context = []
     ): void {
@@ -113,33 +109,27 @@ trait AuditsRoles
             ? $this->mapRolesToArray($freshModel->roles)
             : [];
 
-        $isAssignment = $event === 'role_assigned';
-        $modifiedRoles = $this->mapRolesToArray($roles);
-
-        $auditNew = [
-            $isAssignment ? 'assigned_roles' : 'removed_roles' => $modifiedRoles,
-            'roles_after_change' => $newRoles,
-            'modification_origin' => $origin->value,
-        ];
-
-        if (filled($context)) {
-            $auditNew['context'] = $context;
-        }
-
         $auditData = [
             'auditEvent' => $event,
             'isCustomEvent' => true,
             'auditCustomOld' => [
-                'roles_before_change' => $oldRoles,
+                'roles' => $oldRoles,
             ],
-            'auditCustomNew' => $auditNew,
+            'auditCustomNew' => [
+                'roles' => $newRoles,
+            ],
         ];
 
         foreach ($auditData as $key => $value) {
             $this->{$key} = $value;
         }
 
+        $this->auditCustomTags = [$origin->value];
+        $this->auditCustomContext = filled($context) ? $context : null;
+
         Event::dispatch(new AuditCustom($this));
+
+        unset($this->auditCustomTags, $this->auditCustomContext);
     }
 
     /**
@@ -155,24 +145,5 @@ trait AuditsRoles
             'name' => $role->name,
             'role_type' => $role->role_type?->slug->getLabel() ?? 'Unknown',
         ])->all());
-    }
-
-    /**
-     * Normalizes various role input formats into a collection of Role models.
-     *
-     * @param  Role|array<Role>|BaseCollection<int, Role>  $roles
-     * @return BaseCollection<int, Role>
-     */
-    private function normalizeRolesToCollection(Role|array|BaseCollection $roles): BaseCollection
-    {
-        if ($roles instanceof Role) {
-            return collect([$roles]);
-        }
-
-        if ($roles instanceof BaseCollection) {
-            return $roles;
-        }
-
-        return collect($roles);
     }
 }

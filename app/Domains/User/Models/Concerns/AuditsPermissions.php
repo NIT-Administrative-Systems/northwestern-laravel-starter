@@ -55,17 +55,7 @@ trait AuditsPermissions
 
         // Only create audit if there were changes
         if (filled($addedPermissionNames) || filled($removedPermissionNames)) {
-            $addedPermissions = collect($newPermissions)
-                ->whereIn('name', $addedPermissionNames)
-                ->values()
-                ->toArray();
-
-            $removedPermissions = collect($oldPermissions)
-                ->whereIn('name', $removedPermissionNames)
-                ->values()
-                ->toArray();
-
-            $this->auditPermissionChange($oldPermissions, $newPermissions, $addedPermissions, $removedPermissions);
+            $this->auditPermissionChange($oldPermissions, $newPermissions);
         }
     }
 
@@ -87,32 +77,28 @@ trait AuditsPermissions
     }
 
     /**
-     * Creates a custom audit log entry for permission changes with detailed diff information.
+     * Creates a custom audit log entry for permission changes with before/after snapshots.
      *
      * This method constructs a specialized audit event that captures the complete context
      * of a permission sync operation. Unlike standard model audits that only track column
-     * changes, this creates a structured snapshot of the permission collection with a diff.
+     * changes, this creates a structured snapshot of the permission collection.
      *
      * @param  list<PermissionData>  $oldPermissions  Permissions before modification
      * @param  list<PermissionData>  $newPermissions  Permissions after modification
-     * @param  list<PermissionData>  $addedPermissions  The permissions that were added
-     * @param  list<PermissionData>  $removedPermissions  The permissions that were removed
      *
      * @see syncPermissionsWithAudit()
      */
-    private function auditPermissionChange(array $oldPermissions, array $newPermissions, array $addedPermissions, array $removedPermissions): void
+    private function auditPermissionChange(array $oldPermissions, array $newPermissions): void
     {
         $auditData = [
             'auditEvent' => 'permissions_modified',
             'isCustomEvent' => true,
             'auditCustomOld' => [
-                'permissions_before_change' => $oldPermissions,
+                'permissions' => $oldPermissions,
             ],
-            'auditCustomNew' => array_filter([
-                'added_permissions' => filled($addedPermissions) ? $addedPermissions : null,
-                'removed_permissions' => filled($removedPermissions) ? $removedPermissions : null,
-                'permissions_after_change' => $newPermissions,
-            ]),
+            'auditCustomNew' => [
+                'permissions' => $newPermissions,
+            ],
         ];
 
         foreach ($auditData as $key => $value) {
