@@ -8,6 +8,7 @@ use App\Domains\User\Models\Audit;
 use App\Filament\Resources\Users\UserResource;
 use Filament\Infolists\Components\CodeEntry;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\ViewEntry;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -139,43 +140,58 @@ class AuditInfolist
                                     ]),
                             ]),
 
-                        Section::make('Metadata')
-                            ->icon(Heroicon::OutlinedInformationCircle)
+                        Grid::make(1)
                             ->columnSpan([
                                 'default' => 1,
                                 'lg' => 1,
                             ])
                             ->schema([
-                                TextEntry::make('trace_id')
-                                    ->label('Trace ID')
-                                    ->visible(fn (Audit $record) => filled($record->trace_id))
-                                    ->icon(Heroicon::OutlinedHashtag)
-                                    ->fontFamily(FontFamily::Mono)
-                                    ->tooltip('Correlate this change with API request logs and other events using the same Trace ID')
-                                    ->copyable()
-                                    ->color('gray'),
+                                Section::make('Metadata')
+                                    ->icon(Heroicon::OutlinedInformationCircle)
+                                    ->schema([
+                                        TextEntry::make('trace_id')
+                                            ->label('Trace ID')
+                                            ->visible(fn (Audit $record) => filled($record->trace_id))
+                                            ->icon(Heroicon::OutlinedHashtag)
+                                            ->fontFamily(FontFamily::Mono)
+                                            ->tooltip('Correlate this change with API request logs and other events using the same Trace ID')
+                                            ->copyable()
+                                            ->color('gray'),
 
-                                TextEntry::make('tags')
-                                    ->label('Tags')
-                                    ->placeholder('No tags')
-                                    ->badge()
-                                    ->separator(',')
-                                    ->icon(Heroicon::OutlinedTag)
-                                    ->color('gray'),
+                                        TextEntry::make('tags')
+                                            ->label('Tags')
+                                            ->placeholder('No tags')
+                                            ->badge()
+                                            ->separator(',')
+                                            ->icon(Heroicon::OutlinedTag)
+                                            ->color('gray'),
 
-                                TextEntry::make('ip_address')
-                                    ->label('IP Address')
-                                    ->placeholder('—')
-                                    ->icon(Heroicon::OutlinedGlobeAlt)
-                                    ->copyable()
-                                    ->color('gray'),
+                                        TextEntry::make('ip_address')
+                                            ->label('IP Address')
+                                            ->placeholder('—')
+                                            ->icon(Heroicon::OutlinedGlobeAlt)
+                                            ->copyable()
+                                            ->color('gray'),
 
-                                TextEntry::make('user_agent')
-                                    ->label('User Agent')
-                                    ->placeholder('—')
-                                    ->icon(Heroicon::OutlinedComputerDesktop)
-                                    ->tooltip(fn ($state) => $state)
-                                    ->color('gray'),
+                                        TextEntry::make('user_agent')
+                                            ->label('User Agent')
+                                            ->placeholder('—')
+                                            ->icon(Heroicon::OutlinedComputerDesktop)
+                                            ->tooltip(fn ($state) => $state)
+                                            ->color('gray'),
+                                    ]),
+
+                                Section::make('Record History')
+                                    ->icon(Heroicon::OutlinedQueueList)
+                                    ->description(fn (Audit $record) => Str::afterLast(
+                                        Relation::getMorphedModel($record->auditable_type) ?? $record->auditable_type,
+                                        '\\'
+                                    ) . ' #' . $record->auditable_id)
+                                    ->schema([
+                                        ViewEntry::make('record_timeline')
+                                            ->hiddenLabel()
+                                            ->view('filament.resources.audits.entries.record-timeline'),
+                                    ]),
                             ]),
                     ]),
             ]);
