@@ -86,6 +86,7 @@ class AuditsTable
                 TextColumn::make('auditable_id')
                     ->label('Record ID')
                     ->numeric()
+                    ->copyable()
                     ->sortable(),
                 TextColumn::make('url')
                     ->formatStateUsing(fn ($state) => str_replace(config('app.url'), '', $state))
@@ -135,7 +136,8 @@ class AuditsTable
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->label('Created At')
-                    ->dateTime()
+                    ->since()
+                    ->dateTimeTooltip()
                     ->sortable(),
             ])
             ->defaultSort('created_at', direction: 'desc')

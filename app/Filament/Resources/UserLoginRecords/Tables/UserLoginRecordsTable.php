@@ -39,7 +39,8 @@ class UserLoginRecordsTable
                     ->hiddenOn(LoginRecordsRelationManager::class),
                 TextColumn::make('logged_in_at')
                     ->label('Logged In At')
-                    ->dateTime()
+                    ->since()
+                    ->dateTimeTooltip()
                     ->sortable(),
                 TextColumn::make('segment')
                     ->badge()
