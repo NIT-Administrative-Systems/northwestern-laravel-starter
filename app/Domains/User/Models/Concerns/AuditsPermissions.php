@@ -7,10 +7,10 @@ namespace App\Domains\User\Models\Concerns;
 use App\Domains\Auth\Enums\PermissionEnum;
 use App\Domains\Auth\Models\Permission;
 use App\Domains\Auth\Models\Role;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Collection as BaseCollection;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Facades\Event;
 use OwenIt\Auditing\Events\AuditCustom;
+use Spatie\Permission\Models\Permission as SpatiePermission;
 
 /**
  * @mixin Role
@@ -62,12 +62,12 @@ trait AuditsPermissions
     /**
      * Converts a collection of permissions to a simplified array format.
      *
-     * @param  BaseCollection<array-key, Permission|Model>  $permissions
+     * @param  EloquentCollection<int, SpatiePermission>  $permissions
      * @return list<PermissionData> Array of simplified permission data
      */
-    private function mapPermissionsToArray(BaseCollection $permissions): array
+    private function mapPermissionsToArray(EloquentCollection $permissions): array
     {
-        /** @var BaseCollection<int, Permission> $permissions */
+        /** @var EloquentCollection<int, Permission> $permissions */
         return array_values($permissions->map(fn (Permission $permission): array => [
             'name' => $permission->name,
             'label' => $permission->label,

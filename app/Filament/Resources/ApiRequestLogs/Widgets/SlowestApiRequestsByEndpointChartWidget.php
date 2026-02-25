@@ -47,12 +47,6 @@ class SlowestApiRequestsByEndpointChartWidget extends BaseApiRequestChartWidget
             );
         }
 
-        /** @var object{
-         *     path: string,
-         *     p95_duration: float|null,
-         *     request_count: int
-         * } $slowest
-         */
         $slowest = $endpointStats->first();
 
         $slowestPath = $slowest->path;

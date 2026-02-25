@@ -57,15 +57,17 @@ Cypress.Commands.add("checkAxeViolations", () => {
         rules: [{ id: "duplicate-id", enabled: false }],
     });
 
-    if (Cypress.env("axe_skip_failures") === "true") {
-        cy.checkA11y(null, null, null, true);
-    } else {
-        if (Cypress.env("axe_excluded_selectors")) {
-            cy.checkA11y({
-                exclude: Cypress.env("axe_excluded_selectors").split(),
-            });
-        } else {
-            cy.checkA11y();
-        }
-    }
+    cy.env(["axe_skip_failures", "axe_excluded_selectors"]).then(
+        ({ axe_skip_failures, axe_excluded_selectors }) => {
+            if (axe_skip_failures === "true") {
+                cy.checkA11y(null, null, null, true);
+            } else if (axe_excluded_selectors) {
+                cy.checkA11y({
+                    exclude: (axe_excluded_selectors as string).split(),
+                });
+            } else {
+                cy.checkA11y();
+            }
+        },
+    );
 });
