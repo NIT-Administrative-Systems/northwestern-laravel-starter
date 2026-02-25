@@ -29,6 +29,7 @@ return new class extends Migration
             $table->index('user_id');
             $table->index('ticketing_system');
             $table->index(['post_error', 'created_at']);
+            $table->index(['user_id', 'created_at']);
         });
     }
 

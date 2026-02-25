@@ -18,6 +18,8 @@ return new class extends Migration
             $table->foreignId('impersonated_user_id')->index();
 
             $table->timestamps();
+
+            $table->index(['impersonator_user_id', 'created_at']);
         });
     }
 
