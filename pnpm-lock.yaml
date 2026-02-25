@@ -21,8 +21,8 @@ importers:
         specifier: ^2.0.11
         version: 2.0.11
       tom-select:
-        specifier: ^2.4.5
-        version: 2.4.5
+        specifier: ^2.5.2
+        version: 2.5.2
     devDependencies:
       '@fortawesome/fontawesome-free':
         specifier: ^7.2.0
@@ -2138,8 +2138,8 @@ packages:
     resolution: {integrity: sha512-65P7iz6X5yEr1cwcgvQxbbIw7Uk3gOy5dIdtZ4rDveLqhrdJP+Li/Hx6tyK0NEb+2GCyneCMJiGqrADCSNk8sQ==}
     engines: {node: '>=8.0'}
 
-  tom-select@2.4.5:
-    resolution: {integrity: sha512-ujZ5P10kRohKDFElklhkO4dRM+WkUEaytHhOuzbQkZ6MyiR8e2IwGKXab4v+ZNipE2queN8ztlb0MmRLqoM6QA==}
+  tom-select@2.5.2:
+    resolution: {integrity: sha512-VAlGj5MBWVLMJje2NwA3XSmxa7CUFpp1tdzFZ8wymCkcLeP0NwF4ARmSuUK4BWbmSN1fETlSazWkMIxEpP4GdQ==}
 
   tough-cookie@5.1.2:
     resolution: {integrity: sha512-FVDYdxtnj0G6Qm/DhNPSb8Ju59ULcup3tuJxkFb5K8Bv2pUXILbf0xZWU8PX8Ov19OXljbUyveOFwRMwkXzO+A==}
@@ -4264,7 +4264,7 @@ snapshots:
     dependencies:
       is-number: 7.0.0
 
-  tom-select@2.4.5:
+  tom-select@2.5.2:
     dependencies:
       '@orchidjs/sifter': 1.1.0
       '@orchidjs/unicode-variants': 1.1.2
