@@ -8,6 +8,7 @@ use App\Domains\Auth\Actions\Local\FixedNumericOneTimeCodeGenerator;
 use InvalidArgumentException;
 use LogicException;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 #[CoversClass(FixedNumericOneTimeCodeGenerator::class)]
@@ -59,13 +60,24 @@ class FixedNumericOneTimeCodeGeneratorTest extends TestCase
         ($this->generator)(-1);
     }
 
-    public function test_throws_in_production_environment(): void
+    #[DataProvider('blockedEnvironmentProvider')]
+    public function test_throws_in_blocked_environments(string $environment): void
     {
-        $this->app['env'] = 'production';
+        $this->app['env'] = $environment;
 
         $this->expectException(LogicException::class);
-        $this->expectExceptionMessage('must not be used in production');
+        $this->expectExceptionMessage('must not be used in production, develop, or QA environments');
 
         ($this->generator)(6);
+    }
+
+    /** @return array<string, array{0: string}> */
+    public static function blockedEnvironmentProvider(): array
+    {
+        return [
+            'production' => ['production'],
+            'develop' => ['develop'],
+            'qa' => ['qa'],
+        ];
     }
 }

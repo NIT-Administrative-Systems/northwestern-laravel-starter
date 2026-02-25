@@ -28,9 +28,9 @@ final class FixedNumericOneTimeCodeGenerator implements OneTimeCodeGenerator
      */
     public function __invoke(int $digits): string
     {
-        if (App::isProduction()) {
+        if (App::environment(['production', 'develop', 'qa'])) {
             throw new LogicException(
-                'The FixedNumericOneTimeCodeGenerator must not be used in production environments.'
+                'The FixedNumericOneTimeCodeGenerator must not be used in production, develop, or QA environments.'
             );
         }
 
