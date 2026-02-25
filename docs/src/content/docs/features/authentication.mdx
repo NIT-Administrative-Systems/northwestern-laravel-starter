@@ -141,7 +141,14 @@ LOCAL_AUTH_RATE_LIMIT_PER_HOUR=10
 
 # Where to redirect after successful login
 LOCAL_AUTH_REDIRECT_AFTER_LOGIN=/
+
+# Use a fixed, predictable verification code instead of random codes
+LOCAL_AUTH_USE_FIXED_CODE=false
 ```
+
+<Aside type="tip">
+  Setting `LOCAL_AUTH_USE_FIXED_CODE=true` in your local `.env` replaces random verification codes with a fixed, predictable code (e.g. `123456` for a 6-digit code). This avoids needing to check your mail trap every time you log in during development. This setting is blocked from running in production, develop, and QA environments as a safety measure.
+</Aside>
 
 ### Creating Local Users
 

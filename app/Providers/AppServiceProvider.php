@@ -34,13 +34,12 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(DbDumperFactory::class, function (): ConfigurableDbDumperFactory {
             return new ConfigurableDbDumperFactory();
         });
-        $this->app->singleton(OneTimeCodeGenerator::class, function () {
-            if ($this->app->environment('ci')) {
-                return new FixedNumericOneTimeCodeGenerator();
-            }
-
-            return new RandomNumericOneTimeCodeGenerator();
-        });
+        $this->app->singleton(
+            OneTimeCodeGenerator::class,
+            config('local-auth.use_fixed_code')
+                ? FixedNumericOneTimeCodeGenerator::class
+                : RandomNumericOneTimeCodeGenerator::class,
+        );
 
         Paginator::useBootstrapFive();
     }

@@ -39,7 +39,13 @@
             -->
 
             <!-- Enums (declarative values, labels, colors) -->
-            <directory>app/Domains/Auth/Enums</directory>
+            <file>app/Domains/Auth/Enums/AccessTokenStatusEnum.php</file>
+            <file>app/Domains/Auth/Enums/AuthTypeEnum.php</file>
+            <file>app/Domains/Auth/Enums/PermissionEnum.php</file>
+            <file>app/Domains/Auth/Enums/PermissionScopeEnum.php</file>
+            <file>app/Domains/Auth/Enums/RoleModificationOriginEnum.php</file>
+            <file>app/Domains/Auth/Enums/RoleTypeEnum.php</file>
+            <file>app/Domains/Auth/Enums/SystemRoleEnum.php</file>
             <directory>app/Domains/Core/Enums</directory>
             <directory>app/Domains/Support/Enums</directory>
             <file>app/Domains/User/Enums/AffiliationEnum.php</file>
@@ -78,7 +84,9 @@
 
             <!-- Framework boilerplate / third-party -->
             <directory>app/Domains/Core/Concerns</directory>
-            <directory>app/Domains/Core/Database</directory>
+            <file
+            >app/Domains/Core/Database/ConfigurableDbDumperFactory.php</file>
+            <file>app/Domains/Core/Database/SchemaChecksumManager.php</file>
             <directory>app/Domains/Core/Exceptions</directory>
             <directory>app/Domains/Core/GlobalAlerts</directory>
             <directory>app/Domains/Core/Services/ConfigValidation</directory>

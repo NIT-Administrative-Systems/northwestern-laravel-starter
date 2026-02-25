@@ -110,6 +110,7 @@ class UsersTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->modifyQueryUsing(fn (Builder $query) => $query->with('roles'))
             ->defaultSort(function (Builder $query) {
                 return $query->orderBy('last_name')->orderBy('first_name');
             })

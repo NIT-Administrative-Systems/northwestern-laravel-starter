@@ -43,7 +43,7 @@ class ProcessNetIdUpdateTest extends TestCase
         $user = User::factory()->create(['username' => 'abc123', 'auth_type' => AuthTypeEnum::SSO]);
         $user->assignRoleWithAudit([$this->adminRole(), $this->editorRole(), $this->nuRole()], RoleModificationOriginEnum::SYSTEM);
 
-        $event = new NetIdUpdated('netid=abc123&action=deactivate');
+        $event = NetIdUpdated::fromPayload('netid=abc123&action=deactivate');
         $listener = new ProcessNetIdUpdate();
         $listener->handle($event);
 
@@ -59,7 +59,7 @@ class ProcessNetIdUpdateTest extends TestCase
         $user = User::factory()->create(['username' => 'test123', 'auth_type' => AuthTypeEnum::SSO]);
         $user->assignRoleWithAudit([$this->adminRole(), $this->editorRole(), $this->nuRole()], RoleModificationOriginEnum::SYSTEM);
 
-        $event = new NetIdUpdated('netid=test123&action=deprovision');
+        $event = NetIdUpdated::fromPayload('netid=test123&action=deprovision');
         $listener = new ProcessNetIdUpdate();
         $listener->handle($event);
 
@@ -75,7 +75,7 @@ class ProcessNetIdUpdateTest extends TestCase
         $user = User::factory()->create(['username' => 'sec123', 'auth_type' => AuthTypeEnum::SSO]);
         $user->assignRoleWithAudit([$this->adminRole(), $this->editorRole(), $this->nuRole()], RoleModificationOriginEnum::SYSTEM);
 
-        $event = new NetIdUpdated('netid=sec123&action=sechold');
+        $event = NetIdUpdated::fromPayload('netid=sec123&action=sechold');
         $listener = new ProcessNetIdUpdate();
         $listener->handle($event);
 
@@ -94,7 +94,7 @@ class ProcessNetIdUpdateTest extends TestCase
             'netid_inactive' => false,
         ]);
 
-        $event = new NetIdUpdated('netid=abc123&action=deactivate');
+        $event = NetIdUpdated::fromPayload('netid=abc123&action=deactivate');
         $listener = new ProcessNetIdUpdate();
         $listener->handle($event);
 
@@ -111,7 +111,7 @@ class ProcessNetIdUpdateTest extends TestCase
             'netid_inactive' => false,
         ]);
 
-        $event = new NetIdUpdated('netid=test123&action=deprovision');
+        $event = NetIdUpdated::fromPayload('netid=test123&action=deprovision');
         $listener = new ProcessNetIdUpdate();
         $listener->handle($event);
 
@@ -128,7 +128,7 @@ class ProcessNetIdUpdateTest extends TestCase
             'netid_inactive' => false,
         ]);
 
-        $event = new NetIdUpdated('netid=sec123&action=sechold');
+        $event = NetIdUpdated::fromPayload('netid=sec123&action=sechold');
         $listener = new ProcessNetIdUpdate();
         $listener->handle($event);
 
@@ -142,7 +142,7 @@ class ProcessNetIdUpdateTest extends TestCase
         $user = User::factory()->create(['username' => 'abc123', 'auth_type' => AuthTypeEnum::SSO]);
         $user->assignRoleWithAudit($this->nuRole(), RoleModificationOriginEnum::SYSTEM);
 
-        $event = new NetIdUpdated('netid=abc123&action=deactivate');
+        $event = NetIdUpdated::fromPayload('netid=abc123&action=deactivate');
         $listener = new ProcessNetIdUpdate();
         $listener->handle($event);
 
@@ -154,7 +154,7 @@ class ProcessNetIdUpdateTest extends TestCase
 
     public function test_it_does_nothing_when_netid_not_found(): void
     {
-        $event = new NetIdUpdated('netid=nonexistent&action=deactivate');
+        $event = NetIdUpdated::fromPayload('netid=nonexistent&action=deactivate');
         $listener = new ProcessNetIdUpdate();
 
         $listener->handle($event);
@@ -172,7 +172,7 @@ class ProcessNetIdUpdateTest extends TestCase
         $user = User::factory()->create(['username' => 'abc123', 'auth_type' => AuthTypeEnum::SSO]);
         $user->assignRoleWithAudit([$role1, $role2, $role3, $this->nuRole()], RoleModificationOriginEnum::SYSTEM);
 
-        $event = new NetIdUpdated('netid=abc123&action=deactivate');
+        $event = NetIdUpdated::fromPayload('netid=abc123&action=deactivate');
         $listener = new ProcessNetIdUpdate();
         $listener->handle($event);
 
@@ -193,7 +193,7 @@ class ProcessNetIdUpdateTest extends TestCase
         ]);
         $user->assignRoleWithAudit($this->adminRole(), RoleModificationOriginEnum::SYSTEM);
 
-        $event = new NetIdUpdated('netid=local123&action=deactivate');
+        $event = NetIdUpdated::fromPayload('netid=local123&action=deactivate');
         $listener = new ProcessNetIdUpdate();
         $listener->handle($event);
 
@@ -212,7 +212,7 @@ class ProcessNetIdUpdateTest extends TestCase
         ]);
         $user->assignRoleWithAudit($this->adminRole(), RoleModificationOriginEnum::SYSTEM);
 
-        $event = new NetIdUpdated('netid=api123&action=deactivate');
+        $event = NetIdUpdated::fromPayload('netid=api123&action=deactivate');
         $listener = new ProcessNetIdUpdate();
         $listener->handle($event);
 

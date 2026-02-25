@@ -37,7 +37,7 @@ class NetIdUpdateController extends Controller
     {
         try {
             $payload = $request->getContent();
-            $event = new NetIdUpdated($payload);
+            $event = NetIdUpdated::fromPayload($payload);
         } catch (Throwable $e) {
             /**
              * Unexpected errors should be reported but still return a successful

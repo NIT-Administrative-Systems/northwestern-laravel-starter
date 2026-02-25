@@ -23,14 +23,18 @@ class NetIdUpdated
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public readonly string $netId;
-
-    public readonly NetIdUpdateActionEnum $action;
+    public function __construct(
+        public readonly string $netId,
+        public readonly NetIdUpdateActionEnum $action,
+    ) {
+    }
 
     /**
+     * Parse a raw URL-encoded webhook payload into an event instance.
+     *
      * @throws InvalidArgumentException If the payload is malformed or missing required fields
      */
-    public function __construct(string $rawPayload)
+    public static function fromPayload(string $rawPayload): self
     {
         parse_str($rawPayload, $parsed);
 
@@ -41,7 +45,7 @@ class NetIdUpdated
             throw new InvalidArgumentException('Webhook payload missing required fields: netid and action');
         }
 
-        $this->netId = strtolower(trim($parsed['netid']));
+        $netId = strtolower(trim($parsed['netid']));
         $actionValue = strtolower(trim($parsed['action']));
 
         $action = NetIdUpdateActionEnum::tryFrom($actionValue);
@@ -49,6 +53,6 @@ class NetIdUpdated
             throw new InvalidArgumentException("Unknown action type: {$actionValue}");
         }
 
-        $this->action = $action;
+        return new self($netId, $action);
     }
 }

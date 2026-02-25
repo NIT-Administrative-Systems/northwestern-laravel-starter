@@ -36,9 +36,7 @@ export default defineConfig({
     viewportWidth: 1920,
     viewportHeight: 1080,
     e2e: {
-        baseUrl:
-            getBaseUrlFromEnv() ||
-            "https://northwestern-laravel-starter-example.adoes.northwestern.edu",
+        baseUrl: getBaseUrlFromEnv() || "http://localhost:8000",
         supportFile: "cypress/support/index.js",
         setupNodeEvents(on, config) {
             initPlugins(on, config);

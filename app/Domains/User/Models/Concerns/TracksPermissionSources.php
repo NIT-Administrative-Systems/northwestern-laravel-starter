@@ -44,7 +44,7 @@ trait TracksPermissionSources
      */
     public function hasPermissionFromRole(PermissionEnum $permission, Role $role): bool
     {
-        $this->loadMissing('roles');
+        $this->loadMissing('roles.permissions');
 
         if (! $this->roles->contains('id', $role->id)) {
             return false;
@@ -61,7 +61,7 @@ trait TracksPermissionSources
      */
     public function getRolesWithPermission(PermissionEnum $permission): Collection
     {
-        $this->loadMissing('roles');
+        $this->loadMissing('roles.permissions');
 
         return $this->roles->filter(
             fn (Role $role): bool => $this->getRolePermissionNames($role)->contains($permission->value)
@@ -80,7 +80,7 @@ trait TracksPermissionSources
      */
     public function getPermissionsFromRole(Role $role): Collection
     {
-        $this->loadMissing('roles');
+        $this->loadMissing('roles.permissions');
 
         if (! $this->roles->contains('id', $role->id)) {
             return collect();
