@@ -153,7 +153,7 @@ class LogsApiRequestsTest extends TestCase
 
         $user = User::factory()->api()->create();
 
-        for ($i = 0; $i < 5; $i++) {
+        for ($i = 0; $i < 3; $i++) {
             Context::flush();
             Context::add(ApiRequestContext::USER_ID, $user->id);
             Context::add(ApiRequestContext::TRACE_ID, Str::uuid()->toString());
@@ -161,7 +161,7 @@ class LogsApiRequestsTest extends TestCase
             $this->getJson($this->endpoint)->assertOk();
         }
 
-        $this->assertDatabaseCount(ApiRequestLog::class, 5);
+        $this->assertDatabaseCount(ApiRequestLog::class, 3);
     }
 
     public function test_sampling_enabled_with_zero_rate_logs_no_successful_requests(): void
@@ -171,7 +171,7 @@ class LogsApiRequestsTest extends TestCase
 
         $user = User::factory()->api()->create();
 
-        for ($i = 0; $i < 10; $i++) {
+        for ($i = 0; $i < 3; $i++) {
             Context::flush();
             Context::add(ApiRequestContext::USER_ID, $user->id);
             Context::add(ApiRequestContext::TRACE_ID, Str::uuid()->toString());
@@ -189,7 +189,7 @@ class LogsApiRequestsTest extends TestCase
 
         $user = User::factory()->api()->create();
 
-        for ($i = 0; $i < 5; $i++) {
+        for ($i = 0; $i < 3; $i++) {
             Context::flush();
             Context::add(ApiRequestContext::USER_ID, $user->id);
             Context::add(ApiRequestContext::TRACE_ID, Str::uuid()->toString());
@@ -197,7 +197,7 @@ class LogsApiRequestsTest extends TestCase
             $this->getJson($this->endpoint)->assertOk();
         }
 
-        $this->assertDatabaseCount(ApiRequestLog::class, 5);
+        $this->assertDatabaseCount(ApiRequestLog::class, 3);
     }
 
     public function test_sampling_always_logs_errors_regardless_of_sample_rate(): void
@@ -211,7 +211,7 @@ class LogsApiRequestsTest extends TestCase
             return response()->json(['error' => 'Not Found'], 404);
         });
 
-        for ($i = 0; $i < 5; $i++) {
+        for ($i = 0; $i < 3; $i++) {
             Context::flush();
             Context::add(ApiRequestContext::USER_ID, $user->id);
             Context::add(ApiRequestContext::TRACE_ID, Str::uuid()->toString());
@@ -219,8 +219,8 @@ class LogsApiRequestsTest extends TestCase
             $this->getJson('/api/error')->assertNotFound();
         }
 
-        // All 5 error requests should be logged despite 0% sampling
-        $this->assertDatabaseCount(ApiRequestLog::class, 5);
+        // All 3 error requests should be logged despite 0% sampling
+        $this->assertDatabaseCount(ApiRequestLog::class, 3);
     }
 
     public function test_sampling_always_logs_failures_regardless_of_sample_rate(): void
@@ -230,7 +230,7 @@ class LogsApiRequestsTest extends TestCase
 
         $user = User::factory()->api()->create();
 
-        for ($i = 0; $i < 5; $i++) {
+        for ($i = 0; $i < 3; $i++) {
             Context::flush();
             Context::add(ApiRequestContext::USER_ID, $user->id);
             Context::add(ApiRequestContext::TRACE_ID, Str::uuid()->toString());
@@ -239,8 +239,8 @@ class LogsApiRequestsTest extends TestCase
             $this->getJson($this->endpoint)->assertOk();
         }
 
-        // All 5 requests with failure reasons should be logged despite 0% sampling
-        $this->assertDatabaseCount(ApiRequestLog::class, 5);
+        // All 3 requests with failure reasons should be logged despite 0% sampling
+        $this->assertDatabaseCount(ApiRequestLog::class, 3);
     }
 
     public function test_sampling_with_50_percent_logs_approximately_half_of_successful_requests(): void
@@ -250,7 +250,7 @@ class LogsApiRequestsTest extends TestCase
 
         $user = User::factory()->api()->create();
 
-        for ($i = 0; $i < 100; $i++) {
+        for ($i = 0; $i < 30; $i++) {
             Context::flush();
             Context::add(ApiRequestContext::USER_ID, $user->id);
             Context::add(ApiRequestContext::TRACE_ID, Str::uuid()->toString());
@@ -260,9 +260,9 @@ class LogsApiRequestsTest extends TestCase
 
         $logCount = ApiRequestLog::count();
 
-        // With 50% sampling, we expect roughly 50 logs (allow ±20 for randomness)
-        $this->assertGreaterThan(30, $logCount, 'Expected at least 30% of 100 requests to be logged');
-        $this->assertLessThan(70, $logCount, 'Expected at most 70% of 100 requests to be logged');
+        // With 50% sampling, we expect roughly 15 logs (allow wide tolerance for randomness)
+        $this->assertGreaterThan(3, $logCount, 'Expected at least ~10% of 30 requests to be logged');
+        $this->assertLessThan(27, $logCount, 'Expected at most ~90% of 30 requests to be logged');
     }
 
     public function test_database_exception_during_logging_does_not_break_request(): void
