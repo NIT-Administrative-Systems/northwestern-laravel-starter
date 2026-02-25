@@ -45,7 +45,7 @@ class UserFactory extends Factory
         return $this->afterCreating(function (User $user) {
             if ($user->auth_type === AuthTypeEnum::SSO) {
                 $role = Role::query()->where('name', SystemRoleEnum::NORTHWESTERN_USER->value)->firstOrFail();
-                $user->assignRoleWithAudit($role, RoleModificationOriginEnum::SSO_PROVISIONING);
+                $user->assignRoleWithAudit($role, RoleModificationOriginEnum::SYSTEM);
             }
         });
     }
