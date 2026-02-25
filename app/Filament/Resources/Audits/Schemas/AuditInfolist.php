@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Audits\Schemas;
 
 use App\Domains\User\Models\Audit;
+use App\Filament\Resources\Audits\AuditResource;
 use App\Filament\Resources\Users\UserResource;
 use Filament\Infolists\Components\CodeEntry;
 use Filament\Infolists\Components\TextEntry;
@@ -156,7 +157,11 @@ class AuditInfolist
                                             ->fontFamily(FontFamily::Mono)
                                             ->tooltip('Correlate this change with API request logs and other events using the same Trace ID')
                                             ->copyable()
-                                            ->color('gray'),
+                                            ->color('primary')
+                                            ->url(fn (Audit $record) => AuditResource::getUrl('index', [
+                                                'search' => $record->trace_id,
+                                            ]))
+                                            ->openUrlInNewTab(),
 
                                         TextEntry::make('tags')
                                             ->label('Tags')

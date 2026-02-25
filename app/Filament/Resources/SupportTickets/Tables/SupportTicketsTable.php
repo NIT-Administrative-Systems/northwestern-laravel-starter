@@ -6,6 +6,8 @@ namespace App\Filament\Resources\SupportTickets\Tables;
 
 use App\Domains\Support\Enums\TicketSystemEnum;
 use App\Domains\Support\Models\SupportTicket;
+use App\Filament\Exports\SupportTicketExporter;
+use Filament\Actions\ExportAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Support\Enums\FontFamily;
@@ -77,6 +79,7 @@ class SupportTicketsTable
 
                 TextColumn::make('requester_email')
                     ->label('Email')
+                    ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('error_message')
@@ -142,6 +145,11 @@ class SupportTicketsTable
             ])
             ->recordActions([
                 ViewAction::make(),
+            ])
+            ->toolbarActions([
+                ExportAction::make()
+                    ->label('Export')
+                    ->exporter(SupportTicketExporter::class),
             ])
             ->emptyStateHeading('No support tickets')
             ->emptyStateDescription('Tickets submitted through the contact form will appear here.')
