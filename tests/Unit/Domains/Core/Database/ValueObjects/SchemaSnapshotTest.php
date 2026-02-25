@@ -7,11 +7,43 @@ namespace Tests\Unit\Domains\Core\Database\ValueObjects;
 use App\Domains\Core\Database\ValueObjects\SchemaSnapshot;
 use Carbon\Carbon;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 
 #[CoversClass(SchemaSnapshot::class)]
 class SchemaSnapshotTest extends TestCase
 {
+    public function test_from_array_creates_instance_from_storage_data(): void
+    {
+        $snapshot = SchemaSnapshot::fromArray('my_snapshot', [
+            'checksum' => 'def456',
+            'created_at' => '2026-01-15T10:30:00+00:00',
+            'migrations' => 8,
+            'seeders' => 2,
+        ]);
+
+        $this->assertSame('my_snapshot', $snapshot->name);
+        $this->assertSame('def456', $snapshot->checksum);
+        $this->assertSame(8, $snapshot->migrationCount);
+        $this->assertSame(2, $snapshot->seederCount);
+    }
+
+    public function test_from_array_round_trips_through_to_array(): void
+    {
+        $data = [
+            'checksum' => 'abc123',
+            'created_at' => '2026-06-15T12:00:00+00:00',
+            'migrations' => 5,
+            'seeders' => 3,
+        ];
+
+        $snapshot = SchemaSnapshot::fromArray('test', $data);
+        $result = $snapshot->toArray();
+
+        $this->assertSame('abc123', $result['checksum']);
+        $this->assertSame(5, $result['migrations']);
+        $this->assertSame(3, $result['seeders']);
+    }
+
     public function test_constructor_sets_readonly_properties(): void
     {
         $createdAt = Carbon::parse('2026-01-15 10:30:00');
@@ -54,7 +86,7 @@ class SchemaSnapshotTest extends TestCase
 
     public function test_get_description_contains_snapshot_info(): void
     {
-        Carbon::setTestNow(Carbon::parse('2026-02-25 12:00:00'));
+        $this->travelTo(Carbon::parse('2026-02-25 12:00:00'));
 
         $snapshot = new SchemaSnapshot(
             name: 'my_snapshot',
@@ -70,6 +102,6 @@ class SchemaSnapshotTest extends TestCase
         $this->assertStringContainsString('10 migrations', $description);
         $this->assertStringContainsString('4 seeders', $description);
 
-        Carbon::setTestNow();
+        $this->travelTo(null);
     }
 }
