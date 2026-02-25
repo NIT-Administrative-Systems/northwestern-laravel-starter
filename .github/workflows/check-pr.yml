@@ -435,6 +435,7 @@ jobs:
         uses: coverallsapp/github-action@v2
         with:
           file: .build/clover.xml
+          fail-on-error: false
 
   end-to-end-tests:
     name: 🌲 Cypress Tests
