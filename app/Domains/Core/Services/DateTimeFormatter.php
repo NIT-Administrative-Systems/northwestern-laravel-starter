@@ -28,7 +28,7 @@ class DateTimeFormatter
         }
 
         return $datetime->copy()
-            ->setTimezone($user->timezone)
+            ->setTimezone($user->timezone ?? config('app.timezone'))
             ->format($format);
     }
 
