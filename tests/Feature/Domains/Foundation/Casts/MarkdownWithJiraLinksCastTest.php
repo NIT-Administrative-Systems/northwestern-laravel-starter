@@ -7,6 +7,7 @@ namespace Tests\Feature\Domains\Foundation\Casts;
 use App\Domains\Foundation\Casts\MarkdownWithJiraLinksCast;
 use App\Domains\Support\Models\Changelog;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 #[CoversClass(MarkdownWithJiraLinksCast::class)]
@@ -22,7 +23,7 @@ class MarkdownWithJiraLinksCastTest extends TestCase
         ]);
 
         $this->assertEquals(
-            'Fixed a bug (<a href="https://jira.example.com/browse/GSTS-1234" target="_blank" rel="noopener"><code>GSTS-1234</code></a>)',
+            'Fixed a bug ([`GSTS-1234`](https://jira.example.com/browse/GSTS-1234))',
             $changelog->body,
         );
     }
@@ -37,11 +38,11 @@ class MarkdownWithJiraLinksCastTest extends TestCase
         ]);
 
         $this->assertStringContainsString(
-            '<a href="https://jira.example.com/browse/GSTS-1234" target="_blank" rel="noopener"><code>GSTS-1234</code></a>',
+            '[`GSTS-1234`](https://jira.example.com/browse/GSTS-1234)',
             $changelog->body,
         );
         $this->assertStringContainsString(
-            '<a href="https://jira.example.com/browse/GSTS-5678" target="_blank" rel="noopener"><code>GSTS-5678</code></a>',
+            '[`GSTS-5678`](https://jira.example.com/browse/GSTS-5678)',
             $changelog->body,
         );
     }
@@ -132,9 +133,70 @@ class MarkdownWithJiraLinksCastTest extends TestCase
         ]);
 
         $this->assertStringContainsString(
-            'href="https://jira.example.com/browse/COMPAPPS-42"',
+            '[`COMPAPPS-42`](https://jira.example.com/browse/COMPAPPS-42)',
             $changelog->body,
         );
+    }
+
+    public function test_output_uses_markdown_link_syntax_not_raw_html(): void
+    {
+        config(['changelog.jira.identifier' => 'GSTS']);
+        config(['changelog.jira.url' => 'https://jira.example.com']);
+
+        $changelog = Changelog::factory()->create([
+            'body' => 'Fixed (`GSTS-100`)',
+        ]);
+
+        $this->assertStringNotContainsString('<a ', $changelog->body);
+        $this->assertStringNotContainsString('</a>', $changelog->body);
+        $this->assertStringNotContainsString('<code>', $changelog->body);
+        $this->assertStringContainsString('[`GSTS-100`](https://jira.example.com/browse/GSTS-100)', $changelog->body);
+    }
+
+    #[DataProvider('xssVectorProvider')]
+    public function test_xss_payloads_in_body_are_not_converted_to_jira_links(string $xssPayload): void
+    {
+        config(['changelog.jira.identifier' => 'GSTS']);
+        config(['changelog.jira.url' => 'https://jira.example.com']);
+
+        $changelog = Changelog::factory()->create([
+            'body' => $xssPayload,
+        ]);
+
+        $this->assertStringNotContainsString('<a href="https://jira.example.com', $changelog->body);
+    }
+
+    public function test_xss_payload_adjacent_to_jira_reference_does_not_pollute_link(): void
+    {
+        config(['changelog.jira.identifier' => 'GSTS']);
+        config(['changelog.jira.url' => 'https://jira.example.com']);
+
+        $changelog = Changelog::factory()->create([
+            'body' => '<script>alert("xss")</script> Fixed (`GSTS-1234`)',
+        ]);
+
+        $this->assertStringContainsString('[`GSTS-1234`](https://jira.example.com/browse/GSTS-1234)', $changelog->body);
+
+        $this->assertStringContainsString('<script>', $changelog->body);
+    }
+
+    /** @return array<string, array{string}> */
+    public static function xssVectorProvider(): array
+    {
+        return [
+            'script tag' => ['<script>alert("xss")</script>'],
+            'script with src' => ['<script src="https://evil.com/xss.js"></script>'],
+            'img onerror' => ['<img src=x onerror=alert("xss")>'],
+            'svg onload' => ['<svg onload=alert("xss")>'],
+            'iframe injection' => ['<iframe src="https://evil.com"></iframe>'],
+            'javascript uri' => ['<a href="javascript:alert(\'xss\')">click</a>'],
+            'event handler in div' => ['<div onmouseover=alert("xss")>hover me</div>'],
+            'meta refresh' => ['<meta http-equiv="refresh" content="0;url=https://evil.com">'],
+            'object tag' => ['<object data="https://evil.com/exploit.swf"></object>'],
+            'embed tag' => ['<embed src="https://evil.com">'],
+            'base tag hijack' => ['<base href="https://evil.com">'],
+            'form action hijack' => ['<form action="https://evil.com"><input type="submit"></form>'],
+        ];
     }
 
     public function test_trailing_slash_on_url_is_normalized(): void
@@ -147,7 +209,7 @@ class MarkdownWithJiraLinksCastTest extends TestCase
         ]);
 
         $this->assertStringContainsString(
-            'href="https://jira.example.com/browse/GSTS-100"',
+            '](https://jira.example.com/browse/GSTS-100)',
             $changelog->body,
         );
         $this->assertStringNotContainsString('//browse', $changelog->body);

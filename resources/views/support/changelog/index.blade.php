@@ -32,7 +32,7 @@
                         </h2>
 
                         <div class="text-body">
-                            <x-markdown :anchors="false" :options="['html_input' => 'allow']">
+                            <x-markdown :anchors="false" :options="['html_input' => 'escape']">
                                 {!! $entry->body !!}
                             </x-markdown>
                         </div>

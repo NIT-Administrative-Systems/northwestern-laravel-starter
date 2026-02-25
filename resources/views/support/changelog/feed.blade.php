@@ -35,7 +35,8 @@ if (!app()->environment('production')) {
                     <![CDATA[{{ $entry->title ?? $entry->slug }}]]>
                 </title>
                 <link>{{ route('support.changelog.show', $entry) }}</link>
-                <description><![CDATA[<x-markdown :anchors="false">{!! $entry->body !!}</x-markdown>]]>
+                <description>
+                    <![CDATA[<x-markdown :anchors="false" :options="['html_input' => 'escape']">{!! $entry->body !!}</x-markdown>]]>
                 </description>
                 <guid isPermaLink="true">{{ route('support.changelog.show', $entry) }}</guid>
                 <pubDate>{{ $entry->created_at->toRssString() }}</pubDate>

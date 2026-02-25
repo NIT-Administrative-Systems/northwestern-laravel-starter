@@ -15,7 +15,7 @@ use Illuminate\Support\Str;
  * so each project can configure its own pattern. When the identifier is not set, the cast is a
  * no-op and backtick-wrapped text remains as plain code formatting.
  *
- * Example: `PROJ-1234` becomes <a href="https://..."><code>PROJ-1234</code></a>
+ * Example: `PROJ-1234` becomes [`PROJ-1234`](https://...)
  *
  * @implements CastsAttributes<string, string>
  */
@@ -45,9 +45,9 @@ class MarkdownWithJiraLinksCast implements CastsAttributes
             $issueId = $match[1];
 
             return sprintf(
-                '<a href="%s/browse/%s" target="_blank" rel="noopener"><code>%s</code></a>',
-                rtrim($baseUrl, '/'),
+                '[`%s`](%s/browse/%s)',
                 $issueId,
+                rtrim($baseUrl, '/'),
                 $issueId,
             );
         }, (string) ($value ?? ''));
