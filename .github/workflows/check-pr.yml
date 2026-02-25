@@ -377,7 +377,7 @@ jobs:
           merge-multiple: true
 
       - name: 📊 Publish Unit Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v2.7
+        uses: EnricoMi/publish-unit-test-result-action@v2
         with:
           check_name: "📊 PHPUnit Test Results"
           github_token: ${{ secrets.GITHUB_TOKEN }}
