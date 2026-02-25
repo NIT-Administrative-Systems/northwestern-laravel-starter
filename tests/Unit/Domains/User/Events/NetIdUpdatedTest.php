@@ -17,7 +17,7 @@ class NetIdUpdatedTest extends TestCase
     {
         $payload = 'netid=abc123&action=deactivate';
 
-        $event = new NetIdUpdated($payload);
+        $event = NetIdUpdated::fromPayload($payload);
 
         $this->assertEquals('abc123', $event->netId);
         $this->assertEquals(NetIdUpdateActionEnum::DEACTIVATE, $event->action);
@@ -27,7 +27,7 @@ class NetIdUpdatedTest extends TestCase
     {
         $payload = 'netid=ABC123&action=deactivate';
 
-        $event = new NetIdUpdated($payload);
+        $event = NetIdUpdated::fromPayload($payload);
 
         $this->assertEquals('abc123', $event->netId);
     }
@@ -36,7 +36,7 @@ class NetIdUpdatedTest extends TestCase
     {
         $payload = 'netid=test&action=DEACTIVATE';
 
-        $event = new NetIdUpdated($payload);
+        $event = NetIdUpdated::fromPayload($payload);
 
         $this->assertEquals(NetIdUpdateActionEnum::DEACTIVATE, $event->action);
     }
@@ -45,7 +45,7 @@ class NetIdUpdatedTest extends TestCase
     {
         $payload = 'netid=test%40user&action=deactivate';
 
-        $event = new NetIdUpdated($payload);
+        $event = NetIdUpdated::fromPayload($payload);
 
         $this->assertEquals('test@user', $event->netId);
     }
@@ -57,7 +57,7 @@ class NetIdUpdatedTest extends TestCase
 
         $payload = 'action=deactivate';
 
-        new NetIdUpdated($payload);
+        NetIdUpdated::fromPayload($payload);
     }
 
     public function test_it_throws_exception_when_action_missing(): void
@@ -67,7 +67,7 @@ class NetIdUpdatedTest extends TestCase
 
         $payload = 'netid=abc123';
 
-        new NetIdUpdated($payload);
+        NetIdUpdated::fromPayload($payload);
     }
 
     public function test_it_throws_exception_when_both_fields_missing(): void
@@ -77,7 +77,7 @@ class NetIdUpdatedTest extends TestCase
 
         $payload = '';
 
-        new NetIdUpdated($payload);
+        NetIdUpdated::fromPayload($payload);
     }
 
     public function test_it_throws_exception_for_unknown_action(): void
@@ -87,14 +87,14 @@ class NetIdUpdatedTest extends TestCase
 
         $payload = 'netid=test&action=unknownaction';
 
-        new NetIdUpdated($payload);
+        NetIdUpdated::fromPayload($payload);
     }
 
     public function test_it_handles_extra_parameters_gracefully(): void
     {
         $payload = 'netid=abc123&action=deactivate&extra=ignored&another=alsoingnored';
 
-        $event = new NetIdUpdated($payload);
+        $event = NetIdUpdated::fromPayload($payload);
 
         $this->assertEquals('abc123', $event->netId);
         $this->assertEquals(NetIdUpdateActionEnum::DEACTIVATE, $event->action);
@@ -104,7 +104,15 @@ class NetIdUpdatedTest extends TestCase
     {
         $payload = 'action=deactivate&netid=abc123';
 
-        $event = new NetIdUpdated($payload);
+        $event = NetIdUpdated::fromPayload($payload);
+
+        $this->assertEquals('abc123', $event->netId);
+        $this->assertEquals(NetIdUpdateActionEnum::DEACTIVATE, $event->action);
+    }
+
+    public function test_constructor_accepts_typed_values_directly(): void
+    {
+        $event = new NetIdUpdated('abc123', NetIdUpdateActionEnum::DEACTIVATE);
 
         $this->assertEquals('abc123', $event->netId);
         $this->assertEquals(NetIdUpdateActionEnum::DEACTIVATE, $event->action);
