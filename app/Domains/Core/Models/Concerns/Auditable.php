@@ -48,6 +48,20 @@ trait Auditable
             $data['url'] .= '#' . $component;
         }
 
+        // Merge custom tags from audit traits (e.g., modification_origin from AuditsRoles)
+        if (isset($this->auditCustomTags) && is_array($this->auditCustomTags)) {
+            $existingTags = filled($data['tags'] ?? null) ? explode(',', $data['tags']) : [];
+            $allTags = array_merge($existingTags, $this->auditCustomTags);
+
+            if (isset($this->auditCustomContext) && is_array($this->auditCustomContext)) {
+                foreach ($this->auditCustomContext as $key => $value) {
+                    $allTags[] = "{$key}: {$value}";
+                }
+            }
+
+            $data['tags'] = implode(',', $allTags) ?: null;
+        }
+
         return $data;
     }
 

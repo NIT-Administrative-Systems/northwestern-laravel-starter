@@ -10,6 +10,7 @@
         "test:e2e:skip-rebuild": "cypress open --env SKIP_DATABASE_REBUILD=true"
     },
     "dependencies": {
+        "@pierre/diffs": "^1.0.11",
         "@sentry/browser": "^10.38.0",
         "bootstrap": "^5.3.8",
         "clipboard": "^2.0.11",

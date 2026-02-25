@@ -7,7 +7,6 @@ namespace App\Filament\Resources\Audits\Schemas;
 use App\Domains\User\Models\Audit;
 use App\Filament\Resources\Audits\AuditResource;
 use App\Filament\Resources\Users\UserResource;
-use Filament\Infolists\Components\CodeEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ViewEntry;
 use Filament\Schemas\Components\Grid;
@@ -19,7 +18,6 @@ use Filament\Support\Enums\TextSize;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Str;
-use Phiki\Grammar\Grammar;
 
 class AuditInfolist
 {
@@ -124,19 +122,10 @@ class AuditInfolist
 
                                 Section::make('Differences')
                                     ->icon(Heroicon::OutlinedArrowsRightLeft)
-                                    ->columns()
                                     ->schema([
-                                        CodeEntry::make('old_values')
-                                            ->label('Previous Values')
-                                            ->placeholder('No previous values')
-                                            ->grammar(Grammar::Json)
-                                            ->copyable()
-                                            ->columnSpanFull(),
-                                        CodeEntry::make('new_values')
-                                            ->label('New Values')
-                                            ->placeholder('No new values')
-                                            ->grammar(Grammar::Json)
-                                            ->copyable()
+                                        ViewEntry::make('diff_viewer')
+                                            ->hiddenLabel()
+                                            ->view('filament.resources.audits.entries.diff-viewer')
                                             ->columnSpanFull(),
                                     ]),
                             ]),

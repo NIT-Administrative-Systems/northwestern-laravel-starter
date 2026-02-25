@@ -50,18 +50,11 @@ class AuditsRolesTest extends TestCase
         $this->assertNotNull($audit->old_values);
         $this->assertNotNull($audit->new_values);
 
-        $this->assertArrayHasKey('roles_before_change', $audit->old_values);
-
-        $this->assertArrayHasKey('assigned_roles', $audit->new_values);
-        $this->assertArrayHasKey('roles_after_change', $audit->new_values);
-
-        /** @var list<array<string, mixed>> $assignedRoles */
-        $assignedRoles = $audit->new_values['assigned_roles'];
-        $assignedRoleNames = collect($assignedRoles)->pluck('name')->all();
-        $this->assertContains($role->name, $assignedRoleNames);
+        $this->assertArrayHasKey('roles', $audit->old_values);
+        $this->assertArrayHasKey('roles', $audit->new_values);
 
         /** @var list<array<string, mixed>> $afterRoles */
-        $afterRoles = $audit->new_values['roles_after_change'];
+        $afterRoles = $audit->new_values['roles'];
         $afterRoleNames = collect($afterRoles)->pluck('name')->all();
         $this->assertContains($role->name, $afterRoleNames);
     }
@@ -102,22 +95,17 @@ class AuditsRolesTest extends TestCase
         $this->assertNotNull($audit->new_values);
 
         /** @var list<array<string, mixed>> $beforeRoles */
-        $beforeRoles = $audit->old_values['roles_before_change'];
+        $beforeRoles = $audit->old_values['roles'];
         $beforeRoleNames = collect($beforeRoles)->pluck('name')->all();
         $this->assertContains($role->name, $beforeRoleNames);
 
-        /** @var list<array<string, mixed>> $removedRoles */
-        $removedRoles = $audit->new_values['removed_roles'];
-        $removedRoleNames = collect($removedRoles)->pluck('name')->all();
-        $this->assertContains($role->name, $removedRoleNames);
-
         /** @var list<array<string, mixed>> $afterRoles */
-        $afterRoles = $audit->new_values['roles_after_change'];
+        $afterRoles = $audit->new_values['roles'];
         $afterRoleNames = collect($afterRoles)->pluck('name')->all();
         $this->assertNotContains($role->name, $afterRoleNames);
     }
 
-    public function test_audit_includes_modification_origin(): void
+    public function test_audit_includes_modification_origin_as_tag(): void
     {
         $user = User::factory()->createOne();
         $role = Role::factory()->createOne();
@@ -130,11 +118,10 @@ class AuditsRolesTest extends TestCase
             ->first();
 
         $this->assertNotNull($audit);
-        $this->assertNotNull($audit->new_values);
-        $this->assertSame('ui-action', $audit->new_values['modification_origin']);
+        $this->assertStringContainsString('ui-action', $audit->tags);
     }
 
-    public function test_audit_includes_context_when_provided(): void
+    public function test_audit_includes_context_as_tags(): void
     {
         $user = User::factory()->createOne();
         $role = Role::factory()->createOne();
@@ -147,9 +134,8 @@ class AuditsRolesTest extends TestCase
             ->first();
 
         $this->assertNotNull($audit);
-        $this->assertNotNull($audit->new_values);
-        $this->assertArrayHasKey('context', $audit->new_values);
-        $this->assertSame(['reason' => 'test'], $audit->new_values['context']);
+        $this->assertStringContainsString('system', $audit->tags);
+        $this->assertStringContainsString('reason: test', $audit->tags);
     }
 
     public function test_assign_role_with_audit_accepts_array_of_roles(): void
@@ -165,8 +151,13 @@ class AuditsRolesTest extends TestCase
             ->first();
 
         $this->assertNotNull($audit);
-        $assignedRoles = $audit->new_values['assigned_roles'];
-        $this->assertCount(2, $assignedRoles);
+
+        /** @var list<array<string, mixed>> $afterRoles */
+        $afterRoles = $audit->new_values['roles'];
+        $afterRoleNames = collect($afterRoles)->pluck('name')->all();
+        foreach ($roles as $role) {
+            $this->assertContains($role->name, $afterRoleNames);
+        }
     }
 
     public function test_assign_role_with_audit_accepts_collection_of_roles(): void
@@ -182,8 +173,13 @@ class AuditsRolesTest extends TestCase
             ->first();
 
         $this->assertNotNull($audit);
-        $assignedRoles = $audit->new_values['assigned_roles'];
-        $this->assertCount(2, $assignedRoles);
+
+        /** @var list<array<string, mixed>> $afterRoles */
+        $afterRoles = $audit->new_values['roles'];
+        $afterRoleNames = collect($afterRoles)->pluck('name')->all();
+        foreach ($roles as $role) {
+            $this->assertContains($role->name, $afterRoleNames);
+        }
     }
 
     public function test_audit_handles_model_deleted_during_role_change(): void
@@ -210,10 +206,10 @@ class AuditsRolesTest extends TestCase
             ->first();
 
         $this->assertNotNull($audit);
-        $this->assertSame([], $audit->new_values['roles_after_change']);
+        $this->assertSame([], $audit->new_values['roles']);
     }
 
-    public function test_audit_excludes_context_when_empty(): void
+    public function test_audit_excludes_context_from_tags_when_empty(): void
     {
         $user = User::factory()->createOne();
         $role = Role::factory()->createOne();
@@ -226,7 +222,7 @@ class AuditsRolesTest extends TestCase
             ->first();
 
         $this->assertNotNull($audit);
-        $this->assertNotNull($audit->new_values);
-        $this->assertArrayNotHasKey('context', $audit->new_values);
+        // Tags should only contain the origin, no context entries
+        $this->assertSame('system', $audit->tags);
     }
 }

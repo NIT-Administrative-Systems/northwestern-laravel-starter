@@ -19,6 +19,7 @@ export default defineConfig({
             input: [
                 "resources/sass/app.scss",
                 "resources/js/app.js",
+                "resources/js/audit-diff.ts",
                 "resources/css/filament/administration/theme.css",
             ],
             refresh: true,
