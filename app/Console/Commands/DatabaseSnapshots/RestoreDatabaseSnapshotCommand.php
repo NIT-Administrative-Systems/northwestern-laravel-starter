@@ -211,9 +211,8 @@ class RestoreDatabaseSnapshotCommand extends DatabaseSnapshotCommand
             return Process::fromShellCommandline(...$arguments)->setTimeout(null);
         };
 
-        /** @phpstan-ignore-next-line getSchemaState exists but Larastan's stub doesn't seem to have it */
         DB::connection(DB::getDefaultConnection())
-            ->getSchemaState(processFactory: $processFactory)
+            ->getSchemaState(processFactory: $processFactory) // @phpstan-ignore method.notFound (getSchemaState exists on concrete connection subclasses)
             ->handleOutputUsing(function ($type, string|iterable $buffer): void {
                 $this->output->write($buffer);
             })
