@@ -18,6 +18,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Validation\ValidationException;
+use InvalidArgumentException;
+use LogicException;
 use PDOException;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -93,7 +95,9 @@ class ProblemDetailsRenderer
             // 400 Bad Request
             $e instanceof BadRequestException,
             $e instanceof ErrorException,
-            $e instanceof NotAcceptableHttpException => ProblemDetails::badRequest(
+            $e instanceof NotAcceptableHttpException,
+            $e instanceof InvalidArgumentException,
+            $e instanceof LogicException => ProblemDetails::badRequest(
                 detail: $e->getMessage() ?: 'The request could not be understood by the server.'
             ),
 

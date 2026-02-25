@@ -16,6 +16,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Validation\ValidationException;
+use InvalidArgumentException;
+use LogicException;
 use PDOException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -148,6 +150,16 @@ class ProblemDetailsRendererTest extends TestCase
                 new PDOException('db error'),
                 500,
                 'Internal Server Error',
+            ],
+            'invalid argument => 400' => [
+                new InvalidArgumentException('Invalid parameter value'),
+                400,
+                'Bad Request',
+            ],
+            'logic exception => 400' => [
+                new LogicException('Unexpected state'),
+                400,
+                'Bad Request',
             ],
             'default => 500' => [
                 new \RuntimeException('unexpected'),
