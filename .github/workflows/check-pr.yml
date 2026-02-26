@@ -1,6 +1,5 @@
 name: Check PR
 
-# Define the targeted versions to be used throughout the workflow.
 env:
   NODE_VERSION: '25'
   PNPM_VERSION: '10.x.x'

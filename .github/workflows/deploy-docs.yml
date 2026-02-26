@@ -1,7 +1,7 @@
 name: Deploy Documentation
 
-# Define the targeted versions to be used throughout the workflow.
 env:
+  DOCS_CNAME: 'laravel-starter.entapp.northwestern.edu'
   NODE_VERSION: '25'
   PNPM_VERSION: '10.x.x'
 
@@ -40,4 +40,4 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: docs/dist
-          cname: laravel-starter.entapp.northwestern.edu
+          cname: ${{ env.DOCS_CNAME }}
