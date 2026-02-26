@@ -49,12 +49,13 @@ class ApiRequestLogsTable
 
                 TextColumn::make('access_token.id')
                     ->label('Token ID')
-                    ->fontFamily(FontFamily::Mono)
+                    ->numeric()
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('access_token.name')
                     ->label('Token Name')
                     ->placeholder('N/A')
+                    ->copyable()
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
@@ -113,6 +114,13 @@ class ApiRequestLogsTable
                     ->weight(fn (int $state) => $state > config('api.request_logging.slow_request_threshold_ms') ? FontWeight::Bold : FontWeight::Normal)
                     ->numeric()
                     ->sortable(),
+
+                TextColumn::make('request_bytes')
+                    ->label('Request Size')
+                    ->placeholder('N/A')
+                    ->formatStateUsing(fn (?int $state): string => $state !== null ? Number::fileSize($state) : 'N/A')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('response_bytes')
                     ->label('Response Size')

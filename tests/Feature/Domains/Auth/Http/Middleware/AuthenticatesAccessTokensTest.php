@@ -235,6 +235,7 @@ class AuthenticatesAccessTokensTest extends TestCase
         $this->assertDatabaseHas(AccessToken::class, [
             'id' => $token->id,
             'last_used_at' => $this->testTime,
+            'last_ip_used' => '127.0.0.1',
             'usage_count' => 1,
         ]);
 
@@ -261,6 +262,7 @@ class AuthenticatesAccessTokensTest extends TestCase
         $this->assertDatabaseHas(AccessToken::class, [
             'id' => $token->id,
             'last_used_at' => $this->testTime,
+            'last_ip_used' => '127.0.0.1',
             'usage_count' => 1,
         ]);
     }
@@ -294,12 +296,17 @@ class AuthenticatesAccessTokensTest extends TestCase
     public function test_token_with_no_ip_restrictions_allows_all_ips(): void
     {
         $user = User::factory()->api()->create();
-        [$plainToken] = $this->issueToken($user, ['allowed_ips' => null]);
+        [$plainToken, $token] = $this->issueToken($user, ['allowed_ips' => null]);
 
         $this->withServerVariables(['REMOTE_ADDR' => '203.0.113.42'])
             ->getJson($this->endpoint, $this->bearerHeader($plainToken))
             ->assertOk()
             ->assertJson(['user_id' => $user->id]);
+
+        $this->assertDatabaseHas(AccessToken::class, [
+            'id' => $token->id,
+            'last_ip_used' => '203.0.113.42',
+        ]);
     }
 
     public function test_token_with_exact_ipv4_match_allows_request(): void

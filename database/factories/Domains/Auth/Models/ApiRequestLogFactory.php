@@ -37,6 +37,7 @@ class ApiRequestLogFactory extends Factory
                 '/api/v2/reports/summary',
             ]),
             'route_name' => fake()->slug(nbWords: random_int(0, 3)),
+            'request_bytes' => fake()->boolean(60) ? fake()->numberBetween(0, 2000) : null,
             'response_bytes' => fake()->boolean(80) ? fake()->numberBetween(100, 5000) : null,
             'ip_address' => fake()->ipv4(),
             'status_code' => $failureReason ? 401 : fake()->randomElement([200, 201, 204]),

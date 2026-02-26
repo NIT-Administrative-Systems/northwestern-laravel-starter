@@ -12,9 +12,11 @@ use App\Filament\Resources\Users\Support\NetIdStatus;
 use Filament\Actions\Action;
 use Filament\Actions\ExportAction;
 use Filament\Actions\ViewAction;
+use Filament\Support\Enums\FontFamily;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -37,6 +39,7 @@ class UsersTable
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('username')
                     ->label('Username')
+                    ->fontFamily(FontFamily::Mono)
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('employee_id')
@@ -51,6 +54,7 @@ class UsersTable
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('email')
                     ->label('Email')
+                    ->copyable()
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -129,6 +133,7 @@ class UsersTable
                     ->searchable()
                     ->preload()
                     ->multiple(),
+                TrashedFilter::make(),
             ])
             ->filtersTriggerAction(
                 fn (Action $action) => $action

@@ -35,6 +35,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->index([$morphPrefix . '_id', $morphPrefix . '_type']);
+            $table->index(['auditable_id', 'auditable_type', 'created_at']);
         });
     }
 

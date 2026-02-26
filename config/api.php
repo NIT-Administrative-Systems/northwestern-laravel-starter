@@ -62,7 +62,7 @@ return [
 
         // Threshold (in milliseconds) used to categorize a request as "slow"
         // for internal monitoring/display purposes.
-        'slow_request_threshold_ms' => 500,
+        'slow_request_threshold_ms' => (int) env('API_REQUEST_LOGGING_SLOW_THRESHOLD_MS', 500),
 
         /*
         |--------------------------------------------------------------------------

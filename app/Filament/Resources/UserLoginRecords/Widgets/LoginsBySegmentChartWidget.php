@@ -19,7 +19,7 @@ class LoginsBySegmentChartWidget extends ChartWidget
 
     public ?string $endDate = null;
 
-    protected ?string $maxHeight = '300px';
+    protected ?string $maxHeight = '235px';
 
     protected ?string $pollingInterval = null;
 
@@ -77,38 +77,44 @@ class LoginsBySegmentChartWidget extends ChartWidget
             };
         }
 
+        $total = array_sum($data);
+
+        $labelsWithPercentages = array_map(function (string $label, int $count) use ($total) {
+            $percentage = $total > 0 ? round(($count / $total) * 100, 1) : 0;
+
+            return "{$label} ({$percentage}%)";
+        }, $labels, $data);
+
         return [
             'datasets' => [
                 [
                     'label' => 'Logins',
                     'data' => $data,
                     'backgroundColor' => $colors,
-                    'borderColor' => $colors,
+                    'borderColor' => 'rgba(255, 255, 255, 0.7)',
+                    'borderWidth' => 2,
                 ],
             ],
-            'labels' => $labels,
+            'labels' => $labelsWithPercentages,
         ];
     }
 
     protected function getType(): string
     {
-        return 'bar';
+        return 'doughnut';
     }
 
     protected function getOptions(): array
     {
         return [
-            'indexAxis' => 'y',
+            'maintainAspectRatio' => false,
             'plugins' => [
                 'legend' => [
-                    'display' => false,
+                    'display' => true,
+                    'position' => 'right',
                 ],
             ],
-            'scales' => [
-                'x' => [
-                    'beginAtZero' => true,
-                ],
-            ],
+            'cutout' => '55%',
         ];
     }
 }

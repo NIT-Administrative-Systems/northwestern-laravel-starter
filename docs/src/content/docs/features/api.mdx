@@ -2,7 +2,7 @@
 title: API System
 description: Complete guide to the Access Token system and features
 sidebar:
-    order: 3
+    order: 4
 ---
 
 import { Aside, Steps, Badge } from '@astrojs/starlight/components';
@@ -192,6 +192,18 @@ Database-based logging is immensely helpful during local development to spot slo
 For production applications expecting high volume:
 - **Opt for a dedicated APM:** Use legitimate tools like [New Relic](https://newrelic.com) or [Datadog](https://www.datadoghq.com) for deeper insights and to avoid database bloat.
 - **Adjust sampling:** If you keep this feature enabled in production, consider setting a very low sampling rate (or disabling it entirely) to avoid the database write overhead.
+
+## Rate Limiting
+
+API routes are globally rate-limited via the `throttleApi()` middleware in `bootstrap/app.php`, keyed by the authenticated user ID (or by IP for unauthenticated requests).
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `RATE_LIMIT_API_PER_MINUTE` | `1800` | Maximum API requests per minute per user/IP |
+
+All rate limiters are defined in `config/rate-limiting.php`.
+
+---
 
 ## Authorization
 

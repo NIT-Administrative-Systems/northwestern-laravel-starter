@@ -156,7 +156,7 @@ class EnvironmentLockdownTest extends TestCase
 
         $user = User::factory()->create();
 
-        foreach (EnvironmentLockdown::EXEMPTED_ROUTES as $routeName) {
+        foreach (config('platform.lockdown.exempted_routes', []) as $routeName) {
             Route::middleware(['web', EnvironmentLockdown::class])
                 ->get('/test-route-' . str_replace('.', '-', $routeName), function () {
                     return response()->json(['ok' => true]);

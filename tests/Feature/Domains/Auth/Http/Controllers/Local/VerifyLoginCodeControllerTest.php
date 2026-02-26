@@ -54,6 +54,8 @@ class VerifyLoginCodeControllerTest extends TestCase
         $this->assertEquals(1, UserLoginRecord::count());
         $loginRecord = UserLoginRecord::first();
         $this->assertEquals(UserSegmentEnum::EXTERNAL_USER, $loginRecord->segment);
+        $this->assertNotNull($loginRecord->ip_address);
+        $this->assertNotNull($loginRecord->user_agent);
         foreach (LoginCodeSession::KEYS as $key) {
             $this->assertFalse(session()->has($key));
         }

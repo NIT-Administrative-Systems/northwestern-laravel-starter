@@ -98,7 +98,7 @@ class DemoUserSeeder extends Seeder
                 'email' => null,
                 'employee_id' => null,
                 'hr_employee_id' => null,
-                'timezone' => 'America/Chicago',
+                'timezone' => config('platform.default_user_timezone'),
             ])
             ->createOne();
     }

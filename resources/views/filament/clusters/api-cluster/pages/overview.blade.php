@@ -84,14 +84,7 @@
         {{-- Left Column: Token Stats --}}
         <div class="space-y-6">
             {{-- Token Overview --}}
-            <x-filament::section>
-                <x-slot name="heading">
-                    <div class="flex items-center gap-2">
-                        <x-filament::icon class="h-5 w-5 text-gray-400" icon="heroicon-o-key" />
-                        <span>Access Tokens</span>
-                    </div>
-                </x-slot>
-
+            <x-filament::section heading="Access Tokens" icon="heroicon-o-key">
                 <div class="space-y-4">
                     <div class="grid grid-cols-3 gap-3 text-center">
                         <div class="bg-success-50 dark:bg-success-500/10 rounded-lg p-3">
@@ -138,14 +131,7 @@
         {{-- Right Column: Configuration --}}
         <div class="space-y-6">
             {{-- Configuration Summary --}}
-            <x-filament::section>
-                <x-slot name="heading">
-                    <div class="flex items-center gap-2">
-                        <x-filament::icon class="h-5 w-5 text-gray-400" icon="heroicon-o-cog-6-tooth" />
-                        <span>Configuration</span>
-                    </div>
-                </x-slot>
-
+            <x-filament::section heading="Configuration" icon="heroicon-o-cog-6-tooth">
                 <div class="space-y-4">
                     {{-- Rate Limit --}}
                     <div class="flex items-center justify-between">

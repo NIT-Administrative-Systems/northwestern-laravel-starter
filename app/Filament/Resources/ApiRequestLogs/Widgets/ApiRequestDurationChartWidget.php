@@ -46,7 +46,9 @@ class ApiRequestDurationChartWidget extends BaseApiRequestChartWidget
         $p50 = (float) $stats->p50;
         $p95 = (float) $stats->p95;
         $avgDuration = (float) $stats->avg_duration;
-        $maxDuration = (float) $stats->max_duration;
+        $threshold = (int) config('api.request_logging.slow_request_threshold_ms');
+
+        $thresholdColor = $p95 > $threshold ? 'danger' : 'success';
 
         return new HtmlString(
             view('filament.resources.api-request-logs.widgets.chart-description', [
@@ -60,9 +62,9 @@ class ApiRequestDurationChartWidget extends BaseApiRequestChartWidget
                         'color' => 'success',
                     ],
                     [
-                        'label' => 'MAX',
-                        'value' => $this->formatDuration($maxDuration),
-                        'color' => 'warning',
+                        'label' => 'P95',
+                        'value' => $this->formatDuration($p95),
+                        'color' => $thresholdColor,
                     ],
                 ],
             ])->render()
@@ -90,7 +92,7 @@ class ApiRequestDurationChartWidget extends BaseApiRequestChartWidget
             $durationsPerPeriod = $this->baseQuery()->selectRaw("
                     EXTRACT(HOUR FROM created_at AT TIME ZONE 'UTC' AT TIME ZONE ?) as hour,
                     AVG(duration_ms) as avg_duration,
-                    MAX(duration_ms) as max_duration
+                    PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY duration_ms) as p95_duration
                 ", [$timezone])
                 ->groupBy('hour')
                 ->orderBy('hour')
@@ -107,7 +109,7 @@ class ApiRequestDurationChartWidget extends BaseApiRequestChartWidget
             $durationsPerPeriod = $this->baseQuery()->selectRaw("
                     DATE(created_at AT TIME ZONE 'UTC' AT TIME ZONE ?) as date,
                     AVG(duration_ms) as avg_duration,
-                    MAX(duration_ms) as max_duration
+                    PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY duration_ms) as p95_duration
                 ", [$timezone])
                 ->groupBy('date')
                 ->orderBy('date')
@@ -125,15 +127,14 @@ class ApiRequestDurationChartWidget extends BaseApiRequestChartWidget
             }
         }
 
-        // Initialize data arrays with 0 instead of null for better visibility
         $avgData = array_fill(0, count($labels), 0);
-        $maxData = array_fill(0, count($labels), 0);
+        $p95Data = array_fill(0, count($labels), 0);
 
         /** @var object{
          *     hour?: int,
          *     date?: string,
          *     avg_duration: float|null,
-         *     max_duration: float|null
+         *     p95_duration: float|null
          * } $record
          */
         foreach ($durationsPerPeriod as $record) {
@@ -142,9 +143,17 @@ class ApiRequestDurationChartWidget extends BaseApiRequestChartWidget
             if (isset($periodMap[$key])) {
                 $index = $periodMap[$key];
                 $avgData[$index] = round((float) $record->avg_duration, 2);
-                $maxData[$index] = (int) $record->max_duration;
+                $p95Data[$index] = round((float) ($record->p95_duration ?? 0), 2);
             }
         }
+
+        $threshold = (int) config('api.request_logging.slow_request_threshold_ms');
+        $thresholdData = array_fill(0, count($labels), $threshold);
+
+        $p95PointColors = array_map(
+            fn (float $v) => $v > $threshold ? 'rgb(239, 68, 68)' : 'rgb(59, 130, 246)',
+            $p95Data
+        );
 
         return [
             'datasets' => [
@@ -161,16 +170,28 @@ class ApiRequestDurationChartWidget extends BaseApiRequestChartWidget
                     'spanGaps' => false,
                 ],
                 [
-                    'label' => 'Max Duration',
-                    'data' => $maxData,
-                    'borderColor' => 'rgb(234, 179, 8)',
-                    'backgroundColor' => 'rgba(234, 179, 8, 0.1)',
+                    'label' => 'P95 Duration',
+                    'data' => $p95Data,
+                    'borderColor' => 'rgb(59, 130, 246)',
+                    'backgroundColor' => 'rgba(59, 130, 246, 0.05)',
                     'borderWidth' => 2,
                     'fill' => true,
                     'tension' => 0.4,
-                    'pointRadius' => 2,
-                    'pointHoverRadius' => 5,
+                    'pointRadius' => 3,
+                    'pointHoverRadius' => 6,
+                    'pointBackgroundColor' => $p95PointColors,
                     'spanGaps' => false,
+                ],
+                [
+                    'label' => 'Slow Threshold',
+                    'data' => $thresholdData,
+                    'borderColor' => 'rgba(239, 68, 68, 0.4)',
+                    'borderDash' => [6, 4],
+                    'borderWidth' => 2,
+                    'pointRadius' => 0,
+                    'pointHoverRadius' => 0,
+                    'fill' => false,
+                    'tension' => 0,
                 ],
             ],
             'labels' => $labels,
@@ -208,6 +229,11 @@ class ApiRequestDurationChartWidget extends BaseApiRequestChartWidget
                             const label = context.dataset.label || '';
                             const value = context.parsed.y ?? 0;
 
+                            // Skip the threshold line in tooltip
+                            if (context.dataset.borderDash) {
+                                return null;
+                            }
+
                             let formatted;
                             if (value >= 1000) {
                                 formatted = (value / 1000).toFixed(1) + ' s';
@@ -216,7 +242,11 @@ class ApiRequestDurationChartWidget extends BaseApiRequestChartWidget
                             }
 
                             return `${label}: ${formatted}`;
-                        }
+                        },
+
+                        filter: function (item) {
+                            return !(item.dataset && item.dataset.borderDash);
+                        },
                     }
                 }
             },

@@ -30,9 +30,9 @@ This stack is dedicated to creating a cohesive, branded experience for end-users
 
 > **Example:** The application's default home page (`/`) is built entirely with this stack.
 
-## Administration Interface - Filament
+## Filament
 
-This stack provides a rapid application development framework for internal staff, focused on data management and configuration.
+Filament is a rapid application development framework built on Livewire and Tailwind. The starter ships with a single **Administration** panel for back-end staff tooling, but Filament is not limited to admin use — it is equally suited for authenticated, data-driven user experiences like portals, dashboards, and self-service tools.
 
 **Framework:** [Filament](https://filamentphp.com)
 
@@ -44,10 +44,15 @@ This stack provides a rapid application development framework for internal staff
 
 ### Purpose & Use Cases
 
-* **Staff/Developer Admin:** Internal tooling and system configuration.
-* **Data Management:** Full **CRUD** operations and interactive tables.
-- **Analytics:** Custom reporting dashboards and chart metrics.
-* **Access:** Available at the `/administration` panel (requires authentication and specific permissions).
+* **Administration:** Internal staff tooling, system configuration, and user management.
+* **Data Management:** Full **CRUD** operations, interactive tables, filters, and bulk actions.
+* **Analytics:** Custom reporting dashboards and chart metrics.
+* **User-Facing Panels:** Portals, self-service tools, and data-driven workflows for authenticated users.
+* **Access:** The built-in Administration panel is available at `/administration` (requires authentication and specific permissions). Additional panels can be created on separate routes.
+
+<Aside type="tip">
+    See the [Adding a Filament Panel](/guides/adding-a-filament-panel) guide for step-by-step instructions on creating additional panels for user-facing functionality.
+</Aside>
 
 ---
 
@@ -70,15 +75,15 @@ The choice between stacks depends entirely on the audience and the required leve
 
     <Card title="Filament" icon="rocket">
         <Badge text="Best For" variant="success" />
-        * **Staff Admin Panels**
+        * **Data-Driven Interfaces**
         * Rapid CRUD Operations
         * User/System Configuration
         * Analytics Dashboards
-        * Internal Staff Tooling
+        * Portals & Self-Service Tools
         <hr />
         <Badge text="Trade-offs" variant="caution" />
         * **Limited UI Customization**
-        * Often not suitable for public users
+        * Not suited for public/unauthenticated pages
     </Card>
 </CardGrid>
 

@@ -21,6 +21,7 @@ return new class extends Migration
 
             $table->unsignedBigInteger('usage_count')->default(0);
             $table->datetime('last_used_at')->nullable();
+            $table->string('last_ip_used', 45)->nullable();
             $table->datetime('expiration_notified_at')->nullable();
             $table->datetime('revoked_at')->nullable();
 

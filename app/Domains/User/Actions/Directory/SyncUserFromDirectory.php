@@ -99,7 +99,7 @@ class SyncUserFromDirectory
         $user->departments = $this->findAll($directoryData, $departmentKeys);
         $user->job_titles = $this->findAll($directoryData, $jobTitleKeys);
 
-        $user->timezone = 'America/Chicago';
+        $user->timezone = config('platform.default_user_timezone');
 
         return $user;
     }

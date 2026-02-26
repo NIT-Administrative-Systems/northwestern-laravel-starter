@@ -34,19 +34,19 @@ return [
 
     'code' => [
         // Number of digits in the verification code
-        'digits' => 6,
+        'digits' => (int) env('LOCAL_AUTH_CODE_DIGITS', 6),
 
         // Minutes before the code expires
-        'expires_in_minutes' => 10,
+        'expires_in_minutes' => (int) env('LOCAL_AUTH_CODE_EXPIRES_MINUTES', 10),
 
         // Maximum failed attempts before lockout
-        'max_attempts' => 8,
+        'max_attempts' => (int) env('LOCAL_AUTH_CODE_MAX_ATTEMPTS', 8),
 
         // Minutes a challenge stays locked after max attempts
-        'lock_minutes' => 15,
+        'lock_minutes' => (int) env('LOCAL_AUTH_CODE_LOCK_MINUTES', 15),
 
         // Cooldown before resending another code
-        'resend_cooldown_seconds' => 30,
+        'resend_cooldown_seconds' => (int) env('LOCAL_AUTH_CODE_RESEND_COOLDOWN', 30),
 
         // Days to retain login challenge records before pruning
         // Set to null to disable automatic pruning

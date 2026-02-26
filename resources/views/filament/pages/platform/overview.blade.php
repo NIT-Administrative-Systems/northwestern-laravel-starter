@@ -72,14 +72,7 @@
         {{-- Left Column --}}
         <div class="space-y-6">
             {{-- Health Checks --}}
-            <x-filament::section>
-                <x-slot name="heading">
-                    <div class="flex items-center gap-2">
-                        <x-filament::icon class="text-primary-500 h-5 w-5" icon="heroicon-o-heart" />
-                        <span>Health Checks</span>
-                    </div>
-                </x-slot>
-
+            <x-filament::section heading="Health Checks" icon="heroicon-o-heart">
                 @if ($healthResults && $healthResults->storedCheckResults->isNotEmpty())
                     <div class="space-y-3">
                         @foreach ($healthResults->storedCheckResults as $result)
@@ -149,14 +142,7 @@
             </x-filament::section>
 
             {{-- Integrations --}}
-            <x-filament::section>
-                <x-slot name="heading">
-                    <div class="flex items-center gap-2">
-                        <x-filament::icon class="text-primary-500 h-5 w-5" icon="heroicon-o-puzzle-piece" />
-                        <span>Integrations</span>
-                    </div>
-                </x-slot>
-
+            <x-filament::section heading="Integrations" icon="heroicon-o-puzzle-piece">
                 @php
                     $integrations = $this->getIntegrations();
                 @endphp
@@ -216,14 +202,7 @@
         {{-- Right Column --}}
         <div class="space-y-6">
             {{-- Environment --}}
-            <x-filament::section>
-                <x-slot name="heading">
-                    <div class="flex items-center gap-2">
-                        <x-filament::icon class="text-primary-500 h-5 w-5" icon="heroicon-o-server" />
-                        <span>Environment</span>
-                    </div>
-                </x-slot>
-
+            <x-filament::section heading="Environment" icon="heroicon-o-server">
                 <div class="divide-y divide-gray-100 dark:divide-gray-800">
                     @foreach ($this->getEnvironmentInfo() as $label => $info)
                         <div class="flex items-center justify-between py-2 first:pt-0 last:pb-0">
@@ -239,14 +218,7 @@
             </x-filament::section>
 
             {{-- Services --}}
-            <x-filament::section>
-                <x-slot name="heading">
-                    <div class="flex items-center gap-2">
-                        <x-filament::icon class="text-primary-500 h-5 w-5" icon="heroicon-o-cog-6-tooth" />
-                        <span>Services</span>
-                    </div>
-                </x-slot>
-
+            <x-filament::section heading="Services" icon="heroicon-o-cog-6-tooth">
                 <div class="divide-y divide-gray-100 dark:divide-gray-800">
                     @foreach ($this->getServicesInfo() as $label => $info)
                         <div class="flex items-center justify-between py-2 first:pt-0 last:pb-0">
@@ -262,14 +234,7 @@
             </x-filament::section>
 
             {{-- Storage Info --}}
-            <x-filament::section>
-                <x-slot name="heading">
-                    <div class="flex items-center gap-2">
-                        <x-filament::icon class="text-primary-500 h-5 w-5" icon="heroicon-o-circle-stack" />
-                        <span>Storage</span>
-                    </div>
-                </x-slot>
-
+            <x-filament::section heading="Storage" icon="heroicon-o-circle-stack">
                 <div class="divide-y divide-gray-100 dark:divide-gray-800">
                     @foreach ($this->getStorageInfo() as $label => $info)
                         <div class="flex items-center justify-between py-2 first:pt-0 last:pb-0">
@@ -285,14 +250,7 @@
             </x-filament::section>
 
             {{-- Error Tracking / Observability --}}
-            <x-filament::section>
-                <x-slot name="heading">
-                    <div class="flex items-center gap-2">
-                        <x-filament::icon class="text-primary-500 h-5 w-5" icon="heroicon-o-bug-ant" />
-                        <span>Error Tracking</span>
-                    </div>
-                </x-slot>
-
+            <x-filament::section heading="Error Tracking" icon="heroicon-o-bug-ant">
                 <div class="divide-y divide-gray-100 dark:divide-gray-800">
                     @foreach ($this->getObservabilityInfo() as $label => $info)
                         <div class="flex items-center justify-between py-2 first:pt-0 last:pb-0">

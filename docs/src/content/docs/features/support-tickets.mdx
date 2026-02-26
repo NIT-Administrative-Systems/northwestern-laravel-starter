@@ -2,7 +2,7 @@
 title: Support Tickets
 description: Contact form with pluggable gateway architecture and automatic email fallback
 sidebar:
-    order: 5
+    order: 7
 ---
 
 import { Card, CardGrid, Aside, Steps, Tabs, TabItem, FileTree, Badge } from '@astrojs/starlight/components';
@@ -310,6 +310,20 @@ $this->app->bind(TicketSystemGateway::class, function () {
 ```
 
 This overrides the binding registered by `SupportServiceProvider` and gives you full control over gateway resolution.
+
+---
+
+## Rate Limiting
+
+The contact form uses a tiered rate limiting strategy — per-minute, per-hour, and per-day — to allow short bursts while preventing sustained abuse over longer windows. All limits are per-user.
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `RATE_LIMIT_SUPPORT_CONTACT_PER_MINUTE` | `2` | Submissions per minute |
+| `RATE_LIMIT_SUPPORT_CONTACT_PER_HOUR` | `5` | Submissions per hour |
+| `RATE_LIMIT_SUPPORT_CONTACT_PER_DAY` | `10` | Submissions per day |
+
+All rate limiters are defined in `config/rate-limiting.php`.
 
 ---
 

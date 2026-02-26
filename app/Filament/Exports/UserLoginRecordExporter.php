@@ -41,6 +41,14 @@ class UserLoginRecordExporter extends Exporter
             ExportColumn::make('logged_in_at')
                 ->label('Logged In At'),
 
+            ExportColumn::make('ip_address')
+                ->label('IP Address')
+                ->enabledByDefault(false),
+
+            ExportColumn::make('user_agent')
+                ->label('User Agent')
+                ->enabledByDefault(false),
+
             ExportColumn::make('created_at')
                 ->label('Created At')
                 ->enabledByDefault(false),

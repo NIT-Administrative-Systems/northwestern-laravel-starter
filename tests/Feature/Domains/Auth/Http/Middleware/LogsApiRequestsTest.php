@@ -353,6 +353,39 @@ class LogsApiRequestsTest extends TestCase
         $this->assertSame(1234, $log->response_bytes);
     }
 
+    public function test_request_bytes_captured_from_content_length_header(): void
+    {
+        $user = User::factory()->api()->create();
+        Context::add(ApiRequestContext::USER_ID, $user->id);
+        Context::add(ApiRequestContext::TRACE_ID, Str::uuid()->toString());
+
+        Route::middleware(LogsApiRequests::class)->post('/api/post-test', function () {
+            return response()->json(['ok' => true]);
+        });
+
+        $this->postJson('/api/post-test', ['data' => 'test'], ['Content-Length' => '512'])
+            ->assertOk();
+
+        $log = ApiRequestLog::first();
+        $this->assertSame(512, $log->request_bytes);
+    }
+
+    public function test_request_bytes_is_null_when_content_length_is_absent(): void
+    {
+        $user = User::factory()->api()->create();
+        Context::add(ApiRequestContext::USER_ID, $user->id);
+        Context::add(ApiRequestContext::TRACE_ID, Str::uuid()->toString());
+
+        Route::middleware(LogsApiRequests::class)->get('/api/no-body', function () {
+            return response()->json(['ok' => true]);
+        });
+
+        $this->get('/api/no-body', ['Accept' => 'application/json'])->assertOk();
+
+        $log = ApiRequestLog::first();
+        $this->assertNull($log->request_bytes);
+    }
+
     public function test_duration_ms_is_calculated_and_stored(): void
     {
         $user = User::factory()->api()->create();

@@ -14,6 +14,7 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\FontFamily;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\Size;
 use Filament\Support\Enums\TextSize;
@@ -57,10 +58,12 @@ class LocalUserInfolist
                                                 TextEntry::make('email')
                                                     ->label('Email Address')
                                                     ->url(fn ($state) => filled($state) ? 'mailto:' . $state : null)
+                                                    ->openUrlInNewTab()
                                                     ->placeholder('N/A'),
 
                                                 TextEntry::make('username')
                                                     ->label('Username')
+                                                    ->fontFamily(FontFamily::Mono)
                                                     ->copyable()
                                                     ->visible(fn (User $record) => $record->username !== $record->email),
                                             ]),

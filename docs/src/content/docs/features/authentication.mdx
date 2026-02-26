@@ -242,56 +242,73 @@ See the [API Documentation](/features/api/) for complete Access Token management
 
 ---
 
-## Authorization
+## User Segmentation
 
-After authentication, authorization is handled through Laravel's permission system combined with custom policies.
+Every login creates a `UserLoginRecord` with a **segment** — a classification of the user at that moment. Segments are used by the login analytics dashboard (charts, stats, filters) and are captured at login time so historical metrics remain accurate even if user roles change later.
 
-### Permission System
+### Default Segments
 
-The starter uses a role-based permission system:
+| Segment | Classification | Color |
+|---------|---------------|-------|
+| Super Admin | User has the `MANAGE_ALL` permission | Danger (red) |
+| External User | User authenticates via local/passwordless auth | Warning (amber) |
+| Other | Everyone else (default) | Gray |
+
+### Adding a New Segment
+
+All charts, filters, exports, and stats dynamically pull from the `UserSegmentEnum`. Adding a new case automatically appears everywhere.
 
 <Steps>
 
-1. **Permissions** - Granular actions users can perform (view users, edit roles, etc.)
+1. **Add a case to the enum**
 
-2. **Roles** - Collections of permissions assigned to users
+   ```php title="app/Domains/User/Enums/UserSegmentEnum.php"
+   case SUPER_ADMIN = 'super-admin';
+   case EXTERNAL_USER = 'external-user';
+   case FACULTY = 'faculty'; // New segment
+   case OTHER = 'other';
+   ```
 
-3. **Role Types** - Categories of roles (Staff, API Integration, etc.)
+   Add a color and icon for the new case in `getColor()` and `getIcon()`. The label is auto-generated from the value (e.g., `'faculty'` → `"Faculty"`).
 
-4. **Policies** - Laravel policies check permissions for specific actions
+2. **Add classification logic**
+
+   In `DetermineUserSegment`, add a check **above** the `default` case:
+
+   ```php title="app/Domains/User/Actions/DetermineUserSegment.php"
+   return match (true) {
+       $this->isSuperAdmin($user) => UserSegmentEnum::SUPER_ADMIN,
+       $this->isExternalUser($user) => UserSegmentEnum::EXTERNAL_USER,
+       $this->isFaculty($user) => UserSegmentEnum::FACULTY,
+       default => UserSegmentEnum::OTHER,
+   };
+   ```
+
+   Cases are evaluated top-to-bottom — order matters when a user could match multiple segments.
 
 </Steps>
 
-### Super Administrators
+---
 
-Users listed in `SUPER_ADMIN_NETIDS` bypass all authorization checks:
+## Rate Limiting
 
-```bash
-# .env
-SUPER_ADMIN_NETIDS=abc123,xyz789,def456
-```
+Authentication endpoints use layered rate limiters to prevent brute force attacks and abuse. Limits are applied per IP and per identifier (email or challenge ID) to balance security with usability.
 
-These users:
-- Have access to all areas of the application
-- Bypass all policy checks
-- Are seeded automatically via `StakeholderSeeder`
+### Passwordless Login
 
-<Aside type="caution">
-Super administrators should be limited to core IT staff and developers. Their NetIDs bypass all authorization checks, granting them unrestricted access to the entire application.
-</Aside>
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `RATE_LIMIT_AUTH_LOGIN_CODE_REQUEST_PER_MINUTE` | `5` | Code request attempts per minute (per IP) |
+| `RATE_LIMIT_AUTH_LOGIN_CODE_REQUEST_PER_EMAIL_PER_MINUTE` | `3` | Code request attempts per minute (per email) |
+| `RATE_LIMIT_AUTH_LOGIN_CODE_VERIFY_PER_MINUTE` | `10` | Code verification attempts per minute (per IP) |
+| `RATE_LIMIT_AUTH_LOGIN_CODE_VERIFY_PER_CHALLENGE_PER_MINUTE` | `5` | Code verification attempts per minute (per challenge) |
 
-### Role-Specific Permission Checks
+### Impersonation
 
-The starter includes a `TracksPermissionSources` trait that enables fine-grained permission source checking. This is useful when you need to know not just *if* a user has a permission, but *which role* grants it.
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `RATE_LIMIT_AUTH_IMPERSONATE_PER_MINUTE` | `10` | Impersonation actions per minute |
 
-#### Available Methods
+All rate limiters are defined in `config/rate-limiting.php`.
 
-| Method | Returns | Description |
-|--------|---------|-------------|
-| `hasPermissionFromRole($permission, $role)` | `bool` | Check if a specific role grants a specific permission to the user |
-| `getRolesWithPermission($permission)` | `Collection<int, Role>` | Get all of the user's roles that grant a specific permission |
-| `getPermissionsFromRole($role)` | `Collection<int, PermissionEnum>` | Get all permissions the user has from a specific role |
-
-<Aside type="tip">
-All role permission lookups are memoized per-role for the lifetime of the `User` model instance, so you can call these methods multiple times without additional database queries.
-</Aside>
+For information on roles, permissions, and policies after a user is authenticated, see the [Authorization](/features/authorization/) documentation.
