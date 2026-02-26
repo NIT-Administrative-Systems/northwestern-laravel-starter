@@ -98,13 +98,17 @@ class SlowestApiRequestsByEndpointChartWidget extends BaseApiRequestChartWidget
 
     public function getDescription(): HtmlString|string|null
     {
-        if (! $this->startDate || ! $this->endDate || ! $this->cachedEndpointStats instanceof Collection) {
+        if (! $this->startDate || ! $this->endDate) {
             return null;
+        }
+
+        if (! $this->cachedEndpointStats instanceof Collection) {
+            $this->getData();
         }
 
         $threshold = (int) config('api.request_logging.slow_request_threshold_ms');
 
-        if ($this->cachedEndpointStats->isEmpty()) {
+        if (! $this->cachedEndpointStats instanceof Collection || $this->cachedEndpointStats->isEmpty()) {
             return new HtmlString(
                 view('filament.resources.api-request-logs.widgets.chart-description', [
                     'leftLabel' => 'Slowest Endpoint (P95)',

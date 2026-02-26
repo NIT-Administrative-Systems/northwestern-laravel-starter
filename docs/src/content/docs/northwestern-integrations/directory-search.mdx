@@ -165,7 +165,7 @@ To sync an additional directory attribute (e.g., building/office location):
 
 3. **Update the User model** (if needed)
 
-   Add a cast if the field isn't a simple string, or add it to `$fillable` if you use mass assignment.
+   Add a cast if the field requires one (e.g., `array`, `datetime`). No `$fillable` changes are needed — the starter runs `Model::unguard()` globally.
 
 </Steps>
 

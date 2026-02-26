@@ -27,16 +27,7 @@ class ImpersonationController extends Controller
         abort_unless(filled($user), 403);
         abort_unless($user->can(PermissionEnum::MANAGE_IMPERSONATION), 403);
 
-        // Validate that the URL is from the same domain
-        $returnUrl = $request->headers->get('referer');
-        if ($returnUrl && filter_var($returnUrl, FILTER_VALIDATE_URL)) {
-            $parsedUrl = parse_url($returnUrl);
-            $currentHost = parse_url((string) config('app.url'), PHP_URL_HOST);
-
-            if (isset($parsedUrl['host']) && $parsedUrl['host'] === $currentHost) {
-                Session::put('impersonation.return_url', $returnUrl);
-            }
-        }
+        $this->storeReturnUrl($request);
 
         $redirectTo = $startImpersonation(
             user: $user,
@@ -44,30 +35,51 @@ class ImpersonationController extends Controller
             guardName: $guardName,
         );
 
-        // If the redirect is 'back' or we want to stay on the current page
-        if ($redirectTo === 'back') {
-            return redirect()->back();
-        }
-
-        // If it's the default root redirect ('/'), stay on the current page instead
-        $validatedReturnUrl = Session::get('impersonation.return_url');
-        if ($redirectTo === '/' && $validatedReturnUrl) {
-            return redirect()->to($validatedReturnUrl);
-        }
-
-        // Otherwise use the specified redirect
-        return redirect()->to($redirectTo);
+        return $this->resolveRedirect($redirectTo);
     }
 
     /** {@see \Lab404\Impersonate\Controllers\ImpersonateController::leave()} */
     public function leave(StopImpersonation $stopImpersonation): RedirectResponse
     {
-        $redirectTo = $stopImpersonation();
+        return $this->resolveRedirect($stopImpersonation());
+    }
 
-        if ($redirectTo !== 'back') {
-            return redirect()->to($redirectTo);
+    /**
+     * Store the referer URL in session if it belongs to the same domain.
+     *
+     * Used after impersonation starts to redirect back to the page the admin was viewing.
+     */
+    private function storeReturnUrl(Request $request): void
+    {
+        $returnUrl = $request->headers->get('referer');
+
+        if (! $returnUrl || ! filter_var($returnUrl, FILTER_VALIDATE_URL)) {
+            return;
         }
 
-        return redirect()->back();
+        $refererHost = parse_url($returnUrl, PHP_URL_HOST);
+        $appHost = parse_url((string) config('app.url'), PHP_URL_HOST);
+
+        if ($refererHost === $appHost) {
+            Session::put('impersonation.return_url', $returnUrl);
+        }
+    }
+
+    /**
+     * Resolve the redirect target, preferring the stored return URL over the default root.
+     */
+    private function resolveRedirect(string $redirectTo): RedirectResponse
+    {
+        if ($redirectTo === 'back') {
+            return redirect()->back();
+        }
+
+        $returnUrl = Session::get('impersonation.return_url');
+
+        if ($redirectTo === '/' && $returnUrl) {
+            return redirect()->to($returnUrl);
+        }
+
+        return redirect()->to($redirectTo);
     }
 }

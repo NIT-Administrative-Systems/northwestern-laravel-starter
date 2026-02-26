@@ -63,8 +63,8 @@ DB::transaction(static function () use ($user, $event) {
     $user->update(['netid_inactive' => true]);
 
     // Add your custom deprovisioning logic here:
-    $user->tokens()->delete();                // Revoke API tokens
-    $user->notify(new AccountDeactivated);    // Send notification
+    $user->access_tokens()->delete();           // Revoke API tokens
+    $user->notify(new AccountDeactivated);      // Send notification
 });
 ```
 

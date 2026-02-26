@@ -245,7 +245,7 @@ class ApiRequestDurationChartWidget extends BaseApiRequestChartWidget
                         },
 
                         filter: function (item) {
-                            return item.formattedValue !== null;
+                            return !(item.dataset && item.dataset.borderDash);
                         },
                     }
                 }
