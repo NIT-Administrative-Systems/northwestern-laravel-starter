@@ -38,66 +38,15 @@ class VerifyLoginCodeController extends Controller
             'code' => ['required', 'string', 'size:' . $digits],
         ]);
 
-        $encryptedChallengeId = session(LoginCodeSession::CHALLENGE_ID);
+        $challengeId = $this->decryptChallengeId();
 
-        if (! $encryptedChallengeId) {
+        if (! $challengeId) {
             return back()->withErrors(['code' => 'Invalid code.'])->onlyInput('code');
         }
 
         try {
-            $challengeId = Crypt::decryptString($encryptedChallengeId);
-        } catch (DecryptException) {
-            Session::forget(LoginCodeSession::CHALLENGE_ID);
-
-            return back()->withErrors(['code' => 'Invalid code.'])->onlyInput('code');
-        }
-
-        try {
-            $user = DB::transaction(function () use ($challengeId, $validated, $request) {
-                // Only query if challengeId is numeric. Non-numeric IDs are decoy values
-                // stored for non-existent users to prevent timing enumeration.
-                $challenge = ctype_digit($challengeId)
-                    ? LoginChallenge::query()->lockForUpdate()->find($challengeId)
-                    : null;
-
-                if (! $challenge) {
-                    throw ValidationException::withMessages(['code' => 'Invalid code.']);
-                }
-
-                if ($challenge->isLocked()) {
-                    $lockoutMinutes = (int) config('local-auth.code.lock_minutes', 15);
-                    $lockoutDuration = CarbonInterval::minutes($lockoutMinutes)->forHumans();
-
-                    throw ValidationException::withMessages([
-                        'code' => "Too many attempts. Please wait {$lockoutDuration} before trying again.",
-                    ]);
-                }
-
-                $codeVerified = ($this->verifyLoginChallengeCode)(
-                    $challenge,
-                    $validated['code'],
-                    $request->ip(),
-                    $request->userAgent()
-                );
-
-                if (! $codeVerified) {
-                    throw ValidationException::withMessages(['code' => 'Invalid code.']);
-                }
-
-                $user = User::firstLocalByEmail($challenge->email);
-
-                if (! $user) {
-                    throw ValidationException::withMessages(['code' => 'Invalid code.']);
-                }
-
-                if (! $user->email_verified_at) {
-                    $user->forceFill(['email_verified_at' => now()])->save();
-                }
-
-                ($this->recordLogin)($user, $request);
-
-                return $user;
-            });
+            $challenge = DB::transaction(fn () => $this->resolveChallenge($challengeId, $validated['code'], $request));
+            $user = $this->authenticateUser($challenge, $request);
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors())->onlyInput('code');
         }
@@ -108,5 +57,88 @@ class VerifyLoginCodeController extends Controller
         Session::forget(LoginCodeSession::KEYS);
 
         return redirect()->intended(config('local-auth.redirect_after_login'));
+    }
+
+    /**
+     * Decrypt the challenge ID from the session, returning null if missing or tampered.
+     */
+    private function decryptChallengeId(): ?string
+    {
+        $encrypted = session(LoginCodeSession::CHALLENGE_ID);
+
+        if (! $encrypted) {
+            return null;
+        }
+
+        try {
+            return Crypt::decryptString($encrypted);
+        } catch (DecryptException) {
+            Session::forget(LoginCodeSession::CHALLENGE_ID);
+
+            return null;
+        }
+    }
+
+    /**
+     * Find the challenge, check lockout, and verify the code.
+     *
+     * Must run inside a transaction with `lockForUpdate` to prevent race conditions.
+     *
+     * @throws ValidationException
+     */
+    private function resolveChallenge(string $challengeId, string $code, Request $request): LoginChallenge
+    {
+        // Non-numeric IDs are decoy values stored for non-existent users to prevent timing enumeration.
+        $challenge = ctype_digit($challengeId)
+            ? LoginChallenge::query()->lockForUpdate()->find($challengeId)
+            : null;
+
+        if (! $challenge) {
+            throw ValidationException::withMessages(['code' => 'Invalid code.']);
+        }
+
+        if ($challenge->isLocked()) {
+            $lockoutMinutes = (int) config('local-auth.code.lock_minutes', 15);
+            $lockoutDuration = CarbonInterval::minutes($lockoutMinutes)->forHumans();
+
+            throw ValidationException::withMessages([
+                'code' => "Too many attempts. Please wait {$lockoutDuration} before trying again.",
+            ]);
+        }
+
+        $codeVerified = ($this->verifyLoginChallengeCode)(
+            $challenge,
+            $code,
+            $request->ip(),
+            $request->userAgent()
+        );
+
+        if (! $codeVerified) {
+            throw ValidationException::withMessages(['code' => 'Invalid code.']);
+        }
+
+        return $challenge;
+    }
+
+    /**
+     * Resolve the user from the challenge, verify their email, and record the login.
+     *
+     * @throws ValidationException
+     */
+    private function authenticateUser(LoginChallenge $challenge, Request $request): User
+    {
+        $user = User::firstLocalByEmail($challenge->email);
+
+        if (! $user) {
+            throw ValidationException::withMessages(['code' => 'Invalid code.']);
+        }
+
+        if (! $user->email_verified_at) {
+            $user->forceFill(['email_verified_at' => now()])->save();
+        }
+
+        ($this->recordLogin)($user, $request);
+
+        return $user;
     }
 }
