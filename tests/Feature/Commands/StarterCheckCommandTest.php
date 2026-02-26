@@ -20,6 +20,9 @@ class StarterCheckCommandTest extends TestCase
 
     protected function setUp(): void
     {
+        // Unset CI env vars so shouldSkip() doesn't bail in GitHub Actions.
+        unset($_ENV['CI'], $_SERVER['CI']);
+
         parent::setUp();
 
         $this->tempVersionFile = tempnam(sys_get_temp_dir(), 'starter-version-') ?: '';
