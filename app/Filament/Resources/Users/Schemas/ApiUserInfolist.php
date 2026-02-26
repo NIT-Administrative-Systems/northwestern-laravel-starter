@@ -14,6 +14,7 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\FontFamily;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\Size;
 use Filament\Support\Enums\TextSize;
@@ -45,11 +46,13 @@ class ApiUserInfolist
 
                             TextEntry::make('username')
                                 ->label('Username')
+                                ->fontFamily(FontFamily::Mono)
                                 ->copyable(),
 
                             TextEntry::make('email')
                                 ->label('Contact Email')
                                 ->url(fn ($state) => filled($state) ? 'mailto:' . $state : null)
+                                ->openUrlInNewTab()
                                 ->placeholder('N/A')
                                 ->columnSpanFull(),
 

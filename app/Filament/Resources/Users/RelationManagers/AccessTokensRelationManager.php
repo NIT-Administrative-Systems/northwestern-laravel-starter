@@ -61,15 +61,17 @@ class AccessTokensRelationManager extends RelationManager
             ->columns([
                 TextColumn::make('id')
                     ->label('ID')
-                    ->fontFamily(FontFamily::Mono)
+                    ->numeric()
+                    ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('name')
                     ->label('Name')
+                    ->copyable()
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('rotated_from_token.id')
                     ->label('Rotated From')
-                    ->fontFamily(FontFamily::Mono)
+                    ->numeric()
                     ->tooltip('The ID of the token this token was rotated from')
                     ->placeholder('N/A')
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -90,6 +92,12 @@ class AccessTokensRelationManager extends RelationManager
                     ->label('Last Used')
                     ->placeholder('Never')
                     ->dateTime(),
+                TextColumn::make('last_ip_used')
+                    ->label('Last IP')
+                    ->fontFamily(FontFamily::Mono)
+                    ->copyable()
+                    ->placeholder('Never')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('usage_count')
                     ->label('Uses')
                     ->tooltip('Total successful requests made with the token')

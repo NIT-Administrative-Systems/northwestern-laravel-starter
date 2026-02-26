@@ -30,32 +30,8 @@ return [
 
     'datetime_display_format' => 'M j, Y g:i A',
 
-    /*
-    |--------------------------------------------------------------------------
-    | Environment Lockdown
-    |--------------------------------------------------------------------------
-    |
-    | When enabled, users without **non-default roles** cannot access the
-    | application and are instead shown a lockdown page. This is useful for
-    | staging/demo environments to prevent unauthorized access from users who
-    | discover the application URL.
-    |
-    | This rule specifically focuses on users who only possess the default
-    | system role (e.g., "Northwestern User") and have not been granted
-    | specific application privileges.
-    |
-    | By default, lockdown is enabled for non-production environments and
-    | disabled for production, local development, CI, and tests.
-    |
-    | Users with impersonation active or any non-default role bypass the lockdown.
-    |
-    */
-    'lockdown' => [
-        'enabled' => env('ENVIRONMENT_LOCKDOWN_ENABLED', match (env('APP_ENV')) {
-            'production', 'local', 'testing', 'ci' => false,
-            default => true,
-        }),
-    ],
+    // Default timezone assigned to users.
+    'default_user_timezone' => env('DEFAULT_USER_TIMEZONE', 'America/Chicago'),
 
     /*
     |--------------------------------------------------------------------------
@@ -92,6 +68,55 @@ return [
     */
 
     'wildcard_photo_sync' => env('WILDCARD_PHOTO_SYNC_ENABLED', false),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Environment Lockdown
+    |--------------------------------------------------------------------------
+    |
+    | When enabled, users without **non-default roles** cannot access the
+    | application and are instead shown a lockdown page. This is useful for
+    | staging/demo environments to prevent unauthorized access from users who
+    | discover the application URL.
+    |
+    | This rule specifically focuses on users who only possess the default
+    | system role (e.g., "Northwestern User") and have not been granted
+    | specific application privileges.
+    |
+    | By default, lockdown is enabled for non-production environments and
+    | disabled for production, local development, CI, and tests.
+    |
+    | Users with impersonation active or any non-default role bypass the lockdown.
+    |
+    */
+    'lockdown' => [
+        'enabled' => env('ENVIRONMENT_LOCKDOWN_ENABLED', match (env('APP_ENV')) {
+            'production', 'local', 'testing', 'ci' => false,
+            default => true,
+        }),
+
+        // Named routes that bypass lockdown (e.g. auth, impersonation, the lockdown page itself).
+        'exempted_routes' => [
+            // Authentication
+            'login-oauth-redirect',
+            'login-oauth-callback',
+            'login-oauth-logout',
+            'login-selection',
+            'logout',
+            'login-code.request',
+            'login-code.send',
+            'login-code.verify',
+            'login-code.code',
+            'login-code.resend',
+
+            // Impersonation
+            'impersonate',
+            'impersonate.leave',
+
+            // Lockdown Page
+            'platform.environment-lockdown',
+        ],
+    ],
 
     /*
     |--------------------------------------------------------------------------

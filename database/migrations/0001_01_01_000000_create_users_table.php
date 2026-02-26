@@ -28,7 +28,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->json('job_titles')->default('[]');
             $table->json('departments')->default('[]');
-            $table->string('timezone')->default('America/Chicago');
+            $table->string('timezone')->default(config('platform.default_user_timezone'));
             $table->string('wildcard_photo_s3_key')->nullable();
             $table->dateTime('wildcard_photo_last_synced_at')->nullable();
             $table->dateTime('last_directory_sync_at')->nullable();

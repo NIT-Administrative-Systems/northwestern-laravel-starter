@@ -45,6 +45,35 @@ The EventHub integration is provided by the [`northwestern-sysdev/laravel-soa`](
 
 ---
 
+## Customizing Deprovisioning Logic
+
+The `ProcessNetIdUpdate` listener handles the default deprovisioning behavior (role removal and marking the NetID inactive) inside a database transaction. To add your own business logic, revoking API tokens, sending notifications, archiving data, etc., edit the transaction block in the listener:
+
+```php title="app/Domains/User/Listeners/ProcessNetIdUpdate.php"
+DB::transaction(static function () use ($user, $event) {
+    // Default: remove non-default roles and mark inactive
+    $user->roles
+        ->reject(fn (Role $role) => $role->name === SystemRoleEnum::NORTHWESTERN_USER->value)
+        ->whenNotEmpty(fn ($roles) => $user->removeRoleWithAudit(
+            roles: $roles->all(),
+            origin: RoleModificationOriginEnum::NETID_STATUS_CHANGE,
+            context: ['netid_action' => $event->action->value]
+        ));
+
+    $user->update(['netid_inactive' => true]);
+
+    // Add your custom deprovisioning logic here:
+    $user->tokens()->delete();                // Revoke API tokens
+    $user->notify(new AccountDeactivated);    // Send notification
+});
+```
+
+<Aside type="tip">
+Everything in the transaction block runs on the queue, so longer-running operations won't block the webhook response. If you need logic that should run outside the transaction, add it after the `DB::transaction()` call in the `handle()` method.
+</Aside>
+
+---
+
 ## Enabling the Webhook
 
 The EventHub webhook route is commented out by default in `routes/api.php`. To enable it:

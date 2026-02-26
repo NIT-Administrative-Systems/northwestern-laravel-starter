@@ -16,6 +16,7 @@ use Filament\Actions\DetachAction;
 use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Support\Enums\FontFamily;
 use Filament\Support\Enums\Size;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
@@ -49,6 +50,7 @@ class UsersRelationManager extends RelationManager
                     ->label('Name'),
                 TextColumn::make('username')
                     ->label('NetID')
+                    ->fontFamily(FontFamily::Mono)
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('primary_affiliation')
@@ -76,6 +78,7 @@ class UsersRelationManager extends RelationManager
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('email')
                     ->label('Email')
+                    ->copyable()
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

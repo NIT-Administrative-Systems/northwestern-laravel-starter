@@ -23,6 +23,8 @@ class UserLoginRecordFactory extends Factory
             'user_id' => User::factory(),
             'logged_in_at' => now(),
             'segment' => fake()->randomElement(UserSegmentEnum::cases()),
+            'ip_address' => fake()->ipv4(),
+            'user_agent' => fake()->userAgent(),
         ];
     }
 

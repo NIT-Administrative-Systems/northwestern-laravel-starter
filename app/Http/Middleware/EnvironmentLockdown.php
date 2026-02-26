@@ -29,30 +29,6 @@ use Symfony\Component\HttpFoundation\Response;
 class EnvironmentLockdown
 {
     /**
-     * Routes that are exempt from environment lockdown restrictions.
-     */
-    public const array EXEMPTED_ROUTES = [
-        // Authentication
-        'login-oauth-redirect',
-        'login-oauth-callback',
-        'login-oauth-logout',
-        'login-selection',
-        'logout',
-        'login-code.request',
-        'login-code.send',
-        'login-code.verify',
-        'login-code.code',
-        'login-code.resend',
-
-        // Impersonation
-        'impersonate',
-        'impersonate.leave',
-
-        // Lockdown Page
-        'platform.environment-lockdown',
-    ];
-
-    /**
      * @param  Closure(Request): Response  $next
      */
     public function handle(Request $request, Closure $next): Response
@@ -78,7 +54,7 @@ class EnvironmentLockdown
         }
 
         // Allow access to authentication and lockdown routes
-        if ($request->routeIs(self::EXEMPTED_ROUTES)) {
+        if ($request->routeIs(config('platform.lockdown.exempted_routes', []))) {
             return $next($request);
         }
 

@@ -36,15 +36,15 @@ readonly class FindOrUpdateUserFromDirectory
     /**
      * Job(s) to execute after a {@see User} is successfully retrieved.
      *
-     * These are commonly longer-running asynchronous tasks that are
-     * not critical to the immediate retrieval of the user.
+     * This is the primary extension point for running custom logic after a user is synchronized.
+     * Each job must implement {@see ShouldQueue} and accept a {@see User} in its constructor.
      *
      * @return list<class-string<ShouldQueue>>
      */
     private function postRetrievalJobs(): array
     {
         $jobs = [
-            // Add any custom post-retrieval jobs here
+            // Add your custom post-retrieval jobs here — see docs for the full job contract.
         ];
 
         if (config('platform.wildcard_photo_sync')) {

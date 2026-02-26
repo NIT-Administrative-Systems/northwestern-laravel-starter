@@ -29,6 +29,7 @@ class SupportTicketsTable
             ->columns([
                 TextColumn::make('id')
                     ->label('ID')
+                    ->numeric()
                     ->sortable(),
 
                 TextColumn::make('user.full_name')
@@ -79,6 +80,7 @@ class SupportTicketsTable
 
                 TextColumn::make('requester_email')
                     ->label('Email')
+                    ->copyable()
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
 

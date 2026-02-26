@@ -50,6 +50,10 @@ class ApiRequestLogExporter extends Exporter
             ExportColumn::make('duration_ms')
                 ->label('Duration (ms)'),
 
+            ExportColumn::make('request_bytes')
+                ->label('Request Size')
+                ->enabledByDefault(false),
+
             ExportColumn::make('response_bytes')
                 ->label('Response Size')
                 ->enabledByDefault(false),

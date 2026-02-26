@@ -94,6 +94,7 @@ class AuditsTable
                     ->searchable(),
                 TextColumn::make('user.username')
                     ->label('NetID')
+                    ->fontFamily(FontFamily::Mono)
                     ->sortable()
                     ->searchable(query: function (Builder $query, string $search): Builder {
                         return $query
@@ -125,6 +126,8 @@ class AuditsTable
                     ->color(fn ($record) => $record->impersonator ? 'warning' : null),
                 TextColumn::make('ip_address')
                     ->label('IP Address')
+                    ->fontFamily(FontFamily::Mono)
+                    ->copyable()
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('user_agent')
@@ -145,15 +148,15 @@ class AuditsTable
                 SelectFilter::make('event')
                     ->label('Event')
                     ->multiple()
-                    ->options([
-                        'created' => 'Created',
-                        'deleted' => 'Deleted',
-                        'updated' => 'Updated',
-                        'restored' => 'Restored',
-                        'role_assigned' => 'Role Assigned',
-                        'role_removed' => 'Role Removed',
-                        'permissions_modified' => 'Permissions Modified',
-                    ]),
+                    ->options(
+                        fn () => Audit::query()
+                            ->distinct()
+                            ->pluck('event', 'event')
+                            ->map(fn (string $event) => Str::of($event)->replace('_', ' ')->title()->toString())
+                            ->all()
+                    )
+                    ->searchable()
+                    ->preload(),
                 SelectFilter::make('auditable_type')
                     ->label('Record')
                     ->multiple()

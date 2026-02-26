@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\ApiRequestLogs\Widgets;
 
 use Carbon\Carbon;
+use Filament\Support\RawJs;
 use Illuminate\Support\HtmlString;
 
 class ApiRequestsByStatusChartWidget extends BaseApiRequestChartWidget
@@ -183,38 +184,65 @@ class ApiRequestsByStatusChartWidget extends BaseApiRequestChartWidget
         return 'bar';
     }
 
-    protected function getOptions(): array
+    protected function getOptions(): RawJs
     {
-        return [
-            'responsive' => true,
-            'maintainAspectRatio' => false,
-            'interaction' => [
-                'mode' => 'index',
-                'intersect' => false,
-            ],
-            'plugins' => [
-                'legend' => [
-                    'display' => false,
-                ],
-            ],
-            'scales' => [
-                'x' => [
-                    'stacked' => true,
-                    'grid' => [
-                        'display' => false,
-                    ],
-                ],
-                'y' => [
-                    'stacked' => true,
-                    'beginAtZero' => true,
-                    'grid' => [
-                        'display' => false,
-                    ],
-                    'ticks' => [
-                        'precision' => 0,
-                    ],
-                ],
-            ],
-        ];
+        return RawJs::make(<<<'JS'
+        {
+            responsive: true,
+            maintainAspectRatio: false,
+
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
+
+            plugins: {
+                legend: {
+                    display: false,
+                },
+
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+
+                    callbacks: {
+                        label: function (context) {
+                            const label = context.dataset.label || '';
+                            const value = context.parsed.y ?? 0;
+
+                            // Sum all datasets for this index to compute percentage
+                            let total = 0;
+                            context.chart.data.datasets.forEach(function (ds) {
+                                total += (ds.data[context.dataIndex] ?? 0);
+                            });
+
+                            const pct = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
+
+                            return `${label}: ${value.toLocaleString()} (${pct}%)`;
+                        },
+                    },
+                },
+            },
+
+            scales: {
+                x: {
+                    stacked: true,
+                    grid: {
+                        display: false,
+                    },
+                },
+                y: {
+                    stacked: true,
+                    beginAtZero: true,
+                    grid: {
+                        display: false,
+                    },
+                    ticks: {
+                        precision: 0,
+                    },
+                },
+            },
+        }
+        JS);
     }
 }

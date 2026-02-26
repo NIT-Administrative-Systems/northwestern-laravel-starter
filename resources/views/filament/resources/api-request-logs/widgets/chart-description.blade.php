@@ -43,6 +43,12 @@
                     <div class="font-mono text-lg font-semibold leading-tight text-gray-900 dark:text-gray-100">
                         {{ $column['value'] }}
                     </div>
+
+                    @if (!empty($column['meta']))
+                        <div class="mt-0.5 text-[0.65rem] text-gray-500 dark:text-gray-400">
+                            {{ $column['meta'] }}
+                        </div>
+                    @endif
                 </div>
             @endforeach
         </div>

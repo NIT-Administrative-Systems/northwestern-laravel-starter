@@ -43,7 +43,7 @@ class ProcessNetIdUpdate implements ShouldQueue
 
             $user->update(['netid_inactive' => true]);
 
-            // Include any additional business logic here, if needed
+            // Add custom deprovisioning logic here, if needed
         });
     }
 }

@@ -17,6 +17,8 @@ return new class extends Migration
             $table->foreignId('user_id')->index();
             $table->datetime('logged_in_at');
             $table->string('segment');
+            $table->string('ip_address', 45)->nullable();
+            $table->text('user_agent')->nullable();
 
             $table->timestamps();
 

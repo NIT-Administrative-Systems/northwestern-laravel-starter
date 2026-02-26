@@ -97,6 +97,8 @@ class VerifyLoginCodeController extends Controller
                 $user->login_records()->create([
                     'logged_in_at' => now(),
                     'segment' => ($this->determineUserSegment)($user),
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
                 ]);
 
                 return $user;

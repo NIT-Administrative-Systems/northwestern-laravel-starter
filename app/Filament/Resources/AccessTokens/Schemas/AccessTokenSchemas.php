@@ -72,8 +72,10 @@ class AccessTokenSchemas
                     ->required()
                     ->live()
                     ->helperText(function ($state) {
+                        $note = 'Tokens cannot be extended after creation. Use rotation to issue a new token.';
+
                         if (blank($state)) {
-                            return null;
+                            return $note;
                         }
 
                         $expiration = $state instanceof TokenExpirationEnum
@@ -81,17 +83,17 @@ class AccessTokenSchemas
                             : TokenExpirationEnum::tryFrom($state);
 
                         if (! $expiration) {
-                            return null;
+                            return $note;
                         }
 
                         if ($expiration === TokenExpirationEnum::NEVER) {
-                            return new HtmlString('<span class="text-warning-600 dark:text-warning-400">This token will never expire.</span>');
+                            return new HtmlString("<span class=\"text-warning-600 dark:text-warning-400\">This token will never expire.</span><br>{$note}");
                         }
 
                         $expiresAt = $expiration->expiresAt();
                         $formattedDate = $expiresAt->format('F j, Y');
 
-                        return new HtmlString("This token will expire on <strong class=\"text-black dark:text-white\">{$formattedDate}</strong>.");
+                        return new HtmlString("This token will expire on <strong class=\"text-black dark:text-white\">{$formattedDate}</strong>.<br>{$note}");
                     }),
 
                 TagsInput::make('allowed_ips')
@@ -104,7 +106,7 @@ class AccessTokenSchemas
                         return null;
                     })
                     ->placeholder('e.g., 192.168.1.1 or 10.0.0.0/8')
-                    ->helperText('Optional. Restrict this token to specific IP addresses or CIDR ranges. Leave empty to allow all IPs.')
+                    ->helperText('Leave empty to allow all IPs. Use CIDR notation for ranges (e.g., 10.0.0.0/8).')
                     ->hintIcon(Heroicon::OutlinedInformationCircle)
                     ->hintIconTooltip(
                         'For integrations routed through an API gateway (e.g., Apigee), network filtering can typically be managed by the proxy and this field is unnecessary. Only define IPs here for direct, external integrations requiring an extra layer of application-level security.'

@@ -70,6 +70,8 @@ class LogsApiRequests
                     : strlen((string) $response->getContent());
             }
 
+            $requestBytes = (int) $request->header('Content-Length', '0');
+
             ApiRequestLog::create([
                 'trace_id' => Context::get(ApiRequestContext::TRACE_ID),
                 'user_id' => $userId,
@@ -80,6 +82,7 @@ class LogsApiRequests
                 'ip_address' => $request->ip() ?? 'unknown',
                 'status_code' => $statusCode,
                 'duration_ms' => $durationMs,
+                'request_bytes' => $requestBytes > 0 ? $requestBytes : null,
                 'response_bytes' => $responseBytes,
                 'user_agent' => $request->userAgent(),
                 'failure_reason' => $failureReason,

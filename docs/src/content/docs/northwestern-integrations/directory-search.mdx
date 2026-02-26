@@ -50,6 +50,127 @@ The underlying API client is provided by the [`northwestern-sysdev/laravel-soa`]
 
 ---
 
+## Post-Retrieval Jobs
+
+After a user is successfully synced and persisted, `FindOrUpdateUserFromDirectory` dispatches a configurable list of **post-retrieval jobs**. This is the primary extension point for running custom logic whenever a user is fetched from the directory — whether during SSO login, manual creation in Filament, or a scheduled directory sync.
+
+Add your jobs to the `postRetrievalJobs()` method in `FindOrUpdateUserFromDirectory`:
+
+```php title="app/Domains/User/Actions/Directory/FindOrUpdateUserFromDirectory.php"
+private function postRetrievalJobs(): array
+{
+    $jobs = [
+        AssignDepartmentJob::class,
+        SyncPermissionsFromDirectoryJob::class,
+    ];
+
+    if (config('platform.wildcard_photo_sync')) {
+        $jobs[] = DownloadWildcardPhotoJob::class;
+    }
+
+    return $jobs;
+}
+```
+
+### Job Contract
+
+Each job in the array must:
+
+- Implement `Illuminate\Contracts\Queue\ShouldQueue`
+- Accept a `User $user` as its constructor argument
+
+```php title="app/Domains/User/Jobs/AssignDepartmentJob.php"
+use App\Domains\User\Models\User;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Queue\Queueable;
+
+class AssignDepartmentJob implements ShouldQueue
+{
+    use Queueable;
+
+    public function __construct(public User $user)
+    {
+        //
+    }
+
+    public function handle(): void
+    {
+        // Your custom logic here
+    }
+}
+```
+
+### Sync vs. Async Dispatch
+
+The caller controls whether jobs run synchronously or are dispatched to the queue via the `$immediate` flag:
+
+| Caller | `$immediate` | Behavior |
+|--------|:------------:|----------|
+| SSO login | `false` | Jobs are **queued** — login completes immediately |
+| Filament user creation | `true` | Jobs run **synchronously** — the admin sees the result before the page redirects |
+| Scheduled directory sync | `false` | Jobs are **queued** — sync processes users in bulk |
+
+<Aside type="tip">
+When jobs run synchronously (`$immediate = true`), failures are caught and reported via your exception handler — they will **not** break the login or creation flow.
+</Aside>
+
+The starter ships with [`DownloadWildcardPhotoJob`](/northwestern-integrations/wildcard-photos/) as a built-in post-retrieval job (enabled when `platform.wildcard_photo_sync` is `true`).
+
+---
+
+## Customizing Field Mappings
+
+The `SyncUserFromDirectory::syncDemographics()` method defines how LDAP directory attributes map onto User model fields. This is the place to customize when your project needs different directory fields, additional attributes, or different priority logic.
+
+### Default Mappings
+
+| User Attribute | LDAP Keys (priority order) | Notes |
+|----------------|----------------------------|-------|
+| `first_name` | `givenName` | Students prepend `nuStudentGivenName` |
+| `last_name` | `sn` | Students prepend `nuStudentSn` |
+| `email` | `mail` | Students prepend `nuStudentEmail` |
+| `employee_id` | `nuStudentNumber`, `employeeNumber` | IDs shorter than 7 characters are discarded |
+| `phone` | `telephoneNumber` | Students prepend `nuAllStudentCurrentPhone` |
+| `departments` | `nuAllDepartmentName` | Multi-value (stored as JSON array) |
+| `job_titles` | `nuAllTitle` | Suppressed for students |
+| `timezone` | — | Set from `config('platform.default_user_timezone')` (default: `America/Chicago`) |
+
+For students, student-specific LDAP fields are prepended to the key arrays so they take priority. The `findValue()` helper returns the first non-empty match, so earlier keys win.
+
+### Adding a New Mapped Field
+
+To sync an additional directory attribute (e.g., building/office location):
+
+<Steps>
+
+1. **Add a migration**
+
+   ```bash
+   php artisan make:migration add_building_to_users_table
+   ```
+
+   ```php
+   Schema::table('users', function (Blueprint $table) {
+       $table->string('building')->nullable();
+   });
+   ```
+
+2. **Update the field mapping**
+
+   In `SyncUserFromDirectory::syncDemographics()`, add the new mapping alongside the existing ones:
+
+   ```php title="app/Domains/User/Actions/Directory/SyncUserFromDirectory.php"
+   $user->building = $this->findValue($directoryData, ['nuPosition1Building', 'postalAddress']);
+   ```
+
+3. **Update the User model** (if needed)
+
+   Add a cast if the field isn't a simple string, or add it to `$fillable` if you use mass assignment.
+
+</Steps>
+
+---
+
 ## Invalid Directory Data
 
 When a directory lookup returns invalid data (missing required fields), the behavior depends on whether the user already exists:

@@ -17,6 +17,7 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\FontFamily;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\Size;
 use Filament\Support\Enums\TextSize;
@@ -93,11 +94,13 @@ class NorthwesternUserInfolist
 
                                                     TextEntry::make('username')
                                                         ->label('NetID')
+                                                        ->fontFamily(FontFamily::Mono)
                                                         ->copyable(),
 
                                                     TextEntry::make('email')
                                                         ->label('Email Address')
                                                         ->url(fn ($state) => filled($state) ? 'mailto:' . $state : null)
+                                                        ->openUrlInNewTab()
                                                         ->placeholder('N/A')
                                                         ->columnSpanFull()
                                                         ->columnSpan([
@@ -112,6 +115,7 @@ class NorthwesternUserInfolist
                                                     TextEntry::make('phone')
                                                         ->label('Phone Number')
                                                         ->url(fn ($state) => filled($state) ? 'tel:' . preg_replace('/\D+/', '', (string) $state) : null)
+                                                        ->openUrlInNewTab()
                                                         ->placeholder('N/A'),
 
                                                     TextEntry::make('hr_employee_id')

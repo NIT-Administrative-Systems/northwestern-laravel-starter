@@ -132,10 +132,11 @@ The API layer is enabled by default. Disable it if your application doesn't need
 // .env
 # Master on/off switch for all API functionality
 API_ENABLED=true
-
-# Rate limiting (requests per minute) — see config/rate-limiting.php
-RATE_LIMIT_API_PER_MINUTE=1800
 ```
+
+<Aside type="tip">
+All rate limiters (API, authentication, support) are centralized in `config/rate-limiting.php` with env var overrides. See the [API](/features/api/#rate-limiting), [Authentication](/features/authentication/#rate-limiting), and [Support Tickets](/features/support-tickets/#rate-limiting) pages for details on each limiter.
+</Aside>
 
 ### Request Logging
 

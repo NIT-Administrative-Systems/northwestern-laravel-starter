@@ -74,6 +74,8 @@ class WebSSOController extends Controller
         $user->login_records()->create([
             'logged_in_at' => Carbon::now(),
             'segment' => ($this->determineUserSegment)($user),
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
         ]);
 
         // Return a redirect here if you have a use for that functionality.

@@ -12,6 +12,7 @@ use App\Filament\Resources\Users\UserResource;
 use Filament\Actions\Action;
 use Filament\Actions\ExportAction;
 use Filament\Actions\ViewAction;
+use Filament\Support\Enums\FontFamily;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -34,6 +35,7 @@ class UserLoginRecordsTable
                     ->hiddenOn(LoginRecordsRelationManager::class),
                 TextColumn::make('user.username')
                     ->label('Username')
+                    ->fontFamily(FontFamily::Mono)
                     ->sortable()
                     ->searchable()
                     ->hiddenOn(LoginRecordsRelationManager::class),
@@ -46,6 +48,18 @@ class UserLoginRecordsTable
                     ->badge()
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('ip_address')
+                    ->label('IP Address')
+                    ->fontFamily(FontFamily::Mono)
+                    ->copyable()
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('user_agent')
+                    ->label('User Agent')
+                    ->limit(40)
+                    ->tooltip(fn ($state) => $state)
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('logged_in_at', direction: 'desc')
             ->heading('Login Records')

@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('ip_address', 45);
             $table->unsignedSmallInteger('status_code');
             $table->unsignedInteger('duration_ms');
+            $table->unsignedBigInteger('request_bytes')->nullable();
             $table->unsignedBigInteger('response_bytes')->nullable();
             $table->text('user_agent')->nullable();
             $table->string('failure_reason')->nullable();

@@ -85,7 +85,7 @@ class AuthenticatesAccessTokens
 
         AccessToken::withoutAuditing(fn () => $accessToken->increment(
             column: 'usage_count',
-            extra: ['last_used_at' => now()]
+            extra: ['last_used_at' => now(), 'last_ip_used' => $request->ip()]
         ));
 
         Auth::onceUsingId($user->getKey());
