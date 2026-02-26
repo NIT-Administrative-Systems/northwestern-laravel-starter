@@ -7,7 +7,7 @@ namespace App\Domains\Auth\Http\Controllers\Local;
 use App\Domains\Auth\Actions\Local\VerifyLoginChallengeCode;
 use App\Domains\Auth\Models\LoginChallenge;
 use App\Domains\Auth\ValueObjects\LoginCodeSession;
-use App\Domains\User\Actions\DetermineUserSegment;
+use App\Domains\User\Actions\RecordLogin;
 use App\Domains\User\Models\User;
 use App\Http\Controllers\Controller;
 use Carbon\CarbonInterval;
@@ -24,7 +24,7 @@ class VerifyLoginCodeController extends Controller
 {
     public function __construct(
         private readonly VerifyLoginChallengeCode $verifyLoginChallengeCode,
-        private readonly DetermineUserSegment $determineUserSegment,
+        private readonly RecordLogin $recordLogin,
     ) {
         //
     }
@@ -94,12 +94,7 @@ class VerifyLoginCodeController extends Controller
                     $user->forceFill(['email_verified_at' => now()])->save();
                 }
 
-                $user->login_records()->create([
-                    'logged_in_at' => now(),
-                    'segment' => ($this->determineUserSegment)($user),
-                    'ip_address' => $request->ip(),
-                    'user_agent' => $request->userAgent(),
-                ]);
+                ($this->recordLogin)($user, $request);
 
                 return $user;
             });

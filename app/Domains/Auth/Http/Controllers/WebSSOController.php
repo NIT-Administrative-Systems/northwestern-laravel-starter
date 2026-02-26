@@ -6,11 +6,10 @@ namespace App\Domains\Auth\Http\Controllers;
 
 use App\Domains\Core\Enums\ExternalServiceEnum;
 use App\Domains\Core\Exceptions\ServiceDownError;
-use App\Domains\User\Actions\DetermineUserSegment;
 use App\Domains\User\Actions\Directory\FindOrUpdateUserFromDirectory;
+use App\Domains\User\Actions\RecordLogin;
 use App\Domains\User\Models\User;
 use App\Http\Controllers\Controller;
-use Carbon\Carbon;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\RedirectResponse;
@@ -37,7 +36,7 @@ class WebSSOController extends Controller
     }
 
     public function __construct(
-        protected DetermineUserSegment $determineUserSegment,
+        protected RecordLogin $recordLogin,
     ) {
         //
     }
@@ -71,12 +70,7 @@ class WebSSOController extends Controller
         Session::regenerate();
         Session::regenerateToken();
 
-        $user->login_records()->create([
-            'logged_in_at' => Carbon::now(),
-            'segment' => ($this->determineUserSegment)($user),
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-        ]);
+        ($this->recordLogin)($user, $request);
 
         // Return a redirect here if you have a use for that functionality.
     }
