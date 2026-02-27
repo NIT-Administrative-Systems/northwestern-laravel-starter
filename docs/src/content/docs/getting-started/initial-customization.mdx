@@ -263,7 +263,7 @@ The following routes are always accessible, regardless of lockdown status:
 - Impersonation routes (take/leave impersonation)
 - The lockdown page itself
 
-These exemptions ensure users can log in and administrators can manage impersonation. If you create additional routes that should be exempt, list them in `EnvironmentLockdown::EXEMPTED_ROUTES` accordingly.
+These exemptions ensure users can log in and administrators can manage impersonation. If you create additional routes that should be exempt, add them to the `exempted_routes` array in `config/platform.php`.
 
 ___
 
