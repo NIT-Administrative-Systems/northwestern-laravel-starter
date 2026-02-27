@@ -1,0 +1,95 @@
+name: Create Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version (e.g., v1.5.0)"
+        required: true
+        type: string
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Validate version format
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Version must match format v#.#.# (e.g., v1.5.0)"
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.RELEASE_TOKEN }}
+
+      - name: Check version doesn't already exist
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          if git tag -l | grep -qx "$VERSION"; then
+            echo "::error::Tag $VERSION already exists"
+            exit 1
+          fi
+
+      - name: Check version is newer than latest
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          LATEST=$(git tag -l 'v*' --sort=-v:refname | head -n1)
+          if [ -n "$LATEST" ]; then
+            LATEST_CLEAN=${LATEST#v}
+            NEW_CLEAN=${VERSION#v}
+            if ! printf '%s\n%s\n' "$LATEST_CLEAN" "$NEW_CLEAN" \
+                 | sort -V | tail -n1 | grep -qx "$NEW_CLEAN"; then
+              echo "::error::$VERSION is not newer than $LATEST"
+              exit 1
+            fi
+          fi
+
+      - name: Bump .starter-version.yaml
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          cat > .starter-version.yaml << EOF
+          # Northwestern Laravel Starter
+          #
+          # This file tracks the version of the starter template that this project
+          # was originally cloned from. It serves as a reference point to compare
+          # against newer releases of the upstream template.
+          #
+          # To see changes introduced since this version, visit:
+          # https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/releases
+
+          version: $VERSION
+          EOF
+
+      - name: Commit and tag
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .starter-version.yaml
+          git commit -m "chore: bump starter version to $VERSION"
+          git tag "$VERSION"
+          git push origin main --tags
+
+      - name: Create GitHub release
+        env:
+          VERSION: ${{ inputs.version }}
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        run: |
+          gh release create "$VERSION" \
+            --title "$VERSION" \
+            --generate-notes \
+            --verify-tag

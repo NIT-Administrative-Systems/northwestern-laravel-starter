@@ -51,6 +51,15 @@ The **Northwestern Laravel Starter** provides a cohesive solution that takes car
 >
 > This starter kit is designed primarily for applications built within [Northwestern University](https://www.northwestern.edu)’s ecosystem. If you're outside Northwestern, you may not be able to use the project as-is. However, the architecture, patterns, and modules implemented here may still be valuable as reference material or inspiration. Contributions from the broader community are welcome.
 
+## Getting Started
+
+```bash
+composer create-project northwestern-sysdev/northwestern-laravel-starter my-project
+```
+
+Visit the [documentation](https://laravel-starter.entapp.northwestern.edu) for complete installation, configuration, and
+usage guides.
+
 ## Features
 
 ### Architectural Foundation
@@ -108,11 +117,6 @@ The **Northwestern Laravel Starter** provides a cohesive solution that takes car
 
 - **Health Checks & Monitoring**: Built-in health checks to monitor critical system components.
 - **Analytics Dashboards**: Pre-built dashboards for API request metrics and login activity.
-
-## Getting Started
-
-Visit the [documentation](https://laravel-starter.entapp.northwestern.edu) for complete installation, configuration, and
-usage guides.
 
 ## Acknowledgements
 
