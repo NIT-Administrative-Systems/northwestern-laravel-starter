@@ -61,7 +61,6 @@ The **Northwestern User** role serves as a baseline. It confirms the user has au
     'name' => SystemRoleEnum::NORTHWESTERN_USER,
     'role_type_id' => $systemManagedRoleId,
     'permissions' => [
-        PermissionEnum::ACCESS_ADMINISTRATION_PANEL,
         // Add default permissions for all Northwestern users here
     ],
 ],
@@ -78,8 +77,8 @@ Permissions are defined as cases in `PermissionEnum`, the **single source of tru
 | Permission | Description | System Managed | API Relevant |
 |------------|-------------|:--------------:|:------------:|
 | `MANAGE_ALL` | Bypasses all authorization checks | Yes | — |
-| `ACCESS_ADMINISTRATION_PANEL` | Access to the Filament admin panel | — | — |
-| `MANAGE_IMPERSONATION` | Impersonate other users | — | — |
+| `ACCESS_ADMINISTRATION_PANEL` | Access to the Filament admin panel | Yes | — |
+| `MANAGE_IMPERSONATION` | Impersonate other users | Yes | — |
 | `VIEW_USERS` | View user profiles and listings | — | Yes |
 | `CREATE_USERS` | Create new user accounts | — | — |
 | `EDIT_USERS` | Edit existing user accounts | — | — |

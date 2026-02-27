@@ -287,11 +287,14 @@ php artisan health:check
 
 Validates connectivity and configuration for:
 
-- **Database** - Connection and query execution
-- **S3/MinIO** - Bucket access and write permissions
-- **Directory Search API** - API connectivity and test query
-- **WebSSO/Entra ID** - Authentication endpoint availability
-- **EventHub** - API endpoint accessibility (if configured)
+- **Database** - Connection and query execution (production only)
+- **Queue** - Queue worker connectivity
+- **Cache** - Cache store read/write
+- **Schedule** - Scheduler heartbeat
+- **Debug Mode** - Ensures debug mode is off (non-local)
+- **Optimized App** - Ensures app is optimized (non-local)
+- **Security Advisories** - Checks for known package vulnerabilities
+- **Directory Search** - API connectivity and test query
 
 **When to use:**
 
@@ -307,6 +310,30 @@ The `/api/health` endpoint also runs these checks for automated monitoring:
 ```bash
 curl https://your-app.northwestern.edu/api/health
 ```
+
+---
+
+## Starter Commands
+
+### `starter:check`
+
+Check for newer releases of the Northwestern Laravel Starter.
+
+```bash
+php artisan starter:check
+```
+
+**What it does:**
+
+1. Reads the current version from `.starter-version.yaml`
+2. Queries the GitHub Releases API for newer versions
+3. Displays release notes and a compare URL for any available updates
+
+**Options:**
+
+- `--version-file` - Path to `.starter-version.yaml` (defaults to project root)
+
+This command runs automatically via `composer install` and `composer update` in local environments. Results are cached for 4 hours to avoid unnecessary API calls.
 
 ---
 

@@ -29,6 +29,16 @@ import { FileTree } from '@astrojs/starlight/components';
             - Models/
             - Services/
             - ...
+        - Foundation
+            - Casts/
+        - Support
+            - Actions/
+            - Enums/
+            - Gateways/
+            - Models/
+            - Repositories/
+            - Seeders/
+            - ...
         - User
             - Actions/
             - Enums/
@@ -175,7 +185,7 @@ enum AuthTypeEnum: string implements HasLabel
 ```
 
 :::tip
-For enums that will be represented in the Filament UI, consider implementing [available interfaces](https://filamentphp.com/docs/4.x/advanced/enums) like `HasLabel` so they integrate seamlessly.
+For enums that will be represented in the Filament UI, consider implementing [available interfaces](https://filamentphp.com/docs/5.x/advanced/enums) like `HasLabel` so they integrate seamlessly.
 :::
 
 ### Models

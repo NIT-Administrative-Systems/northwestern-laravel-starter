@@ -56,7 +56,7 @@ For a higher-level overview of all authentication methods, see the [Authenticati
 The `oauthLogout()` method handles SSO session cleanup:
 
 - **Production** — Delegates to the `laravel-soa` trait's `oauthLogout()` method, which redirects to Entra ID's logout endpoint. The local session is cleared afterward.
-- **CI/Test environment** — Short-circuits the Entra redirect and performs a local-only logout to avoid external service dependencies in tests.
+- **CI environment** — Short-circuits the Entra redirect and performs a local-only logout to avoid external service dependencies in CI.
 
 ---
 

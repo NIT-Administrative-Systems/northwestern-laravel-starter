@@ -164,8 +164,8 @@ LOCAL_AUTH_USE_FIXED_CODE=false
     ```php
     use App\Domains\User\Models\User;
     use App\Domains\User\Enums\AffiliationEnum;
-    use App\Domains\User\Enums\AuthTypeEnum;
-    use App\Domains\User\Actions\Local\IssueLoginChallenge;
+    use App\Domains\Auth\Enums\AuthTypeEnum;
+    use App\Domains\Auth\Actions\Local\IssueLoginChallenge;
 
     $user = User::create([
         'username' => 'jdoe',
