@@ -102,6 +102,63 @@ class HandlesImpersonationTest extends TestCase
         $this->assertTrue($user->canImpersonateUser($target));
     }
 
+    public function test_can_be_impersonated_returns_false_when_target_has_manage_all_and_impersonator_does_not(): void
+    {
+        $this->bindImpersonateService(false);
+
+        $impersonator = User::factory()->createOne();
+        $impersonatorRole = Role::factory()->createOne();
+        $impersonatorRole->givePermissionTo(PermissionEnum::MANAGE_IMPERSONATION);
+        $impersonator->assignRoleWithAudit($impersonatorRole, RoleModificationOriginEnum::SYSTEM);
+
+        $target = User::factory()->createOne();
+        $targetRole = Role::factory()->createOne();
+        $targetRole->givePermissionTo(PermissionEnum::MANAGE_ALL);
+        $target->assignRoleWithAudit($targetRole, RoleModificationOriginEnum::SYSTEM);
+
+        $this->actingAs($impersonator);
+
+        $this->assertFalse($target->canBeImpersonated());
+        $this->assertFalse($impersonator->canImpersonateUser($target));
+    }
+
+    public function test_can_be_impersonated_returns_true_when_both_users_have_manage_all(): void
+    {
+        $this->bindImpersonateService(false);
+
+        $impersonator = User::factory()->createOne();
+        $impersonatorRole = Role::factory()->createOne();
+        $impersonatorRole->givePermissionTo([PermissionEnum::MANAGE_IMPERSONATION, PermissionEnum::MANAGE_ALL]);
+        $impersonator->assignRoleWithAudit($impersonatorRole, RoleModificationOriginEnum::SYSTEM);
+
+        $target = User::factory()->createOne();
+        $targetRole = Role::factory()->createOne();
+        $targetRole->givePermissionTo(PermissionEnum::MANAGE_ALL);
+        $target->assignRoleWithAudit($targetRole, RoleModificationOriginEnum::SYSTEM);
+
+        $this->actingAs($impersonator);
+
+        $this->assertTrue($target->canBeImpersonated());
+        $this->assertTrue($impersonator->canImpersonateUser($target));
+    }
+
+    public function test_can_be_impersonated_returns_true_when_target_does_not_have_manage_all(): void
+    {
+        $this->bindImpersonateService(false);
+
+        $impersonator = User::factory()->createOne();
+        $impersonatorRole = Role::factory()->createOne();
+        $impersonatorRole->givePermissionTo(PermissionEnum::MANAGE_IMPERSONATION);
+        $impersonator->assignRoleWithAudit($impersonatorRole, RoleModificationOriginEnum::SYSTEM);
+
+        $target = User::factory()->createOne();
+
+        $this->actingAs($impersonator);
+
+        $this->assertTrue($target->canBeImpersonated());
+        $this->assertTrue($impersonator->canImpersonateUser($target));
+    }
+
     private function bindImpersonateService(bool $isImpersonating): void
     {
         $impersonate = Mockery::mock();
