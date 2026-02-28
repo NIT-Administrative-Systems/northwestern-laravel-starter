@@ -7,7 +7,6 @@ namespace App\Domains\Auth\Http\Controllers\Api\V1;
 use App\Domains\Auth\Actions\Api\IssueAccessToken;
 use App\Domains\Auth\Http\Requests\Api\V1\StoreAccessTokenRequest;
 use App\Domains\Auth\Http\Resources\Api\V1\AccessTokenResource;
-use App\Domains\Auth\Models\AccessToken;
 use App\Domains\Core\ValueObjects\ApiRequestContext;
 use App\Http\Controllers\Api\V1\ApiController;
 use Carbon\Carbon;
@@ -140,22 +139,17 @@ class AccessTokenApiController extends ApiController
                 content: new OA\JsonContent(ref: '#/components/schemas/ProblemDetails')
             ),
             new OA\Response(
-                response: Response::HTTP_FORBIDDEN,
-                description: 'The token does not belong to the authenticated user.',
-                content: new OA\JsonContent(ref: '#/components/schemas/ProblemDetails')
-            ),
-            new OA\Response(
                 response: Response::HTTP_NOT_FOUND,
                 description: 'Access token not found.',
                 content: new OA\JsonContent(ref: '#/components/schemas/ProblemDetails')
             ),
         ]
     )]
-    public function show(Request $request, AccessToken $token): AccessTokenResource
+    public function show(Request $request, int $token): AccessTokenResource
     {
-        abort_if($token->user_id !== $request->user()->id, Response::HTTP_FORBIDDEN, 'This token does not belong to you.');
+        $accessToken = $request->user()->access_tokens()->findOrFail($token);
 
-        return new AccessTokenResource($token);
+        return new AccessTokenResource($accessToken);
     }
 
     #[OA\Delete(
@@ -181,11 +175,6 @@ class AccessTokenApiController extends ApiController
                 content: new OA\JsonContent(ref: '#/components/schemas/ProblemDetails')
             ),
             new OA\Response(
-                response: Response::HTTP_FORBIDDEN,
-                description: 'The token does not belong to the authenticated user.',
-                content: new OA\JsonContent(ref: '#/components/schemas/ProblemDetails')
-            ),
-            new OA\Response(
                 response: Response::HTTP_UNPROCESSABLE_ENTITY,
                 description: 'Cannot revoke the token currently being used.',
                 content: new OA\JsonContent(ref: '#/components/schemas/ProblemDetails')
@@ -197,9 +186,9 @@ class AccessTokenApiController extends ApiController
             ),
         ]
     )]
-    public function destroy(Request $request, AccessToken $token): Response
+    public function destroy(Request $request, int $token): Response
     {
-        abort_if($token->user_id !== $request->user()->id, Response::HTTP_FORBIDDEN, 'This token does not belong to you.');
+        $token = $request->user()->access_tokens()->findOrFail($token);
 
         if (Context::get(ApiRequestContext::TOKEN_ID) === $token->id) {
             throw ValidationException::withMessages([

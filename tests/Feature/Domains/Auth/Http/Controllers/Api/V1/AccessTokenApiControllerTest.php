@@ -231,7 +231,7 @@ class AccessTokenApiControllerTest extends ApiTestCase
         $response->assertJsonPath('data.name', 'Viewable Token');
     }
 
-    public function test_show_returns_403_for_other_users_token(): void
+    public function test_show_returns_404_for_other_users_token(): void
     {
         $otherUser = User::factory()->api()->create();
         $otherToken = AccessToken::factory()->for($otherUser)->create();
@@ -241,10 +241,7 @@ class AccessTokenApiControllerTest extends ApiTestCase
             $this->bearerAuthenticationHeader()
         );
 
-        $response->assertForbidden();
-        $response->assertJson([
-            'detail' => 'This token does not belong to you.',
-        ]);
+        $response->assertNotFound();
     }
 
     public function test_show_returns_404_for_nonexistent_token(): void
@@ -276,7 +273,7 @@ class AccessTokenApiControllerTest extends ApiTestCase
         $this->assertEquals(AccessTokenStatusEnum::REVOKED, $token->status);
     }
 
-    public function test_destroy_returns_403_for_other_users_token(): void
+    public function test_destroy_returns_404_for_other_users_token(): void
     {
         $otherUser = User::factory()->api()->create();
         $otherToken = AccessToken::factory()->for($otherUser)->create();
@@ -287,10 +284,7 @@ class AccessTokenApiControllerTest extends ApiTestCase
             $this->bearerAuthenticationHeader()
         );
 
-        $response->assertForbidden();
-        $response->assertJson([
-            'detail' => 'This token does not belong to you.',
-        ]);
+        $response->assertNotFound();
     }
 
     public function test_destroy_prevents_revoking_current_token(): void

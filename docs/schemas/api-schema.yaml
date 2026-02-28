@@ -99,12 +99,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
-        '403':
-          description: 'The token does not belong to the authenticated user.'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
         '404':
           description: 'Access token not found.'
           content:
@@ -134,12 +128,6 @@ paths:
           description: 'Access token revoked.'
         '401':
           description: 'Missing or invalid bearer token.'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
-        '403':
-          description: 'The token does not belong to the authenticated user.'
           content:
             application/json:
               schema:
