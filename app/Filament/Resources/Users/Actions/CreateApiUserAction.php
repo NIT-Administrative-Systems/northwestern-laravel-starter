@@ -122,7 +122,7 @@ class CreateApiUserAction extends Action
                             return;
                         }
 
-                        $username = 'api-' . ltrim(strtolower((string) $state['username']), 'api-');
+                        $username = 'api-' . preg_replace('/^api-/', '', strtolower((string) $state['username']));
 
                         $configuration = AccessTokenSchemas::normalizeConfigurationState($state);
 
