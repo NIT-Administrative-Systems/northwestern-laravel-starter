@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\Auth\Http\Controllers\Local;
 
+use App\Domains\Auth\Actions\Local\IssueLoginChallenge;
 use App\Domains\Auth\Http\Controllers\Local\SendLoginCodeController;
 use App\Domains\Auth\Models\LoginChallenge;
 use App\Domains\Auth\ValueObjects\LoginCodeSession;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Timebox;
 use PHPUnit\Framework\Attributes\CoversClass;
+use RuntimeException;
 use Tests\TestCase;
 
 #[CoversClass(SendLoginCodeController::class)]
@@ -294,5 +296,26 @@ class SendLoginCodeControllerTest extends TestCase
 
         $response->assertRedirect(route('login-code.code'));
         $response->assertSessionHasNoErrors();
+    }
+
+    public function test_send_surfaces_runtime_exception_from_challenge_issuer_as_validation_error(): void
+    {
+        User::factory()->affiliate()->create(['email' => 'test@example.com']);
+
+        $this->mock(IssueLoginChallenge::class, function ($mock) {
+            $mock->shouldReceive('__invoke')
+                ->once()
+                ->andThrow(new RuntimeException('Too many login attempts. Please try again in 1 minute(s).'));
+        });
+
+        $response = $this->post(route('login-code.send'), [
+            'email' => 'test@example.com',
+        ]);
+
+        $response->assertSessionHasErrors('email');
+        $this->assertStringContainsString(
+            'Too many login attempts',
+            (string) session('errors')->first('email')
+        );
     }
 }

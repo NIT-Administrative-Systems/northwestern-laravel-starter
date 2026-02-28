@@ -58,6 +58,21 @@ class RolePolicyTest extends TestCase
         $this->assertTrue($this->policy()->update($user));
     }
 
+    public function test_delete_denies_user_without_permission(): void
+    {
+        $user = User::factory()->create();
+
+        $this->assertFalse($this->policy()->delete($user));
+    }
+
+    public function test_delete_allows_user_with_permission(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo(PermissionEnum::DELETE_ROLES);
+
+        $this->assertTrue($this->policy()->delete($user));
+    }
+
     protected function policy(): RolePolicy
     {
         return resolve(RolePolicy::class);
