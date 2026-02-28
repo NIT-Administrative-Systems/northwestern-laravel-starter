@@ -30,15 +30,25 @@ class ContactController extends Controller
 
         $ticket = $createTicket($ticket);
 
-        $message = match (true) {
-            $ticket->wasPostedSuccessfully() => sprintf(
+        if ($ticket->wasPostedSuccessfully()) {
+            $message = sprintf(
                 'Your support request has been submitted (%s). You will receive a confirmation email shortly.',
                 $ticket->ticket_number,
-            ),
-            $ticket->fallback_sent_at !== null => 'Your request has been submitted. You should receive a confirmation email shortly.',
-            default => 'Your request has been submitted. Our team will follow up with you by email.',
-        };
+            );
 
-        return redirect()->route('support.contact.create')->with('status-success', $message);
+            return redirect()->route('support.contact.create')->with('status-success', $message);
+        }
+
+        if ($ticket->fallback_sent_at !== null) {
+            return redirect()->route('support.contact.create')->with(
+                'status-success',
+                'Your request has been submitted. You should receive a confirmation email shortly.',
+            );
+        }
+
+        return redirect()->route('support.contact.create')->with(
+            'status-danger',
+            'We were unable to submit your request. Please try again later.',
+        );
     }
 }

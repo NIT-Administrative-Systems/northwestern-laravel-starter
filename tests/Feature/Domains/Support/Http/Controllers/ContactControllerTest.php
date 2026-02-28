@@ -133,7 +133,7 @@ class ContactControllerTest extends TestCase
         });
     }
 
-    public function test_store_default_message_when_both_fail(): void
+    public function test_store_error_message_when_both_fail(): void
     {
         $this->bindCompletelyFailedGateway();
         $user = User::factory()->create();
@@ -144,8 +144,8 @@ class ContactControllerTest extends TestCase
                 'details' => 'Details',
             ]);
 
-        $response->assertSessionHas('status-success', function (string $message) {
-            return str_contains($message, 'follow up with you by email');
+        $response->assertSessionHas('status-danger', function (string $message) {
+            return str_contains($message, 'unable to submit');
         });
     }
 
