@@ -70,7 +70,17 @@ class EditRole extends EditRecord
     {
         $apiPermissions = $this->data['api_permissions'] ?? [];
         $regularPermissions = $this->data['regular_permissions'] ?? [];
-        $systemPermissions = $this->data['system_permissions'] ?? [];
+
+        if (auth()->user()->hasPermissionTo(PermissionEnum::MANAGE_ALL)) {
+            $systemPermissions = $this->data['system_permissions'] ?? [];
+        } else {
+            // Preserve existing system permissions the user cannot manage
+            $systemPermissions = $this->record->permissions
+                ->filter(fn ($p) => PermissionEnum::tryFrom($p->name)?->isSystemManaged())
+                ->pluck('name')
+                ->toArray();
+        }
+
         $allPermissions = array_merge($apiPermissions, $regularPermissions, $systemPermissions);
 
         $this->record->syncPermissionsWithAudit($allPermissions);
