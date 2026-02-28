@@ -73,8 +73,12 @@ Edit `config/local-auth.php` or set environment variables:
 # Enable/disable local authentication
 LOCAL_AUTH_ENABLED=true
 
-# Rate limit for login code requests (per hour)
+# Rate limit for login code requests per email (per hour)
 LOCAL_AUTH_RATE_LIMIT_PER_HOUR=10
+
+# Rate limit for login code requests per IP (per hour)
+# Prevents a single IP from exhausting multiple accounts' per-email rate limits
+LOCAL_AUTH_RATE_LIMIT_PER_IP_PER_HOUR=20
 
 # Redirect destination after successful login
 LOCAL_AUTH_REDIRECT_AFTER_LOGIN=/

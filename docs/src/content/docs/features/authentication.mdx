@@ -136,8 +136,11 @@ External users (non-Northwestern) can access the application via time-limited ve
 # Enable/disable local authentication
 LOCAL_AUTH_ENABLED=true
 
-# Rate limit for login code requests (per hour)
+# Rate limit for login code requests per email (per hour)
 LOCAL_AUTH_RATE_LIMIT_PER_HOUR=10
+
+# Rate limit for login code requests per IP (per hour)
+LOCAL_AUTH_RATE_LIMIT_PER_IP_PER_HOUR=20
 
 # Where to redirect after successful login
 LOCAL_AUTH_REDIRECT_AFTER_LOGIN=/

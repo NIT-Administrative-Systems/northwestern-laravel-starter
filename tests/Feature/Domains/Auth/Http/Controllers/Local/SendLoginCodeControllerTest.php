@@ -24,6 +24,7 @@ class SendLoginCodeControllerTest extends TestCase
 
         config(['local-auth.enabled' => true]);
         config(['local-auth.rate_limit_per_hour' => 5]);
+        config(['local-auth.rate_limit_per_ip_per_hour' => 20]);
         config(['local-auth.code.digits' => 6]);
         config(['local-auth.code.resend_cooldown_seconds' => 30]);
 
@@ -262,5 +263,36 @@ class SendLoginCodeControllerTest extends TestCase
             'Too many login attempts',
             (string) session('errors')->first('email')
         );
+    }
+
+    public function test_send_enforces_per_ip_rate_limit(): void
+    {
+        config(['local-auth.rate_limit_per_ip_per_hour' => 2]);
+
+        $this->post(route('login-code.send'), ['email' => 'user1@example.com']);
+        $this->post(route('login-code.send'), ['email' => 'user2@example.com']);
+
+        $response = $this->post(route('login-code.send'), ['email' => 'user3@example.com']);
+
+        $response->assertSessionHasErrors('email');
+        $this->assertStringContainsString(
+            'Too many login attempts',
+            (string) session('errors')->first('email')
+        );
+    }
+
+    public function test_per_ip_rate_limit_does_not_block_different_ips(): void
+    {
+        config(['local-auth.rate_limit_per_ip_per_hour' => 1]);
+
+        // Exhaust rate limit for 127.0.0.1
+        $this->post(route('login-code.send'), ['email' => 'user1@example.com']);
+
+        // Request from a different IP should succeed
+        $response = $this->withServerVariables(['REMOTE_ADDR' => '192.168.1.100'])
+            ->post(route('login-code.send'), ['email' => 'user2@example.com']);
+
+        $response->assertRedirect(route('login-code.code'));
+        $response->assertSessionHasNoErrors();
     }
 }
