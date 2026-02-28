@@ -18,6 +18,7 @@ use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 use UnitEnum;
 
 class SupportTicketResource extends Resource
@@ -52,7 +53,7 @@ class SupportTicketResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        $errorCount = SupportTicket::where('post_error', true)->count();
+        $errorCount = Cache::flexible('nav_badge_support_errors_count', [30, 60], fn () => SupportTicket::where('post_error', true)->count());
 
         return $errorCount > 0 ? (string) $errorCount : null;
     }

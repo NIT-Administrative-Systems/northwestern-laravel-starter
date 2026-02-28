@@ -22,6 +22,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Cache;
 use UnitEnum;
 
 class RoleResource extends Resource
@@ -69,7 +70,7 @@ class RoleResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return number_format(static::getModel()::count());
+        return number_format(Cache::flexible('nav_badge_roles_count', [30, 60], fn () => static::getModel()::count()));
     }
 
     /** @return array<string, string> */
