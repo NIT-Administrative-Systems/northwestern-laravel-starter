@@ -8,16 +8,29 @@ use App\Domains\Auth\Http\Middleware\LogsApiRequests;
 use App\Domains\User\Http\Controllers\Api\V1\UserApiController;
 use App\Http\Middleware\EnsureApiEnabled;
 use Illuminate\Support\Facades\Route;
+use Spatie\Health\Http\Middleware\RequiresSecretToken;
 
 /*
 |--------------------------------------------------------------------------
 | Public API Routes
 |--------------------------------------------------------------------------
-| Endpoints that do not require API authentication. Useful for health checks
-| or other publicly accessible resources.
+| Endpoints that do not require API authentication. Useful for publicly
+| accessible resources.
 */
 
 Route::middleware([EnsureApiEnabled::class])->group(function () {
+    //
+});
+
+/*
+|--------------------------------------------------------------------------
+| Health Check Routes
+|--------------------------------------------------------------------------
+| Protected by a secret token (X-Secret-Token header) rather than bearer
+| token authentication. Set HEALTH_SECRET_TOKEN in your .env file.
+*/
+
+Route::middleware([EnsureApiEnabled::class, RequiresSecretToken::class])->group(function () {
     Route::get('health', Spatie\Health\Http\Controllers\HealthCheckJsonResultsController::class);
 });
 
