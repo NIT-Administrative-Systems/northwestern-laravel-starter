@@ -47,7 +47,11 @@ readonly class CreateLocalUser
         }, 0, fn (\Throwable $e) => $e instanceof UniqueConstraintViolationException);
 
         if ($sendLoginLink) {
-            resolve(IssueLoginChallenge::class)($user->email, request()->ip(), request()->userAgent());
+            try {
+                resolve(IssueLoginChallenge::class)($user->email, request()->ip(), request()->userAgent());
+            } catch (\Throwable $e) {
+                report($e);
+            }
         }
 
         return $user;

@@ -26,7 +26,7 @@ use RuntimeException;
  * - Persists a {@see LoginChallenge} record with an expiry and request metadata
  * - Queues a {@see SendLoginCodeEmailJob} for the user
  */
-final readonly class IssueLoginChallenge
+class IssueLoginChallenge
 {
     public function __construct(
         private OneTimeCodeGenerator $oneTimeCodeGenerator,
