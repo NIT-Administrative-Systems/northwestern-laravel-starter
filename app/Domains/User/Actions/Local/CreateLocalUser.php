@@ -8,6 +8,7 @@ use App\Domains\Auth\Actions\Local\IssueLoginChallenge;
 use App\Domains\Auth\Enums\AuthTypeEnum;
 use App\Domains\User\Enums\AffiliationEnum;
 use App\Domains\User\Models\User;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -27,21 +28,23 @@ readonly class CreateLocalUser
         ?string $description = null,
         bool $sendLoginLink = true,
     ): User {
-        $user = DB::transaction(function () use ($email, $firstName, $lastName, $title, $department, $description) {
-            $username = $this->generateUsername($email);
+        $user = retry(3, function () use ($email, $firstName, $lastName, $title, $department, $description) {
+            return DB::transaction(function () use ($email, $firstName, $lastName, $title, $department, $description) {
+                $username = $this->generateUsername($email);
 
-            return User::create([
-                'username' => $username,
-                'auth_type' => AuthTypeEnum::LOCAL,
-                'primary_affiliation' => AffiliationEnum::AFFILIATE,
-                'email' => strtolower($email),
-                'first_name' => $firstName,
-                'last_name' => $lastName,
-                'job_titles' => [$title],
-                'departments' => [$department],
-                'description' => $description,
-            ]);
-        });
+                return User::create([
+                    'username' => $username,
+                    'auth_type' => AuthTypeEnum::LOCAL,
+                    'primary_affiliation' => AffiliationEnum::AFFILIATE,
+                    'email' => strtolower($email),
+                    'first_name' => $firstName,
+                    'last_name' => $lastName,
+                    'job_titles' => [$title],
+                    'departments' => [$department],
+                    'description' => $description,
+                ]);
+            });
+        }, 0, fn (\Throwable $e) => $e instanceof UniqueConstraintViolationException);
 
         if ($sendLoginLink) {
             resolve(IssueLoginChallenge::class)($user->email, request()->ip(), request()->userAgent());
