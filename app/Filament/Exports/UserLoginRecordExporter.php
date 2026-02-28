@@ -47,12 +47,22 @@ class UserLoginRecordExporter extends Exporter
 
             ExportColumn::make('user_agent')
                 ->label('User Agent')
+                ->formatStateUsing(fn (?string $state) => self::sanitizeCsvFormula($state))
                 ->enabledByDefault(false),
 
             ExportColumn::make('created_at')
                 ->label('Created At')
                 ->enabledByDefault(false),
         ];
+    }
+
+    private static function sanitizeCsvFormula(?string $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        return preg_match('/^[=+\-@\t\r]/', $value) ? "'" . $value : $value;
     }
 
     public static function getCompletedNotificationBody(Export $export): string
