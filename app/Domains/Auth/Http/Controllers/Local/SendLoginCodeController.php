@@ -130,9 +130,28 @@ class SendLoginCodeController extends Controller
 
         $this->timebox->call(function (Timebox $timebox) use ($email, $request, &$challenge, &$error) {
             $timebox->dontReturnEarly();
+
+            // Check rate limit before user lookup so both registered and
+            // unregistered emails produce identical rate-limit responses,
+            // preventing user enumeration via response differential.
+            $rateLimitKey = "login-code:{$email}";
+            $maxAttempts = (int) config('local-auth.rate_limit_per_hour');
+
+            if (RateLimiter::tooManyAttempts($rateLimitKey, $maxAttempts)) {
+                $seconds = RateLimiter::availableIn($rateLimitKey);
+                $minutes = (int) ceil($seconds / 60);
+                $error = "Too many login attempts. Please try again in {$minutes} minute(s).";
+
+                return;
+            }
+
             $user = User::firstLocalByEmail($email);
 
             if (! $user) {
+                // Consume a rate-limit slot for unknown emails too, so attackers
+                // cannot make unlimited probing requests without being throttled.
+                RateLimiter::hit($rateLimitKey, 3600);
+
                 return;
             }
 

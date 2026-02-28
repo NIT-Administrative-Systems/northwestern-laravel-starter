@@ -246,4 +246,21 @@ class SendLoginCodeControllerTest extends TestCase
             (string) session('errors')->first('email')
         );
     }
+
+    public function test_send_rate_limits_nonexistent_email_identically_to_existing(): void
+    {
+        config(['local-auth.rate_limit_per_hour' => 1]);
+
+        RateLimiter::hit('login-code:nonexistent@example.com', 3600);
+
+        $response = $this->post(route('login-code.send'), [
+            'email' => 'nonexistent@example.com',
+        ]);
+
+        $response->assertSessionHasErrors('email');
+        $this->assertStringContainsString(
+            'Too many login attempts',
+            (string) session('errors')->first('email')
+        );
+    }
 }
