@@ -6,13 +6,15 @@ namespace App\Filament\Resources\Users\Actions;
 
 use App\Domains\Auth\Enums\PermissionEnum;
 use App\Domains\User\Actions\Directory\FindOrUpdateUserFromDirectory;
-use App\Domains\User\Exceptions\BadDirectoryEntry;
+use App\Domains\User\Enums\DirectorySearchType;
+use App\Domains\User\Models\User;
 use App\Filament\Resources\Users\UserResource;
 use Exception;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
+use Northwestern\SysDev\SOA\DirectorySearch;
 
 class CreateNorthwesternUserAction extends Action
 {
@@ -44,7 +46,7 @@ class CreateNorthwesternUserAction extends Action
                         $set('netid', trim($state ?? ''));
                     })
                     ->rules([
-                        fn (FindOrUpdateUserFromDirectory $findOrUpdateUserFromDirectory) => function ($attribute, $value, $fail) use ($findOrUpdateUserFromDirectory) {
+                        fn (DirectorySearch $directorySearch) => function ($attribute, $value, $fail) use ($directorySearch) {
                             $searchValue = trim($value);
 
                             if (blank($searchValue)) {
@@ -52,15 +54,15 @@ class CreateNorthwesternUserAction extends Action
                             }
 
                             try {
-                                $user = $findOrUpdateUserFromDirectory($searchValue, immediate: true);
+                                $searchType = DirectorySearchType::fromSearchValue($searchValue);
+                                $result = $directorySearch->lookup($searchValue, $searchType->value, 'basic');
 
-                                if (! $user instanceof \App\Domains\User\Models\User) {
+                                if (! $result) {
                                     $fail('Not found in the directory. You can search by a Northwestern email address or NetID.');
                                 }
-                            } catch (BadDirectoryEntry) {
-                                $fail('This user has an incomplete entry in the Northwestern Directory. They cannot be loaded.');
                             } catch (Exception $e) {
                                 report($e);
+                                $fail('Unable to search the directory. Please try again.');
                             }
                         },
                     ]),
@@ -71,7 +73,7 @@ class CreateNorthwesternUserAction extends Action
                 try {
                     $user = ($findOrUpdateUserFromDirectory)($searchValue, immediate: true);
 
-                    if (! $user instanceof \App\Domains\User\Models\User) {
+                    if (! $user instanceof User) {
                         // This shouldn't happen since validation passed, but handle it
                         Notification::make()
                             ->title('User not found')
