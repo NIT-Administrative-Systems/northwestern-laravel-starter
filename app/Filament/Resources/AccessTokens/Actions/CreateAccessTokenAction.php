@@ -12,6 +12,7 @@ use App\Filament\Resources\Users\RelationManagers\AccessTokensRelationManager;
 use Filament\Actions\Action;
 use Filament\Schemas\Components\Wizard;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Session;
 
 class CreateAccessTokenAction extends Action
@@ -42,6 +43,10 @@ class CreateAccessTokenAction extends Action
                         IssueAccessToken $issueAccessToken,
                         AccessTokensRelationManager $livewire,
                     ) {
+                        if (Session::has(AccessTokenSchemas::SESSION_KEY_CREATE)) {
+                            return;
+                        }
+
                         /** @var User $owner */
                         $owner = $livewire->getOwnerRecord();
                         $configuration = AccessTokenSchemas::normalizeConfigurationState($state);
@@ -54,19 +59,19 @@ class CreateAccessTokenAction extends Action
                         );
 
                         Session::put([
-                            AccessTokenSchemas::SESSION_KEY => [
-                                'token' => $rawToken,
+                            AccessTokenSchemas::SESSION_KEY_CREATE => [
+                                'token' => Crypt::encryptString($rawToken),
                                 'record_id' => $accessToken->getKey(),
                             ],
                         ]);
                     }),
                 Wizard\Step::make('Copy Token')
                     ->schema(
-                        AccessTokenSchemas::copyTokenStepSchema(),
+                        AccessTokenSchemas::copyTokenStepSchema(AccessTokenSchemas::SESSION_KEY_CREATE),
                     ),
             ])
             ->modalSubmitAction(fn (Action $action) => AccessTokenSchemas::copyTokenSubmitButton($action))
-            ->action(fn () => AccessTokenSchemas::clearTokenSession())
+            ->action(fn () => AccessTokenSchemas::clearTokenSession(AccessTokenSchemas::SESSION_KEY_CREATE))
 
             ->successNotificationTitle('Access Token created');
     }

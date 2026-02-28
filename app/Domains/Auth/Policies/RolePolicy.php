@@ -23,4 +23,9 @@ class RolePolicy
     {
         return $user->hasPermissionTo(PermissionEnum::EDIT_ROLES);
     }
+
+    public function delete(User $user): bool
+    {
+        return $user->hasPermissionTo(PermissionEnum::DELETE_ROLES);
+    }
 }

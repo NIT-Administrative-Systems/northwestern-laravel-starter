@@ -168,6 +168,27 @@ class CreateLocalUserTest extends TestCase
         $this->assertEquals('203.0.113.42', $loginChallenge->requested_ip);
     }
 
+    public function test_returns_user_when_login_challenge_fails(): void
+    {
+        $this->mock(\App\Domains\Auth\Actions\Local\IssueLoginChallenge::class, function ($mock) {
+            $mock->shouldReceive('__invoke')
+                ->once()
+                ->andThrow(new \RuntimeException('Too many login attempts.'));
+        });
+
+        $user = $this->action()(
+            email: 'challenge-fail@example.com',
+            firstName: 'Test',
+            lastName: 'User',
+            title: 'Dev',
+            department: 'IT',
+            sendLoginLink: true,
+        );
+
+        $this->assertTrue($user->exists);
+        $this->assertEquals('challenge-fail@example.com', $user->email);
+    }
+
     protected function action(): CreateLocalUser
     {
         return resolve(CreateLocalUser::class);

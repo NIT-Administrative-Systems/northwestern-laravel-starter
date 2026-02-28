@@ -30,7 +30,8 @@ class SupportTicketExporter extends Exporter
                 ->label('Email'),
 
             ExportColumn::make('subject')
-                ->label('Subject'),
+                ->label('Subject')
+                ->formatStateUsing(fn (?string $state) => self::sanitizeCsvFormula($state)),
 
             ExportColumn::make('ticketing_system')
                 ->label('Gateway'),
@@ -56,6 +57,15 @@ class SupportTicketExporter extends Exporter
             ExportColumn::make('created_at')
                 ->label('Submitted At'),
         ];
+    }
+
+    private static function sanitizeCsvFormula(?string $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        return preg_match('/^[=+\-@\t\r]/', $value) ? "'" . $value : $value;
     }
 
     public static function getCompletedNotificationBody(Export $export): string

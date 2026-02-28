@@ -9,7 +9,6 @@ use App\Domains\Support\Enums\TicketSystemEnum;
 use App\Domains\Support\Exceptions\TdxLookupFailed;
 use App\Domains\Support\Gateway\CreationResult;
 use App\Domains\Support\Models\SupportTicket;
-use Exception;
 use InvalidArgumentException;
 use Northwestern\Sysdev\TeamDynamix\Api\Entity\Ticket\CreateTicket;
 use Northwestern\Sysdev\TeamDynamix\Api\Entity\Ticket\TicketResponse;
@@ -47,7 +46,7 @@ class TeamDynamixGateway implements TicketSystemGateway
         try {
             $tdxTicket = retry(3, fn () => $this->lookupAndCreate($ticket), 250);
             $ticketNumber = (string) $tdxTicket->ticket->id;
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             $hasError = true;
             $errorMessage = $e->getMessage();
 

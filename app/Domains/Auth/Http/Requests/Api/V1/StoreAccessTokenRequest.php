@@ -21,7 +21,7 @@ class StoreAccessTokenRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'expires_at' => ['nullable', 'integer', 'min:' . now()->addDay()->timestamp],
+            'expires_at' => ['nullable', 'integer', 'min:' . now()->addDay()->timestamp, 'max:' . now()->addYears(10)->timestamp],
             'allowed_ips' => ['nullable', 'array'],
             'allowed_ips.*' => ['string', new ValidIpOrCidrRule()],
         ];

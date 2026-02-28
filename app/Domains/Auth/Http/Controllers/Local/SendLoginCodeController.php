@@ -130,9 +130,44 @@ class SendLoginCodeController extends Controller
 
         $this->timebox->call(function (Timebox $timebox) use ($email, $request, &$challenge, &$error) {
             $timebox->dontReturnEarly();
+
+            // Per-IP rate limit: prevents a single IP from exhausting multiple
+            // accounts' per-email rate limits (targeted account lockout DoS).
+            $ipRateLimitKey = 'login-code-ip:' . $request->ip();
+            $maxIpAttempts = (int) config('local-auth.rate_limit_per_ip_per_hour', 20);
+
+            if (RateLimiter::tooManyAttempts($ipRateLimitKey, $maxIpAttempts)) {
+                $seconds = RateLimiter::availableIn($ipRateLimitKey);
+                $minutes = (int) ceil($seconds / 60);
+                $error = "Too many login attempts. Please try again in {$minutes} minute(s).";
+
+                return;
+            }
+
+            // Per-email rate limit: check before user lookup so both registered and
+            // unregistered emails produce identical rate-limit responses,
+            // preventing user enumeration via response differential.
+            $rateLimitKey = "login-code:{$email}";
+            $maxAttempts = (int) config('local-auth.rate_limit_per_hour');
+
+            if (RateLimiter::tooManyAttempts($rateLimitKey, $maxAttempts)) {
+                $seconds = RateLimiter::availableIn($rateLimitKey);
+                $minutes = (int) ceil($seconds / 60);
+                $error = "Too many login attempts. Please try again in {$minutes} minute(s).";
+
+                return;
+            }
+
+            // Hit the per-IP rate limiter for every request that passes both checks.
+            RateLimiter::hit($ipRateLimitKey, 3600);
+
             $user = User::firstLocalByEmail($email);
 
             if (! $user) {
+                // Consume a rate-limit slot for unknown emails too, so attackers
+                // cannot make unlimited probing requests without being throttled.
+                RateLimiter::hit($rateLimitKey, 3600);
+
                 return;
             }
 

@@ -130,6 +130,7 @@ class AccessToken extends BaseModel
                 return match (true) {
                     filled($this->revoked_at) => AccessTokenStatusEnum::REVOKED,
                     $this->expires_at?->isPast() => AccessTokenStatusEnum::EXPIRED,
+                    $this->token_hash === null => AccessTokenStatusEnum::REVOKED,
                     default => AccessTokenStatusEnum::ACTIVE,
                 };
             }
@@ -144,6 +145,12 @@ class AccessToken extends BaseModel
      */
     public static function hashFromPlain(#[SensitiveParameter] string $token): string
     {
-        return hash_hmac('sha256', $token, (string) config('app.key'));
+        $key = (string) config('app.key');
+
+        if (str_starts_with($key, 'base64:')) {
+            $key = base64_decode(substr($key, 7));
+        }
+
+        return hash_hmac('sha256', $token, $key);
     }
 }

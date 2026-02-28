@@ -57,8 +57,7 @@ class DirectorySearchCheckTest extends TestCase
         $this->assertInstanceOf(Result::class, $result);
         $this->assertEquals(Status::ok(), $result->status);
         $this->assertEquals('Ok', $result->getShortSummary());
-        $this->assertArrayHasKey('tested_netid', $result->meta);
-        $this->assertEquals($this->testNetId, $result->meta['tested_netid']);
+        $this->assertArrayNotHasKey('tested_netid', $result->meta);
     }
 
     public function test_check_fails_on_api_error(): void

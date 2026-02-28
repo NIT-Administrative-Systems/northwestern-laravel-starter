@@ -51,13 +51,14 @@ class ApiRequestFilterWidget extends Widget implements HasForms
                 Select::make('userId')
                     ->label('User')
                     ->placeholder('All Users')
-                    ->options(function () {
-                        return User::query()
-                            ->api()
-                            ->orderBy('username')
-                            ->pluck('username', 'id');
-                    })
                     ->searchable()
+                    ->getSearchResultsUsing(fn (string $search) => User::query()
+                        ->api()
+                        ->where('username', 'ilike', "%{$search}%")
+                        ->orderBy('username')
+                        ->limit(50)
+                        ->pluck('username', 'id'))
+                    ->getOptionLabelUsing(fn ($value) => User::find($value)?->username)
                     ->live()
                     ->afterStateUpdated(function ($state) {
                         $this->userId = $state;

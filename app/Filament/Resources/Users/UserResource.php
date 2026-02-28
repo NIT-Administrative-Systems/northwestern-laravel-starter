@@ -23,6 +23,7 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Cache;
 use UnitEnum;
 
 class UserResource extends Resource
@@ -67,7 +68,7 @@ class UserResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return number_format(static::getModel()::count());
+        return number_format(Cache::flexible('nav_badge_users_count', [30, 60], fn () => static::getModel()::count()));
     }
 
     public static function getGlobalSearchResultTitle(Model $record): string|Htmlable

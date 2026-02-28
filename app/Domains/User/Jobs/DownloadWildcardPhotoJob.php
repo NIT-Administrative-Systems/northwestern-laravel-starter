@@ -38,13 +38,21 @@ class DownloadWildcardPhotoJob implements ShouldQueue
         }
 
         $jpegPhoto = data_get($userInfo, 'jpegPhoto');
-        $photoS3Key = null;
 
-        if (filled($jpegPhoto)) {
-            $decodedPhoto = base64_decode((string) $jpegPhoto);
-            $photoS3Key = "wildcard-photos/{$this->user->username}.jpg";
+        if (blank($jpegPhoto)) {
+            return;
+        }
 
-            Storage::disk('s3')->put($photoS3Key, $decodedPhoto);
+        $decodedPhoto = base64_decode((string) $jpegPhoto, strict: true);
+
+        if ($decodedPhoto === false || $decodedPhoto === '') {
+            return;
+        }
+
+        $photoS3Key = "wildcard-photos/{$this->user->username}.jpg";
+
+        if (! Storage::disk('s3')->put($photoS3Key, $decodedPhoto)) {
+            return;
         }
 
         $this->user->update([

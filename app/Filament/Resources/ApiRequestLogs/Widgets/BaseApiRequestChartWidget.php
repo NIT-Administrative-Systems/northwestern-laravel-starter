@@ -23,7 +23,7 @@ abstract class BaseApiRequestChartWidget extends ChartWidget
 
     protected ?string $maxHeight = '300px';
 
-    protected ?string $pollingInterval = '10s';
+    protected ?string $pollingInterval = '60s';
 
     public function mount(): void
     {

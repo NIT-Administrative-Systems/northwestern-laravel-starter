@@ -46,7 +46,14 @@ trait HandlesImpersonation
      */
     public function canBeImpersonated(): bool
     {
-        return $this->auth_type !== AuthTypeEnum::API;
+        if ($this->auth_type === AuthTypeEnum::API) {
+            return false;
+        }
+
+        // Prevent impersonating users with higher privileges
+        $impersonator = auth()->user();
+
+        return ! ($impersonator && $this->hasPermissionTo(PermissionEnum::MANAGE_ALL) && ! $impersonator->hasPermissionTo(PermissionEnum::MANAGE_ALL));
     }
 
     /**

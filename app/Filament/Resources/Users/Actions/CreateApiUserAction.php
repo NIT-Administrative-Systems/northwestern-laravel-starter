@@ -17,6 +17,7 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Wizard;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Session;
 
 class CreateApiUserAction extends Action
@@ -66,7 +67,7 @@ class CreateApiUserAction extends Action
                                                 function () {
                                                     return function (string $attribute, $value, $fail) {
                                                         // Skip validation if we already created a user in this session
-                                                        if (Session::has(AccessTokenSchemas::SESSION_KEY . '.user_id')) {
+                                                        if (Session::has(AccessTokenSchemas::SESSION_KEY_CREATE_API_USER)) {
                                                             return;
                                                         }
 
@@ -118,7 +119,11 @@ class CreateApiUserAction extends Action
                         AccessTokenSchemas::tokenConfigurationSection(),
                     ])
                     ->afterValidation(function (array $state, $set, CreateApiUser $createApiUser) {
-                        $username = 'api-' . ltrim(strtolower((string) $state['username']), 'api-');
+                        if (Session::has(AccessTokenSchemas::SESSION_KEY_CREATE_API_USER)) {
+                            return;
+                        }
+
+                        $username = 'api-' . preg_replace('/^api-/', '', strtolower((string) $state['username']));
 
                         $configuration = AccessTokenSchemas::normalizeConfigurationState($state);
 
@@ -133,8 +138,8 @@ class CreateApiUserAction extends Action
                         );
 
                         Session::put([
-                            AccessTokenSchemas::SESSION_KEY => [
-                                'token' => $token,
+                            AccessTokenSchemas::SESSION_KEY_CREATE_API_USER => [
+                                'token' => Crypt::encryptString($token),
                                 'user_id' => $user->getKey(),
                             ],
                         ]);
@@ -142,13 +147,13 @@ class CreateApiUserAction extends Action
 
                 Wizard\Step::make('Copy Token')
                     ->schema(
-                        AccessTokenSchemas::copyTokenStepSchema(),
+                        AccessTokenSchemas::copyTokenStepSchema(AccessTokenSchemas::SESSION_KEY_CREATE_API_USER),
                     ),
             ])
             ->modalSubmitAction(fn (Action $action) => AccessTokenSchemas::copyTokenSubmitButton($action))
             ->action(function () {
-                $userId = session(AccessTokenSchemas::SESSION_KEY . '.user_id');
-                AccessTokenSchemas::clearTokenSession();
+                $userId = session(AccessTokenSchemas::SESSION_KEY_CREATE_API_USER . '.user_id');
+                AccessTokenSchemas::clearTokenSession(AccessTokenSchemas::SESSION_KEY_CREATE_API_USER);
 
                 if ($userId) {
                     /** @var User $user */

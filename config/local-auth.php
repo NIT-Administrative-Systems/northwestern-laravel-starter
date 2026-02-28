@@ -26,8 +26,12 @@ return [
     // Blocked from running in production, develop, and QA as a safety measure.
     'use_fixed_code' => (bool) env('LOCAL_AUTH_USE_FIXED_CODE', false),
 
-    // Maximum requests per hour (applies to both form submissions and code sends)
+    // Maximum requests per email per hour (applies to both form submissions and code sends)
     'rate_limit_per_hour' => env('LOCAL_AUTH_RATE_LIMIT_PER_HOUR', 10),
+
+    // Maximum login code requests per IP per hour (limits a single IP from exhausting
+    // multiple accounts' per-email rate limits)
+    'rate_limit_per_ip_per_hour' => (int) env('LOCAL_AUTH_RATE_LIMIT_PER_IP_PER_HOUR', 20),
 
     // Where to send users after a successful login (route name or path)
     'redirect_after_login' => env('LOCAL_AUTH_REDIRECT_AFTER_LOGIN', '/'),

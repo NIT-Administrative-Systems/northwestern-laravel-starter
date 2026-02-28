@@ -27,11 +27,15 @@ Additional checks are available for services like Redis, Horizon, Octane, and mo
 
 ## API Endpoint
 
-A public health check endpoint is available for external monitoring systems.
+A health check endpoint is available for external monitoring systems, protected by a secret token.
 
 **Endpoint:** `GET /api/health`
 
-**Authentication:** None
+**Authentication:** Requires an `X-Secret-Token` header matching the `HEALTH_SECRET_TOKEN` environment variable.
+
+```bash
+curl -H "X-Secret-Token: your-secret-token" https://your-app.example.com/api/health
+```
 
 **Response:**
 

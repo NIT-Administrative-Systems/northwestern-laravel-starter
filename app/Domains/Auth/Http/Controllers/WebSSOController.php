@@ -8,6 +8,7 @@ use App\Domains\Core\Enums\ExternalServiceEnum;
 use App\Domains\Core\Exceptions\ServiceDownError;
 use App\Domains\User\Actions\Directory\FindOrUpdateUserFromDirectory;
 use App\Domains\User\Actions\RecordLogin;
+use App\Domains\User\Exceptions\BadDirectoryEntry;
 use App\Domains\User\Models\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Contracts\Auth\Authenticatable;
@@ -43,6 +44,7 @@ class WebSSOController extends Controller
 
     protected function findUserByNetID(FindOrUpdateUserFromDirectory $findOrUpdateUserFromDirectory, ?string $netid = null): ?Authenticatable
     {
+        /** @var ?Authenticatable */
         return retry(
             times: self::RETRY_LOOKUP_TIMES,
             callback: function () use ($findOrUpdateUserFromDirectory, $netid): User {
@@ -58,7 +60,8 @@ class WebSSOController extends Controller
 
                 return $user;
             },
-            sleepMilliseconds: 500
+            sleepMilliseconds: 500,
+            when: fn (\Throwable $e) => ! ($e instanceof BadDirectoryEntry),
         );
     }
 

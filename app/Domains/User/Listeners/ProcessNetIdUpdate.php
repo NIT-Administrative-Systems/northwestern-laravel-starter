@@ -23,16 +23,17 @@ class ProcessNetIdUpdate implements ShouldQueue
 {
     public function handle(NetIdUpdated $event): void
     {
-        $user = User::query()
-            ->sso()
-            ->with('roles')
-            ->firstWhere('username', $event->netId);
+        DB::transaction(static function () use ($event) {
+            $user = User::query()
+                ->sso()
+                ->lockForUpdate()
+                ->with('roles')
+                ->firstWhere('username', $event->netId);
 
-        if (! $user) {
-            return;
-        }
+            if (! $user) {
+                return;
+            }
 
-        DB::transaction(static function () use ($user, $event) {
             $user->roles
                 ->reject(fn (Role $role) => $role->name === SystemRoleEnum::NORTHWESTERN_USER->value)
                 ->whenNotEmpty(fn ($roles) => $user->removeRoleWithAudit(

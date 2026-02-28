@@ -7,7 +7,6 @@ namespace App\Domains\Auth\Http\Middleware;
 use App\Domains\Auth\Models\ApiRequestLog;
 use App\Domains\Core\ValueObjects\ApiRequestContext;
 use Closure;
-use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Lottery;
@@ -87,8 +86,8 @@ class LogsApiRequests
                 'user_agent' => $request->userAgent(),
                 'failure_reason' => $failureReason,
             ]);
-        } catch (Exception) {
-            // Silently ignore logging failures to avoid impacting the API response
+        } catch (\Throwable $e) {
+            report($e);
         }
 
         return $response;

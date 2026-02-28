@@ -7,7 +7,7 @@ namespace App\Console\Commands;
 use App\Domains\Auth\Mail\AccessTokenExpirationNotification;
 use App\Domains\Auth\Models\AccessToken;
 use Illuminate\Console\Command;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -36,17 +36,18 @@ class SendAccessTokenExpirationNotificationsCommand extends Command
         $totalErrors = 0;
 
         foreach ($intervals as $daysBeforeExpiration) {
-            $tokens = $this->getExpiringTokens($daysBeforeExpiration);
+            $query = $this->getExpiringTokensQuery($daysBeforeExpiration);
+            $count = $query->count();
 
-            if ($tokens->isEmpty()) {
+            if ($count === 0) {
                 $this->components->info("No tokens expiring in {$daysBeforeExpiration} days");
 
                 continue;
             }
 
-            $this->components->info("Found {$tokens->count()} token(s) expiring in {$daysBeforeExpiration} days");
+            $this->components->info("Found {$count} token(s) expiring in {$daysBeforeExpiration} days");
 
-            foreach ($tokens as $token) {
+            foreach ($query->lazyById(100) as $token) {
                 try {
                     $this->processToken($token, $daysBeforeExpiration);
                     $totalNotificationsSent++;
@@ -64,12 +65,12 @@ class SendAccessTokenExpirationNotificationsCommand extends Command
     }
 
     /**
-     * Get tokens that are expiring within the specified number of days
-     * and haven't been notified yet (or were last notified more than 24 hours ago).
+     * Build query for tokens expiring within the specified number of days
+     * that haven't been notified yet (or were last notified more than 24 hours ago).
      *
-     * @return Collection<int, AccessToken>
+     * @return Builder<AccessToken>
      */
-    private function getExpiringTokens(int $daysBeforeExpiration): Collection
+    private function getExpiringTokensQuery(int $daysBeforeExpiration): Builder
     {
         $now = Carbon::now(timezone: config('app.timezone'));
         $targetDate = $now->copy()->addDays($daysBeforeExpiration);
@@ -92,8 +93,7 @@ class SendAccessTokenExpirationNotificationsCommand extends Command
             ->where(function (\Illuminate\Contracts\Database\Query\Builder $query) use ($now) {
                 $query->whereNull('expiration_notified_at')
                     ->orWhere('expiration_notified_at', '<', $now->copy()->subHours(24));
-            })
-            ->get();
+            });
     }
 
     /**

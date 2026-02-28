@@ -20,6 +20,7 @@ use Filament\Schemas\Components\Wizard;
 use Filament\Support\Enums\IconPosition;
 use Filament\Support\Enums\IconSize;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\HtmlString;
 use Phiki\Grammar\Grammar;
@@ -30,14 +31,25 @@ use Phiki\Grammar\Grammar;
 class AccessTokenSchemas
 {
     /**
-     * Session key used by all flows that temporarily expose a raw Access Token
+     * Session key for the "Create Token" wizard flow.
      *
-     * The value stored under this key is a small associative array containing:
-     * - **token:** `string` - The raw Bearer token
-     * - **record_id:** `int|null` - The associated AccessToken ID, when applicable
-     * - **user_id:** `int|null` The associated User ID, when applicable
+     * Stored value: `['token' => string, 'record_id' => int]`
      */
-    public const string SESSION_KEY = 'access_token_credentials';
+    public const string SESSION_KEY_CREATE = 'access_token_credentials:create';
+
+    /**
+     * Session key for the "Create API User" wizard flow.
+     *
+     * Stored value: `['token' => string, 'user_id' => int]`
+     */
+    public const string SESSION_KEY_CREATE_API_USER = 'access_token_credentials:create_api_user';
+
+    /**
+     * Session key for the "Rotate Token" wizard flow.
+     *
+     * Stored value: `['token' => string, 'record_id' => int]`
+     */
+    public const string SESSION_KEY_ROTATE = 'access_token_credentials:rotate';
 
     /**
      * Generic configuration section for token validity and IP restrictions.
@@ -160,13 +172,13 @@ class AccessTokenSchemas
      * - the raw token display; and
      * - the usage/help content.
      *
-     * The token is resolved from {@see self::SESSION_KEY}. If a `record_id` is
+     * The token is resolved from the given `$sessionKey`. If a `record_id` is
      * present, and the current record is an {@see AccessToken}, the token is only
      * shown when the IDs match.
      *
      * @return array<int,Section>
      */
-    public static function copyTokenStepSchema(): array
+    public static function copyTokenStepSchema(string $sessionKey): array
     {
         $copySection = Section::make()
             ->icon(Heroicon::OutlinedExclamationTriangle)
@@ -177,14 +189,15 @@ class AccessTokenSchemas
                 CodeEntry::make('token')
                     ->label('Bearer Token')
                     ->grammar(Grammar::Txt)
-                    ->state(function ($record) {
-                        $data = session(self::SESSION_KEY);
+                    ->state(function ($record) use ($sessionKey) {
+                        $data = session($sessionKey);
 
-                        $token = data_get($data, 'token');
-                        if (! is_string($token)) {
+                        $encryptedToken = data_get($data, 'token');
+                        if (! is_string($encryptedToken)) {
                             return null;
                         }
 
+                        $token = Crypt::decryptString($encryptedToken);
                         $recordId = data_get($data, 'record_id');
 
                         // If this session token is tied to a specific AccessToken record,
@@ -257,7 +270,7 @@ class AccessTokenSchemas
             return true;
         }
 
-        $data = session(self::SESSION_KEY);
+        $data = session(self::SESSION_KEY_ROTATE);
 
         return is_array($data)
             && ($data['record_id'] ?? null) === $token->getKey();
@@ -269,8 +282,8 @@ class AccessTokenSchemas
      * This should be called once the operator has confirmed that the token
      * has been copied or when abandoning a token-related wizard.
      */
-    public static function clearTokenSession(): void
+    public static function clearTokenSession(string $sessionKey): void
     {
-        Session::forget(self::SESSION_KEY);
+        Session::forget($sessionKey);
     }
 }
