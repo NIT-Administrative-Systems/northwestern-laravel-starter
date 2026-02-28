@@ -42,6 +42,10 @@ class CreateAccessTokenAction extends Action
                         IssueAccessToken $issueAccessToken,
                         AccessTokensRelationManager $livewire,
                     ) {
+                        if (Session::has(AccessTokenSchemas::SESSION_KEY_CREATE)) {
+                            return;
+                        }
+
                         /** @var User $owner */
                         $owner = $livewire->getOwnerRecord();
                         $configuration = AccessTokenSchemas::normalizeConfigurationState($state);
@@ -54,7 +58,7 @@ class CreateAccessTokenAction extends Action
                         );
 
                         Session::put([
-                            AccessTokenSchemas::SESSION_KEY => [
+                            AccessTokenSchemas::SESSION_KEY_CREATE => [
                                 'token' => $rawToken,
                                 'record_id' => $accessToken->getKey(),
                             ],
@@ -62,11 +66,11 @@ class CreateAccessTokenAction extends Action
                     }),
                 Wizard\Step::make('Copy Token')
                     ->schema(
-                        AccessTokenSchemas::copyTokenStepSchema(),
+                        AccessTokenSchemas::copyTokenStepSchema(AccessTokenSchemas::SESSION_KEY_CREATE),
                     ),
             ])
             ->modalSubmitAction(fn (Action $action) => AccessTokenSchemas::copyTokenSubmitButton($action))
-            ->action(fn () => AccessTokenSchemas::clearTokenSession())
+            ->action(fn () => AccessTokenSchemas::clearTokenSession(AccessTokenSchemas::SESSION_KEY_CREATE))
 
             ->successNotificationTitle('Access Token created');
     }

@@ -60,7 +60,7 @@ HTML))
                         AccessToken $record,
                     ) {
                         // If we've already rotated this token in this wizard session, don't do it again.
-                        if (Session::has(AccessTokenSchemas::SESSION_KEY)) {
+                        if (Session::has(AccessTokenSchemas::SESSION_KEY_ROTATE)) {
                             return;
                         }
 
@@ -75,7 +75,7 @@ HTML))
                         );
 
                         Session::put([
-                            AccessTokenSchemas::SESSION_KEY => [
+                            AccessTokenSchemas::SESSION_KEY_ROTATE => [
                                 'token' => $newToken,
                                 'record_id' => $record->getKey(),
                             ],
@@ -83,11 +83,11 @@ HTML))
                     }),
                 Wizard\Step::make('Copy Token')
                     ->schema(
-                        AccessTokenSchemas::copyTokenStepSchema(),
+                        AccessTokenSchemas::copyTokenStepSchema(AccessTokenSchemas::SESSION_KEY_ROTATE),
                     ),
             ])
             ->modalSubmitAction(fn (Action $action) => AccessTokenSchemas::copyTokenSubmitButton($action))
-            ->action(fn () => AccessTokenSchemas::clearTokenSession())
+            ->action(fn () => AccessTokenSchemas::clearTokenSession(AccessTokenSchemas::SESSION_KEY_ROTATE))
             ->successNotificationTitle('Access Token rotated')
             ->visible(fn (AccessToken $record): bool => AccessTokenSchemas::canShowRotate($record));
     }
