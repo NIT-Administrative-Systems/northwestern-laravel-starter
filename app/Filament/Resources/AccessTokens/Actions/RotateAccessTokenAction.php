@@ -14,6 +14,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Wizard;
 use Filament\Support\Enums\Size;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\HtmlString;
 
@@ -76,7 +77,7 @@ HTML))
 
                         Session::put([
                             AccessTokenSchemas::SESSION_KEY_ROTATE => [
-                                'token' => $newToken,
+                                'token' => Crypt::encryptString($newToken),
                                 'record_id' => $record->getKey(),
                             ],
                         ]);

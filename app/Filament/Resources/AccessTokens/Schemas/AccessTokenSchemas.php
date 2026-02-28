@@ -20,6 +20,7 @@ use Filament\Schemas\Components\Wizard;
 use Filament\Support\Enums\IconPosition;
 use Filament\Support\Enums\IconSize;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\HtmlString;
 use Phiki\Grammar\Grammar;
@@ -191,11 +192,12 @@ class AccessTokenSchemas
                     ->state(function ($record) use ($sessionKey) {
                         $data = session($sessionKey);
 
-                        $token = data_get($data, 'token');
-                        if (! is_string($token)) {
+                        $encryptedToken = data_get($data, 'token');
+                        if (! is_string($encryptedToken)) {
                             return null;
                         }
 
+                        $token = Crypt::decryptString($encryptedToken);
                         $recordId = data_get($data, 'record_id');
 
                         // If this session token is tied to a specific AccessToken record,

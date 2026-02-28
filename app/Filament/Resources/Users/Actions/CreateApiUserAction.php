@@ -17,6 +17,7 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Wizard;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Session;
 
 class CreateApiUserAction extends Action
@@ -138,7 +139,7 @@ class CreateApiUserAction extends Action
 
                         Session::put([
                             AccessTokenSchemas::SESSION_KEY_CREATE_API_USER => [
-                                'token' => $token,
+                                'token' => Crypt::encryptString($token),
                                 'user_id' => $user->getKey(),
                             ],
                         ]);
