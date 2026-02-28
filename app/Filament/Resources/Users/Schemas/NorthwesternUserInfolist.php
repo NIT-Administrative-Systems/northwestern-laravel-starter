@@ -207,7 +207,7 @@ class NorthwesternUserInfolist
                                         ->action(function ($record, FindOrUpdateUserFromDirectory $findOrUpdateUserFromDirectory) {
                                             $user = ($findOrUpdateUserFromDirectory)($record->username, immediate: true);
 
-                                            if ($record->directory_sync_last_failed_at !== $user?->directory_sync_last_failed_at) {
+                                            if ($record->directory_sync_last_failed_at?->getTimestamp() !== $user?->directory_sync_last_failed_at?->getTimestamp()) {
                                                 Notification::make()
                                                     ->title('Directory sync failed')
                                                     ->body('The Northwestern Directory may be unavailable or the user has an incomplete record. Please try again later.')
