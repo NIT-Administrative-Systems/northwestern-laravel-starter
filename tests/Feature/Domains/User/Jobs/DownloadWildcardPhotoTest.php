@@ -50,7 +50,7 @@ class DownloadWildcardPhotoTest extends TestCase
         $job->handle($directorySearch);
     }
 
-    public function test_empty_photo_updates_null_without_storage_call(): void
+    public function test_empty_photo_does_nothing(): void
     {
         $user = User::factory()->create();
 
@@ -67,6 +67,57 @@ class DownloadWildcardPhotoTest extends TestCase
         $job->handle($directorySearch);
 
         Storage::disk('s3')->assertMissing("wildcard-photos/{$user->username}.jpg");
+
+        $user->refresh();
+        $this->assertNull($user->wildcard_photo_s3_key);
+        $this->assertNull($user->wildcard_photo_last_synced_at);
+    }
+
+    public function test_empty_photo_does_not_erase_existing_s3_key(): void
+    {
+        $user = User::factory()->create([
+            'wildcard_photo_s3_key' => 'wildcard-photos/existing.jpg',
+            'wildcard_photo_last_synced_at' => now()->subDay(),
+        ]);
+
+        Storage::fake('s3');
+
+        $directorySearch = $this->createMock(DirectorySearch::class);
+
+        $directorySearch->expects($this->once())
+            ->method('lookupByNetId')
+            ->with($this->equalTo($user->username))
+            ->willReturn([]);
+
+        $job = new DownloadWildcardPhotoJob($user);
+        $job->handle($directorySearch);
+
+        $user->refresh();
+        $this->assertEquals('wildcard-photos/existing.jpg', $user->wildcard_photo_s3_key);
+        $this->assertNotNull($user->wildcard_photo_last_synced_at);
+    }
+
+    public function test_invalid_base64_does_not_store_or_update(): void
+    {
+        $user = User::factory()->create();
+
+        Storage::fake('s3');
+
+        $directorySearch = $this->createMock(DirectorySearch::class);
+
+        $directorySearch->expects($this->once())
+            ->method('lookupByNetId')
+            ->with($this->equalTo($user->username))
+            ->willReturn(['jpegPhoto' => '!!!invalid-base64!!!']);
+
+        $job = new DownloadWildcardPhotoJob($user);
+        $job->handle($directorySearch);
+
+        Storage::disk('s3')->assertMissing("wildcard-photos/{$user->username}.jpg");
+
+        $user->refresh();
+        $this->assertNull($user->wildcard_photo_s3_key);
+        $this->assertNull($user->wildcard_photo_last_synced_at);
     }
 
     public function test_valid_photo_stores_photo_and_updates_user(): void
@@ -94,5 +145,38 @@ class DownloadWildcardPhotoTest extends TestCase
 
         $storedContent = Storage::disk('s3')->get($expectedPath);
         $this->assertEquals($originalPhoto, $storedContent);
+
+        $user->refresh();
+        $this->assertEquals($expectedPath, $user->wildcard_photo_s3_key);
+        $this->assertNotNull($user->wildcard_photo_last_synced_at);
+    }
+
+    public function test_s3_write_failure_does_not_update_user(): void
+    {
+        $user = User::factory()->create();
+
+        $originalPhoto = 'fake-image-data';
+        $base64Photo = base64_encode($originalPhoto);
+
+        $directorySearch = $this->createMock(DirectorySearch::class);
+
+        $directorySearch->expects($this->once())
+            ->method('lookupByNetId')
+            ->with($this->equalTo($user->username))
+            ->willReturn(['jpegPhoto' => $base64Photo]);
+
+        Storage::shouldReceive('disk')
+            ->with('s3')
+            ->andReturnSelf();
+        Storage::shouldReceive('put')
+            ->once()
+            ->andReturn(false);
+
+        $job = new DownloadWildcardPhotoJob($user);
+        $job->handle($directorySearch);
+
+        $user->refresh();
+        $this->assertNull($user->wildcard_photo_s3_key);
+        $this->assertNull($user->wildcard_photo_last_synced_at);
     }
 }
