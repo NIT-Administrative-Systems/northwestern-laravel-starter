@@ -66,7 +66,11 @@ class ProblemDetailsRenderer
             // 401 & 403 Authentication/Authorization
             $e instanceof AuthenticationException => ProblemDetails::unauthorized(),
 
-            $e instanceof UnauthorizedHttpException,
+            $e instanceof UnauthorizedHttpException => ProblemDetails::unauthorized(
+                detail: $e->getMessage() ?: 'Authentication required.',
+                headers: $e->getHeaders()
+            ),
+
             $e instanceof AuthorizationException,
             $e instanceof AccessDeniedHttpException => tap(
                 ProblemDetails::forbidden(

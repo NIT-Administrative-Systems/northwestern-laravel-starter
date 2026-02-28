@@ -29,6 +29,7 @@ use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotAcceptableHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Tests\TestCase;
 use Throwable;
 
@@ -93,6 +94,11 @@ class ProblemDetailsRendererTest extends TestCase
         return [
             'authentication' => [
                 new AuthenticationException(),
+                401,
+                'Unauthorized',
+            ],
+            'unauthorized http exception' => [
+                new UnauthorizedHttpException('Bearer'),
                 401,
                 'Unauthorized',
             ],
@@ -256,6 +262,16 @@ class ProblemDetailsRendererTest extends TestCase
             'Bearer realm="Test Realm"',
             $response->headers->get('WWW-Authenticate')
         );
+    }
+
+    public function test_unauthorized_http_exception_preserves_www_authenticate_header(): void
+    {
+        $exception = new UnauthorizedHttpException('Bearer realm="api"');
+
+        $response = $this->renderForApi($exception);
+
+        $this->assertSame(401, $response->getStatusCode());
+        $this->assertSame('Bearer realm="api"', $response->headers->get('WWW-Authenticate'));
     }
 
     public function test_non_api_html_request_returns_null(): void
