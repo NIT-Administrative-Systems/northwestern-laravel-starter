@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Users\RelationManagers;
 
 use App\Domains\Auth\Enums\AuthTypeEnum;
+use App\Domains\Auth\Enums\PermissionEnum;
 use App\Domains\User\Models\User;
 use App\Filament\Resources\AccessTokens\Actions\CreateAccessTokenAction;
 use App\Filament\Resources\AccessTokens\Actions\EditAccessTokenIpRestrictionsAction;
@@ -38,7 +39,8 @@ class AccessTokensRelationManager extends RelationManager
     public static function canViewForRecord(Model $ownerRecord, string $pageClass): bool
     {
         /** @var User $ownerRecord */
-        return $ownerRecord->auth_type === AuthTypeEnum::API;
+        return $ownerRecord->auth_type === AuthTypeEnum::API
+            && auth()->user()?->hasPermissionTo(PermissionEnum::MANAGE_API_USERS);
     }
 
     public static function getTabComponent(Model $ownerRecord, string $pageClass): Tab
