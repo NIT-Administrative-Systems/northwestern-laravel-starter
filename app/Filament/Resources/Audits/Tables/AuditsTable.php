@@ -148,19 +148,21 @@ class AuditsTable
                 SelectFilter::make('event')
                     ->label('Event')
                     ->multiple()
-                    ->options(
-                        fn () => Audit::query()
-                            ->distinct()
-                            ->pluck('event', 'event')
-                            ->map(fn (string $event) => Str::of($event)->replace('_', ' ')->title()->toString())
-                            ->all()
-                    )
+                    ->options([
+                        'created' => 'Created',
+                        'updated' => 'Updated',
+                        'deleted' => 'Deleted',
+                        'restored' => 'Restored',
+                        'role_assigned' => 'Role Assigned',
+                        'role_removed' => 'Role Removed',
+                        'permissions_modified' => 'Permissions Modified',
+                    ])
                     ->searchable()
                     ->preload(),
                 SelectFilter::make('auditable_type')
                     ->label('Record')
                     ->multiple()
-                    ->options(self::modelTypeOptionsGrouped())
+                    ->options(fn () => self::modelTypeOptionsGrouped())
                     ->searchable()
                     ->preload()
                     ->indicateUsing(function (array $state): ?string {
@@ -222,7 +224,7 @@ class AuditsTable
                             ->hintIconTooltip('Some model types create automated or low-value audit logs and are hidden by default. You can include or exclude specific types to narrow results as needed.')
                             ->multiple()
                             ->placeholder('None')
-                            ->options(self::modelTypeOptionsGrouped())
+                            ->options(fn () => self::modelTypeOptionsGrouped())
                             ->searchable()
                             ->default([...self::DEFAULT_IGNORED_MODEL_TYPES])
                             ->preload(),
@@ -268,35 +270,37 @@ class AuditsTable
      */
     private static function modelTypeOptionsGrouped(): array
     {
-        $all = Audit::query()
-            ->select('auditable_type')
-            ->distinct()
-            ->orderBy('auditable_type')
-            ->pluck('auditable_type');
+        return once(function () {
+            $all = Audit::query()
+                ->select('auditable_type')
+                ->distinct()
+                ->orderBy('auditable_type')
+                ->pluck('auditable_type');
 
-        return $all
-            ->map(function (string $fullClass) {
-                $actual = Relation::getMorphedModel($fullClass) ?? $fullClass;
+            return $all
+                ->map(function (string $fullClass) {
+                    $actual = Relation::getMorphedModel($fullClass) ?? $fullClass;
 
-                if (preg_match('/App\\\\Domains\\\\([^\\\\]+)\\\\Models\\\\[^\\\\]+/', $actual, $m)) {
-                    $domain = Str::headline($m[1]);
-                } else {
-                    $domain = 'Other';
-                }
+                    if (preg_match('/App\\\\Domains\\\\([^\\\\]+)\\\\Models\\\\[^\\\\]+/', $actual, $m)) {
+                        $domain = Str::headline($m[1]);
+                    } else {
+                        $domain = 'Other';
+                    }
 
-                return [
-                    'domain' => $domain,
-                    'full_class' => $fullClass,
-                    'label' => class_basename($actual),
-                ];
-            })
-            ->groupBy('domain')
-            ->map(function ($items) {
-                return collect($items)->mapWithKeys(
-                    fn ($it) => [$it['full_class'] => $it['label']]
-                )->all();
-            })
-            ->all();
+                    return [
+                        'domain' => $domain,
+                        'full_class' => $fullClass,
+                        'label' => class_basename($actual),
+                    ];
+                })
+                ->groupBy('domain')
+                ->map(function ($items) {
+                    return collect($items)->mapWithKeys(
+                        fn ($it) => [$it['full_class'] => $it['label']]
+                    )->all();
+                })
+                ->all();
+        });
     }
 
     /**
