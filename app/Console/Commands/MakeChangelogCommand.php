@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use Carbon\Exceptions\InvalidFormatException;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
@@ -122,9 +123,15 @@ class MakeChangelogCommand extends Command
             label: 'Authored date',
             placeholder: $today,
             default: $today,
-            validate: fn (string $value): ?string => Carbon::createFromFormat('Y-m-d', $value) instanceof Carbon
-                ? null
-                : 'Please enter a valid date in YYYY-MM-DD format.',
+            validate: function (string $value): ?string {
+                try {
+                    Carbon::createFromFormat('Y-m-d', $value);
+
+                    return null;
+                } catch (InvalidFormatException) {
+                    return 'Please enter a valid date in YYYY-MM-DD format.';
+                }
+            },
             hint: 'The canonical release date shown to users (YYYY-MM-DD).',
         );
     }
@@ -162,9 +169,9 @@ class MakeChangelogCommand extends Command
      */
     private function generateDefaultTitle(string $slug): string
     {
-        $date = Carbon::createFromFormat('Y-m-d', $slug);
-
-        if (! $date instanceof Carbon) {
+        try {
+            $date = Carbon::createFromFormat('Y-m-d', $slug);
+        } catch (InvalidFormatException) {
             return Str::title(str_replace('-', ' ', $slug));
         }
 
