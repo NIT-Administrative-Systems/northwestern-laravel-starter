@@ -82,6 +82,20 @@ class StoreAccessTokenRequestTest extends TestCase
         $this->assertArrayHasKey('expires_at', $validator->errors()->toArray());
     }
 
+    public function test_validation_fails_with_expires_at_beyond_max(): void
+    {
+        $data = [
+            'name' => 'My API Token',
+            'expires_at' => 999999999999999999,
+        ];
+        $request = new StoreAccessTokenRequest();
+
+        $validator = Validator::make($data, $request->rules());
+
+        $this->assertFalse($validator->passes());
+        $this->assertArrayHasKey('expires_at', $validator->errors()->toArray());
+    }
+
     public function test_validation_passes_with_valid_ipv4_addresses(): void
     {
         $data = [
