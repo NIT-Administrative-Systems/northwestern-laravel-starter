@@ -412,6 +412,21 @@ class StarterCheckCommandTest extends TestCase
         Http::assertNothingSent();
     }
 
+    public function test_silently_exits_when_database_is_unavailable(): void
+    {
+        $this->writeVersionFile('v1.4.0');
+
+        Cache::shouldReceive('get')
+            ->with('starter-check-releases')
+            ->andThrow(new \PDOException('SQLSTATE[08006] connection to server failed: database does not exist'));
+
+        $exitCode = $this->withoutMockingConsoleOutput()
+            ->artisan('starter:check', ['--version-file' => $this->tempVersionFile]);
+
+        $this->assertSame(0, $exitCode);
+        $this->assertEmpty(trim(Artisan::output()));
+    }
+
     public function test_defaults_to_project_root_version_file(): void
     {
         Http::fake([
