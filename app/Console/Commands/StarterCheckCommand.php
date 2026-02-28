@@ -36,6 +36,17 @@ class StarterCheckCommand extends Command
 
     public function handle(): int
     {
+        try {
+            return $this->check();
+        } catch (\PDOException) {
+            // Gracefully degrade when the database is unavailable (e.g. fresh
+            // installs via `composer create-project` before the DB exists).
+            return self::SUCCESS;
+        }
+    }
+
+    private function check(): int
+    {
         if ($this->shouldSkip()) {
             return self::SUCCESS;
         }
