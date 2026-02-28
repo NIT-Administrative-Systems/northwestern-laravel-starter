@@ -130,6 +130,7 @@ class AccessToken extends BaseModel
                 return match (true) {
                     filled($this->revoked_at) => AccessTokenStatusEnum::REVOKED,
                     $this->expires_at?->isPast() => AccessTokenStatusEnum::EXPIRED,
+                    $this->token_hash === null => AccessTokenStatusEnum::REVOKED,
                     default => AccessTokenStatusEnum::ACTIVE,
                 };
             }
