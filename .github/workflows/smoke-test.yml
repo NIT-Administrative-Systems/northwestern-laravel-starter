@@ -1,5 +1,5 @@
 name: Smoke Test
-run-name: "Smoke Test ${{ inputs.version || github.event.release.tag_name || 'latest' }}"
+run-name: "Smoke Test | ${{ inputs.version || github.event.release.tag_name || 'dev-main' }}"
 
 env:
   NODE_VERSION: '25'
@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Version to test (e.g., v1.7.0). Defaults to latest release."
+        description: "Version to test (e.g., v1.7.0). Defaults to dev-main."
         required: false
         type: string
 
@@ -39,20 +39,26 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
           RELEASE_TAG: ${{ github.event.release.tag_name }}
           INPUT_VERSION: ${{ inputs.version }}
-          GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
           if [ "$EVENT_NAME" = "release" ]; then
-            VERSION="$RELEASE_TAG"
+            TAG="$RELEASE_TAG"
+            COMPOSER="${TAG#v}"
+            VCS=""
           elif [ -n "$INPUT_VERSION" ]; then
-            VERSION="$INPUT_VERSION"
+            TAG="$INPUT_VERSION"
+            COMPOSER="${TAG#v}"
+            VCS=""
           else
-            VERSION=$(gh api "repos/$GH_REPO/releases/latest" --jq '.tag_name')
+            TAG="dev-main"
+            COMPOSER="dev-main"
+            VCS="--repository={\"type\":\"vcs\",\"url\":\"https://github.com/$GH_REPO\"} --stability=dev"
           fi
 
-          echo "tag=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "composer=${VERSION#v}" >> "$GITHUB_OUTPUT"
-          echo "Testing version: $VERSION (composer: ${VERSION#v})"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "composer=$COMPOSER" >> "$GITHUB_OUTPUT"
+          echo "vcs=$VCS" >> "$GITHUB_OUTPUT"
+          echo "Testing version: $TAG (composer: $COMPOSER)"
 
       - name: 🐘 Setup PHP
         uses: shivammathur/setup-php@v2
@@ -77,11 +83,13 @@ jobs:
       - name: 📦 composer create-project
         env:
           VERSION: ${{ steps.version.outputs.composer }}
+          VCS_ARGS: ${{ steps.version.outputs.vcs }}
         run: |
           composer create-project \
             northwestern-sysdev/northwestern-laravel-starter \
             test-project \
             "$VERSION" \
+            $VCS_ARGS \
             --prefer-dist \
             --no-interaction
 
@@ -96,9 +104,12 @@ jobs:
           echo "--- Checking APP_KEY was generated (post-create-project-cmd) ---"
           grep -q "^APP_KEY=base64:" .env || { echo "::error::APP_KEY not generated"; exit 1; }
 
-          echo "--- Checking .starter-version.yaml exists and matches release ---"
+          echo "--- Checking .starter-version.yaml exists ---"
           test -f .starter-version.yaml || { echo "::error::.starter-version.yaml not found"; exit 1; }
-          grep -q "version: $VERSION" .starter-version.yaml || { echo "::error::.starter-version.yaml does not contain $VERSION"; exit 1; }
+          if [ "$VERSION" != "dev-main" ]; then
+            echo "--- Checking .starter-version.yaml matches release ---"
+            grep -q "version: $VERSION" .starter-version.yaml || { echo "::error::.starter-version.yaml does not contain $VERSION"; exit 1; }
+          fi
 
           echo "--- Validating composer.json ---"
           composer validate --strict

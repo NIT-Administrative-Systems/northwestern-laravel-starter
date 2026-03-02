@@ -2,6 +2,7 @@
     "$schema": "https://getcomposer.org/schema.json",
     "name": "northwestern-sysdev/northwestern-laravel-starter",
     "type": "project",
+    "description": "A comprehensive starter kit for Laravel projects at Northwestern University",
     "license": "MIT",
     "require": {
         "php": "^8.4",
