@@ -36,7 +36,7 @@ class AccessTokenApiController extends ApiController
                 description: 'Page number of the results to fetch.',
                 in: 'query',
                 required: false,
-                schema: new OA\Schema(type: 'integer', format: 'int64', minimum: 1, example: 1)
+                schema: new OA\Schema(type: 'integer', format: 'int64', example: 1, minimum: 1)
             ),
         ],
         responses: [
