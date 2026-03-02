@@ -105,7 +105,10 @@ class RoleResource extends Resource
     /** @return Builder<Role> */
     public static function getGlobalSearchEloquentQuery(): Builder
     {
-        return parent::getGlobalSearchEloquentQuery()
+        /** @var Builder<Role> $query */
+        $query = parent::getGlobalSearchEloquentQuery();
+
+        return $query
             ->with(['role_type'])
             ->withCount(['users', 'permissions']);
     }
@@ -113,7 +116,10 @@ class RoleResource extends Resource
     /** @return Builder<Role> */
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()
+        /** @var Builder<Role> $query */
+        $query = parent::getEloquentQuery();
+
+        return $query
             ->with(['role_type', 'permissions'])
             ->withCount(['users', 'permissions']);
     }
@@ -121,7 +127,10 @@ class RoleResource extends Resource
     /** @return Builder<Role> */
     public static function getRecordRouteBindingEloquentQuery(): Builder
     {
-        return parent::getRecordRouteBindingEloquentQuery()
+        /** @var Builder<Role> $query */
+        $query = parent::getRecordRouteBindingEloquentQuery();
+
+        return $query
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);

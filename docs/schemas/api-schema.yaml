@@ -19,8 +19,8 @@ paths:
           schema:
             type: integer
             format: int64
-            minimum: 1
             example: 1
+            minimum: 1
       responses:
         '200':
           description: 'Paginated list of access tokens for the authenticated user.'
@@ -189,11 +189,11 @@ components:
         status:
           description: 'Operational status of the token, derived from revocation and expiration timestamps.'
           type: string
+          example: active
           enum:
             - active
             - expired
             - revoked
-          example: active
         last_used_at:
           description: 'When this token was last used (null if never used).'
           type: string
@@ -374,10 +374,10 @@ components:
         scope:
           description: "Whether this permission applies system-wide or only to the authenticated user's context."
           type: string
+          example: system-wide
           enum:
             - system-wide
             - personal
-          example: system-wide
         system_managed:
           type: boolean
           example: false
@@ -403,12 +403,12 @@ components:
       properties:
         slug:
           type: string
+          example: api-integration
           enum:
             - system-managed
             - application-admin
             - application-role
             - api-integration
-          example: api-integration
         label:
           type: string
           example: 'API Integration'
@@ -473,11 +473,11 @@ components:
         auth_type:
           description: 'How the user authenticates to the application.'
           type: string
+          example: api
           enum:
             - sso
             - local
             - api
-          example: api
         first_name:
           type: string
           example: NUIT
@@ -494,14 +494,14 @@ components:
         primary_affiliation:
           description: 'Primary Northwestern affiliation for the user.'
           type: string
+          example: not-matched
+          nullable: true
           enum:
             - student
             - faculty
             - staff
             - affiliate
             - not-matched
-          example: not-matched
-          nullable: true
         departments:
           type: array
           items:

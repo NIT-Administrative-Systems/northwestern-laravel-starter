@@ -54,7 +54,8 @@ The **Northwestern Laravel Starter** provides a cohesive solution that takes car
 ## Getting Started
 
 ```bash
-composer create-project northwestern-sysdev/northwestern-laravel-starter my-project
+composer create-project northwestern-sysdev/northwestern-laravel-starter your-project-name
+cd your-project-name
 ```
 
 Visit the [documentation](https://laravel-starter.entapp.northwestern.edu) for complete installation, configuration, and

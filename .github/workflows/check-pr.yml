@@ -345,7 +345,7 @@ jobs:
           --teamcity
 
       - name: 📦 Upload Test Results
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: Test Results PR${{ github.event.pull_request.number }} Run${{ github.run_id }} Shard${{ matrix.shard }}
@@ -353,7 +353,7 @@ jobs:
           retention-days: 1
 
       - name: 📦 Upload Coverage Data
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: Coverage Shard${{ matrix.shard }}
@@ -369,7 +369,7 @@ jobs:
 
     steps:
       - name: 📥 Download Test Results
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           path: artifacts
           pattern: Test Results PR${{ github.event.pull_request.number }} Run${{ github.run_id }}*
@@ -400,7 +400,7 @@ jobs:
           tools: phpunit/phpcov
 
       - name: 📥 Download Coverage Shards
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           path: .build/coverage-shards
           pattern: Coverage Shard*
