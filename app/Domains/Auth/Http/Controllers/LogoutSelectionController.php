@@ -32,6 +32,15 @@ class LogoutSelectionController extends Controller
             return redirect(route('login-selection'));
         }
 
-        return redirect(route('login-oauth-logout'));
+        $webssoConfigured = filled(config('nusoa.sso.apigeeApiKey'))
+            || config('nusoa.sso.strategy') === 'forgerock-direct';
+
+        return redirect(
+            route(
+                $webssoConfigured
+                ? 'login-websso-logout'
+                : 'login-oauth-logout'
+            )
+        );
     }
 }

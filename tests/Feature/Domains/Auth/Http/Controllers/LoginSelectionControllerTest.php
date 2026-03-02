@@ -11,7 +11,7 @@ use Tests\TestCase;
 #[CoversClass(LoginSelectionController::class)]
 class LoginSelectionControllerTest extends TestCase
 {
-    public function test_renders_login_selection_view_when_local_auth_enabled(): void
+    public function test_renders_view_with_entra_route_when_local_auth_enabled(): void
     {
         config(['local-auth.enabled' => true]);
 
@@ -19,9 +19,38 @@ class LoginSelectionControllerTest extends TestCase
 
         $response->assertOk();
         $response->assertViewIs('auth.login-selection');
+        $response->assertViewHas('ssoRoute', 'login-oauth-redirect');
     }
 
-    public function test_redirects_to_oauth_when_local_auth_disabled_and_not_ci_env(): void
+    public function test_renders_view_with_websso_route_when_local_auth_enabled_and_api_key_set(): void
+    {
+        config([
+            'local-auth.enabled' => true,
+            'nusoa.sso.apigeeApiKey' => 'test-api-key',
+        ]);
+
+        $response = $this->get(route('login-selection'));
+
+        $response->assertOk();
+        $response->assertViewIs('auth.login-selection');
+        $response->assertViewHas('ssoRoute', 'login-websso');
+    }
+
+    public function test_renders_view_with_websso_route_when_local_auth_enabled_and_forgerock_direct(): void
+    {
+        config([
+            'local-auth.enabled' => true,
+            'nusoa.sso.strategy' => 'forgerock-direct',
+        ]);
+
+        $response = $this->get(route('login-selection'));
+
+        $response->assertOk();
+        $response->assertViewIs('auth.login-selection');
+        $response->assertViewHas('ssoRoute', 'login-websso');
+    }
+
+    public function test_redirects_to_entra_when_local_auth_disabled(): void
     {
         config(['local-auth.enabled' => false]);
 
@@ -30,7 +59,31 @@ class LoginSelectionControllerTest extends TestCase
         $response->assertRedirect(route('login-oauth-redirect'));
     }
 
-    public function test_renders_login_selection_view_when_local_auth_disabled_but_env_is_ci(): void
+    public function test_redirects_to_websso_when_local_auth_disabled_and_api_key_set(): void
+    {
+        config([
+            'local-auth.enabled' => false,
+            'nusoa.sso.apigeeApiKey' => 'test-api-key',
+        ]);
+
+        $response = $this->get(route('login-selection'));
+
+        $response->assertRedirect(route('login-websso'));
+    }
+
+    public function test_redirects_to_websso_when_local_auth_disabled_and_forgerock_direct(): void
+    {
+        config([
+            'local-auth.enabled' => false,
+            'nusoa.sso.strategy' => 'forgerock-direct',
+        ]);
+
+        $response = $this->get(route('login-selection'));
+
+        $response->assertRedirect(route('login-websso'));
+    }
+
+    public function test_renders_view_in_ci_env_when_local_auth_disabled(): void
     {
         config(['local-auth.enabled' => false]);
 
@@ -40,5 +93,21 @@ class LoginSelectionControllerTest extends TestCase
 
         $response->assertOk();
         $response->assertViewIs('auth.login-selection');
+    }
+
+    public function test_renders_view_with_websso_route_in_ci_env_when_api_key_set(): void
+    {
+        config([
+            'local-auth.enabled' => false,
+            'nusoa.sso.apigeeApiKey' => 'test-api-key',
+        ]);
+
+        $this->app->detectEnvironment(fn () => 'ci');
+
+        $response = $this->get(route('login-selection'));
+
+        $response->assertOk();
+        $response->assertViewIs('auth.login-selection');
+        $response->assertViewHas('ssoRoute', 'login-websso');
     }
 }

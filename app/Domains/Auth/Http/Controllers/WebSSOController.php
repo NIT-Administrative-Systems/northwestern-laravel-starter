@@ -23,7 +23,9 @@ use Northwestern\SysDev\SOA\Auth\WebSSOAuthentication;
 
 class WebSSOController extends Controller
 {
-    use WebSSOAuthentication;
+    use WebSSOAuthentication {
+        oauthLogout as protected webSSOAuthOauthLogout;
+    }
 
     /**
      * @var int
@@ -32,14 +34,11 @@ class WebSSOController extends Controller
 
     protected string $redirectTo = '/';
 
-    use WebSSOAuthentication {
-        oauthLogout as protected webSSOAuthOauthLogout;
-    }
-
     public function __construct(
         protected RecordLogin $recordLogin,
     ) {
-        //
+        $this->login_route_name = 'login-websso';
+        $this->logout_return_to_route = 'login-selection';
     }
 
     protected function findUserByNetID(FindOrUpdateUserFromDirectory $findOrUpdateUserFromDirectory, ?string $netid = null): ?Authenticatable

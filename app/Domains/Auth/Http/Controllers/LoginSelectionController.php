@@ -19,22 +19,26 @@ class LoginSelectionController extends Controller
 
     public function __invoke(Request $request): RedirectResponse|View
     {
-        if (config('local-auth.enabled')) {
-            return view('auth.login-selection');
+        $ssoRoute = $this->ssoRoute();
+        $localEnabled = config('local-auth.enabled');
+
+        if (! $localEnabled && ! App::environment('ci')) {
+            return redirect(route($ssoRoute));
         }
 
-        /**
-         * In the CI environment (e.g. GitHub Actions), we show the login selection page
-         * instead of redirecting to Azure AD, since CI doesn't have Azure credentials
-         * and cannot perform real OAuth logins.
-         *
-         * This ensures that frontend tests or CI-driven browser interactions can reach
-         * the login page without triggering external auth flows.
-         */
-        if (App::environment('ci')) {
-            return view('auth.login-selection');
-        }
+        return view('auth.login-selection', [
+            'ssoRoute' => $ssoRoute,
+            'localEnabled' => $localEnabled,
+        ]);
+    }
 
-        return redirect(route('login-oauth-redirect'));
+    private function ssoRoute(): string
+    {
+        $webssoConfigured = filled(config('nusoa.sso.apigeeApiKey'))
+            || config('nusoa.sso.strategy') === 'forgerock-direct';
+
+        return $webssoConfigured
+            ? 'login-websso'
+            : 'login-oauth-redirect';
     }
 }
