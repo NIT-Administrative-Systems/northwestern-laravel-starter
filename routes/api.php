@@ -8,6 +8,7 @@ use App\Domains\Auth\Http\Middleware\LogsApiRequests;
 use App\Domains\User\Http\Controllers\Api\V1\UserApiController;
 use App\Http\Middleware\EnsureApiEnabled;
 use Illuminate\Support\Facades\Route;
+use Spatie\Health\Http\Controllers\HealthCheckJsonResultsController;
 use Spatie\Health\Http\Middleware\RequiresSecretToken;
 
 /*
@@ -20,18 +21,6 @@ use Spatie\Health\Http\Middleware\RequiresSecretToken;
 
 Route::middleware([EnsureApiEnabled::class])->group(function () {
     //
-});
-
-/*
-|--------------------------------------------------------------------------
-| Health Check Routes
-|--------------------------------------------------------------------------
-| Protected by a secret token (X-Secret-Token header) rather than bearer
-| token authentication. Set HEALTH_SECRET_TOKEN in your .env file.
-*/
-
-Route::middleware([EnsureApiEnabled::class, RequiresSecretToken::class])->group(function () {
-    Route::get('health', Spatie\Health\Http\Controllers\HealthCheckJsonResultsController::class);
 });
 
 /*
@@ -50,6 +39,18 @@ Route::middleware([EnsureApiEnabled::class, LogsApiRequests::class, Authenticate
         Route::get('me/tokens/{token}', [AccessTokenApiController::class, 'show']);
         Route::delete('me/tokens/{token}', [AccessTokenApiController::class, 'destroy']);
     });
+});
+
+/*
+|--------------------------------------------------------------------------
+| Health Check Routes
+|--------------------------------------------------------------------------
+| Protected by a secret token (X-Secret-Token header) rather than Bearer
+| token authentication. Set HEALTH_SECRET_TOKEN in your .env file.
+*/
+
+Route::middleware([EnsureApiEnabled::class, RequiresSecretToken::class])->group(function () {
+    Route::get('health', HealthCheckJsonResultsController::class);
 });
 
 /*
