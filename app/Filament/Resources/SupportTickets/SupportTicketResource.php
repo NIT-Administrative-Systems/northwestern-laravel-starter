@@ -96,13 +96,19 @@ class SupportTicketResource extends Resource
     /** @return Builder<SupportTicket> */
     public static function getGlobalSearchEloquentQuery(): Builder
     {
-        return parent::getGlobalSearchEloquentQuery()->with('user');
+        /** @var Builder<SupportTicket> $query */
+        $query = parent::getGlobalSearchEloquentQuery();
+
+        return $query->with('user');
     }
 
     /** @return Builder<SupportTicket> */
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->with('user');
+        /** @var Builder<SupportTicket> $query */
+        $query = parent::getEloquentQuery();
+
+        return $query->with('user');
     }
 
     /** @return array<string, PageRegistration> */
