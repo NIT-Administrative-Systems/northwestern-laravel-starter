@@ -1,0 +1,159 @@
+name: Smoke Test
+run-name: "Smoke Test ${{ inputs.version || github.event.release.tag_name || 'latest' }}"
+
+env:
+  NODE_VERSION: '25'
+  PNPM_VERSION: '10.x.x'
+  PHP_VERSION: '8.4'
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to test (e.g., v1.7.0). Defaults to latest release."
+        required: false
+        type: string
+
+jobs:
+  create-project:
+    name: composer create-project
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: root
+          POSTGRES_DB: root
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 3s --health-timeout 3s --health-retries 5
+
+    steps:
+      - name: 🔢 Determine version
+        id: version
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          INPUT_VERSION: ${{ inputs.version }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          if [ "$EVENT_NAME" = "release" ]; then
+            VERSION="$RELEASE_TAG"
+          elif [ -n "$INPUT_VERSION" ]; then
+            VERSION="$INPUT_VERSION"
+          else
+            VERSION=$(gh api "repos/$GH_REPO/releases/latest" --jq '.tag_name')
+          fi
+
+          echo "tag=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "composer=${VERSION#v}" >> "$GITHUB_OUTPUT"
+          echo "Testing version: $VERSION (composer: ${VERSION#v})"
+
+      - name: 🐘 Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: >-
+            ctype, curl, dom, fileinfo, filter, hash, iconv, intl, json, libxml,
+            mbstring, openssl, pcre, pdo, pdo_pgsql, phar, reflection, session,
+            simplexml, sodium, tokenizer, xml, xmlreader, xmlwriter, zip
+          ini-values: memory_limit=-1
+
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: 📦 composer create-project
+        env:
+          VERSION: ${{ steps.version.outputs.composer }}
+        run: |
+          composer create-project \
+            northwestern-sysdev/northwestern-laravel-starter \
+            test-project \
+            "$VERSION" \
+            --prefer-dist \
+            --no-interaction
+
+      - name: ✅ Validate post-install hooks
+        working-directory: test-project
+        env:
+          VERSION: ${{ steps.version.outputs.tag }}
+        run: |
+          echo "--- Checking .env exists (post-root-package-install) ---"
+          test -f .env || { echo "::error::.env file not created"; exit 1; }
+
+          echo "--- Checking APP_KEY was generated (post-create-project-cmd) ---"
+          grep -q "^APP_KEY=base64:" .env || { echo "::error::APP_KEY not generated"; exit 1; }
+
+          echo "--- Checking .starter-version.yaml exists and matches release ---"
+          test -f .starter-version.yaml || { echo "::error::.starter-version.yaml not found"; exit 1; }
+          grep -q "version: $VERSION" .starter-version.yaml || { echo "::error::.starter-version.yaml does not contain $VERSION"; exit 1; }
+
+          echo "--- Validating composer.json ---"
+          composer validate --strict
+
+          echo "All post-install hook validations passed."
+
+      - name: ⚙️ Configure CI environment
+        working-directory: test-project
+        run: |
+          cp .env.ci .env
+          php artisan key:generate
+
+      - name: 🗄️ Run migrations
+        working-directory: test-project
+        run: php artisan migrate --force
+
+      - name: 🌱 Run seeders
+        working-directory: test-project
+        run: php artisan db:seed --force
+
+      - name: 💾 Install pnpm dependencies
+        working-directory: test-project
+        run: pnpm install --frozen-lockfile
+
+      - name: 🏗️ Build frontend assets
+        working-directory: test-project
+        run: pnpm build
+
+      - name: 🚀 Boot application
+        working-directory: test-project
+        run: |
+          php artisan serve --port=8000 &
+
+          echo "Waiting for server..."
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:8000 > /dev/null 2>&1; then
+              echo "Server is ready."
+              break
+            fi
+            sleep 1
+          done
+
+          echo "--- Verifying HTTP 200 response ---"
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000)
+          if [ "$HTTP_STATUS" -ne 200 ]; then
+            echo "::error::Expected HTTP 200, got $HTTP_STATUS"
+            exit 1
+          fi
+          echo "Application boots successfully (HTTP $HTTP_STATUS)."
+
+      - name: 🧪 Run unit tests
+        working-directory: test-project
+        run: php artisan test
+
+      - name: 📜 Dump Laravel logs
+        if: failure()
+        working-directory: test-project
+        run: cat storage/logs/laravel.log 2>/dev/null || echo "No Laravel log file found."
