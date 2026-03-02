@@ -30,6 +30,11 @@ Route::prefix('auth')->group(function () {
             ->withoutMiddleware([VerifyCsrfToken::class]);
         Route::get('oauth-logout', [Controllers\WebSSOController::class, 'oauthLogout'])->name('login-oauth-logout');
     });
+
+    Route::prefix('websso')->group(function () {
+        Route::get('login', [Controllers\WebSSOController::class, 'login'])->name('login-websso');
+        Route::get('logout', [Controllers\WebSSOController::class, 'logout'])->name('login-websso-logout');
+    });
 });
 
 Route::post('/impersonate/take/{id}/{guardName?}', [Controllers\ImpersonationController::class, 'take'])->middleware('throttle:auth:impersonate')->name('impersonate');

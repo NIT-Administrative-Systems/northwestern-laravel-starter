@@ -1,15 +1,18 @@
 ---
 title: WebSSO / Entra ID
-description: Single sign-on authentication via Microsoft Entra ID, with support for other providers through the laravel-soa package
+description: Single sign-on authentication via Microsoft Entra ID or Online Passport (agentless WebSSO), auto-detected from credentials
 sidebar:
     order: 2
 ---
 
 import { Aside, Steps } from '@astrojs/starlight/components';
 
-Northwestern users authenticate via single sign-on. The starter ships with **Microsoft Entra ID** (formerly Azure AD) configured by default, using the [`northwestern-sysdev/laravel-soa`](https://github.com/NIT-Administrative-Systems/SysDev-laravel-soa) package's `WebSSOAuthentication` trait.
+Northwestern users authenticate via single sign-on. The starter supports two SSO providers through the [`northwestern-sysdev/laravel-soa`](https://github.com/NIT-Administrative-Systems/SysDev-laravel-soa) package's `WebSSOAuthentication` trait:
 
-The `laravel-soa` package also supports **Online Passport** (Northwestern's agentless WebSSO via OpenAM/ForgeRock) as an alternative authentication method. Both can coexist in the same application.
+- **Microsoft Entra ID** (formerly Azure AD) — OAuth2 authorization code flow directly to Microsoft
+- **Online Passport** (agentless WebSSO) — Cookie-based SSO via OpenAM/ForgeRock, validated through Apigee
+
+The starter **auto-detects** which provider to use based on your credentials. If a `WEBSSO_API_KEY` is set or `WEBSSO_STRATEGY` is `forgerock-direct`, the starter routes login/logout through Online Passport. Otherwise, it defaults to Entra ID. Only one provider is active at a time.
 
 For a higher-level overview of all authentication methods, see the [Authentication](/features/authentication/) documentation.
 
@@ -39,9 +42,37 @@ For a higher-level overview of all authentication methods, see the [Authenticati
 
 </Steps>
 
+## How It Works (Online Passport)
+
+<Steps>
+
+1. **User clicks "Sign in with NetID"**
+
+   The application redirects to ForgeRock's login page via `WebSSOController@login`. The user is sent to Northwestern's Online Passport login portal.
+
+2. **User authenticates with ForgeRock**
+
+   User enters their NetID credentials (and completes MFA if Duo is enabled).
+
+3. **Cookie validation**
+
+   After authentication, ForgeRock sets a `nusso` session cookie. The `laravel-soa` package validates this cookie by calling Northwestern's agentless WebSSO API (via Apigee or directly against ForgeRock, depending on the configured strategy).
+
+4. **Directory Search lookup**
+
+   `WebSSOController::findUserByNetID()` calls `FindOrUpdateUserFromDirectory` to provision or update the user — identical to the Entra ID flow.
+
+5. **Session established**
+
+   The `authenticated()` hook regenerates the session and CSRF token, creates a `UserLoginRecord` for audit purposes, and logs the user in.
+
+</Steps>
+
 ---
 
 ## Routes
+
+### Entra ID Routes
 
 | Method | URI | Controller | Name |
 |--------|-----|------------|------|
@@ -49,14 +80,27 @@ For a higher-level overview of all authentication methods, see the [Authenticati
 | `POST` | `/auth/azure-ad/callback` | `WebSSOController@oauthCallback` | — |
 | `GET` | `/auth/azure-ad/oauth-logout` | `WebSSOController@oauthLogout` | `login-oauth-logout` |
 
+### Online Passport Routes
+
+| Method | URI | Controller | Name |
+|--------|-----|------------|------|
+| `GET` | `/auth/websso/login` | `WebSSOController@login` | `login-websso` |
+| `GET` | `/auth/websso/logout` | `WebSSOController@logout` | `login-websso-logout` |
+
 ---
 
 ## Logout
+
+### Entra ID Logout
 
 The `oauthLogout()` method handles SSO session cleanup:
 
 - **Production** — Delegates to the `laravel-soa` trait's `oauthLogout()` method, which redirects to Entra ID's logout endpoint. The local session is cleared afterward.
 - **CI environment** — Short-circuits the Entra redirect and performs a local-only logout to avoid external service dependencies in CI.
+
+### Online Passport Logout
+
+The `logout()` method (from the `WebSSOAuthentication` trait) redirects the user to ForgeRock's logout endpoint to clear the `nusso` session cookie. The local session is invalidated before the redirect.
 
 ---
 
@@ -89,11 +133,9 @@ Entra ID requires registering the application in Azure's control panel. You'll n
 
 ---
 
-## Alternative: Online Passport (Agentless WebSSO)
+## Online Passport Configuration
 
-The `laravel-soa` package also supports Northwestern's **Online Passport** authentication, which uses OpenAM/ForgeRock for cookie-based SSO. This is the agentless WebSSO flow where session cookie validation is proxied through Northwestern's Apigee gateway.
-
-Unlike the Entra ID OAuth2 flow (which goes directly to Microsoft), the Online Passport flow validates a `nusso` cookie via Apigee's agentless WebSSO API endpoint. Access to this API requires an Apigee API key, requested through Northwestern's [API Service Registry](https://apiserviceregistry.northwestern.edu/).
+Setting `WEBSSO_API_KEY` (or using `WEBSSO_STRATEGY=forgerock-direct`) switches the starter from Entra ID to Online Passport. The login and logout buttons will automatically route through ForgeRock instead of Microsoft.
 
 ```bash
 # .env — Online Passport / Agentless WebSSO settings

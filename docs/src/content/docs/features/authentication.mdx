@@ -12,12 +12,12 @@ The Northwestern Laravel Starter provides a flexible, multi-method authenticatio
 ## Authentication Methods
 
 <CardGrid>
-  <Card title="Entra ID" icon="approve-check">
-    **Northwestern Single Sign-On**
+  <Card title="NetID Single Sign-On" icon="approve-check">
+    **Northwestern SSO (Entra ID or Online Passport)**
 
     Primary authentication method for Northwestern users via NetID.
 
-    - Integrated with Northwestern's identity provider
+    - Entra ID (OAuth2) or Online Passport (cookie-based)
     - Multi-factor authentication support
     - Automatic user provisioning
     - Session-based authentication
@@ -47,9 +47,9 @@ The Northwestern Laravel Starter provides a flexible, multi-method authenticatio
 
 ---
 
-## Entra ID Authentication
+## NetID Authentication
 
-Northwestern users authenticate via single sign-on using their NetID credentials.
+Northwestern users authenticate via single sign-on using their NetID credentials. The starter supports two SSO providers — **Microsoft Entra ID** (OAuth2) and **Online Passport** (agentless WebSSO via ForgeRock) — and auto-detects which one to use based on your configured credentials. See the [WebSSO / Entra ID](/northwestern-integrations/websso/) documentation for provider-specific details.
 
 ### How It Works
 

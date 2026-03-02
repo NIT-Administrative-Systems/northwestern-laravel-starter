@@ -37,7 +37,7 @@ class LogoutSelectionControllerTest extends TestCase
         $this->assertNotEquals($oldSessionId, session()->getId());
     }
 
-    public function test_redirects_oauth_user_to_oauth_logout(): void
+    public function test_redirects_sso_user_to_entra_logout_by_default(): void
     {
         $user = User::factory()->create();
 
@@ -46,6 +46,34 @@ class LogoutSelectionControllerTest extends TestCase
         $response = $this->post(route('logout'));
 
         $response->assertRedirect(route('login-oauth-logout'));
+        $this->assertAuthenticatedAs($user);
+    }
+
+    public function test_redirects_sso_user_to_websso_logout_when_api_key_set(): void
+    {
+        config(['nusoa.sso.apigeeApiKey' => 'test-api-key']);
+
+        $user = User::factory()->create();
+
+        $this->actingAs($user);
+
+        $response = $this->post(route('logout'));
+
+        $response->assertRedirect(route('login-websso-logout'));
+        $this->assertAuthenticatedAs($user);
+    }
+
+    public function test_redirects_sso_user_to_websso_logout_when_forgerock_direct(): void
+    {
+        config(['nusoa.sso.strategy' => 'forgerock-direct']);
+
+        $user = User::factory()->create();
+
+        $this->actingAs($user);
+
+        $response = $this->post(route('logout'));
+
+        $response->assertRedirect(route('login-websso-logout'));
         $this->assertAuthenticatedAs($user);
     }
 }
