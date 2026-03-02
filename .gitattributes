@@ -10,3 +10,4 @@
 *.neon.dist linguist-language=neon
 
 .github/workflows/release.yml             export-ignore
+.github/workflows/smoke-test.yml          export-ignore
