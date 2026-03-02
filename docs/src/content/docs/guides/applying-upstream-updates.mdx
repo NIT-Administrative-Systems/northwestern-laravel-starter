@@ -1,0 +1,110 @@
+---
+title: Applying Upstream Updates
+description: How to pull in changes from the Northwestern Laravel Starter after your project has diverged
+sidebar:
+    order: 3
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+
+After running `composer create-project`, your application is an independent Git repository with no connection to the starter. When the starter ships fixes or new features, you can optionally cherry-pick those commits into your project.
+
+## Knowing When Updates Are Available
+
+The `starter:check` command compares the version in your `.starter-version.yaml` file against GitHub releases and notifies you when newer versions exist. It runs automatically during `composer install` and `composer update` in local environments, so you'll be notified without any extra effort.
+
+If you want to check manually:
+
+```bash
+php artisan starter:check
+```
+
+When updates are available, the command shows each release with its date, a link to the release notes, and a comparison URL so you can review what changed.
+
+<Aside>
+After applying updates (or deciding to skip them), update the `version` in `.starter-version.yaml` to the latest release. This suppresses the notification until the next release.
+</Aside>
+
+## Setup
+
+Add the starter as a Git remote (one-time):
+
+```bash
+git remote add starter https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter.git
+git fetch starter
+```
+
+## Cherry-Picking Commits
+
+<Steps>
+
+1. **Fetch the latest starter commits**
+
+   ```bash
+   git fetch starter
+   ```
+
+2. **Review what's changed**
+
+   Browse the starter's commit log to find the commits you want:
+
+   ```bash
+   git log starter/main --oneline
+   ```
+
+3. **Cherry-pick specific commits**
+
+   Apply individual commits to your current branch:
+
+   ```bash
+   git cherry-pick <commit-hash>
+   ```
+
+   Or apply a range of commits:
+
+   ```bash
+   git cherry-pick <oldest-hash>^..<newest-hash>
+   ```
+
+4. **Resolve any conflicts**
+
+   If the cherry-pick encounters conflicts (because your project has diverged), Git will pause and let you resolve them:
+
+   ```bash
+   # Review conflicts
+   git status
+
+   # Fix conflicting files, then continue
+   git add .
+   git cherry-pick --continue
+   ```
+
+   If a commit doesn't apply cleanly and isn't worth the effort, you can skip it:
+
+   ```bash
+   git cherry-pick --abort
+   ```
+
+</Steps>
+
+## Tips
+
+- **Review the release notes first.** The comparison URL from `starter:check` shows exactly what changed. Some commits may depend on others or require configuration changes.
+- **Cherry-pick in order** when applying multiple related commits. Applying them out of sequence increases the likelihood of conflicts.
+- **Update `.starter-version.yaml`** after you're done so `starter:check` stops notifying you about releases you've already handled.
+
+<Aside type="tip">
+If a cherry-pick produces too many conflicts, it may be easier to read the commit diff (`git show <hash>`) and apply the changes manually. This is common when your project has significantly restructured a file the starter also changed.
+</Aside>
+
+## Alternative: Patch Files
+
+If you prefer not to add the starter as a remote, you can apply changes from patch files:
+
+```bash
+# In a clone of the starter repo, generate patches
+git format-patch <from>..<to> --stdout > upstream-fix.patch
+
+# In your project repo, apply the patch
+git am upstream-fix.patch
+```
