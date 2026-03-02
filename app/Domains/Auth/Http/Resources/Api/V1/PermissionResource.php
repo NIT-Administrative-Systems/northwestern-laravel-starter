@@ -40,8 +40,8 @@ use OpenApi\Attributes as OA;
             property: 'scope',
             description: 'Whether this permission applies system-wide or only to the authenticated user\'s context.',
             type: 'string',
-            enum: [PermissionScopeEnum::SYSTEM_WIDE->value, PermissionScopeEnum::PERSONAL->value],
-            example: PermissionScopeEnum::SYSTEM_WIDE->value
+            example: PermissionScopeEnum::SYSTEM_WIDE->value,
+            enum: [PermissionScopeEnum::SYSTEM_WIDE->value, PermissionScopeEnum::PERSONAL->value]
         ),
         new OA\Property(property: 'system_managed', type: 'boolean', example: false),
         new OA\Property(

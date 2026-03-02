@@ -25,8 +25,8 @@ use OpenApi\Attributes as OA;
             property: 'auth_type',
             description: 'How the user authenticates to the application.',
             type: 'string',
-            enum: [AuthTypeEnum::SSO->value, AuthTypeEnum::LOCAL->value, AuthTypeEnum::API->value],
-            example: AuthTypeEnum::API->value
+            example: AuthTypeEnum::API->value,
+            enum: [AuthTypeEnum::SSO->value, AuthTypeEnum::LOCAL->value, AuthTypeEnum::API->value]
         ),
         new OA\Property(property: 'first_name', type: 'string', example: 'NUIT'),
         new OA\Property(property: 'last_name', type: 'string', example: 'API'),
@@ -36,9 +36,9 @@ use OpenApi\Attributes as OA;
             property: 'primary_affiliation',
             description: 'Primary Northwestern affiliation for the user.',
             type: 'string',
-            enum: [AffiliationEnum::STUDENT->value, AffiliationEnum::FACULTY->value, AffiliationEnum::STAFF->value, AffiliationEnum::AFFILIATE->value, AffiliationEnum::OTHER->value],
             example: AffiliationEnum::OTHER->value,
-            nullable: true
+            nullable: true,
+            enum: [AffiliationEnum::STUDENT->value, AffiliationEnum::FACULTY->value, AffiliationEnum::STAFF->value, AffiliationEnum::AFFILIATE->value, AffiliationEnum::OTHER->value]
         ),
         new OA\Property(
             property: 'departments',
