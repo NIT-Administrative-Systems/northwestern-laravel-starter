@@ -22,8 +22,8 @@ use OpenApi\Attributes as OA;
             property: 'status',
             description: 'Operational status of the token, derived from revocation and expiration timestamps.',
             type: 'string',
-            enum: ['active', 'expired', 'revoked'],
-            example: 'active'
+            example: 'active',
+            enum: ['active', 'expired', 'revoked']
         ),
         new OA\Property(
             property: 'last_used_at',

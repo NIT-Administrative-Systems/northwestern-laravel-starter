@@ -89,6 +89,8 @@ class AuditsTable
                     ->copyable()
                     ->sortable(),
                 TextColumn::make('url')
+                    ->label('URL')
+                    ->fontFamily(FontFamily::Mono)
                     ->formatStateUsing(fn ($state) => str_replace(config('app.url'), '', $state))
                     ->limit(50)
                     ->searchable(),
