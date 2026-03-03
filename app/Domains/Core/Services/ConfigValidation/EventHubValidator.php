@@ -12,6 +12,8 @@ use Illuminate\Support\Collection;
  *
  * When the application is configured to use the real EventHub API,
  * this validator ensures all required credentials are present.
+ * When no EventHub credentials are configured at all, the validator
+ * reports as skipped since EventHub is an optional integration.
  */
 class EventHubValidator implements ConfigValidator
 {
@@ -19,6 +21,8 @@ class EventHubValidator implements ConfigValidator
     protected Collection $missingVariables;
 
     protected bool $isMocked = false;
+
+    protected bool $isSkipped = false;
 
     public function name(): string
     {
@@ -39,6 +43,14 @@ class EventHubValidator implements ConfigValidator
             'EVENT_HUB_HMAC_VERIFICATION_SHARED_SECRET' => config('nusoa.eventHub.hmacVerificationSharedSecret'),
         ]);
 
+        $allBlank = $variables->every(fn ($value): bool => blank($value));
+
+        if ($allBlank) {
+            $this->isSkipped = true;
+
+            return true;
+        }
+
         $this->missingVariables = $variables
             ->filter(fn ($value): bool => blank($value))
             ->keys();
@@ -52,6 +64,10 @@ class EventHubValidator implements ConfigValidator
             return 'EventHub is running in <comment>mock mode</comment>';
         }
 
+        if ($this->isSkipped) {
+            return 'EventHub is <comment>not configured</comment> (optional)';
+        }
+
         $baseUrl = config('nusoa.eventHub.baseUrl');
 
         return "EventHub configured for <comment>{$baseUrl}</comment>";
@@ -61,7 +77,7 @@ class EventHubValidator implements ConfigValidator
     {
         $count = $this->missingVariables->count();
 
-        return "{$count} required EventHub " . ($count === 1 ? 'variable is' : 'variables are') . ' not set';
+        return "{$count} required EventHub " . ($count === 1 ? 'variable is' : 'variables are') . ' not set (partial configuration detected)';
     }
 
     /** @return list<string> */
@@ -72,6 +88,7 @@ class EventHubValidator implements ConfigValidator
             ->all());
 
         $hints[] = 'Or set <comment>EVENT_HUB_MOCK_ENABLED=true</comment> for local development';
+        $hints[] = 'Or remove all EVENT_HUB_* variables if EventHub is not needed';
 
         return $hints;
     }

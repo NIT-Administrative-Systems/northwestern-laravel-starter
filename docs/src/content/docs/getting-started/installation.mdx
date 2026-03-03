@@ -5,7 +5,7 @@ sidebar:
     order: 3
 ---
 
-import { Steps } from '@astrojs/starlight/components';
+import { Steps, Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 
 ## Initial Setup
 
@@ -62,7 +62,6 @@ The application expects specific services to exist before you can begin local de
         DB_DATABASE=your_project_name_local
         DB_PHPUNIT_DATABASE=your_project_name_test
         AWS_BUCKET=your-project-name
-        AZURE_CLIENT_ID=your-azure-entra-id-client-id
         ```
 
         Ideally, these changes should be committed to your repository to serve as the base configuration for other developers.
@@ -99,14 +98,42 @@ pnpm build
 
 ### 5. Environment Configuration
 
-In your **LOCAL** `.env` file, the following environment variables must be set:
+In your **LOCAL** `.env` file, configure credentials depending on your authentication strategy. See the [WebSSO / Entra ID](/northwestern-integrations/websso/) documentation for full details on each provider.
 
-```bash
-// .env
-AZURE_CLIENT_SECRET=your-value-here
-DIRECTORY_SEARCH_API_KEY=your-value-here
-EVENT_HUB_API_KEY=your-value-here # Only if the EventHub integration is needed
-```
+<Tabs>
+  <TabItem label="Entra ID" icon="seti:lock">
+    If your application uses **Microsoft Entra ID** (the default):
+
+    ```bash
+    // .env
+    AZURE_CLIENT_ID=your-client-id
+    AZURE_CLIENT_SECRET=your-client-secret
+    DIRECTORY_SEARCH_API_KEY=your-value-here
+    EVENT_HUB_API_KEY=your-value-here # Only if the EventHub integration is needed
+    ```
+
+    <Aside type="tip">
+    `AZURE_CLIENT_ID` can also be set in `.env.example` as a shared default for your team.
+    </Aside>
+  </TabItem>
+
+  <TabItem label="Online Passport (WebSSO)" icon="seti:lock">
+    If your application uses **Online Passport** (agentless WebSSO):
+
+    ```bash
+    // .env
+    WEBSSO_URL_BASE=https://prd-nusso.it.northwestern.edu
+    WEBSSO_API_URL_BASE=https://northwestern-prod.apigee.net/agentless-websso
+    WEBSSO_API_KEY=your-api-key
+    DIRECTORY_SEARCH_API_KEY=your-value-here
+    EVENT_HUB_API_KEY=your-value-here # Only if the EventHub integration is needed
+    ```
+
+    <Aside type="tip">
+    Setting `WEBSSO_API_KEY` automatically switches the starter from Entra ID to Online Passport. See the [WebSSO / Entra ID](/northwestern-integrations/websso/#online-passport-configuration) docs for additional configuration options like `WEBSSO_STRATEGY` and `DUO_ENABLED`.
+    </Aside>
+  </TabItem>
+</Tabs>
 
 ### 6. Validate Configuration
 
