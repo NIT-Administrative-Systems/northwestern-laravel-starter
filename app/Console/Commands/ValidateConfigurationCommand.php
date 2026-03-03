@@ -7,10 +7,11 @@ namespace App\Console\Commands;
 use App\Domains\Core\Contracts\ConfigValidator;
 use App\Domains\Core\Services\ConfigValidation\AppKeyValidator;
 use App\Domains\Core\Services\ConfigValidation\DatabaseValidator;
-use App\Domains\Core\Services\ConfigValidation\EnvironmentVariablesValidator;
+use App\Domains\Core\Services\ConfigValidation\DirectorySearchValidator;
 use App\Domains\Core\Services\ConfigValidation\EventHubValidator;
 use App\Domains\Core\Services\ConfigValidation\FilesystemValidator;
 use App\Domains\Core\Services\ConfigValidation\QueueValidator;
+use App\Domains\Core\Services\ConfigValidation\SSOValidator;
 use Illuminate\Console\Command;
 use Throwable;
 
@@ -45,7 +46,8 @@ class ValidateConfigurationCommand extends Command
     {
         return [
             new AppKeyValidator(),
-            new EnvironmentVariablesValidator(),
+            new SSOValidator(),
+            new DirectorySearchValidator(),
             new DatabaseValidator(),
             new QueueValidator(),
             new FilesystemValidator(),
