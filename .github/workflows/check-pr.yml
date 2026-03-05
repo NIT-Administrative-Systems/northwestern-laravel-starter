@@ -361,7 +361,7 @@ jobs:
           retention-days: 1
 
   publish-test-results:
-    name: 📊 Publish Test Results
+    name: 📊 Unit Test Results
     needs: unit-tests
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -376,11 +376,25 @@ jobs:
           merge-multiple: true
 
       - name: 📊 Publish Unit Test Results
+        id: test-results
         uses: EnricoMi/publish-unit-test-result-action@v2
         with:
           check_name: "📊 PHPUnit Test Results"
           github_token: ${{ secrets.GITHUB_TOKEN }}
           files: "artifacts/**/*.xml"
+
+      # This will cause "📊 Unit Test Results" to fail if there are failures from any of the test shards.
+      #
+      # This is the item that should be required in the protection ruleset, instead of the "📊 PHPUnit Test Results"
+      # check created by the prior step. Checks created this way may be attached to a random workflow that runs around
+      # the same time -- like the Copilot Review workflow. Then it won't count for the ruleset and PRs will be stuck
+      # unmergeable.
+      #
+      # See <https://github.com/EnricoMi/publish-unit-test-result-action/issues/12>.
+      - name: 📉 Fail on Errors
+        if: ${{ fromJSON( steps.test-results.outputs.json ).conclusion != 'success' }}
+        run: |
+          false
 
   coverage-report:
     name: 📈 Coverage Report
