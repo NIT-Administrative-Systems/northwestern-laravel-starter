@@ -93,6 +93,8 @@ class AppServiceProvider extends ServiceProvider
             RequestException::dontTruncate();
         }
 
-        Http::preventStrayRequests();
+        if (App::environment(['ci', 'testing'])) {
+            Http::preventStrayRequests();
+        }
     }
 }
