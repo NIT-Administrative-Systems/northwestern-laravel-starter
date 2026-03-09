@@ -113,6 +113,7 @@
             <file>app/Providers/ViewServiceProvider.php</file>
 
             <!-- Console commands -->
+            <file>app/Console/Commands/ForceDetachRoleCommand.php</file>
             <file>app/Console/Commands/RebuildDatabaseCommand.php</file>
             <file>app/Console/Commands/MakeChangelogCommand.php</file>
             <file>app/Console/Commands/TestNetIdUpdateCommand.php</file>

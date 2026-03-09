@@ -4,14 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Commands;
 
-use App\Console\Commands\ForceDetachRoleCommand;
 use App\Domains\Auth\Enums\RoleModificationOriginEnum;
 use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\User;
-use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
-#[CoversClass(ForceDetachRoleCommand::class)]
 class ForceDetachRoleCommandTest extends TestCase
 {
     public function test_fails_when_user_not_found(): void
