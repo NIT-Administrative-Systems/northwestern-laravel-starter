@@ -44,6 +44,7 @@ class ApiRequestLogsTable
                 TextColumn::make('user.username')
                     ->label('User')
                     ->fontFamily(FontFamily::Mono)
+                    ->placeholder('Unauthenticated')
                     ->searchable()
                     ->hiddenOn(ApiRequestLogsRelationManager::class),
 
@@ -207,8 +208,8 @@ class ApiRequestLogsTable
             ->recordActions([
                 ViewAction::make()
                     ->label('View User')
-                    ->url(fn (ApiRequestLog $record) => UserResource::getUrl('view', ['record' => $record->user]))
-                    ->hidden($isRelationManager),
+                    ->url(fn (ApiRequestLog $record) => $record->user_id ? UserResource::getUrl('view', ['record' => $record->user]) : null)
+                    ->hidden(fn (ApiRequestLog $record) => $isRelationManager || ! $record->user_id),
             ])
             ->toolbarActions([
                 ExportAction::make()
