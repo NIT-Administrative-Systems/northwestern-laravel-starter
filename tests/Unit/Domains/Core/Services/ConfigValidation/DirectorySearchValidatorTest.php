@@ -5,10 +5,8 @@ declare(strict_types=1);
 namespace Tests\Unit\Domains\Core\Services\ConfigValidation;
 
 use App\Domains\Core\Services\ConfigValidation\DirectorySearchValidator;
-use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
-#[CoversClass(DirectorySearchValidator::class)]
 class DirectorySearchValidatorTest extends TestCase
 {
     public function test_passes_when_api_key_is_configured(): void

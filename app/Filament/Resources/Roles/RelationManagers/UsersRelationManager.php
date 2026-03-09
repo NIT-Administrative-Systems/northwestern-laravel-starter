@@ -23,6 +23,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\HtmlString;
 
 class UsersRelationManager extends RelationManager
@@ -108,11 +109,11 @@ class UsersRelationManager extends RelationManager
             ->modifyQueryUsing(fn (Builder $query) => $query->with('roles'))
             ->headerActions([
                 AttachAction::make()
-                    ->visible(function () {
+                    ->authorize(function () {
                         /** @var Role $role */
                         $role = $this->getOwnerRecord();
 
-                        return $role->canBeManaged();
+                        return ! $role->isAssignmentLocked() && Gate::allows('attachUser', $role);
                     })
                     ->label('Assign User')
                     ->color('primary')
@@ -172,8 +173,6 @@ class UsersRelationManager extends RelationManager
                             return;
                         }
 
-                        abort_unless($role->canBeManaged(), 403, 'You are not authorized to assign users to this role.');
-
                         if ($role->role_type->slug === RoleTypeEnum::API_INTEGRATION && ! $user->is_api_user) {
                             Notification::make()
                                 ->title('Invalid user assignment')
@@ -193,11 +192,11 @@ class UsersRelationManager extends RelationManager
             ->recordUrl(fn (User $record) => UserResource::getUrl('view', ['record' => $record]))
             ->recordActions([
                 DetachAction::make()
-                    ->visible(function () {
+                    ->authorize(function () {
                         /** @var Role $role */
                         $role = $this->getOwnerRecord();
 
-                        return $role->canBeManaged();
+                        return ! $role->isAssignmentLocked() && Gate::allows('detachUser', $role);
                     })
                     ->button()
                     ->outlined()
@@ -214,8 +213,6 @@ class UsersRelationManager extends RelationManager
                     ->action(function (User $record, RelationManager $livewire): void {
                         /** @var Role $role */
                         $role = $livewire->getOwnerRecord();
-
-                        abort_unless($role->canBeManaged(), 403, 'You are not authorized to remove users from this role.');
 
                         $record->removeRoleWithAudit($role, RoleModificationOriginEnum::UI_ACTION);
                     })

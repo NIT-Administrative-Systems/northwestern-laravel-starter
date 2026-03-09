@@ -5,10 +5,8 @@ declare(strict_types=1);
 namespace Tests\Unit\Domains\Core\Services\ConfigValidation;
 
 use App\Domains\Core\Services\ConfigValidation\EventHubValidator;
-use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
-#[CoversClass(EventHubValidator::class)]
 class EventHubValidatorTest extends TestCase
 {
     public function test_passes_when_mock_mode_is_enabled(): void

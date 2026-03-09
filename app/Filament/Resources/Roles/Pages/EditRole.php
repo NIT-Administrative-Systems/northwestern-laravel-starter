@@ -11,6 +11,7 @@ use App\Domains\User\Models\User;
 use App\Filament\Resources\Roles\RoleResource;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 
@@ -21,19 +22,11 @@ class EditRole extends EditRecord
 {
     protected static string $resource = RoleResource::class;
 
-    public function mount(int|string $record): void
-    {
-        parent::mount($record);
-
-        abort_if($this->record->isSystemManagedType(), 403, 'System Managed roles cannot be edited.');
-    }
-
     protected function getHeaderActions(): array
     {
         return [
             DeleteAction::make()
-                ->authorize(PermissionEnum::DELETE_ROLES)
-                ->hidden(fn () => $this->record->isSystemManagedType())
+                ->authorize(fn () => ! $this->record->isAssignmentLocked() && Gate::allows('delete', $this->record))
                 ->modalDescription(function (Role $record): HtmlString {
                     $userCount = $record->users()->count();
 

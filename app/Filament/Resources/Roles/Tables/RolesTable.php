@@ -12,9 +12,12 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ExportAction;
 use Filament\Actions\ViewAction;
 use Filament\Support\Enums\FontWeight;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Gate;
 
 class RolesTable
 {
@@ -29,6 +32,13 @@ class RolesTable
                     ->label('Role Type')
                     ->badge()
                     ->searchable(),
+                IconColumn::make('assignment_locked')
+                    ->label('Assignment Locked')
+                    ->boolean()
+                    ->trueIcon(Heroicon::LockClosed)
+                    ->falseIcon('')
+                    ->trueColor('warning')
+                    ->tooltip(fn (Role $record) => $record->isAssignmentLocked() ? 'Assignment locked — managed programmatically' : null),
                 TextColumn::make('permissions_count')
                     ->label('Permissions')
                     ->badge()
@@ -88,13 +98,7 @@ class RolesTable
                             ! auth()->user()->hasPermissionTo(PermissionEnum::EDIT_ROLES);
                     }),
                 EditAction::make()
-                    ->visible(function ($record) {
-                        if ($record->isSystemManagedType()) {
-                            return false;
-                        }
-
-                        return auth()->user()->hasPermissionTo(PermissionEnum::EDIT_ROLES);
-                    }),
+                    ->authorize(fn (Role $record) => Gate::allows('update', $record)),
             ])
             ->toolbarActions([
                 ExportAction::make()

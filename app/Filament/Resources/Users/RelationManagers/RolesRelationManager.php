@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\HtmlString;
 
 class RolesRelationManager extends RelationManager
@@ -51,7 +52,7 @@ class RolesRelationManager extends RelationManager
             $user = $this->getOwnerRecord();
             $assignedRoleIds = $user->roles()->pluck('id')->toArray();
 
-            return Role::query()
+            return Role::assignable()
                 ->with('role_type')
                 ->whereNotIn('id', $assignedRoleIds)
                 ->when(
@@ -60,7 +61,7 @@ class RolesRelationManager extends RelationManager
                     fn ($query) => $query->whereHas('role_type', fn (\Illuminate\Contracts\Database\Query\Builder $q) => $q->where('slug', '!=', RoleTypeEnum::API_INTEGRATION))
                 )
                 ->get()
-                ->filter(fn (Role $role) => $role->canBeManaged());
+                ->filter(fn (Role $role) => Gate::allows('attachUser', $role));
         });
     }
 
@@ -138,8 +139,6 @@ class RolesRelationManager extends RelationManager
                             return;
                         }
 
-                        abort_unless($role->canBeManaged(), 403, 'You are not authorized to assign this role.');
-
                         // Validate that API roles can only be assigned to API users and vice versa
                         if ($role->role_type->slug === RoleTypeEnum::API_INTEGRATION && ! $user->is_api_user) {
                             Notification::make()
@@ -162,12 +161,10 @@ class RolesRelationManager extends RelationManager
                 DetachAction::make()
                     ->label('Remove')
                     ->modalHeading('Remove Role')
-                    ->visible(fn (Role $record) => $record->canBeManaged())
+                    ->authorize(fn (Role $record) => ! $record->isAssignmentLocked() && Gate::allows('detachUser', $record))
                     ->modalDescription(fn (Role $record) => 'Are you sure you want to remove the ' . $record->name . ' role from this user?')
                     ->modalSubmitActionLabel('Remove Role')
                     ->action(function (Role $record, RelationManager $livewire): void {
-                        abort_unless($record->canBeManaged(), 403, 'You are not authorized to remove this role.');
-
                         /** @var User $user */
                         $user = $livewire->getOwnerRecord();
                         $user->removeRoleWithAudit($record, RoleModificationOriginEnum::UI_ACTION);

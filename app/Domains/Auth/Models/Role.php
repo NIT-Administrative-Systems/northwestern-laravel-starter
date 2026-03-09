@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Domains\Auth\Models;
 
-use App\Domains\Auth\Enums\PermissionEnum;
 use App\Domains\Auth\Enums\RoleTypeEnum;
 use App\Domains\Core\Models\Concerns\Auditable as AuditableConcern;
 use App\Domains\User\Models\Concerns\AuditsPermissions;
 use App\Domains\User\Models\User;
 use Database\Factories\Domains\Auth\Models\RoleFactory;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -17,6 +18,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\Permission\Models\Role as SpatieRole;
 
+/**
+ * @property bool $assignment_locked
+ */
 class Role extends SpatieRole implements Auditable
 {
     /** @use HasFactory<RoleFactory> */
@@ -49,7 +53,7 @@ class Role extends SpatieRole implements Auditable
 
     /**
      * Determine if this role is a System Managed role type.
-     * System Managed roles not be editable through the UI.
+     * System Managed roles cannot be edited through the UI.
      */
     public function isSystemManagedType(): bool
     {
@@ -57,23 +61,20 @@ class Role extends SpatieRole implements Auditable
     }
 
     /**
-     * Determine if the given user can manage this role (assign/remove it from users).
-     *
-     * System Administrator roles require the MANAGE_ALL permission.
-     * All other roles require the ASSIGN_ROLES permission.
+     * Determine if this role has assignment locking enabled.
      */
-    public function canBeManaged(?User $user = null): bool
+    public function isAssignmentLocked(): bool
     {
-        $user ??= auth()->user();
+        return $this->assignment_locked === true;
+    }
 
-        if (! $user instanceof User) {
-            return false;
-        }
-
-        if ($this->isSystemManagedType()) {
-            return $user->hasPermissionTo(PermissionEnum::MANAGE_ALL);
-        }
-
-        return $user->hasPermissionTo(PermissionEnum::ASSIGN_ROLES);
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
+    #[Scope]
+    protected function assignable(Builder $query): Builder
+    {
+        return $query->where('assignment_locked', false);
     }
 }
