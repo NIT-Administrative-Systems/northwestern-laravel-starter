@@ -26,16 +26,29 @@ class ViewRole extends ViewRecord
         $schema = parent::form($schema);
         $components = $schema->getComponents();
 
-        // Add warning section for System Managed roles at the top
         if ($this->record->isSystemManagedType()) {
-            array_unshift($components, Section::make('System Managed Role')
+            array_unshift($components, Section::make('System Managed')
                 ->icon(Heroicon::OutlinedShieldExclamation)
                 ->iconColor('danger')
                 ->schema([
-                    TextEntry::make('warning')
+                    TextEntry::make('system_managed_warning')
                         ->hiddenLabel()
                         ->color('danger')
                         ->state('System Managed type roles are read-only and cannot be modified in the user interface.')
+                        ->columnSpanFull(),
+                ])
+                ->columnSpanFull());
+        }
+
+        if ($this->record->isAssignmentLocked()) {
+            array_unshift($components, Section::make('Assignment Locked')
+                ->icon(Heroicon::OutlinedLockClosed)
+                ->iconColor('warning')
+                ->schema([
+                    TextEntry::make('assignment_locked_warning')
+                        ->hiddenLabel()
+                        ->color('warning')
+                        ->state('This role\'s assignment is managed programmatically and cannot be changed through the admin panel.')
                         ->columnSpanFull(),
                 ])
                 ->columnSpanFull());

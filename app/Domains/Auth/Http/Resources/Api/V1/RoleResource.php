@@ -33,6 +33,7 @@ use OpenApi\Attributes as OA;
     properties: [
         new OA\Property(property: 'id', type: 'integer', format: 'int64', example: 4),
         new OA\Property(property: 'name', type: 'string', example: 'Content Manager'),
+        new OA\Property(property: 'assignment_locked', type: 'boolean', example: false),
         new OA\Property(
             property: 'role_type',
             ref: '#/components/schemas/RoleType',
@@ -80,6 +81,7 @@ class RoleResource extends JsonResource
         return [
             'id' => $this->getKey(),
             'name' => $this->name,
+            'assignment_locked' => $this->assignment_locked,
             'role_type' => $this->when(
                 $this->relationLoaded('role_type'),
                 fn () => [

@@ -51,6 +51,13 @@ class RoleFactory extends Factory
         return $this->forRoleType(RoleTypeEnum::SYSTEM_MANAGED);
     }
 
+    public function assignmentLocked(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'assignment_locked' => true,
+        ]);
+    }
+
     public function forRoleType(RoleTypeEnum $roleType): static
     {
         $name = fake()->unique()->slug() . '-' . $roleType->value;

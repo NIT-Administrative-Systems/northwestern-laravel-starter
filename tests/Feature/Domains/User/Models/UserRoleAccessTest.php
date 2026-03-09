@@ -10,11 +10,9 @@ use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\User;
 use Filament\Panel;
 use Mockery;
-use PHPUnit\Framework\Attributes\CoversClass;
 use ReflectionMethod;
 use Tests\TestCase;
 
-#[CoversClass(User::class)]
 class UserRoleAccessTest extends TestCase
 {
     public function test_assign_role_is_not_publicly_callable(): void

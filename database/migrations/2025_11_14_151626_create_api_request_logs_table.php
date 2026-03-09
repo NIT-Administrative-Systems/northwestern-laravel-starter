@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('api_request_logs', static function (Blueprint $table) {
             $table->id();
             $table->uuid('trace_id');
-            $table->foreignId('user_id');
+            $table->foreignId('user_id')->nullable();
             $table->foreignId('access_token_id')->nullable();
 
             $table->string('method', 10);

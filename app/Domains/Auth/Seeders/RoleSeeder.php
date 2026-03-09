@@ -38,6 +38,7 @@ class RoleSeeder extends Seeder implements IdempotentSeederInterface
             [
                 'name' => SystemRoleEnum::NORTHWESTERN_USER,
                 'role_type_id' => $systemManagedRoleId,
+                'assignment_locked' => true,
                 'permissions' => [
                     // Add permissions as needed
                 ],

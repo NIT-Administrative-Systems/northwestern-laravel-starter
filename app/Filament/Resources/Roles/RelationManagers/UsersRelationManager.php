@@ -23,6 +23,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\HtmlString;
 
 class UsersRelationManager extends RelationManager
@@ -108,11 +109,11 @@ class UsersRelationManager extends RelationManager
             ->modifyQueryUsing(fn (Builder $query) => $query->with('roles'))
             ->headerActions([
                 AttachAction::make()
-                    ->visible(function () {
+                    ->authorize(function () {
                         /** @var Role $role */
                         $role = $this->getOwnerRecord();
 
-                        return $role->canBeManaged();
+                        return ! $role->isAssignmentLocked() && Gate::allows('attachUser', $role);
                     })
                     ->label('Assign User')
                     ->color('primary')
@@ -172,7 +173,8 @@ class UsersRelationManager extends RelationManager
                             return;
                         }
 
-                        abort_unless($role->canBeManaged(), 403, 'You are not authorized to assign users to this role.');
+                        abort_if($role->isAssignmentLocked(), 403, 'This role is assignment-locked and cannot be assigned through the UI.');
+                        abort_unless(Gate::allows('attachUser', $role), 403, 'You are not authorized to assign users to this role.');
 
                         if ($role->role_type->slug === RoleTypeEnum::API_INTEGRATION && ! $user->is_api_user) {
                             Notification::make()
@@ -193,11 +195,11 @@ class UsersRelationManager extends RelationManager
             ->recordUrl(fn (User $record) => UserResource::getUrl('view', ['record' => $record]))
             ->recordActions([
                 DetachAction::make()
-                    ->visible(function () {
+                    ->authorize(function () {
                         /** @var Role $role */
                         $role = $this->getOwnerRecord();
 
-                        return $role->canBeManaged();
+                        return ! $role->isAssignmentLocked() && Gate::allows('detachUser', $role);
                     })
                     ->button()
                     ->outlined()
@@ -215,7 +217,8 @@ class UsersRelationManager extends RelationManager
                         /** @var Role $role */
                         $role = $livewire->getOwnerRecord();
 
-                        abort_unless($role->canBeManaged(), 403, 'You are not authorized to remove users from this role.');
+                        abort_if($role->isAssignmentLocked(), 403, 'This role is assignment-locked and cannot be removed through the UI.');
+                        abort_unless(Gate::allows('detachUser', $role), 403, 'You are not authorized to remove users from this role.');
 
                         $record->removeRoleWithAudit($role, RoleModificationOriginEnum::UI_ACTION);
                     })

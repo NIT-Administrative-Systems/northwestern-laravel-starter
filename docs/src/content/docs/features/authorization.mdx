@@ -38,7 +38,7 @@ Every role belongs to a **role type** that determines how it can be managed and 
 
 ### When to Use Each Type
 
-- **System Managed** — Reserved for roles the starter ships with. Their definitions (name, permissions) are managed by seeders and cannot be edited or deleted through the admin panel. However, users with `MANAGE_ALL` **can** assign and remove system-managed roles from users via the UI.
+- **System Managed** — Reserved for roles the starter ships with. Their definitions (name, permissions) are managed by seeders and cannot be edited or deleted through the admin panel. However, users with `MANAGE_ALL` **can** assign and remove system-managed roles from users via the UI (unless the role is also assignment-locked).
 - **Application Admin** — For roles that grant administrative capabilities within your application (e.g., "Department Manager", "Content Editor"). Created and managed by administrators in Filament.
 - **Application Role** — For standard user roles that grant specific feature access (e.g., "Report Viewer", "Data Entry"). The most common type you'll create.
 - **API Integration** — For API consumer roles. These can only be assigned to API users and only display API-relevant permissions in the role form.
@@ -49,10 +49,10 @@ Every role belongs to a **role type** that determines how it can be managed and 
 
 The starter ships with two system-managed roles, created by `RoleSeeder`:
 
-| Role | Permissions | Assigned When |
-|------|-------------|---------------|
-| **Super Administrator** | All permissions | `StakeholderSeeder` runs for NetIDs in `SUPER_ADMIN_NETIDS` |
-| **Northwestern User** | None by default | Automatically on first SSO login |
+| Role | Permissions | Assignment Locked | Assigned When |
+|------|-------------|:-----------------:|---------------|
+| **Super Administrator** | All permissions | No | `StakeholderSeeder` runs for NetIDs in `SUPER_ADMIN_NETIDS` |
+| **Northwestern User** | None by default | Yes | Automatically on first SSO login |
 
 The **Northwestern User** role serves as a baseline. It confirms the user has authenticated via SSO but grants no application-specific permissions. Add permissions to this role in `RoleSeeder` if your application needs default access for all Northwestern users:
 
@@ -60,10 +60,72 @@ The **Northwestern User** role serves as a baseline. It confirms the user has au
 [
     'name' => SystemRoleEnum::NORTHWESTERN_USER,
     'role_type_id' => $systemManagedRoleId,
+    'assignment_locked' => true,
     'permissions' => [
         // Add default permissions for all Northwestern users here
     ],
 ],
+```
+
+---
+
+## Assignment-Locked Roles
+
+Assignment-locked roles have a per-role `assignment_locked` flag that prevents manual assignment or removal through the UI — regardless of permission level, including Super Administrators with `MANAGE_ALL`.
+
+### What It Is
+
+When a role is assignment-locked, it cannot be attached to or detached from users through Filament. The role is exclusively managed through programmatic processes (SSO provisioning, third-party API integrations, scheduled commands).
+
+### Distinction from System Managed
+
+These are two independent concepts:
+
+| Combination | Can Edit Definition | Can Assign via UI |
+|---|---|---|
+| Neither | Yes | Yes |
+| System Managed only | No | Yes |
+| Assignment Locked only | Yes | No |
+| Both | No | No |
+
+- **System Managed** controls a role's *definition* — its name, permissions, and type are seeder-synced and cannot be edited in the UI.
+- **Assignment Locked** controls a role's *assignment* — it cannot be attached to or detached from users in the UI.
+
+### Use Cases
+
+- Roles driven by external APIs where the application is not the source of truth
+- Roles assigned during SSO provisioning that should never be manually changed
+- Roles managed by scheduled sync commands from external systems
+
+### How to Enable
+
+Set `assignment_locked => true` in the role seeder:
+
+```php title="app/Domains/Auth/Seeders/RoleSeeder.php"
+Role::updateOrCreate(
+    ['name' => 'My External Role'],
+    [
+        'role_type_id' => $roleTypeId,
+        'assignment_locked' => true,
+    ],
+);
+```
+
+### Programmatic Assignment
+
+The audited methods (`assignRoleWithAudit`, `removeRoleWithAudit`) work normally for all origins. The lock is enforced at the UI layer — Filament hides attach/detach actions and filters locked roles from assignment dropdowns. Programmatic code is trusted and can assign or remove locked roles freely.
+
+### Default Locked Roles
+
+- **Northwestern User** — assignment-locked (managed by SSO provisioning)
+- **Super Administrator** — intentionally *not* assignment-locked for onboarding
+
+### Emergency Detachment
+
+For emergency situations, use the `role:force-detach` Artisan command, which uses the `SYSTEM` origin to bypass the lock while preserving the audit trail:
+
+```bash
+php artisan role:force-detach username "Northwestern User" --reason="Emergency access fix"
 ```
 
 ---
@@ -217,13 +279,15 @@ Both methods create an audit entry capturing:
 
 The `RoleModificationOriginEnum` tracks **why** a role change occurred:
 
-| Origin | Used When |
-|--------|-----------|
-| `UI_ACTION` | Admin assigns/removes a role in Filament |
-| `SSO_PROVISIONING` | Northwestern User role assigned on first SSO login |
-| `NETID_STATUS_CHANGE` | Roles stripped when a NetID is deactivated via EventHub |
-| `REMOVED_BY_DELETION` | Roles removed from users when a role is deleted |
-| `SYSTEM` | Programmatic changes (seeders, Artisan commands) |
+| Origin | Manual | Used When |
+|--------|:------:|-----------|
+| `UI_ACTION` | Yes | Admin assigns/removes a role in Filament |
+| `SSO_PROVISIONING` | No | Northwestern User role assigned on first SSO login |
+| `NETID_STATUS_CHANGE` | No | Roles stripped when a NetID is deactivated via EventHub |
+| `REMOVED_BY_DELETION` | No | Roles removed from users when a role is deleted |
+| `SYSTEM` | No | Programmatic changes (seeders, Artisan commands) |
+
+The Filament UI prevents manual assignment and removal for assignment-locked roles. Programmatic origins are always allowed — the lock is not enforced at the domain layer.
 
 ### Audited Permission Sync
 
@@ -250,7 +314,7 @@ The `TracksPermissionSources` trait on the User model enables fine-grained check
 | `PermissionEnum` | Single source of truth for all permissions (cases, metadata, seeder) |
 | `RoleTypeEnum` | Defines role type categories and their behavioral rules |
 | `SystemRoleEnum` | Names for the two system-managed roles |
-| `RoleModificationOriginEnum` | Tracks why role changes occurred |
+| `RoleModificationOriginEnum` | Tracks why role changes occurred, classifies manual vs. programmatic |
 | `AuditsRoles` | Trait providing `assignRoleWithAudit()` / `removeRoleWithAudit()` |
 | `AuditsPermissions` | Trait providing `syncPermissionsWithAudit()` |
 | `TracksPermissionSources` | Trait for querying which roles grant which permissions |

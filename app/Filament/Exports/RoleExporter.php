@@ -26,6 +26,9 @@ class RoleExporter extends Exporter
             ExportColumn::make('role_type.label')
                 ->label('Role Type'),
 
+            ExportColumn::make('assignment_locked')
+                ->label('Assignment Locked'),
+
             ExportColumn::make('permissions_count')
                 ->label('Permissions Count')
                 ->counts('permissions'),

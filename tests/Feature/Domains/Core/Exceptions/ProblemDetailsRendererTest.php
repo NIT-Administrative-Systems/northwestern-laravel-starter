@@ -19,7 +19,6 @@ use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
 use LogicException;
 use PDOException;
-use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -33,7 +32,6 @@ use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Tests\TestCase;
 use Throwable;
 
-#[CoversClass(ProblemDetailsRenderer::class)]
 class ProblemDetailsRendererTest extends TestCase
 {
     private ProblemDetailsRenderer $renderer;
