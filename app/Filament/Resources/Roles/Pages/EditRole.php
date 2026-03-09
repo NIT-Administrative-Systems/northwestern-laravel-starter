@@ -22,11 +22,18 @@ class EditRole extends EditRecord
 {
     protected static string $resource = RoleResource::class;
 
+    public function mount(int|string $record): void
+    {
+        parent::mount($record);
+
+        abort_if($this->record->isSystemManagedType(), 403, 'System Managed roles cannot be edited.');
+    }
+
     protected function getHeaderActions(): array
     {
         return [
             DeleteAction::make()
-                ->authorize(fn () => ! $this->record->isAssignmentLocked() && Gate::allows('delete', $this->record))
+                ->authorize(fn () => ! $this->record->isSystemManagedType() && ! $this->record->isAssignmentLocked() && Gate::allows('delete', $this->record))
                 ->modalDescription(function (Role $record): HtmlString {
                     $userCount = $record->users()->count();
 

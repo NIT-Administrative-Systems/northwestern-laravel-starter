@@ -38,7 +38,7 @@ class RolesTable
                     ->trueIcon(Heroicon::LockClosed)
                     ->falseIcon('')
                     ->trueColor('warning')
-                    ->tooltip(fn (Role $record) => $record->isAssignmentLocked() ? 'Assignment locked — managed programmatically' : null),
+                    ->tooltip(fn (Role $record) => $record->isAssignmentLocked() ? 'Assigned programmatically - cannot be changed in the UI' : null),
                 TextColumn::make('permissions_count')
                     ->label('Permissions')
                     ->badge()
@@ -98,7 +98,7 @@ class RolesTable
                             ! auth()->user()->hasPermissionTo(PermissionEnum::EDIT_ROLES);
                     }),
                 EditAction::make()
-                    ->authorize(fn (Role $record) => Gate::allows('update', $record)),
+                    ->authorize(fn (Role $record) => ! $record->isSystemManagedType() && Gate::allows('update', $record)),
             ])
             ->toolbarActions([
                 ExportAction::make()

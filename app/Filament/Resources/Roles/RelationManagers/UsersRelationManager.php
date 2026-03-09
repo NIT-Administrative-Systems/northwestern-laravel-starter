@@ -173,6 +173,12 @@ class UsersRelationManager extends RelationManager
                             return;
                         }
 
+                        abort_unless(
+                            ! $role->isAssignmentLocked() && Gate::allows('attachUser', $role),
+                            403,
+                            'You are not authorized to assign users to this role.',
+                        );
+
                         if ($role->role_type->slug === RoleTypeEnum::API_INTEGRATION && ! $user->is_api_user) {
                             Notification::make()
                                 ->title('Invalid user assignment')
@@ -213,6 +219,12 @@ class UsersRelationManager extends RelationManager
                     ->action(function (User $record, RelationManager $livewire): void {
                         /** @var Role $role */
                         $role = $livewire->getOwnerRecord();
+
+                        abort_unless(
+                            ! $role->isAssignmentLocked() && Gate::allows('detachUser', $role),
+                            403,
+                            'You are not authorized to remove users from this role.',
+                        );
 
                         $record->removeRoleWithAudit($role, RoleModificationOriginEnum::UI_ACTION);
                     })

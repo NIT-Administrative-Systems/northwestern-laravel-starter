@@ -139,6 +139,12 @@ class RolesRelationManager extends RelationManager
                             return;
                         }
 
+                        abort_unless(
+                            ! $role->isAssignmentLocked() && Gate::allows('attachUser', $role),
+                            403,
+                            'You are not authorized to assign this role.',
+                        );
+
                         // Validate that API roles can only be assigned to API users and vice versa
                         if ($role->role_type->slug === RoleTypeEnum::API_INTEGRATION && ! $user->is_api_user) {
                             Notification::make()
@@ -165,6 +171,12 @@ class RolesRelationManager extends RelationManager
                     ->modalDescription(fn (Role $record) => 'Are you sure you want to remove the ' . $record->name . ' role from this user?')
                     ->modalSubmitActionLabel('Remove Role')
                     ->action(function (Role $record, RelationManager $livewire): void {
+                        abort_unless(
+                            ! $record->isAssignmentLocked() && Gate::allows('detachUser', $record),
+                            403,
+                            'You are not authorized to remove this role.',
+                        );
+
                         /** @var User $user */
                         $user = $livewire->getOwnerRecord();
                         $user->removeRoleWithAudit($record, RoleModificationOriginEnum::UI_ACTION);
