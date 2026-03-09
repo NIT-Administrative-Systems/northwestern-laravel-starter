@@ -128,10 +128,12 @@ Commands like `migrate:fresh`, `migrate:refresh`, `db:wipe`, and `db:seed --forc
 ### Stray HTTP Request Prevention
 
 ```php
-Http::preventStrayRequests();
+if (App::environment(['ci', 'testing'])) {
+    Http::preventStrayRequests();
+}
 ```
 
-Any outbound HTTP request made via Laravel's `Http` client that hasn't been explicitly faked will throw an exception. This ensures tests don't make real HTTP calls to external services. If you see a stray request error, you need to add `Http::fake()` for that endpoint.
+In CI and testing environments, any outbound HTTP request made via Laravel's `Http` client that hasn't been explicitly faked will throw an exception. This ensures your test suite doesn't accidentally make real HTTP calls to external services, verifying that all network dependencies are properly mocked. If you see a stray request error, you need to add `Http::fake()` for that endpoint.
 
 ### Untruncated Request Exceptions
 
