@@ -173,11 +173,8 @@ class UsersRelationManager extends RelationManager
                             return;
                         }
 
-                        abort_unless(
-                            ! $role->isAssignmentLocked() && Gate::allows('attachUser', $role),
-                            403,
-                            'You are not authorized to assign users to this role.',
-                        );
+                        abort_if($role->isAssignmentLocked(), 403, 'This role is assignment-locked and cannot be assigned through the UI.');
+                        abort_unless(Gate::allows('attachUser', $role), 403, 'You are not authorized to assign users to this role.');
 
                         if ($role->role_type->slug === RoleTypeEnum::API_INTEGRATION && ! $user->is_api_user) {
                             Notification::make()
@@ -220,11 +217,8 @@ class UsersRelationManager extends RelationManager
                         /** @var Role $role */
                         $role = $livewire->getOwnerRecord();
 
-                        abort_unless(
-                            ! $role->isAssignmentLocked() && Gate::allows('detachUser', $role),
-                            403,
-                            'You are not authorized to remove users from this role.',
-                        );
+                        abort_if($role->isAssignmentLocked(), 403, 'This role is assignment-locked and cannot be removed through the UI.');
+                        abort_unless(Gate::allows('detachUser', $role), 403, 'You are not authorized to remove users from this role.');
 
                         $record->removeRoleWithAudit($role, RoleModificationOriginEnum::UI_ACTION);
                     })

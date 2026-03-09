@@ -123,13 +123,14 @@ class RolePolicyTest extends TestCase
         $this->assertFalse($this->policy()->attachUser($user, $role));
     }
 
-    public function test_attach_user_allows_system_managed_with_manage_all(): void
+    public function test_attach_user_denies_system_managed_even_with_manage_all(): void
     {
         $user = User::factory()->create();
         $user->givePermissionTo(PermissionEnum::MANAGE_ALL);
         $role = Role::factory()->systemManaged()->create();
 
-        $this->assertTrue($this->policy()->attachUser($user, $role));
+        // Policy returns false; super admins gain access via Gate::before(), not the policy
+        $this->assertFalse($this->policy()->attachUser($user, $role));
     }
 
     public function test_detach_user_mirrors_attach_user(): void

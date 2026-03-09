@@ -287,7 +287,7 @@ The `RoleModificationOriginEnum` tracks **why** a role change occurred:
 | `REMOVED_BY_DELETION` | No | Roles removed from users when a role is deleted |
 | `SYSTEM` | No | Programmatic changes (seeders, Artisan commands) |
 
-Manual origins are blocked for assignment-locked roles. Programmatic origins are always allowed.
+The Filament UI prevents manual assignment and removal for assignment-locked roles. Programmatic origins are always allowed — the lock is not enforced at the domain layer.
 
 ### Audited Permission Sync
 

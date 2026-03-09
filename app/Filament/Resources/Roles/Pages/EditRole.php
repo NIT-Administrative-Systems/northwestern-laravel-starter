@@ -33,7 +33,7 @@ class EditRole extends EditRecord
     {
         return [
             DeleteAction::make()
-                ->authorize(fn () => ! $this->record->isSystemManagedType() && ! $this->record->isAssignmentLocked() && Gate::allows('delete', $this->record))
+                ->authorize(fn () => ! $this->record->isSystemManagedType() && Gate::allows('delete', $this->record))
                 ->modalDescription(function (Role $record): HtmlString {
                     $userCount = $record->users()->count();
 

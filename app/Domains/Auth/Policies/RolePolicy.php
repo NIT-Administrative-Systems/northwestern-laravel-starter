@@ -41,14 +41,15 @@ class RolePolicy
     /**
      * Permission check for assigning this role to users.
      *
-     * System Managed roles require MANAGE_ALL permission.
+     * System Managed roles return false here — super admins gain access
+     * via Gate::before(), consistent with how all other policies work.
      * Does NOT check assignment_locked — that's enforced outside the gate
      * so it cannot be bypassed by super admins.
      */
     public function attachUser(User $user, Role $role): bool
     {
         if ($role->isSystemManagedType()) {
-            return $user->hasPermissionTo(PermissionEnum::MANAGE_ALL);
+            return false;
         }
 
         return $user->hasPermissionTo(PermissionEnum::ASSIGN_ROLES);

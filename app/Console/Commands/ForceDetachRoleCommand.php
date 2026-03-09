@@ -27,9 +27,9 @@ class ForceDetachRoleCommand extends Command implements PromptsForMissingInput
     public function handle(): int
     {
         $userIdentifier = $this->argument('user');
-        $user = User::where('username', $userIdentifier)
-            ->orWhere('id', is_numeric($userIdentifier) ? $userIdentifier : 0)
-            ->first();
+        $user = is_numeric($userIdentifier)
+            ? User::find($userIdentifier)
+            : User::where('username', $userIdentifier)->first();
 
         if (! $user) {
             $this->components->error("User not found: {$userIdentifier}");
