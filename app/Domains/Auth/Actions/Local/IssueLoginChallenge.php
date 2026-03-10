@@ -28,6 +28,8 @@ use RuntimeException;
  */
 class IssueLoginChallenge
 {
+    protected const int MAX_USER_AGENT_LENGTH = 512;
+
     public function __construct(
         private OneTimeCodeGenerator $oneTimeCodeGenerator,
     ) {
@@ -60,7 +62,7 @@ class IssueLoginChallenge
                 'code_hash' => Hash::make($code),
                 'expires_at' => CarbonImmutable::now()->addMinutes($expires),
                 'requested_ip' => $ip,
-                'requested_user_agent' => $userAgent ? Str::limit($userAgent, 512, '') : null,
+                'requested_user_agent' => $userAgent ? Str::limit($userAgent, static::MAX_USER_AGENT_LENGTH, '') : null,
             ]);
 
             RateLimiter::hit($rateLimitKey, (int) CarbonInterval::hour()->totalSeconds);

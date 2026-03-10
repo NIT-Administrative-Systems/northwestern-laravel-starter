@@ -27,10 +27,9 @@ class WebSSOController extends Controller
         oauthLogout as protected webSSOAuthOauthLogout;
     }
 
-    /**
-     * @var int
-     */
-    protected const RETRY_LOOKUP_TIMES = 3;
+    protected const int RETRY_LOOKUP_TIMES = 3;
+
+    protected const int RETRY_SLEEP_MS = 500;
 
     protected string $redirectTo = '/';
 
@@ -59,7 +58,7 @@ class WebSSOController extends Controller
 
                 return $user;
             },
-            sleepMilliseconds: 500,
+            sleepMilliseconds: static::RETRY_SLEEP_MS,
             when: fn (\Throwable $e) => ! ($e instanceof BadDirectoryEntry),
         );
     }

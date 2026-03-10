@@ -27,6 +27,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  */
 class LogsApiRequests
 {
+    protected const string TRACE_HEADER = 'X-Trace-Id';
+
     /**
      * @param  Request  $request  The incoming HTTP request
      * @param  Closure(Request): (Response)  $next  The next middleware in the pipeline
@@ -44,7 +46,7 @@ class LogsApiRequests
         $endTime = microtime(true);
         $durationMs = (int) (($endTime - $startTime) * 1000);
 
-        $response->headers->set('X-Trace-Id', Context::get(ApiRequestContext::TRACE_ID));
+        $response->headers->set(static::TRACE_HEADER, Context::get(ApiRequestContext::TRACE_ID));
 
         $userId = Context::get(ApiRequestContext::USER_ID);
         $failureReason = Context::get(ApiRequestContext::FAILURE_REASON);
