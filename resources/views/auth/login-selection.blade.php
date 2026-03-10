@@ -102,7 +102,8 @@
 
                         <a class="btn btn-outline-secondary btn-lg w-100 d-inline-flex align-items-center justify-content-center mt-auto"
                            href="https://laravel-starter.entapp.northwestern.edu/getting-started/installation/#5-environment-configuration"
-                           target="_blank">
+                           target="_blank"
+                           rel="noopener noreferrer">
                             <i class="fas fa-book fa-fw me-2" aria-hidden="true"></i>
                             <span>Authentication Documentation</span>
                         </a>
