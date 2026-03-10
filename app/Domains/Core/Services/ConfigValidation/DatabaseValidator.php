@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Core\Services\ConfigValidation;
 
+use App\Domains\Core\Attributes\StarterValidator;
 use App\Domains\Core\Contracts\ConfigValidator;
 use Illuminate\Support\Facades\DB;
 use Throwable;
@@ -11,13 +12,14 @@ use Throwable;
 /**
  * Validates the database connection is configured and accessible.
  */
+#[StarterValidator(description: 'Database Connection')]
 class DatabaseValidator implements ConfigValidator
 {
     protected ?string $errorReason = null;
 
-    public function name(): string
+    public function shouldRun(): bool
     {
-        return 'Database Connection';
+        return true;
     }
 
     public function validate(): bool

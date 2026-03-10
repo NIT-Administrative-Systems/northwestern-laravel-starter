@@ -68,6 +68,16 @@
             <directory>app/Domains/User/Seeders</directory>
             <file>app/Domains/Core/Seeders/IdempotentSeeder.php</file>
 
+            <!-- Config validators -->
+            <file
+            >app/Domains/Core/Services/ConfigValidation/AppKeyValidator.php</file>
+            <file
+            >app/Domains/Core/Services/ConfigValidation/DatabaseValidator.php</file>
+            <file
+            >app/Domains/Core/Services/ConfigValidation/FilesystemValidator.php</file>
+            <file
+            >app/Domains/Core/Services/ConfigValidation/QueueValidator.php</file>
+
             <!-- Contracts / Interfaces -->
             <directory>app/Domains/Auth/Contracts</directory>
             <directory>app/Domains/Core/Contracts</directory>
@@ -89,7 +99,6 @@
             <file>app/Domains/Core/Database/SchemaChecksumManager.php</file>
             <directory>app/Domains/Core/Exceptions</directory>
             <directory>app/Domains/Core/GlobalAlerts</directory>
-            <directory>app/Domains/Core/Services/ConfigValidation</directory>
             <directory>app/Domains/User/Exceptions</directory>
             <directory>app/Domains/Support/Exceptions</directory>
             <directory>app/Filament</directory>

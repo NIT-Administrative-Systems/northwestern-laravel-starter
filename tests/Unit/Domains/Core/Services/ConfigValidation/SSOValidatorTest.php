@@ -5,10 +5,19 @@ declare(strict_types=1);
 namespace Tests\Unit\Domains\Core\Services\ConfigValidation;
 
 use App\Domains\Core\Services\ConfigValidation\SSOValidator;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
+#[CoversClass(SSOValidator::class)]
 class SSOValidatorTest extends TestCase
 {
+    public function test_should_always_run(): void
+    {
+        $validator = new SSOValidator();
+
+        $this->assertTrue($validator->shouldRun());
+    }
+
     public function test_passes_when_entra_id_credentials_are_configured(): void
     {
         config([
@@ -158,12 +167,5 @@ class SSOValidatorTest extends TestCase
         $hints = $validator->hints();
         $lastHint = end($hints);
         $this->assertStringContainsString('WebSSO / Entra ID', $lastHint);
-    }
-
-    public function test_name_returns_expected_value(): void
-    {
-        $validator = new SSOValidator();
-
-        $this->assertSame('SSO Authentication', $validator->name());
     }
 }

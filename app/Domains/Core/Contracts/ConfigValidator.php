@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Core\Contracts;
 
-use App\Console\Commands\ValidateConfigurationCommand;
+use App\Domains\Core\Attributes\StarterValidator;
 
 /**
  * A config validator checks system dependencies and configuration.
@@ -13,19 +13,20 @@ use App\Console\Commands\ValidateConfigurationCommand;
  * application dependencies (database, filesystem, queue, etc.) are properly
  * configured and functional.
  *
- * Validators should be registered in {@see ValidateConfigurationCommand::validators()}.
+ * Validators are discovered automatically when decorated with the
+ * {@see StarterValidator} attribute. The display name is provided via the
+ * attribute's `description` parameter rather than a method on this interface.
  */
 interface ConfigValidator
 {
     /**
-     * A short, human-readable name for this validator.
+     * Whether this validator is relevant to the current configuration.
      *
-     * This is displayed as the label during validation output.
-     *
-     * @example "Environment Variables"
-     * @example "Database Connection"
+     * Return false to skip validation entirely for optional integrations
+     * that are not configured. Skipped validators are displayed separately
+     * from passed/failed results.
      */
-    public function name(): string;
+    public function shouldRun(): bool;
 
     /**
      * Validate the configuration.

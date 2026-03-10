@@ -5,18 +5,75 @@ declare(strict_types=1);
 namespace Tests\Unit\Domains\Core\Services\ConfigValidation;
 
 use App\Domains\Core\Services\ConfigValidation\EventHubValidator;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
+#[CoversClass(EventHubValidator::class)]
 class EventHubValidatorTest extends TestCase
 {
-    public function test_passes_when_mock_mode_is_enabled(): void
+    public function test_should_not_run_when_mock_mode_is_enabled(): void
     {
         config(['nusoa.eventHub.mock' => true]);
 
         $validator = new EventHubValidator();
 
-        $this->assertTrue($validator->validate());
-        $this->assertStringContainsString('mock mode', $validator->successMessage());
+        $this->assertFalse($validator->shouldRun());
+    }
+
+    public function test_should_not_run_when_no_credentials_are_configured(): void
+    {
+        config([
+            'nusoa.eventHub.mock' => false,
+            'nusoa.eventHub.baseUrl' => null,
+            'nusoa.eventHub.apiKey' => null,
+            'nusoa.eventHub.hmacVerificationSharedSecret' => null,
+        ]);
+
+        $validator = new EventHubValidator();
+
+        $this->assertFalse($validator->shouldRun());
+    }
+
+    public function test_should_not_run_when_all_credentials_are_empty_strings(): void
+    {
+        config([
+            'nusoa.eventHub.mock' => false,
+            'nusoa.eventHub.baseUrl' => '',
+            'nusoa.eventHub.apiKey' => '',
+            'nusoa.eventHub.hmacVerificationSharedSecret' => '',
+        ]);
+
+        $validator = new EventHubValidator();
+
+        $this->assertFalse($validator->shouldRun());
+    }
+
+    public function test_should_run_when_mock_disabled_and_credentials_partially_set(): void
+    {
+        config([
+            'nusoa.eventHub.mock' => false,
+            'nusoa.eventHub.baseUrl' => 'https://northwestern-dev.apigee.net',
+            'nusoa.eventHub.apiKey' => null,
+            'nusoa.eventHub.hmacVerificationSharedSecret' => null,
+        ]);
+
+        $validator = new EventHubValidator();
+
+        $this->assertTrue($validator->shouldRun());
+    }
+
+    public function test_should_run_when_mock_disabled_and_all_credentials_set(): void
+    {
+        config([
+            'nusoa.eventHub.mock' => false,
+            'nusoa.eventHub.baseUrl' => 'https://northwestern-dev.apigee.net',
+            'nusoa.eventHub.apiKey' => 'test-api-key',
+            'nusoa.eventHub.hmacVerificationSharedSecret' => 'test-secret',
+        ]);
+
+        $validator = new EventHubValidator();
+
+        $this->assertTrue($validator->shouldRun());
     }
 
     public function test_passes_when_all_credentials_are_configured(): void
@@ -32,22 +89,6 @@ class EventHubValidatorTest extends TestCase
 
         $this->assertTrue($validator->validate());
         $this->assertStringContainsString('northwestern-dev.apigee.net', $validator->successMessage());
-    }
-
-    public function test_skips_when_no_credentials_are_configured(): void
-    {
-        config([
-            'nusoa.eventHub.mock' => false,
-            'nusoa.eventHub.baseUrl' => null,
-            'nusoa.eventHub.apiKey' => null,
-            'nusoa.eventHub.hmacVerificationSharedSecret' => null,
-        ]);
-
-        $validator = new EventHubValidator();
-
-        $this->assertTrue($validator->validate());
-        $this->assertStringContainsString('not configured', $validator->successMessage());
-        $this->assertStringContainsString('optional', $validator->successMessage());
     }
 
     public function test_fails_when_partially_configured(): void
@@ -135,27 +176,5 @@ class EventHubValidatorTest extends TestCase
         $this->assertTrue(
             collect($hints)->contains(fn (string $hint) => str_contains($hint, 'remove all EVENT_HUB_'))
         );
-    }
-
-    public function test_skips_when_all_credentials_are_empty_strings(): void
-    {
-        config([
-            'nusoa.eventHub.mock' => false,
-            'nusoa.eventHub.baseUrl' => '',
-            'nusoa.eventHub.apiKey' => '',
-            'nusoa.eventHub.hmacVerificationSharedSecret' => '',
-        ]);
-
-        $validator = new EventHubValidator();
-
-        $this->assertTrue($validator->validate());
-        $this->assertStringContainsString('not configured', $validator->successMessage());
-    }
-
-    public function test_name_returns_expected_value(): void
-    {
-        $validator = new EventHubValidator();
-
-        $this->assertSame('EventHub', $validator->name());
     }
 }

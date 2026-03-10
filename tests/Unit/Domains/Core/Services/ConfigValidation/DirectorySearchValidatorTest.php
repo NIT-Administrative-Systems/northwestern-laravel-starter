@@ -5,10 +5,19 @@ declare(strict_types=1);
 namespace Tests\Unit\Domains\Core\Services\ConfigValidation;
 
 use App\Domains\Core\Services\ConfigValidation\DirectorySearchValidator;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
+#[CoversClass(DirectorySearchValidator::class)]
 class DirectorySearchValidatorTest extends TestCase
 {
+    public function test_should_always_run(): void
+    {
+        $validator = new DirectorySearchValidator();
+
+        $this->assertTrue($validator->shouldRun());
+    }
+
     public function test_passes_when_api_key_is_configured(): void
     {
         config(['nusoa.directorySearch.apiKey' => 'test-api-key']);
@@ -52,12 +61,5 @@ class DirectorySearchValidatorTest extends TestCase
         $validator->validate();
 
         $this->assertStringContainsString('API Service Registry', $validator->hints()[1]);
-    }
-
-    public function test_name_returns_expected_value(): void
-    {
-        $validator = new DirectorySearchValidator();
-
-        $this->assertSame('Directory Search', $validator->name());
     }
 }

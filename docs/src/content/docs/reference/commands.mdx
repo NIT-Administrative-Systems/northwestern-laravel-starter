@@ -237,12 +237,17 @@ php artisan config:validate
 
 **What it does:**
 
-Checks that all required environment variables are set and configuration is valid:
+Runs all auto-discovered config validators and reports their status. Built-in validators check:
 
-- Northwestern API credentials (Directory Search, WebSSO, EventHub)
-- Database connection details
-- S3/MinIO configuration
-- Required app settings
+- Application key
+- SSO credentials (Entra ID or Online Passport)
+- Directory Search API key
+- Database connectivity
+- Queue connection
+- S3 storage access
+- EventHub credentials (when not mocked)
+
+Validators that aren't relevant to the current configuration (e.g., EventHub when mocked) are automatically skipped and shown separately in the output.
 
 **When to use:**
 
@@ -250,6 +255,60 @@ Checks that all required environment variables are set and configuration is vali
 - After environment variable changes
 - Before deployment
 - Troubleshooting integration issues
+
+### Adding Custom Validators
+
+Validators are discovered automatically using the `#[StarterValidator]` attribute, following the same pattern as `#[AutoSeed]` for seeders.
+
+**1. Create a validator class** implementing `ConfigValidator` in a `Services/ConfigValidation` directory within your domain:
+
+```php
+<?php
+
+namespace App\Domains\Billing\Services\ConfigValidation;
+
+use App\Domains\Core\Attributes\StarterValidator;
+use App\Domains\Core\Contracts\ConfigValidator;
+
+#[StarterValidator(description: 'Stripe')]
+class StripeValidator implements ConfigValidator
+{
+    public function shouldRun(): bool
+    {
+        // Return false to skip when the integration isn't configured
+        return filled(config('services.stripe.secret'));
+    }
+
+    public function validate(): bool
+    {
+        return filled(config('services.stripe.secret'))
+            && filled(config('services.stripe.key'));
+    }
+
+    public function successMessage(): string
+    {
+        return 'Stripe API keys are configured';
+    }
+
+    public function errorMessage(): string
+    {
+        return 'Stripe configuration is incomplete';
+    }
+
+    public function hints(): array
+    {
+        return [
+            'Set <comment>STRIPE_KEY</comment> and <comment>STRIPE_SECRET</comment> in your .env file',
+        ];
+    }
+}
+```
+
+**2. That's it.** The validator is automatically discovered from any `app/Domains/*/Services/ConfigValidation` directory. No registration or configuration needed.
+
+<Aside type="tip">
+The `description` parameter on `#[StarterValidator]` controls the label shown in the command output. The `shouldRun()` method determines whether the validator is relevant — return `false` for optional integrations that aren't configured to avoid false negatives.
+</Aside>
 
 ---
 

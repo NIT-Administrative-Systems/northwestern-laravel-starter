@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Core\Services\ConfigValidation;
 
+use App\Domains\Core\Attributes\StarterValidator;
 use App\Domains\Core\Contracts\ConfigValidator;
 use Illuminate\Support\Collection;
 
@@ -14,6 +15,7 @@ use Illuminate\Support\Collection;
  * Online Passport (agentless WebSSO via ForgeRock). This validator detects
  * which provider is active and checks the appropriate credentials.
  */
+#[StarterValidator(description: 'SSO Authentication')]
 class SSOValidator implements ConfigValidator
 {
     /** @var Collection<int, string> */
@@ -21,9 +23,9 @@ class SSOValidator implements ConfigValidator
 
     protected bool $isOnlinePassport = false;
 
-    public function name(): string
+    public function shouldRun(): bool
     {
-        return 'SSO Authentication';
+        return true;
     }
 
     public function validate(): bool
