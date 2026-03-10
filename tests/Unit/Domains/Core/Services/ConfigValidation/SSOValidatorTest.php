@@ -159,11 +159,4 @@ class SSOValidatorTest extends TestCase
         $lastHint = end($hints);
         $this->assertStringContainsString('WebSSO / Entra ID', $lastHint);
     }
-
-    public function test_name_returns_expected_value(): void
-    {
-        $validator = new SSOValidator();
-
-        $this->assertSame('SSO Authentication', $validator->name());
-    }
 }

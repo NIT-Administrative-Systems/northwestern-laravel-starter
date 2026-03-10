@@ -5,13 +5,8 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Domains\Core\Contracts\ConfigValidator;
-use App\Domains\Core\Services\ConfigValidation\AppKeyValidator;
-use App\Domains\Core\Services\ConfigValidation\DatabaseValidator;
-use App\Domains\Core\Services\ConfigValidation\DirectorySearchValidator;
-use App\Domains\Core\Services\ConfigValidation\EventHubValidator;
-use App\Domains\Core\Services\ConfigValidation\FilesystemValidator;
-use App\Domains\Core\Services\ConfigValidation\QueueValidator;
-use App\Domains\Core\Services\ConfigValidation\SSOValidator;
+use App\Domains\Core\Services\ConfigValidatorResolver;
+use App\Domains\Core\ValueObjects\ResolvedValidator;
 use Illuminate\Console\Command;
 use Throwable;
 
@@ -23,7 +18,10 @@ use function Laravel\Prompts\spin;
  * This command runs a series of validators to ensure the application
  * is properly configured and all required services are accessible.
  *
- * @phpstan-type ValidationResult array{validator: ConfigValidator, passed: bool}
+ * Validators are discovered automatically by scanning for classes
+ * implementing {@see ConfigValidator} with the #[StarterValidator] attribute.
+ *
+ * @phpstan-type ValidationResult array{validator: ConfigValidator, description: string, passed: bool, skipped: bool}
  */
 class ValidateConfigurationCommand extends Command
 {
@@ -34,38 +32,17 @@ class ValidateConfigurationCommand extends Command
     /** @var list<ValidationResult> */
     protected array $results = [];
 
-    /**
-     * Configure a list of validators to run against the application configuration.
-     *
-     * Validators should not include any logic that would cause side effects,
-     * and should be safe to run in any environment.
-     *
-     * @return list<ConfigValidator>
-     */
-    protected function validators(): array
-    {
-        return [
-            new AppKeyValidator(),
-            new SSOValidator(),
-            new DirectorySearchValidator(),
-            new DatabaseValidator(),
-            new QueueValidator(),
-            new FilesystemValidator(),
-            new EventHubValidator(),
-        ];
-    }
-
-    public function handle(): int
+    public function handle(ConfigValidatorResolver $resolver): int
     {
         // @phpstan-ignore-next-line
         ray()->disable();
 
         $this->displayHeader();
-        $this->runValidators($this->validators());
+        $this->runValidators($resolver->discover());
         $this->displayResults();
         $this->displaySummary();
 
-        return $this->allPassed() ? self::SUCCESS : self::FAILURE;
+        return $this->hasFailed() ? self::FAILURE : self::SUCCESS;
     }
 
     /**
@@ -80,25 +57,38 @@ class ValidateConfigurationCommand extends Command
     /**
      * Run all validators and collect results.
      *
-     * @param  list<ConfigValidator>  $validators
+     * @param  list<ResolvedValidator>  $resolvedValidators
      */
-    protected function runValidators(array $validators): void
+    protected function runValidators(array $resolvedValidators): void
     {
-        foreach ($validators as $validator) {
+        foreach ($resolvedValidators as $resolved) {
+            if (! $resolved->validator->shouldRun()) {
+                $this->results[] = [
+                    'validator' => $resolved->validator,
+                    'description' => $resolved->description,
+                    'passed' => false,
+                    'skipped' => true,
+                ];
+
+                continue;
+            }
+
             $passed = spin(
-                callback: function () use ($validator): bool {
+                callback: function () use ($resolved): bool {
                     try {
-                        return $validator->validate();
+                        return $resolved->validator->validate();
                     } catch (Throwable) {
                         return false;
                     }
                 },
-                message: "Checking {$validator->name()}..."
+                message: "Checking {$resolved->description}..."
             );
 
             $this->results[] = [
-                'validator' => $validator,
+                'validator' => $resolved->validator,
+                'description' => $resolved->description,
                 'passed' => $passed,
+                'skipped' => false,
             ];
         }
     }
@@ -111,23 +101,32 @@ class ValidateConfigurationCommand extends Command
         $this->newLine();
 
         foreach ($this->results as $result) {
-            $validator = $result['validator'];
-            $passed = $result['passed'];
-
-            if ($passed) {
-                $this->displaySuccess($validator);
+            if ($result['skipped']) {
+                $this->displaySkipped($result['description']);
+            } elseif ($result['passed']) {
+                $this->displaySuccess($result['description'], $result['validator']);
             } else {
-                $this->displayFailure($validator);
+                $this->displayFailure($result['description'], $result['validator']);
             }
         }
     }
 
     /**
+     * Display a skipped validation result.
+     */
+    protected function displaySkipped(string $description): void
+    {
+        $this->line("  <fg=yellow>–</> <fg=white>{$description}</>");
+        $this->line('    <fg=gray>Skipped (not configured)</>');
+        $this->newLine();
+    }
+
+    /**
      * Display a successful validation result.
      */
-    protected function displaySuccess(ConfigValidator $validator): void
+    protected function displaySuccess(string $description, ConfigValidator $validator): void
     {
-        $this->line("  <fg=green>✓</> <fg=white>{$validator->name()}</>");
+        $this->line("  <fg=green>✓</> <fg=white>{$description}</>");
         $this->line("    <fg=gray>{$validator->successMessage()}</>");
         $this->newLine();
     }
@@ -135,9 +134,9 @@ class ValidateConfigurationCommand extends Command
     /**
      * Display a failed validation result with hints.
      */
-    protected function displayFailure(ConfigValidator $validator): void
+    protected function displayFailure(string $description, ConfigValidator $validator): void
     {
-        $this->line("  <fg=red>✗</> <fg=white>{$validator->name()}</>");
+        $this->line("  <fg=red>✗</> <fg=white>{$description}</>");
         $this->line("    <fg=red>{$validator->errorMessage()}</>");
 
         $hints = $validator->hints();
@@ -156,29 +155,36 @@ class ValidateConfigurationCommand extends Command
      */
     protected function displaySummary(): void
     {
-        $passed = collect($this->results)->where('passed', true)->count();
-        $failed = collect($this->results)->where('passed', false)->count();
-        $total = count($this->results);
+        $passed = collect($this->results)->where('passed', true)->where('skipped', false)->count();
+        $failed = collect($this->results)->where('passed', false)->where('skipped', false)->count();
+        $skipped = collect($this->results)->where('skipped', true)->count();
 
         $this->line('  <fg=gray>─────────────────────────────────────────────────</>');
         $this->newLine();
 
-        if ($this->allPassed()) {
-            $this->line("  <fg=green>✓</> All {$total} checks passed");
+        if (! $this->hasFailed()) {
+            $parts = ["{$passed} passed"];
+            if ($skipped > 0) {
+                $parts[] = "{$skipped} skipped";
+            }
+            $this->line('  <fg=green>✓</> ' . implode(', ', $parts));
         } else {
             $passedText = "<fg=green>{$passed} passed</>";
             $failedText = "<fg=red>{$failed} failed</>";
-            $this->line("  {$passedText}, {$failedText}");
+            $skippedText = $skipped > 0 ? ", <fg=yellow>{$skipped} skipped</>" : '';
+            $this->line("  {$passedText}, {$failedText}{$skippedText}");
         }
 
         $this->newLine();
     }
 
     /**
-     * Check if all validators passed.
+     * Check if any validators failed.
      */
-    protected function allPassed(): bool
+    protected function hasFailed(): bool
     {
-        return collect($this->results)->every(fn (array $result): bool => $result['passed']);
+        return collect($this->results)
+            ->where('skipped', false)
+            ->contains(fn (array $result): bool => ! $result['passed']);
     }
 }

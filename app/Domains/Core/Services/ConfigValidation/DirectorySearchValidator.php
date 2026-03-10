@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Core\Services\ConfigValidation;
 
+use App\Domains\Core\Attributes\StarterValidator;
 use App\Domains\Core\Contracts\ConfigValidator;
 
 /**
@@ -12,11 +13,12 @@ use App\Domains\Core\Contracts\ConfigValidator;
  * The Directory Search API is required for user provisioning during
  * SSO login and for stakeholder seeding.
  */
+#[StarterValidator(description: 'Directory Search')]
 class DirectorySearchValidator implements ConfigValidator
 {
-    public function name(): string
+    public function shouldRun(): bool
     {
-        return 'Directory Search';
+        return true;
     }
 
     public function validate(): bool

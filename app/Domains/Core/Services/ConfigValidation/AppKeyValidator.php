@@ -4,18 +4,20 @@ declare(strict_types=1);
 
 namespace App\Domains\Core\Services\ConfigValidation;
 
+use App\Domains\Core\Attributes\StarterValidator;
 use App\Domains\Core\Contracts\ConfigValidator;
 
 /**
  * Validates that the application key is set and properly formatted.
  */
+#[StarterValidator(description: 'Application Key')]
 class AppKeyValidator implements ConfigValidator
 {
     protected ?string $errorReason = null;
 
-    public function name(): string
+    public function shouldRun(): bool
     {
-        return 'Application Key';
+        return true;
     }
 
     public function validate(): bool

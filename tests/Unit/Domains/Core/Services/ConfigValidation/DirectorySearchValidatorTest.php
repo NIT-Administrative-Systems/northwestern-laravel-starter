@@ -53,11 +53,4 @@ class DirectorySearchValidatorTest extends TestCase
 
         $this->assertStringContainsString('API Service Registry', $validator->hints()[1]);
     }
-
-    public function test_name_returns_expected_value(): void
-    {
-        $validator = new DirectorySearchValidator();
-
-        $this->assertSame('Directory Search', $validator->name());
-    }
 }

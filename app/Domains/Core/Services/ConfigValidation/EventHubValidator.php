@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Core\Services\ConfigValidation;
 
+use App\Domains\Core\Attributes\StarterValidator;
 use App\Domains\Core\Contracts\ConfigValidator;
 use Illuminate\Support\Collection;
 
@@ -13,43 +14,36 @@ use Illuminate\Support\Collection;
  * When the application is configured to use the real EventHub API,
  * this validator ensures all required credentials are present.
  * When no EventHub credentials are configured at all, the validator
- * reports as skipped since EventHub is an optional integration.
+ * is skipped since EventHub is an optional integration.
  */
+#[StarterValidator(description: 'EventHub')]
 class EventHubValidator implements ConfigValidator
 {
     /** @var Collection<int, string> */
     protected Collection $missingVariables;
 
-    protected bool $isMocked = false;
-
-    protected bool $isSkipped = false;
-
-    public function name(): string
+    public function shouldRun(): bool
     {
-        return 'EventHub';
+        if (config('nusoa.eventHub.mock', true)) {
+            return false;
+        }
+
+        $variables = collect([
+            config('nusoa.eventHub.baseUrl'),
+            config('nusoa.eventHub.apiKey'),
+            config('nusoa.eventHub.hmacVerificationSharedSecret'),
+        ]);
+
+        return ! $variables->every(fn ($value): bool => blank($value));
     }
 
     public function validate(): bool
     {
-        $this->isMocked = (bool) config('nusoa.eventHub.mock', true);
-
-        if ($this->isMocked) {
-            return true;
-        }
-
         $variables = collect([
             'EVENT_HUB_BASE_URL' => config('nusoa.eventHub.baseUrl'),
             'EVENT_HUB_API_KEY' => config('nusoa.eventHub.apiKey'),
             'EVENT_HUB_HMAC_VERIFICATION_SHARED_SECRET' => config('nusoa.eventHub.hmacVerificationSharedSecret'),
         ]);
-
-        $allBlank = $variables->every(fn ($value): bool => blank($value));
-
-        if ($allBlank) {
-            $this->isSkipped = true;
-
-            return true;
-        }
 
         $this->missingVariables = $variables
             ->filter(fn ($value): bool => blank($value))
@@ -60,14 +54,6 @@ class EventHubValidator implements ConfigValidator
 
     public function successMessage(): string
     {
-        if ($this->isMocked) {
-            return 'EventHub is running in <comment>mock mode</comment>';
-        }
-
-        if ($this->isSkipped) {
-            return 'EventHub is <comment>not configured</comment> (optional)';
-        }
-
         $baseUrl = config('nusoa.eventHub.baseUrl');
 
         return "EventHub configured for <comment>{$baseUrl}</comment>";

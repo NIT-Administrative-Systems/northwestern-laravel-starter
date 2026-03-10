@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Core\Services\ConfigValidation;
 
+use App\Domains\Core\Attributes\StarterValidator;
 use App\Domains\Core\Contracts\ConfigValidator;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Redis;
@@ -12,11 +13,12 @@ use Throwable;
 /**
  * Validates the queue connection is configured and accessible.
  */
+#[StarterValidator(description: 'Queue Connection')]
 class QueueValidator implements ConfigValidator
 {
-    public function name(): string
+    public function shouldRun(): bool
     {
-        return 'Queue Connection';
+        return true;
     }
 
     public function validate(): bool
