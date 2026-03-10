@@ -17,6 +17,7 @@ class LogoutSelectionControllerTest extends TestCase
     {
         parent::setUp();
 
+        Route::get('auth/azure-ad/oauth-logout', fn () => null)->name('login-oauth-logout');
         Route::get('auth/websso/logout', fn () => null)->name('login-websso-logout');
         Route::getRoutes()->refreshNameLookups();
     }
