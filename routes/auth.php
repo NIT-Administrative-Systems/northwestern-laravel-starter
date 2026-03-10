@@ -26,17 +26,26 @@ Route::prefix('auth')->group(function () {
     Route::get('type', Controllers\LoginSelectionController::class)->name('login-selection');
     Route::post('logout', Controllers\LogoutSelectionController::class)->name('logout');
 
-    Route::prefix('azure-ad')->group(function () {
-        Route::get('redirect', [Controllers\WebSSOController::class, 'oauthRedirect'])->name('login-oauth-redirect');
-        Route::post('callback', [Controllers\WebSSOController::class, 'oauthCallback'])->name('login-oauth-callback')
-            ->withoutMiddleware([VerifyCsrfToken::class]);
-        Route::get('oauth-logout', [Controllers\WebSSOController::class, 'oauthLogout'])->name('login-oauth-logout');
-    });
+    $webssoConfigured = filled(config('nusoa.sso.apigeeApiKey'))
+        || config('nusoa.sso.strategy') === 'forgerock-direct';
+    $entraConfigured = filled(config('services.northwestern-azure.client_id'))
+        && filled(config('services.northwestern-azure.client_secret'));
 
-    Route::prefix('websso')->group(function () {
-        Route::get('login', [Controllers\WebSSOController::class, 'login'])->name('login-websso');
-        Route::get('logout', [Controllers\WebSSOController::class, 'logout'])->name('login-websso-logout');
-    });
+    if ($entraConfigured) {
+        Route::prefix('azure-ad')->group(function () {
+            Route::get('redirect', [Controllers\WebSSOController::class, 'oauthRedirect'])->name('login-oauth-redirect');
+            Route::post('callback', [Controllers\WebSSOController::class, 'oauthCallback'])->name('login-oauth-callback')
+                ->withoutMiddleware([VerifyCsrfToken::class]);
+            Route::get('oauth-logout', [Controllers\WebSSOController::class, 'oauthLogout'])->name('login-oauth-logout');
+        });
+    }
+
+    if ($webssoConfigured) {
+        Route::prefix('websso')->group(function () {
+            Route::get('login', [Controllers\WebSSOController::class, 'login'])->name('login-websso');
+            Route::get('logout', [Controllers\WebSSOController::class, 'logout'])->name('login-websso-logout');
+        });
+    }
 });
 
 Route::post('/impersonate/take/{id}/{guardName?}', [Controllers\ImpersonationController::class, 'take'])->middleware('throttle:auth:impersonate')->name('impersonate');

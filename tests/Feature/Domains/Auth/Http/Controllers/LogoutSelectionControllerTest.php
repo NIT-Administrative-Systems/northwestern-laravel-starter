@@ -6,12 +6,21 @@ namespace Tests\Feature\Domains\Auth\Http\Controllers;
 
 use App\Domains\Auth\Http\Controllers\LogoutSelectionController;
 use App\Domains\User\Models\User;
+use Illuminate\Support\Facades\Route;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(LogoutSelectionController::class)]
 class LogoutSelectionControllerTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Route::get('auth/websso/logout', fn () => null)->name('login-websso-logout');
+        Route::getRoutes()->refreshNameLookups();
+    }
+
     public function test_redirects_to_login_selection_when_user_not_authenticated(): void
     {
         $response = $this->post(route('logout'));

@@ -5,12 +5,21 @@ declare(strict_types=1);
 namespace Tests\Feature\Domains\Auth\Http\Controllers;
 
 use App\Domains\Auth\Http\Controllers\LoginSelectionController;
+use Illuminate\Support\Facades\Route;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(LoginSelectionController::class)]
 class LoginSelectionControllerTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Route::get('auth/websso/login', fn () => null)->name('login-websso');
+        Route::getRoutes()->refreshNameLookups();
+    }
+
     public function test_renders_view_with_entra_route_when_local_auth_enabled(): void
     {
         config(['local-auth.enabled' => true]);
