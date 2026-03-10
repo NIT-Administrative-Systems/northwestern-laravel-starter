@@ -78,6 +78,30 @@ class LogoutSelectionControllerTest extends TestCase
         $this->assertAuthenticatedAs($user);
     }
 
+    public function test_logs_out_sso_user_locally_when_no_sso_provider_configured(): void
+    {
+        config([
+            'nusoa.sso.apigeeApiKey' => null,
+            'nusoa.sso.strategy' => null,
+            'services.northwestern-azure.client_id' => null,
+            'services.northwestern-azure.client_secret' => null,
+        ]);
+
+        $user = User::factory()->create();
+        $user = User::find($user->id);
+
+        $this->actingAs($user);
+
+        $oldSessionId = session()->getId();
+
+        $response = $this->post(route('logout'));
+
+        $response->assertRedirect(route('login-selection'));
+        $this->assertGuest();
+
+        $this->assertNotEquals($oldSessionId, session()->getId());
+    }
+
     public function test_redirects_sso_user_to_websso_logout_when_forgerock_direct(): void
     {
         config(['nusoa.sso.strategy' => 'forgerock-direct']);

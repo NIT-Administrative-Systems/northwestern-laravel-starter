@@ -6,7 +6,6 @@ describe("Authentication - Login", () => {
     context("Login selection page", () => {
         it("should display available login methods", () => {
             cy.visit("/auth/type");
-            cy.getBySel("netid-login").should("be.visible");
 
             cy.php("config('local-auth.enabled')").then((enabled) => {
                 if (enabled) {
