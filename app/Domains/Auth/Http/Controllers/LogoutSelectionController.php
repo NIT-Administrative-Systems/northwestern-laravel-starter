@@ -24,23 +24,27 @@ class LogoutSelectionController extends Controller
             return redirect(route('login-selection'));
         }
 
-        if ($user->auth_type === AuthTypeEnum::LOCAL) {
-            Auth::logout();
-            Session::invalidate();
-            Session::regenerateToken();
-
-            return redirect(route('login-selection'));
-        }
-
         $webssoConfigured = filled(config('nusoa.sso.apigeeApiKey'))
             || config('nusoa.sso.strategy') === 'forgerock-direct';
 
-        return redirect(
-            route(
-                $webssoConfigured
-                ? 'login-websso-logout'
-                : 'login-oauth-logout'
-            )
-        );
+        $entraConfigured = filled(config('services.northwestern-azure.client_id'))
+            && filled(config('services.northwestern-azure.client_secret'));
+
+        $logoutUrl = match (true) {
+            $user->auth_type === AuthTypeEnum::LOCAL => null,
+            $webssoConfigured => route('login-websso-logout'),
+            $entraConfigured => route('login-oauth-logout'),
+            default => null,
+        };
+
+        if ($logoutUrl) {
+            return redirect($logoutUrl);
+        }
+
+        Auth::logout();
+        Session::invalidate();
+        Session::regenerateToken();
+
+        return redirect(route('login-selection'));
     }
 }

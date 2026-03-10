@@ -49,6 +49,11 @@ class LogoutSelectionControllerTest extends TestCase
 
     public function test_redirects_sso_user_to_entra_logout_by_default(): void
     {
+        config([
+            'services.northwestern-azure.client_id' => 'test-client-id',
+            'services.northwestern-azure.client_secret' => 'test-client-secret',
+        ]);
+
         $user = User::factory()->create();
 
         $this->actingAs($user);
