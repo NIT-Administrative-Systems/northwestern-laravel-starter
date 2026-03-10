@@ -19,26 +19,31 @@ class LoginSelectionController extends Controller
 
     public function __invoke(Request $request): RedirectResponse|View
     {
-        $ssoRoute = $this->ssoRoute();
+        $ssoUrl = $this->ssoUrl();
         $localEnabled = config('local-auth.enabled');
 
-        if (! $localEnabled && ! App::environment('ci')) {
-            return redirect(route($ssoRoute));
+        if (! $localEnabled && ! App::environment('ci') && $ssoUrl) {
+            return redirect($ssoUrl);
         }
 
         return view('auth.login-selection', [
-            'ssoRoute' => $ssoRoute,
+            'ssoUrl' => $ssoUrl,
             'localEnabled' => $localEnabled,
         ]);
     }
 
-    private function ssoRoute(): string
+    private function ssoUrl(): ?string
     {
         $webssoConfigured = filled(config('nusoa.sso.apigeeApiKey'))
             || config('nusoa.sso.strategy') === 'forgerock-direct';
 
-        return $webssoConfigured
-            ? 'login-websso'
-            : 'login-oauth-redirect';
+        $entraConfigured = filled(config('services.northwestern-azure.client_id'))
+            && filled(config('services.northwestern-azure.client_secret'));
+
+        return match (true) {
+            $webssoConfigured => route('login-websso'),
+            $entraConfigured => route('login-oauth-redirect'),
+            default => null,
+        };
     }
 }

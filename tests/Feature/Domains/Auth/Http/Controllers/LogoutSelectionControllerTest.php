@@ -6,12 +6,28 @@ namespace Tests\Feature\Domains\Auth\Http\Controllers;
 
 use App\Domains\Auth\Http\Controllers\LogoutSelectionController;
 use App\Domains\User\Models\User;
+use Illuminate\Support\Facades\Route;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(LogoutSelectionController::class)]
 class LogoutSelectionControllerTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        if (! Route::has('login-oauth-logout')) {
+            Route::get('auth/azure-ad/oauth-logout', fn () => null)->name('login-oauth-logout');
+        }
+
+        if (! Route::has('login-websso-logout')) {
+            Route::get('auth/websso/logout', fn () => null)->name('login-websso-logout');
+        }
+
+        Route::getRoutes()->refreshNameLookups();
+    }
+
     public function test_redirects_to_login_selection_when_user_not_authenticated(): void
     {
         $response = $this->post(route('logout'));
@@ -39,6 +55,11 @@ class LogoutSelectionControllerTest extends TestCase
 
     public function test_redirects_sso_user_to_entra_logout_by_default(): void
     {
+        config([
+            'services.northwestern-azure.client_id' => 'test-client-id',
+            'services.northwestern-azure.client_secret' => 'test-client-secret',
+        ]);
+
         $user = User::factory()->create();
 
         $this->actingAs($user);
@@ -61,6 +82,30 @@ class LogoutSelectionControllerTest extends TestCase
 
         $response->assertRedirect(route('login-websso-logout'));
         $this->assertAuthenticatedAs($user);
+    }
+
+    public function test_logs_out_sso_user_locally_when_no_sso_provider_configured(): void
+    {
+        config([
+            'nusoa.sso.apigeeApiKey' => null,
+            'nusoa.sso.strategy' => null,
+            'services.northwestern-azure.client_id' => null,
+            'services.northwestern-azure.client_secret' => null,
+        ]);
+
+        $user = User::factory()->create();
+        $user = User::find($user->id);
+
+        $this->actingAs($user);
+
+        $oldSessionId = session()->getId();
+
+        $response = $this->post(route('logout'));
+
+        $response->assertRedirect(route('login-selection'));
+        $this->assertGuest();
+
+        $this->assertNotEquals($oldSessionId, session()->getId());
     }
 
     public function test_redirects_sso_user_to_websso_logout_when_forgerock_direct(): void

@@ -5,21 +5,45 @@ declare(strict_types=1);
 namespace Tests\Feature\Domains\Auth\Http\Controllers;
 
 use App\Domains\Auth\Http\Controllers\LoginSelectionController;
+use Illuminate\Support\Facades\Route;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(LoginSelectionController::class)]
 class LoginSelectionControllerTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        if (! Route::has('login-oauth-redirect')) {
+            Route::get('auth/azure-ad/redirect', fn () => null)->name('login-oauth-redirect');
+        }
+
+        if (! Route::has('login-websso')) {
+            Route::get('auth/websso/login', fn () => null)->name('login-websso');
+        }
+
+        if (! Route::has('login-code.request')) {
+            Route::get('auth/login', fn () => null)->name('login-code.request');
+        }
+
+        Route::getRoutes()->refreshNameLookups();
+    }
+
     public function test_renders_view_with_entra_route_when_local_auth_enabled(): void
     {
-        config(['local-auth.enabled' => true]);
+        config([
+            'local-auth.enabled' => true,
+            'services.northwestern-azure.client_id' => 'test-client-id',
+            'services.northwestern-azure.client_secret' => 'test-client-secret',
+        ]);
 
         $response = $this->get(route('login-selection'));
 
         $response->assertOk();
         $response->assertViewIs('auth.login-selection');
-        $response->assertViewHas('ssoRoute', 'login-oauth-redirect');
+        $response->assertViewHas('ssoUrl', route('login-oauth-redirect'));
     }
 
     public function test_renders_view_with_websso_route_when_local_auth_enabled_and_api_key_set(): void
@@ -33,7 +57,7 @@ class LoginSelectionControllerTest extends TestCase
 
         $response->assertOk();
         $response->assertViewIs('auth.login-selection');
-        $response->assertViewHas('ssoRoute', 'login-websso');
+        $response->assertViewHas('ssoUrl', route('login-websso'));
     }
 
     public function test_renders_view_with_websso_route_when_local_auth_enabled_and_forgerock_direct(): void
@@ -47,12 +71,16 @@ class LoginSelectionControllerTest extends TestCase
 
         $response->assertOk();
         $response->assertViewIs('auth.login-selection');
-        $response->assertViewHas('ssoRoute', 'login-websso');
+        $response->assertViewHas('ssoUrl', route('login-websso'));
     }
 
     public function test_redirects_to_entra_when_local_auth_disabled(): void
     {
-        config(['local-auth.enabled' => false]);
+        config([
+            'local-auth.enabled' => false,
+            'services.northwestern-azure.client_id' => 'test-client-id',
+            'services.northwestern-azure.client_secret' => 'test-client-secret',
+        ]);
 
         $response = $this->get(route('login-selection'));
 
@@ -85,7 +113,11 @@ class LoginSelectionControllerTest extends TestCase
 
     public function test_renders_view_in_ci_env_when_local_auth_disabled(): void
     {
-        config(['local-auth.enabled' => false]);
+        config([
+            'local-auth.enabled' => false,
+            'services.northwestern-azure.client_id' => 'test-client-id',
+            'services.northwestern-azure.client_secret' => 'test-client-secret',
+        ]);
 
         $this->app->detectEnvironment(fn () => 'ci');
 
@@ -108,6 +140,6 @@ class LoginSelectionControllerTest extends TestCase
 
         $response->assertOk();
         $response->assertViewIs('auth.login-selection');
-        $response->assertViewHas('ssoRoute', 'login-websso');
+        $response->assertViewHas('ssoUrl', route('login-websso'));
     }
 }

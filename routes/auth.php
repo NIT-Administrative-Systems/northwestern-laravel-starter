@@ -7,34 +7,45 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function () {
-    Route::middleware('guest')->group(function () {
-        Route::get('login', Controllers\Local\ShowLoginCodeRequestController::class)->name('login-code.request');
-        Route::post('login/request', [Controllers\Local\SendLoginCodeController::class, 'send'])
-            ->middleware('throttle:auth:login-code:request')
-            ->name('login-code.send');
-        Route::post('login/resend', [Controllers\Local\SendLoginCodeController::class, 'resend'])
-            ->middleware('throttle:auth:login-code:request')
-            ->name('login-code.resend');
-        Route::get('login/code', Controllers\Local\ShowLoginCodeFormController::class)->name('login-code.code');
-        Route::post('login/verify', Controllers\Local\VerifyLoginCodeController::class)
-            ->middleware('throttle:auth:login-code:verify')
-            ->name('login-code.verify');
-    });
+    if (config('local-auth.enabled')) {
+        Route::middleware('guest')->group(function () {
+            Route::get('login', Controllers\Local\ShowLoginCodeRequestController::class)->name('login-code.request');
+            Route::post('login/request', [Controllers\Local\SendLoginCodeController::class, 'send'])
+                ->middleware('throttle:auth:login-code:request')
+                ->name('login-code.send');
+            Route::post('login/resend', [Controllers\Local\SendLoginCodeController::class, 'resend'])
+                ->middleware('throttle:auth:login-code:request')
+                ->name('login-code.resend');
+            Route::get('login/code', Controllers\Local\ShowLoginCodeFormController::class)->name('login-code.code');
+            Route::post('login/verify', Controllers\Local\VerifyLoginCodeController::class)
+                ->middleware('throttle:auth:login-code:verify')
+                ->name('login-code.verify');
+        });
+    }
 
     Route::get('type', Controllers\LoginSelectionController::class)->name('login-selection');
     Route::post('logout', Controllers\LogoutSelectionController::class)->name('logout');
 
-    Route::prefix('azure-ad')->group(function () {
-        Route::get('redirect', [Controllers\WebSSOController::class, 'oauthRedirect'])->name('login-oauth-redirect');
-        Route::post('callback', [Controllers\WebSSOController::class, 'oauthCallback'])->name('login-oauth-callback')
-            ->withoutMiddleware([VerifyCsrfToken::class]);
-        Route::get('oauth-logout', [Controllers\WebSSOController::class, 'oauthLogout'])->name('login-oauth-logout');
-    });
+    $webssoConfigured = filled(config('nusoa.sso.apigeeApiKey'))
+        || config('nusoa.sso.strategy') === 'forgerock-direct';
+    $entraConfigured = filled(config('services.northwestern-azure.client_id'))
+        && filled(config('services.northwestern-azure.client_secret'));
 
-    Route::prefix('websso')->group(function () {
-        Route::get('login', [Controllers\WebSSOController::class, 'login'])->name('login-websso');
-        Route::get('logout', [Controllers\WebSSOController::class, 'logout'])->name('login-websso-logout');
-    });
+    if ($entraConfigured) {
+        Route::prefix('azure-ad')->group(function () {
+            Route::get('redirect', [Controllers\WebSSOController::class, 'oauthRedirect'])->name('login-oauth-redirect');
+            Route::post('callback', [Controllers\WebSSOController::class, 'oauthCallback'])->name('login-oauth-callback')
+                ->withoutMiddleware([VerifyCsrfToken::class]);
+            Route::get('oauth-logout', [Controllers\WebSSOController::class, 'oauthLogout'])->name('login-oauth-logout');
+        });
+    }
+
+    if ($webssoConfigured) {
+        Route::prefix('websso')->group(function () {
+            Route::get('login', [Controllers\WebSSOController::class, 'login'])->name('login-websso');
+            Route::get('logout', [Controllers\WebSSOController::class, 'logout'])->name('login-websso-logout');
+        });
+    }
 });
 
 Route::post('/impersonate/take/{id}/{guardName?}', [Controllers\ImpersonationController::class, 'take'])->middleware('throttle:auth:impersonate')->name('impersonate');
