@@ -13,7 +13,6 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(ConfigValidatorResolver::class)]
-#[CoversClass(ResolvedValidator::class)]
 #[CoversClass(StarterValidator::class)]
 class ConfigValidatorResolverTest extends TestCase
 {

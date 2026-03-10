@@ -117,7 +117,7 @@ class ValidateConfigurationCommand extends Command
     protected function displaySkipped(string $description): void
     {
         $this->line("  <fg=yellow>–</> <fg=white>{$description}</>");
-        $this->line('    <fg=gray>Skipped (not configured)</>');
+        $this->line('    <fg=gray>Skipped (not applicable)</>');
         $this->newLine();
     }
 

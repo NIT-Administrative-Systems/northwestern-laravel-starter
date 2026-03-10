@@ -47,7 +47,7 @@ class ConfigValidatorResolver
             ->unique(fn (array $item): string => $item['class'])
             ->sortBy('description')
             ->map(fn (array $item): ResolvedValidator => new ResolvedValidator(
-                validator: new $item['class'](),
+                validator: resolve($item['class']),
                 description: $item['description'],
             ))
             ->values()
