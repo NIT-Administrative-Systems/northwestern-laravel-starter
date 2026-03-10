@@ -16,8 +16,18 @@ class LoginSelectionControllerTest extends TestCase
     {
         parent::setUp();
 
-        Route::get('auth/azure-ad/redirect', fn () => null)->name('login-oauth-redirect');
-        Route::get('auth/websso/login', fn () => null)->name('login-websso');
+        if (! Route::has('login-oauth-redirect')) {
+            Route::get('auth/azure-ad/redirect', fn () => null)->name('login-oauth-redirect');
+        }
+
+        if (! Route::has('login-websso')) {
+            Route::get('auth/websso/login', fn () => null)->name('login-websso');
+        }
+
+        if (! Route::has('login-code.request')) {
+            Route::get('auth/login', fn () => null)->name('login-code.request');
+        }
+
         Route::getRoutes()->refreshNameLookups();
     }
 
