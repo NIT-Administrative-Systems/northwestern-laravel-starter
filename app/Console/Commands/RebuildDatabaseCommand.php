@@ -91,7 +91,7 @@ class RebuildDatabaseCommand extends Command
             $this->newLine();
         }
 
-        if (blank(config('api.demo_user_token'))) {
+        if (config('api.enabled') && blank(config('api.demo_user_token'))) {
             $this->components->warn("The demo API user's access token is missing.");
             $this->line('  <fg=gray>→</> A random value has been generated for <comment>api-nuit</comment>');
             $this->line('  <fg=gray>→</> For predictable local testing, add to your <comment>.env</comment> file:');

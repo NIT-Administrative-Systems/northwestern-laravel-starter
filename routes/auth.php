@@ -7,19 +7,21 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function () {
-    Route::middleware('guest')->group(function () {
-        Route::get('login', Controllers\Local\ShowLoginCodeRequestController::class)->name('login-code.request');
-        Route::post('login/request', [Controllers\Local\SendLoginCodeController::class, 'send'])
-            ->middleware('throttle:auth:login-code:request')
-            ->name('login-code.send');
-        Route::post('login/resend', [Controllers\Local\SendLoginCodeController::class, 'resend'])
-            ->middleware('throttle:auth:login-code:request')
-            ->name('login-code.resend');
-        Route::get('login/code', Controllers\Local\ShowLoginCodeFormController::class)->name('login-code.code');
-        Route::post('login/verify', Controllers\Local\VerifyLoginCodeController::class)
-            ->middleware('throttle:auth:login-code:verify')
-            ->name('login-code.verify');
-    });
+    if (config('local-auth.enabled')) {
+        Route::middleware('guest')->group(function () {
+            Route::get('login', Controllers\Local\ShowLoginCodeRequestController::class)->name('login-code.request');
+            Route::post('login/request', [Controllers\Local\SendLoginCodeController::class, 'send'])
+                ->middleware('throttle:auth:login-code:request')
+                ->name('login-code.send');
+            Route::post('login/resend', [Controllers\Local\SendLoginCodeController::class, 'resend'])
+                ->middleware('throttle:auth:login-code:request')
+                ->name('login-code.resend');
+            Route::get('login/code', Controllers\Local\ShowLoginCodeFormController::class)->name('login-code.code');
+            Route::post('login/verify', Controllers\Local\VerifyLoginCodeController::class)
+                ->middleware('throttle:auth:login-code:verify')
+                ->name('login-code.verify');
+        });
+    }
 
     Route::get('type', Controllers\LoginSelectionController::class)->name('login-selection');
     Route::post('logout', Controllers\LogoutSelectionController::class)->name('logout');
