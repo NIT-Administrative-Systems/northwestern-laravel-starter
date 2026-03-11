@@ -17,6 +17,7 @@ class AccessTokenExpirationNotification extends Mailable implements ShouldQueue
 {
     use Queueable;
 
+    /** @param  positive-int  $daysUntilExpiration */
     public function __construct(
         #[WithoutRelations]
         public readonly User $user,

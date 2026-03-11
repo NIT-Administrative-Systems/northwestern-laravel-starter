@@ -19,7 +19,7 @@ readonly class CreationResult
     /**
      * @param  TicketSystemEnum  $ticketSystemType  The gateway that handled the request.
      * @param  bool  $creationError  Whether the submission failed.
-     * @param  string|null  $ticketNumber  The external ticket reference (e.g., TDX ID or SUP-47). Null on failure.
+     * @param  non-empty-string|null  $ticketNumber  The external ticket reference (e.g., TDX ID or SUP-47). Null on failure.
      * @param  string|null  $errorMessage  A description of the failure. Null on success.
      */
     public function __construct(

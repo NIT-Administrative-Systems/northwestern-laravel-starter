@@ -27,6 +27,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  */
 class LogsApiRequests
 {
+    protected const string TRACE_HEADER = 'X-Trace-Id';
+
     /**
      * @param  Request  $request  The incoming HTTP request
      * @param  Closure(Request): (Response)  $next  The next middleware in the pipeline
@@ -44,7 +46,7 @@ class LogsApiRequests
         $endTime = microtime(true);
         $durationMs = (int) (($endTime - $startTime) * 1000);
 
-        $response->headers->set('X-Trace-Id', Context::get(ApiRequestContext::TRACE_ID));
+        $response->headers->set(static::TRACE_HEADER, Context::get(ApiRequestContext::TRACE_ID));
 
         $userId = Context::get(ApiRequestContext::USER_ID);
         $failureReason = Context::get(ApiRequestContext::FAILURE_REASON);
@@ -62,6 +64,7 @@ class LogsApiRequests
         try {
             $responseBytes = null;
             if (! $response instanceof StreamedResponse) {
+                /** @var numeric-string|null $contentLength */
                 $contentLength = $response->headers->get('Content-Length');
 
                 $responseBytes = $contentLength !== null
@@ -105,7 +108,7 @@ class LogsApiRequests
      * 3. If authentication failure → Always log (security events are always important)
      * 4. Otherwise → Apply probabilistic sampling to successful requests
      *
-     * @param  int  $statusCode  HTTP status code of the response
+     * @param  int<100, 599>  $statusCode  HTTP status code of the response
      * @param  string|null  $failureReason  Authentication failure reason, if any
      * @return bool True if the request should be logged, false if it should be skipped
      */

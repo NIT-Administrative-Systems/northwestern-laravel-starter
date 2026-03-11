@@ -66,7 +66,7 @@ class ProblemDetails
      *
      * All fields are optional per RFC 9457, but we provide sensible defaults.
      *
-     * @param  int  $status  HTTP status code (advisory; included for consumer convenience)
+     * @param  int<100, 599>  $status  HTTP status code (advisory; included for consumer convenience)
      * @param  string  $title  Short, human-readable summary (should not change between occurrences)
      * @param  string|null  $detail  Specific explanation for this occurrence (should help client correct the problem)
      * @param  string  $type  URI reference identifying the problem type (defaults to "about:blank")
@@ -170,7 +170,10 @@ class ProblemDetails
         );
     }
 
-    /** @param array<string, string> $headers */
+    /**
+     * @param  positive-int  $retryAfter
+     * @param  array<string, string>  $headers
+     */
     public static function serviceUnavailable(string $detail = 'Service temporarily unavailable', int $retryAfter = 3600, array $headers = []): JsonResponse
     {
         $defaultHeaders = ['Retry-After' => (string) $retryAfter];
@@ -183,7 +186,10 @@ class ProblemDetails
         );
     }
 
-    /** @param array<string, string> $headers */
+    /**
+     * @param  positive-int  $retryAfter
+     * @param  array<string, string>  $headers
+     */
     public static function tooManyRequests(string $detail = 'Too many requests', int $retryAfter = 60, array $headers = []): JsonResponse
     {
         return self::response(

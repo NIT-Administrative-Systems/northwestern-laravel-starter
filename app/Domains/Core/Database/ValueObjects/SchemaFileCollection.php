@@ -14,8 +14,8 @@ use Illuminate\Contracts\Support\Arrayable;
 readonly class SchemaFileCollection implements Arrayable
 {
     /**
-     * @param  array<int, string>  $migrations  Absolute paths to migration files
-     * @param  array<int, string>  $seeders  Absolute paths to seeder files
+     * @param  list<non-empty-string>  $migrations  Absolute paths to migration files
+     * @param  list<non-empty-string>  $seeders  Absolute paths to seeder files
      */
     public function __construct(
         public array $migrations,
@@ -26,7 +26,7 @@ readonly class SchemaFileCollection implements Arrayable
     /**
      * Get all schema files combined.
      *
-     * @return array<int, string>
+     * @return list<non-empty-string>
      */
     public function all(): array
     {
@@ -51,9 +51,9 @@ readonly class SchemaFileCollection implements Arrayable
      * Convert to array format.
      *
      * @return array{
-     *     migrations: array<int, string>,
-     *     seeders: array<int, string>,
-     *     all: array<int, string>
+     *     migrations: list<non-empty-string>,
+     *     seeders: list<non-empty-string>,
+     *     all: list<non-empty-string>
      * }
      */
     public function toArray(): array

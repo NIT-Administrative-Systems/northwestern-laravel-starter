@@ -95,6 +95,8 @@ class TeamDynamixGateway implements TicketSystemGateway
     /**
      * Resolve the TDX assignee group ID from configuration.
      *
+     * @return positive-int
+     *
      * @throws InvalidArgumentException If the group ID is missing or not a positive integer.
      */
     private function resolveAssigneeGroupId(): int

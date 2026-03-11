@@ -18,6 +18,8 @@ class StartImpersonation
     }
 
     /**
+     * @param  positive-int|non-empty-string  $userIdToImpersonate
+     *
      * @throws MissingUserProvider
      * @throws InvalidUserProvider
      */

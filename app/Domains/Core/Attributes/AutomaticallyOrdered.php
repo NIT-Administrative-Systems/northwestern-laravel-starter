@@ -51,9 +51,9 @@ use Attribute;
 class AutomaticallyOrdered
 {
     /**
-     * @param  string  $primary  The primary column to order by (default: 'order_index')
+     * @param  non-empty-string  $primary  The primary column to order by (default: 'order_index')
      * @param  'asc'|'desc'  $primaryDirection  Sort direction for primary column (default: 'asc')
-     * @param  string  $secondary  The secondary column to order by (default: 'label')
+     * @param  non-empty-string  $secondary  The secondary column to order by (default: 'label')
      * @param  'asc'|'desc'  $secondaryDirection  Sort direction for secondary column (default: 'asc')
      */
     public function __construct(

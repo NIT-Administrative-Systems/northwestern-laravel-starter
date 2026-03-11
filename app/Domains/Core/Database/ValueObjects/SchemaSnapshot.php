@@ -14,6 +14,12 @@ use Illuminate\Contracts\Support\Arrayable;
  */
 readonly class SchemaSnapshot implements Arrayable
 {
+    /**
+     * @param  non-empty-string  $name
+     * @param  non-empty-string  $checksum
+     * @param  non-negative-int  $migrationCount
+     * @param  non-negative-int  $seederCount
+     */
     public function __construct(
         public string $name,
         public string $checksum,

@@ -90,7 +90,7 @@ class ForceDetachRoleCommand extends Command implements PromptsForMissingInput
         return self::SUCCESS;
     }
 
-    /** @return array<string, mixed> */
+    /** @return array{user: \Closure, role: \Closure} */
     protected function promptForMissingArgumentsUsing(): array
     {
         return [

@@ -124,6 +124,8 @@ class ConfigValidatorResolver
 
     /**
      * Extract the fully qualified class name from a PHP file.
+     *
+     * @return class-string|null
      */
     private function extractFullyQualifiedClassName(SplFileInfo $file): ?string
     {

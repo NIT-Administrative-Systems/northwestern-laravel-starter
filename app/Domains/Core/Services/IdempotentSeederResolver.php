@@ -45,7 +45,7 @@ class IdempotentSeederResolver
      * Supports glob patterns like 'app/Domains/*\/Seeders' to scan multiple directories.
      *
      * @param  string|array<string>|null  $paths  Directory path(s) or glob pattern(s) to scan
-     * @return array<SeederInfo> Seeders in dependency-resolved order
+     * @return list<SeederInfo> Seeders in dependency-resolved order
      */
     public function discover(string|array|null $paths = null): array
     {
@@ -179,6 +179,8 @@ class IdempotentSeederResolver
 
     /**
      * Check if a class is a valid, instantiable seeder.
+     *
+     * @param  class-string  $className
      */
     private function isValidSeederClass(string $className): bool
     {
@@ -250,7 +252,7 @@ class IdempotentSeederResolver
      * The algorithm detects this during traversal and throws an exception with a
      * helpful message showing the circular chain.
      *
-     * @return array<SeederInfo> Seeders ordered such that all dependencies run first
+     * @return list<SeederInfo> Seeders ordered such that all dependencies run first
      *
      * @throws RuntimeException If circular dependencies are detected
      *

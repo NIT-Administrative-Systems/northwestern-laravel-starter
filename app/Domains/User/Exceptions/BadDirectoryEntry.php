@@ -9,6 +9,7 @@ use Exception;
 class BadDirectoryEntry extends Exception
 {
     /**
+     * @param  non-empty-string|null  $netId
      * @param  array<string, mixed>|null  $directoryData
      */
     public function __construct(

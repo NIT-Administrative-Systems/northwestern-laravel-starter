@@ -277,7 +277,7 @@ class FindOrUpdateUserFromDirectoryTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Search value cannot be empty');
 
-        $this->service()('');
+        $this->service()(''); // @phpstan-ignore argument.type
     }
 
     public function test_whitespace_only_search_value_throws_exception(): void
