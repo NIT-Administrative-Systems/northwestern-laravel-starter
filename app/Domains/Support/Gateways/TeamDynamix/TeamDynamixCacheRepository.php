@@ -18,7 +18,7 @@ use Throwable;
  * available by name through API list endpoints. This repository caches those
  * lookups for one week to avoid repeated API calls on ticket submission.
  *
- * @phpstan-type TdxRecord array{ID: int, Name: string, ...}
+ * @phpstan-type TdxRecord array{ID: positive-int, Name: non-empty-string, ...}
  *
  * @see TeamDynamixGateway
  */
@@ -32,6 +32,7 @@ class TeamDynamixCacheRepository
         $this->cacheFor = CarbonInterval::week();
     }
 
+    /** @return positive-int */
     public function findTicketTypeId(string $name): int
     {
         return Cache::remember(
@@ -41,6 +42,7 @@ class TeamDynamixCacheRepository
         );
     }
 
+    /** @return positive-int */
     public function findTicketFormTypeId(string $name): int
     {
         return Cache::remember(
@@ -50,6 +52,7 @@ class TeamDynamixCacheRepository
         );
     }
 
+    /** @return positive-int */
     public function findTicketStatusId(string $name): int
     {
         return Cache::remember(
@@ -59,6 +62,7 @@ class TeamDynamixCacheRepository
         );
     }
 
+    /** @return positive-int */
     public function findTicketPriorityId(string $name): int
     {
         return Cache::remember(
@@ -68,6 +72,7 @@ class TeamDynamixCacheRepository
         );
     }
 
+    /** @return positive-int */
     public function findServiceId(string $name): int
     {
         return Cache::remember(
@@ -83,7 +88,7 @@ class TeamDynamixCacheRepository
      * @param  string  $apiName  Human-readable label for error reporting (e.g., "Ticket Type").
      * @param  string  $rawBody  Raw JSON response body from the TDX API list endpoint.
      * @param  string  $value  The name to match (case-insensitive).
-     * @return int The numeric ID of the matching record.
+     * @return positive-int The numeric ID of the matching record.
      *
      * @throws TdxLookupFailed|Throwable If no record with the given name is found.
      */

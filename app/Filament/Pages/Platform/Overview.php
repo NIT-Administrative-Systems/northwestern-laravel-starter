@@ -231,7 +231,7 @@ class Overview extends Page
     }
 
     /**
-     * @return array<string, mixed>
+     * @return array{name: string, label: string, status: string, summary: string, message: string, color: string, icon: string}
      */
     public function formatHealthResult(StoredCheckResult $result): array
     {

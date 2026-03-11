@@ -48,7 +48,7 @@ readonly class SeederInfo
     /**
      * Get short names of dependencies
      *
-     * @return array<string>
+     * @return list<non-empty-string>
      */
     public function getDependencyShortNames(): array
     {

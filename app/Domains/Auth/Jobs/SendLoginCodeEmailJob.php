@@ -20,6 +20,7 @@ class SendLoginCodeEmailJob implements ShouldQueue
     use Queueable;
 
     /**
+     * @param  positive-int  $loginChallengeId
      * @param  string  $encryptedCode  The verification code encrypted at the time the challenge is issued.
      *
      * Queued jobs are serialized and transported through the queue (e.g., SES), and the payload

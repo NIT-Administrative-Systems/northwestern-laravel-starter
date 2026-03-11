@@ -25,10 +25,10 @@ readonly class RotateAccessToken
      * Rotate the provided Access Token.
      *
      * @param  AccessToken  $previousAccessToken  The token being rotated.
-     * @param  string  $name  Descriptive name for the new token
+     * @param  non-empty-string  $name  Descriptive name for the new token
      * @param  User|null  $rotatedBy  The user performing the rotation. Defaults to the current authenticated user.
      * @param  CarbonInterface|null  $expiresAt  When the replacement token expires (null = no expiration).
-     * @param  array<int, string>|null  $allowedIps  Optional IP restrictions for the replacement token.
+     * @param  list<non-empty-string>|null  $allowedIps  Optional IP restrictions for the replacement token.
      * @return string The raw Bearer token string that must be shown to the operator.
      */
     public function __invoke(

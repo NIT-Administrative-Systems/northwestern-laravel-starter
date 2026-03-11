@@ -21,7 +21,7 @@ use Attribute;
 readonly class StarterValidator
 {
     /**
-     * @param  string  $description  Human-readable label displayed during validation output
+     * @param  non-empty-string  $description  Human-readable label displayed during validation output
      */
     public function __construct(
         public string $description,

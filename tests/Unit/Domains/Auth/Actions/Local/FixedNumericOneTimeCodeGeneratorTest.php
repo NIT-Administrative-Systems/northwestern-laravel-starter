@@ -49,7 +49,7 @@ class FixedNumericOneTimeCodeGeneratorTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Digits must be >= 1.');
 
-        ($this->generator)(0);
+        ($this->generator)(0); // @phpstan-ignore argument.type
     }
 
     public function test_throws_for_negative_digits(): void
@@ -57,7 +57,7 @@ class FixedNumericOneTimeCodeGeneratorTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Digits must be >= 1.');
 
-        ($this->generator)(-1);
+        ($this->generator)(-1); // @phpstan-ignore argument.type
     }
 
     #[DataProvider('blockedEnvironmentProvider')]

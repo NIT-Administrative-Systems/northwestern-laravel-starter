@@ -140,8 +140,8 @@ class AccessToken extends BaseModel
     /**
      * Generate a hash for the given plain token.
      *
-     * @param  string  $token  The plain token to hash.
-     * @return string The resulting hash.
+     * @param  non-empty-string  $token  The plain token to hash.
+     * @return non-empty-string The resulting hash.
      */
     public static function hashFromPlain(#[SensitiveParameter] string $token): string
     {

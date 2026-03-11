@@ -32,7 +32,7 @@ final class LoginCodeSession
      */
     public const string CHALLENGE_ID = self::PREFIX . 'challenge_id';
 
-    /** @var array<int, string> */
+    /** @var non-empty-list<non-empty-string> */
     public const array KEYS = [
         self::EMAIL,
         self::CHALLENGE_ID,

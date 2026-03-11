@@ -55,7 +55,7 @@ readonly class FindOrUpdateUserFromDirectory
     }
 
     /**
-     * @param  string  $searchValue  NetID, email address, or employee ID.
+     * @param  non-empty-string  $searchValue  NetID, email address, or employee ID.
      * @param  bool  $immediate  Whether to synchronously run {@see self::postRetrievalJobs()} or dispatch them to the queue
      *                           after a {@see User} is retrieved.
      *

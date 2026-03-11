@@ -23,8 +23,8 @@ final class FixedNumericOneTimeCodeGenerator implements OneTimeCodeGenerator
     /**
      * Generate a predictable code based on the SEED pattern.
      *
-     * @param  int  $digits  The desired length of the code.
-     * @return string A string starting with "123..." truncated to the requested length.
+     * @param  positive-int  $digits  The desired length of the code.
+     * @return non-empty-string A string starting with "123..." truncated to the requested length.
      */
     public function __invoke(int $digits): string
     {

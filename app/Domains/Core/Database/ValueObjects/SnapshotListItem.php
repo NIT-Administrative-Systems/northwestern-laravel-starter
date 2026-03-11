@@ -12,6 +12,10 @@ use Illuminate\Contracts\Support\Arrayable;
  */
 final readonly class SnapshotListItem implements Arrayable
 {
+    /**
+     * @param  non-empty-string  $name
+     * @param  non-negative-int  $size
+     */
     public function __construct(
         public string $name,
         public int $size,

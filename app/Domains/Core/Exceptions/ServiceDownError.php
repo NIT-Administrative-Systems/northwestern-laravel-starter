@@ -10,6 +10,7 @@ use Illuminate\Support\Str;
 
 class ServiceDownError extends Exception
 {
+    /** @param  positive-int|null  $retryAttempted */
     public function __construct(
         protected ExternalServiceEnum $service,
         protected ?string $additionalMessage = null,

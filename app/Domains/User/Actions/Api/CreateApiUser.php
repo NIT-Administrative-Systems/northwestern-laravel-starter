@@ -23,14 +23,14 @@ readonly class CreateApiUser
     /**
      * Create a new API user with an initial token.
      *
-     * @param  string  $username  The username for the API user (should be prefixed with 'api-')
-     * @param  string  $firstName  The display label for this API user (will be suffixed with 'API')
-     * @param  string  $tokenName  Descriptive name for the initial access token
+     * @param  non-empty-string  $username  The username for the API user (should be prefixed with 'api-')
+     * @param  non-empty-string  $firstName  The display label for this API user (will be suffixed with 'API')
+     * @param  non-empty-string  $tokenName  Descriptive name for the initial access token
      * @param  string|null  $description  Optional description of the API user's purpose
      * @param  string|null  $email  Optional contact email for expiration notifications
      * @param  CarbonInterface|null  $expiresAt  When the token expires (null for no expiration)
-     * @param  array<int, string>|null  $allowedIps  Optional list of allowed IP addresses or CIDR ranges
-     * @return array{0: User, 1: string} The created user and the raw Bearer token
+     * @param  list<non-empty-string>|null  $allowedIps  Optional list of allowed IP addresses or CIDR ranges
+     * @return array{0: User, 1: non-empty-string} The created user and the raw Bearer token
      */
     public function __invoke(
         string $username,

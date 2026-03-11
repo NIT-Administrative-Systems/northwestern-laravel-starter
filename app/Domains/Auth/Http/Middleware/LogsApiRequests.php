@@ -64,6 +64,7 @@ class LogsApiRequests
         try {
             $responseBytes = null;
             if (! $response instanceof StreamedResponse) {
+                /** @var numeric-string|null $contentLength */
                 $contentLength = $response->headers->get('Content-Length');
 
                 $responseBytes = $contentLength !== null
@@ -107,7 +108,7 @@ class LogsApiRequests
      * 3. If authentication failure → Always log (security events are always important)
      * 4. Otherwise → Apply probabilistic sampling to successful requests
      *
-     * @param  int  $statusCode  HTTP status code of the response
+     * @param  int<100, 599>  $statusCode  HTTP status code of the response
      * @param  string|null  $failureReason  Authentication failure reason, if any
      * @return bool True if the request should be logged, false if it should be skipped
      */
