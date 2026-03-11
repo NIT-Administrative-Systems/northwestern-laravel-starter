@@ -12,7 +12,7 @@ import { Card, CardGrid, Aside } from '@astrojs/starlight/components';
 - **PHP**: `^8.4`
 - **Node.js**: `v25.x`
 - **pnpm**: `^10.0`
-- **PostgreSQL**: `16+`
+- **Database**: PostgreSQL `16+`, MySQL `8.0+`, or SQLite `3.35+`
 
 ### PHP Extensions
 
@@ -29,15 +29,16 @@ ext-xml         ext-xmlreader   ext-xmlwriter   ext-zip
 
 ### Database Requirements
 
-<Aside type="caution" title="PostgreSQL Only">
-**PostgreSQL 16+** is the **only** officially supported database driver for this project. Further documentation will assume PostgreSQL is in use.
+<Aside type="note" title="Supported Databases">
+The following database engines are officially supported and tested in CI:
 
-The application has **not been tested** with MySQL, MariaDB, SQLite, or other database engines. Key limitations with other databases:
+- **PostgreSQL** `16+`
+- **MySQL** `8.0+`
+- **SQLite** `3.35+`
 
-- **Schema Compatibility** - Certain migrations may use PostgreSQL-specific features
-- **Native Functions** - Filament charts and analytics widgets rely on PostgreSQL functions
+PostgreSQL is the default and recommended driver for production deployments. MySQL is fully supported as an alternative. SQLite is suitable for local development, testing, and lightweight deployments.
 
-If you choose to use a different database driver, expect to modify migrations, seeders, and dashboard widgets.
+Set the `DB_CONNECTION` environment variable in your `.env` file to switch drivers (`pgsql`, `mysql`, or `sqlite`).
 </Aside>
 
 ## Local Development Setup
@@ -49,14 +50,14 @@ If you choose to use a different database driver, expect to modify migrations, s
     [Laravel Herd](https://herd.laravel.com/) provides an all-in-one development environment for macOS and Windows:
     - PHP 8.4+ with extension management
     - Nginx web server
-    - PostgreSQL, Redis, and MinIO services
+    - PostgreSQL, MySQL, Redis, and MinIO services
     - Automatic site provisioning
   </Card>
 
   <Card title="Laravel Valet" icon="seti:config">
     **Alternative**
 
-    [Laravel Valet](https://laravel.com/docs/valet) is a lightweight macOS environment requiring manual installation of PHP, PostgreSQL, and other dependencies.
+    [Laravel Valet](https://laravel.com/docs/valet) is a lightweight macOS environment requiring manual installation of PHP, your chosen database (PostgreSQL, MySQL, or SQLite), and other dependencies.
 
     Suitable as an alternative if you cannot use Laravel Herd.
   </Card>

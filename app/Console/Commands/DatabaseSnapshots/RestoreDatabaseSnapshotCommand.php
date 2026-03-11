@@ -26,7 +26,9 @@ use function Laravel\Prompts\confirm;
  * schema compatibility before proceeding with the restore operation.
  *
  * Requirements:
- * - PostgreSQL: `psql` CLI utility must be in your `$PATH`
+ * - PostgreSQL: `psql` CLI utility must be in your `$PATH` (or set PG_BIN_DIRECTORY)
+ * - MySQL: `mysql` CLI utility must be in your `$PATH`
+ * - SQLite: No external utilities required
  */
 class RestoreDatabaseSnapshotCommand extends DatabaseSnapshotCommand
 {
@@ -194,13 +196,18 @@ class RestoreDatabaseSnapshotCommand extends DatabaseSnapshotCommand
      */
     private function loadSnapshot(string $snapshotPath): void
     {
-        $processFactory = function (...$arguments): Process {
+        $driver = DB::getDriverName();
+
+        $processFactory = function (...$arguments) use ($driver): Process {
             $quote = ConfigurableDbDumperFactory::determineQuoteForPlatform();
-            $pgBinDir = ConfigurableDbDumperFactory::findPostgresDirectory();
+
+            $extraDirs = $driver === 'pgsql'
+                ? array_filter([ConfigurableDbDumperFactory::findPostgresDirectory()])
+                : [];
 
             $originalCommand = (string) Arr::first($arguments);
             $util = Str::before($originalCommand, ' ');
-            $commandPath = $this->executableFinder->find($util, extraDirs: array_filter([$pgBinDir]));
+            $commandPath = $this->executableFinder->find($util, extraDirs: $extraDirs);
 
             if ($commandPath === null) {
                 throw new RuntimeException("Required utility not found: {$util}");

@@ -33,10 +33,15 @@ class ConfigurableDbDumperFactory extends DbDumperFactory
     public static function createForConnection(string $connectionName): DbDumper
     {
         $dbDumper = parent::createForConnection($connectionName);
-        $pgBinDir = self::findPostgresDirectory();
 
-        if (filled($pgBinDir)) {
-            $dbDumper->setDumpBinaryPath($pgBinDir);
+        $driver = config("database.connections.{$connectionName}.driver");
+
+        if ($driver === 'pgsql') {
+            $pgBinDir = self::findPostgresDirectory();
+
+            if (filled($pgBinDir)) {
+                $dbDumper->setDumpBinaryPath($pgBinDir);
+            }
         }
 
         return $dbDumper;
@@ -57,7 +62,7 @@ class ConfigurableDbDumperFactory extends DbDumperFactory
         $seekDir = match ($platform) {
             'win' => self::windowsHomeDir() . self::DEFAULT_PATHS['win'],
             'darwin' => self::DEFAULT_PATHS['darwin'],
-            default => throw new RuntimeException('This tool only supports Windows and macOS.'),
+            default => throw new RuntimeException('PostgreSQL binary auto-discovery only supports Windows and macOS (Laravel Herd). Set PG_BIN_DIRECTORY in .env instead.'),
         };
 
         try {

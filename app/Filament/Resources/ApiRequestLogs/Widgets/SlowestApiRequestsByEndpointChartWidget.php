@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\ApiRequestLogs\Widgets;
 
 use App\Domains\Auth\Models\ApiRequestLog;
+use App\Domains\Core\Database\DatabaseExpressions;
 use Filament\Support\RawJs;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\HtmlString;
@@ -25,17 +26,7 @@ class SlowestApiRequestsByEndpointChartWidget extends BaseApiRequestChartWidget
 
         $threshold = (int) config('api.request_logging.slow_request_threshold_ms');
 
-        $this->cachedEndpointStats = $this->baseQuery()
-            ->selectRaw('
-                path,
-                PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY duration_ms) as p50_duration,
-                PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY duration_ms) as p95_duration,
-                COUNT(*) as request_count
-            ')
-            ->groupBy('path')
-            ->orderByDesc('p95_duration')
-            ->limit(10)
-            ->get();
+        $this->cachedEndpointStats = $this->computeEndpointStats();
 
         if ($this->cachedEndpointStats->isEmpty()) {
             return [
@@ -150,6 +141,49 @@ class SlowestApiRequestsByEndpointChartWidget extends BaseApiRequestChartWidget
                 ],
             ])->render()
         );
+    }
+
+    /**
+     * Compute endpoint stats with percentiles, using PHP fallback for non-PostgreSQL drivers.
+     *
+     * @return Collection<int, ApiRequestLog>
+     */
+    private function computeEndpointStats(): Collection
+    {
+        if (DatabaseExpressions::supportsNativePercentile()) {
+            $p50 = DatabaseExpressions::percentile('duration_ms', 0.5);
+            $p95 = DatabaseExpressions::percentile('duration_ms', 0.95);
+
+            return $this->baseQuery()
+                ->selectRaw("path, {$p50['sql']} as p50_duration, {$p95['sql']} as p95_duration, COUNT(*) as request_count")
+                ->groupBy('path')
+                ->orderByDesc('p95_duration')
+                ->limit(10)
+                ->get();
+        }
+
+        // MySQL/SQLite fallback: single query, compute percentiles in PHP
+        $allRows = $this->baseQuery()->select(['path', 'duration_ms'])->get();
+
+        if ($allRows->isEmpty()) {
+            return new Collection();
+        }
+
+        $grouped = $allRows->groupBy('path');
+
+        $pathStats = $this->baseQuery()
+            ->selectRaw('path, COUNT(*) as request_count')
+            ->groupBy('path')
+            ->get();
+
+        foreach ($pathStats as $stat) {
+            $values = $grouped->get($stat->path, collect())->pluck('duration_ms');
+            $percentiles = DatabaseExpressions::computeMultiplePercentilesInPhp($values, [0.5, 0.95]);
+            $stat->setAttribute('p50_duration', $percentiles['0.5']);
+            $stat->setAttribute('p95_duration', $percentiles['0.95']);
+        }
+
+        return $pathStats->sortByDesc('p95_duration')->take(10)->values();
     }
 
     protected function getType(): string

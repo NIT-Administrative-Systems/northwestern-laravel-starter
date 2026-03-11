@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\UserLoginRecords\Widgets;
 
+use App\Domains\Core\Database\DatabaseExpressions;
 use App\Domains\User\Models\UserLoginRecord;
 use Carbon\Carbon;
 use Filament\Widgets\ChartWidget;
@@ -57,16 +58,19 @@ class LoginTrendsChartWidget extends ChartWidget
         $startInUserTz = Carbon::parse($this->startDate, 'UTC')->setTimezone($timezone);
         $endInUserTz = Carbon::parse($this->endDate, 'UTC')->setTimezone($timezone);
 
+        $extractHour = DatabaseExpressions::extractHour('logged_in_at', $timezone);
+        $dateInTz = DatabaseExpressions::dateInTimezone('logged_in_at', $timezone);
+
         // For a single day ("Today" and "Yesterday"), show hourly data
         if ($startInUserTz->isSameDay($endInUserTz)) {
             /** @var Collection<int, object{hour: string, total_count: string, unique_count: string}> $hourlyStats */
             $hourlyStats = UserLoginRecord::query()
                 ->whereBetween('logged_in_at', [$this->startDate, $this->endDate])
                 ->selectRaw("
-                    EXTRACT(HOUR FROM logged_in_at AT TIME ZONE 'UTC' AT TIME ZONE ?) as hour,
+                    {$extractHour['sql']} as hour,
                     COUNT(*) as total_count,
                     COUNT(DISTINCT user_id) as unique_count
-                ", [$timezone])
+                ", $extractHour['bindings'])
                 ->groupBy('hour')
                 ->orderBy('hour')
                 ->get()
@@ -93,10 +97,10 @@ class LoginTrendsChartWidget extends ChartWidget
             $dailyStats = UserLoginRecord::query()
                 ->whereBetween('logged_in_at', [$this->startDate, $this->endDate])
                 ->selectRaw("
-                    DATE(logged_in_at AT TIME ZONE 'UTC' AT TIME ZONE ?) as date,
+                    {$dateInTz['sql']} as date,
                     COUNT(*) as total_count,
                     COUNT(DISTINCT user_id) as unique_count
-                ", [$timezone])
+                ", $dateInTz['bindings'])
                 ->groupBy('date')
                 ->orderBy('date')
                 ->get()

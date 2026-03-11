@@ -94,8 +94,6 @@
 
             <!-- Framework boilerplate / third-party -->
             <directory>app/Domains/Core/Concerns</directory>
-            <file
-            >app/Domains/Core/Database/ConfigurableDbDumperFactory.php</file>
             <file>app/Domains/Core/Database/SchemaChecksumManager.php</file>
             <directory>app/Domains/Core/Exceptions</directory>
             <directory>app/Domains/Core/GlobalAlerts</directory>
@@ -128,7 +126,7 @@
             <file>app/Console/Commands/TestNetIdUpdateCommand.php</file>
             <file>app/Console/Commands/ValidateConfigurationCommand.php</file>
             <file>app/Console/Commands/Concerns/RunsSteps.php</file>
-            <directory>app/Console/Commands/DatabaseSnapshots</directory>
+            <!-- DatabaseSnapshots commands now have tests — removed from exclusions -->
         </exclude>
     </source>
     <php>

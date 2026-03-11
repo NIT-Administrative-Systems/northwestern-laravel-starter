@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\ApiRequestLogs\Widgets;
 
 use App\Domains\Auth\Models\ApiRequestLog;
+use App\Domains\Core\Database\DatabaseExpressions;
 use Carbon\Carbon;
 use Filament\Support\RawJs;
 use Illuminate\Support\HtmlString;
@@ -31,13 +32,7 @@ class ApiRequestDurationChartWidget extends BaseApiRequestChartWidget
          *     max_duration: float|null
          * } $stats
          */
-        $stats = $query->selectRaw('
-                PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY duration_ms) as p50,
-                PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY duration_ms) as p95,
-                AVG(duration_ms) as avg_duration,
-                MAX(duration_ms) as max_duration
-            ')
-            ->first();
+        $stats = $this->computeSummaryStats($query);
 
         if (! $stats) {
             return null;
@@ -87,16 +82,31 @@ class ApiRequestDurationChartWidget extends BaseApiRequestChartWidget
         // Determine if this is a single day view (hourly) or multi-day view (daily)
         $isSingleDay = $startInUserTz->isSameDay($endInUserTz);
 
+        $extractHour = DatabaseExpressions::extractHour('created_at', $timezone);
+        $dateInTz = DatabaseExpressions::dateInTimezone('created_at', $timezone);
+        $p95 = DatabaseExpressions::percentile('duration_ms', 0.95);
+        $nativePercentile = DatabaseExpressions::supportsNativePercentile();
+
         if ($isSingleDay) {
-            // Hourly grouping for single day
-            $durationsPerPeriod = $this->baseQuery()->selectRaw("
-                    EXTRACT(HOUR FROM created_at AT TIME ZONE 'UTC' AT TIME ZONE ?) as hour,
-                    AVG(duration_ms) as avg_duration,
-                    PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY duration_ms) as p95_duration
-                ", [$timezone])
+            $selectParts = [
+                "{$extractHour['sql']} as hour",
+                'AVG(duration_ms) as avg_duration',
+            ];
+            $bindings = $extractHour['bindings'];
+
+            if ($nativePercentile) {
+                $selectParts[] = "{$p95['sql']} as p95_duration";
+            }
+
+            $durationsPerPeriod = $this->baseQuery()
+                ->selectRaw(implode(', ', $selectParts), $bindings)
                 ->groupBy('hour')
                 ->orderBy('hour')
                 ->get();
+
+            if (! $nativePercentile) {
+                $this->computeGroupedP95($durationsPerPeriod, 'hour', $extractHour);
+            }
 
             $labels = [];
             $periodMap = [];
@@ -106,14 +116,25 @@ class ApiRequestDurationChartWidget extends BaseApiRequestChartWidget
                 $periodMap[(string) $hour] = count($labels) - 1;
             }
         } else {
-            $durationsPerPeriod = $this->baseQuery()->selectRaw("
-                    DATE(created_at AT TIME ZONE 'UTC' AT TIME ZONE ?) as date,
-                    AVG(duration_ms) as avg_duration,
-                    PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY duration_ms) as p95_duration
-                ", [$timezone])
+            $selectParts = [
+                "{$dateInTz['sql']} as date",
+                'AVG(duration_ms) as avg_duration',
+            ];
+            $bindings = $dateInTz['bindings'];
+
+            if ($nativePercentile) {
+                $selectParts[] = "{$p95['sql']} as p95_duration";
+            }
+
+            $durationsPerPeriod = $this->baseQuery()
+                ->selectRaw(implode(', ', $selectParts), $bindings)
                 ->groupBy('date')
                 ->orderBy('date')
                 ->get();
+
+            if (! $nativePercentile) {
+                $this->computeGroupedP95($durationsPerPeriod, 'date', $dateInTz);
+            }
 
             $labels = [];
             $periodMap = [];
@@ -196,6 +217,62 @@ class ApiRequestDurationChartWidget extends BaseApiRequestChartWidget
             ],
             'labels' => $labels,
         ];
+    }
+
+    /**
+     * Compute summary stats (P50, P95, AVG, MAX), falling back to PHP for non-PostgreSQL drivers.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder<ApiRequestLog>  $query
+     * @return object{p50: float|null, p95: float|null, avg_duration: float|null, max_duration: float|null}|null
+     */
+    private function computeSummaryStats(\Illuminate\Database\Eloquent\Builder $query): ?object
+    {
+        if (DatabaseExpressions::supportsNativePercentile()) {
+            $p50Expr = DatabaseExpressions::percentile('duration_ms', 0.5);
+            $p95Expr = DatabaseExpressions::percentile('duration_ms', 0.95);
+
+            /** @var object{p50: float|null, p95: float|null, avg_duration: float|null, max_duration: float|null}|null */
+            return $query->selectRaw(
+                "{$p50Expr['sql']} as p50, {$p95Expr['sql']} as p95, AVG(duration_ms) as avg_duration, MAX(duration_ms) as max_duration"
+            )->first();
+        }
+
+        // For MySQL/SQLite: fetch all durations in a single query and compute in PHP
+        $durations = $query->pluck('duration_ms');
+
+        if ($durations->isEmpty()) {
+            return null;
+        }
+
+        $percentiles = DatabaseExpressions::computeMultiplePercentilesInPhp($durations, [0.5, 0.95]);
+
+        return (object) [
+            'p50' => $percentiles['0.5'],
+            'p95' => $percentiles['0.95'],
+            'avg_duration' => $durations->avg(),
+            'max_duration' => $durations->max(),
+        ];
+    }
+
+    /**
+     * Compute P95 in PHP for grouped results (MySQL/SQLite fallback).
+     *
+     * @param  \Illuminate\Database\Eloquent\Collection<int, ApiRequestLog>  $records
+     * @param  array{sql: string, bindings: array<int, string>}  $periodExpr
+     */
+    private function computeGroupedP95(\Illuminate\Database\Eloquent\Collection $records, string $groupKey, array $periodExpr): void
+    {
+        $allRows = $this->baseQuery()
+            ->selectRaw("{$periodExpr['sql']} as period_key, duration_ms", $periodExpr['bindings'])
+            ->get();
+
+        $grouped = $allRows->groupBy('period_key');
+
+        foreach ($records as $record) {
+            $key = (string) $record->{$groupKey};
+            $values = $grouped->get($key, collect())->pluck('duration_ms');
+            $record->setAttribute('p95_duration', DatabaseExpressions::computePercentileInPhp($values, 0.95));
+        }
     }
 
     protected function getType(): string

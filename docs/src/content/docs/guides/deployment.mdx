@@ -204,6 +204,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: 8.4
+          # Use pdo_pgsql for PostgreSQL (default), pdo_mysql for MySQL, or pdo_sqlite for SQLite
           extensions: ctype, curl, dom, fileinfo, filter, hash, iconv, intl, json, libxml, mbstring, openssl, pcre, pdo, pdo_pgsql, phar, reflection, session, simplexml, sodium, tokenizer, xml, xmlreader, xmlwriter, zip
 
       - name: 📦 Install pnpm

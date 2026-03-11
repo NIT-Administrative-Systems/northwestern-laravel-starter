@@ -1,0 +1,134 @@
+name: Database Compatibility
+
+on:
+    pull_request:
+        branches: [main]
+        paths:
+            - "**.php"
+            - "composer.lock"
+            - "database/**"
+    push:
+        branches: [main]
+        paths:
+            - "**.php"
+            - "composer.lock"
+            - "database/**"
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+env:
+    PHP_VERSION: "8.4"
+
+jobs:
+    test-pgsql:
+        name: "Tests (PostgreSQL)"
+        runs-on: ubuntu-latest
+        timeout-minutes: 20
+        services:
+            postgres:
+                image: postgres:16
+                env:
+                    POSTGRES_USER: root
+                    POSTGRES_PASSWORD: root
+                    POSTGRES_DB: testing
+                ports:
+                    - 5432:5432
+                options: >-
+                    --health-cmd pg_isready
+                    --health-interval 3s
+                    --health-timeout 3s
+                    --health-retries 5
+
+        steps:
+            - name: Checkout Repository
+              uses: actions/checkout@v6
+
+            - name: Setup Environment
+              uses: ./.github/actions/common-setup
+              with:
+                  php-version: ${{ env.PHP_VERSION }}
+                  php-only: true
+                  run-ide-helper: false
+                  db-driver: pgsql
+
+            - name: Run Tests
+              run: ./vendor/bin/pest --parallel
+              env:
+                  DB_CONNECTION: phpunit
+                  DB_HOST: 127.0.0.1
+                  DB_PORT: 5432
+                  DB_PHPUNIT_DATABASE: testing
+                  DB_USERNAME: root
+                  DB_PASSWORD: root
+
+    test-mysql:
+        name: "Tests (MySQL)"
+        runs-on: ubuntu-latest
+        timeout-minutes: 20
+        services:
+            mysql:
+                image: mysql:8.4
+                env:
+                    MYSQL_ROOT_PASSWORD: root
+                    MYSQL_DATABASE: testing
+                ports:
+                    - 3306:3306
+                options: >-
+                    --health-cmd "mysqladmin ping -h localhost"
+                    --health-interval 3s
+                    --health-timeout 3s
+                    --health-retries 5
+
+        steps:
+            - name: Checkout Repository
+              uses: actions/checkout@v6
+
+            - name: Setup Environment
+              uses: ./.github/actions/common-setup
+              with:
+                  php-version: ${{ env.PHP_VERSION }}
+                  php-only: true
+                  run-ide-helper: false
+                  db-driver: mysql
+
+            - name: Load MySQL Timezone Data
+              run: |
+                  mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql -h 127.0.0.1 -u root -proot mysql
+
+            - name: Run Tests
+              run: ./vendor/bin/pest --parallel
+              env:
+                  DB_CONNECTION: phpunit-mysql
+                  DB_HOST: 127.0.0.1
+                  DB_PORT: 3306
+                  DB_PHPUNIT_DATABASE: testing
+                  DB_USERNAME: root
+                  DB_PASSWORD: root
+
+    test-sqlite:
+        name: "Tests (SQLite)"
+        runs-on: ubuntu-latest
+        timeout-minutes: 20
+
+        steps:
+            - name: Checkout Repository
+              uses: actions/checkout@v6
+
+            - name: Setup Environment
+              uses: ./.github/actions/common-setup
+              with:
+                  php-version: ${{ env.PHP_VERSION }}
+                  php-only: true
+                  run-ide-helper: false
+                  db-driver: sqlite
+
+            - name: Create SQLite Database
+              run: touch database/testing.sqlite
+
+            - name: Run Tests
+              run: ./vendor/bin/pest --parallel
+              env:
+                  DB_CONNECTION: phpunit-sqlite
+                  DB_PHPUNIT_DATABASE: database/testing.sqlite

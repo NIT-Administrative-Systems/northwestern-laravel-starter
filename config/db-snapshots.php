@@ -5,9 +5,12 @@ declare(strict_types=1);
 return [
 
     /**
-     * Custom: the path to the directory where `psql` and `pg_dump` live.
+     * Custom: the path to the directory where PostgreSQL binaries (`psql`, `pg_dump`) live.
      *
-     * If left null, we'll try to guess it.
+     * Only used when DB_CONNECTION is `pgsql`. If left null, the application will
+     * attempt to auto-discover the path (e.g., Laravel Herd's bundled PostgreSQL).
+     *
+     * MySQL and SQLite do not require this setting.
      */
     'pg_bin_directory' => env('PG_BIN_DIRECTORY'),
 

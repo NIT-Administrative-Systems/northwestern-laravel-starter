@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\ApiRequestLogs\Widgets;
 
+use App\Domains\Core\Database\DatabaseExpressions;
 use Carbon\Carbon;
 use Filament\Support\RawJs;
 use Illuminate\Support\HtmlString;
@@ -69,17 +70,22 @@ class ApiRequestsByStatusChartWidget extends BaseApiRequestChartWidget
         $endInUserTz = Carbon::parse($this->endDate, 'UTC')->setTimezone($timezone);
         $isSingleDay = $startInUserTz->isSameDay($endInUserTz);
 
-        if ($isSingleDay) {
-            $requestsPerPeriodPerStatus = $this->baseQuery()
-                ->selectRaw("
-                    CASE
+        $extractHour = DatabaseExpressions::extractHour('created_at', $timezone);
+        $dateInTz = DatabaseExpressions::dateInTimezone('created_at', $timezone);
+
+        $statusCaseExpr = "CASE
                         WHEN status_code >= 100 AND status_code < 400 THEN '1xx-3xx'
                         WHEN status_code >= 400 AND status_code < 500 THEN '4xx'
                         WHEN status_code >= 500 THEN '5xx'
-                    END as status_range,
-                    EXTRACT(HOUR FROM created_at AT TIME ZONE 'UTC' AT TIME ZONE ?) as hour,
+                    END as status_range";
+
+        if ($isSingleDay) {
+            $requestsPerPeriodPerStatus = $this->baseQuery()
+                ->selectRaw("
+                    {$statusCaseExpr},
+                    {$extractHour['sql']} as hour,
                     COUNT(*) as count
-                ", [$timezone])
+                ", $extractHour['bindings'])
                 ->groupBy('status_range', 'hour')
                 ->orderBy('hour')
                 ->get();
@@ -95,14 +101,10 @@ class ApiRequestsByStatusChartWidget extends BaseApiRequestChartWidget
             // Daily grouping for multi-day range
             $requestsPerPeriodPerStatus = $this->baseQuery()
                 ->selectRaw("
-                    CASE
-                        WHEN status_code >= 100 AND status_code < 400 THEN '1xx-3xx'
-                        WHEN status_code >= 400 AND status_code < 500 THEN '4xx'
-                        WHEN status_code >= 500 THEN '5xx'
-                    END as status_range,
-                    DATE(created_at AT TIME ZONE 'UTC' AT TIME ZONE ?) as date,
+                    {$statusCaseExpr},
+                    {$dateInTz['sql']} as date,
                     COUNT(*) as count
-                ", [$timezone])
+                ", $dateInTz['bindings'])
                 ->groupBy('status_range', 'date')
                 ->orderBy('date')
                 ->get();

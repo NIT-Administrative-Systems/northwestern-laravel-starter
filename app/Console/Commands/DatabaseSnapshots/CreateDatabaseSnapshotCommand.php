@@ -18,7 +18,9 @@ use RuntimeException;
  * to ensure snapshots are compatible with the current codebase state.
  *
  * Requirements:
- * - PostgreSQL: `pg_dump` and `psql` CLI utilities must be in your `$PATH`
+ * - PostgreSQL: `pg_dump` CLI utility must be in your `$PATH` (or set PG_BIN_DIRECTORY)
+ * - MySQL: `mysqldump` CLI utility must be in your `$PATH`
+ * - SQLite: No external utilities required
  */
 class CreateDatabaseSnapshotCommand extends DatabaseSnapshotCommand
 {

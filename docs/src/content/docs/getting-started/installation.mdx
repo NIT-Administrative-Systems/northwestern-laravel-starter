@@ -31,11 +31,18 @@ The application expects specific services to exist before you can begin local de
 <Steps>
     1. **Create Databases**
 
-        Create the two databases required by the application:
+        Create the two databases required by the application. The steps depend on your chosen database driver:
 
+        **PostgreSQL** (default) or **MySQL**:
         ```text
         your_project_name_local   # Primary application database
         your_project_name_test    # PHPUnit test database
+        ```
+
+        **SQLite**:
+        ```bash
+        touch database/database.sqlite   # Primary application database
+        touch database/testing.sqlite     # PHPUnit test database
         ```
 
     2. **Create MinIO Bucket**
