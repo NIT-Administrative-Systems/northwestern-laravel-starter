@@ -117,9 +117,25 @@ runs:
     - name: ⚙️ Prepare Application Environment
       if: ${{ inputs.docs-only != 'true' }}
       shell: bash
+      env:
+        DB_DRIVER: ${{ inputs.db-driver }}
       run: |
         cp .env.ci .env
         php artisan key:generate
+
+        # Override the default pgsql connection in .env.ci when using a different driver.
+        # The database matrix workflow sets the full DB_* env vars in its "Run Tests" step,
+        # but migrate needs a valid connection during setup.
+        if [ "$DB_DRIVER" = "sqlite" ]; then
+          touch database/database.sqlite
+          sed -i 's/^DB_CONNECTION=.*/DB_CONNECTION=sqlite/' .env
+          sed -i 's|^DB_DATABASE=.*|DB_DATABASE=database/database.sqlite|' .env
+        elif [ "$DB_DRIVER" = "mysql" ]; then
+          sed -i 's/^DB_CONNECTION=.*/DB_CONNECTION=mysql/' .env
+          sed -i 's/^DB_PORT=.*/DB_PORT=3306/' .env
+          sed -i 's/^DB_DATABASE=.*/DB_DATABASE=testing/' .env
+        fi
+
         php artisan migrate --force
 
     - name: 🔧 Generate IDE Helper Files
