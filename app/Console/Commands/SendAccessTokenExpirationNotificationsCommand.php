@@ -130,6 +130,7 @@ class SendAccessTokenExpirationNotificationsCommand extends Command
             'username' => $token->user?->username,
             'token_id' => $token->id,
             'error' => $e->getMessage(),
+            'exception_class' => get_class($e),
             'trace' => $e->getTraceAsString(),
         ]);
     }

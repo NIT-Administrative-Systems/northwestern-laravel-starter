@@ -10,11 +10,11 @@ use App\Domains\User\Enums\DirectorySearchType;
 use App\Domains\User\Exceptions\BadDirectoryEntry;
 use App\Domains\User\Jobs\DownloadWildcardPhotoJob;
 use App\Domains\User\Models\User;
-use Exception;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Arr;
 use InvalidArgumentException;
 use Northwestern\SysDev\SOA\DirectorySearch;
+use Throwable;
 
 /**
  * Finds or updates a user from the directory.
@@ -79,7 +79,7 @@ readonly class FindOrUpdateUserFromDirectory
                 // A failed synchronous post-retrieval job should not break the flow of user retrieval.
                 try {
                     dispatch_sync(new $jobClass($user));
-                } catch (Exception $e) {
+                } catch (Throwable $e) {
                     report($e);
                 }
             } else {

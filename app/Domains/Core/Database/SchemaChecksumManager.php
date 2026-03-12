@@ -8,13 +8,13 @@ use App\Domains\Core\Database\ValueObjects\SchemaFileCollection;
 use App\Domains\Core\Database\ValueObjects\SchemaSnapshot;
 use App\Domains\Core\Database\ValueObjects\SnapshotListItem;
 use Carbon\Carbon;
-use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use JsonException;
 use RuntimeException;
 use Symfony\Component\Finder\Finder;
+use Throwable;
 
 /**
  * Manages database schema checksums and snapshot metadata.
@@ -91,7 +91,7 @@ class SchemaChecksumManager
                 ->toJson();
 
             return hash(self::HASH_ALGORITHM, $checksumData);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             Log::error('Failed to calculate schema checksum', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),

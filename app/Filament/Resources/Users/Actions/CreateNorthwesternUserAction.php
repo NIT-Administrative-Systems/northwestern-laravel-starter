@@ -9,12 +9,12 @@ use App\Domains\User\Actions\Directory\FindOrUpdateUserFromDirectory;
 use App\Domains\User\Enums\DirectorySearchType;
 use App\Domains\User\Models\User;
 use App\Filament\Resources\Users\UserResource;
-use Exception;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use Northwestern\SysDev\SOA\DirectorySearch;
+use Throwable;
 
 class CreateNorthwesternUserAction extends Action
 {
@@ -60,7 +60,7 @@ class CreateNorthwesternUserAction extends Action
                                 if (! $result) {
                                     $fail('Not found in the directory. You can search by a Northwestern email address or NetID.');
                                 }
-                            } catch (Exception $e) {
+                            } catch (Throwable $e) {
                                 report($e);
                                 $fail('Unable to search the directory. Please try again.');
                             }
@@ -101,7 +101,7 @@ class CreateNorthwesternUserAction extends Action
                     }
 
                     return redirect()->to(UserResource::getUrl('view', ['record' => $user]));
-                } catch (Exception $e) {
+                } catch (Throwable $e) {
                     Notification::make()
                         ->title('User creation failed')
                         ->body('An unexpected error occurred. Please try again or contact support if the issue persists.')

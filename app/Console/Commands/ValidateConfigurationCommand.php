@@ -8,6 +8,7 @@ use App\Domains\Core\Contracts\ConfigValidator;
 use App\Domains\Core\Services\ConfigValidatorResolver;
 use App\Domains\Core\ValueObjects\ResolvedValidator;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 use function Laravel\Prompts\spin;
@@ -73,16 +74,29 @@ class ValidateConfigurationCommand extends Command
                 continue;
             }
 
+            $validatorException = null;
+
             $passed = spin(
-                callback: function () use ($resolved): bool {
+                callback: function () use ($resolved, &$validatorException): bool {
                     try {
                         return $resolved->validator->validate();
-                    } catch (Throwable) {
+                    } catch (Throwable $e) {
+                        $validatorException = $e;
+
                         return false;
                     }
                 },
                 message: "Checking {$resolved->description}..."
             );
+
+            if ($validatorException instanceof Throwable) {
+                Log::warning('Config validator threw an exception', [
+                    'validator' => $resolved->validator::class,
+                    'description' => $resolved->description,
+                    'exception' => $validatorException->getMessage(),
+                    'exception_class' => get_class($validatorException),
+                ]);
+            }
 
             $this->results[] = [
                 'validator' => $resolved->validator,

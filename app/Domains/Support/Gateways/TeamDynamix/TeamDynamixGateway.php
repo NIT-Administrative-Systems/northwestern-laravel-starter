@@ -50,9 +50,7 @@ class TeamDynamixGateway implements TicketSystemGateway
             $hasError = true;
             $errorMessage = $e->getMessage();
 
-            if (app()->bound('sentry')) {
-                resolve('sentry')->captureException($e);
-            }
+            report($e);
         }
 
         return new CreationResult(

@@ -8,8 +8,8 @@ use App\Domains\Support\Contracts\TicketSystemGateway;
 use App\Domains\Support\Enums\TicketSystem;
 use App\Domains\Support\Gateways\CreationResult;
 use App\Domains\Support\Models\SupportTicket;
-use Exception;
 use Illuminate\Support\Facades\Mail;
+use Throwable;
 
 /**
  * Submits support tickets via email.
@@ -58,10 +58,8 @@ class MailGateway implements TicketSystemGateway
                 ticketNumber: $referenceNumber,
                 errorMessage: null,
             );
-        } catch (Exception $e) {
-            if (app()->bound('sentry')) {
-                resolve('sentry')->captureException($e);
-            }
+        } catch (Throwable $e) {
+            report($e);
 
             return new CreationResult(
                 ticketSystemType: TicketSystem::Mail,
