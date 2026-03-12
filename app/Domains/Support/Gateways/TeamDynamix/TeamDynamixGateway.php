@@ -6,8 +6,8 @@ namespace App\Domains\Support\Gateways\TeamDynamix;
 
 use App\Domains\Support\Contracts\TicketSystemGateway;
 use App\Domains\Support\Enums\TicketSystemEnum;
-use App\Domains\Support\Exceptions\TdxLookupFailed;
-use App\Domains\Support\Gateway\CreationResult;
+use App\Domains\Support\Exceptions\TdxLookupFailedException;
+use App\Domains\Support\Gateways\CreationResult;
 use App\Domains\Support\Models\SupportTicket;
 use InvalidArgumentException;
 use Northwestern\Sysdev\TeamDynamix\Api\Entity\Ticket\CreateTicket;
@@ -66,7 +66,7 @@ class TeamDynamixGateway implements TicketSystemGateway
     /**
      * Resolve TDX metadata IDs and create the ticket.
      *
-     * @throws TdxLookupFailed If any metadata lookup fails.
+     * @throws TdxLookupFailedException If any metadata lookup fails.
      */
     private function lookupAndCreate(SupportTicket $ticket): TicketResponse
     {

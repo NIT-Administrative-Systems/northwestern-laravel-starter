@@ -6,7 +6,7 @@ namespace App\Domains\Support\Actions;
 
 use App\Domains\Support\Contracts\TicketSystemGateway;
 use App\Domains\Support\Enums\TicketSystemEnum;
-use App\Domains\Support\Gateway\TicketSystemGatewayFactory;
+use App\Domains\Support\Gateways\TicketSystemGatewayFactory;
 use App\Domains\Support\Models\SupportTicket;
 use App\Domains\Support\Repositories\SupportTicketRepository;
 

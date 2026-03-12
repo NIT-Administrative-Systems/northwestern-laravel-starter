@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Auth\Jobs;
 
-use App\Domains\Auth\Mail\LoginCodeNotification;
+use App\Domains\Auth\Mail\LoginCodeMail;
 use App\Domains\Auth\Models\LoginChallenge;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -12,7 +12,7 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Mail;
 
 /**
- * Responsible for sending the {@see LoginCodeNotification} email containing the OTP, and recording
+ * Responsible for sending the {@see LoginCodeMail} email containing the OTP, and recording
  * the {@see LoginChallenge::$email_sent_at} timestamp.
  */
 class SendLoginCodeEmailJob implements ShouldQueue
@@ -52,7 +52,7 @@ class SendLoginCodeEmailJob implements ShouldQueue
         }
 
         Mail::to($challenge->email)->send(
-            new LoginCodeNotification(
+            new LoginCodeMail(
                 encryptedCode: $this->encryptedCode,
                 expiresAt: $challenge->expires_at,
             )

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Support\Repositories;
 
-use App\Domains\Support\Gateway\CreationResult;
+use App\Domains\Support\Gateways\CreationResult;
 use App\Domains\Support\Models\SupportTicket;
 use App\Domains\User\Models\User;
 use Illuminate\Support\Carbon;

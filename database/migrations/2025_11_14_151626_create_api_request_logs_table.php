@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Domains\Core\Exceptions\NoRollback;
+use App\Domains\Core\Exceptions\NoRollbackException;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -39,6 +39,6 @@ return new class extends Migration
 
     public function down(): never
     {
-        throw new NoRollback();
+        throw new NoRollbackException();
     }
 };

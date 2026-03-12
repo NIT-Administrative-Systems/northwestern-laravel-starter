@@ -6,7 +6,7 @@ namespace App\Domains\Core\Exceptions;
 
 use RuntimeException;
 
-class MissingRequestIpForRestrictedToken extends RuntimeException
+class MissingRequestIpForRestrictedTokenException extends RuntimeException
 {
     /** @param list<string> $allowedIps */
     public function __construct(

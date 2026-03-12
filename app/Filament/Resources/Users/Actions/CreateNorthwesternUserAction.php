@@ -6,7 +6,7 @@ namespace App\Filament\Resources\Users\Actions;
 
 use App\Domains\Auth\Enums\PermissionEnum;
 use App\Domains\User\Actions\Directory\FindOrUpdateUserFromDirectory;
-use App\Domains\User\Enums\DirectorySearchType;
+use App\Domains\User\Enums\DirectorySearchTypeEnum;
 use App\Domains\User\Models\User;
 use App\Filament\Resources\Users\UserResource;
 use Exception;
@@ -54,7 +54,7 @@ class CreateNorthwesternUserAction extends Action
                             }
 
                             try {
-                                $searchType = DirectorySearchType::fromSearchValue($searchValue);
+                                $searchType = DirectorySearchTypeEnum::fromSearchValue($searchValue);
                                 $result = $directorySearch->lookup($searchValue, $searchType->value, 'basic');
 
                                 if (! $result) {

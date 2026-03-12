@@ -7,7 +7,7 @@ namespace App\Domains\Auth\Http\Middleware;
 use App\Domains\Auth\Enums\AuthTypeEnum;
 use App\Domains\Auth\Models\AccessToken;
 use App\Domains\Core\Enums\ApiRequestFailureEnum;
-use App\Domains\Core\Exceptions\MissingRequestIpForRestrictedToken;
+use App\Domains\Core\Exceptions\MissingRequestIpForRestrictedTokenException;
 use App\Domains\Core\ValueObjects\ApiRequestContext;
 use Closure;
 use Illuminate\Auth\AuthenticationException;
@@ -118,7 +118,7 @@ class AuthenticatesAccessTokens
          * a client IP.
          */
         if (blank($requestIp)) {
-            report(new MissingRequestIpForRestrictedToken(array_values($allowedIps)));
+            report(new MissingRequestIpForRestrictedTokenException(array_values($allowedIps)));
 
             return false;
         }

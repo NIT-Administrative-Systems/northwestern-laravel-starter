@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Domains\Support\Repositories;
 
 use App\Domains\Support\Enums\TicketSystemEnum;
-use App\Domains\Support\Gateway\CreationResult;
+use App\Domains\Support\Gateways\CreationResult;
 use App\Domains\Support\Models\SupportTicket;
 use App\Domains\Support\Repositories\SupportTicketRepository;
 use App\Domains\User\Models\User;

@@ -6,7 +6,7 @@ namespace App\Domains\Support\Gateways\Mail;
 
 use App\Domains\Support\Contracts\TicketSystemGateway;
 use App\Domains\Support\Enums\TicketSystemEnum;
-use App\Domains\Support\Gateway\CreationResult;
+use App\Domains\Support\Gateways\CreationResult;
 use App\Domains\Support\Models\SupportTicket;
 use Exception;
 use Illuminate\Support\Facades\Mail;

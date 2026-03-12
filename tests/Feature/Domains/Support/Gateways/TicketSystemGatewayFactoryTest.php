@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\Domains\Support\Gateway;
+namespace Tests\Feature\Domains\Support\Gateways;
 
 use App\Domains\Support\Enums\TicketSystemEnum;
-use App\Domains\Support\Gateway\TicketSystemGatewayFactory;
 use App\Domains\Support\Gateways\Mail\MailGateway;
 use App\Domains\Support\Gateways\TeamDynamix\TeamDynamixGateway;
+use App\Domains\Support\Gateways\TicketSystemGatewayFactory;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;

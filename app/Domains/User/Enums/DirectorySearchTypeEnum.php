@@ -6,7 +6,7 @@ namespace App\Domains\User\Enums;
 
 use InvalidArgumentException;
 
-enum DirectorySearchType: string
+enum DirectorySearchTypeEnum: string
 {
     case EMAIL = 'mail';
     case NETID = 'netid';

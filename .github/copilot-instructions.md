@@ -52,7 +52,7 @@
 
 - **One responsibility per file:** Do not mix schema changes with data backfills unless tightly coupled.
 - **Database-agnostic types:** Use fluent column definitions (`->string('netid', 8)`, `->text('notes')`) and avoid raw SQL unless no fluent alternative exists.
-- **No rollback implementations:** NEVER include an implementation of the `down()` method. ALWAYS use `throw new NoRollback();`.
+- **No rollback implementations:** NEVER include an implementation of the `down()` method. ALWAYS use `throw new NoRollbackException();`.
 - **Long-running operations:** Data migrations affecting large tables should be converted into queued jobs or artisan commands instead of bulky migrations. Migrations should only define schema changes.
 - **Column order:** Group columns logically - primary key first, foreign keys together, timestamps last. This improves readability and maintainability.
 

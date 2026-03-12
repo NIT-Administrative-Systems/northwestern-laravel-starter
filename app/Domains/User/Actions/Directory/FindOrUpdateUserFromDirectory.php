@@ -6,7 +6,7 @@ namespace App\Domains\User\Actions\Directory;
 
 use App\Domains\Auth\Enums\AuthTypeEnum;
 use App\Domains\User\Actions\PersistUserWithUniqueUsername;
-use App\Domains\User\Enums\DirectorySearchType;
+use App\Domains\User\Enums\DirectorySearchTypeEnum;
 use App\Domains\User\Exceptions\BadDirectoryEntry;
 use App\Domains\User\Jobs\DownloadWildcardPhotoJob;
 use App\Domains\User\Models\User;
@@ -95,7 +95,7 @@ readonly class FindOrUpdateUserFromDirectory
      */
     protected function lookupAndSyncUserFromDirectory(string $searchValue): ?User
     {
-        $searchType = DirectorySearchType::fromSearchValue($searchValue);
+        $searchType = DirectorySearchTypeEnum::fromSearchValue($searchValue);
 
         $existingUser = $this->findExistingUser($searchValue, $searchType);
 
@@ -115,12 +115,12 @@ readonly class FindOrUpdateUserFromDirectory
     /**
      * Based on the search value and type, attempts to find an existing user in the database.
      */
-    private function findExistingUser(string $searchValue, DirectorySearchType $searchType): ?User
+    private function findExistingUser(string $searchValue, DirectorySearchTypeEnum $searchType): ?User
     {
         return match ($searchType) {
-            DirectorySearchType::EMAIL => User::whereEmailEquals($searchValue)->first(),
-            DirectorySearchType::NETID => User::whereUsernameEquals($searchValue)->first(),
-            DirectorySearchType::EMPLOYEE_ID => User::where('employee_id', $searchValue)->first(),
+            DirectorySearchTypeEnum::EMAIL => User::whereEmailEquals($searchValue)->first(),
+            DirectorySearchTypeEnum::NETID => User::whereUsernameEquals($searchValue)->first(),
+            DirectorySearchTypeEnum::EMPLOYEE_ID => User::where('employee_id', $searchValue)->first(),
         };
     }
 
@@ -181,9 +181,9 @@ readonly class FindOrUpdateUserFromDirectory
      *
      * @param  array<string, mixed>  $directoryData
      */
-    private function syncAndPersistUser(array $directoryData, DirectorySearchType $searchType): User
+    private function syncAndPersistUser(array $directoryData, DirectorySearchTypeEnum $searchType): User
     {
-        $user = ($searchType === DirectorySearchType::EMAIL)
+        $user = ($searchType === DirectorySearchTypeEnum::EMAIL)
             ? User::firstExistingByEmailOrNewSso($directoryData['mail'])
             : User::firstExistingSsoByNetIdOrNew($directoryData['uid']);
 

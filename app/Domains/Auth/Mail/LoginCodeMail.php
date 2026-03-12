@@ -13,11 +13,11 @@ use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Support\Facades\Crypt;
 
 /**
- * Notification email containing a login verification code for {@see AuthTypeEnum::LOCAL} users.
+ * Mailable containing a login verification code for {@see AuthTypeEnum::LOCAL} users.
  *
  * @see SendLoginCodeEmailJob
  */
-class LoginCodeNotification extends Mailable
+class LoginCodeMail extends Mailable
 {
     public function __construct(
         public readonly string $encryptedCode,

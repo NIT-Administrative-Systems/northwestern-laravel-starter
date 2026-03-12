@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Domains\Support\Gateway;
+namespace App\Domains\Support\Gateways;
 
 use App\Domains\Support\Contracts\TicketSystemGateway;
 use App\Domains\Support\Enums\TicketSystemEnum;
