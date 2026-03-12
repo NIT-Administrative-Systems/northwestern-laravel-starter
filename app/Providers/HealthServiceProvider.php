@@ -12,6 +12,7 @@ use Spatie\Health\Checks\Checks\DatabaseCheck;
 use Spatie\Health\Checks\Checks\DebugModeCheck;
 use Spatie\Health\Checks\Checks\OptimizedAppCheck;
 use Spatie\Health\Checks\Checks\QueueCheck;
+use Spatie\Health\Checks\Checks\RedisCheck;
 use Spatie\Health\Checks\Checks\ScheduleCheck;
 use Spatie\Health\Facades\Health;
 use Spatie\SecurityAdvisoriesHealthCheck\SecurityAdvisoriesCheck;
@@ -35,6 +36,10 @@ class HealthServiceProvider extends ServiceProvider
             DirectorySearchCheck::new(),
         ];
 
+        if ($this->usesRedisDriver()) {
+            $checks[] = RedisCheck::new();
+        }
+
         /**
          * Commonly, sub-production databases are hosted through AWS RDS and scale to
          * zero when not in use. This causes intermittent connection failures that
@@ -45,5 +50,15 @@ class HealthServiceProvider extends ServiceProvider
         }
 
         Health::checks($checks);
+    }
+
+    private function usesRedisDriver(): bool
+    {
+        $redisDrivers = ['redis', 'predis'];
+
+        return in_array(config('database.redis.client'), $redisDrivers, true)
+            || in_array(config('cache.default'), $redisDrivers, true)
+            || in_array(config('queue.default'), $redisDrivers, true)
+            || in_array(config('session.driver'), $redisDrivers, true);
     }
 }
