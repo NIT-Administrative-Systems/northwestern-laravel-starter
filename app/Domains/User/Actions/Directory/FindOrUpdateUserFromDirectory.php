@@ -68,7 +68,7 @@ readonly class FindOrUpdateUserFromDirectory
             throw new InvalidArgumentException('Search value cannot be empty');
         }
 
-        $user = $this->fetchAndProcessUser($searchValue);
+        $user = $this->lookupAndSyncUserFromDirectory($searchValue);
 
         if (! $user instanceof User) {
             return null;
@@ -93,7 +93,7 @@ readonly class FindOrUpdateUserFromDirectory
     /**
      * @throws BadDirectoryEntry
      */
-    protected function fetchAndProcessUser(string $searchValue): ?User
+    protected function lookupAndSyncUserFromDirectory(string $searchValue): ?User
     {
         $searchType = DirectorySearchType::fromSearchValue($searchValue);
 
@@ -106,7 +106,7 @@ readonly class FindOrUpdateUserFromDirectory
         $directoryData = $this->directorySearch->lookup($searchValue, $searchType->value, 'basic');
 
         if ($this->isDirectoryDataInvalid($directoryData)) {
-            return $this->handleInvalidDirectoryData($existingUser, $searchValue, $directoryData);
+            return $this->resolveInvalidDirectoryEntry($existingUser, $searchValue, $directoryData);
         }
 
         return $this->syncAndPersistUser($directoryData, $searchType);
@@ -157,7 +157,7 @@ readonly class FindOrUpdateUserFromDirectory
      *
      * @throws BadDirectoryEntry
      */
-    private function handleInvalidDirectoryData(?User $existingUser, string $searchValue, array|false|null $directoryData): User
+    private function resolveInvalidDirectoryEntry(?User $existingUser, string $searchValue, array|false|null $directoryData): User
     {
         if ($existingUser instanceof User) {
             if ($existingUser->auth_type === AuthTypeEnum::SSO) {

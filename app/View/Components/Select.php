@@ -101,7 +101,7 @@ class Select extends Component
 
         $this->optionCountPluralNoun = $optionCountPluralNoun;
 
-        $this->options = self::processOptions($this->options);
+        $this->options = self::normalizeOptionsToKeyValuePairs($this->options);
 
         $this->registerPlugins();
     }
@@ -156,7 +156,7 @@ class Select extends Component
      *
      * @return array<string|int, string|array<string|int, string>|mixed> Processed options as key-value pairs
      */
-    public static function processOptions(mixed $options): array
+    public static function normalizeOptionsToKeyValuePairs(mixed $options): array
     {
         if ($options === null || $options === []) {
             return [];
@@ -176,7 +176,7 @@ class Select extends Component
                 $processedOptions[$enumKey] = self::getEnumLabel($value);
             } elseif (is_array($value)) {
                 // Support nested optgroups
-                $processedOptions[$key] = self::processOptions($value);
+                $processedOptions[$key] = self::normalizeOptionsToKeyValuePairs($value);
             } elseif ($isSequentialNumericList && is_int($key)) {
                 // For pure numeric sequential lists, use value as both key and label
                 $processedOptions[$value] = (string) $value;
