@@ -29,7 +29,7 @@ final class PersistUserWithUniqueUsername
             return DB::transaction(function () use ($user) {
                 $user->save();
 
-                if ($user->auth_type === AuthType::Sso && ! $user->hasRole(SystemRole::NorthwesternUser)) {
+                if ($user->auth_type === AuthType::SSO && ! $user->hasRole(SystemRole::NorthwesternUser)) {
                     $role = Role::query()->where('name', SystemRole::NorthwesternUser->value)->firstOrFail();
                     $user->assignRoleWithAudit($role, RoleModificationOrigin::SsoProvisioning);
                 }

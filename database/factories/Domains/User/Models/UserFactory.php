@@ -25,7 +25,7 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'auth_type' => AuthType::Sso,
+            'auth_type' => AuthType::SSO,
             'username' => $this->generateUniqueUsername(),
             'primary_affiliation' => fake()->randomElement(Affiliation::cases()),
             'employee_id' => fake()->numerify('#######'),
@@ -43,7 +43,7 @@ class UserFactory extends Factory
     public function configure(): static
     {
         return $this->afterCreating(function (User $user) {
-            if ($user->auth_type === AuthType::Sso) {
+            if ($user->auth_type === AuthType::SSO) {
                 $role = Role::query()->where('name', SystemRole::NorthwesternUser->value)->firstOrFail();
                 $user->assignRoleWithAudit($role, RoleModificationOrigin::System);
             }
@@ -95,7 +95,7 @@ class UserFactory extends Factory
     {
         return $this->state(function () {
             return [
-                'auth_type' => AuthType::Api,
+                'auth_type' => AuthType::API,
                 'primary_affiliation' => Affiliation::Other,
                 'username' => 'api-' . fake()->unique()->userName(),
                 'email' => null,

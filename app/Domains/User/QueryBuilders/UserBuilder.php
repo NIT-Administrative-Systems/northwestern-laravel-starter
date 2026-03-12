@@ -22,7 +22,7 @@ class UserBuilder extends Builder
      */
     public function sso(): static
     {
-        return $this->where('auth_type', AuthType::Sso);
+        return $this->where('auth_type', AuthType::SSO);
     }
 
     /**
@@ -38,7 +38,7 @@ class UserBuilder extends Builder
      */
     public function api(): static
     {
-        return $this->where('auth_type', AuthType::Api);
+        return $this->where('auth_type', AuthType::API);
     }
 
     /**
@@ -129,7 +129,7 @@ class UserBuilder extends Builder
 
         return $this->getModel()->newInstance([
             'email' => $normalized,
-            'auth_type' => AuthType::Sso,
+            'auth_type' => AuthType::SSO,
         ]);
     }
 
@@ -156,7 +156,7 @@ class UserBuilder extends Builder
 
         return $user ?: $this->getModel()->newInstance([
             'username' => $normalized,
-            'auth_type' => AuthType::Sso,
+            'auth_type' => AuthType::SSO,
         ]);
     }
 }

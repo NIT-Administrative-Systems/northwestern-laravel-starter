@@ -169,16 +169,16 @@ use Filament\Support\Contracts\HasLabel;
 
 enum AuthType: string implements HasLabel
 {
-    case Sso = 'sso';
+    case SSO = 'sso';
     case Local = 'local';
-    case Api = 'api';
+    case API = 'api';
 
     public function getLabel(): string
     {
         return match ($this) {
-            self::Sso => 'NetID',
+            self::SSO => 'NetID',
             self::Local => 'Verification Code',
-            self::Api => 'API',
+            self::API => 'API',
         };
     }
 }
@@ -254,7 +254,7 @@ class UserBuilder extends Builder
 {
     public function sso(): self
     {
-        return $this->where('auth_type', AuthType::Sso);
+        return $this->where('auth_type', AuthType::SSO);
     }
 
     public function whereEmailEquals(string $email): self

@@ -23,7 +23,7 @@ class LoginRecordsRelationManager extends RelationManager
     public static function canViewForRecord(Model $ownerRecord, string $pageClass): bool
     {
         /** @var User $ownerRecord */
-        return $ownerRecord->auth_type !== AuthType::Api
+        return $ownerRecord->auth_type !== AuthType::API
             && auth()->user()?->hasPermissionTo(SystemPermission::ViewLoginRecords);
     }
 

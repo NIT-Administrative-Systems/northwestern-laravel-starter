@@ -11,25 +11,25 @@ use Filament\Support\Icons\Heroicon;
 
 enum AuthType: string implements HasColor, HasIcon, HasLabel
 {
-    case Sso = 'sso';
+    case SSO = 'sso';
     case Local = 'local';
-    case Api = 'api';
+    case API = 'api';
 
     public function getLabel(): string
     {
         return match ($this) {
-            self::Sso => 'NetID',
+            self::SSO => 'NetID',
             self::Local => 'Verification Code',
-            self::Api => 'API',
+            self::API => 'API',
         };
     }
 
     public function getIcon(): Heroicon
     {
         return match ($this) {
-            self::Sso => Heroicon::OutlinedShieldCheck,
+            self::SSO => Heroicon::OutlinedShieldCheck,
             self::Local => Heroicon::OutlinedKey,
-            self::Api => Heroicon::OutlinedCodeBracket,
+            self::API => Heroicon::OutlinedCodeBracket,
         };
     }
 
@@ -37,9 +37,9 @@ enum AuthType: string implements HasColor, HasIcon, HasLabel
     public function getColor(): string
     {
         return match ($this) {
-            self::Sso => 'primary',
+            self::SSO => 'primary',
             self::Local => 'gray',
-            self::Api => 'info',
+            self::API => 'info',
         };
     }
 }

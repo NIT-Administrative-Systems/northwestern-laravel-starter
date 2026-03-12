@@ -27,7 +27,7 @@ class DownloadWildcardPhotoJob implements ShouldQueue
     public function handle(DirectorySearch $directorySearch): void
     {
         // Non-Northwestern users don't have a Wildcard photo, so there's no action to take.
-        if ($this->user->auth_type !== AuthType::Sso || ! config('platform.wildcard_photo_sync')) {
+        if ($this->user->auth_type !== AuthType::SSO || ! config('platform.wildcard_photo_sync')) {
             return;
         }
 

@@ -40,7 +40,7 @@ class ProcessNetIdUpdateTest extends TestCase
 
     public function test_it_removes_all_roles_except_northwestern_on_deactivate(): void
     {
-        $user = User::factory()->create(['username' => 'abc123', 'auth_type' => AuthType::Sso]);
+        $user = User::factory()->create(['username' => 'abc123', 'auth_type' => AuthType::SSO]);
         $user->assignRoleWithAudit([$this->adminRole(), $this->editorRole(), $this->nuRole()], RoleModificationOrigin::System);
 
         $event = NetIdUpdated::fromPayload('netid=abc123&action=deactivate');
@@ -56,7 +56,7 @@ class ProcessNetIdUpdateTest extends TestCase
 
     public function test_it_removes_all_roles_except_northwestern_on_deprovision(): void
     {
-        $user = User::factory()->create(['username' => 'test123', 'auth_type' => AuthType::Sso]);
+        $user = User::factory()->create(['username' => 'test123', 'auth_type' => AuthType::SSO]);
         $user->assignRoleWithAudit([$this->adminRole(), $this->editorRole(), $this->nuRole()], RoleModificationOrigin::System);
 
         $event = NetIdUpdated::fromPayload('netid=test123&action=deprovision');
@@ -72,7 +72,7 @@ class ProcessNetIdUpdateTest extends TestCase
 
     public function test_it_removes_all_roles_except_northwestern_on_security_hold(): void
     {
-        $user = User::factory()->create(['username' => 'sec123', 'auth_type' => AuthType::Sso]);
+        $user = User::factory()->create(['username' => 'sec123', 'auth_type' => AuthType::SSO]);
         $user->assignRoleWithAudit([$this->adminRole(), $this->editorRole(), $this->nuRole()], RoleModificationOrigin::System);
 
         $event = NetIdUpdated::fromPayload('netid=sec123&action=sechold');
@@ -90,7 +90,7 @@ class ProcessNetIdUpdateTest extends TestCase
     {
         $user = User::factory()->create([
             'username' => 'abc123',
-            'auth_type' => AuthType::Sso,
+            'auth_type' => AuthType::SSO,
             'netid_inactive' => false,
         ]);
 
@@ -107,7 +107,7 @@ class ProcessNetIdUpdateTest extends TestCase
     {
         $user = User::factory()->create([
             'username' => 'test123',
-            'auth_type' => AuthType::Sso,
+            'auth_type' => AuthType::SSO,
             'netid_inactive' => false,
         ]);
 
@@ -124,7 +124,7 @@ class ProcessNetIdUpdateTest extends TestCase
     {
         $user = User::factory()->create([
             'username' => 'sec123',
-            'auth_type' => AuthType::Sso,
+            'auth_type' => AuthType::SSO,
             'netid_inactive' => false,
         ]);
 
@@ -139,7 +139,7 @@ class ProcessNetIdUpdateTest extends TestCase
 
     public function test_it_handles_user_with_only_northwestern_role(): void
     {
-        $user = User::factory()->create(['username' => 'abc123', 'auth_type' => AuthType::Sso]);
+        $user = User::factory()->create(['username' => 'abc123', 'auth_type' => AuthType::SSO]);
         $user->assignRoleWithAudit($this->nuRole(), RoleModificationOrigin::System);
 
         $event = NetIdUpdated::fromPayload('netid=abc123&action=deactivate');
@@ -169,7 +169,7 @@ class ProcessNetIdUpdateTest extends TestCase
         $role2 = Role::factory()->create(['name' => 'role2']);
         $role3 = Role::factory()->create(['name' => 'role3']);
 
-        $user = User::factory()->create(['username' => 'abc123', 'auth_type' => AuthType::Sso]);
+        $user = User::factory()->create(['username' => 'abc123', 'auth_type' => AuthType::SSO]);
         $user->assignRoleWithAudit([$role1, $role2, $role3, $this->nuRole()], RoleModificationOrigin::System);
 
         $event = NetIdUpdated::fromPayload('netid=abc123&action=deactivate');
@@ -207,7 +207,7 @@ class ProcessNetIdUpdateTest extends TestCase
     {
         $user = User::factory()->create([
             'username' => 'api123',
-            'auth_type' => AuthType::Api,
+            'auth_type' => AuthType::API,
             'netid_inactive' => false,
         ]);
         $user->assignRoleWithAudit($this->adminRole(), RoleModificationOrigin::System);

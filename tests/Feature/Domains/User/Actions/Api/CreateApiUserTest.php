@@ -40,7 +40,7 @@ class CreateApiUserTest extends TestCase
         );
 
         $this->assertSame('api-service', $user->username);
-        $this->assertSame(AuthType::Api, $user->auth_type);
+        $this->assertSame(AuthType::API, $user->auth_type);
         $this->assertSame(Affiliation::Other, $user->primary_affiliation);
         $this->assertSame('My Service', $user->first_name);
         $this->assertSame('API', $user->last_name);

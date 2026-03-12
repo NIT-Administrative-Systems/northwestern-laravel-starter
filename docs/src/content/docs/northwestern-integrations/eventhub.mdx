@@ -111,7 +111,7 @@ class MyTest extends TestCase
     {
         $user = User::factory()->create([
             'username' => 'abc123',
-            'auth_type' => AuthType::Sso,
+            'auth_type' => AuthType::SSO,
         ]);
 
         $this->send(

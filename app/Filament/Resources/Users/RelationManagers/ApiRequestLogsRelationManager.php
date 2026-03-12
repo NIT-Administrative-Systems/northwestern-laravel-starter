@@ -37,7 +37,7 @@ class ApiRequestLogsRelationManager extends RelationManager
         }
 
         /** @var User $ownerRecord */
-        return $ownerRecord->auth_type === AuthType::Api
+        return $ownerRecord->auth_type === AuthType::API
             && auth()->user()?->hasPermissionTo(SystemPermission::ManageAll);
     }
 

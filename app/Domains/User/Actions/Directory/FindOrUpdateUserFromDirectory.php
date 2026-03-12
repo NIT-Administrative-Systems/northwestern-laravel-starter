@@ -99,7 +99,7 @@ readonly class FindOrUpdateUserFromDirectory
 
         $existingUser = $this->findExistingUser($searchValue, $searchType);
 
-        if ($existingUser?->auth_type === AuthType::Api) {
+        if ($existingUser?->auth_type === AuthType::API) {
             return null;
         }
 
@@ -160,7 +160,7 @@ readonly class FindOrUpdateUserFromDirectory
     private function resolveInvalidDirectoryEntry(?User $existingUser, string $searchValue, array|false|null $directoryData): User
     {
         if ($existingUser instanceof User) {
-            if ($existingUser->auth_type === AuthType::Sso) {
+            if ($existingUser->auth_type === AuthType::SSO) {
                 $existingUser->update([
                     'netid_inactive' => true,
                     'directory_sync_last_failed_at' => now(),

@@ -33,7 +33,7 @@ class NetIdUpdateControllerTest extends TestCase
 
     public function test_it_dispatches_event_for_deactivation_action(): void
     {
-        User::factory()->create(['username' => 'abc123', 'auth_type' => AuthType::Sso]);
+        User::factory()->create(['username' => 'abc123', 'auth_type' => AuthType::SSO]);
 
         $response = $this->send('etidentity.ldap.netid.term', 'netid=abc123&action=deactivate');
 
@@ -51,7 +51,7 @@ class NetIdUpdateControllerTest extends TestCase
 
     public function test_it_dispatches_event_for_deprovision_action(): void
     {
-        User::factory()->create(['username' => 'test123', 'auth_type' => AuthType::Sso]);
+        User::factory()->create(['username' => 'test123', 'auth_type' => AuthType::SSO]);
 
         $response = $this->send('etidentity.ldap.netid.term', 'netid=test123&action=deprovision');
 
@@ -69,7 +69,7 @@ class NetIdUpdateControllerTest extends TestCase
 
     public function test_it_dispatches_event_for_security_hold_action(): void
     {
-        User::factory()->create(['username' => 'sec456', 'auth_type' => AuthType::Sso]);
+        User::factory()->create(['username' => 'sec456', 'auth_type' => AuthType::SSO]);
 
         $response = $this->send('etidentity.ldap.netid.term', 'netid=sec456&action=sechold');
 

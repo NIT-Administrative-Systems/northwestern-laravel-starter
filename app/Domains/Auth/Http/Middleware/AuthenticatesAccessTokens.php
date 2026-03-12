@@ -65,7 +65,7 @@ class AuthenticatesAccessTokens
         unset($rawToken);
 
         $accessToken = AccessToken::query()
-            ->withWhereHas('user', fn ($query) => $query->where('auth_type', AuthType::Api))
+            ->withWhereHas('user', fn ($query) => $query->where('auth_type', AuthType::API))
             ->where('token_hash', $tokenHash)
             ->active()
             ->first();

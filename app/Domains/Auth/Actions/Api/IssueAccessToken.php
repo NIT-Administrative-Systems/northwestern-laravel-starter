@@ -34,7 +34,7 @@ readonly class IssueAccessToken
         ?CarbonInterface $expiresAt = null,
         ?array $allowedIps = null,
     ): array {
-        if ($user->auth_type !== AuthType::Api) {
+        if ($user->auth_type !== AuthType::API) {
             throw new InvalidArgumentException('Tokens can only be issued for API users.');
         }
 

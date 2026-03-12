@@ -24,7 +24,7 @@ class SyncUserFromDirectoryTest extends TestCase
     #[DataProvider('directoryDataProvider')]
     public function test_sync_user(array $directoryData, array $expectedAttributes): void
     {
-        $user = new User(['auth_type' => AuthType::Sso, 'username' => 'foo']);
+        $user = new User(['auth_type' => AuthType::SSO, 'username' => 'foo']);
         $user = $this->service()($user, $directoryData);
 
         $actualAttributes = Arr::only($user->getAttributes(), array_keys($expectedAttributes));
@@ -89,7 +89,7 @@ class SyncUserFromDirectoryTest extends TestCase
 
     public function test_assigns_username_from_directory_when_blank(): void
     {
-        $user = new User(['auth_type' => AuthType::Sso]);
+        $user = new User(['auth_type' => AuthType::SSO]);
         $directoryData = self::studentData();
         $directoryData['uid'] = 'new_user';
 
@@ -100,7 +100,7 @@ class SyncUserFromDirectoryTest extends TestCase
 
     public function test_handles_missing_uid_when_user_has_no_username(): void
     {
-        $user = new User(['auth_type' => AuthType::Sso]);
+        $user = new User(['auth_type' => AuthType::SSO]);
         $directoryData = self::studentData();
         unset($directoryData['uid']);
 
@@ -111,7 +111,7 @@ class SyncUserFromDirectoryTest extends TestCase
 
     public function test_handles_invalid_primary_affiliation(): void
     {
-        $user = new User(['auth_type' => AuthType::Sso, 'username' => 'test']);
+        $user = new User(['auth_type' => AuthType::SSO, 'username' => 'test']);
         $directoryData = self::studentData();
         $directoryData['eduPersonPrimaryAffiliation'] = 'invalid_affiliation';
 
@@ -122,7 +122,7 @@ class SyncUserFromDirectoryTest extends TestCase
 
     public function test_trims_whitespace_from_values(): void
     {
-        $user = new User(['auth_type' => AuthType::Sso, 'username' => 'test']);
+        $user = new User(['auth_type' => AuthType::SSO, 'username' => 'test']);
         $directoryData = [
             'eduPersonPrimaryAffiliation' => 'student',
             'givenName' => ['  John  '],
@@ -139,7 +139,7 @@ class SyncUserFromDirectoryTest extends TestCase
 
     public function test_handles_empty_array_values(): void
     {
-        $user = new User(['auth_type' => AuthType::Sso, 'username' => 'test']);
+        $user = new User(['auth_type' => AuthType::SSO, 'username' => 'test']);
         $directoryData = [
             'eduPersonPrimaryAffiliation' => 'student',
             'givenName' => [],
@@ -156,7 +156,7 @@ class SyncUserFromDirectoryTest extends TestCase
 
     public function test_filters_short_employee_ids(): void
     {
-        $user = new User(['auth_type' => AuthType::Sso, 'username' => 'test']);
+        $user = new User(['auth_type' => AuthType::SSO, 'username' => 'test']);
         $directoryData = [
             'eduPersonPrimaryAffiliation' => 'staff',
             'employeeNumber' => '123456', // Too short
@@ -171,7 +171,7 @@ class SyncUserFromDirectoryTest extends TestCase
 
     public function test_sets_hr_employee_id_when_different_from_student_number(): void
     {
-        $user = new User(['auth_type' => AuthType::Sso, 'username' => 'test']);
+        $user = new User(['auth_type' => AuthType::SSO, 'username' => 'test']);
         $directoryData = [
             'eduPersonPrimaryAffiliation' => 'student',
             'employeeNumber' => '1234567',
@@ -186,7 +186,7 @@ class SyncUserFromDirectoryTest extends TestCase
 
     public function test_does_not_set_hr_employee_id_when_same_as_student_number(): void
     {
-        $user = new User(['auth_type' => AuthType::Sso, 'username' => 'test']);
+        $user = new User(['auth_type' => AuthType::SSO, 'username' => 'test']);
         $directoryData = [
             'eduPersonPrimaryAffiliation' => 'student',
             'employeeNumber' => '1234567',
@@ -201,7 +201,7 @@ class SyncUserFromDirectoryTest extends TestCase
 
     public function test_student_data_takes_priority_for_students(): void
     {
-        $user = new User(['auth_type' => AuthType::Sso, 'username' => 'test']);
+        $user = new User(['auth_type' => AuthType::SSO, 'username' => 'test']);
         $directoryData = [
             'eduPersonPrimaryAffiliation' => 'student',
             'givenName' => ['Generic Name'],
@@ -221,7 +221,7 @@ class SyncUserFromDirectoryTest extends TestCase
 
     public function test_removes_duplicate_values_in_arrays(): void
     {
-        $user = new User(['auth_type' => AuthType::Sso, 'username' => 'test']);
+        $user = new User(['auth_type' => AuthType::SSO, 'username' => 'test']);
         $directoryData = [
             'eduPersonPrimaryAffiliation' => 'staff',
             'nuAllDepartmentName' => ['IT', 'HR', 'IT', 'Finance', 'HR'],

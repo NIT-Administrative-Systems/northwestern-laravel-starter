@@ -30,9 +30,9 @@ class ViewUser extends ViewRecord
 
         /** @phpstan-ignore match.unhandled (all AuthType cases are covered) */
         return match ($record->auth_type) {
-            AuthType::Sso => NorthwesternUserInfolist::configure($schema),
+            AuthType::SSO => NorthwesternUserInfolist::configure($schema),
             AuthType::Local => LocalUserInfolist::configure($schema),
-            AuthType::Api => ApiUserInfolist::configure($schema),
+            AuthType::API => ApiUserInfolist::configure($schema),
         };
     }
 

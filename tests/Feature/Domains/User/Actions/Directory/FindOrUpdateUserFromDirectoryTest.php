@@ -103,7 +103,7 @@ class FindOrUpdateUserFromDirectoryTest extends TestCase
     {
         User::factory()->create([
             'username' => 'api-user',
-            'auth_type' => AuthType::Api,
+            'auth_type' => AuthType::API,
         ]);
 
         $result = $this->service()('api-user');
@@ -140,7 +140,7 @@ class FindOrUpdateUserFromDirectoryTest extends TestCase
         $directoryApi = $this->createStub(DirectorySearch::class);
         $existingUser = User::factory()->create([
             'username' => 'existing-no-email',
-            'auth_type' => AuthType::Sso,
+            'auth_type' => AuthType::SSO,
             'email' => 'existing@northwestern.edu',
             'netid_inactive' => false,
         ]);
@@ -169,7 +169,7 @@ class FindOrUpdateUserFromDirectoryTest extends TestCase
         $directoryApi = $this->createStub(DirectorySearch::class);
         User::factory()->create([
             'username' => 'missing-mail',
-            'auth_type' => AuthType::Sso,
+            'auth_type' => AuthType::SSO,
             'netid_inactive' => false,
         ]);
 
@@ -204,7 +204,7 @@ class FindOrUpdateUserFromDirectoryTest extends TestCase
         $directoryApi = $this->createStub(DirectorySearch::class);
         $existingUser = User::factory()->create([
             'username' => 'existing-no-data',
-            'auth_type' => AuthType::Sso,
+            'auth_type' => AuthType::SSO,
             'netid_inactive' => false,
         ]);
 
@@ -365,7 +365,7 @@ class FindOrUpdateUserFromDirectoryTest extends TestCase
     {
         $existingUser = User::factory()->create([
             'email' => 'existing@northwestern.edu',
-            'auth_type' => AuthType::Sso,
+            'auth_type' => AuthType::SSO,
         ]);
 
         $directoryApi = $this->createStub(DirectorySearch::class);
@@ -385,7 +385,7 @@ class FindOrUpdateUserFromDirectoryTest extends TestCase
         $existingUser = User::factory()->create([
             'employee_id' => '1000000',  // Match the studentData
             'username' => 'abc123',      // Match the NetID in directory data
-            'auth_type' => AuthType::Sso,
+            'auth_type' => AuthType::SSO,
         ]);
 
         $directoryApi = $this->createStub(DirectorySearch::class);

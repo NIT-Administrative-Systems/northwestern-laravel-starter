@@ -15,9 +15,9 @@ class UserBuilderTest extends TestCase
 {
     public function test_scope_sso_only_returns_sso_users(): void
     {
-        $sso = User::factory()->create(['auth_type' => AuthType::Sso]);
+        $sso = User::factory()->create(['auth_type' => AuthType::SSO]);
         User::factory()->create(['auth_type' => AuthType::Local]);
-        User::factory()->create(['auth_type' => AuthType::Api]);
+        User::factory()->create(['auth_type' => AuthType::API]);
 
         $results = User::query()->sso()->get();
 
@@ -27,9 +27,9 @@ class UserBuilderTest extends TestCase
 
     public function test_scope_local_only_returns_local_users(): void
     {
-        User::factory()->create(['auth_type' => AuthType::Sso]);
+        User::factory()->create(['auth_type' => AuthType::SSO]);
         $local = User::factory()->create(['auth_type' => AuthType::Local]);
-        User::factory()->create(['auth_type' => AuthType::Api]);
+        User::factory()->create(['auth_type' => AuthType::API]);
 
         $results = User::query()->local()->get();
 
@@ -39,9 +39,9 @@ class UserBuilderTest extends TestCase
 
     public function test_scope_api_only_returns_api_users(): void
     {
-        User::factory()->create(['auth_type' => AuthType::Sso]);
+        User::factory()->create(['auth_type' => AuthType::SSO]);
         User::factory()->create(['auth_type' => AuthType::Local]);
-        $api = User::factory()->create(['auth_type' => AuthType::Api]);
+        $api = User::factory()->create(['auth_type' => AuthType::API]);
 
         $results = User::query()->api()->get();
 
@@ -85,7 +85,7 @@ class UserBuilderTest extends TestCase
     {
         $sso = User::factory()->create([
             'email' => 'test@example.com',
-            'auth_type' => AuthType::Sso,
+            'auth_type' => AuthType::SSO,
         ]);
 
         // Should not find this one
@@ -116,7 +116,7 @@ class UserBuilderTest extends TestCase
     {
         $ssoUser = User::factory()->create([
             'email' => 'sso@example.com',
-            'auth_type' => AuthType::Sso,
+            'auth_type' => AuthType::SSO,
         ]);
 
         $foundSso = User::query()->firstByEmailSsoThenLocal('sso@example.com');
@@ -135,7 +135,7 @@ class UserBuilderTest extends TestCase
     {
         $existing = User::factory()->create([
             'email' => 'existing@example.com',
-            'auth_type' => AuthType::Sso,
+            'auth_type' => AuthType::SSO,
         ]);
 
         $result = User::query()->firstExistingByEmailOrNewSso('EXISTING@example.com');
@@ -150,14 +150,14 @@ class UserBuilderTest extends TestCase
 
         $this->assertFalse($result->exists);
         $this->assertEquals('new@example.com', $result->email);
-        $this->assertEquals(AuthType::Sso, $result->auth_type);
+        $this->assertEquals(AuthType::SSO, $result->auth_type);
     }
 
     public function test_first_existing_sso_by_netid_or_new_restores_trashed_user(): void
     {
         $trashed = User::factory()->create([
             'username' => 'trashed_user',
-            'auth_type' => AuthType::Sso,
+            'auth_type' => AuthType::SSO,
             'deleted_at' => now(),
         ]);
 
@@ -176,6 +176,6 @@ class UserBuilderTest extends TestCase
 
         $this->assertFalse($result->exists);
         $this->assertEquals('new_netid', $result->username);
-        $this->assertEquals(AuthType::Sso, $result->auth_type);
+        $this->assertEquals(AuthType::SSO, $result->auth_type);
     }
 }

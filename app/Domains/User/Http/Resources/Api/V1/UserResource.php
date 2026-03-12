@@ -25,8 +25,8 @@ use OpenApi\Attributes as OA;
             property: 'auth_type',
             description: 'How the user authenticates to the application.',
             type: 'string',
-            example: AuthType::Api->value,
-            enum: [AuthType::Sso->value, AuthType::Local->value, AuthType::Api->value]
+            example: AuthType::API->value,
+            enum: [AuthType::SSO->value, AuthType::Local->value, AuthType::API->value]
         ),
         new OA\Property(property: 'first_name', type: 'string', example: 'NUIT'),
         new OA\Property(property: 'last_name', type: 'string', example: 'API'),

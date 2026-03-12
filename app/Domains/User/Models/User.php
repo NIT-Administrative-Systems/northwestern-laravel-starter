@@ -195,7 +195,7 @@ class User extends Authenticatable implements Auditable, FilamentUser, HasName
     protected function isApiUser(): Attribute
     {
         return Attribute::make(
-            get: fn (): bool => $this->auth_type === AuthType::Api,
+            get: fn (): bool => $this->auth_type === AuthType::API,
         );
     }
 

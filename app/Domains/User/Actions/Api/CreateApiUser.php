@@ -56,7 +56,7 @@ readonly class CreateApiUser
             $user = User::create([
                 'username' => strtolower($username),
                 'primary_affiliation' => Affiliation::Other,
-                'auth_type' => AuthType::Api,
+                'auth_type' => AuthType::API,
                 'email' => filled($email) ? strtolower($email) : null,
                 'first_name' => $firstName,
                 'last_name' => 'API',

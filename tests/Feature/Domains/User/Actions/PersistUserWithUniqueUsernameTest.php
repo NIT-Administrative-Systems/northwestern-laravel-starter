@@ -21,7 +21,7 @@ class PersistUserWithUniqueUsernameTest extends TestCase
     {
         $user = User::factory()->make([
             'username' => 'unique_user',
-            'auth_type' => AuthType::Api,
+            'auth_type' => AuthType::API,
         ]);
 
         $action = new PersistUserWithUniqueUsername();
@@ -35,7 +35,7 @@ class PersistUserWithUniqueUsernameTest extends TestCase
     {
         $user = User::factory()->make([
             'username' => 'sso_user',
-            'auth_type' => AuthType::Sso,
+            'auth_type' => AuthType::SSO,
         ]);
 
         $action = new PersistUserWithUniqueUsername();
@@ -48,7 +48,7 @@ class PersistUserWithUniqueUsernameTest extends TestCase
     {
         $user = User::factory()->create([
             'username' => 'existing_sso_user',
-            'auth_type' => AuthType::Sso,
+            'auth_type' => AuthType::SSO,
         ]);
 
         $role = Role::query()->where('name', SystemRole::NorthwesternUser->value)->firstOrFail();

@@ -46,7 +46,7 @@ trait HandlesImpersonation
      */
     public function canBeImpersonated(): bool
     {
-        if ($this->auth_type === AuthType::Api) {
+        if ($this->auth_type === AuthType::API) {
             return false;
         }
 

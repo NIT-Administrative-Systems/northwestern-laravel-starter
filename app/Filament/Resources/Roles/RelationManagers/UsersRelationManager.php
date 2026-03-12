@@ -146,7 +146,7 @@ class UsersRelationManager extends RelationManager
                                                 ->orWhere('email', 'ilike', "%{$search}%");
                                         })
                                         ->when($isApiRole, fn (Builder $query) => $query->api())
-                                        ->unless($isApiRole, fn (Builder $query) => $query->where('auth_type', '!=', AuthType::Api))
+                                        ->unless($isApiRole, fn (Builder $query) => $query->where('auth_type', '!=', AuthType::API))
                                         ->whereDoesntHave('roles', function (Builder $query) use ($role) {
                                             $query->where('id', $role->id);
                                         })
