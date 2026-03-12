@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Auth\Mail;
 
-use App\Domains\Auth\Enums\AuthTypeEnum;
+use App\Domains\Auth\Enums\AuthType;
 use App\Domains\Auth\Jobs\SendLoginCodeEmailJob;
 use Carbon\CarbonImmutable;
 use Illuminate\Mail\Mailable;
@@ -13,11 +13,11 @@ use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Support\Facades\Crypt;
 
 /**
- * Notification email containing a login verification code for {@see AuthTypeEnum::LOCAL} users.
+ * Mailable containing a login verification code for {@see AuthType::Local} users.
  *
  * @see SendLoginCodeEmailJob
  */
-class LoginCodeNotification extends Mailable
+class LoginCodeMail extends Mailable
 {
     public function __construct(
         public readonly string $encryptedCode,

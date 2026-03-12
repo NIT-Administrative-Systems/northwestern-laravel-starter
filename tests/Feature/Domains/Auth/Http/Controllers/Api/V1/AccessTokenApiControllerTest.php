@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\Auth\Http\Controllers\Api\V1;
 
-use App\Domains\Auth\Enums\AccessTokenStatusEnum;
+use App\Domains\Auth\Enums\AccessTokenStatus;
 use App\Domains\Auth\Http\Controllers\Api\V1\AccessTokenApiController;
 use App\Domains\Auth\Models\AccessToken;
 use App\Domains\User\Models\User;
@@ -112,7 +112,7 @@ class AccessTokenApiControllerTest extends ApiTestCase
         $firstToken = $tokens->first();
         $this->assertNotNull($firstToken);
 
-        $this->assertEquals(AccessTokenStatusEnum::ACTIVE->value, $firstToken['status']);
+        $this->assertEquals(AccessTokenStatus::Active->value, $firstToken['status']);
     }
 
     public function test_store_creates_new_access_token(): void
@@ -270,7 +270,7 @@ class AccessTokenApiControllerTest extends ApiTestCase
 
         $token->refresh();
         $this->assertNotNull($token->revoked_at);
-        $this->assertEquals(AccessTokenStatusEnum::REVOKED, $token->status);
+        $this->assertEquals(AccessTokenStatus::Revoked, $token->status);
     }
 
     public function test_destroy_returns_404_for_other_users_token(): void

@@ -6,7 +6,7 @@ namespace App\Domains\Auth\Http\Controllers;
 
 use App\Domains\Auth\Actions\Impersonation\StartImpersonation;
 use App\Domains\Auth\Actions\Impersonation\StopImpersonation;
-use App\Domains\Auth\Enums\PermissionEnum;
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -25,7 +25,7 @@ class ImpersonationController extends Controller
         $user = auth()->user();
 
         abort_unless(filled($user), 403);
-        abort_unless($user->can(PermissionEnum::MANAGE_IMPERSONATION), 403);
+        abort_unless($user->can(SystemPermission::ManageImpersonation), 403);
 
         $this->storeReturnUrl($request);
 

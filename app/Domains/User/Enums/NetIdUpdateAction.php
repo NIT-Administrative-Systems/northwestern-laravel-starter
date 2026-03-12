@@ -9,9 +9,9 @@ use App\Domains\User\Events\NetIdUpdated;
 /**
  * Types of NetID update actions sent from {@see NetIdUpdated} messages.
  */
-enum NetIdUpdateActionEnum: string
+enum NetIdUpdateAction: string
 {
-    case DEACTIVATE = 'deactivate';
-    case DEPROVISION = 'deprovision';
-    case SECURITY_HOLD = 'sechold';
+    case Deactivate = 'deactivate';
+    case Deprovision = 'deprovision';
+    case SecurityHold = 'sechold';
 }

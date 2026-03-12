@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Domains\Support\Gateways\Mail;
 
 use App\Domains\Support\Contracts\TicketSystemGateway;
-use App\Domains\Support\Enums\TicketSystemEnum;
-use App\Domains\Support\Gateway\CreationResult;
+use App\Domains\Support\Enums\TicketSystem;
+use App\Domains\Support\Gateways\CreationResult;
 use App\Domains\Support\Models\SupportTicket;
 use Exception;
 use Illuminate\Support\Facades\Mail;
@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Mail;
  *
  * Sends the ticket details to the support team mailbox and a separate
  * confirmation to the requester. Used as the primary driver when
- * {@see TicketSystemEnum::MAIL} is configured, or as the auto
+ * {@see TicketSystem::Mail} is configured, or as the auto
  * fallback when a non-mail primary gateway fails.
  *
  * When operating in fallback mode ({@see $isFallbackStrategy}), the support
@@ -53,7 +53,7 @@ class MailGateway implements TicketSystemGateway
                 ->send(new SupportTicketConfirmation($ticket, $referenceNumber));
 
             return new CreationResult(
-                ticketSystemType: TicketSystemEnum::MAIL,
+                ticketSystemType: TicketSystem::Mail,
                 creationError: false,
                 ticketNumber: $referenceNumber,
                 errorMessage: null,
@@ -64,7 +64,7 @@ class MailGateway implements TicketSystemGateway
             }
 
             return new CreationResult(
-                ticketSystemType: TicketSystemEnum::MAIL,
+                ticketSystemType: TicketSystem::Mail,
                 creationError: true,
                 ticketNumber: null,
                 errorMessage: $e->getMessage(),

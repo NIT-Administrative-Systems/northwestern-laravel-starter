@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Auth\Actions\Api;
 
-use App\Domains\Auth\Enums\AuthTypeEnum;
+use App\Domains\Auth\Enums\AuthType;
 use App\Domains\Auth\Models\AccessToken;
 use App\Domains\User\Models\User;
 use Carbon\CarbonInterface;
@@ -34,7 +34,7 @@ readonly class IssueAccessToken
         ?CarbonInterface $expiresAt = null,
         ?array $allowedIps = null,
     ): array {
-        if ($user->auth_type !== AuthTypeEnum::API) {
+        if ($user->auth_type !== AuthType::API) {
             throw new InvalidArgumentException('Tokens can only be issued for API users.');
         }
 

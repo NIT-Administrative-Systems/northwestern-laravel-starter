@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users\RelationManagers;
 
-use App\Domains\Auth\Enums\AuthTypeEnum;
-use App\Domains\Auth\Enums\PermissionEnum;
+use App\Domains\Auth\Enums\AuthType;
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\User\Models\User;
 use App\Filament\Resources\UserLoginRecords\UserLoginRecordResource;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -23,8 +23,8 @@ class LoginRecordsRelationManager extends RelationManager
     public static function canViewForRecord(Model $ownerRecord, string $pageClass): bool
     {
         /** @var User $ownerRecord */
-        return $ownerRecord->auth_type !== AuthTypeEnum::API
-            && auth()->user()?->hasPermissionTo(PermissionEnum::VIEW_LOGIN_RECORDS);
+        return $ownerRecord->auth_type !== AuthType::API
+            && auth()->user()?->hasPermissionTo(SystemPermission::ViewLoginRecords);
     }
 
     public static function getTabComponent(Model $ownerRecord, string $pageClass): Tab

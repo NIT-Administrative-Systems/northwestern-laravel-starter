@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\User\Http\Controllers\Api\V1;
 
-use App\Domains\User\Enums\AffiliationEnum;
+use App\Domains\User\Enums\Affiliation;
 use App\Domains\User\Http\Controllers\Api\V1\UserApiController;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\ApiTestCase;
@@ -79,12 +79,12 @@ class UserApiControllerTest extends ApiTestCase
 
     public function test_returns_primary_affiliation_as_string_value(): void
     {
-        $this->apiUser->update(['primary_affiliation' => AffiliationEnum::STAFF]);
+        $this->apiUser->update(['primary_affiliation' => Affiliation::Staff]);
 
         $response = $this->authenticatedGet();
 
         $response->assertOk();
-        $response->assertJsonPath('data.primary_affiliation', AffiliationEnum::STAFF->value);
+        $response->assertJsonPath('data.primary_affiliation', Affiliation::Staff->value);
     }
 
     public function test_returns_null_for_nullable_fields(): void

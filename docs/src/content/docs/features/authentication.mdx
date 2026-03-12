@@ -166,14 +166,14 @@ LOCAL_AUTH_USE_FIXED_CODE=false
   <TabItem label="Programmatically" icon="seti:php">
     ```php
     use App\Domains\User\Models\User;
-    use App\Domains\User\Enums\AffiliationEnum;
-    use App\Domains\Auth\Enums\AuthTypeEnum;
+    use App\Domains\User\Enums\Affiliation;
+    use App\Domains\Auth\Enums\AuthType;
     use App\Domains\Auth\Actions\Local\IssueLoginChallenge;
 
     $user = User::create([
         'username' => 'jdoe',
-        'auth_type' => AuthTypeEnum::LOCAL,
-        'primary_affiliation' => AffiliationEnum::AFFILIATE,
+        'auth_type' => AuthType::Local,
+        'primary_affiliation' => Affiliation::Affiliate,
         'email' => 'jane.doe@example.com',
         'first_name' => 'Jane',
         'last_name' => 'Doe',
@@ -253,23 +253,23 @@ Every login creates a `UserLoginRecord` with a **segment** — a classification 
 
 | Segment | Classification | Color |
 |---------|---------------|-------|
-| Super Admin | User has the `MANAGE_ALL` permission | Danger (red) |
+| Super Admin | User has the `ManageAll` permission | Danger (red) |
 | External User | User authenticates via local/passwordless auth | Warning (amber) |
 | Other | Everyone else (default) | Gray |
 
 ### Adding a New Segment
 
-All charts, filters, exports, and stats dynamically pull from the `UserSegmentEnum`. Adding a new case automatically appears everywhere.
+All charts, filters, exports, and stats dynamically pull from the `UserSegment`. Adding a new case automatically appears everywhere.
 
 <Steps>
 
 1. **Add a case to the enum**
 
-   ```php title="app/Domains/User/Enums/UserSegmentEnum.php"
-   case SUPER_ADMIN = 'super-admin';
-   case EXTERNAL_USER = 'external-user';
-   case FACULTY = 'faculty'; // New segment
-   case OTHER = 'other';
+   ```php title="app/Domains/User/Enums/UserSegment.php"
+   case SuperAdmin = 'super-admin';
+   case ExternalUser = 'external-user';
+   case Faculty = 'faculty'; // New segment
+   case Other = 'other';
    ```
 
    Add a color and icon for the new case in `getColor()` and `getIcon()`. The label is auto-generated from the value (e.g., `'faculty'` → `"Faculty"`).
@@ -280,10 +280,10 @@ All charts, filters, exports, and stats dynamically pull from the `UserSegmentEn
 
    ```php title="app/Domains/User/Actions/DetermineUserSegment.php"
    return match (true) {
-       $this->isSuperAdmin($user) => UserSegmentEnum::SUPER_ADMIN,
-       $this->isExternalUser($user) => UserSegmentEnum::EXTERNAL_USER,
-       $this->isFaculty($user) => UserSegmentEnum::FACULTY,
-       default => UserSegmentEnum::OTHER,
+       $this->isSuperAdmin($user) => UserSegment::SuperAdmin,
+       $this->isExternalUser($user) => UserSegment::ExternalUser,
+       $this->isFaculty($user) => UserSegment::Faculty,
+       default => UserSegment::Other,
    };
    ```
 

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Roles\Pages;
 
-use App\Domains\Auth\Enums\PermissionEnum;
-use App\Domains\Auth\Enums\RoleModificationOriginEnum;
+use App\Domains\Auth\Enums\RoleModificationOrigin;
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\User;
 use App\Filament\Resources\Roles\RoleResource;
@@ -53,7 +53,7 @@ class EditRole extends EditRecord
                     $record->users()
                         ->lazyById(100)
                         ->each(function (User $user) use ($record) {
-                            $user->removeRoleWithAudit($record, RoleModificationOriginEnum::REMOVED_BY_DELETION);
+                            $user->removeRoleWithAudit($record, RoleModificationOrigin::RemovedByDeletion);
                         });
                 }),
         ];
@@ -71,12 +71,12 @@ class EditRole extends EditRecord
         $apiPermissions = $this->data['api_permissions'] ?? [];
         $regularPermissions = $this->data['regular_permissions'] ?? [];
 
-        if (auth()->user()->hasPermissionTo(PermissionEnum::MANAGE_ALL)) {
+        if (auth()->user()->hasPermissionTo(SystemPermission::ManageAll)) {
             $systemPermissions = $this->data['system_permissions'] ?? [];
         } else {
             // Preserve existing system permissions the user cannot manage
             $systemPermissions = $this->record->permissions
-                ->filter(fn ($p) => PermissionEnum::tryFrom($p->name)?->isSystemManaged())
+                ->filter(fn ($p) => SystemPermission::tryFrom($p->name)?->isSystemManaged())
                 ->pluck('name')
                 ->toArray();
         }

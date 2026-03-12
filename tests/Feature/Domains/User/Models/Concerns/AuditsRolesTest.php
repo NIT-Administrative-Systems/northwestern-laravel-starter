@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\User\Models\Concerns;
 
-use App\Domains\Auth\Enums\RoleModificationOriginEnum;
+use App\Domains\Auth\Enums\RoleModificationOrigin;
 use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\Audit;
 use App\Domains\User\Models\Concerns\AuditsRoles;
@@ -31,7 +31,7 @@ class AuditsRolesTest extends TestCase
 
     public function test_assign_role_with_audit_creates_audit_record(): void
     {
-        $this->user->assignRoleWithAudit($this->role, RoleModificationOriginEnum::SYSTEM);
+        $this->user->assignRoleWithAudit($this->role, RoleModificationOrigin::System);
 
         $audit = Audit::where('event', 'role_assigned')
             ->where('auditable_type', User::class)
@@ -45,7 +45,7 @@ class AuditsRolesTest extends TestCase
 
     public function test_assign_role_with_audit_captures_roles_before_and_after(): void
     {
-        $this->user->assignRoleWithAudit($this->role, RoleModificationOriginEnum::SYSTEM);
+        $this->user->assignRoleWithAudit($this->role, RoleModificationOrigin::System);
 
         $audit = Audit::where('event', 'role_assigned')
             ->where('auditable_id', $this->user->id)
@@ -67,9 +67,9 @@ class AuditsRolesTest extends TestCase
 
     public function test_remove_role_with_audit_creates_audit_record(): void
     {
-        $this->user->assignRoleWithAudit($this->role, RoleModificationOriginEnum::SYSTEM);
+        $this->user->assignRoleWithAudit($this->role, RoleModificationOrigin::System);
 
-        $this->user->removeRoleWithAudit($this->role, RoleModificationOriginEnum::SYSTEM);
+        $this->user->removeRoleWithAudit($this->role, RoleModificationOrigin::System);
 
         $audit = Audit::where('event', 'role_removed')
             ->where('auditable_type', User::class)
@@ -83,9 +83,9 @@ class AuditsRolesTest extends TestCase
 
     public function test_remove_role_with_audit_captures_correct_diff(): void
     {
-        $this->user->assignRoleWithAudit($this->role, RoleModificationOriginEnum::SYSTEM);
+        $this->user->assignRoleWithAudit($this->role, RoleModificationOrigin::System);
 
-        $this->user->removeRoleWithAudit($this->role, RoleModificationOriginEnum::SYSTEM);
+        $this->user->removeRoleWithAudit($this->role, RoleModificationOrigin::System);
 
         $audit = Audit::where('event', 'role_removed')
             ->where('auditable_id', $this->user->id)
@@ -109,7 +109,7 @@ class AuditsRolesTest extends TestCase
 
     public function test_audit_includes_modification_origin_as_tag(): void
     {
-        $this->user->assignRoleWithAudit($this->role, RoleModificationOriginEnum::UI_ACTION);
+        $this->user->assignRoleWithAudit($this->role, RoleModificationOrigin::UiAction);
 
         $audit = Audit::where('event', 'role_assigned')
             ->where('auditable_id', $this->user->id)
@@ -122,7 +122,7 @@ class AuditsRolesTest extends TestCase
 
     public function test_audit_includes_context_as_tags(): void
     {
-        $this->user->assignRoleWithAudit($this->role, RoleModificationOriginEnum::SYSTEM, ['reason' => 'test']);
+        $this->user->assignRoleWithAudit($this->role, RoleModificationOrigin::System, ['reason' => 'test']);
 
         $audit = Audit::where('event', 'role_assigned')
             ->where('auditable_id', $this->user->id)
@@ -138,7 +138,7 @@ class AuditsRolesTest extends TestCase
     {
         $roles = Role::factory()->count(2)->create()->all();
 
-        $this->user->assignRoleWithAudit($roles, RoleModificationOriginEnum::SYSTEM);
+        $this->user->assignRoleWithAudit($roles, RoleModificationOrigin::System);
 
         $audit = Audit::where('event', 'role_assigned')
             ->where('auditable_id', $this->user->id)
@@ -159,7 +159,7 @@ class AuditsRolesTest extends TestCase
     {
         $roles = Role::factory()->count(2)->create();
 
-        $this->user->assignRoleWithAudit($roles, RoleModificationOriginEnum::SYSTEM);
+        $this->user->assignRoleWithAudit($roles, RoleModificationOrigin::System);
 
         $audit = Audit::where('event', 'role_assigned')
             ->where('auditable_id', $this->user->id)
@@ -187,7 +187,7 @@ class AuditsRolesTest extends TestCase
             }
         });
 
-        $this->user->assignRoleWithAudit($this->role, RoleModificationOriginEnum::SYSTEM);
+        $this->user->assignRoleWithAudit($this->role, RoleModificationOrigin::System);
 
         $this->assertTrue($intercepted);
 
@@ -202,7 +202,7 @@ class AuditsRolesTest extends TestCase
 
     public function test_audit_excludes_context_from_tags_when_empty(): void
     {
-        $this->user->assignRoleWithAudit($this->role, RoleModificationOriginEnum::SYSTEM);
+        $this->user->assignRoleWithAudit($this->role, RoleModificationOrigin::System);
 
         $audit = Audit::where('event', 'role_assigned')
             ->where('auditable_id', $this->user->id)

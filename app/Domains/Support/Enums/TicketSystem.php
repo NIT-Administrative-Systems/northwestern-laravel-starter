@@ -16,16 +16,16 @@ use Filament\Support\Contracts\HasLabel;
  * via {@see self::gatewayClass()}. The string value corresponds to the
  * `SUPPORT_DRIVER` env variable and the `ticketing_system` column.
  */
-enum TicketSystemEnum: string implements HasLabel
+enum TicketSystem: string implements HasLabel
 {
-    case TEAM_DYNAMIX = 'team-dynamix';
-    case MAIL = 'mail';
+    case TeamDynamix = 'team-dynamix';
+    case Mail = 'mail';
 
     public function getLabel(): string
     {
         return match ($this) {
-            self::TEAM_DYNAMIX => 'TeamDynamix',
-            self::MAIL => 'Email',
+            self::TeamDynamix => 'TeamDynamix',
+            self::Mail => 'Email',
         };
     }
 
@@ -37,8 +37,8 @@ enum TicketSystemEnum: string implements HasLabel
     public function gatewayClass(): string
     {
         return match ($this) {
-            self::TEAM_DYNAMIX => TeamDynamixGateway::class,
-            self::MAIL => MailGateway::class,
+            self::TeamDynamix => TeamDynamixGateway::class,
+            self::Mail => MailGateway::class,
         };
     }
 }

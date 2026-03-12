@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\AccessTokens\Actions;
 
 use App\Domains\Auth\Actions\Api\IssueAccessToken;
-use App\Domains\Auth\Enums\PermissionEnum;
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\User\Models\User;
 use App\Filament\Resources\AccessTokens\Schemas\AccessTokenSchemas;
 use App\Filament\Resources\Users\RelationManagers\AccessTokensRelationManager;
@@ -26,7 +26,7 @@ class CreateAccessTokenAction extends Action
     {
         parent::setUp();
 
-        $this->authorize(PermissionEnum::MANAGE_API_USERS)
+        $this->authorize(SystemPermission::ManageApiUsers)
             ->label('Create Token')
             ->icon(Heroicon::OutlinedPlusCircle)
             ->outlined()

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Domains\User\Actions\Local;
 
 use App\Domains\Auth\Actions\Local\IssueLoginChallenge;
-use App\Domains\Auth\Enums\AuthTypeEnum;
-use App\Domains\User\Enums\AffiliationEnum;
+use App\Domains\Auth\Enums\AuthType;
+use App\Domains\User\Enums\Affiliation;
 use App\Domains\User\Models\User;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
@@ -34,8 +34,8 @@ readonly class CreateLocalUser
 
                 return User::create([
                     'username' => $username,
-                    'auth_type' => AuthTypeEnum::LOCAL,
-                    'primary_affiliation' => AffiliationEnum::AFFILIATE,
+                    'auth_type' => AuthType::Local,
+                    'primary_affiliation' => Affiliation::Affiliate,
                     'email' => strtolower($email),
                     'first_name' => $firstName,
                     'last_name' => $lastName,

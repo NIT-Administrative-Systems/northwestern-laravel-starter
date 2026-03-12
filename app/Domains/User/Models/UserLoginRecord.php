@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Domains\User\Models;
 
 use App\Domains\Core\Models\BaseModel;
-use App\Domains\User\Enums\UserSegmentEnum;
+use App\Domains\User\Enums\UserSegment;
 use Database\Factories\Domains\User\Models\UserLoginRecordFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -18,7 +18,7 @@ class UserLoginRecord extends BaseModel
     public static $auditingDisabled = true;
 
     protected $casts = [
-        'segment' => UserSegmentEnum::class,
+        'segment' => UserSegment::class,
         'logged_in_at' => 'datetime',
     ];
 

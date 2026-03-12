@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users\RelationManagers;
 
-use App\Domains\Auth\Enums\AuthTypeEnum;
-use App\Domains\Auth\Enums\PermissionEnum;
+use App\Domains\Auth\Enums\AuthType;
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\User\Models\User;
 use App\Filament\Resources\ApiRequestLogs\Tables\ApiRequestLogsTable;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -37,8 +37,8 @@ class ApiRequestLogsRelationManager extends RelationManager
         }
 
         /** @var User $ownerRecord */
-        return $ownerRecord->auth_type === AuthTypeEnum::API
-            && auth()->user()?->hasPermissionTo(PermissionEnum::MANAGE_ALL);
+        return $ownerRecord->auth_type === AuthType::API
+            && auth()->user()?->hasPermissionTo(SystemPermission::ManageAll);
     }
 
     public static function getTabComponent(Model $ownerRecord, string $pageClass): Tab

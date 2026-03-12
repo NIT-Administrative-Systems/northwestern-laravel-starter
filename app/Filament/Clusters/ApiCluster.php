@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Clusters;
 
-use App\Domains\Auth\Enums\PermissionEnum;
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Filament\Navigation\AdministrationNavGroup;
 use BackedEnum;
 use Filament\Clusters\Cluster;
@@ -22,7 +22,7 @@ class ApiCluster extends Cluster
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedServerStack;
 
-    protected static string|null|UnitEnum $navigationGroup = AdministrationNavGroup::PLATFORM;
+    protected static string|null|UnitEnum $navigationGroup = AdministrationNavGroup::Platform;
 
     protected static ?int $navigationSort = 2;
 
@@ -34,6 +34,6 @@ class ApiCluster extends Cluster
             return false;
         }
 
-        return auth()->user()?->hasPermissionTo(PermissionEnum::MANAGE_ALL) ?? false;
+        return auth()->user()?->hasPermissionTo(SystemPermission::ManageAll) ?? false;
     }
 }

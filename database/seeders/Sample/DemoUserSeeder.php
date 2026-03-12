@@ -74,7 +74,7 @@ class DemoUserSeeder extends Seeder
             ])
             ->createOne();
 
-        $user->roles()->attach(Role::whereHas('role_type', fn ($query) => $query->where('slug', RoleTypeEnum::SYSTEM_MANAGED))->firstOrFail());
+        $user->roles()->attach(Role::whereHas('role_type', fn ($query) => $query->where('slug', RoleTypeEnum::SystemManaged))->firstOrFail());
     }
 
     private function apiUser(): void

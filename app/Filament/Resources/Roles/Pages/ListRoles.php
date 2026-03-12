@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Roles\Pages;
 
-use App\Domains\Auth\Enums\PermissionEnum;
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Filament\Resources\Roles\RoleResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
@@ -18,7 +18,7 @@ class ListRoles extends ListRecords
     {
         return [
             CreateAction::make()
-                ->authorize(PermissionEnum::EDIT_ROLES)
+                ->authorize(SystemPermission::EditRoles)
                 ->label('Create Role')
                 ->icon(Heroicon::OutlinedPlusCircle),
         ];

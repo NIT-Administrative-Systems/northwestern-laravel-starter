@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\User\Models\Concerns;
 
-use App\Domains\Auth\Enums\PermissionEnum;
-use App\Domains\Auth\Enums\RoleModificationOriginEnum;
+use App\Domains\Auth\Enums\RoleModificationOrigin;
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\Concerns\HandlesImpersonation;
 use App\Domains\User\Models\User;
@@ -22,8 +22,8 @@ class HandlesImpersonationTest extends TestCase
 
         $user = User::factory()->createOne();
         $role = Role::factory()->createOne();
-        $role->givePermissionTo(PermissionEnum::MANAGE_IMPERSONATION);
-        $user->assignRoleWithAudit($role, RoleModificationOriginEnum::SYSTEM);
+        $role->givePermissionTo(SystemPermission::ManageImpersonation);
+        $user->assignRoleWithAudit($role, RoleModificationOrigin::System);
 
         $this->assertTrue($user->canImpersonate());
     }
@@ -43,8 +43,8 @@ class HandlesImpersonationTest extends TestCase
 
         $user = User::factory()->createOne();
         $role = Role::factory()->createOne();
-        $role->givePermissionTo(PermissionEnum::MANAGE_IMPERSONATION);
-        $user->assignRoleWithAudit($role, RoleModificationOriginEnum::SYSTEM);
+        $role->givePermissionTo(SystemPermission::ManageImpersonation);
+        $user->assignRoleWithAudit($role, RoleModificationOrigin::System);
 
         $this->assertFalse($user->canImpersonate());
     }
@@ -55,8 +55,8 @@ class HandlesImpersonationTest extends TestCase
 
         $user = User::factory()->createOne();
         $role = Role::factory()->createOne();
-        $role->givePermissionTo(PermissionEnum::MANAGE_IMPERSONATION);
-        $user->assignRoleWithAudit($role, RoleModificationOriginEnum::SYSTEM);
+        $role->givePermissionTo(SystemPermission::ManageImpersonation);
+        $user->assignRoleWithAudit($role, RoleModificationOrigin::System);
 
         $this->assertFalse($user->canImpersonateUser($user));
     }
@@ -68,8 +68,8 @@ class HandlesImpersonationTest extends TestCase
         $user = User::factory()->createOne();
         $target = User::factory()->createOne();
         $role = Role::factory()->createOne();
-        $role->givePermissionTo(PermissionEnum::MANAGE_IMPERSONATION);
-        $user->assignRoleWithAudit($role, RoleModificationOriginEnum::SYSTEM);
+        $role->givePermissionTo(SystemPermission::ManageImpersonation);
+        $user->assignRoleWithAudit($role, RoleModificationOrigin::System);
 
         $this->assertFalse($user->canImpersonateUser($target));
     }
@@ -81,8 +81,8 @@ class HandlesImpersonationTest extends TestCase
         $user = User::factory()->createOne();
         $target = User::factory()->api()->createOne();
         $role = Role::factory()->createOne();
-        $role->givePermissionTo(PermissionEnum::MANAGE_IMPERSONATION);
-        $user->assignRoleWithAudit($role, RoleModificationOriginEnum::SYSTEM);
+        $role->givePermissionTo(SystemPermission::ManageImpersonation);
+        $user->assignRoleWithAudit($role, RoleModificationOrigin::System);
 
         $this->assertFalse($user->canImpersonateUser($target));
         $this->assertFalse($target->canBeImpersonated());
@@ -95,8 +95,8 @@ class HandlesImpersonationTest extends TestCase
         $user = User::factory()->createOne();
         $target = User::factory()->affiliate()->createOne();
         $role = Role::factory()->createOne();
-        $role->givePermissionTo(PermissionEnum::MANAGE_IMPERSONATION);
-        $user->assignRoleWithAudit($role, RoleModificationOriginEnum::SYSTEM);
+        $role->givePermissionTo(SystemPermission::ManageImpersonation);
+        $user->assignRoleWithAudit($role, RoleModificationOrigin::System);
 
         $this->assertTrue($target->canBeImpersonated());
         $this->assertTrue($user->canImpersonateUser($target));
@@ -108,13 +108,13 @@ class HandlesImpersonationTest extends TestCase
 
         $impersonator = User::factory()->createOne();
         $impersonatorRole = Role::factory()->createOne();
-        $impersonatorRole->givePermissionTo(PermissionEnum::MANAGE_IMPERSONATION);
-        $impersonator->assignRoleWithAudit($impersonatorRole, RoleModificationOriginEnum::SYSTEM);
+        $impersonatorRole->givePermissionTo(SystemPermission::ManageImpersonation);
+        $impersonator->assignRoleWithAudit($impersonatorRole, RoleModificationOrigin::System);
 
         $target = User::factory()->createOne();
         $targetRole = Role::factory()->createOne();
-        $targetRole->givePermissionTo(PermissionEnum::MANAGE_ALL);
-        $target->assignRoleWithAudit($targetRole, RoleModificationOriginEnum::SYSTEM);
+        $targetRole->givePermissionTo(SystemPermission::ManageAll);
+        $target->assignRoleWithAudit($targetRole, RoleModificationOrigin::System);
 
         $this->actingAs($impersonator);
 
@@ -128,13 +128,13 @@ class HandlesImpersonationTest extends TestCase
 
         $impersonator = User::factory()->createOne();
         $impersonatorRole = Role::factory()->createOne();
-        $impersonatorRole->givePermissionTo([PermissionEnum::MANAGE_IMPERSONATION, PermissionEnum::MANAGE_ALL]);
-        $impersonator->assignRoleWithAudit($impersonatorRole, RoleModificationOriginEnum::SYSTEM);
+        $impersonatorRole->givePermissionTo([SystemPermission::ManageImpersonation, SystemPermission::ManageAll]);
+        $impersonator->assignRoleWithAudit($impersonatorRole, RoleModificationOrigin::System);
 
         $target = User::factory()->createOne();
         $targetRole = Role::factory()->createOne();
-        $targetRole->givePermissionTo(PermissionEnum::MANAGE_ALL);
-        $target->assignRoleWithAudit($targetRole, RoleModificationOriginEnum::SYSTEM);
+        $targetRole->givePermissionTo(SystemPermission::ManageAll);
+        $target->assignRoleWithAudit($targetRole, RoleModificationOrigin::System);
 
         $this->actingAs($impersonator);
 
@@ -148,8 +148,8 @@ class HandlesImpersonationTest extends TestCase
 
         $impersonator = User::factory()->createOne();
         $impersonatorRole = Role::factory()->createOne();
-        $impersonatorRole->givePermissionTo(PermissionEnum::MANAGE_IMPERSONATION);
-        $impersonator->assignRoleWithAudit($impersonatorRole, RoleModificationOriginEnum::SYSTEM);
+        $impersonatorRole->givePermissionTo(SystemPermission::ManageImpersonation);
+        $impersonator->assignRoleWithAudit($impersonatorRole, RoleModificationOrigin::System);
 
         $target = User::factory()->createOne();
 

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Domains\Support\Actions;
 
 use App\Domains\Support\Contracts\TicketSystemGateway;
-use App\Domains\Support\Enums\TicketSystemEnum;
-use App\Domains\Support\Gateway\TicketSystemGatewayFactory;
+use App\Domains\Support\Enums\TicketSystem;
+use App\Domains\Support\Gateways\TicketSystemGatewayFactory;
 use App\Domains\Support\Models\SupportTicket;
 use App\Domains\Support\Repositories\SupportTicketRepository;
 
@@ -38,10 +38,10 @@ class CreateSupportTicket
      */
     public function __invoke(SupportTicket $ticket): SupportTicket
     {
-        $result = $this->gateway->create($ticket);
-        $ticket = $this->repo->updatePostStatus($ticket, $result);
+        $creationResult = $this->gateway->create($ticket);
+        $ticket = $this->repo->updatePostStatus($ticket, $creationResult);
 
-        if ($result->creationError && $result->ticketSystemType !== TicketSystemEnum::MAIL) {
+        if ($creationResult->creationError && $creationResult->ticketSystemType !== TicketSystem::Mail) {
             $fallbackResult = $this->factory->fallback()->create($ticket);
 
             if (! $fallbackResult->creationError) {

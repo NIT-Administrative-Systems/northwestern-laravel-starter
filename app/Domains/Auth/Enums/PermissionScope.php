@@ -17,12 +17,12 @@ use Illuminate\Support\Str;
  *
  * ## Scope Types
  *
- * **SYSTEM_WIDE**: System-wide permissions that grant unrestricted access across all resources.
+ * **SystemWide**: System-wide permissions that grant unrestricted access across all resources.
  * - Example: `view-users` allows viewing ALL users in the system
  * - Example: `edit-roles` allows editing ANY role
  * - Typically assigned to administrators and staff
  *
- * **PERSONAL**: Permissions limited to resources owned by or directly related to the user.
+ * **Personal**: Permissions limited to resources owned by or directly related to the user.
  * - Example: `view-own-profile` allows viewing only the user's own profile
  * - Example: `edit-own-posts` allows editing only posts created by the user
  * - Enables self-service functionality without granting broad system access
@@ -35,22 +35,22 @@ use Illuminate\Support\Str;
  * ```php
  * public function update(User $user, Post $post): bool
  * {
- *     // SYSTEM_WIDE permission bypasses ownership check
+ *     // SystemWide permission bypasses ownership check
  *     if ($user->hasPermissionTo('edit-any-post')) {
  *         return true;
  *     }
  *
- *     // PERSONAL permission requires ownership verification
+ *     // Personal permission requires ownership verification
  *     return $user->hasPermissionTo('edit-own-post') && $post->user->is($user);
  * }
  * ```
  *
- * @see PermissionEnum::scope() For assigning scopes to individual permissions
+ * @see SystemPermission::scope() For assigning scopes to individual permissions
  */
-enum PermissionScopeEnum: string implements HasLabel
+enum PermissionScope: string implements HasLabel
 {
-    case SYSTEM_WIDE = 'system-wide';
-    case PERSONAL = 'personal';
+    case SystemWide = 'system-wide';
+    case Personal = 'personal';
 
     /**
      * A human-readable label of the permission.
@@ -63,8 +63,8 @@ enum PermissionScopeEnum: string implements HasLabel
     public function getColor(): string
     {
         return match ($this) {
-            self::SYSTEM_WIDE => 'gray',
-            self::PERSONAL => 'info',
+            self::SystemWide => 'gray',
+            self::Personal => 'info',
         };
     }
 

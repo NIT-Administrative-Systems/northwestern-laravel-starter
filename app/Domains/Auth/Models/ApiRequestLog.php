@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Auth\Models;
 
-use App\Domains\Core\Enums\ApiRequestFailureEnum;
+use App\Domains\Core\Enums\ApiRequestFailure;
 use App\Domains\User\Models\User;
 use Database\Factories\Domains\Auth\Models\ApiRequestLogFactory;
 use Illuminate\Database\Eloquent\Builder;
@@ -21,7 +21,7 @@ class ApiRequestLog extends Model
     public const null UPDATED_AT = null;
 
     protected $casts = [
-        'failure_reason' => ApiRequestFailureEnum::class,
+        'failure_reason' => ApiRequestFailure::class,
         'created_at' => 'datetime',
     ];
 

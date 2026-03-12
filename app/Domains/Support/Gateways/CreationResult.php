@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Domains\Support\Gateway;
+namespace App\Domains\Support\Gateways;
 
 use App\Domains\Support\Contracts\TicketSystemGateway;
-use App\Domains\Support\Enums\TicketSystemEnum;
+use App\Domains\Support\Enums\TicketSystem;
 
 /**
  * Immutable value object representing the outcome of a gateway submission.
@@ -17,13 +17,13 @@ use App\Domains\Support\Enums\TicketSystemEnum;
 readonly class CreationResult
 {
     /**
-     * @param  TicketSystemEnum  $ticketSystemType  The gateway that handled the request.
+     * @param  TicketSystem  $ticketSystemType  The gateway that handled the request.
      * @param  bool  $creationError  Whether the submission failed.
      * @param  non-empty-string|null  $ticketNumber  The external ticket reference (e.g., TDX ID or SUP-47). Null on failure.
      * @param  string|null  $errorMessage  A description of the failure. Null on success.
      */
     public function __construct(
-        public TicketSystemEnum $ticketSystemType,
+        public TicketSystem $ticketSystemType,
         public bool $creationError,
         public ?string $ticketNumber,
         public ?string $errorMessage,

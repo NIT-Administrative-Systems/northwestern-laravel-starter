@@ -63,7 +63,7 @@ class SendLoginCodeController extends Controller
         abort_unless(config('local-auth.enabled'), 404);
 
         $email = $request->email();
-        $challenge = $this->processLoginCodeRequest($email, $request);
+        $challenge = $this->issueLoginChallengeWithTimingProtection($email, $request);
 
         Session::put([
             LoginCodeSession::EMAIL => $email,
@@ -95,7 +95,7 @@ class SendLoginCodeController extends Controller
             return back()->with('status', "Please wait {$seconds} seconds before requesting another code.");
         }
 
-        $challenge = $this->processLoginCodeRequest($email, $request);
+        $challenge = $this->issueLoginChallengeWithTimingProtection($email, $request);
 
         Session::put([
             LoginCodeSession::CHALLENGE_ID => $challenge instanceof LoginChallenge
@@ -121,7 +121,7 @@ class SendLoginCodeController extends Controller
      *
      * @throws ValidationException If rate limit exceeded
      */
-    private function processLoginCodeRequest(string $email, Request $request): ?LoginChallenge
+    private function issueLoginChallengeWithTimingProtection(string $email, Request $request): ?LoginChallenge
     {
         $jitterMs = random_int(0, 50);
         $minimumTimeMs = self::MIN_TOTAL_RESPONSE_TIME_MS + $jitterMs;

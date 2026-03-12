@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Database\Factories\Domains\Auth\Models;
 
 use App\Domains\Auth\Models\ApiRequestLog;
-use App\Domains\Core\Enums\ApiRequestFailureEnum;
+use App\Domains\Core\Enums\ApiRequestFailure;
 use App\Domains\User\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Arr;
@@ -24,7 +24,7 @@ class ApiRequestLogFactory extends Factory
     {
         $failureReason = fake()->boolean(70)
             ? null
-            : Arr::random(ApiRequestFailureEnum::cases());
+            : Arr::random(ApiRequestFailure::cases());
 
         return [
             'trace_id' => fake()->uuid(),
@@ -57,12 +57,12 @@ class ApiRequestLogFactory extends Factory
         ]);
     }
 
-    public function failed(?ApiRequestFailureEnum $reason = null): self
+    public function failed(?ApiRequestFailure $reason = null): self
     {
         return $this->state(fn (array $attributes) => [
             'access_token_id' => null,
             'status_code' => 401,
-            'failure_reason' => $reason ?? Arr::random(ApiRequestFailureEnum::cases()),
+            'failure_reason' => $reason ?? Arr::random(ApiRequestFailure::cases()),
         ]);
     }
 }

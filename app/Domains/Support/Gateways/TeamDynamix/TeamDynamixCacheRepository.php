@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Support\Gateways\TeamDynamix;
 
-use App\Domains\Support\Exceptions\TdxLookupFailed;
+use App\Domains\Support\Exceptions\TdxLookupFailedException;
 use Carbon\CarbonInterval;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
@@ -90,7 +90,7 @@ class TeamDynamixCacheRepository
      * @param  string  $value  The name to match (case-insensitive).
      * @return positive-int The numeric ID of the matching record.
      *
-     * @throws TdxLookupFailed|Throwable If no record with the given name is found.
+     * @throws TdxLookupFailedException|Throwable If no record with the given name is found.
      */
     private function find(string $apiName, string $rawBody, string $value): int
     {
@@ -99,7 +99,7 @@ class TeamDynamixCacheRepository
         $types = collect($decoded);
 
         $type = $types->filter(fn (array $type) => strtolower($type['Name']) === strtolower($value))->first();
-        throw_unless($type, TdxLookupFailed::for($apiName, $value));
+        throw_unless($type, TdxLookupFailedException::for($apiName, $value));
 
         return $type['ID'];
     }

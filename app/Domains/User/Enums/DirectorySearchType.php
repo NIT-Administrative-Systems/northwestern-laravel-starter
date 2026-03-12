@@ -8,9 +8,9 @@ use InvalidArgumentException;
 
 enum DirectorySearchType: string
 {
-    case EMAIL = 'mail';
-    case NETID = 'netid';
-    case EMPLOYEE_ID = 'emplid';
+    case Email = 'mail';
+    case NetId = 'netid';
+    case EmployeeId = 'emplid';
 
     /**
      * Determines the search type based on the input value.
@@ -26,13 +26,13 @@ enum DirectorySearchType: string
         }
 
         if (filter_var($trimmedValue, FILTER_VALIDATE_EMAIL)) {
-            return self::EMAIL;
+            return self::Email;
         }
 
         if (ctype_digit($trimmedValue)) {
-            return self::EMPLOYEE_ID;
+            return self::EmployeeId;
         }
 
-        return self::NETID;
+        return self::NetId;
     }
 }

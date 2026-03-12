@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\Support\Gateways\TeamDynamix;
 
-use App\Domains\Support\Exceptions\TdxLookupFailed;
+use App\Domains\Support\Exceptions\TdxLookupFailedException;
 use App\Domains\Support\Gateways\TeamDynamix\TeamDynamixCacheRepository;
 use DateTime;
 use Illuminate\Support\Facades\Cache;
@@ -117,7 +117,7 @@ class TeamDynamixCacheRepositoryTest extends TestCase
 
         $repo = new TeamDynamixCacheRepository($tdx);
 
-        $this->expectException(TdxLookupFailed::class);
+        $this->expectException(TdxLookupFailedException::class);
         $this->expectExceptionMessage("Unable to find Ticket Type with value 'Default' in TeamDynamix.");
 
         $repo->findTicketTypeId('Default');

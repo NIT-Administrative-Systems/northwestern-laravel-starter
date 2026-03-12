@@ -29,7 +29,7 @@ class AuditResource extends Resource
 
     protected static ?string $navigationLabel = 'Audit Logs';
 
-    protected static string|null|UnitEnum $navigationGroup = AdministrationNavGroup::PLATFORM;
+    protected static string|null|UnitEnum $navigationGroup = AdministrationNavGroup::Platform;
 
     protected static ?int $navigationSort = 3;
 

@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace App\Domains\User\Models;
 
-use App\Domains\Auth\Enums\AuthTypeEnum;
-use App\Domains\Auth\Enums\PermissionEnum;
-use App\Domains\Auth\Enums\SystemRoleEnum;
+use App\Domains\Auth\Enums\AuthType;
+use App\Domains\Auth\Enums\SystemPermission;
+use App\Domains\Auth\Enums\SystemRole;
 use App\Domains\Auth\Models\AccessToken;
 use App\Domains\Auth\Models\ApiRequestLog;
 use App\Domains\Auth\Models\LoginChallenge;
 use App\Domains\Auth\Models\Role;
 use App\Domains\Core\Models\Concerns\Auditable as AuditableConcern;
 use App\Domains\Support\Models\SupportTicket;
-use App\Domains\User\Enums\AffiliationEnum;
+use App\Domains\User\Enums\Affiliation;
 use App\Domains\User\Models\Concerns\AuditsRoles;
 use App\Domains\User\Models\Concerns\HandlesImpersonation;
 use App\Domains\User\Models\Concerns\TracksPermissionSources;
@@ -78,8 +78,8 @@ class User extends Authenticatable implements Auditable, FilamentUser, HasName
     ];
 
     protected $casts = [
-        'auth_type' => AuthTypeEnum::class,
-        'primary_affiliation' => AffiliationEnum::class,
+        'auth_type' => AuthType::class,
+        'primary_affiliation' => Affiliation::class,
         'departments' => 'array',
         'job_titles' => 'array',
         'wildcard_photo_last_synced_at' => 'datetime',
@@ -183,7 +183,7 @@ class User extends Authenticatable implements Auditable, FilamentUser, HasName
     protected function isLocalUser(): Attribute
     {
         return Attribute::make(
-            get: fn (): bool => $this->auth_type === AuthTypeEnum::LOCAL,
+            get: fn (): bool => $this->auth_type === AuthType::Local,
         );
     }
 
@@ -195,7 +195,7 @@ class User extends Authenticatable implements Auditable, FilamentUser, HasName
     protected function isApiUser(): Attribute
     {
         return Attribute::make(
-            get: fn (): bool => $this->auth_type === AuthTypeEnum::API,
+            get: fn (): bool => $this->auth_type === AuthType::API,
         );
     }
 
@@ -213,7 +213,7 @@ class User extends Authenticatable implements Auditable, FilamentUser, HasName
     {
         return Attribute::make(
             get: fn (): Collection => $this->roles->reject(
-                fn ($role) => $role->name === SystemRoleEnum::NORTHWESTERN_USER->value
+                fn ($role) => $role->name === SystemRole::NorthwesternUser->value
             ),
         );
     }
@@ -232,7 +232,7 @@ class User extends Authenticatable implements Auditable, FilamentUser, HasName
          * @phpstan-ignore match.unhandled
          */
         return match ($panel->getId()) {
-            AdministrationPanelProvider::ID => $this->can(PermissionEnum::ACCESS_ADMINISTRATION_PANEL),
+            AdministrationPanelProvider::ID => $this->can(SystemPermission::AccessAdministrationPanel),
         };
     }
 }

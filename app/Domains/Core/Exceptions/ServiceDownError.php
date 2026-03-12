@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Core\Exceptions;
 
-use App\Domains\Core\Enums\ExternalServiceEnum;
+use App\Domains\Core\Enums\ExternalService;
 use Exception;
 use Illuminate\Support\Str;
 
@@ -12,7 +12,7 @@ class ServiceDownError extends Exception
 {
     /** @param  positive-int|null  $retryAttempted */
     public function __construct(
-        protected ExternalServiceEnum $service,
+        protected ExternalService $service,
         protected ?string $additionalMessage = null,
         protected ?int $retryAttempted = null,
         int $code = 0,

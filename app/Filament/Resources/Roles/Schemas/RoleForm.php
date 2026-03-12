@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Roles\Schemas;
 
-use App\Domains\Auth\Enums\PermissionEnum;
-use App\Domains\Auth\Enums\PermissionScopeEnum;
+use App\Domains\Auth\Enums\PermissionScope;
 use App\Domains\Auth\Enums\RoleTypeEnum;
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\Permission;
 use App\Domains\Auth\Models\RoleType;
 use Filament\Forms\Components\CheckboxList;
@@ -27,7 +27,7 @@ class RoleForm
         $nonApiPermissions = [];
         $systemPermissions = [];
 
-        $permissionScopeBadgeHTML = collect(PermissionScopeEnum::cases())->mapWithKeys(function (PermissionScopeEnum $scope) {
+        $permissionScopeBadgeHTML = collect(PermissionScope::cases())->mapWithKeys(function (PermissionScope $scope) {
             return [$scope->value => $scope->getBadgeHTML()];
         });
 
@@ -52,7 +52,7 @@ class RoleForm
         $allRoleTypeOptions = $allRoleTypes->pluck('label', 'id');
 
         $roleTypeOptions = $allRoleTypes
-            ->reject(fn (RoleType $roleType) => $roleType->slug === RoleTypeEnum::SYSTEM_MANAGED)
+            ->reject(fn (RoleType $roleType) => $roleType->slug === RoleTypeEnum::SystemManaged)
             ->pluck('label', 'id');
 
         return $schema
@@ -112,7 +112,7 @@ class RoleForm
                         }
 
                         $roleType = $record->role_type ?? once(fn () => RoleType::find($roleTypeId));
-                        if ($roleType?->slug === RoleTypeEnum::API_INTEGRATION) {
+                        if ($roleType?->slug === RoleTypeEnum::ApiIntegration) {
                             return 'Select data access permissions appropriate for API integrations. UI-specific permissions are not available for API roles.';
                         }
 
@@ -120,7 +120,7 @@ class RoleForm
                     })
                     ->collapsible()
                     ->schema(array_filter([
-                        // For API_INTEGRATION roles, only show API permissions
+                        // For ApiIntegration roles, only show API permissions
                         filled($apiPermissions) ? CheckboxList::make('api_permissions')
                             ->label('API Permissions')
                             ->options(collect($apiPermissions)->mapWithKeys(fn ($data, $value) => [
@@ -146,7 +146,7 @@ class RoleForm
                                 }
                                 $roleType = $record->role_type ?? once(fn () => RoleType::find($roleTypeId));
 
-                                return $roleType?->slug === RoleTypeEnum::API_INTEGRATION;
+                                return $roleType?->slug === RoleTypeEnum::ApiIntegration;
                             })
                             ->dehydrated(false)
                             ->columnSpanFull() : null,
@@ -177,12 +177,12 @@ class RoleForm
                                 }
                                 $roleType = $record->role_type ?? once(fn () => RoleType::find($roleTypeId));
 
-                                return $roleType?->slug !== RoleTypeEnum::API_INTEGRATION;
+                                return $roleType?->slug !== RoleTypeEnum::ApiIntegration;
                             })
                             ->dehydrated(false)
                             ->columnSpanFull() : null,
 
-                        // System Permissions - only visible to users with MANAGE_ALL and hidden for API roles
+                        // System Permissions - only visible to users with ManageAll and hidden for API roles
                         filled($systemPermissions) ? CheckboxList::make('system_permissions')
                             ->label('System Managed Permissions')
                             ->helperText(new HtmlString(<<<'HTML'
@@ -201,7 +201,7 @@ class RoleForm
                                 $value => $data['description'],
                             ])->toArray())
                             ->visible(function ($get, $record) {
-                                if (! auth()->user()->hasPermissionTo(PermissionEnum::MANAGE_ALL)) {
+                                if (! auth()->user()->hasPermissionTo(SystemPermission::ManageAll)) {
                                     return false;
                                 }
 
@@ -211,7 +211,7 @@ class RoleForm
                                 }
                                 $roleType = $record->role_type ?? once(fn () => RoleType::find($roleTypeId));
 
-                                return $roleType?->slug !== RoleTypeEnum::API_INTEGRATION;
+                                return $roleType?->slug !== RoleTypeEnum::ApiIntegration;
                             })
                             ->columns()
                             ->gridDirection('row')

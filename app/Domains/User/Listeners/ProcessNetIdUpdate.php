@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domains\User\Listeners;
 
-use App\Domains\Auth\Enums\RoleModificationOriginEnum;
-use App\Domains\Auth\Enums\SystemRoleEnum;
+use App\Domains\Auth\Enums\RoleModificationOrigin;
+use App\Domains\Auth\Enums\SystemRole;
 use App\Domains\Auth\Models\Role;
 use App\Domains\User\Events\NetIdUpdated;
 use App\Domains\User\Models\User;
@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\DB;
  * Processes **NetID Update** events received from Northwestern's Identity system.
  *
  * When a NetID is deactivated, deprovisioned, or put on security hold, this listener:
- * - Removes all role assignments except the default {@see SystemRoleEnum::NORTHWESTERN_USER} role
+ * - Removes all role assignments except the default {@see SystemRole::NorthwesternUser} role
  * - Marks the user's NetID as inactive
  */
 class ProcessNetIdUpdate implements ShouldQueue
@@ -35,10 +35,10 @@ class ProcessNetIdUpdate implements ShouldQueue
             }
 
             $user->roles
-                ->reject(fn (Role $role) => $role->name === SystemRoleEnum::NORTHWESTERN_USER->value)
+                ->reject(fn (Role $role) => $role->name === SystemRole::NorthwesternUser->value)
                 ->whenNotEmpty(fn ($roles) => $user->removeRoleWithAudit(
                     roles: $roles->all(),
-                    origin: RoleModificationOriginEnum::NETID_STATUS_CHANGE,
+                    origin: RoleModificationOrigin::NetIdStatusChange,
                     context: ['netid_action' => $event->action->value]
                 ));
 

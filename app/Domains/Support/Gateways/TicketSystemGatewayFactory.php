@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Domains\Support\Gateway;
+namespace App\Domains\Support\Gateways;
 
 use App\Domains\Support\Contracts\TicketSystemGateway;
-use App\Domains\Support\Enums\TicketSystemEnum;
+use App\Domains\Support\Enums\TicketSystem;
 use App\Domains\Support\Gateways\Mail\MailGateway;
 use InvalidArgumentException;
 
@@ -13,7 +13,7 @@ use InvalidArgumentException;
  * Resolves {@see TicketSystemGateway} implementations from the service container.
  *
  * The default gateway is determined by the `support.driver` config value, mapped
- * to a concrete class via {@see TicketSystemEnum::gatewayClass()}. The factory
+ * to a concrete class via {@see TicketSystem::gatewayClass()}. The factory
  * also provides a mail fallback for use when non-mail primary gateways fail.
  */
 class TicketSystemGatewayFactory
@@ -26,12 +26,12 @@ class TicketSystemGatewayFactory
         $driver = config('support.driver');
 
         return $this->make(
-            TicketSystemEnum::tryFrom($driver)
+            TicketSystem::tryFrom($driver)
                 ?? throw new InvalidArgumentException(
                     sprintf(
                         'Unsupported support driver: [%s]. Supported: %s.',
                         $driver,
-                        implode(', ', array_column(TicketSystemEnum::cases(), 'value')),
+                        implode(', ', array_column(TicketSystem::cases(), 'value')),
                     )
                 )
         );
@@ -48,10 +48,10 @@ class TicketSystemGatewayFactory
     /**
      * Resolve a gateway instance for the given ticket system type.
      *
-     * The concrete class is determined by {@see TicketSystemEnum::gatewayClass()},
+     * The concrete class is determined by {@see TicketSystem::gatewayClass()},
      * keeping the factory decoupled from individual gateway implementations.
      */
-    public function make(TicketSystemEnum $type): TicketSystemGateway
+    public function make(TicketSystem $type): TicketSystemGateway
     {
         return resolve($type->gatewayClass());
     }

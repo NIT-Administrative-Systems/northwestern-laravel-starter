@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Domains\Support\Models;
 
 use App\Domains\Core\Models\BaseModel;
-use App\Domains\Support\Enums\TicketSystemEnum;
+use App\Domains\Support\Enums\TicketSystem;
 use App\Domains\User\Models\User;
 use Database\Factories\Domains\Support\Models\SupportTicketFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -26,7 +26,7 @@ class SupportTicket extends BaseModel
     use HasFactory, SoftDeletes;
 
     protected $casts = [
-        'ticketing_system' => TicketSystemEnum::class,
+        'ticketing_system' => TicketSystem::class,
         'posted_to_ticketing_system_at' => 'datetime',
         'fallback_sent_at' => 'datetime',
         'post_error' => 'boolean',

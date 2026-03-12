@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\Auth\Mail;
 
-use App\Domains\Auth\Mail\LoginCodeNotification;
+use App\Domains\Auth\Mail\LoginCodeMail;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Crypt;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
-#[CoversClass(LoginCodeNotification::class)]
-class LoginCodeNotificationTest extends TestCase
+#[CoversClass(LoginCodeMail::class)]
+class LoginCodeMailTest extends TestCase
 {
     public function test_envelope_has_correct_subject(): void
     {
         config(['app.name' => 'Test App']);
-        $mailable = new LoginCodeNotification(
+        $mailable = new LoginCodeMail(
             Crypt::encryptString('123456'),
             CarbonImmutable::now()->addMinutes(10)
         );
@@ -30,7 +30,7 @@ class LoginCodeNotificationTest extends TestCase
         $expiresAt = CarbonImmutable::now()->addMinutes(12);
         $expectedMinutes = 12;
 
-        $mailable = new LoginCodeNotification(
+        $mailable = new LoginCodeMail(
             Crypt::encryptString('654321'),
             $expiresAt
         );

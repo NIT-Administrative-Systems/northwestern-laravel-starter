@@ -14,39 +14,39 @@ class DirectorySearchCheck extends Check
 
     public function run(): Result
     {
-        $result = Result::make();
+        $healthResult = Result::make();
 
         $netId = config('nusoa.directorySearch.healthCheckNetid');
 
         if (blank($netId)) {
-            return $result
+            return $healthResult
                 ->warning()
                 ->shortSummary('Configuration missing')
                 ->notificationMessage('Health check skipped: Test NetID not configured');
         }
 
         $directorySearch = resolve(DirectorySearch::class);
-        $info = $directorySearch->lookupByNetId($netId, 'basic');
+        $directoryLookup = $directorySearch->lookupByNetId($netId, 'basic');
 
         if (filled($directorySearch->getLastError())) {
-            return $result
+            return $healthResult
                 ->failed('API error')
                 ->notificationMessage("Directory Search API error - {$directorySearch->getLastError()}");
         }
 
-        if ($info === false || blank($info)) {
-            return $result
+        if ($directoryLookup === false || blank($directoryLookup)) {
+            return $healthResult
                 ->failed('Empty response received')
                 ->notificationMessage("Directory Search API returned no data for test NetID: {$netId}");
         }
 
-        if (! data_get($info, 'uid')) {
-            return $result
+        if (! data_get($directoryLookup, 'uid')) {
+            return $healthResult
                 ->failed('Invalid response structure')
                 ->notificationMessage("Directory Search API response missing required 'uid' field for NetID: {$netId}");
         }
 
-        return $result
+        return $healthResult
             ->ok();
     }
 }

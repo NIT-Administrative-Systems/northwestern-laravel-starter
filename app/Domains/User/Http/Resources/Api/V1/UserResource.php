@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Domains\User\Http\Resources\Api\V1;
 
-use App\Domains\Auth\Enums\AuthTypeEnum;
+use App\Domains\Auth\Enums\AuthType;
 use App\Domains\Auth\Http\Resources\Api\V1\RoleResource;
-use App\Domains\User\Enums\AffiliationEnum;
+use App\Domains\User\Enums\Affiliation;
 use App\Domains\User\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -25,8 +25,8 @@ use OpenApi\Attributes as OA;
             property: 'auth_type',
             description: 'How the user authenticates to the application.',
             type: 'string',
-            example: AuthTypeEnum::API->value,
-            enum: [AuthTypeEnum::SSO->value, AuthTypeEnum::LOCAL->value, AuthTypeEnum::API->value]
+            example: AuthType::API->value,
+            enum: [AuthType::SSO->value, AuthType::Local->value, AuthType::API->value]
         ),
         new OA\Property(property: 'first_name', type: 'string', example: 'NUIT'),
         new OA\Property(property: 'last_name', type: 'string', example: 'API'),
@@ -36,9 +36,9 @@ use OpenApi\Attributes as OA;
             property: 'primary_affiliation',
             description: 'Primary Northwestern affiliation for the user.',
             type: 'string',
-            example: AffiliationEnum::OTHER->value,
+            example: Affiliation::Other->value,
             nullable: true,
-            enum: [AffiliationEnum::STUDENT->value, AffiliationEnum::FACULTY->value, AffiliationEnum::STAFF->value, AffiliationEnum::AFFILIATE->value, AffiliationEnum::OTHER->value]
+            enum: [Affiliation::Student->value, Affiliation::Faculty->value, Affiliation::Staff->value, Affiliation::Affiliate->value, Affiliation::Other->value]
         ),
         new OA\Property(
             property: 'departments',

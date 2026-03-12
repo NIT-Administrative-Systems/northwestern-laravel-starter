@@ -9,11 +9,11 @@ use Filament\Support\Contracts\HasIcon;
 use Filament\Support\Contracts\HasLabel;
 use Filament\Support\Icons\Heroicon;
 
-enum AccessTokenStatusEnum: string implements HasColor, HasIcon, HasLabel
+enum AccessTokenStatus: string implements HasColor, HasIcon, HasLabel
 {
-    case ACTIVE = 'active';
-    case EXPIRED = 'expired';
-    case REVOKED = 'revoked';
+    case Active = 'active';
+    case Expired = 'expired';
+    case Revoked = 'revoked';
 
     public function getLabel(): string
     {
@@ -23,18 +23,18 @@ enum AccessTokenStatusEnum: string implements HasColor, HasIcon, HasLabel
     public function getColor(): string
     {
         return match ($this) {
-            self::ACTIVE => 'success',
-            self::EXPIRED => 'gray',
-            self::REVOKED => 'danger',
+            self::Active => 'success',
+            self::Expired => 'gray',
+            self::Revoked => 'danger',
         };
     }
 
     public function getIcon(): Heroicon
     {
         return match ($this) {
-            self::ACTIVE => Heroicon::OutlinedBolt,
-            self::EXPIRED => Heroicon::OutlinedArchiveBoxXMark,
-            self::REVOKED => Heroicon::OutlinedShieldExclamation,
+            self::Active => Heroicon::OutlinedBolt,
+            self::Expired => Heroicon::OutlinedArchiveBoxXMark,
+            self::Revoked => Heroicon::OutlinedShieldExclamation,
         };
     }
 }

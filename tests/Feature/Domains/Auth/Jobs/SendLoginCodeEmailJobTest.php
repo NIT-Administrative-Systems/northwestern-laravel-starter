@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Domains\Auth\Jobs;
 
 use App\Domains\Auth\Jobs\SendLoginCodeEmailJob;
-use App\Domains\Auth\Mail\LoginCodeNotification;
+use App\Domains\Auth\Mail\LoginCodeMail;
 use App\Domains\Auth\Models\LoginChallenge;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Crypt;
@@ -40,7 +40,7 @@ class SendLoginCodeEmailJobTest extends TestCase
 
         $job->handle();
 
-        Mail::assertSent(LoginCodeNotification::class, function (LoginCodeNotification $mail) use ($challenge) {
+        Mail::assertSent(LoginCodeMail::class, function (LoginCodeMail $mail) use ($challenge) {
             return $mail->hasTo($challenge->email);
         });
 

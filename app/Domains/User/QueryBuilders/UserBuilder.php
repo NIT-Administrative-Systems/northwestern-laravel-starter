@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\User\QueryBuilders;
 
-use App\Domains\Auth\Enums\AuthTypeEnum;
+use App\Domains\Auth\Enums\AuthType;
 use App\Domains\User\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -22,7 +22,7 @@ class UserBuilder extends Builder
      */
     public function sso(): static
     {
-        return $this->where('auth_type', AuthTypeEnum::SSO);
+        return $this->where('auth_type', AuthType::SSO);
     }
 
     /**
@@ -30,7 +30,7 @@ class UserBuilder extends Builder
      */
     public function local(): static
     {
-        return $this->where('auth_type', AuthTypeEnum::LOCAL);
+        return $this->where('auth_type', AuthType::Local);
     }
 
     /**
@@ -38,7 +38,7 @@ class UserBuilder extends Builder
      */
     public function api(): static
     {
-        return $this->where('auth_type', AuthTypeEnum::API);
+        return $this->where('auth_type', AuthType::API);
     }
 
     /**
@@ -129,7 +129,7 @@ class UserBuilder extends Builder
 
         return $this->getModel()->newInstance([
             'email' => $normalized,
-            'auth_type' => AuthTypeEnum::SSO,
+            'auth_type' => AuthType::SSO,
         ]);
     }
 
@@ -156,7 +156,7 @@ class UserBuilder extends Builder
 
         return $user ?: $this->getModel()->newInstance([
             'username' => $normalized,
-            'auth_type' => AuthTypeEnum::SSO,
+            'auth_type' => AuthType::SSO,
         ]);
     }
 }

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Domains\User\Actions;
 
 use App\Domains\User\Actions\RecordLogin;
-use App\Domains\User\Enums\UserSegmentEnum;
+use App\Domains\User\Enums\UserSegment;
 use App\Domains\User\Models\User;
 use App\Domains\User\Models\UserLoginRecord;
 use Illuminate\Http\Request;
@@ -30,7 +30,7 @@ class RecordLoginTest extends TestCase
 
         $record = $user->login_records->first();
         $this->assertNotNull($record->logged_in_at);
-        $this->assertEquals(UserSegmentEnum::OTHER, $record->segment);
+        $this->assertEquals(UserSegment::Other, $record->segment);
         $this->assertEquals('192.168.1.50', $record->ip_address);
         $this->assertEquals('TestBrowser/1.0', $record->user_agent);
     }
@@ -43,7 +43,7 @@ class RecordLoginTest extends TestCase
         $this->action()($user, $request);
 
         $record = UserLoginRecord::sole();
-        $this->assertEquals(UserSegmentEnum::EXTERNAL_USER, $record->segment);
+        $this->assertEquals(UserSegment::ExternalUser, $record->segment);
     }
 
     protected function action(): RecordLogin

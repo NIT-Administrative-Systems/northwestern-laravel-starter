@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\SupportTickets\Schemas;
 
-use App\Domains\Support\Enums\TicketSystemEnum;
+use App\Domains\Support\Enums\TicketSystem;
 use App\Domains\Support\Models\SupportTicket;
 use App\Filament\Resources\Users\UserResource;
 use Filament\Infolists\Components\TextEntry;
@@ -51,7 +51,7 @@ class SupportTicketInfolist
                                         TextEntry::make('ticketing_system')
                                             ->label('Gateway')
                                             ->badge()
-                                            ->formatStateUsing(fn (?TicketSystemEnum $state) => $state?->getLabel() ?? '—'),
+                                            ->formatStateUsing(fn (?TicketSystem $state) => $state?->getLabel() ?? '—'),
 
                                         TextEntry::make('status')
                                             ->label('Status')

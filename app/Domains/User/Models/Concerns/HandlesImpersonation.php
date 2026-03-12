@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domains\User\Models\Concerns;
 
-use App\Domains\Auth\Enums\AuthTypeEnum;
-use App\Domains\Auth\Enums\PermissionEnum;
+use App\Domains\Auth\Enums\AuthType;
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\User\Models\User;
 
 /**
@@ -23,7 +23,7 @@ trait HandlesImpersonation
      */
     public function canImpersonate(): bool
     {
-        return $this->can(PermissionEnum::MANAGE_IMPERSONATION) && ! $this->isImpersonated();
+        return $this->can(SystemPermission::ManageImpersonation) && ! $this->isImpersonated();
     }
 
     /**
@@ -46,14 +46,14 @@ trait HandlesImpersonation
      */
     public function canBeImpersonated(): bool
     {
-        if ($this->auth_type === AuthTypeEnum::API) {
+        if ($this->auth_type === AuthType::API) {
             return false;
         }
 
         // Prevent impersonating users with higher privileges
         $impersonator = auth()->user();
 
-        return ! ($impersonator && $this->hasPermissionTo(PermissionEnum::MANAGE_ALL) && ! $impersonator->hasPermissionTo(PermissionEnum::MANAGE_ALL));
+        return ! ($impersonator && $this->hasPermissionTo(SystemPermission::ManageAll) && ! $impersonator->hasPermissionTo(SystemPermission::ManageAll));
     }
 
     /**

@@ -49,8 +49,8 @@ abstract class IdempotentSeeder extends Seeder implements IdempotentSeederInterf
     {
         $touchedSlugs = [];
 
-        foreach ($this->data() as $row) {
-            $row = collect($row);
+        foreach ($this->data() as $seedRecord) {
+            $seedRecord = collect($seedRecord);
 
             /** @var Builder<BaseModel> $builder */
             $builder = $this->model::query();
@@ -68,15 +68,15 @@ abstract class IdempotentSeeder extends Seeder implements IdempotentSeederInterf
                     ? $modelInstance->getDeletedAtColumn()
                     : 'deleted_at';
 
-                $row->put($deletedColumn, null);
+                $seedRecord->put($deletedColumn, null);
             }
 
             $builder->updateOrCreate(
-                $row->only($this->slugColumn)->all(),
-                $row->except($this->slugColumn)->all(),
+                $seedRecord->only($this->slugColumn)->all(),
+                $seedRecord->except($this->slugColumn)->all(),
             );
 
-            $touchedSlugs[] = $row->get($this->slugColumn);
+            $touchedSlugs[] = $seedRecord->get($this->slugColumn);
         }
 
         $this->model::whereNotIn($this->slugColumn, $touchedSlugs)->get()->each->delete();

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\AccessTokens\Schemas;
 
-use App\Domains\Auth\Enums\AccessTokenStatusEnum;
-use App\Domains\Auth\Enums\TokenExpirationEnum;
+use App\Domains\Auth\Enums\AccessTokenStatus;
+use App\Domains\Auth\Enums\TokenExpiration;
 use App\Domains\Auth\Models\AccessToken;
 use App\Domains\Core\Rules\ValidIpOrCidrRule;
 use Carbon\CarbonInterface;
@@ -79,7 +79,7 @@ class AccessTokenSchemas
 
                 Select::make('expiration')
                     ->label('Expiration')
-                    ->options(TokenExpirationEnum::class)
+                    ->options(TokenExpiration::class)
                     ->placeholder('Select Date')
                     ->required()
                     ->live()
@@ -90,15 +90,15 @@ class AccessTokenSchemas
                             return $note;
                         }
 
-                        $expiration = $state instanceof TokenExpirationEnum
+                        $expiration = $state instanceof TokenExpiration
                             ? $state
-                            : TokenExpirationEnum::tryFrom($state);
+                            : TokenExpiration::tryFrom($state);
 
                         if (! $expiration) {
                             return $note;
                         }
 
-                        if ($expiration === TokenExpirationEnum::NEVER) {
+                        if ($expiration === TokenExpiration::Never) {
                             return new HtmlString("<span class=\"text-warning-600 dark:text-warning-400\">This token will never expire.</span><br>{$note}");
                         }
 
@@ -132,13 +132,13 @@ class AccessTokenSchemas
     /**
      * Normalize token configuration values from a {@see Wizard} step state.
      *
-     * This helper extracts the name, converts the selected {@see TokenExpirationEnum} into a concrete
+     * This helper extracts the name, converts the selected {@see TokenExpiration} into a concrete
      * {@see CarbonInterface} expiration date (or null for no expiration), and normalizes
      * IP data to a consistent format.
      *
      * @param  array{
      *     name: string,
-     *     expiration: TokenExpirationEnum|int,
+     *     expiration: TokenExpiration|int,
      *     allowed_ips?: array<int,string>|null
      * }  $state
      * @return array{
@@ -149,9 +149,9 @@ class AccessTokenSchemas
      */
     public static function normalizeConfigurationState(array $state): array
     {
-        $expiration = $state['expiration'] instanceof TokenExpirationEnum
+        $expiration = $state['expiration'] instanceof TokenExpiration
             ? $state['expiration']
-            : TokenExpirationEnum::from((int) $state['expiration']);
+            : TokenExpiration::from((int) $state['expiration']);
 
         $expiresAt = $expiration->expiresAt();
 
@@ -190,15 +190,15 @@ class AccessTokenSchemas
                     ->label('Bearer Token')
                     ->grammar(Grammar::Txt)
                     ->state(function ($record) use ($sessionKey) {
-                        $data = session($sessionKey);
+                        $sessionTokenData = session($sessionKey);
 
-                        $encryptedToken = data_get($data, 'token');
+                        $encryptedToken = data_get($sessionTokenData, 'token');
                         if (! is_string($encryptedToken)) {
                             return null;
                         }
 
                         $token = Crypt::decryptString($encryptedToken);
-                        $recordId = data_get($data, 'record_id');
+                        $recordId = data_get($sessionTokenData, 'record_id');
 
                         // If this session token is tied to a specific AccessToken record,
                         // only show it when the bound record matches.
@@ -252,7 +252,7 @@ class AccessTokenSchemas
      */
     public static function isMutable(AccessToken $token): bool
     {
-        return $token->status === AccessTokenStatusEnum::ACTIVE;
+        return $token->status === AccessTokenStatus::Active;
     }
 
     /**
@@ -270,10 +270,10 @@ class AccessTokenSchemas
             return true;
         }
 
-        $data = session(self::SESSION_KEY_ROTATE);
+        $rotationSessionData = session(self::SESSION_KEY_ROTATE);
 
-        return is_array($data)
-            && ($data['record_id'] ?? null) === $token->getKey();
+        return is_array($rotationSessionData)
+            && ($rotationSessionData['record_id'] ?? null) === $token->getKey();
     }
 
     /**

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\UserLoginRecords\Tables;
 
-use App\Domains\User\Enums\UserSegmentEnum;
+use App\Domains\User\Enums\UserSegment;
 use App\Domains\User\Models\UserLoginRecord;
 use App\Filament\Exports\UserLoginRecordExporter;
 use App\Filament\Resources\Users\RelationManagers\LoginRecordsRelationManager;
@@ -67,7 +67,7 @@ class UserLoginRecordsTable
             ->filters([
                 SelectFilter::make('segment')
                     ->multiple()
-                    ->options(UserSegmentEnum::class)
+                    ->options(UserSegment::class)
                     ->hiddenOn(LoginRecordsRelationManager::class),
             ])
             ->filtersTriggerAction(

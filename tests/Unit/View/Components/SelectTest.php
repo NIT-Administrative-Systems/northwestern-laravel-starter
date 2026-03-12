@@ -106,14 +106,14 @@ class SelectTest extends TestCase
             'pending' => 'pending',
         ];
 
-        $this->assertSame($expected, Select::processOptions($options));
+        $this->assertSame($expected, Select::normalizeOptionsToKeyValuePairs($options));
     }
 
     public function test_associative_array_options(): void
     {
         $options = ['active' => 'Active', 'pending' => 'Pending'];
 
-        $this->assertSame($options, Select::processOptions($options));
+        $this->assertSame($options, Select::normalizeOptionsToKeyValuePairs($options));
     }
 
     public function test_collection_options(): void
@@ -125,7 +125,7 @@ class SelectTest extends TestCase
             'pending' => 'pending',
         ];
 
-        $this->assertSame($expected, Select::processOptions($options));
+        $this->assertSame($expected, Select::normalizeOptionsToKeyValuePairs($options));
     }
 
     public function test_model_collection_id_and_label(): void
@@ -137,7 +137,7 @@ class SelectTest extends TestCase
             2 => 'Bar',
         ];
 
-        $this->assertSame($expected, Select::processOptions($users));
+        $this->assertSame($expected, Select::normalizeOptionsToKeyValuePairs($users));
     }
 
     public function test_nested_options(): void
@@ -147,18 +147,18 @@ class SelectTest extends TestCase
             'Special' => ['banned' => 'Banned'],
         ];
 
-        $this->assertSame($options, Select::processOptions($options));
+        $this->assertSame($options, Select::normalizeOptionsToKeyValuePairs($options));
     }
 
     public function test_unit_enum_options(): void
     {
         $options = FakeEnum::cases();
         $expected = [
-            'ACTIVE' => 'Active',
-            'PENDING' => 'Pending',
+            'Active' => 'Active',
+            'Pending' => 'Pending',
         ];
 
-        $this->assertSame($expected, Select::processOptions($options));
+        $this->assertSame($expected, Select::normalizeOptionsToKeyValuePairs($options));
     }
 
     public function test_backed_enum_options(): void
@@ -169,7 +169,7 @@ class SelectTest extends TestCase
             'pending' => 'Pending',
         ];
 
-        $this->assertSame($expected, Select::processOptions($options));
+        $this->assertSame($expected, Select::normalizeOptionsToKeyValuePairs($options));
     }
 
     public function test_mixed_array_with_enums(): void
@@ -177,16 +177,16 @@ class SelectTest extends TestCase
         $options = [
             FakeBackedEnum::Active,
             'custom' => 'Custom Label',
-            FakeEnum::PENDING,
+            FakeEnum::Pending,
         ];
 
         $expected = [
             'active' => 'Active',
             'custom' => 'Custom Label',
-            'PENDING' => 'Pending',
+            'Pending' => 'Pending',
         ];
 
-        $this->assertSame($expected, Select::processOptions($options));
+        $this->assertSame($expected, Select::normalizeOptionsToKeyValuePairs($options));
     }
 
     public function test_numeric_list_options(): void
@@ -199,7 +199,7 @@ class SelectTest extends TestCase
             3 => '3',
         ];
 
-        $this->assertSame($expected, Select::processOptions($options));
+        $this->assertSame($expected, Select::normalizeOptionsToKeyValuePairs($options));
     }
 
     public function test_nested_enum_options(): void
@@ -211,8 +211,8 @@ class SelectTest extends TestCase
 
         $expected = [
             'Group 1' => [
-                'ACTIVE' => 'Active',
-                'PENDING' => 'Pending',
+                'Active' => 'Active',
+                'Pending' => 'Pending',
             ],
             'Group 2' => [
                 'active' => 'Active',
@@ -220,18 +220,18 @@ class SelectTest extends TestCase
             ],
         ];
 
-        $this->assertSame($expected, Select::processOptions($options));
+        $this->assertSame($expected, Select::normalizeOptionsToKeyValuePairs($options));
     }
 
     public function test_empty_options(): void
     {
-        $this->assertSame([], Select::processOptions([]));
-        $this->assertSame([], Select::processOptions(collect()));
+        $this->assertSame([], Select::normalizeOptionsToKeyValuePairs([]));
+        $this->assertSame([], Select::normalizeOptionsToKeyValuePairs(collect()));
     }
 
     public function test_null_options(): void
     {
-        $this->assertSame([], Select::processOptions(null));
+        $this->assertSame([], Select::normalizeOptionsToKeyValuePairs(null));
     }
 
     public function test_collection_of_models_directly(): void
@@ -243,7 +243,7 @@ class SelectTest extends TestCase
             2 => 'Bob',
         ];
 
-        $this->assertSame($expected, Select::processOptions($users));
+        $this->assertSame($expected, Select::normalizeOptionsToKeyValuePairs($users));
     }
 
     public function test_max_options_returns_null_when_set_to_null(): void
@@ -288,11 +288,11 @@ class SelectTest extends TestCase
         $options = FakeEnumWithoutLabel::cases();
 
         $expected = [
-            'SOME_VALUE' => 'Some Value',
-            'ANOTHER_ITEM' => 'Another Item',
+            'SomeValue' => 'Some Value',
+            'AnotherItem' => 'Another Item',
         ];
 
-        $this->assertSame($expected, Select::processOptions($options));
+        $this->assertSame($expected, Select::normalizeOptionsToKeyValuePairs($options));
     }
 
     public function test_backed_enum_without_label_method_uses_name_fallback(): void
@@ -304,26 +304,26 @@ class SelectTest extends TestCase
             'ai' => 'Another Item',
         ];
 
-        $this->assertSame($expected, Select::processOptions($options));
+        $this->assertSame($expected, Select::normalizeOptionsToKeyValuePairs($options));
     }
 }
 
 enum FakeEnumWithoutLabel
 {
-    case SOME_VALUE;
-    case ANOTHER_ITEM;
+    case SomeValue;
+    case AnotherItem;
 }
 
 enum FakeBackedEnumWithoutLabel: string
 {
-    case SOME_VALUE = 'sv';
-    case ANOTHER_ITEM = 'ai';
+    case SomeValue = 'sv';
+    case AnotherItem = 'ai';
 }
 
 enum FakeEnum
 {
-    case ACTIVE;
-    case PENDING;
+    case Active;
+    case Pending;
 
     public function label(): string
     {

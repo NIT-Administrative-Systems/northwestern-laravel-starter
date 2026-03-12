@@ -31,14 +31,14 @@ Every role belongs to a **role type** that determines how it can be managed and 
 
 | Type | Purpose | UI Editable | Assignable To |
 |------|---------|:-----------:|---------------|
-| **System Managed** | Critical roles managed by code (Super Administrator, Northwestern User) | No — read-only in Filament | All users (assignable by `MANAGE_ALL` users) |
+| **System Managed** | Critical roles managed by code (Super Administrator, Northwestern User) | No — read-only in Filament | All users (assignable by `ManageAll` users) |
 | **Application Admin** | Administrative roles with elevated privileges | Yes | SSO and local users |
 | **Application Role** | Standard user roles for day-to-day access | Yes | SSO and local users |
 | **API Integration** | Roles for programmatic API consumers | Yes | API users only |
 
 ### When to Use Each Type
 
-- **System Managed** — Reserved for roles the starter ships with. Their definitions (name, permissions) are managed by seeders and cannot be edited or deleted through the admin panel. However, users with `MANAGE_ALL` **can** assign and remove system-managed roles from users via the UI (unless the role is also assignment-locked).
+- **System Managed** — Reserved for roles the starter ships with. Their definitions (name, permissions) are managed by seeders and cannot be edited or deleted through the admin panel. However, users with `ManageAll` **can** assign and remove system-managed roles from users via the UI (unless the role is also assignment-locked).
 - **Application Admin** — For roles that grant administrative capabilities within your application (e.g., "Department Manager", "Content Editor"). Created and managed by administrators in Filament.
 - **Application Role** — For standard user roles that grant specific feature access (e.g., "Report Viewer", "Data Entry"). The most common type you'll create.
 - **API Integration** — For API consumer roles. These can only be assigned to API users and only display API-relevant permissions in the role form.
@@ -58,7 +58,7 @@ The **Northwestern User** role serves as a baseline. It confirms the user has au
 
 ```php title="app/Domains/Auth/Seeders/RoleSeeder.php"
 [
-    'name' => SystemRoleEnum::NORTHWESTERN_USER,
+    'name' => SystemRole::NorthwesternUser,
     'role_type_id' => $systemManagedRoleId,
     'assignment_locked' => true,
     'permissions' => [
@@ -71,7 +71,7 @@ The **Northwestern User** role serves as a baseline. It confirms the user has au
 
 ## Assignment-Locked Roles
 
-Assignment-locked roles have a per-role `assignment_locked` flag that prevents manual assignment or removal through the UI — regardless of permission level, including Super Administrators with `MANAGE_ALL`.
+Assignment-locked roles have a per-role `assignment_locked` flag that prevents manual assignment or removal through the UI — regardless of permission level, including Super Administrators with `ManageAll`.
 
 ### What It Is
 
@@ -132,28 +132,28 @@ php artisan role:force-detach username "Northwestern User" --reason="Emergency a
 
 ## Permissions
 
-Permissions are defined as cases in `PermissionEnum`, the **single source of truth** for all permissions in the application. The `PermissionSeeder` reads this enum to create and update permission records in the database.
+Permissions are defined as cases in `SystemPermission`, the **single source of truth** for all permissions in the application. The `PermissionSeeder` reads this enum to create and update permission records in the database.
 
 ### Default Permissions
 
 | Permission | Description | System Managed | API Relevant |
 |------------|-------------|:--------------:|:------------:|
-| `MANAGE_ALL` | Bypasses all authorization checks | Yes | — |
-| `ACCESS_ADMINISTRATION_PANEL` | Access to the Filament admin panel | Yes | — |
-| `MANAGE_IMPERSONATION` | Impersonate other users | Yes | — |
-| `VIEW_USERS` | View user profiles and listings | — | Yes |
-| `CREATE_USERS` | Create new user accounts | — | — |
-| `EDIT_USERS` | Edit existing user accounts | — | — |
-| `VIEW_ROLES` | View role definitions and assignments | — | — |
-| `EDIT_ROLES` | Create and edit role definitions | — | — |
-| `DELETE_ROLES` | Permanently delete roles | Yes | — |
-| `ASSIGN_ROLES` | Assign and remove roles from users | — | — |
-| `MANAGE_API_USERS` | Create and manage API users and tokens | — | — |
-| `VIEW_AUDIT_LOGS` | View audit trail entries | Yes | — |
-| `VIEW_LOGIN_RECORDS` | View login analytics | Yes | — |
-| `VIEW_SUPPORT_TICKETS` | View support ticket submissions | Yes | — |
+| `ManageAll` | Bypasses all authorization checks | Yes | — |
+| `AccessAdministrationPanel` | Access to the Filament admin panel | Yes | — |
+| `ManageImpersonation` | Impersonate other users | Yes | — |
+| `ViewUsers` | View user profiles and listings | — | Yes |
+| `CreateUsers` | Create new user accounts | — | — |
+| `EditUsers` | Edit existing user accounts | — | — |
+| `ViewRoles` | View role definitions and assignments | — | — |
+| `EditRoles` | Create and edit role definitions | — | — |
+| `DeleteRoles` | Permanently delete roles | Yes | — |
+| `AssignRoles` | Assign and remove roles from users | — | — |
+| `ManageApiUsers` | Create and manage API users and tokens | — | — |
+| `ViewAuditLogs` | View audit trail entries | Yes | — |
+| `ViewLoginRecords` | View login analytics | Yes | — |
+| `ViewSupportTickets` | View support ticket submissions | Yes | — |
 
-**System Managed** permissions are security-sensitive and can only be included in system-managed roles or by users with `MANAGE_ALL`. They appear in a separate "Sensitive Permissions" section in the role form.
+**System Managed** permissions are security-sensitive and can only be included in system-managed roles or by users with `ManageAll`. They appear in a separate "Sensitive Permissions" section in the role form.
 
 **API Relevant** permissions are the only ones shown when editing an API Integration role.
 
@@ -161,10 +161,10 @@ Permissions are defined as cases in `PermissionEnum`, the **single source of tru
 
 <Steps>
 
-1. **Add a case to `PermissionEnum`**
+1. **Add a case to `SystemPermission`**
 
-   ```php title="app/Domains/Auth/Enums/PermissionEnum.php"
-   case VIEW_REPORTS = 'view-reports';
+   ```php title="app/Domains/Auth/Enums/SystemPermission.php"
+   case ViewReports = 'view-reports';
    ```
 
 2. **Update the metadata methods**
@@ -177,7 +177,7 @@ Permissions are defined as cases in `PermissionEnum`, the **single source of tru
    {
        return match ($this) {
            // ...existing cases...
-           self::VIEW_REPORTS => false,
+           self::ViewReports => false,
            default => false,
        };
    }
@@ -187,17 +187,17 @@ Permissions are defined as cases in `PermissionEnum`, the **single source of tru
    {
        return match ($this) {
            // ...existing cases...
-           self::VIEW_REPORTS => true, // if API consumers need this
+           self::ViewReports => true, // if API consumers need this
            default => false,
        };
    }
 
    // System-wide or limited to owned resources?
-   public function scope(): PermissionScopeEnum
+   public function scope(): PermissionScope
    {
        return match ($this) {
            // ...existing cases...
-           default => PermissionScopeEnum::SYSTEM_WIDE,
+           default => PermissionScope::SystemWide,
        };
    }
    ```
@@ -211,7 +211,7 @@ Permissions are defined as cases in `PermissionEnum`, the **single source of tru
    {
        return match ($this) {
            // ...existing cases...
-           self::VIEW_REPORTS => 'View reporting dashboards and export report data.',
+           self::ViewReports => 'View reporting dashboards and export report data.',
        };
    }
    ```
@@ -230,17 +230,17 @@ Permissions are defined as cases in `PermissionEnum`, the **single source of tru
 
 ## Super Administrators
 
-Users listed in `SUPER_ADMIN_NETIDS` receive the Super Administrator role (which includes `MANAGE_ALL`) via `StakeholderSeeder`:
+Users listed in `SUPER_ADMIN_NETIDS` receive the Super Administrator role (which includes `ManageAll`) via `StakeholderSeeder`:
 
 ```bash
 # .env
 SUPER_ADMIN_NETIDS=abc123,xyz789,def456
 ```
 
-The `MANAGE_ALL` permission triggers a `Gate::before()` hook that short-circuits **all** authorization. Every `$this->authorize()`, `@can`, and `Gate::allows()` call returns `true`.
+The `ManageAll` permission triggers a `Gate::before()` hook that short-circuits **all** authorization. Every `$this->authorize()`, `@can`, and `Gate::allows()` call returns `true`.
 
 <Aside type="caution">
-When testing new authorization logic, always test with a non-super-admin user. Bugs in policies are invisible when testing with `MANAGE_ALL` because the gate bypass runs before your policy code.
+When testing new authorization logic, always test with a non-super-admin user. Bugs in policies are invisible when testing with `ManageAll` because the gate bypass runs before your policy code.
 </Aside>
 
 ---
@@ -254,7 +254,7 @@ The starter makes Spatie's built-in `assignRole()` and `removeRole()` methods **
 ```php
 $user->assignRoleWithAudit(
     roles: $role,
-    origin: RoleModificationOriginEnum::UI_ACTION,
+    origin: RoleModificationOrigin::UiAction,
     context: ['reason' => 'Promoted to team lead'],
 );
 ```
@@ -264,7 +264,7 @@ $user->assignRoleWithAudit(
 ```php
 $user->removeRoleWithAudit(
     roles: $role,
-    origin: RoleModificationOriginEnum::NETID_STATUS_CHANGE,
+    origin: RoleModificationOrigin::NetIdStatusChange,
     context: ['netid_action' => 'deactivate'],
 );
 ```
@@ -277,15 +277,15 @@ Both methods create an audit entry capturing:
 
 ### Origin Types
 
-The `RoleModificationOriginEnum` tracks **why** a role change occurred:
+The `RoleModificationOrigin` tracks **why** a role change occurred:
 
 | Origin | Manual | Used When |
 |--------|:------:|-----------|
-| `UI_ACTION` | Yes | Admin assigns/removes a role in Filament |
-| `SSO_PROVISIONING` | No | Northwestern User role assigned on first SSO login |
-| `NETID_STATUS_CHANGE` | No | Roles stripped when a NetID is deactivated via EventHub |
-| `REMOVED_BY_DELETION` | No | Roles removed from users when a role is deleted |
-| `SYSTEM` | No | Programmatic changes (seeders, Artisan commands) |
+| `UiAction` | Yes | Admin assigns/removes a role in Filament |
+| `SsoProvisioning` | No | Northwestern User role assigned on first SSO login |
+| `NetIdStatusChange` | No | Roles stripped when a NetID is deactivated via EventHub |
+| `RemovedByDeletion` | No | Roles removed from users when a role is deleted |
+| `System` | No | Programmatic changes (seeders, Artisan commands) |
 
 The Filament UI prevents manual assignment and removal for assignment-locked roles. Programmatic origins are always allowed — the lock is not enforced at the domain layer.
 
@@ -303,7 +303,7 @@ The `TracksPermissionSources` trait on the User model enables fine-grained check
 |--------|---------|-------------|
 | `hasPermissionFromRole($permission, $role)` | `bool` | Check if a specific role grants a permission to the user |
 | `getRolesWithPermission($permission)` | `Collection<Role>` | Get all of the user's roles that grant a permission |
-| `getPermissionsFromRole($role)` | `Collection<PermissionEnum>` | Get all permissions the user has from a specific role |
+| `getPermissionsFromRole($role)` | `Collection<SystemPermission>` | Get all permissions the user has from a specific role |
 
 ---
 
@@ -311,12 +311,12 @@ The `TracksPermissionSources` trait on the User model enables fine-grained check
 
 | Class | Purpose |
 |-------|---------|
-| `PermissionEnum` | Single source of truth for all permissions (cases, metadata, seeder) |
+| `SystemPermission` | Single source of truth for all permissions (cases, metadata, seeder) |
 | `RoleTypeEnum` | Defines role type categories and their behavioral rules |
-| `SystemRoleEnum` | Names for the two system-managed roles |
-| `RoleModificationOriginEnum` | Tracks why role changes occurred, classifies manual vs. programmatic |
+| `SystemRole` | Names for the two system-managed roles |
+| `RoleModificationOrigin` | Tracks why role changes occurred, classifies manual vs. programmatic |
 | `AuditsRoles` | Trait providing `assignRoleWithAudit()` / `removeRoleWithAudit()` |
 | `AuditsPermissions` | Trait providing `syncPermissionsWithAudit()` |
 | `TracksPermissionSources` | Trait for querying which roles grant which permissions |
 | `RoleSeeder` | Creates system roles with their permissions |
-| `PermissionSeeder` | Syncs `PermissionEnum` cases to the database |
+| `PermissionSeeder` | Syncs `SystemPermission` cases to the database |

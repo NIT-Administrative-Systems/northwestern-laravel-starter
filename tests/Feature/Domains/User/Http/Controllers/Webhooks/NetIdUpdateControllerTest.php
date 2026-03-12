@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\User\Http\Controllers\Webhooks;
 
-use App\Domains\Auth\Enums\AuthTypeEnum;
+use App\Domains\Auth\Enums\AuthType;
 use App\Domains\Core\Concerns\MocksEventHub;
-use App\Domains\User\Enums\NetIdUpdateActionEnum;
+use App\Domains\User\Enums\NetIdUpdateAction;
 use App\Domains\User\Events\NetIdUpdated;
 use App\Domains\User\Http\Controllers\Webhooks\NetIdUpdateController;
 use App\Domains\User\Models\User;
@@ -33,7 +33,7 @@ class NetIdUpdateControllerTest extends TestCase
 
     public function test_it_dispatches_event_for_deactivation_action(): void
     {
-        User::factory()->create(['username' => 'abc123', 'auth_type' => AuthTypeEnum::SSO]);
+        User::factory()->create(['username' => 'abc123', 'auth_type' => AuthType::SSO]);
 
         $response = $this->send('etidentity.ldap.netid.term', 'netid=abc123&action=deactivate');
 
@@ -42,16 +42,16 @@ class NetIdUpdateControllerTest extends TestCase
             ->assertJson([
                 'status' => NetIdUpdateController::STATUS_ACCEPTED,
                 'netid' => 'abc123',
-                'action' => NetIdUpdateActionEnum::DEACTIVATE->value,
+                'action' => NetIdUpdateAction::Deactivate->value,
             ]);
 
         Event::assertDispatched(fn (NetIdUpdated $event) => $event->netId === 'abc123'
-            && $event->action === NetIdUpdateActionEnum::DEACTIVATE);
+            && $event->action === NetIdUpdateAction::Deactivate);
     }
 
     public function test_it_dispatches_event_for_deprovision_action(): void
     {
-        User::factory()->create(['username' => 'test123', 'auth_type' => AuthTypeEnum::SSO]);
+        User::factory()->create(['username' => 'test123', 'auth_type' => AuthType::SSO]);
 
         $response = $this->send('etidentity.ldap.netid.term', 'netid=test123&action=deprovision');
 
@@ -60,16 +60,16 @@ class NetIdUpdateControllerTest extends TestCase
             ->assertJson([
                 'status' => NetIdUpdateController::STATUS_ACCEPTED,
                 'netid' => 'test123',
-                'action' => NetIdUpdateActionEnum::DEPROVISION->value,
+                'action' => NetIdUpdateAction::Deprovision->value,
             ]);
 
         Event::assertDispatched(fn (NetIdUpdated $event) => $event->netId === 'test123'
-            && $event->action === NetIdUpdateActionEnum::DEPROVISION);
+            && $event->action === NetIdUpdateAction::Deprovision);
     }
 
     public function test_it_dispatches_event_for_security_hold_action(): void
     {
-        User::factory()->create(['username' => 'sec456', 'auth_type' => AuthTypeEnum::SSO]);
+        User::factory()->create(['username' => 'sec456', 'auth_type' => AuthType::SSO]);
 
         $response = $this->send('etidentity.ldap.netid.term', 'netid=sec456&action=sechold');
 
@@ -78,11 +78,11 @@ class NetIdUpdateControllerTest extends TestCase
             ->assertJson([
                 'status' => NetIdUpdateController::STATUS_ACCEPTED,
                 'netid' => 'sec456',
-                'action' => NetIdUpdateActionEnum::SECURITY_HOLD->value,
+                'action' => NetIdUpdateAction::SecurityHold->value,
             ]);
 
         Event::assertDispatched(fn (NetIdUpdated $event) => $event->netId === 'sec456'
-            && $event->action === NetIdUpdateActionEnum::SECURITY_HOLD);
+            && $event->action === NetIdUpdateAction::SecurityHold);
     }
 
     public function test_it_returns_ignored_for_unknown_users(): void

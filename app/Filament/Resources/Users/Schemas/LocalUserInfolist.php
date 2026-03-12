@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users\Schemas;
 
-use App\Domains\Auth\Enums\PermissionEnum;
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\User\Models\User;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;
@@ -89,7 +89,7 @@ class LocalUserInfolist
                                         ->columnSpanFull()
                                         ->belowContent([
                                             Action::make('edit_description')
-                                                ->authorize(PermissionEnum::EDIT_USERS)
+                                                ->authorize(SystemPermission::EditUsers)
                                                 ->label('Edit Notes')
                                                 ->icon(Heroicon::OutlinedPencil)
                                                 ->color('primary')

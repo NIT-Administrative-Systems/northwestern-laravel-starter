@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\Domains\Support\Gateway;
+namespace Tests\Feature\Domains\Support\Gateways;
 
-use App\Domains\Support\Enums\TicketSystemEnum;
-use App\Domains\Support\Gateway\TicketSystemGatewayFactory;
+use App\Domains\Support\Enums\TicketSystem;
 use App\Domains\Support\Gateways\Mail\MailGateway;
 use App\Domains\Support\Gateways\TeamDynamix\TeamDynamixGateway;
+use App\Domains\Support\Gateways\TicketSystemGatewayFactory;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
@@ -51,7 +51,7 @@ class TicketSystemGatewayFactoryTest extends TestCase
             $this->factory()->default();
             $this->fail('Expected InvalidArgumentException was not thrown.');
         } catch (InvalidArgumentException $e) {
-            foreach (TicketSystemEnum::cases() as $case) {
+            foreach (TicketSystem::cases() as $case) {
                 $this->assertStringContainsString($case->value, $e->getMessage());
             }
         }
@@ -69,8 +69,8 @@ class TicketSystemGatewayFactoryTest extends TestCase
     {
         $factory = $this->factory();
 
-        $this->assertInstanceOf(MailGateway::class, $factory->make(TicketSystemEnum::MAIL));
-        $this->assertInstanceOf(TeamDynamixGateway::class, $factory->make(TicketSystemEnum::TEAM_DYNAMIX));
+        $this->assertInstanceOf(MailGateway::class, $factory->make(TicketSystem::Mail));
+        $this->assertInstanceOf(TeamDynamixGateway::class, $factory->make(TicketSystem::TeamDynamix));
     }
 
     protected function factory(): TicketSystemGatewayFactory

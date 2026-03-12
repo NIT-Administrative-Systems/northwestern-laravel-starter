@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Domains\User\Actions\Api;
 
-use App\Domains\Auth\Enums\AuthTypeEnum;
+use App\Domains\Auth\Enums\AuthType;
 use App\Domains\Auth\Models\AccessToken;
-use App\Domains\User\Enums\AffiliationEnum;
+use App\Domains\User\Enums\Affiliation;
 use App\Domains\User\Models\User;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
@@ -55,8 +55,8 @@ readonly class CreateApiUser
         ) {
             $user = User::create([
                 'username' => strtolower($username),
-                'primary_affiliation' => AffiliationEnum::OTHER,
-                'auth_type' => AuthTypeEnum::API,
+                'primary_affiliation' => Affiliation::Other,
+                'auth_type' => AuthType::API,
                 'email' => filled($email) ? strtolower($email) : null,
                 'first_name' => $firstName,
                 'last_name' => 'API',

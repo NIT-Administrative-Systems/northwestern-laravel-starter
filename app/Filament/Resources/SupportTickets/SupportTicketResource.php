@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\SupportTickets;
 
-use App\Domains\Auth\Enums\PermissionEnum;
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Support\Models\SupportTicket;
 use App\Filament\Navigation\AdministrationNavGroup;
 use App\Filament\Resources\SupportTickets\Schemas\SupportTicketInfolist;
@@ -29,7 +29,7 @@ class SupportTicketResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'subject';
 
-    protected static string|null|UnitEnum $navigationGroup = AdministrationNavGroup::PLATFORM;
+    protected static string|null|UnitEnum $navigationGroup = AdministrationNavGroup::Platform;
 
     protected static ?int $navigationSort = 10;
 
@@ -38,7 +38,7 @@ class SupportTicketResource extends Resource
     public static function canAccess(): bool
     {
         return config('support.enabled')
-            && auth()->user()?->can(PermissionEnum::VIEW_SUPPORT_TICKETS);
+            && auth()->user()?->can(SystemPermission::ViewSupportTickets);
     }
 
     public static function table(Table $table): Table

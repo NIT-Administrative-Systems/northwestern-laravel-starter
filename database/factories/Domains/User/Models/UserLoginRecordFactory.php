@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories\Domains\User\Models;
 
-use App\Domains\User\Enums\UserSegmentEnum;
+use App\Domains\User\Enums\UserSegment;
 use App\Domains\User\Models\User;
 use App\Domains\User\Models\UserLoginRecord;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -22,7 +22,7 @@ class UserLoginRecordFactory extends Factory
         return [
             'user_id' => User::factory(),
             'logged_in_at' => now(),
-            'segment' => fake()->randomElement(UserSegmentEnum::cases()),
+            'segment' => fake()->randomElement(UserSegment::cases()),
             'ip_address' => fake()->ipv4(),
             'user_agent' => fake()->userAgent(),
         ];

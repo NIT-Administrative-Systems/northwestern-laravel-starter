@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Auth\Models;
 
-use App\Domains\Auth\Enums\PermissionScopeEnum;
+use App\Domains\Auth\Enums\PermissionScope;
 use App\Domains\Core\Models\Concerns\Auditable as AuditableConcern;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\Permission\Models\Permission as SpatiePermission;
@@ -12,7 +12,7 @@ use Spatie\Permission\Models\Permission as SpatiePermission;
 /**
  * @property string $name
  * @property string $label
- * @property PermissionScopeEnum $scope
+ * @property PermissionScope $scope
  * @property string $description
  * @property string $guard_name
  * @property bool $system_managed
@@ -23,7 +23,7 @@ class Permission extends SpatiePermission implements Auditable
     use AuditableConcern;
 
     protected $casts = [
-        'scope' => PermissionScopeEnum::class,
+        'scope' => PermissionScope::class,
     ];
 
     /**

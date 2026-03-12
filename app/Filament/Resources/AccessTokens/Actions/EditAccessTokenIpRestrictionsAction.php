@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\AccessTokens\Actions;
 
-use App\Domains\Auth\Enums\PermissionEnum;
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\AccessToken;
 use App\Domains\Core\Rules\ValidIpOrCidrRule;
 use App\Filament\Resources\AccessTokens\Schemas\AccessTokenSchemas;
@@ -26,7 +26,7 @@ class EditAccessTokenIpRestrictionsAction extends Action
     {
         parent::setUp();
 
-        $this->authorize(PermissionEnum::MANAGE_API_USERS)
+        $this->authorize(SystemPermission::ManageApiUsers)
             ->label('Edit IP Restrictions')
             ->icon(Heroicon::OutlinedShieldCheck)
             ->color('gray')

@@ -145,14 +145,14 @@ class AutoSeedListCommand extends Command
      */
     private function outputJson(array $seeders): void
     {
-        $data = [
+        $jsonOutput = [
             'total' => count($seeders),
             'seeders' => [],
         ];
         $order = 1;
 
         foreach ($seeders as $seeder) {
-            $data['seeders'][] = [
+            $jsonOutput['seeders'][] = [
                 'order' => $order++,
                 'class' => $seeder->className,
                 'short_name' => $seeder->getShortName(),
@@ -160,7 +160,7 @@ class AutoSeedListCommand extends Command
             ];
         }
 
-        $this->line(json_encode($data, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
+        $this->line(json_encode($jsonOutput, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
     }
 
     /**

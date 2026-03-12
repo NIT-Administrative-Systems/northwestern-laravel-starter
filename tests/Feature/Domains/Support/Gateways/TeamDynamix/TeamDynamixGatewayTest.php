@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\Support\Gateways\TeamDynamix;
 
-use App\Domains\Support\Enums\TicketSystemEnum;
+use App\Domains\Support\Enums\TicketSystem;
 use App\Domains\Support\Gateways\TeamDynamix\TeamDynamixCacheRepository;
 use App\Domains\Support\Gateways\TeamDynamix\TeamDynamixGateway;
 use App\Domains\Support\Models\SupportTicket;
@@ -72,7 +72,7 @@ class TeamDynamixGatewayTest extends TestCase
 
         $result = $gateway->create($ticket);
 
-        $this->assertSame(TicketSystemEnum::TEAM_DYNAMIX, $result->ticketSystemType);
+        $this->assertSame(TicketSystem::TeamDynamix, $result->ticketSystemType);
         $this->assertFalse($result->creationError);
         $this->assertSame('4567', $result->ticketNumber);
         $this->assertNull($result->errorMessage);

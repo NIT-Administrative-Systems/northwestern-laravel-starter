@@ -6,10 +6,10 @@ namespace Tests\Feature\Domains\Support\Actions;
 
 use App\Domains\Support\Actions\CreateSupportTicket;
 use App\Domains\Support\Contracts\TicketSystemGateway;
-use App\Domains\Support\Enums\TicketSystemEnum;
-use App\Domains\Support\Gateway\CreationResult;
-use App\Domains\Support\Gateway\TicketSystemGatewayFactory;
+use App\Domains\Support\Enums\TicketSystem;
+use App\Domains\Support\Gateways\CreationResult;
 use App\Domains\Support\Gateways\Mail\MailGateway;
+use App\Domains\Support\Gateways\TicketSystemGatewayFactory;
 use App\Domains\Support\Models\SupportTicket;
 use App\Domains\Support\Repositories\SupportTicketRepository;
 use Mockery;
@@ -26,7 +26,7 @@ class CreateSupportTicketTest extends TestCase
         $gateway = Mockery::mock(TicketSystemGateway::class);
         $gateway->expects('create')
             ->andReturns(new CreationResult(
-                ticketSystemType: TicketSystemEnum::MAIL,
+                ticketSystemType: TicketSystem::Mail,
                 creationError: false,
                 ticketNumber: 'SUP-1',
                 errorMessage: null,
@@ -50,7 +50,7 @@ class CreateSupportTicketTest extends TestCase
         $gateway = Mockery::mock(TicketSystemGateway::class);
         $gateway->expects('create')
             ->andReturns(new CreationResult(
-                ticketSystemType: TicketSystemEnum::MAIL,
+                ticketSystemType: TicketSystem::Mail,
                 creationError: true,
                 ticketNumber: null,
                 errorMessage: 'Mail server down',
@@ -73,7 +73,7 @@ class CreateSupportTicketTest extends TestCase
         $gateway = Mockery::mock(TicketSystemGateway::class);
         $gateway->expects('create')
             ->andReturns(new CreationResult(
-                ticketSystemType: TicketSystemEnum::TEAM_DYNAMIX,
+                ticketSystemType: TicketSystem::TeamDynamix,
                 creationError: true,
                 ticketNumber: null,
                 errorMessage: 'TDX timeout',
@@ -82,7 +82,7 @@ class CreateSupportTicketTest extends TestCase
         $fallbackGateway = Mockery::mock(MailGateway::class);
         $fallbackGateway->expects('create')
             ->andReturns(new CreationResult(
-                ticketSystemType: TicketSystemEnum::MAIL,
+                ticketSystemType: TicketSystem::Mail,
                 creationError: false,
                 ticketNumber: 'SUP-1',
                 errorMessage: null,
@@ -106,7 +106,7 @@ class CreateSupportTicketTest extends TestCase
         $gateway = Mockery::mock(TicketSystemGateway::class);
         $gateway->expects('create')
             ->andReturns(new CreationResult(
-                ticketSystemType: TicketSystemEnum::TEAM_DYNAMIX,
+                ticketSystemType: TicketSystem::TeamDynamix,
                 creationError: true,
                 ticketNumber: null,
                 errorMessage: 'TDX down',
@@ -115,7 +115,7 @@ class CreateSupportTicketTest extends TestCase
         $fallbackGateway = Mockery::mock(MailGateway::class);
         $fallbackGateway->expects('create')
             ->andReturns(new CreationResult(
-                ticketSystemType: TicketSystemEnum::MAIL,
+                ticketSystemType: TicketSystem::Mail,
                 creationError: true,
                 ticketNumber: null,
                 errorMessage: 'Mail also failed',
@@ -139,7 +139,7 @@ class CreateSupportTicketTest extends TestCase
         $gateway = Mockery::mock(TicketSystemGateway::class);
         $gateway->expects('create')
             ->andReturns(new CreationResult(
-                ticketSystemType: TicketSystemEnum::TEAM_DYNAMIX,
+                ticketSystemType: TicketSystem::TeamDynamix,
                 creationError: false,
                 ticketNumber: '1234567',
                 errorMessage: null,
@@ -150,7 +150,7 @@ class CreateSupportTicketTest extends TestCase
         $action = new CreateSupportTicket($gateway, $factory, resolve(SupportTicketRepository::class));
         $result = $action($ticket);
 
-        $this->assertSame(TicketSystemEnum::TEAM_DYNAMIX, $result->ticketing_system);
+        $this->assertSame(TicketSystem::TeamDynamix, $result->ticketing_system);
         $this->assertSame('1234567', $result->ticket_number);
         $this->assertFalse($result->post_error);
         $this->assertNotNull($result->posted_to_ticketing_system_at);

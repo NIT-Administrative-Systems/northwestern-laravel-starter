@@ -49,11 +49,11 @@ class SendAccessTokenExpirationNotificationsCommand extends Command
 
             foreach ($query->lazyById(100) as $token) {
                 try {
-                    $this->processToken($token, $daysBeforeExpiration);
+                    $this->sendExpirationNotificationForToken($token, $daysBeforeExpiration);
                     $totalNotificationsSent++;
                 } catch (Throwable $e) {
                     $totalErrors++;
-                    $this->handleError($token, $e);
+                    $this->logNotificationFailure($token, $e);
                 }
             }
         }
@@ -99,7 +99,7 @@ class SendAccessTokenExpirationNotificationsCommand extends Command
     /**
      * Process a single token and send notification.
      */
-    private function processToken(AccessToken $token, int $daysUntilExpiration): void
+    private function sendExpirationNotificationForToken(AccessToken $token, int $daysUntilExpiration): void
     {
         $user = $token->user;
 
@@ -119,7 +119,7 @@ class SendAccessTokenExpirationNotificationsCommand extends Command
     /**
      * Handle errors that occur during token processing.
      */
-    private function handleError(AccessToken $token, Throwable $e): void
+    private function logNotificationFailure(AccessToken $token, Throwable $e): void
     {
         $identifier = $token->user->username ?? "token #{$token->id}";
 

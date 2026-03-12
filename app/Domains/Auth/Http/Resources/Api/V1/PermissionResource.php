@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Auth\Http\Resources\Api\V1;
 
-use App\Domains\Auth\Enums\PermissionScopeEnum;
+use App\Domains\Auth\Enums\PermissionScope;
 use App\Domains\Auth\Models\Permission;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -40,8 +40,8 @@ use OpenApi\Attributes as OA;
             property: 'scope',
             description: 'Whether this permission applies system-wide or only to the authenticated user\'s context.',
             type: 'string',
-            example: PermissionScopeEnum::SYSTEM_WIDE->value,
-            enum: [PermissionScopeEnum::SYSTEM_WIDE->value, PermissionScopeEnum::PERSONAL->value]
+            example: PermissionScope::SystemWide->value,
+            enum: [PermissionScope::SystemWide->value, PermissionScope::Personal->value]
         ),
         new OA\Property(property: 'system_managed', type: 'boolean', example: false),
         new OA\Property(

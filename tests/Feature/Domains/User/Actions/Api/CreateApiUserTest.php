@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\User\Actions\Api;
 
-use App\Domains\Auth\Enums\AuthTypeEnum;
+use App\Domains\Auth\Enums\AuthType;
 use App\Domains\Auth\Models\AccessToken;
 use App\Domains\User\Actions\Api\CreateApiUser;
-use App\Domains\User\Enums\AffiliationEnum;
+use App\Domains\User\Enums\Affiliation;
 use Carbon\CarbonImmutable;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
@@ -40,8 +40,8 @@ class CreateApiUserTest extends TestCase
         );
 
         $this->assertSame('api-service', $user->username);
-        $this->assertSame(AuthTypeEnum::API, $user->auth_type);
-        $this->assertSame(AffiliationEnum::OTHER, $user->primary_affiliation);
+        $this->assertSame(AuthType::API, $user->auth_type);
+        $this->assertSame(Affiliation::Other, $user->primary_affiliation);
         $this->assertSame('My Service', $user->first_name);
         $this->assertSame('API', $user->last_name);
         $this->assertSame('api@example.com', $user->email);

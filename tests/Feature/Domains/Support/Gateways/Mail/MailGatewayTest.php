@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\Support\Gateways\Mail;
 
-use App\Domains\Support\Enums\TicketSystemEnum;
+use App\Domains\Support\Enums\TicketSystem;
 use App\Domains\Support\Gateways\Mail\MailGateway;
 use App\Domains\Support\Gateways\Mail\SupportTicketConfirmation;
 use App\Domains\Support\Gateways\Mail\SupportTicketMessage;
@@ -51,7 +51,7 @@ class MailGatewayTest extends TestCase
 
         $result = $gateway->create($ticket);
 
-        $this->assertSame(TicketSystemEnum::MAIL, $result->ticketSystemType);
+        $this->assertSame(TicketSystem::Mail, $result->ticketSystemType);
         $this->assertFalse($result->creationError);
         $this->assertNull($result->errorMessage);
         $this->assertNotNull($result->ticketNumber);
@@ -92,7 +92,7 @@ class MailGatewayTest extends TestCase
 
         $result = $gateway->create($ticket);
 
-        $this->assertSame(TicketSystemEnum::MAIL, $result->ticketSystemType);
+        $this->assertSame(TicketSystem::Mail, $result->ticketSystemType);
         $this->assertTrue($result->creationError);
         $this->assertNull($result->ticketNumber);
         $this->assertSame('SMTP connection refused', $result->errorMessage);

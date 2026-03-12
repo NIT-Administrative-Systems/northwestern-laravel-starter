@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Domains\User\Actions;
+namespace Tests\Unit\Domains\User\Enums;
 
 use App\Domains\User\Enums\DirectorySearchType;
 use InvalidArgumentException;
@@ -40,7 +40,7 @@ class DirectorySearchTypeTest extends TestCase
 
         foreach ($validEmails as $email) {
             $result = DirectorySearchType::fromSearchValue($email);
-            $this->assertSame(DirectorySearchType::EMAIL, $result);
+            $this->assertSame(DirectorySearchType::Email, $result);
         }
     }
 
@@ -50,7 +50,7 @@ class DirectorySearchTypeTest extends TestCase
         $validIds = ['1', '123', '123456', '1234567', '12345678'];
         foreach ($validIds as $id) {
             $result = DirectorySearchType::fromSearchValue($id);
-            $this->assertSame(DirectorySearchType::EMPLOYEE_ID, $result);
+            $this->assertSame(DirectorySearchType::EmployeeId, $result);
         }
     }
 
@@ -59,20 +59,20 @@ class DirectorySearchTypeTest extends TestCase
         $validNetIds = ['abc', 'abc123', 'user1', 'test', 'a1b2c3d4', 'test-user', 'existing-no-email', 'user!@#'];
         foreach ($validNetIds as $netId) {
             $result = DirectorySearchType::fromSearchValue($netId);
-            $this->assertSame(DirectorySearchType::NETID, $result);
+            $this->assertSame(DirectorySearchType::NetId, $result);
         }
     }
 
     public function test_whitespace_is_trimmed(): void
     {
         $result = DirectorySearchType::fromSearchValue('  abc123  ');
-        $this->assertSame(DirectorySearchType::NETID, $result);
+        $this->assertSame(DirectorySearchType::NetId, $result);
 
         $result = DirectorySearchType::fromSearchValue('  user@example.com  ');
-        $this->assertSame(DirectorySearchType::EMAIL, $result);
+        $this->assertSame(DirectorySearchType::Email, $result);
 
         $result = DirectorySearchType::fromSearchValue('  1234567  ');
-        $this->assertSame(DirectorySearchType::EMPLOYEE_ID, $result);
+        $this->assertSame(DirectorySearchType::EmployeeId, $result);
     }
 
     /**
@@ -81,16 +81,16 @@ class DirectorySearchTypeTest extends TestCase
     public static function validSearchValuesProvider(): array
     {
         return [
-            'typical email' => ['example@northwestern.edu', DirectorySearchType::EMAIL],
-            'another email format' => ['user@domain.com', DirectorySearchType::EMAIL],
-            'complex email' => ['test.email+tag@example.org', DirectorySearchType::EMAIL],
-            'employee ID 7 digits' => ['1234567', DirectorySearchType::EMPLOYEE_ID],
-            'netid alphanumeric' => ['abc123', DirectorySearchType::NETID],
-            'netid short' => ['abc', DirectorySearchType::NETID],
-            'netid long' => ['abcd1234', DirectorySearchType::NETID],
-            'netid with hyphens' => ['test-user', DirectorySearchType::NETID],
-            'netid longer format' => ['missing-mail-format', DirectorySearchType::NETID],
-            'netid alphabetic only' => ['notanemail', DirectorySearchType::NETID],
+            'typical email' => ['example@northwestern.edu', DirectorySearchType::Email],
+            'another email format' => ['user@domain.com', DirectorySearchType::Email],
+            'complex email' => ['test.email+tag@example.org', DirectorySearchType::Email],
+            'employee ID 7 digits' => ['1234567', DirectorySearchType::EmployeeId],
+            'netid alphanumeric' => ['abc123', DirectorySearchType::NetId],
+            'netid short' => ['abc', DirectorySearchType::NetId],
+            'netid long' => ['abcd1234', DirectorySearchType::NetId],
+            'netid with hyphens' => ['test-user', DirectorySearchType::NetId],
+            'netid longer format' => ['missing-mail-format', DirectorySearchType::NetId],
+            'netid alphabetic only' => ['notanemail', DirectorySearchType::NetId],
         ];
     }
 

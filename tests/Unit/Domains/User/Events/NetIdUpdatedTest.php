@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Domains\User\Events;
 
-use App\Domains\User\Enums\NetIdUpdateActionEnum;
+use App\Domains\User\Enums\NetIdUpdateAction;
 use App\Domains\User\Events\NetIdUpdated;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -20,7 +20,7 @@ class NetIdUpdatedTest extends TestCase
         $event = NetIdUpdated::fromPayload($payload);
 
         $this->assertEquals('abc123', $event->netId);
-        $this->assertEquals(NetIdUpdateActionEnum::DEACTIVATE, $event->action);
+        $this->assertEquals(NetIdUpdateAction::Deactivate, $event->action);
     }
 
     public function test_it_normalizes_netid_to_lowercase(): void
@@ -38,7 +38,7 @@ class NetIdUpdatedTest extends TestCase
 
         $event = NetIdUpdated::fromPayload($payload);
 
-        $this->assertEquals(NetIdUpdateActionEnum::DEACTIVATE, $event->action);
+        $this->assertEquals(NetIdUpdateAction::Deactivate, $event->action);
     }
 
     public function test_it_handles_url_encoded_characters(): void
@@ -97,7 +97,7 @@ class NetIdUpdatedTest extends TestCase
         $event = NetIdUpdated::fromPayload($payload);
 
         $this->assertEquals('abc123', $event->netId);
-        $this->assertEquals(NetIdUpdateActionEnum::DEACTIVATE, $event->action);
+        $this->assertEquals(NetIdUpdateAction::Deactivate, $event->action);
     }
 
     public function test_it_handles_parameters_in_different_order(): void
@@ -107,14 +107,14 @@ class NetIdUpdatedTest extends TestCase
         $event = NetIdUpdated::fromPayload($payload);
 
         $this->assertEquals('abc123', $event->netId);
-        $this->assertEquals(NetIdUpdateActionEnum::DEACTIVATE, $event->action);
+        $this->assertEquals(NetIdUpdateAction::Deactivate, $event->action);
     }
 
     public function test_constructor_accepts_typed_values_directly(): void
     {
-        $event = new NetIdUpdated('abc123', NetIdUpdateActionEnum::DEACTIVATE);
+        $event = new NetIdUpdated('abc123', NetIdUpdateAction::Deactivate);
 
         $this->assertEquals('abc123', $event->netId);
-        $this->assertEquals(NetIdUpdateActionEnum::DEACTIVATE, $event->action);
+        $this->assertEquals(NetIdUpdateAction::Deactivate, $event->action);
     }
 }

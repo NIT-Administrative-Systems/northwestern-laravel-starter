@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Domains\Support\Contracts\TicketSystemGateway;
-use App\Domains\Support\Gateway\TicketSystemGatewayFactory;
+use App\Domains\Support\Gateways\TicketSystemGatewayFactory;
 use Illuminate\Support\ServiceProvider;
 
 /**

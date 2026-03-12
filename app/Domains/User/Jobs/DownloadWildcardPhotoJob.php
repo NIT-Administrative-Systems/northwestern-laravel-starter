@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\User\Jobs;
 
-use App\Domains\Auth\Enums\AuthTypeEnum;
+use App\Domains\Auth\Enums\AuthType;
 use App\Domains\User\Models\User;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -27,7 +27,7 @@ class DownloadWildcardPhotoJob implements ShouldQueue
     public function handle(DirectorySearch $directorySearch): void
     {
         // Non-Northwestern users don't have a Wildcard photo, so there's no action to take.
-        if ($this->user->auth_type !== AuthTypeEnum::SSO || ! config('platform.wildcard_photo_sync')) {
+        if ($this->user->auth_type !== AuthType::SSO || ! config('platform.wildcard_photo_sync')) {
             return;
         }
 

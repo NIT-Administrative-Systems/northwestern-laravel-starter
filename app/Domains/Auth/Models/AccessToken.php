@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Auth\Models;
 
-use App\Domains\Auth\Enums\AccessTokenStatusEnum;
+use App\Domains\Auth\Enums\AccessTokenStatus;
 use App\Domains\Core\Models\BaseModel;
 use App\Domains\User\Models\User;
 use Carbon\Carbon;
@@ -122,16 +122,16 @@ class AccessToken extends BaseModel
         return $this->hasMany(ApiRequestLog::class, 'access_token_id');
     }
 
-    /** @return Attribute<AccessTokenStatusEnum, never> */
+    /** @return Attribute<AccessTokenStatus, never> */
     protected function status(): Attribute
     {
         return Attribute::make(
             get: function () {
                 return match (true) {
-                    filled($this->revoked_at) => AccessTokenStatusEnum::REVOKED,
-                    $this->expires_at?->isPast() => AccessTokenStatusEnum::EXPIRED,
-                    $this->token_hash === null => AccessTokenStatusEnum::REVOKED,
-                    default => AccessTokenStatusEnum::ACTIVE,
+                    filled($this->revoked_at) => AccessTokenStatus::Revoked,
+                    $this->expires_at?->isPast() => AccessTokenStatus::Expired,
+                    $this->token_hash === null => AccessTokenStatus::Revoked,
+                    default => AccessTokenStatus::Active,
                 };
             }
         );

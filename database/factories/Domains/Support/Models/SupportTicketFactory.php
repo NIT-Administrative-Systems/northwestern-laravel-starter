@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories\Domains\Support\Models;
 
-use App\Domains\Support\Enums\TicketSystemEnum;
+use App\Domains\Support\Enums\TicketSystem;
 use App\Domains\Support\Models\SupportTicket;
 use App\Domains\User\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -26,7 +26,7 @@ class SupportTicketFactory extends Factory
             'subject' => fake()->sentence(4),
             'details' => fake()->paragraphs(2, true),
             'requester_email' => fake()->companyEmail(),
-            'ticketing_system' => TicketSystemEnum::MAIL,
+            'ticketing_system' => TicketSystem::Mail,
             'ticket_number' => (string) fake()->randomNumber(5, true),
             'post_error' => false,
             'error_message' => null,
@@ -59,7 +59,7 @@ class SupportTicketFactory extends Factory
     public function teamDynamix(): self
     {
         return $this->state(fn () => [
-            'ticketing_system' => TicketSystemEnum::TEAM_DYNAMIX,
+            'ticketing_system' => TicketSystem::TeamDynamix,
             'ticket_number' => (string) fake()->randomNumber(7, true),
         ]);
     }

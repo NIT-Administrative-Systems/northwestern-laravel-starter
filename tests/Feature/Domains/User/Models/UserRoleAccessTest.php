@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\User\Models;
 
-use App\Domains\Auth\Enums\PermissionEnum;
-use App\Domains\Auth\Enums\RoleModificationOriginEnum;
+use App\Domains\Auth\Enums\RoleModificationOrigin;
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\User;
 use Filament\Panel;
@@ -54,8 +54,8 @@ class UserRoleAccessTest extends TestCase
     {
         $user = User::factory()->createOne();
         $role = Role::factory()->createOne();
-        $role->givePermissionTo(PermissionEnum::ACCESS_ADMINISTRATION_PANEL);
-        $user->assignRoleWithAudit($role, RoleModificationOriginEnum::SYSTEM);
+        $role->givePermissionTo(SystemPermission::AccessAdministrationPanel);
+        $user->assignRoleWithAudit($role, RoleModificationOrigin::System);
 
         $panel = Mockery::mock(Panel::class);
         $panel->expects('getId')->andReturn('administration');

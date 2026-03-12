@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\Support\Repositories;
 
-use App\Domains\Support\Enums\TicketSystemEnum;
-use App\Domains\Support\Gateway\CreationResult;
+use App\Domains\Support\Enums\TicketSystem;
+use App\Domains\Support\Gateways\CreationResult;
 use App\Domains\Support\Models\SupportTicket;
 use App\Domains\Support\Repositories\SupportTicketRepository;
 use App\Domains\User\Models\User;
@@ -49,7 +49,7 @@ class SupportTicketRepositoryTest extends TestCase
         $ticket = SupportTicket::factory()->pending()->create();
 
         $result = new CreationResult(
-            ticketSystemType: TicketSystemEnum::MAIL,
+            ticketSystemType: TicketSystem::Mail,
             creationError: false,
             ticketNumber: 'SUP-1',
             errorMessage: null,
@@ -57,7 +57,7 @@ class SupportTicketRepositoryTest extends TestCase
 
         $updated = $this->repo()->updatePostStatus($ticket, $result);
 
-        $this->assertSame(TicketSystemEnum::MAIL, $updated->ticketing_system);
+        $this->assertSame(TicketSystem::Mail, $updated->ticketing_system);
         $this->assertSame('SUP-1', $updated->ticket_number);
         $this->assertFalse($updated->post_error);
         $this->assertNull($updated->error_message);
@@ -69,7 +69,7 @@ class SupportTicketRepositoryTest extends TestCase
         $ticket = SupportTicket::factory()->pending()->create();
 
         $result = new CreationResult(
-            ticketSystemType: TicketSystemEnum::TEAM_DYNAMIX,
+            ticketSystemType: TicketSystem::TeamDynamix,
             creationError: true,
             ticketNumber: null,
             errorMessage: 'TDX API timeout',
@@ -77,7 +77,7 @@ class SupportTicketRepositoryTest extends TestCase
 
         $updated = $this->repo()->updatePostStatus($ticket, $result);
 
-        $this->assertSame(TicketSystemEnum::TEAM_DYNAMIX, $updated->ticketing_system);
+        $this->assertSame(TicketSystem::TeamDynamix, $updated->ticketing_system);
         $this->assertNull($updated->ticket_number);
         $this->assertTrue($updated->post_error);
         $this->assertSame('TDX API timeout', $updated->error_message);
@@ -89,7 +89,7 @@ class SupportTicketRepositoryTest extends TestCase
         $ticket = SupportTicket::factory()->pending()->create();
 
         $result = new CreationResult(
-            ticketSystemType: TicketSystemEnum::MAIL,
+            ticketSystemType: TicketSystem::Mail,
             creationError: true,
             ticketNumber: null,
             errorMessage: 'Mail send failed',

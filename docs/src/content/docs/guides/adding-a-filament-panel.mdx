@@ -135,22 +135,22 @@ The `User::canAccessPanel()` method uses a `match` statement that intentionally 
 // app/Domains/User/Models/User.php
 
 return match ($panel->getId()) {
-    AdministrationPanelProvider::ID => $this->can(PermissionEnum::ACCESS_ADMINISTRATION_PANEL),
-    PortalPanelProvider::ID => $this->can(PermissionEnum::ACCESS_PORTAL),
+    AdministrationPanelProvider::ID => $this->can(SystemPermission::AccessAdministrationPanel),
+    PortalPanelProvider::ID => $this->can(SystemPermission::AccessPortal),
 };
 ```
 
 ### Add a new permission
 
-Define a new permission in `PermissionEnum` for your panel:
+Define a new permission in `SystemPermission` for your panel:
 
 ```php
-// app/Domains/Auth/Enums/PermissionEnum.php
+// app/Domains/Auth/Enums/SystemPermission.php
 
-case ACCESS_PORTAL = 'access-portal';
+case AccessPortal = 'access-portal';
 ```
 
-Then add a description, set the system-managed flag, and configure the scope — following the patterns of the existing `ACCESS_ADMINISTRATION_PANEL` permission.
+Then add a description, set the system-managed flag, and configure the scope — following the patterns of the existing `AccessAdministrationPanel` permission.
 
 ## Navigation Groups
 
@@ -165,14 +165,14 @@ use Filament\Support\Contracts\HasLabel;
 
 enum PortalNavGroup implements HasLabel
 {
-    case DASHBOARD;
-    case MY_RECORDS;
+    case Dashboard;
+    case MyRecords;
 
     public function getLabel(): string
     {
         return match ($this) {
-            self::DASHBOARD => 'Dashboard',
-            self::MY_RECORDS => 'My Records',
+            self::Dashboard => 'Dashboard',
+            self::MyRecords => 'My Records',
         };
     }
 }
@@ -181,7 +181,7 @@ enum PortalNavGroup implements HasLabel
 Then reference it in your resources:
 
 ```php
-protected static string|null|UnitEnum $navigationGroup = PortalNavGroup::MY_RECORDS;
+protected static string|null|UnitEnum $navigationGroup = PortalNavGroup::MyRecords;
 protected static ?int $navigationSort = 1;
 ```
 
@@ -205,12 +205,12 @@ The Administration panel establishes several patterns worth replicating:
 | Pattern | What to do | Reference |
 |---------|-----------|-----------|
 | **Panel ID constant** | Define `public const string ID` on the provider | `AdministrationPanelProvider::ID` |
-| **Permission gating** | One permission per panel in `PermissionEnum` | `ACCESS_ADMINISTRATION_PANEL` |
+| **Permission gating** | One permission per panel in `SystemPermission` | `AccessAdministrationPanel` |
 | **Nav group enum** | A `HasLabel` enum per panel for sidebar organization | `AdministrationNavGroup` |
 | **Heroicon constants** | Use the `Heroicon` enum instead of raw strings | `Heroicon::OutlinedUsers` |
 | **Resource separation** | Dedicated directories per panel under `app/Filament/` | `app/Filament/Resources/` |
 | **Policies** | Standard Laravel policies — Filament respects them automatically | `UserPolicy`, `RolePolicy` |
 
 <Aside type="tip">
-    You do not need to check for `MANAGE_ALL` inside policies. The `Gate::before()` callback in `AppServiceProvider` automatically grants super-administrators full access to every panel and resource.
+    You do not need to check for `ManageAll` inside policies. The `Gate::before()` callback in `AppServiceProvider` automatically grants super-administrators full access to every panel and resource.
 </Aside>

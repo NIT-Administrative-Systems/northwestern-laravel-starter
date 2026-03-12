@@ -6,7 +6,7 @@ namespace App\Domains\Core\Exceptions;
 
 use Exception;
 
-class NoRollback extends Exception
+class NoRollbackException extends Exception
 {
     public function __construct()
     {

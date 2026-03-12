@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Domains\User\Actions;
 
-use App\Domains\Auth\Enums\AuthTypeEnum;
-use App\Domains\Auth\Enums\PermissionEnum;
-use App\Domains\User\Enums\UserSegmentEnum;
+use App\Domains\Auth\Enums\AuthType;
+use App\Domains\Auth\Enums\SystemPermission;
+use App\Domains\User\Enums\UserSegment;
 use App\Domains\User\Models\User;
 use App\Domains\User\Models\UserLoginRecord;
 
@@ -25,26 +25,26 @@ use App\Domains\User\Models\UserLoginRecord;
  * Expand this logic as your application grows to capture more relevant metrics.
  *
  * @see UserLoginRecord
- * @see UserSegmentEnum
+ * @see UserSegment
  */
 readonly class DetermineUserSegment
 {
-    public function __invoke(User $user): UserSegmentEnum
+    public function __invoke(User $user): UserSegment
     {
         return match (true) {
-            $this->isSuperAdmin($user) => UserSegmentEnum::SUPER_ADMIN,
-            $this->isExternalUser($user) => UserSegmentEnum::EXTERNAL_USER,
-            default => UserSegmentEnum::OTHER,
+            $this->isSuperAdmin($user) => UserSegment::SuperAdmin,
+            $this->isExternalUser($user) => UserSegment::ExternalUser,
+            default => UserSegment::Other,
         };
     }
 
     public function isSuperAdmin(User $user): bool
     {
-        return $user->can(PermissionEnum::MANAGE_ALL);
+        return $user->can(SystemPermission::ManageAll);
     }
 
     public function isExternalUser(User $user): bool
     {
-        return $user->auth_type === AuthTypeEnum::LOCAL;
+        return $user->auth_type === AuthType::Local;
     }
 }

@@ -33,7 +33,7 @@ class RoleResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
-    protected static string|null|UnitEnum $navigationGroup = AdministrationNavGroup::USER_MANAGEMENT;
+    protected static string|null|UnitEnum $navigationGroup = AdministrationNavGroup::UserManagement;
 
     protected static ?int $navigationSort = 2;
 

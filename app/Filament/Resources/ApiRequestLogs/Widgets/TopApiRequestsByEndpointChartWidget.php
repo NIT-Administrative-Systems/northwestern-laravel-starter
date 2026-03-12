@@ -50,28 +50,28 @@ class TopApiRequestsByEndpointChartWidget extends BaseApiRequestChartWidget
         }
 
         $labels = $this->cachedEndpointStats->pluck('path')->all();
-        $data = $this->cachedEndpointStats->pluck('request_count')->map(fn ($v) => (int) $v)->all();
+        $requestCounts = $this->cachedEndpointStats->pluck('request_count')->map(fn ($v) => (int) $v)->all();
 
         // Add "Other" category for remaining endpoints
-        $topSum = array_sum($data);
+        $topSum = array_sum($requestCounts);
         $otherCount = $this->cachedTotalCount - $topSum;
 
         if ($otherCount > 0) {
             $labels[] = 'Other';
-            $data[] = $otherCount;
+            $requestCounts[] = $otherCount;
         }
 
         // Pre-compute percentages for tooltip access
         $percentages = array_map(
             fn (int $v) => $this->cachedTotalCount > 0 ? round(($v / $this->cachedTotalCount) * 100, 1) : 0,
-            $data,
+            $requestCounts,
         );
 
         return [
             'datasets' => [
                 [
                     'label' => 'Requests',
-                    'data' => $data,
+                    'data' => $requestCounts,
                     'backgroundColor' => array_map(
                         fn (string $label) => $label === 'Other' ? 'rgb(148, 163, 184)' : 'rgb(34, 197, 94)',
                         $labels,

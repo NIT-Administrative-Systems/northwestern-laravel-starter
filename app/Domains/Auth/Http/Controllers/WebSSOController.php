@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Auth\Http\Controllers;
 
-use App\Domains\Core\Enums\ExternalServiceEnum;
+use App\Domains\Core\Enums\ExternalService;
 use App\Domains\Core\Exceptions\ServiceDownError;
 use App\Domains\User\Actions\Directory\FindOrUpdateUserFromDirectory;
 use App\Domains\User\Actions\RecordLogin;
@@ -51,7 +51,7 @@ class WebSSOController extends Controller
                 throw_unless(
                     $user,
                     ServiceDownError::class,
-                    service: ExternalServiceEnum::DIRECTORY_SEARCH,
+                    service: ExternalService::DirectorySearch,
                     additionalMessage: $findOrUpdateUserFromDirectory->getLastError(),
                     retryAttempted: self::RETRY_LOOKUP_TIMES
                 );

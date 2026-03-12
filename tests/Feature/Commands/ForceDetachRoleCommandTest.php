@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Commands;
 
-use App\Domains\Auth\Enums\RoleModificationOriginEnum;
+use App\Domains\Auth\Enums\RoleModificationOrigin;
 use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\User;
 use Tests\TestCase;
@@ -56,7 +56,7 @@ class ForceDetachRoleCommandTest extends TestCase
     {
         $user = User::factory()->create();
         $role = Role::factory()->create();
-        $user->assignRoleWithAudit($role, RoleModificationOriginEnum::SYSTEM);
+        $user->assignRoleWithAudit($role, RoleModificationOrigin::System);
 
         $this->artisan('role:force-detach', [
             'user' => $user->username,
@@ -74,7 +74,7 @@ class ForceDetachRoleCommandTest extends TestCase
     {
         $user = User::factory()->create();
         $role = Role::factory()->create();
-        $user->assignRoleWithAudit($role, RoleModificationOriginEnum::SYSTEM);
+        $user->assignRoleWithAudit($role, RoleModificationOrigin::System);
 
         $this->artisan('role:force-detach', [
             'user' => $user->username,
@@ -92,7 +92,7 @@ class ForceDetachRoleCommandTest extends TestCase
     {
         $user = User::factory()->create();
         $role = Role::factory()->create();
-        $user->assignRoleWithAudit($role, RoleModificationOriginEnum::SYSTEM);
+        $user->assignRoleWithAudit($role, RoleModificationOrigin::System);
 
         $this->artisan('role:force-detach', [
             'user' => $user->username,
@@ -110,7 +110,7 @@ class ForceDetachRoleCommandTest extends TestCase
     {
         $user = User::factory()->create();
         $role = Role::factory()->create();
-        $user->assignRoleWithAudit($role, RoleModificationOriginEnum::SYSTEM);
+        $user->assignRoleWithAudit($role, RoleModificationOrigin::System);
 
         $this->artisan('role:force-detach', [
             'user' => $user->username,
@@ -127,7 +127,7 @@ class ForceDetachRoleCommandTest extends TestCase
     {
         $user = User::factory()->create();
         $role = Role::factory()->create();
-        $user->assignRoleWithAudit($role, RoleModificationOriginEnum::SYSTEM);
+        $user->assignRoleWithAudit($role, RoleModificationOrigin::System);
 
         $this->artisan('role:force-detach', [
             'user' => (string) $user->id,
@@ -144,7 +144,7 @@ class ForceDetachRoleCommandTest extends TestCase
     {
         $user = User::factory()->create();
         $role = Role::factory()->assignmentLocked()->create();
-        $user->assignRoleWithAudit($role, RoleModificationOriginEnum::SYSTEM);
+        $user->assignRoleWithAudit($role, RoleModificationOrigin::System);
 
         $this->artisan('role:force-detach', [
             'user' => $user->username,

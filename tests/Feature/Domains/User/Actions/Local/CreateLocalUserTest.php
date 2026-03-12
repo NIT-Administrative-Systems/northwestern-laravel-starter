@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\User\Actions\Local;
 
-use App\Domains\Auth\Enums\AuthTypeEnum;
+use App\Domains\Auth\Enums\AuthType;
 use App\Domains\Auth\Models\LoginChallenge;
 use App\Domains\User\Actions\Local\CreateLocalUser;
 use Illuminate\Support\Facades\Mail;
@@ -34,7 +34,7 @@ class CreateLocalUserTest extends TestCase
         );
 
         $this->assertTrue($user->exists);
-        $this->assertEquals(AuthTypeEnum::LOCAL, $user->auth_type);
+        $this->assertEquals(AuthType::Local, $user->auth_type);
         $this->assertEquals('test@example.com', $user->email);
         $this->assertEquals('John', $user->first_name);
         $this->assertEquals('Doe', $user->last_name);

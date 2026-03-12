@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\AccessTokens\Actions;
 
-use App\Domains\Auth\Enums\PermissionEnum;
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\AccessToken;
 use App\Filament\Resources\AccessTokens\Schemas\AccessTokenSchemas;
 use Filament\Actions\Action;
@@ -22,7 +22,7 @@ class RevokeAccessTokenAction extends Action
     {
         parent::setUp();
 
-        $this->authorize(PermissionEnum::MANAGE_API_USERS)
+        $this->authorize(SystemPermission::ManageApiUsers)
             ->label('Revoke')
             ->icon(Heroicon::OutlinedXCircle)
             ->color('danger')

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Domains\Auth\Seeders;
 
-use App\Domains\Auth\Enums\PermissionEnum;
 use App\Domains\Auth\Enums\RoleTypeEnum;
-use App\Domains\Auth\Enums\SystemRoleEnum;
+use App\Domains\Auth\Enums\SystemPermission;
+use App\Domains\Auth\Enums\SystemRole;
 use App\Domains\Auth\Models\Role;
 use App\Domains\Auth\Models\RoleType;
 use App\Domains\Core\Attributes\AutoSeed;
@@ -27,16 +27,16 @@ class RoleSeeder extends Seeder implements IdempotentSeederInterface
     {
         resolve(PermissionRegistrar::class)->forgetCachedPermissions();
 
-        $systemManagedRoleId = RoleType::where('slug', RoleTypeEnum::SYSTEM_MANAGED)->value('id');
+        $systemManagedRoleId = RoleType::where('slug', RoleTypeEnum::SystemManaged)->value('id');
 
         $roles = collect([
             [
-                'name' => SystemRoleEnum::SUPER_ADMINISTRATOR,
+                'name' => SystemRole::SuperAdministrator,
                 'role_type_id' => $systemManagedRoleId,
-                'permissions' => PermissionEnum::cases(),
+                'permissions' => SystemPermission::cases(),
             ],
             [
-                'name' => SystemRoleEnum::NORTHWESTERN_USER,
+                'name' => SystemRole::NorthwesternUser,
                 'role_type_id' => $systemManagedRoleId,
                 'assignment_locked' => true,
                 'permissions' => [

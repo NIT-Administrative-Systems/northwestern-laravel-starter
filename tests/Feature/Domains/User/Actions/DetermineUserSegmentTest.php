@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\User\Actions;
 
-use App\Domains\Auth\Enums\PermissionEnum;
-use App\Domains\Auth\Enums\RoleModificationOriginEnum;
+use App\Domains\Auth\Enums\RoleModificationOrigin;
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\Role;
 use App\Domains\User\Actions\DetermineUserSegment;
-use App\Domains\User\Enums\UserSegmentEnum;
+use App\Domains\User\Enums\UserSegment;
 use App\Domains\User\Models\User;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
@@ -20,16 +20,16 @@ class DetermineUserSegmentTest extends TestCase
     {
         $systemManagedRole = Role::factory()
             ->systemManaged()
-            ->hasPermissions([PermissionEnum::MANAGE_ALL])
+            ->hasPermissions([SystemPermission::ManageAll])
             ->create();
 
         $user = User::factory()->create();
 
-        $user->assignRoleWithAudit($systemManagedRole, RoleModificationOriginEnum::SYSTEM);
+        $user->assignRoleWithAudit($systemManagedRole, RoleModificationOrigin::System);
 
         $segment = $this->action()($user);
 
-        $this->assertEquals(UserSegmentEnum::SUPER_ADMIN, $segment);
+        $this->assertEquals(UserSegment::SuperAdmin, $segment);
     }
 
     public function test_determines_external_user(): void
@@ -38,7 +38,7 @@ class DetermineUserSegmentTest extends TestCase
 
         $segment = $this->action()($user);
 
-        $this->assertEquals(UserSegmentEnum::EXTERNAL_USER, $segment);
+        $this->assertEquals(UserSegment::ExternalUser, $segment);
     }
 
     public function test_determines_other(): void
@@ -47,7 +47,7 @@ class DetermineUserSegmentTest extends TestCase
 
         $segment = $this->action()($user);
 
-        $this->assertEquals(UserSegmentEnum::OTHER, $segment);
+        $this->assertEquals(UserSegment::Other, $segment);
     }
 
     protected function action(): DetermineUserSegment

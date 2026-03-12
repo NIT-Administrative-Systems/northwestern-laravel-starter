@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Pages\Platform;
 
-use App\Domains\Auth\Enums\PermissionEnum;
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Filament\Navigation\AdministrationNavGroup;
 use BackedEnum;
 use Carbon\Carbon;
@@ -30,13 +30,13 @@ class Overview extends Page
 
     protected static ?string $slug = 'overview';
 
-    protected static string|null|UnitEnum $navigationGroup = AdministrationNavGroup::PLATFORM;
+    protected static string|null|UnitEnum $navigationGroup = AdministrationNavGroup::Platform;
 
     protected static ?int $navigationSort = 1;
 
     public static function canAccess(): bool
     {
-        return auth()->user()->hasPermissionTo(PermissionEnum::MANAGE_ALL);
+        return auth()->user()->hasPermissionTo(SystemPermission::ManageAll);
     }
 
     /**
@@ -114,20 +114,20 @@ class Overview extends Page
         $disk = config('filesystems.default');
         $isS3 = $disk === 's3';
 
-        $info = [
+        $storageDetails = [
             'Default Disk' => ['value' => ucfirst((string) $disk)],
         ];
 
         if ($isS3) {
-            $info['Bucket'] = ['value' => config('filesystems.disks.s3.bucket'), 'mono' => true];
-            $info['Region'] = ['value' => config('filesystems.disks.s3.region') ?: 'Not set', 'mono' => true];
+            $storageDetails['Bucket'] = ['value' => config('filesystems.disks.s3.bucket'), 'mono' => true];
+            $storageDetails['Region'] = ['value' => config('filesystems.disks.s3.region') ?: 'Not set', 'mono' => true];
             $endpoint = config('filesystems.disks.s3.endpoint');
-            $info['Endpoint'] = ['value' => $endpoint ?: 'AWS Default', 'mono' => (bool) $endpoint];
+            $storageDetails['Endpoint'] = ['value' => $endpoint ?: 'AWS Default', 'mono' => (bool) $endpoint];
         } else {
-            $info['Storage Type'] = ['value' => 'Local filesystem'];
+            $storageDetails['Storage Type'] = ['value' => 'Local filesystem'];
         }
 
-        return $info;
+        return $storageDetails;
     }
 
     /**

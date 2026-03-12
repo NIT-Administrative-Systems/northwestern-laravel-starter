@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Domains\Core\Exceptions;
 
 use App\Domains\Auth\Http\Middleware\LogsApiRequests;
-use App\Domains\Core\Enums\ApiRequestFailureEnum;
+use App\Domains\Core\Enums\ApiRequestFailure;
 use App\Domains\Core\ValueObjects\ApiRequestContext;
 use App\Http\Responses\ProblemDetails;
 use ErrorException;
@@ -38,7 +38,7 @@ use Throwable;
  *
  * Notes:
  * - Only applies to API requests (under `/api/*` or requests that want JSON)
- * - Tags certain application-level exceptions with an {@see ApiRequestFailureEnum}
+ * - Tags certain application-level exceptions with an {@see ApiRequestFailure}
  *   so that {@see LogsApiRequests} can associate the failure with a user
  * - Framework-level routing exceptions (e.g. 404, some 405/400 errors throw before
  *   the middleware stack) still receive Problem Details responses, but will not
@@ -60,7 +60,7 @@ class ProblemDetailsRenderer
             // --- 4XX Client Errors ---
             $e instanceof ValidationException => tap(
                 ProblemDetails::unprocessableEntity(errors: $e->errors()),
-                fn () => $this->setFailure(ApiRequestFailureEnum::VALIDATION_FAILED)
+                fn () => $this->setFailure(ApiRequestFailure::ValidationFailed)
             ),
 
             // 401 & 403 Authentication/Authorization
@@ -76,7 +76,7 @@ class ProblemDetailsRenderer
                 ProblemDetails::forbidden(
                     detail: $e->getMessage() ?: 'You do not have permission to access this resource.'
                 ),
-                fn () => $this->setFailure(ApiRequestFailureEnum::UNAUTHORIZED)
+                fn () => $this->setFailure(ApiRequestFailure::Unauthorized)
             ),
 
             // 404 Not Found & 409 Conflict
@@ -87,7 +87,7 @@ class ProblemDetailsRenderer
                 ProblemDetails::conflict(
                     detail: $e->getMessage() ?: 'Conflict'
                 ),
-                fn () => $this->setFailure(ApiRequestFailureEnum::CONFLICT)
+                fn () => $this->setFailure(ApiRequestFailure::Conflict)
             ),
 
             // 405 Method Not Allowed
@@ -125,7 +125,7 @@ class ProblemDetailsRenderer
                     detail: $e->getMessage() ?: null,
                     headers: $e->getHeaders()
                 ),
-                fn () => $this->setFailure(ApiRequestFailureEnum::SERVER_ERROR)
+                fn () => $this->setFailure(ApiRequestFailure::ServerError)
             ),
 
             // Catch specific database exceptions
@@ -133,13 +133,13 @@ class ProblemDetailsRenderer
                 ProblemDetails::internalServerError(
                     detail: 'A database error occurred while processing the request.'
                 ),
-                fn () => $this->setFailure(ApiRequestFailureEnum::DATABASE_ERROR)
+                fn () => $this->setFailure(ApiRequestFailure::DatabaseError)
             ),
 
             // 500 Internal Server Error
             default => tap(
                 ProblemDetails::internalServerError(),
-                fn () => $this->setFailure(ApiRequestFailureEnum::SERVER_ERROR)
+                fn () => $this->setFailure(ApiRequestFailure::ServerError)
             ),
         };
     }
@@ -148,7 +148,7 @@ class ProblemDetailsRenderer
      * Write a failure reason into the shared API request context, but do not
      * overwrite an existing one (e.g. from the authentication middleware).
      */
-    private function setFailure(ApiRequestFailureEnum $failure): void
+    private function setFailure(ApiRequestFailure $failure): void
     {
         if (Context::has(ApiRequestContext::FAILURE_REASON)) {
             return;

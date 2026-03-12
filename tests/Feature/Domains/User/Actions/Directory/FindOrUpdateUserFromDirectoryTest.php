@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\User\Actions\Directory;
 
-use App\Domains\Auth\Enums\AuthTypeEnum;
+use App\Domains\Auth\Enums\AuthType;
 use App\Domains\User\Actions\Directory\FindOrUpdateUserFromDirectory;
-use App\Domains\User\Enums\AffiliationEnum;
+use App\Domains\User\Enums\Affiliation;
 use App\Domains\User\Exceptions\BadDirectoryEntry;
 use App\Domains\User\Models\User;
 use Illuminate\Contracts\Bus\Dispatcher;
@@ -37,7 +37,7 @@ class FindOrUpdateUserFromDirectoryTest extends TestCase
         $this->assertFalse($activeUser->netid_inactive);
         $this->assertNull($activeUser->directory_sync_last_failed_at);
         $this->assertEquals('abc123', $activeUser->username);
-        $this->assertEquals(AffiliationEnum::STUDENT, $activeUser->primary_affiliation);
+        $this->assertEquals(Affiliation::Student, $activeUser->primary_affiliation);
     }
 
     public function test_missing_affiliation_throws_exception(): void
@@ -103,7 +103,7 @@ class FindOrUpdateUserFromDirectoryTest extends TestCase
     {
         User::factory()->create([
             'username' => 'api-user',
-            'auth_type' => AuthTypeEnum::API,
+            'auth_type' => AuthType::API,
         ]);
 
         $result = $this->service()('api-user');
@@ -140,7 +140,7 @@ class FindOrUpdateUserFromDirectoryTest extends TestCase
         $directoryApi = $this->createStub(DirectorySearch::class);
         $existingUser = User::factory()->create([
             'username' => 'existing-no-email',
-            'auth_type' => AuthTypeEnum::SSO,
+            'auth_type' => AuthType::SSO,
             'email' => 'existing@northwestern.edu',
             'netid_inactive' => false,
         ]);
@@ -169,7 +169,7 @@ class FindOrUpdateUserFromDirectoryTest extends TestCase
         $directoryApi = $this->createStub(DirectorySearch::class);
         User::factory()->create([
             'username' => 'missing-mail',
-            'auth_type' => AuthTypeEnum::SSO,
+            'auth_type' => AuthType::SSO,
             'netid_inactive' => false,
         ]);
 
@@ -204,7 +204,7 @@ class FindOrUpdateUserFromDirectoryTest extends TestCase
         $directoryApi = $this->createStub(DirectorySearch::class);
         $existingUser = User::factory()->create([
             'username' => 'existing-no-data',
-            'auth_type' => AuthTypeEnum::SSO,
+            'auth_type' => AuthType::SSO,
             'netid_inactive' => false,
         ]);
 
@@ -224,7 +224,7 @@ class FindOrUpdateUserFromDirectoryTest extends TestCase
         $directoryApi = $this->createStub(DirectorySearch::class);
         $existingUser = User::factory()->create([
             'username' => 'local-user',
-            'auth_type' => AuthTypeEnum::LOCAL,
+            'auth_type' => AuthType::Local,
             'netid_inactive' => false,
         ]);
 
@@ -298,7 +298,7 @@ class FindOrUpdateUserFromDirectoryTest extends TestCase
         $this->assertTrue($user->exists);
         $this->assertEquals('abc123', $user->username);
         $this->assertEquals('StudieNU20XX@u.northwestern.edu', $user->email); // Student email has priority
-        $this->assertEquals(AffiliationEnum::STUDENT, $user->primary_affiliation);
+        $this->assertEquals(Affiliation::Student, $user->primary_affiliation);
     }
 
     public function test_employee_id_search_creates_user(): void
@@ -311,7 +311,7 @@ class FindOrUpdateUserFromDirectoryTest extends TestCase
         $this->assertTrue($user->exists);
         $this->assertEquals('abc123', $user->username);
         $this->assertEquals('StudieNU20XX@u.northwestern.edu', $user->email); // Student email has priority
-        $this->assertEquals(AffiliationEnum::STUDENT, $user->primary_affiliation);
+        $this->assertEquals(Affiliation::Student, $user->primary_affiliation);
     }
 
     public function test_netid_search_with_mixed_case(): void
@@ -365,7 +365,7 @@ class FindOrUpdateUserFromDirectoryTest extends TestCase
     {
         $existingUser = User::factory()->create([
             'email' => 'existing@northwestern.edu',
-            'auth_type' => AuthTypeEnum::SSO,
+            'auth_type' => AuthType::SSO,
         ]);
 
         $directoryApi = $this->createStub(DirectorySearch::class);
@@ -385,7 +385,7 @@ class FindOrUpdateUserFromDirectoryTest extends TestCase
         $existingUser = User::factory()->create([
             'employee_id' => '1000000',  // Match the studentData
             'username' => 'abc123',      // Match the NetID in directory data
-            'auth_type' => AuthTypeEnum::SSO,
+            'auth_type' => AuthType::SSO,
         ]);
 
         $directoryApi = $this->createStub(DirectorySearch::class);
