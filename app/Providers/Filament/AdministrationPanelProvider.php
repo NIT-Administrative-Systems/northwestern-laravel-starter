@@ -77,19 +77,19 @@ class AdministrationPanelProvider extends PanelProvider
                 NavigationItem::make('Telescope')
                     ->url('/telescope', shouldOpenInNewTab: true)
                     ->visible(fn (): bool => auth()->user()->can('viewTelescope'))
-                    ->group(AdministrationNavGroup::DEVELOPER_TOOLS)
+                    ->group(AdministrationNavGroup::DeveloperTools)
                     ->icon(Heroicon::OutlinedEye)
                     ->sort(1001),
                 NavigationItem::make('MinIO Console')
                     ->url(config('filesystems.disks.s3.minio_console'), shouldOpenInNewTab: true)
                     ->visible(fn (): bool => filled(config('filesystems.disks.s3.minio_console')) && auth()->user()->can('viewTelescope'))
-                    ->group(AdministrationNavGroup::DEVELOPER_TOOLS)
+                    ->group(AdministrationNavGroup::DeveloperTools)
                     ->icon(Heroicon::OutlinedCloud)
                     ->sort(1002),
                 NavigationItem::make('MailPit')
                     ->url(config('platform.mail-capture.url'), shouldOpenInNewTab: true)
                     ->visible(fn (): bool => filled(config('platform.mail-capture.url')) && auth()->user()->can('viewTelescope'))
-                    ->group(AdministrationNavGroup::DEVELOPER_TOOLS)
+                    ->group(AdministrationNavGroup::DeveloperTools)
                     ->icon(Heroicon::OutlinedEnvelope)
                     ->sort(1003),
             ])

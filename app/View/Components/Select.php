@@ -29,7 +29,7 @@ use UnitEnum;
  *
  * <x-select
  *     id="affiliation"
- *     :options="AffiliationEnum::cases()"
+ *     :options="Affiliation::cases()"
  *     :plugins="['checkbox_options', 'clear_button']"
  * />
  * </code>
@@ -196,7 +196,7 @@ class Select extends Component
     {
         return method_exists($enum, 'label')
             ? $enum->label()
-            : Str::title(str_replace(['-', '_'], ' ', $enum->name));
+            : Str::headline($enum->name);
     }
 
     /**

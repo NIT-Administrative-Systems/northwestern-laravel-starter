@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Domains\Auth\Http\Middleware;
 
-use App\Domains\Auth\Enums\AuthTypeEnum;
+use App\Domains\Auth\Enums\AuthType;
 use App\Domains\Auth\Models\AccessToken;
-use App\Domains\Core\Enums\ApiRequestFailureEnum;
+use App\Domains\Core\Enums\ApiRequestFailure;
 use App\Domains\Core\Exceptions\MissingRequestIpForRestrictedTokenException;
 use App\Domains\Core\ValueObjects\ApiRequestContext;
 use Closure;
@@ -42,7 +42,7 @@ class AuthenticatesAccessTokens
      *
      * @throws AuthenticationException When authentication fails for any reason
      *
-     * @see ApiRequestFailureEnum for the specific failure reasons tracked in logs
+     * @see ApiRequestFailure for the specific failure reasons tracked in logs
      * @see AccessToken for token management
      */
     public function handle(Request $request, Closure $next): Response
@@ -52,26 +52,26 @@ class AuthenticatesAccessTokens
         $authHeader = (string) $request->header('Authorization', '');
 
         if (! str_starts_with($authHeader, 'Bearer ')) {
-            $this->fail(ApiRequestFailureEnum::INVALID_HEADER_FORMAT);
+            $this->fail(ApiRequestFailure::InvalidHeaderFormat);
         }
 
         $rawToken = trim(Str::after($authHeader, 'Bearer '));
 
         if (blank($rawToken)) {
-            $this->fail(ApiRequestFailureEnum::MISSING_CREDENTIALS);
+            $this->fail(ApiRequestFailure::MissingCredentials);
         }
 
         $tokenHash = AccessToken::hashFromPlain($rawToken);
         unset($rawToken);
 
         $accessToken = AccessToken::query()
-            ->withWhereHas('user', fn ($query) => $query->where('auth_type', AuthTypeEnum::API))
+            ->withWhereHas('user', fn ($query) => $query->where('auth_type', AuthType::Api))
             ->where('token_hash', $tokenHash)
             ->active()
             ->first();
 
         if (! $accessToken || ! $accessToken->user) {
-            $this->fail(ApiRequestFailureEnum::TOKEN_INVALID_OR_EXPIRED);
+            $this->fail(ApiRequestFailure::TokenInvalidOrExpired);
         }
 
         $user = $accessToken->user;
@@ -80,7 +80,7 @@ class AuthenticatesAccessTokens
         Context::add(ApiRequestContext::TOKEN_ID, $accessToken->getKey());
 
         if (! $this->isIpAllowed($request->ip(), $accessToken->allowed_ips)) {
-            $this->fail(ApiRequestFailureEnum::IP_DENIED);
+            $this->fail(ApiRequestFailure::IpDenied);
         }
 
         AccessToken::withoutAuditing(fn () => $accessToken->increment(
@@ -127,7 +127,7 @@ class AuthenticatesAccessTokens
         return IpUtils::checkIp($requestIp, $allowedIps);
     }
 
-    private function fail(ApiRequestFailureEnum $reason): never
+    private function fail(ApiRequestFailure $reason): never
     {
         Context::add(ApiRequestContext::FAILURE_REASON, $reason->value);
 

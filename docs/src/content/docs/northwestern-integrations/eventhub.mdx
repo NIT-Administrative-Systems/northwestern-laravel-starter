@@ -53,10 +53,10 @@ The `ProcessNetIdUpdate` listener handles the default deprovisioning behavior (r
 DB::transaction(static function () use ($user, $event) {
     // Default: remove non-default roles and mark inactive
     $user->roles
-        ->reject(fn (Role $role) => $role->name === SystemRoleEnum::NORTHWESTERN_USER->value)
+        ->reject(fn (Role $role) => $role->name === SystemRole::NorthwesternUser->value)
         ->whenNotEmpty(fn ($roles) => $user->removeRoleWithAudit(
             roles: $roles->all(),
-            origin: RoleModificationOriginEnum::NETID_STATUS_CHANGE,
+            origin: RoleModificationOrigin::NetIdStatusChange,
             context: ['netid_action' => $event->action->value]
         ));
 
@@ -111,7 +111,7 @@ class MyTest extends TestCase
     {
         $user = User::factory()->create([
             'username' => 'abc123',
-            'auth_type' => AuthTypeEnum::SSO,
+            'auth_type' => AuthType::Sso,
         ]);
 
         $this->send(

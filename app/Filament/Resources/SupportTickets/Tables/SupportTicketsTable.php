@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\SupportTickets\Tables;
 
-use App\Domains\Support\Enums\TicketSystemEnum;
+use App\Domains\Support\Enums\TicketSystem;
 use App\Domains\Support\Models\SupportTicket;
 use App\Filament\Exports\SupportTicketExporter;
 use Filament\Actions\ExportAction;
@@ -45,7 +45,7 @@ class SupportTicketsTable
                 TextColumn::make('ticketing_system')
                     ->label('Gateway')
                     ->badge()
-                    ->formatStateUsing(fn (?TicketSystemEnum $state) => $state?->getLabel() ?? '—'),
+                    ->formatStateUsing(fn (?TicketSystem $state) => $state?->getLabel() ?? '—'),
 
                 TextColumn::make('ticket_number')
                     ->label('Ticket #')
@@ -106,7 +106,7 @@ class SupportTicketsTable
 
                 SelectFilter::make('ticketing_system')
                     ->label('Gateway')
-                    ->options(TicketSystemEnum::class),
+                    ->options(TicketSystem::class),
 
                 Filter::make('created_at_range')
                     ->label('Date Range')

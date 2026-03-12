@@ -1,5 +1,5 @@
 @php
-    use App\Domains\Auth\Enums\PermissionEnum;
+    use App\Domains\Auth\Enums\SystemPermission;
 @endphp
 
 @extends('northwestern::purple-container')
@@ -15,13 +15,13 @@
      * of these users may not have access to backend monitoring tools like Sentry, exposing the exception details
      * directly in the UI helps them infer the nature of the failure and facilitates more accurate issue reports.
      *
-     * In production, visibility is strictly limited to users with the MANAGE_ALL permission (typically administrators).
+     * In production, visibility is strictly limited to users with the ManageAll permission (typically administrators).
      * This safeguards sensitive system information from being exposed to the general user base, while still granting
      * administrators immediate access to stack traces. This allows for rapid diagnosis of live issues without having
      * to cross-reference external logs or Sentry data.
      */
     $isProduction = app()->environment('production');
-    $userCanViewDetails = auth()->check() && auth()->user()->can(PermissionEnum::MANAGE_ALL);
+    $userCanViewDetails = auth()->check() && auth()->user()->can(SystemPermission::ManageAll);
 
     $showDetails = !$isProduction || $userCanViewDetails;
 @endphp

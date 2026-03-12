@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Roles\Tables;
 
-use App\Domains\Auth\Enums\PermissionEnum;
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\Role;
 use App\Filament\Exports\RoleExporter;
 use Filament\Actions\Action;
@@ -94,8 +94,8 @@ class RolesTable
                             return true;
                         }
 
-                        return auth()->user()->hasPermissionTo(PermissionEnum::VIEW_ROLES) &&
-                            ! auth()->user()->hasPermissionTo(PermissionEnum::EDIT_ROLES);
+                        return auth()->user()->hasPermissionTo(SystemPermission::ViewRoles) &&
+                            ! auth()->user()->hasPermissionTo(SystemPermission::EditRoles);
                     }),
                 EditAction::make()
                     ->authorize(fn (Role $record) => ! $record->isSystemManagedType() && Gate::allows('update', $record)),

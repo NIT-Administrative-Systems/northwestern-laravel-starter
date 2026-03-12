@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Domains\Auth\Enums\RoleModificationOriginEnum;
+use App\Domains\Auth\Enums\RoleModificationOrigin;
 use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\User;
 use Illuminate\Console\Command;
@@ -81,7 +81,7 @@ class ForceDetachRoleCommand extends Command implements PromptsForMissingInput
 
         $user->removeRoleWithAudit(
             $role,
-            RoleModificationOriginEnum::SYSTEM,
+            RoleModificationOrigin::System,
             ['reason' => $reason, 'command' => 'role:force-detach'],
         );
 

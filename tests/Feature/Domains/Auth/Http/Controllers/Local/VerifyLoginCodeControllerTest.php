@@ -7,7 +7,7 @@ namespace Tests\Feature\Domains\Auth\Http\Controllers\Local;
 use App\Domains\Auth\Http\Controllers\Local\VerifyLoginCodeController;
 use App\Domains\Auth\Models\LoginChallenge;
 use App\Domains\Auth\ValueObjects\LoginCodeSession;
-use App\Domains\User\Enums\UserSegmentEnum;
+use App\Domains\User\Enums\UserSegment;
 use App\Domains\User\Models\User;
 use App\Domains\User\Models\UserLoginRecord;
 use Illuminate\Support\Facades\Crypt;
@@ -53,7 +53,7 @@ class VerifyLoginCodeControllerTest extends TestCase
         $this->assertAuthenticatedAs($user);
         $this->assertEquals(1, UserLoginRecord::count());
         $loginRecord = UserLoginRecord::first();
-        $this->assertEquals(UserSegmentEnum::EXTERNAL_USER, $loginRecord->segment);
+        $this->assertEquals(UserSegment::ExternalUser, $loginRecord->segment);
         $this->assertNotNull($loginRecord->ip_address);
         $this->assertNotNull($loginRecord->user_agent);
         foreach (LoginCodeSession::KEYS as $key) {

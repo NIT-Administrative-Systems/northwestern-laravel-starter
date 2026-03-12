@@ -20,13 +20,13 @@
 ## Framework-specific guidance
 
 - **Routing**: Use attribute or route-group organization with explicit middleware stacks. Keep route definitions thin; point to invokable controllers or action classes.
-- **Enums**: Use backed string enums for database values (e.g., `AuthTypeEnum`, `SystemRoleEnum`, `PermissionEnum`). Document each case with PHPDoc.
+- **Enums**: Use backed string enums for database values (e.g., `AuthType`, `SystemRole`, `SystemPermission`). Document each case with PHPDoc.
 - **Eloquent**: Favor query scopes, custom casts, and value objects over raw queries. **Never add `$fillable` or `$guarded` to Eloquent models** - omit them entirely for mass assignment protection. Always eager load relationships needed to avoid N+1 queries. Use custom query builders extending `Illuminate\Database\Eloquent\Builder` with proper type hints.
 - **Model inheritance**: Models should extend `App\Domains\Core\Models\BaseModel` which provides automatic audit logging. Exception: `User` extends `Authenticatable` but uses the `Auditable` concern directly.
 - **Model properties**: Use `protected $hidden` array for sensitive fields (passwords, tokens). Use `protected $casts` property for type casting, NOT the `casts()` method. Define `protected array $auditExclude` to exclude fields from audit logs (e.g., timestamps that change frequently, tokens, passwords).
 - **Model attributes**: Use Laravel's `Attribute` casting for computed properties. Mark with `@comment` for code generator support. Pattern: `protected function attributeName(): Attribute { return Attribute::make(get: fn() => ...) }`.
 - **Model concerns**: Extract reusable model behavior into traits in `Models/Concerns/`. Examples: `Auditable`, `HandlesImpersonation`, `AuditsRoles`.
-- **Policies & authorization**: Register policies per model and check them explicitly. Align permissions with `spatie/laravel-permission` using enum-based permission constants (e.g., `PermissionEnum`).
+- **Policies & authorization**: Register policies per model and check them explicitly. Align permissions with `spatie/laravel-permission` using enum-based permission constants (e.g., `SystemPermission`).
 - **Livewire & Filament**: Keep Livewire components lean, delegating heavy logic to actions. In Filament resources, extract form/table definitions into methods for reuse and keep validation centralized.
 
 ## Testing & quality gates

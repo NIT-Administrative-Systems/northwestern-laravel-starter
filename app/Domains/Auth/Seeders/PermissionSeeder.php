@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Auth\Seeders;
 
-use App\Domains\Auth\Enums\PermissionEnum;
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\Permission;
 use App\Domains\Core\Attributes\AutoSeed;
 use App\Domains\Core\Contracts\IdempotentSeederInterface;
@@ -17,7 +17,7 @@ class PermissionSeeder extends Seeder implements IdempotentSeederInterface
 {
     public function run(): void
     {
-        collect(PermissionEnum::cases())->map(function (PermissionEnum $permission): array {
+        collect(SystemPermission::cases())->map(function (SystemPermission $permission): array {
             return [
                 'name' => $permission->value,
                 'label' => $permission->getLabel(),

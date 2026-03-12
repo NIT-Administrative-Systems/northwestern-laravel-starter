@@ -16,7 +16,7 @@ The feature is disabled by default and can be enabled with a single environment 
 The system follows a layered architecture:
 
 - **Contract** — `TicketSystemGateway` interface decouples the orchestration from gateway implementations
-- **Enum-driven resolution** — `TicketSystemEnum::gatewayClass()` maps each driver to its concrete class
+- **Enum-driven resolution** — `TicketSystem::gatewayClass()` maps each driver to its concrete class
 - **Immutable value object** — `CreationResult` carries the outcome of every gateway call
 - **Repository** — Keeps persistence concerns out of the action
 - **Action** — `CreateSupportTicket` orchestrates the full workflow in one place
@@ -159,7 +159,7 @@ The `fallback_sent_at` timestamp on the ticket is only set when the fallback act
 
 ## Filament Admin Panel
 
-The `SupportTicketResource` provides a **read-only** view of all submitted tickets in the Filament admin panel. It requires the `VIEW_SUPPORT_TICKETS` permission and is only visible when `SUPPORT_ENABLED=true`.
+The `SupportTicketResource` provides a **read-only** view of all submitted tickets in the Filament admin panel. It requires the `ViewSupportTickets` permission and is only visible when `SUPPORT_ENABLED=true`.
 
 The resource displays a red badge on the navigation item showing the count of tickets where `post_error = true`, giving administrators immediate visibility into failed submissions.
 
@@ -189,32 +189,32 @@ Adding a new gateway requires three steps: add an enum case, implement the inter
 
 <Steps>
 
-1. **Add a case to `TicketSystemEnum`**
+1. **Add a case to `TicketSystem`**
 
    ```php
-   // app/Domains/Support/Enums/TicketSystemEnum.php
+   // app/Domains/Support/Enums/TicketSystem.php
 
-   enum TicketSystemEnum: string implements HasLabel
+   enum TicketSystem: string implements HasLabel
    {
-       case TEAM_DYNAMIX = 'team-dynamix';
-       case MAIL = 'mail';
-       case JIRA = 'jira'; // New case
+       case TeamDynamix = 'team-dynamix';
+       case Mail = 'mail';
+       case Jira = 'jira'; // New case
 
        public function getLabel(): string
        {
            return match ($this) {
-               self::TEAM_DYNAMIX => 'TeamDynamix',
-               self::MAIL => 'Email',
-               self::JIRA => 'Jira',
+               self::TeamDynamix => 'TeamDynamix',
+               self::Mail => 'Email',
+               self::Jira => 'Jira',
            };
        }
 
        public function gatewayClass(): string
        {
            return match ($this) {
-               self::TEAM_DYNAMIX => TeamDynamixGateway::class,
-               self::MAIL => MailGateway::class,
-               self::JIRA => JiraGateway::class,
+               self::TeamDynamix => TeamDynamixGateway::class,
+               self::Mail => MailGateway::class,
+               self::Jira => JiraGateway::class,
            };
        }
    }
@@ -232,7 +232,7 @@ Adding a new gateway requires three steps: add an enum case, implement the inter
    namespace App\Domains\Support\Gateways\Jira;
 
    use App\Domains\Support\Contracts\TicketSystemGateway;
-   use App\Domains\Support\Enums\TicketSystemEnum;
+   use App\Domains\Support\Enums\TicketSystem;
    use App\Domains\Support\Gateways\CreationResult;
    use App\Domains\Support\Models\SupportTicket;
    use Exception;
@@ -246,7 +246,7 @@ Adding a new gateway requires three steps: add an enum case, implement the inter
                $issueKey = $this->submitToJira($ticket);
 
                return new CreationResult(
-                   ticketSystemType: TicketSystemEnum::JIRA,
+                   ticketSystemType: TicketSystem::Jira,
                    creationError: false,
                    ticketNumber: $issueKey,
                    errorMessage: null,
@@ -257,7 +257,7 @@ Adding a new gateway requires three steps: add an enum case, implement the inter
                }
 
                return new CreationResult(
-                   ticketSystemType: TicketSystemEnum::JIRA,
+                   ticketSystemType: TicketSystem::Jira,
                    creationError: true,
                    ticketNumber: null,
                    errorMessage: $e->getMessage(),

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Domains\Support\Http\Controllers;
 
 use App\Domains\Support\Contracts\TicketSystemGateway;
-use App\Domains\Support\Enums\TicketSystemEnum;
+use App\Domains\Support\Enums\TicketSystem;
 use App\Domains\Support\Gateways\CreationResult;
 use App\Domains\Support\Models\SupportTicket;
 use App\Domains\User\Models\User;
@@ -178,7 +178,7 @@ class ContactControllerTest extends TestCase
                 public function create(SupportTicket $ticket): CreationResult
                 {
                     return new CreationResult(
-                        ticketSystemType: TicketSystemEnum::MAIL,
+                        ticketSystemType: TicketSystem::Mail,
                         creationError: false,
                         ticketNumber: $this->ticketNumber,
                         errorMessage: null,
@@ -196,7 +196,7 @@ class ContactControllerTest extends TestCase
                 public function create(SupportTicket $ticket): CreationResult
                 {
                     return new CreationResult(
-                        ticketSystemType: TicketSystemEnum::TEAM_DYNAMIX,
+                        ticketSystemType: TicketSystem::TeamDynamix,
                         creationError: true,
                         ticketNumber: null,
                         errorMessage: 'TDX error',
@@ -214,7 +214,7 @@ class ContactControllerTest extends TestCase
                 public function create(SupportTicket $ticket): CreationResult
                 {
                     return new CreationResult(
-                        ticketSystemType: TicketSystemEnum::MAIL,
+                        ticketSystemType: TicketSystem::Mail,
                         creationError: true,
                         ticketNumber: null,
                         errorMessage: 'Mail failed',

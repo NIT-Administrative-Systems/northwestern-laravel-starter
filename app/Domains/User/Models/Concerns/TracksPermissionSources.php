@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\User\Models\Concerns;
 
-use App\Domains\Auth\Enums\PermissionEnum;
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\User;
 use Illuminate\Support\Collection;
@@ -38,11 +38,11 @@ trait TracksPermissionSources
      * This distinction matters when authorization logic depends on *how* the user
      * obtained a permission.
      *
-     * @param  PermissionEnum  $permission  The permission to check
+     * @param  SystemPermission  $permission  The permission to check
      * @param  Role  $role  The role that should grant this permission
      * @return bool True if the user has this role AND the role includes this permission
      */
-    public function hasPermissionFromRole(PermissionEnum $permission, Role $role): bool
+    public function hasPermissionFromRole(SystemPermission $permission, Role $role): bool
     {
         $this->loadMissing('roles.permissions');
 
@@ -56,10 +56,10 @@ trait TracksPermissionSources
     /**
      * Get all roles that grant the user a specific permission.
      *
-     * @param  PermissionEnum  $permission  The permission to check
+     * @param  SystemPermission  $permission  The permission to check
      * @return Collection<int, Role> Collection of roles that grant this permission
      */
-    public function getRolesWithPermission(PermissionEnum $permission): Collection
+    public function getRolesWithPermission(SystemPermission $permission): Collection
     {
         $this->loadMissing('roles.permissions');
 
@@ -76,7 +76,7 @@ trait TracksPermissionSources
      * 2. Are granted by the specified role
      *
      * @param  Role  $role  The role to get permissions from
-     * @return Collection<int, PermissionEnum> Collection of permissions from this role
+     * @return Collection<int, SystemPermission> Collection of permissions from this role
      */
     public function getPermissionsFromRole(Role $role): Collection
     {
@@ -87,7 +87,7 @@ trait TracksPermissionSources
         }
 
         return $this->getRolePermissionNames($role)
-            ->map(fn (string $name): ?PermissionEnum => PermissionEnum::tryFrom($name))
+            ->map(fn (string $name): ?SystemPermission => SystemPermission::tryFrom($name))
             ->filter()
             ->values();
     }

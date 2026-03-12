@@ -134,7 +134,7 @@ namespace App\Domains\User\Actions;
 
 class DetermineUserSegment
 {
-    public function __invoke(User $user): UserSegmentEnum
+    public function __invoke(User $user): UserSegment
     {
         // Business logic to determine user segment
     }
@@ -167,18 +167,18 @@ namespace App\Domains\Auth\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
-enum AuthTypeEnum: string implements HasLabel
+enum AuthType: string implements HasLabel
 {
-    case SSO = 'sso';
-    case LOCAL = 'local';
-    case API = 'api';
+    case Sso = 'sso';
+    case Local = 'local';
+    case Api = 'api';
 
     public function getLabel(): string
     {
         return match ($this) {
-            self::SSO => 'NetID',
-            self::LOCAL => 'Verification Code',
-            self::API => 'API',
+            self::Sso => 'NetID',
+            self::Local => 'Verification Code',
+            self::Api => 'API',
         };
     }
 }
@@ -242,7 +242,7 @@ All models should extend `BaseModel` which provides:
 ```php
 namespace App\Domains\User\QueryBuilders;
 
-use App\Domains\Auth\Enums\AuthTypeEnum;
+use App\Domains\Auth\Enums\AuthType;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
@@ -254,7 +254,7 @@ class UserBuilder extends Builder
 {
     public function sso(): self
     {
-        return $this->where('auth_type', AuthTypeEnum::SSO);
+        return $this->where('auth_type', AuthType::Sso);
     }
 
     public function whereEmailEquals(string $email): self
@@ -276,7 +276,7 @@ As your application grows, you may want to add new domains. For example, if buil
         - EnrollStudent.php
         - UnenrollStudent.php
     - Enums/
-        - CourseStatusEnum.php
+        - CourseStatus.php
     - Models/
         - Course.php
         - Enrollment.php

@@ -8,18 +8,18 @@ use Filament\Support\Contracts\HasLabel;
 
 enum AdministrationNavGroup implements HasLabel
 {
-    case USER_MANAGEMENT;
+    case UserManagement;
 
-    case PLATFORM;
+    case Platform;
 
-    case DEVELOPER_TOOLS;
+    case DeveloperTools;
 
     public function getLabel(): string
     {
         return match ($this) {
-            self::USER_MANAGEMENT => 'User Management',
-            self::PLATFORM => 'Platform',
-            self::DEVELOPER_TOOLS => 'Developer Tools',
+            self::UserManagement => 'User Management',
+            self::Platform => 'Platform',
+            self::DeveloperTools => 'Developer Tools',
         };
     }
 }

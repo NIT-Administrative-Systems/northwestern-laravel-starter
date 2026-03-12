@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Domains\User\Actions\Directory;
 
-use App\Domains\Auth\Enums\AuthTypeEnum;
+use App\Domains\Auth\Enums\AuthType;
 use App\Domains\User\Actions\PersistUserWithUniqueUsername;
-use App\Domains\User\Enums\DirectorySearchTypeEnum;
+use App\Domains\User\Enums\DirectorySearchType;
 use App\Domains\User\Exceptions\BadDirectoryEntry;
 use App\Domains\User\Jobs\DownloadWildcardPhotoJob;
 use App\Domains\User\Models\User;
@@ -95,11 +95,11 @@ readonly class FindOrUpdateUserFromDirectory
      */
     protected function lookupAndSyncUserFromDirectory(string $searchValue): ?User
     {
-        $searchType = DirectorySearchTypeEnum::fromSearchValue($searchValue);
+        $searchType = DirectorySearchType::fromSearchValue($searchValue);
 
         $existingUser = $this->findExistingUser($searchValue, $searchType);
 
-        if ($existingUser?->auth_type === AuthTypeEnum::API) {
+        if ($existingUser?->auth_type === AuthType::Api) {
             return null;
         }
 
@@ -115,12 +115,12 @@ readonly class FindOrUpdateUserFromDirectory
     /**
      * Based on the search value and type, attempts to find an existing user in the database.
      */
-    private function findExistingUser(string $searchValue, DirectorySearchTypeEnum $searchType): ?User
+    private function findExistingUser(string $searchValue, DirectorySearchType $searchType): ?User
     {
         return match ($searchType) {
-            DirectorySearchTypeEnum::EMAIL => User::whereEmailEquals($searchValue)->first(),
-            DirectorySearchTypeEnum::NETID => User::whereUsernameEquals($searchValue)->first(),
-            DirectorySearchTypeEnum::EMPLOYEE_ID => User::where('employee_id', $searchValue)->first(),
+            DirectorySearchType::Email => User::whereEmailEquals($searchValue)->first(),
+            DirectorySearchType::NetId => User::whereUsernameEquals($searchValue)->first(),
+            DirectorySearchType::EmployeeId => User::where('employee_id', $searchValue)->first(),
         };
     }
 
@@ -160,7 +160,7 @@ readonly class FindOrUpdateUserFromDirectory
     private function resolveInvalidDirectoryEntry(?User $existingUser, string $searchValue, array|false|null $directoryData): User
     {
         if ($existingUser instanceof User) {
-            if ($existingUser->auth_type === AuthTypeEnum::SSO) {
+            if ($existingUser->auth_type === AuthType::Sso) {
                 $existingUser->update([
                     'netid_inactive' => true,
                     'directory_sync_last_failed_at' => now(),
@@ -181,9 +181,9 @@ readonly class FindOrUpdateUserFromDirectory
      *
      * @param  array<string, mixed>  $directoryData
      */
-    private function syncAndPersistUser(array $directoryData, DirectorySearchTypeEnum $searchType): User
+    private function syncAndPersistUser(array $directoryData, DirectorySearchType $searchType): User
     {
-        $user = ($searchType === DirectorySearchTypeEnum::EMAIL)
+        $user = ($searchType === DirectorySearchType::Email)
             ? User::firstExistingByEmailOrNewSso($directoryData['mail'])
             : User::firstExistingSsoByNetIdOrNew($directoryData['uid']);
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\UserLoginRecords\Widgets;
 
-use App\Domains\User\Enums\UserSegmentEnum;
+use App\Domains\User\Enums\UserSegment;
 use App\Domains\User\Models\UserLoginRecord;
 use Carbon\Carbon;
 use Filament\Widgets\ChartWidget;
@@ -44,7 +44,7 @@ class LoginsBySegmentChartWidget extends ChartWidget
     {
         /**
          * @var Collection<int, object{
-         *     segment: UserSegmentEnum,
+         *     segment: UserSegment,
          *     count: int,
          * }> $segmentCounts
          */

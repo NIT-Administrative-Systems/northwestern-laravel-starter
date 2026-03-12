@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users\Schemas;
 
-use App\Domains\Auth\Enums\PermissionEnum;
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\User\Actions\Directory\FindOrUpdateUserFromDirectory;
 use App\Domains\User\Models\User;
 use App\Filament\Resources\Users\Support\NetIdStatus;
@@ -192,7 +192,7 @@ class NorthwesternUserInfolist
                                 ->dateTimeTooltip()
                                 ->belowContent([
                                     Action::make('sync')
-                                        ->authorize(PermissionEnum::EDIT_USERS)
+                                        ->authorize(SystemPermission::EditUsers)
                                         ->label('Force Sync')
                                         ->icon(Heroicon::OutlinedArrowPath)
                                         ->tooltip('User data syncs automatically with the Northwestern Directory during login. If this appears out of date, you may force a refresh.')

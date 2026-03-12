@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users\Tables;
 
-use App\Domains\Auth\Enums\AuthTypeEnum;
-use App\Domains\User\Enums\AffiliationEnum;
+use App\Domains\Auth\Enums\AuthType;
+use App\Domains\User\Enums\Affiliation;
 use App\Domains\User\Models\User;
 use App\Filament\Exports\UserExporter;
 use App\Filament\Resources\Users\Support\NetIdStatus;
@@ -121,11 +121,11 @@ class UsersTable
             ->filters([
                 SelectFilter::make('primary_affiliation')
                     ->label('Primary Affiliation')
-                    ->options(AffiliationEnum::class)
+                    ->options(Affiliation::class)
                     ->multiple(),
                 SelectFilter::make('auth_type')
                     ->label('Authentication')
-                    ->options(AuthTypeEnum::class)
+                    ->options(AuthType::class)
                     ->multiple(),
                 SelectFilter::make('role')
                     ->label('Role')

@@ -1,5 +1,5 @@
 @php
-    use App\Domains\Auth\Enums\PermissionEnum;
+    use App\Domains\Auth\Enums\SystemPermission;
     use App\Providers\Filament\AdministrationPanelProvider;
     use Filament\Facades\Filament;
 @endphp
@@ -15,7 +15,7 @@
     @endunless
 
     @auth
-        @can(PermissionEnum::ACCESS_ADMINISTRATION_PANEL)
+        @can(SystemPermission::AccessAdministrationPanel)
             <li class="nav-item px-md-1">
                 <a class="nav-link"
                    data-cy="admin-panel-link"

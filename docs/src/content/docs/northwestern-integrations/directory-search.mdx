@@ -17,7 +17,7 @@ The underlying API client is provided by the [`northwestern-sysdev/laravel-soa`]
 
 1. **Search type detection**
 
-   `DirectorySearchTypeEnum::fromSearchValue()` auto-detects whether the input is an email address, employee ID (numeric), or NetID (fallback).
+   `DirectorySearchType::fromSearchValue()` auto-detects whether the input is an email address, employee ID (numeric), or NetID (fallback).
 
 2. **API lookup**
 
@@ -45,7 +45,7 @@ The underlying API client is provided by the [`northwestern-sysdev/laravel-soa`]
 |-------|---------|
 | `FindOrUpdateUserFromDirectory` | Orchestrates the full lookup-validate-sync-persist flow |
 | `SyncUserFromDirectory` | Maps LDAP attributes to User model fields |
-| `DirectorySearchTypeEnum` | Auto-detects search input type (email, employee ID, NetID) |
+| `DirectorySearchType` | Auto-detects search input type (email, employee ID, NetID) |
 | `PersistUserWithUniqueUsername` | Saves/updates user with unique username generation |
 
 ---

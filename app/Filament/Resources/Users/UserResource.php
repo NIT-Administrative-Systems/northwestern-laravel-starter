@@ -34,7 +34,7 @@ class UserResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUsers;
 
-    protected static string|null|UnitEnum $navigationGroup = AdministrationNavGroup::USER_MANAGEMENT;
+    protected static string|null|UnitEnum $navigationGroup = AdministrationNavGroup::UserManagement;
 
     protected static ?int $navigationSort = 1;
 

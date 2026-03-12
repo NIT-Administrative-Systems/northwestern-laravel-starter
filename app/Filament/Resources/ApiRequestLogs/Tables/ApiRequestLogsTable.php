@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\ApiRequestLogs\Tables;
 
 use App\Domains\Auth\Models\ApiRequestLog;
-use App\Domains\Core\Enums\ApiRequestFailureEnum;
+use App\Domains\Core\Enums\ApiRequestFailure;
 use App\Filament\Exports\ApiRequestLogExporter;
 use App\Filament\Resources\Users\RelationManagers\ApiRequestLogsRelationManager;
 use App\Filament\Resources\Users\UserResource;
@@ -196,7 +196,7 @@ class ApiRequestLogsTable
 
                 SelectFilter::make('failure_reason')
                     ->label('Failure Reason')
-                    ->options(ApiRequestFailureEnum::class)
+                    ->options(ApiRequestFailure::class)
                     ->multiple()
                     ->preload(),
             ])

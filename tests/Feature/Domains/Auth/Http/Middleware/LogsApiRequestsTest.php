@@ -7,7 +7,7 @@ namespace Tests\Feature\Domains\Auth\Http\Middleware;
 use App\Domains\Auth\Http\Middleware\LogsApiRequests;
 use App\Domains\Auth\Models\AccessToken;
 use App\Domains\Auth\Models\ApiRequestLog;
-use App\Domains\Core\Enums\ApiRequestFailureEnum;
+use App\Domains\Core\Enums\ApiRequestFailure;
 use App\Domains\Core\ValueObjects\ApiRequestContext;
 use App\Domains\User\Models\User;
 use Illuminate\Support\Facades\Context;
@@ -102,7 +102,7 @@ class LogsApiRequestsTest extends TestCase
 
         Context::add(ApiRequestContext::USER_ID, $user->id);
         Context::add(ApiRequestContext::TRACE_ID, $traceId);
-        Context::add(ApiRequestContext::FAILURE_REASON, ApiRequestFailureEnum::IP_DENIED->value);
+        Context::add(ApiRequestContext::FAILURE_REASON, ApiRequestFailure::IpDenied->value);
 
         Route::middleware(LogsApiRequests::class)->get('/api/forbidden', function () {
             return response()->json(['error' => 'Forbidden'], 403);
@@ -114,7 +114,7 @@ class LogsApiRequestsTest extends TestCase
             'trace_id' => $traceId,
             'user_id' => $user->id,
             'status_code' => 403,
-            'failure_reason' => ApiRequestFailureEnum::IP_DENIED->value,
+            'failure_reason' => ApiRequestFailure::IpDenied->value,
         ]);
     }
 
@@ -234,7 +234,7 @@ class LogsApiRequestsTest extends TestCase
             Context::flush();
             Context::add(ApiRequestContext::USER_ID, $user->id);
             Context::add(ApiRequestContext::TRACE_ID, Str::uuid()->toString());
-            Context::add(ApiRequestContext::FAILURE_REASON, ApiRequestFailureEnum::TOKEN_INVALID_OR_EXPIRED->value);
+            Context::add(ApiRequestContext::FAILURE_REASON, ApiRequestFailure::TokenInvalidOrExpired->value);
 
             $this->getJson($this->endpoint)->assertOk();
         }
@@ -414,7 +414,7 @@ class LogsApiRequestsTest extends TestCase
         Context::add(ApiRequestContext::USER_ID, $user->id);
         Context::add(ApiRequestContext::TOKEN_ID, $token->id);
         Context::add(ApiRequestContext::TRACE_ID, $traceId);
-        Context::add(ApiRequestContext::FAILURE_REASON, ApiRequestFailureEnum::VALIDATION_FAILED->value);
+        Context::add(ApiRequestContext::FAILURE_REASON, ApiRequestFailure::ValidationFailed->value);
 
         $this->getJson($this->endpoint, ['User-Agent' => 'TestBot/2.0'])
             ->assertOk();
@@ -427,7 +427,7 @@ class LogsApiRequestsTest extends TestCase
             'path' => 'api/test',
             'status_code' => 200,
             'user_agent' => 'TestBot/2.0',
-            'failure_reason' => ApiRequestFailureEnum::VALIDATION_FAILED->value,
+            'failure_reason' => ApiRequestFailure::ValidationFailed->value,
         ]);
     }
 }

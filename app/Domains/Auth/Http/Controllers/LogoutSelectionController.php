@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Auth\Http\Controllers;
 
-use App\Domains\Auth\Enums\AuthTypeEnum;
+use App\Domains\Auth\Enums\AuthType;
 use App\Domains\User\Models\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Contracts\View\View;
@@ -31,7 +31,7 @@ class LogoutSelectionController extends Controller
             && filled(config('services.northwestern-azure.client_secret'));
 
         $logoutUrl = match (true) {
-            $user->auth_type === AuthTypeEnum::LOCAL => null,
+            $user->auth_type === AuthType::Local => null,
             $webssoConfigured => route('login-websso-logout'),
             $entraConfigured => route('login-oauth-logout'),
             default => null,

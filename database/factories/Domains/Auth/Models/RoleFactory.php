@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Database\Factories\Domains\Auth\Models;
 
-use App\Domains\Auth\Enums\PermissionEnum;
 use App\Domains\Auth\Enums\RoleTypeEnum;
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\Permission;
 use App\Domains\Auth\Models\Role;
 use App\Domains\Auth\Models\RoleType;
@@ -33,7 +33,7 @@ class RoleFactory extends Factory
     }
 
     /**
-     * @param  PermissionEnum[]  $permissions
+     * @param  SystemPermission[]  $permissions
      */
     public function hasPermissions(array $permissions): static
     {
@@ -48,7 +48,7 @@ class RoleFactory extends Factory
 
     public function systemManaged(): static
     {
-        return $this->forRoleType(RoleTypeEnum::SYSTEM_MANAGED);
+        return $this->forRoleType(RoleTypeEnum::SystemManaged);
     }
 
     public function assignmentLocked(): static

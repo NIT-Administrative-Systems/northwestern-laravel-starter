@@ -7,7 +7,7 @@ namespace App\Providers;
 use App\Domains\Auth\Actions\Local\FixedNumericOneTimeCodeGenerator;
 use App\Domains\Auth\Actions\Local\RandomNumericOneTimeCodeGenerator;
 use App\Domains\Auth\Contracts\OneTimeCodeGenerator;
-use App\Domains\Auth\Enums\PermissionEnum;
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Core\Database\ConfigurableDbDumperFactory;
 use App\Domains\Core\Exceptions\ProblemDetailsRenderer;
 use App\Domains\User\Models\User;
@@ -66,12 +66,12 @@ class AppServiceProvider extends ServiceProvider
         });
 
         /**
-         * Users with the {@see PermissionEnum::MANAGE_ALL} permission bypass all authorization checks.
+         * Users with the {@see SystemPermission::ManageAll} permission bypass all authorization checks.
          * This is important to remember when adding new authorization checks to the application.
          * Be sure to accurately test new features with and without the permission.
          */
         Gate::before(static function (User $user): ?true {
-            return $user->hasPermissionTo(PermissionEnum::MANAGE_ALL) ? true : null;
+            return $user->hasPermissionTo(SystemPermission::ManageAll) ? true : null;
         });
     }
 

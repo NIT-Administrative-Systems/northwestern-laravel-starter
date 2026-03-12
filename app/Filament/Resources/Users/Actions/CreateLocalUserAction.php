@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users\Actions;
 
-use App\Domains\Auth\Enums\PermissionEnum;
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\User\Actions\Local\CreateLocalUser;
 use App\Filament\Resources\Users\UserResource;
 use Filament\Actions\Action;
@@ -26,7 +26,7 @@ class CreateLocalUserAction extends Action
     {
         parent::setUp();
 
-        $this->authorize(PermissionEnum::CREATE_USERS)
+        $this->authorize(SystemPermission::CreateUsers)
             ->visible(fn () => config('local-auth.enabled'))
             ->label('Add Local User')
             ->icon(Heroicon::OutlinedUserPlus)

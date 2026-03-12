@@ -57,7 +57,7 @@ class Role extends SpatieRole implements Auditable
      */
     public function isSystemManagedType(): bool
     {
-        return $this->role_type?->slug === RoleTypeEnum::SYSTEM_MANAGED;
+        return $this->role_type?->slug === RoleTypeEnum::SystemManaged;
     }
 
     /**

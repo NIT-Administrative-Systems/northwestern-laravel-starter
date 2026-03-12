@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Users\Actions;
 
 use App\Domains\Auth\Actions\Local\IssueLoginChallenge;
-use App\Domains\Auth\Enums\PermissionEnum;
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\User\Models\User;
 use Exception;
 use Filament\Actions\Action;
@@ -23,7 +23,7 @@ class SendLoginCodeAction extends Action
     {
         parent::setUp();
 
-        $this->authorize(PermissionEnum::MANAGE_ALL)
+        $this->authorize(SystemPermission::ManageAll)
             ->label('Send Verification Code')
             ->color('info')
             ->outlined()

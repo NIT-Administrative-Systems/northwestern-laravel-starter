@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\User\Policies;
 
-use App\Domains\Auth\Enums\PermissionEnum;
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\User\Models\User;
 use App\Domains\User\Policies\UserPolicy;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -33,7 +33,7 @@ class UserPolicyTest extends TestCase
         $user = User::factory()->createOne();
         $otherUser = User::factory()->createOne();
 
-        $user->givePermissionTo(PermissionEnum::VIEW_USERS);
+        $user->givePermissionTo(SystemPermission::ViewUsers);
 
         $this->assertTrue($this->policy()->view($user, $otherUser));
     }
@@ -48,7 +48,7 @@ class UserPolicyTest extends TestCase
     public function test_view_any_allows_user_with_permission(): void
     {
         $user = User::factory()->createOne();
-        $user->givePermissionTo(PermissionEnum::VIEW_USERS);
+        $user->givePermissionTo(SystemPermission::ViewUsers);
 
         $this->assertTrue($this->policy()->viewAny($user));
     }
@@ -73,7 +73,7 @@ class UserPolicyTest extends TestCase
         $user = User::factory()->createOne();
         $otherUser = User::factory()->createOne();
 
-        $user->givePermissionTo(PermissionEnum::EDIT_USERS);
+        $user->givePermissionTo(SystemPermission::EditUsers);
 
         $this->assertTrue($this->policy()->edit($user, $otherUser));
     }

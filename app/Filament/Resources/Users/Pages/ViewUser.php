@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users\Pages;
 
-use App\Domains\Auth\Enums\AuthTypeEnum;
+use App\Domains\Auth\Enums\AuthType;
 use App\Domains\User\Models\User;
 use App\Filament\Resources\Users\Actions\SendLoginCodeAction;
 use App\Filament\Resources\Users\Schemas\ApiUserInfolist;
@@ -28,11 +28,11 @@ class ViewUser extends ViewRecord
 
         $schema->record($record);
 
-        /** @phpstan-ignore match.unhandled (all AuthTypeEnum cases are covered) */
+        /** @phpstan-ignore match.unhandled (all AuthType cases are covered) */
         return match ($record->auth_type) {
-            AuthTypeEnum::SSO => NorthwesternUserInfolist::configure($schema),
-            AuthTypeEnum::LOCAL => LocalUserInfolist::configure($schema),
-            AuthTypeEnum::API => ApiUserInfolist::configure($schema),
+            AuthType::Sso => NorthwesternUserInfolist::configure($schema),
+            AuthType::Local => LocalUserInfolist::configure($schema),
+            AuthType::Api => ApiUserInfolist::configure($schema),
         };
     }
 

@@ -6,7 +6,7 @@ namespace Tests\Feature\Domains\Auth\Http\Controllers;
 
 use App\Domains\Auth\Actions\Impersonation\StartImpersonation;
 use App\Domains\Auth\Actions\Impersonation\StopImpersonation;
-use App\Domains\Auth\Enums\PermissionEnum;
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Http\Controllers\ImpersonationController;
 use App\Domains\User\Models\User;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -26,7 +26,7 @@ class ImpersonationControllerTest extends TestCase
         $this->withoutMiddleware(VerifyCsrfToken::class);
 
         $this->authorizedUser = User::factory()->create();
-        $this->authorizedUser->givePermissionTo(PermissionEnum::MANAGE_IMPERSONATION);
+        $this->authorizedUser->givePermissionTo(SystemPermission::ManageImpersonation);
     }
 
     public function test_take_impersonation_requires_authorization(): void

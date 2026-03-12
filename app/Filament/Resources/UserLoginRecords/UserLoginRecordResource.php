@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\UserLoginRecords;
 
-use App\Domains\Auth\Enums\PermissionEnum;
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\User\Models\UserLoginRecord;
 use App\Filament\Navigation\AdministrationNavGroup;
 use App\Filament\Resources\UserLoginRecords\Pages\ListUserLoginRecords;
@@ -31,7 +31,7 @@ class UserLoginRecordResource extends Resource
 
     protected static ?string $slug = 'login-records';
 
-    protected static string|null|UnitEnum $navigationGroup = AdministrationNavGroup::PLATFORM;
+    protected static string|null|UnitEnum $navigationGroup = AdministrationNavGroup::Platform;
 
     protected static ?int $navigationSort = 4;
 
@@ -39,7 +39,7 @@ class UserLoginRecordResource extends Resource
 
     public static function canAccess(): bool
     {
-        return auth()->user()->hasPermissionTo(PermissionEnum::VIEW_LOGIN_RECORDS);
+        return auth()->user()->hasPermissionTo(SystemPermission::ViewLoginRecords);
     }
 
     public static function table(Table $table): Table

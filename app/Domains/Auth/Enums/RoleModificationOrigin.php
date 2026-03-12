@@ -14,30 +14,30 @@ use App\Domains\User\Listeners\ProcessNetIdUpdate;
  *
  * ## Origins
  *
- * **UI_ACTION** — A role was assigned or removed by an administrator through
+ * **UiAction** — A role was assigned or removed by an administrator through
  * the Filament UI.
  * - Triggered by: Role management actions performed manually in the UI.
  *
- * **REMOVED_BY_DELETION** — A role was detached from all users because the
+ * **RemovedByDeletion** — A role was detached from all users because the
  * underlying role definition was deleted.
  * - Triggered by: Role deletion operations in Filament or system tooling.
  *
- * **NETID_STATUS_CHANGE** — A role was removed due to a NetID lifecycle event
+ * **NetIdStatusChange** — A role was removed due to a NetID lifecycle event
  * such as deactivation, deprovisioning, or security hold.
  * - Triggered by: NetID update webhooks processed in {@see ProcessNetIdUpdate}.
  *
- * **SSO_PROVISIONING** — A role was assigned during first-time SSO login when
+ * **SsoProvisioning** — A role was assigned during first-time SSO login when
  * the user is provisioned from directory data.
  * - Triggered by: User creation in {@see PersistUserWithUniqueUsername}.
  *
- * **SYSTEM** — A role was assigned or removed by a programmatic or automated
+ * **System** — A role was assigned or removed by a programmatic or automated
  * operation without a specific contextual origin (e.g., seeders, test setup).
  */
-enum RoleModificationOriginEnum: string
+enum RoleModificationOrigin: string
 {
-    case UI_ACTION = 'ui-action';
-    case REMOVED_BY_DELETION = 'removed-by-deletion';
-    case NETID_STATUS_CHANGE = 'netid-status-change';
-    case SSO_PROVISIONING = 'sso-provisioning';
-    case SYSTEM = 'system';
+    case UiAction = 'ui-action';
+    case RemovedByDeletion = 'removed-by-deletion';
+    case NetIdStatusChange = 'netid-status-change';
+    case SsoProvisioning = 'sso-provisioning';
+    case System = 'system';
 }

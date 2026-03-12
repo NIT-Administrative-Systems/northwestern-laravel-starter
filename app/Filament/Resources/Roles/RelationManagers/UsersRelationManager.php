@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Roles\RelationManagers;
 
-use App\Domains\Auth\Enums\AuthTypeEnum;
-use App\Domains\Auth\Enums\RoleModificationOriginEnum;
+use App\Domains\Auth\Enums\AuthType;
+use App\Domains\Auth\Enums\RoleModificationOrigin;
 use App\Domains\Auth\Enums\RoleTypeEnum;
 use App\Domains\Auth\Models\Role;
-use App\Domains\User\Enums\AffiliationEnum;
+use App\Domains\User\Enums\Affiliation;
 use App\Domains\User\Models\User;
 use App\Filament\Resources\Users\UserResource;
 use Filament\Actions\AttachAction;
@@ -99,11 +99,11 @@ class UsersRelationManager extends RelationManager
             ->filters([
                 SelectFilter::make('primary_affiliation')
                     ->label('Primary Affiliation')
-                    ->options(AffiliationEnum::class)
+                    ->options(Affiliation::class)
                     ->multiple(),
                 SelectFilter::make('auth_type')
                     ->label('Auth Type')
-                    ->options(AuthTypeEnum::class)
+                    ->options(AuthType::class)
                     ->multiple(),
             ])
             ->modifyQueryUsing(fn (Builder $query) => $query->with('roles'))
@@ -125,7 +125,7 @@ class UsersRelationManager extends RelationManager
                     ->schema(function (RelationManager $livewire) {
                         /** @var Role $role */
                         $role = $livewire->getOwnerRecord();
-                        $isApiRole = $role->role_type->slug === RoleTypeEnum::API_INTEGRATION;
+                        $isApiRole = $role->role_type->slug === RoleTypeEnum::ApiIntegration;
 
                         return [
                             Select::make('recordId')
@@ -146,7 +146,7 @@ class UsersRelationManager extends RelationManager
                                                 ->orWhere('email', 'ilike', "%{$search}%");
                                         })
                                         ->when($isApiRole, fn (Builder $query) => $query->api())
-                                        ->unless($isApiRole, fn (Builder $query) => $query->where('auth_type', '!=', AuthTypeEnum::API))
+                                        ->unless($isApiRole, fn (Builder $query) => $query->where('auth_type', '!=', AuthType::Api))
                                         ->whereDoesntHave('roles', function (Builder $query) use ($role) {
                                             $query->where('id', $role->id);
                                         })
@@ -176,7 +176,7 @@ class UsersRelationManager extends RelationManager
                         abort_if($role->isAssignmentLocked(), 403, 'This role is assignment-locked and cannot be assigned through the UI.');
                         abort_unless(Gate::allows('attachUser', $role), 403, 'You are not authorized to assign users to this role.');
 
-                        if ($role->role_type->slug === RoleTypeEnum::API_INTEGRATION && ! $user->is_api_user) {
+                        if ($role->role_type->slug === RoleTypeEnum::ApiIntegration && ! $user->is_api_user) {
                             Notification::make()
                                 ->title('Invalid user assignment')
                                 ->body('API Integration roles can only be assigned to API users.')
@@ -188,7 +188,7 @@ class UsersRelationManager extends RelationManager
                             return;
                         }
 
-                        $user->assignRoleWithAudit($role, RoleModificationOriginEnum::UI_ACTION);
+                        $user->assignRoleWithAudit($role, RoleModificationOrigin::UiAction);
                     })
                     ->successNotificationTitle('User assigned'),
             ])
@@ -220,7 +220,7 @@ class UsersRelationManager extends RelationManager
                         abort_if($role->isAssignmentLocked(), 403, 'This role is assignment-locked and cannot be removed through the UI.');
                         abort_unless(Gate::allows('detachUser', $role), 403, 'You are not authorized to remove users from this role.');
 
-                        $record->removeRoleWithAudit($role, RoleModificationOriginEnum::UI_ACTION);
+                        $record->removeRoleWithAudit($role, RoleModificationOrigin::UiAction);
                     })
                     ->successNotificationTitle('Role removed'),
             ]);

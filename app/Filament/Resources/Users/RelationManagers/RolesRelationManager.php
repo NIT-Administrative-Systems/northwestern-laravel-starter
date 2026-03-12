@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users\RelationManagers;
 
-use App\Domains\Auth\Enums\PermissionEnum;
-use App\Domains\Auth\Enums\RoleModificationOriginEnum;
+use App\Domains\Auth\Enums\RoleModificationOrigin;
 use App\Domains\Auth\Enums\RoleTypeEnum;
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\User;
 use App\Filament\Resources\Roles\RoleResource;
@@ -57,8 +57,8 @@ class RolesRelationManager extends RelationManager
                 ->whereNotIn('id', $assignedRoleIds)
                 ->when(
                     $user->is_api_user,
-                    fn ($query) => $query->whereHas('role_type', fn (\Illuminate\Contracts\Database\Query\Builder $q) => $q->where('slug', RoleTypeEnum::API_INTEGRATION)),
-                    fn ($query) => $query->whereHas('role_type', fn (\Illuminate\Contracts\Database\Query\Builder $q) => $q->where('slug', '!=', RoleTypeEnum::API_INTEGRATION))
+                    fn ($query) => $query->whereHas('role_type', fn (\Illuminate\Contracts\Database\Query\Builder $q) => $q->where('slug', RoleTypeEnum::ApiIntegration)),
+                    fn ($query) => $query->whereHas('role_type', fn (\Illuminate\Contracts\Database\Query\Builder $q) => $q->where('slug', '!=', RoleTypeEnum::ApiIntegration))
                 )
                 ->get()
                 ->filter(fn (Role $role) => Gate::allows('attachUser', $role));
@@ -95,7 +95,7 @@ class RolesRelationManager extends RelationManager
             ])
             ->headerActions([
                 AttachAction::make()
-                    ->authorize(PermissionEnum::ASSIGN_ROLES)
+                    ->authorize(SystemPermission::AssignRoles)
                     ->label('Assign Role')
                     ->color('primary')
                     ->outlined()
@@ -143,7 +143,7 @@ class RolesRelationManager extends RelationManager
                         abort_unless(Gate::allows('attachUser', $role), 403, 'You are not authorized to assign this role.');
 
                         // Validate that API roles can only be assigned to API users and vice versa
-                        if ($role->role_type->slug === RoleTypeEnum::API_INTEGRATION && ! $user->is_api_user) {
+                        if ($role->role_type->slug === RoleTypeEnum::ApiIntegration && ! $user->is_api_user) {
                             Notification::make()
                                 ->title('Invalid role assignment')
                                 ->body('API Integration roles can only be assigned to API users.')
@@ -155,7 +155,7 @@ class RolesRelationManager extends RelationManager
                             return;
                         }
 
-                        $user->assignRoleWithAudit($role, RoleModificationOriginEnum::UI_ACTION);
+                        $user->assignRoleWithAudit($role, RoleModificationOrigin::UiAction);
                     })
                     ->successNotificationTitle('Role assigned'),
             ])
@@ -173,7 +173,7 @@ class RolesRelationManager extends RelationManager
 
                         /** @var User $user */
                         $user = $livewire->getOwnerRecord();
-                        $user->removeRoleWithAudit($record, RoleModificationOriginEnum::UI_ACTION);
+                        $user->removeRoleWithAudit($record, RoleModificationOrigin::UiAction);
                     })
                     ->successNotificationTitle('Role removed'),
             ])

@@ -12,15 +12,15 @@ use Illuminate\Support\Str;
 
 enum RoleTypeEnum: string implements HasColor, HasIcon, HasLabel
 {
-    case SYSTEM_MANAGED = 'system-managed';
-    case APPLICATION_ADMIN = 'application-admin';
-    case APPLICATION_ROLE = 'application-role';
-    case API_INTEGRATION = 'api-integration';
+    case SystemManaged = 'system-managed';
+    case ApplicationAdmin = 'application-admin';
+    case ApplicationRole = 'application-role';
+    case ApiIntegration = 'api-integration';
 
     public function getLabel(): string
     {
         return match ($this) {
-            self::API_INTEGRATION => 'API Integration',
+            self::ApiIntegration => 'API Integration',
             // Auto-converts the string to a title. You can override one by adding a specific case.
             default => Str::of($this->value)->replace('-', ' ')->title()->toString(),
         };
@@ -29,30 +29,30 @@ enum RoleTypeEnum: string implements HasColor, HasIcon, HasLabel
     public function getColor(): string
     {
         return match ($this) {
-            self::SYSTEM_MANAGED => 'danger',
-            self::APPLICATION_ADMIN => 'warning',
-            self::APPLICATION_ROLE => 'success',
-            self::API_INTEGRATION => 'gray',
+            self::SystemManaged => 'danger',
+            self::ApplicationAdmin => 'warning',
+            self::ApplicationRole => 'success',
+            self::ApiIntegration => 'gray',
         };
     }
 
     public function getIcon(): Heroicon
     {
         return match ($this) {
-            self::SYSTEM_MANAGED => Heroicon::OutlinedShieldCheck,
-            self::APPLICATION_ADMIN => Heroicon::OutlinedUserGroup,
-            self::APPLICATION_ROLE => Heroicon::OutlinedUser,
-            self::API_INTEGRATION => Heroicon::OutlinedCog,
+            self::SystemManaged => Heroicon::OutlinedShieldCheck,
+            self::ApplicationAdmin => Heroicon::OutlinedUserGroup,
+            self::ApplicationRole => Heroicon::OutlinedUser,
+            self::ApiIntegration => Heroicon::OutlinedCog,
         };
     }
 
     public function getDescription(): string
     {
         return match ($this) {
-            self::SYSTEM_MANAGED => 'Roles that are programmatically managed by the system.',
-            self::APPLICATION_ADMIN => 'Application administrators who manage specific areas.',
-            self::APPLICATION_ROLE => 'Standard user roles with specific permissions.',
-            self::API_INTEGRATION => 'Roles for API consumers and integrations.',
+            self::SystemManaged => 'Roles that are programmatically managed by the system.',
+            self::ApplicationAdmin => 'Application administrators who manage specific areas.',
+            self::ApplicationRole => 'Standard user roles with specific permissions.',
+            self::ApiIntegration => 'Roles for API consumers and integrations.',
         };
     }
 }

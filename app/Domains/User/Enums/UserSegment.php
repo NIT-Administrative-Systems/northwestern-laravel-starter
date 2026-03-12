@@ -14,11 +14,11 @@ use Illuminate\Support\Str;
 /**
  * Represents the segment of a {@see User} at the time of login.
  */
-enum UserSegmentEnum: string implements HasColor, HasIcon, HasLabel
+enum UserSegment: string implements HasColor, HasIcon, HasLabel
 {
-    case SUPER_ADMIN = 'super-admin';
-    case EXTERNAL_USER = 'external-user';
-    case OTHER = 'other';
+    case SuperAdmin = 'super-admin';
+    case ExternalUser = 'external-user';
+    case Other = 'other';
 
     public function getLabel(): string
     {
@@ -31,18 +31,18 @@ enum UserSegmentEnum: string implements HasColor, HasIcon, HasLabel
     public function getColor(): string
     {
         return match ($this) {
-            self::SUPER_ADMIN => 'danger',
-            self::EXTERNAL_USER => 'warning',
-            self::OTHER => 'gray',
+            self::SuperAdmin => 'danger',
+            self::ExternalUser => 'warning',
+            self::Other => 'gray',
         };
     }
 
     public function getIcon(): Heroicon
     {
         return match ($this) {
-            self::SUPER_ADMIN => Heroicon::OutlinedShieldCheck,
-            self::EXTERNAL_USER => Heroicon::OutlinedBuildingOffice2,
-            self::OTHER => Heroicon::OutlinedUserCircle,
+            self::SuperAdmin => Heroicon::OutlinedShieldCheck,
+            self::ExternalUser => Heroicon::OutlinedBuildingOffice2,
+            self::Other => Heroicon::OutlinedUserCircle,
         };
     }
 }

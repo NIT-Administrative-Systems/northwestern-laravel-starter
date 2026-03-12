@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Domains\User\Actions;
 
-use App\Domains\Auth\Enums\AuthTypeEnum;
-use App\Domains\Auth\Enums\RoleModificationOriginEnum;
-use App\Domains\Auth\Enums\SystemRoleEnum;
+use App\Domains\Auth\Enums\AuthType;
+use App\Domains\Auth\Enums\RoleModificationOrigin;
+use App\Domains\Auth\Enums\SystemRole;
 use App\Domains\Auth\Models\Role;
 use App\Domains\User\Actions\Directory\FindOrUpdateUserFromDirectory;
 use App\Domains\User\Models\User;
@@ -29,9 +29,9 @@ final class PersistUserWithUniqueUsername
             return DB::transaction(function () use ($user) {
                 $user->save();
 
-                if ($user->auth_type === AuthTypeEnum::SSO && ! $user->hasRole(SystemRoleEnum::NORTHWESTERN_USER)) {
-                    $role = Role::query()->where('name', SystemRoleEnum::NORTHWESTERN_USER->value)->firstOrFail();
-                    $user->assignRoleWithAudit($role, RoleModificationOriginEnum::SSO_PROVISIONING);
+                if ($user->auth_type === AuthType::Sso && ! $user->hasRole(SystemRole::NorthwesternUser)) {
+                    $role = Role::query()->where('name', SystemRole::NorthwesternUser->value)->firstOrFail();
+                    $user->assignRoleWithAudit($role, RoleModificationOrigin::SsoProvisioning);
                 }
 
                 return $user;

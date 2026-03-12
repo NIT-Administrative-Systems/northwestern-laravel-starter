@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\User\Events;
 
-use App\Domains\User\Enums\NetIdUpdateActionEnum;
+use App\Domains\User\Enums\NetIdUpdateAction;
 use App\Domains\User\Http\Controllers\Webhooks\NetIdUpdateController;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -25,7 +25,7 @@ class NetIdUpdated
 
     public function __construct(
         public readonly string $netId,
-        public readonly NetIdUpdateActionEnum $action,
+        public readonly NetIdUpdateAction $action,
     ) {
     }
 
@@ -48,7 +48,7 @@ class NetIdUpdated
         $netId = strtolower(trim($parsed['netid']));
         $actionValue = strtolower(trim($parsed['action']));
 
-        $action = NetIdUpdateActionEnum::tryFrom($actionValue);
+        $action = NetIdUpdateAction::tryFrom($actionValue);
         if ($action === null) {
             throw new InvalidArgumentException("Unknown action type: {$actionValue}");
         }

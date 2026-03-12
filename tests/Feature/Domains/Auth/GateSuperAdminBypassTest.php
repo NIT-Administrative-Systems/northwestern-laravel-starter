@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\Auth;
 
-use App\Domains\Auth\Enums\PermissionEnum;
-use App\Domains\Auth\Enums\RoleModificationOriginEnum;
+use App\Domains\Auth\Enums\RoleModificationOrigin;
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\User;
 use Tests\TestCase;
@@ -16,18 +16,18 @@ class GateSuperAdminBypassTest extends TestCase
     {
         $user = User::factory()->createOne();
         $role = Role::factory()->createOne();
-        $role->givePermissionTo(PermissionEnum::MANAGE_ALL);
-        $user->assignRoleWithAudit($role, RoleModificationOriginEnum::SYSTEM);
+        $role->givePermissionTo(SystemPermission::ManageAll);
+        $user->assignRoleWithAudit($role, RoleModificationOrigin::System);
 
-        $this->assertTrue($user->can(PermissionEnum::VIEW_USERS));
+        $this->assertTrue($user->can(SystemPermission::ViewUsers));
     }
 
     public function test_user_with_manage_all_bypasses_policy_checks(): void
     {
         $user = User::factory()->createOne();
         $role = Role::factory()->createOne();
-        $role->givePermissionTo(PermissionEnum::MANAGE_ALL);
-        $user->assignRoleWithAudit($role, RoleModificationOriginEnum::SYSTEM);
+        $role->givePermissionTo(SystemPermission::ManageAll);
+        $user->assignRoleWithAudit($role, RoleModificationOrigin::System);
 
         $anotherUser = User::factory()->createOne();
 
@@ -38,19 +38,19 @@ class GateSuperAdminBypassTest extends TestCase
     {
         $user = User::factory()->createOne();
         $role = Role::factory()->createOne();
-        $user->assignRoleWithAudit($role, RoleModificationOriginEnum::SYSTEM);
+        $user->assignRoleWithAudit($role, RoleModificationOrigin::System);
 
-        $this->assertFalse($user->can(PermissionEnum::VIEW_USERS));
+        $this->assertFalse($user->can(SystemPermission::ViewUsers));
     }
 
     public function test_user_without_manage_all_respects_granted_permissions(): void
     {
         $user = User::factory()->createOne();
         $role = Role::factory()->createOne();
-        $role->givePermissionTo(PermissionEnum::VIEW_USERS);
-        $user->assignRoleWithAudit($role, RoleModificationOriginEnum::SYSTEM);
+        $role->givePermissionTo(SystemPermission::ViewUsers);
+        $user->assignRoleWithAudit($role, RoleModificationOrigin::System);
 
-        $this->assertTrue($user->can(PermissionEnum::VIEW_USERS));
-        $this->assertFalse($user->can(PermissionEnum::EDIT_USERS));
+        $this->assertTrue($user->can(SystemPermission::ViewUsers));
+        $this->assertFalse($user->can(SystemPermission::EditUsers));
     }
 }

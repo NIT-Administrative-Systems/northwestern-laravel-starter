@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\User\Models\Concerns;
 
-use App\Domains\Auth\Enums\PermissionEnum;
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\Audit;
 use App\Domains\User\Models\Concerns\AuditsPermissions;
@@ -20,7 +20,7 @@ class AuditsPermissionsTest extends TestCase
     {
         $role = Role::factory()->createOne();
 
-        $role->syncPermissionsWithAudit([PermissionEnum::VIEW_USERS]);
+        $role->syncPermissionsWithAudit([SystemPermission::ViewUsers]);
 
         $audit = Audit::where('event', 'permissions_modified')
             ->where('auditable_type', Role::class)
@@ -35,13 +35,13 @@ class AuditsPermissionsTest extends TestCase
     public function test_sync_permissions_does_not_create_audit_when_no_changes(): void
     {
         $role = Role::factory()->createOne();
-        $role->givePermissionTo(PermissionEnum::VIEW_USERS);
+        $role->givePermissionTo(SystemPermission::ViewUsers);
 
         $auditCountBefore = Audit::where('event', 'permissions_modified')
             ->where('auditable_id', $role->id)
             ->count();
 
-        $role->syncPermissionsWithAudit([PermissionEnum::VIEW_USERS]);
+        $role->syncPermissionsWithAudit([SystemPermission::ViewUsers]);
 
         $auditCountAfter = Audit::where('event', 'permissions_modified')
             ->where('auditable_id', $role->id)
@@ -54,7 +54,7 @@ class AuditsPermissionsTest extends TestCase
     {
         $role = Role::factory()->createOne();
 
-        $role->syncPermissionsWithAudit([PermissionEnum::VIEW_USERS]);
+        $role->syncPermissionsWithAudit([SystemPermission::ViewUsers]);
 
         $audit = Audit::where('event', 'permissions_modified')
             ->where('auditable_id', $role->id)
@@ -67,7 +67,7 @@ class AuditsPermissionsTest extends TestCase
 
         /** @var list<array<string, mixed>> $afterPermissions */
         $afterPermissions = $audit->new_values['permissions'];
-        $addedPermission = collect($afterPermissions)->firstWhere('name', PermissionEnum::VIEW_USERS->value);
+        $addedPermission = collect($afterPermissions)->firstWhere('name', SystemPermission::ViewUsers->value);
         $this->assertNotNull($addedPermission);
         $this->assertArrayHasKey('name', $addedPermission);
         $this->assertArrayHasKey('label', $addedPermission);
@@ -78,7 +78,7 @@ class AuditsPermissionsTest extends TestCase
     public function test_sync_permissions_audit_captures_removed_permissions(): void
     {
         $role = Role::factory()->createOne();
-        $role->givePermissionTo(PermissionEnum::VIEW_USERS);
+        $role->givePermissionTo(SystemPermission::ViewUsers);
 
         $role->syncPermissionsWithAudit([]);
 
@@ -94,7 +94,7 @@ class AuditsPermissionsTest extends TestCase
         /** @var list<array<string, mixed>> $beforePermissions */
         $beforePermissions = $audit->old_values['permissions'];
         $beforeNames = collect($beforePermissions)->pluck('name')->all();
-        $this->assertContains(PermissionEnum::VIEW_USERS->value, $beforeNames);
+        $this->assertContains(SystemPermission::ViewUsers->value, $beforeNames);
 
         /** @var list<array<string, mixed>> $afterPermissions */
         $afterPermissions = $audit->new_values['permissions'];
@@ -104,7 +104,7 @@ class AuditsPermissionsTest extends TestCase
     public function test_sync_permissions_handles_model_deleted_during_sync(): void
     {
         $role = Role::factory()->createOne();
-        $role->givePermissionTo(PermissionEnum::VIEW_USERS);
+        $role->givePermissionTo(SystemPermission::ViewUsers);
         $role->load('permissions');
 
         $intercepted = false;
@@ -116,7 +116,7 @@ class AuditsPermissionsTest extends TestCase
             }
         });
 
-        $role->syncPermissionsWithAudit([PermissionEnum::EDIT_USERS]);
+        $role->syncPermissionsWithAudit([SystemPermission::EditUsers]);
 
         $this->assertTrue($intercepted);
 
@@ -132,9 +132,9 @@ class AuditsPermissionsTest extends TestCase
     public function test_sync_permissions_audit_captures_before_and_after_state(): void
     {
         $role = Role::factory()->createOne();
-        $role->givePermissionTo(PermissionEnum::VIEW_USERS);
+        $role->givePermissionTo(SystemPermission::ViewUsers);
 
-        $role->syncPermissionsWithAudit([PermissionEnum::EDIT_USERS]);
+        $role->syncPermissionsWithAudit([SystemPermission::EditUsers]);
 
         $audit = Audit::where('event', 'permissions_modified')
             ->where('auditable_id', $role->id)
@@ -148,13 +148,13 @@ class AuditsPermissionsTest extends TestCase
         /** @var list<array<string, mixed>> $beforePermissions */
         $beforePermissions = $audit->old_values['permissions'];
         $beforeNames = collect($beforePermissions)->pluck('name')->all();
-        $this->assertContains(PermissionEnum::VIEW_USERS->value, $beforeNames);
-        $this->assertNotContains(PermissionEnum::EDIT_USERS->value, $beforeNames);
+        $this->assertContains(SystemPermission::ViewUsers->value, $beforeNames);
+        $this->assertNotContains(SystemPermission::EditUsers->value, $beforeNames);
 
         /** @var list<array<string, mixed>> $afterPermissions */
         $afterPermissions = $audit->new_values['permissions'];
         $afterNames = collect($afterPermissions)->pluck('name')->all();
-        $this->assertContains(PermissionEnum::EDIT_USERS->value, $afterNames);
-        $this->assertNotContains(PermissionEnum::VIEW_USERS->value, $afterNames);
+        $this->assertContains(SystemPermission::EditUsers->value, $afterNames);
+        $this->assertNotContains(SystemPermission::ViewUsers->value, $afterNames);
     }
 }

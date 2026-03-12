@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\User\Actions\Directory;
 
-use App\Domains\User\Enums\AffiliationEnum;
+use App\Domains\User\Enums\Affiliation;
 use App\Domains\User\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
@@ -26,8 +26,8 @@ class SyncUserFromDirectory
             $user->username = Arr::get($directoryData, 'uid');
         }
 
-        $eduPrimaryAffiliation = AffiliationEnum::tryFrom($directoryData['eduPersonPrimaryAffiliation'] ?? '');
-        $user->primary_affiliation = $eduPrimaryAffiliation ?? AffiliationEnum::OTHER;
+        $eduPrimaryAffiliation = Affiliation::tryFrom($directoryData['eduPersonPrimaryAffiliation'] ?? '');
+        $user->primary_affiliation = $eduPrimaryAffiliation ?? Affiliation::Other;
 
         $user = $this->syncDemographics($user, $directoryData);
 
@@ -62,7 +62,7 @@ class SyncUserFromDirectory
         $jobTitleKeys = ['nuAllTitle'];
 
         // Student data fields should have priority over less-specific fields when this is a student
-        if ($user->primary_affiliation === AffiliationEnum::STUDENT) {
+        if ($user->primary_affiliation === Affiliation::Student) {
             array_unshift($firstNameKeys, 'nuStudentGivenName');
             array_unshift($lastNameKeys, 'nuStudentSn');
             array_unshift($employeeIdKeys, 'nuStudentNumber');

@@ -9,27 +9,27 @@ use Filament\Support\Contracts\HasIcon;
 use Filament\Support\Contracts\HasLabel;
 use Filament\Support\Icons\Heroicon;
 
-enum AuthTypeEnum: string implements HasColor, HasIcon, HasLabel
+enum AuthType: string implements HasColor, HasIcon, HasLabel
 {
-    case SSO = 'sso';
-    case LOCAL = 'local';
-    case API = 'api';
+    case Sso = 'sso';
+    case Local = 'local';
+    case Api = 'api';
 
     public function getLabel(): string
     {
         return match ($this) {
-            self::SSO => 'NetID',
-            self::LOCAL => 'Verification Code',
-            self::API => 'API',
+            self::Sso => 'NetID',
+            self::Local => 'Verification Code',
+            self::Api => 'API',
         };
     }
 
     public function getIcon(): Heroicon
     {
         return match ($this) {
-            self::SSO => Heroicon::OutlinedShieldCheck,
-            self::LOCAL => Heroicon::OutlinedKey,
-            self::API => Heroicon::OutlinedCodeBracket,
+            self::Sso => Heroicon::OutlinedShieldCheck,
+            self::Local => Heroicon::OutlinedKey,
+            self::Api => Heroicon::OutlinedCodeBracket,
         };
     }
 
@@ -37,9 +37,9 @@ enum AuthTypeEnum: string implements HasColor, HasIcon, HasLabel
     public function getColor(): string
     {
         return match ($this) {
-            self::SSO => 'primary',
-            self::LOCAL => 'gray',
-            self::API => 'info',
+            self::Sso => 'primary',
+            self::Local => 'gray',
+            self::Api => 'info',
         };
     }
 }

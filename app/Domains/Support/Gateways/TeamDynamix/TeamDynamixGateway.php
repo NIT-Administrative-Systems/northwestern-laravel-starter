@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Domains\Support\Gateways\TeamDynamix;
 
 use App\Domains\Support\Contracts\TicketSystemGateway;
-use App\Domains\Support\Enums\TicketSystemEnum;
+use App\Domains\Support\Enums\TicketSystem;
 use App\Domains\Support\Exceptions\TdxLookupFailedException;
 use App\Domains\Support\Gateways\CreationResult;
 use App\Domains\Support\Models\SupportTicket;
@@ -56,7 +56,7 @@ class TeamDynamixGateway implements TicketSystemGateway
         }
 
         return new CreationResult(
-            ticketSystemType: TicketSystemEnum::TEAM_DYNAMIX,
+            ticketSystemType: TicketSystem::TeamDynamix,
             creationError: $hasError,
             ticketNumber: $ticketNumber,
             errorMessage: $errorMessage,

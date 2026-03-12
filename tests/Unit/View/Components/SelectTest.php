@@ -154,8 +154,8 @@ class SelectTest extends TestCase
     {
         $options = FakeEnum::cases();
         $expected = [
-            'ACTIVE' => 'Active',
-            'PENDING' => 'Pending',
+            'Active' => 'Active',
+            'Pending' => 'Pending',
         ];
 
         $this->assertSame($expected, Select::normalizeOptionsToKeyValuePairs($options));
@@ -177,13 +177,13 @@ class SelectTest extends TestCase
         $options = [
             FakeBackedEnum::Active,
             'custom' => 'Custom Label',
-            FakeEnum::PENDING,
+            FakeEnum::Pending,
         ];
 
         $expected = [
             'active' => 'Active',
             'custom' => 'Custom Label',
-            'PENDING' => 'Pending',
+            'Pending' => 'Pending',
         ];
 
         $this->assertSame($expected, Select::normalizeOptionsToKeyValuePairs($options));
@@ -211,8 +211,8 @@ class SelectTest extends TestCase
 
         $expected = [
             'Group 1' => [
-                'ACTIVE' => 'Active',
-                'PENDING' => 'Pending',
+                'Active' => 'Active',
+                'Pending' => 'Pending',
             ],
             'Group 2' => [
                 'active' => 'Active',
@@ -288,8 +288,8 @@ class SelectTest extends TestCase
         $options = FakeEnumWithoutLabel::cases();
 
         $expected = [
-            'SOME_VALUE' => 'Some Value',
-            'ANOTHER_ITEM' => 'Another Item',
+            'SomeValue' => 'Some Value',
+            'AnotherItem' => 'Another Item',
         ];
 
         $this->assertSame($expected, Select::normalizeOptionsToKeyValuePairs($options));
@@ -310,20 +310,20 @@ class SelectTest extends TestCase
 
 enum FakeEnumWithoutLabel
 {
-    case SOME_VALUE;
-    case ANOTHER_ITEM;
+    case SomeValue;
+    case AnotherItem;
 }
 
 enum FakeBackedEnumWithoutLabel: string
 {
-    case SOME_VALUE = 'sv';
-    case ANOTHER_ITEM = 'ai';
+    case SomeValue = 'sv';
+    case AnotherItem = 'ai';
 }
 
 enum FakeEnum
 {
-    case ACTIVE;
-    case PENDING;
+    case Active;
+    case Pending;
 
     public function label(): string
     {

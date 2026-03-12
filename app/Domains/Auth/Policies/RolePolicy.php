@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Auth\Policies;
 
-use App\Domains\Auth\Enums\PermissionEnum;
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\User;
 
@@ -12,12 +12,12 @@ class RolePolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->hasPermissionTo(PermissionEnum::VIEW_ROLES);
+        return $user->hasPermissionTo(SystemPermission::ViewRoles);
     }
 
     public function create(User $user): bool
     {
-        return $user->hasPermissionTo(PermissionEnum::EDIT_ROLES);
+        return $user->hasPermissionTo(SystemPermission::EditRoles);
     }
 
     public function update(User $user, Role $role): bool
@@ -26,7 +26,7 @@ class RolePolicy
             return false;
         }
 
-        return $user->hasPermissionTo(PermissionEnum::EDIT_ROLES);
+        return $user->hasPermissionTo(SystemPermission::EditRoles);
     }
 
     public function delete(User $user, Role $role): bool
@@ -35,7 +35,7 @@ class RolePolicy
             return false;
         }
 
-        return $user->hasPermissionTo(PermissionEnum::DELETE_ROLES);
+        return $user->hasPermissionTo(SystemPermission::DeleteRoles);
     }
 
     /**
@@ -52,7 +52,7 @@ class RolePolicy
             return false;
         }
 
-        return $user->hasPermissionTo(PermissionEnum::ASSIGN_ROLES);
+        return $user->hasPermissionTo(SystemPermission::AssignRoles);
     }
 
     /**

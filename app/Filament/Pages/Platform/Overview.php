@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Pages\Platform;
 
-use App\Domains\Auth\Enums\PermissionEnum;
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Filament\Navigation\AdministrationNavGroup;
 use BackedEnum;
 use Carbon\Carbon;
@@ -30,13 +30,13 @@ class Overview extends Page
 
     protected static ?string $slug = 'overview';
 
-    protected static string|null|UnitEnum $navigationGroup = AdministrationNavGroup::PLATFORM;
+    protected static string|null|UnitEnum $navigationGroup = AdministrationNavGroup::Platform;
 
     protected static ?int $navigationSort = 1;
 
     public static function canAccess(): bool
     {
-        return auth()->user()->hasPermissionTo(PermissionEnum::MANAGE_ALL);
+        return auth()->user()->hasPermissionTo(SystemPermission::ManageAll);
     }
 
     /**

@@ -20,8 +20,8 @@ use OpenApi\Attributes as OA;
         new OA\Property(
             property: 'slug',
             type: 'string',
-            example: RoleTypeEnum::API_INTEGRATION->value,
-            enum: [RoleTypeEnum::SYSTEM_MANAGED->value, RoleTypeEnum::APPLICATION_ADMIN->value, RoleTypeEnum::APPLICATION_ROLE->value, RoleTypeEnum::API_INTEGRATION->value]
+            example: RoleTypeEnum::ApiIntegration->value,
+            enum: [RoleTypeEnum::SystemManaged->value, RoleTypeEnum::ApplicationAdmin->value, RoleTypeEnum::ApplicationRole->value, RoleTypeEnum::ApiIntegration->value]
         ),
         new OA\Property(property: 'label', type: 'string', example: 'API Integration'),
     ],

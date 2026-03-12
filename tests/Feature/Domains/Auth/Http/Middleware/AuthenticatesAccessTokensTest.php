@@ -6,7 +6,7 @@ namespace Tests\Feature\Domains\Auth\Http\Middleware;
 
 use App\Domains\Auth\Http\Middleware\AuthenticatesAccessTokens;
 use App\Domains\Auth\Models\AccessToken;
-use App\Domains\Core\Enums\ApiRequestFailureEnum;
+use App\Domains\Core\Enums\ApiRequestFailure;
 use App\Domains\Core\ValueObjects\ApiRequestContext;
 use App\Domains\User\Models\User;
 use Carbon\CarbonImmutable;
@@ -77,7 +77,7 @@ class AuthenticatesAccessTokensTest extends TestCase
     }
 
     #[DataProvider('malformedAuthHeaderProvider')]
-    public function test_malformed_bearer_auth_header_is_rejected(?string $header, ApiRequestFailureEnum $failureReason): void
+    public function test_malformed_bearer_auth_header_is_rejected(?string $header, ApiRequestFailure $failureReason): void
     {
         $headers = [];
         if ($header !== null) {
@@ -101,15 +101,15 @@ class AuthenticatesAccessTokensTest extends TestCase
         );
     }
 
-    /** @return array<string, array{0: string|null, 1: ApiRequestFailureEnum}> */
+    /** @return array<string, array{0: string|null, 1: ApiRequestFailure}> */
     public static function malformedAuthHeaderProvider(): array
     {
         return [
-            'no header' => [null, ApiRequestFailureEnum::INVALID_HEADER_FORMAT],
-            'empty header' => ['', ApiRequestFailureEnum::INVALID_HEADER_FORMAT],
-            'wrong scheme' => ['Basic abc123', ApiRequestFailureEnum::INVALID_HEADER_FORMAT],
-            'bearer with no token' => ['Bearer', ApiRequestFailureEnum::INVALID_HEADER_FORMAT],
-            'bearer with space only' => ['Bearer   ', ApiRequestFailureEnum::MISSING_CREDENTIALS],
+            'no header' => [null, ApiRequestFailure::InvalidHeaderFormat],
+            'empty header' => ['', ApiRequestFailure::InvalidHeaderFormat],
+            'wrong scheme' => ['Basic abc123', ApiRequestFailure::InvalidHeaderFormat],
+            'bearer with no token' => ['Bearer', ApiRequestFailure::InvalidHeaderFormat],
+            'bearer with space only' => ['Bearer   ', ApiRequestFailure::MissingCredentials],
         ];
     }
 
@@ -132,7 +132,7 @@ class AuthenticatesAccessTokensTest extends TestCase
         $this->assertNull(Context::get(ApiRequestContext::USER_ID));
         $this->assertNull(Context::get(ApiRequestContext::TOKEN_ID));
         $this->assertSame(
-            ApiRequestFailureEnum::TOKEN_INVALID_OR_EXPIRED->value,
+            ApiRequestFailure::TokenInvalidOrExpired->value,
             Context::get(ApiRequestContext::FAILURE_REASON),
         );
     }
@@ -344,7 +344,7 @@ class AuthenticatesAccessTokensTest extends TestCase
         $this->assertSame($user->id, Context::get(ApiRequestContext::USER_ID));
         $this->assertSame($token->id, Context::get(ApiRequestContext::TOKEN_ID));
         $this->assertSame(
-            ApiRequestFailureEnum::IP_DENIED->value,
+            ApiRequestFailure::IpDenied->value,
             Context::get(ApiRequestContext::FAILURE_REASON),
         );
     }
@@ -507,7 +507,7 @@ class AuthenticatesAccessTokensTest extends TestCase
             ]);
 
         $this->assertSame(
-            ApiRequestFailureEnum::IP_DENIED->value,
+            ApiRequestFailure::IpDenied->value,
             Context::get(ApiRequestContext::FAILURE_REASON),
         );
     }

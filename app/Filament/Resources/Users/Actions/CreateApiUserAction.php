@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users\Actions;
 
-use App\Domains\Auth\Enums\PermissionEnum;
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\User\Actions\Api\CreateApiUser;
 use App\Domains\User\Models\User;
 use App\Filament\Resources\AccessTokens\Schemas\AccessTokenSchemas;
@@ -31,7 +31,7 @@ class CreateApiUserAction extends Action
     {
         parent::setUp();
 
-        $this->authorize(PermissionEnum::MANAGE_API_USERS)
+        $this->authorize(SystemPermission::ManageApiUsers)
             ->visible(config('api.enabled'))
             ->label('Add API User')
             ->icon(Heroicon::OutlinedKey)

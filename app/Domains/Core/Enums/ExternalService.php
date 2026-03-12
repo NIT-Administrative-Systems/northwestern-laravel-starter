@@ -10,9 +10,9 @@ use Illuminate\Support\Str;
  * The application might need to interact with external services. Define them here to make interacting
  * with APIs and throwing exceptions more manageable.
  */
-enum ExternalServiceEnum: string
+enum ExternalService: string
 {
-    case DIRECTORY_SEARCH = 'directory-search';
+    case DirectorySearch = 'directory-search';
 
     /**
      * A human-readable label of the external service.

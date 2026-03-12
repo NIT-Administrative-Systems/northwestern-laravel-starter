@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\User\Models\Concerns;
 
-use App\Domains\Auth\Enums\RoleModificationOriginEnum;
+use App\Domains\Auth\Enums\RoleModificationOrigin;
 use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\User;
 use Illuminate\Support\Collection as BaseCollection;
@@ -32,7 +32,7 @@ trait AuditsRoles
      * - Optional contextual metadata
      *
      * @param  Role|array<Role>|BaseCollection<int, Role>  $roles  The role(s) to assign
-     * @param  RoleModificationOriginEnum  $origin  The source/reason for this role change
+     * @param  RoleModificationOrigin  $origin  The source/reason for this role change
      * @param  array<string, mixed>  $context  Additional contextual information
      *
      * @see auditRoleChange() for the audit event structure
@@ -40,7 +40,7 @@ trait AuditsRoles
      */
     public function assignRoleWithAudit(
         Role|array|BaseCollection $roles,
-        RoleModificationOriginEnum $origin,
+        RoleModificationOrigin $origin,
         array $context = []
     ): void {
         $this->loadMissing('roles.role_type');
@@ -63,7 +63,7 @@ trait AuditsRoles
      * - Optional contextual metadata
      *
      * @param  Role|array<Role>|BaseCollection<int, Role>  $roles  The role(s) to remove
-     * @param  RoleModificationOriginEnum  $origin  The source/reason for this role change
+     * @param  RoleModificationOrigin  $origin  The source/reason for this role change
      * @param  array<string, mixed>  $context  Additional contextual information
      *
      * @see auditRoleChange() for the audit event structure
@@ -71,7 +71,7 @@ trait AuditsRoles
      */
     public function removeRoleWithAudit(
         Role|array|BaseCollection $roles,
-        RoleModificationOriginEnum $origin,
+        RoleModificationOrigin $origin,
         array $context = []
     ): void {
         $this->loadMissing('roles.role_type');
@@ -91,7 +91,7 @@ trait AuditsRoles
      *
      * @param  'role_assigned'|'role_removed'  $event  The specific audit event type
      * @param  list<RoleData>  $oldRoles  The collection of roles before modification
-     * @param  RoleModificationOriginEnum  $origin  The source/reason for this role change
+     * @param  RoleModificationOrigin  $origin  The source/reason for this role change
      * @param  array<string, mixed>  $context  Additional contextual information
      *
      * @see assignRoleWithAudit()
@@ -100,7 +100,7 @@ trait AuditsRoles
     private function auditRoleChange(
         string $event,
         array $oldRoles,
-        RoleModificationOriginEnum $origin,
+        RoleModificationOrigin $origin,
         array $context = []
     ): void {
         // Get latest roles after the modification

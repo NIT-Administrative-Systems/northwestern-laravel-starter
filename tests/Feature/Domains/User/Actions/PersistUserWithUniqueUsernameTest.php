@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\User\Actions;
 
-use App\Domains\Auth\Enums\AuthTypeEnum;
-use App\Domains\Auth\Enums\RoleModificationOriginEnum;
-use App\Domains\Auth\Enums\SystemRoleEnum;
+use App\Domains\Auth\Enums\AuthType;
+use App\Domains\Auth\Enums\RoleModificationOrigin;
+use App\Domains\Auth\Enums\SystemRole;
 use App\Domains\Auth\Models\Role;
 use App\Domains\User\Actions\PersistUserWithUniqueUsername;
 use App\Domains\User\Models\Audit;
@@ -21,7 +21,7 @@ class PersistUserWithUniqueUsernameTest extends TestCase
     {
         $user = User::factory()->make([
             'username' => 'unique_user',
-            'auth_type' => AuthTypeEnum::API,
+            'auth_type' => AuthType::Api,
         ]);
 
         $action = new PersistUserWithUniqueUsername();
@@ -35,24 +35,24 @@ class PersistUserWithUniqueUsernameTest extends TestCase
     {
         $user = User::factory()->make([
             'username' => 'sso_user',
-            'auth_type' => AuthTypeEnum::SSO,
+            'auth_type' => AuthType::Sso,
         ]);
 
         $action = new PersistUserWithUniqueUsername();
         $savedUser = $action($user);
 
-        $this->assertTrue($savedUser->hasRole(SystemRoleEnum::NORTHWESTERN_USER));
+        $this->assertTrue($savedUser->hasRole(SystemRole::NorthwesternUser));
     }
 
     public function test_it_skips_role_assignment_when_sso_user_already_has_role(): void
     {
         $user = User::factory()->create([
             'username' => 'existing_sso_user',
-            'auth_type' => AuthTypeEnum::SSO,
+            'auth_type' => AuthType::Sso,
         ]);
 
-        $role = Role::query()->where('name', SystemRoleEnum::NORTHWESTERN_USER->value)->firstOrFail();
-        $user->assignRoleWithAudit($role, RoleModificationOriginEnum::SSO_PROVISIONING);
+        $role = Role::query()->where('name', SystemRole::NorthwesternUser->value)->firstOrFail();
+        $user->assignRoleWithAudit($role, RoleModificationOrigin::SsoProvisioning);
 
         $auditCountBefore = Audit::query()->where('user_id', $user->id)->count();
 
@@ -61,7 +61,7 @@ class PersistUserWithUniqueUsernameTest extends TestCase
 
         $auditCountAfter = Audit::query()->where('user_id', $user->id)->count();
 
-        $this->assertTrue($user->hasRole(SystemRoleEnum::NORTHWESTERN_USER));
+        $this->assertTrue($user->hasRole(SystemRole::NorthwesternUser));
         $this->assertSame($auditCountBefore, $auditCountAfter, 'No new audit records should be created for an already-assigned role');
     }
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Roles\Pages;
 
-use App\Domains\Auth\Enums\PermissionEnum;
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\Role;
 use App\Filament\Resources\Roles\RoleResource;
 use Filament\Resources\Pages\CreateRecord;
@@ -29,7 +29,7 @@ class CreateRole extends CreateRecord
     {
         $apiPermissions = $this->data['api_permissions'] ?? [];
         $regularPermissions = $this->data['regular_permissions'] ?? [];
-        $systemPermissions = auth()->user()->hasPermissionTo(PermissionEnum::MANAGE_ALL)
+        $systemPermissions = auth()->user()->hasPermissionTo(SystemPermission::ManageAll)
             ? ($this->data['system_permissions'] ?? [])
             : [];
         $allPermissions = array_merge($apiPermissions, $regularPermissions, $systemPermissions);

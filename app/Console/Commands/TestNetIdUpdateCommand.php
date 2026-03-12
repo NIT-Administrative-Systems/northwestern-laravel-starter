@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Domains\Core\Concerns\MocksEventHub;
-use App\Domains\User\Enums\NetIdUpdateActionEnum;
+use App\Domains\User\Enums\NetIdUpdateAction;
 use App\Domains\User\Listeners\ProcessNetIdUpdate;
 use App\Http\Controllers\Webhooks\NetIdUpdateController;
 use Illuminate\Console\Command;
@@ -42,12 +42,12 @@ class TestNetIdUpdateCommand extends Command implements PromptsForMissingInput
         $actionInput = (string) $this->argument('action');
         $viaQueue = (bool) $this->option('via-queue');
 
-        $action = NetIdUpdateActionEnum::tryFrom($actionInput);
+        $action = NetIdUpdateAction::tryFrom($actionInput);
 
         if (! $action) {
             $valid = implode(', ', array_map(
-                static fn (NetIdUpdateActionEnum $a) => $a->value,
-                NetIdUpdateActionEnum::cases()
+                static fn (NetIdUpdateAction $a) => $a->value,
+                NetIdUpdateAction::cases()
             ));
 
             $this->components->error("Invalid action [{$actionInput}].");
@@ -84,8 +84,8 @@ class TestNetIdUpdateCommand extends Command implements PromptsForMissingInput
             'action' => fn () => select(
                 'Select an action',
                 array_map(
-                    static fn (NetIdUpdateActionEnum $a) => $a->value,
-                    NetIdUpdateActionEnum::cases()
+                    static fn (NetIdUpdateAction $a) => $a->value,
+                    NetIdUpdateAction::cases()
                 )
             ),
         ];
