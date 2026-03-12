@@ -190,15 +190,15 @@ class AccessTokenSchemas
                     ->label('Bearer Token')
                     ->grammar(Grammar::Txt)
                     ->state(function ($record) use ($sessionKey) {
-                        $data = session($sessionKey);
+                        $sessionTokenData = session($sessionKey);
 
-                        $encryptedToken = data_get($data, 'token');
+                        $encryptedToken = data_get($sessionTokenData, 'token');
                         if (! is_string($encryptedToken)) {
                             return null;
                         }
 
                         $token = Crypt::decryptString($encryptedToken);
-                        $recordId = data_get($data, 'record_id');
+                        $recordId = data_get($sessionTokenData, 'record_id');
 
                         // If this session token is tied to a specific AccessToken record,
                         // only show it when the bound record matches.
@@ -270,10 +270,10 @@ class AccessTokenSchemas
             return true;
         }
 
-        $data = session(self::SESSION_KEY_ROTATE);
+        $rotationSessionData = session(self::SESSION_KEY_ROTATE);
 
-        return is_array($data)
-            && ($data['record_id'] ?? null) === $token->getKey();
+        return is_array($rotationSessionData)
+            && ($rotationSessionData['record_id'] ?? null) === $token->getKey();
     }
 
     /**

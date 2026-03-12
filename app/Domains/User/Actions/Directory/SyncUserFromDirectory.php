@@ -110,27 +110,27 @@ class SyncUserFromDirectory
      * Some of the DirectorySearch results are ['a key'][0].
      * This helper pops the first array key out, if it looks like that.
      *
-     * @param  array<string, mixed>  $data
+     * @param  array<string, mixed>  $directoryFields
      * @param  list<string>  $keys
      */
-    private function findValue(array $data, array $keys): ?string
+    private function findValue(array $directoryFields, array $keys): ?string
     {
         foreach ($keys as $key) {
-            if (! array_key_exists($key, $data)) {
+            if (! array_key_exists($key, $directoryFields)) {
                 continue;
             }
 
-            $value = $data[$key];
-            if ($value === null) {
+            $fieldValue = $directoryFields[$key];
+            if ($fieldValue === null) {
                 continue;
             }
-            if ($value === '') {
+            if ($fieldValue === '') {
                 continue;
             }
 
-            if (is_array($value)) {
+            if (is_array($fieldValue)) {
                 // Find the first non-empty value in the array
-                foreach ($value as $item) {
+                foreach ($fieldValue as $item) {
                     $trimmed = trim((string) $item);
                     if (filled($trimmed)) {
                         return $trimmed;
@@ -140,7 +140,7 @@ class SyncUserFromDirectory
                 continue;
             }
 
-            $trimmed = trim((string) $value);
+            $trimmed = trim((string) $fieldValue);
             if (filled($trimmed)) {
                 return $trimmed;
             }
@@ -152,29 +152,29 @@ class SyncUserFromDirectory
     /**
      * Retrieves all non-empty values for the specified keys, flattened into a single array.
      *
-     * @param  array<string, mixed>  $data
+     * @param  array<string, mixed>  $directoryFields
      * @param  list<string>  $keys
      * @return list<string>
      */
-    private function findAll(array $data, array $keys): array
+    private function findAll(array $directoryFields, array $keys): array
     {
         $values = [];
 
         foreach ($keys as $key) {
-            $value = Arr::get($data, $key);
-            if ($value !== null) {
-                $values[] = $value;
+            $fieldValue = Arr::get($directoryFields, $key);
+            if ($fieldValue !== null) {
+                $values[] = $fieldValue;
             }
         }
 
-        $result = collect($values)
+        $cleanedValues = collect($values)
             ->flatten()
-            ->reject(fn (mixed $value): bool => blank(trim((string) $value)))
-            ->map(fn (mixed $value): string => trim((string) $value))
+            ->reject(fn (mixed $fieldValue): bool => blank(trim((string) $fieldValue)))
+            ->map(fn (mixed $fieldValue): string => trim((string) $fieldValue))
             ->unique()
             ->values()
             ->all();
 
-        return array_values($result);
+        return array_values($cleanedValues);
     }
 }

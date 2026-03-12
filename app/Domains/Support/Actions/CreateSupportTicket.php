@@ -38,10 +38,10 @@ class CreateSupportTicket
      */
     public function __invoke(SupportTicket $ticket): SupportTicket
     {
-        $result = $this->gateway->create($ticket);
-        $ticket = $this->repo->updatePostStatus($ticket, $result);
+        $creationResult = $this->gateway->create($ticket);
+        $ticket = $this->repo->updatePostStatus($ticket, $creationResult);
 
-        if ($result->creationError && $result->ticketSystemType !== TicketSystemEnum::MAIL) {
+        if ($creationResult->creationError && $creationResult->ticketSystemType !== TicketSystemEnum::MAIL) {
             $fallbackResult = $this->factory->fallback()->create($ticket);
 
             if (! $fallbackResult->creationError) {

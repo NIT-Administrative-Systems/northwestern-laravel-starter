@@ -57,15 +57,15 @@ class LoginsBySegmentChartWidget extends ChartWidget
             ->get();
 
         $labels = [];
-        $data = [];
+        $chartValues = [];
         $colors = [];
 
-        foreach ($segmentCounts as $row) {
-            $segmentEnum = $row->segment;
-            $count = $row->count;
+        foreach ($segmentCounts as $segmentCount) {
+            $segmentEnum = $segmentCount->segment;
+            $count = $segmentCount->count;
 
             $labels[] = $segmentEnum->getLabel();
-            $data[] = $count;
+            $chartValues[] = $count;
 
             $colors[] = match ($segmentEnum->getColor()) {
                 'danger' => 'rgb(239, 68, 68)',
@@ -77,19 +77,19 @@ class LoginsBySegmentChartWidget extends ChartWidget
             };
         }
 
-        $total = array_sum($data);
+        $total = array_sum($chartValues);
 
         $labelsWithPercentages = array_map(function (string $label, int $count) use ($total) {
             $percentage = $total > 0 ? round(($count / $total) * 100, 1) : 0;
 
             return "{$label} ({$percentage}%)";
-        }, $labels, $data);
+        }, $labels, $chartValues);
 
         return [
             'datasets' => [
                 [
                     'label' => 'Logins',
-                    'data' => $data,
+                    'data' => $chartValues,
                     'backgroundColor' => $colors,
                     'borderColor' => 'rgba(255, 255, 255, 0.7)',
                     'borderWidth' => 2,

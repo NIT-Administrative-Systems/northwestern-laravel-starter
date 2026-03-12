@@ -114,20 +114,20 @@ class Overview extends Page
         $disk = config('filesystems.default');
         $isS3 = $disk === 's3';
 
-        $info = [
+        $storageDetails = [
             'Default Disk' => ['value' => ucfirst((string) $disk)],
         ];
 
         if ($isS3) {
-            $info['Bucket'] = ['value' => config('filesystems.disks.s3.bucket'), 'mono' => true];
-            $info['Region'] = ['value' => config('filesystems.disks.s3.region') ?: 'Not set', 'mono' => true];
+            $storageDetails['Bucket'] = ['value' => config('filesystems.disks.s3.bucket'), 'mono' => true];
+            $storageDetails['Region'] = ['value' => config('filesystems.disks.s3.region') ?: 'Not set', 'mono' => true];
             $endpoint = config('filesystems.disks.s3.endpoint');
-            $info['Endpoint'] = ['value' => $endpoint ?: 'AWS Default', 'mono' => (bool) $endpoint];
+            $storageDetails['Endpoint'] = ['value' => $endpoint ?: 'AWS Default', 'mono' => (bool) $endpoint];
         } else {
-            $info['Storage Type'] = ['value' => 'Local filesystem'];
+            $storageDetails['Storage Type'] = ['value' => 'Local filesystem'];
         }
 
-        return $info;
+        return $storageDetails;
     }
 
     /**
