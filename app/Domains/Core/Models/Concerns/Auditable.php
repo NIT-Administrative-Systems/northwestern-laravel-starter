@@ -6,10 +6,10 @@ namespace App\Domains\Core\Models\Concerns;
 
 use App\Domains\Core\ValueObjects\ApiRequestContext;
 use App\Domains\User\Models\Audit;
-use Exception;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
+use Throwable;
 
 /**
  * @phpstan-require-extends \Illuminate\Database\Eloquent\Model
@@ -82,7 +82,7 @@ trait Auditable
             $decodedSnapshot = json_decode((string) $livewireSnapshot, true, 512, JSON_THROW_ON_ERROR);
 
             return data_get($decodedSnapshot, 'memo.name');
-        } catch (Exception) {
+        } catch (Throwable) {
             // Extracting the component name isn't critical, we can ignore any errors and return null
 
             return null;

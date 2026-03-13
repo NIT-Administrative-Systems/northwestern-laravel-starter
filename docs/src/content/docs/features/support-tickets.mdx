@@ -235,7 +235,7 @@ Adding a new gateway requires three steps: add an enum case, implement the inter
    use App\Domains\Support\Enums\TicketSystem;
    use App\Domains\Support\Gateways\CreationResult;
    use App\Domains\Support\Models\SupportTicket;
-   use Exception;
+   use Throwable;
 
    class JiraGateway implements TicketSystemGateway
    {
@@ -251,10 +251,8 @@ Adding a new gateway requires three steps: add an enum case, implement the inter
                    ticketNumber: $issueKey,
                    errorMessage: null,
                );
-           } catch (Exception $e) {
-               if (app()->bound('sentry')) {
-                   resolve('sentry')->captureException($e);
-               }
+           } catch (Throwable $e) {
+               report($e);
 
                return new CreationResult(
                    ticketSystemType: TicketSystem::Jira,

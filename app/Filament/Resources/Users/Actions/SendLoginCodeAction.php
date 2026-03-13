@@ -7,10 +7,10 @@ namespace App\Filament\Resources\Users\Actions;
 use App\Domains\Auth\Actions\Local\IssueLoginChallenge;
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\User\Models\User;
-use Exception;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
+use Throwable;
 
 class SendLoginCodeAction extends Action
 {
@@ -40,7 +40,9 @@ class SendLoginCodeAction extends Action
                         ->title('Verification code sent')
                         ->body('A new verification code has been sent to ' . $record->email . '.')
                         ->send();
-                } catch (Exception $e) {
+                } catch (Throwable $e) {
+                    report($e);
+
                     Notification::make()
                         ->danger()
                         ->title('Failed to send verification code')

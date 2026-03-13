@@ -6,8 +6,8 @@ namespace App\Console\Commands;
 
 use App\Domains\Core\Database\ValueObjects\SeederInfo;
 use App\Domains\Core\Services\IdempotentSeederResolver;
-use Exception;
 use Illuminate\Console\Command;
+use Throwable;
 
 use function Laravel\Prompts\note;
 use function Laravel\Prompts\table;
@@ -41,7 +41,7 @@ class AutoSeedListCommand extends Command
             }
 
             return self::SUCCESS;
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             $this->components->error('Failed to discover seeders');
             $this->components->error($e->getMessage());
 
