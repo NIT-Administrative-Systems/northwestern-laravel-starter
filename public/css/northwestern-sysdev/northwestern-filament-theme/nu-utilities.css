@@ -61,7 +61,11 @@
 .fi-avatar,
 .fi-user-avatar,
 .fi-tenant-avatar {
-    border-radius: 50% !important;
+    border-radius: 0 !important;
+    border: 1px solid var(--nu-border-color) !important;
+    object-fit: cover;
+    width: 2.25rem !important;
+    height: 2.25rem !important;
 }
 
 .fi-sidebar-item-btn:focus-visible {
@@ -107,6 +111,12 @@
 
 .fi-ta-header-cell-sort-btn {
     transition: color var(--nu-transition-fast);
+}
+
+.dark .fi-avatar,
+.dark .fi-user-avatar,
+.dark .fi-tenant-avatar {
+    border-color: var(--nu-color-text-muted) !important;
 }
 
 .dark .fi-simple-layout {

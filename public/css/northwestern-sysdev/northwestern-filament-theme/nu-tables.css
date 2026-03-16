@@ -103,7 +103,7 @@
 
 .dark .fi-ta-header-cell,
 .dark .fi-ta-actions-header-cell {
-    background-color: var(--nu-purple-surface);
+    background-color: rgb(78 42 132 / 15%);
     border-bottom-color: var(--nu-border-color);
 }
 

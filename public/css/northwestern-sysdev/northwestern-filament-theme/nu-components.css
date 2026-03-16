@@ -55,6 +55,10 @@
     box-shadow: var(--nu-shadow-md) !important;
 }
 
+.fi-no-notification-title {
+    font-weight: 550 !important;
+}
+
 .fi-wi-stats-overview-stat {
     border-radius: var(--nu-border-radius) !important;
     box-shadow: none !important;

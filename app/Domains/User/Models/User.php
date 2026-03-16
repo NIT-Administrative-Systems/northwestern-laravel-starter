@@ -22,6 +22,7 @@ use App\Http\Middleware\EnvironmentLockdown;
 use App\Providers\Filament\AdministrationPanelProvider;
 use Database\Factories\Domains\User\Models\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
+use Filament\Models\Contracts\HasAvatar;
 use Filament\Models\Contracts\HasName;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -50,7 +51,7 @@ use Spatie\Permission\Traits\HasRoles;
  *
  * @property Collection<int, Role> $roles
  */
-class User extends Authenticatable implements Auditable, FilamentUser, HasName
+class User extends Authenticatable implements Auditable, FilamentUser, HasAvatar, HasName
 {
     /** @use HasFactory<UserFactory> */
     use AuditableConcern, HandlesImpersonation, HasFactory, Notifiable, SoftDeletes, TracksPermissionSources;
@@ -216,6 +217,15 @@ class User extends Authenticatable implements Auditable, FilamentUser, HasName
                 fn ($role) => $role->name === SystemRole::NorthwesternUser->value
             ),
         );
+    }
+
+    public function getFilamentAvatarUrl(): ?string
+    {
+        if (! config('platform.wildcard_photo_sync')) {
+            return null;
+        }
+
+        return route('users.wildcard-photo', $this);
     }
 
     public function getFilamentName(): string
