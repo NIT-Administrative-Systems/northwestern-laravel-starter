@@ -1,0 +1,111 @@
+/* ==========================================================================
+   Northwestern Design Tokens
+   ========================================================================== */
+
+:root {
+    --nu-purple-10: #e4e0ee;
+    --nu-purple-20: #ccc4df;
+    --nu-purple-30: #b6acd1;
+    --nu-purple-40: #a495c3;
+    --nu-purple-50: #9380b6;
+    --nu-purple-60: #836eaa;
+    --nu-purple-70: #765da0;
+    --nu-purple-80: #684c96;
+    --nu-purple-90: #5b3b8c;
+    --nu-purple-100: #4e2a84;
+    --nu-purple-110: #482476;
+    --nu-purple-120: #401f68;
+    --nu-purple-130: #38175a;
+    --nu-purple-140: #30104e;
+    --nu-purple-150: #260841;
+    --nu-purple-160: #1d0235;
+
+    --nu-black-100: #000;
+    --nu-black-80: #342f2e;
+    --nu-black-50: #716c6b;
+    --nu-black-20: #bbb8b8;
+    --nu-black-10: #d8d6d6;
+
+    --nu-green: #58b947;
+    --nu-teal: #7fcecd;
+    --nu-blue: #5091cd;
+    --nu-yellow: #ede93b;
+    --nu-gold: #ffc520;
+    --nu-orange: #ef553f;
+
+    --nu-dark-green: #008656;
+    --nu-dark-teal: #007fa4;
+    --nu-dark-blue: #0d2d6c;
+    --nu-dark-yellow: #d9c826;
+    --nu-dark-gold: #ca7c1b;
+    --nu-dark-orange: #d85820;
+
+    --nu-color-success: #008656;
+    --nu-color-info: #5091cd;
+    --nu-color-warning: #ffc520;
+    --nu-color-danger: #ef553f;
+    --nu-color-text: #342f2e;
+    --nu-color-text-muted: #716c6b;
+    --nu-color-link: #4e2a84;
+    --nu-color-link-hover: #401f68;
+
+    --nu-shadow-sm: 0 1px 2px rgb(0 0 0 / 6%);
+    --nu-shadow-md: 0 2px 8px rgb(0 0 0 / 10%);
+    --nu-shadow-lg: 0 4px 16px rgb(0 0 0 / 12%);
+    --nu-shadow-xl: 0 8px 24px rgb(0 0 0 / 15%);
+    --nu-transition-fast: 150ms ease;
+    --nu-transition-default: 200ms ease;
+    --nu-transition-slow: 300ms ease-in-out;
+
+    --radius-xs: 0;
+    --radius-sm: 0;
+    --radius-md: 0;
+    --radius-lg: 0;
+    --radius-xl: 0;
+    --radius-2xl: 0;
+    --radius-3xl: 0;
+    --radius-4xl: 0;
+    --radius-full: 9999px;
+
+    --nu-body-bg: #f8fafc;
+    --nu-sidebar-bg: #fff;
+    --nu-topbar-bg: #401f68;
+    --nu-topbar-text: #fff;
+    --nu-border-color: #ccc;
+    --nu-border-radius: 0;
+
+    --nu-font-body:
+        "Akkurat Pro", -apple-system, blinkmacsystemfont, "Segoe UI", roboto,
+        sans-serif;
+    --nu-font-heading:
+        "Poppins", "Akkurat Pro", -apple-system, blinkmacsystemfont, "Segoe UI",
+        roboto, sans-serif;
+
+    --nu-focus-ring: var(--nu-purple-100);
+    --nu-focus-border: #a795c2;
+    --nu-focus-shadow-color: rgb(78 42 132 / 25%);
+
+    --nu-purple-surface: #f3f0f7;
+    --nu-purple-surface-subtle: #f7f5f9;
+    --nu-surface-muted: #f9fafb;
+    --nu-hover-bg: #f3f4f6;
+    --nu-disabled-bg: #e9ecef;
+    --nu-badge-border: #e0e0e0;
+}
+
+.dark {
+    --nu-body-bg: #18181b;
+    --nu-sidebar-bg: #1e1e1e;
+    --nu-border-color: #3a3a3a;
+    --nu-color-text: #f0f0f0;
+    --nu-color-text-muted: #a1a1aa;
+
+    --nu-focus-ring: var(--nu-purple-40);
+    --nu-focus-shadow-color: rgb(147 128 182 / 40%);
+
+    --nu-purple-surface: rgb(255 255 255 / 5%);
+    --nu-purple-surface-subtle: rgb(255 255 255 / 3%);
+    --nu-surface-muted: rgb(255 255 255 / 5%);
+    --nu-hover-bg: rgb(255 255 255 / 10%);
+    --nu-disabled-bg: #343a40;
+}

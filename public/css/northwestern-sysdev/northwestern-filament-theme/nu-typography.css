@@ -1,0 +1,207 @@
+/* ==========================================================================
+   Typography — Northwestern Brand Fonts
+   ========================================================================== */
+
+@font-face {
+    font-family: "Akkurat Pro";
+    src: url("https://common.northwestern.edu/v8/css/fonts/AkkuratProLight.woff")
+        format("woff");
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Akkurat Pro";
+    src: url("https://common.northwestern.edu/v8/css/fonts/AkkuratProLightItalic.woff")
+        format("woff");
+    font-weight: 300;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Akkurat Pro";
+    src: url("https://common.northwestern.edu/v8/css/fonts/AkkuratProRegular.woff")
+        format("woff");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Akkurat Pro";
+    src: url("https://common.northwestern.edu/v8/css/fonts/AkkuratProItalic.woff")
+        format("woff");
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Akkurat Pro";
+    src: url("https://common.northwestern.edu/v8/css/fonts/AkkuratProRegular.woff")
+        format("woff");
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Akkurat Pro";
+    src: url("https://common.northwestern.edu/v8/css/fonts/AkkuratProBold.woff")
+        format("woff");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Akkurat Pro";
+    src: url("https://common.northwestern.edu/v8/css/fonts/AkkuratProBoldItalic.woff")
+        format("woff");
+    font-weight: 700;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: Poppins;
+    src: url("https://common.northwestern.edu/v8/css/fonts/Poppins-ExtraLight.woff")
+        format("woff");
+    font-weight: 100;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: Poppins;
+    src: url("https://common.northwestern.edu/v8/css/fonts/Poppins-Light.woff")
+        format("woff");
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: Poppins;
+    src: url("https://common.northwestern.edu/v8/css/fonts/Poppins-Light.woff")
+        format("woff");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: Poppins;
+    src: url("https://common.northwestern.edu/v8/css/fonts/Poppins-Bold.woff")
+        format("woff");
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: Poppins;
+    src: url("https://common.northwestern.edu/v8/css/fonts/Poppins-Bold.woff")
+        format("woff");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: Poppins;
+    src: url("https://common.northwestern.edu/v8/css/fonts/Poppins-ExtraBold.woff")
+        format("woff");
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+}
+
+body.fi-body {
+    font-family: var(--nu-font-body);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--nu-color-text);
+}
+
+.fi-header-heading,
+.fi-modal-heading,
+.fi-section-header-heading,
+.fi-sidebar-header,
+.fi-ta-header-heading,
+.fi-ta-group-heading,
+.fi-ta-empty-state-heading,
+.fi-empty-state-heading,
+.fi-simple-header-heading,
+.fi-no-notification-title,
+.fi-wi-stats-overview-stat-label,
+.fi-account-widget-heading,
+.fi-callout-heading,
+.fi-global-search-result-heading,
+.fi-sc-wizard-header-step-label,
+.fi-fo-builder-item-header-label,
+.fi-fo-repeater-item-header-label {
+    font-family: var(--nu-font-heading);
+}
+
+.fi-header-heading {
+    font-weight: 700;
+}
+
+.fi-section-header-heading,
+.fi-modal-heading,
+.fi-ta-header-heading,
+.fi-sc-wizard-header-step-label,
+.fi-callout-heading {
+    font-weight: 600;
+}
+
+.fi-body .fi-main h1:not([class*="fi-"]),
+.fi-body .fi-main h2:not([class*="fi-"]),
+.fi-body .fi-main h3:not([class*="fi-"]),
+.fi-body .fi-main h4:not([class*="fi-"]),
+.fi-body .fi-main h5:not([class*="fi-"]),
+.fi-body .fi-main h6:not([class*="fi-"]) {
+    font-family: var(--nu-font-heading) !important;
+    color: var(--nu-color-text) !important;
+}
+
+.fi-sidebar-item-label {
+    font-family: var(--nu-font-body);
+    font-size: 0.875rem;
+}
+
+.fi-breadcrumbs {
+    font-family: var(--nu-font-body);
+    font-size: 0.8125rem;
+}
+
+.fi-wi-stats-overview-stat-value {
+    font-family: var(--nu-font-heading);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.fi-ta-header-cell {
+    font-family: var(--nu-font-body);
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+}
+
+.fi-fo-field-label label {
+    font-family: var(--nu-font-body);
+    font-weight: 700;
+}
+
+.fi-body .fi-main a:not([class*="fi-"], .filament-breadcrumbs-link) {
+    text-decoration: underline;
+    transition: color 0.15s ease;
+}
+
+.fi-body .fi-main a:not([class*="fi-"], .filament-breadcrumbs-link):hover {
+    text-decoration: underline;
+}

@@ -23,6 +23,7 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Northwestern\FilamentTheme\NorthwesternTheme;
 use pxlrbt\FilamentEnvironmentIndicator\EnvironmentIndicatorPlugin;
 
 class AdministrationPanelProvider extends PanelProvider
@@ -41,12 +42,7 @@ class AdministrationPanelProvider extends PanelProvider
             ->id(self::ID)
             ->path(self::ID)
             ->maxContentWidth(Width::Full)
-            ->colors([
-                'primary' => Color::Purple,
-            ])
             ->viteTheme('resources/css/filament/administration/theme.css')
-            ->favicon('https://common.northwestern.edu/v8/icons/favicon-32.png')
-            ->brandLogo(config('northwestern-theme.lockup'))
             ->userMenuItems([
                 'logout' => fn (Action $action) => $action
                     ->label('Sign out')
@@ -67,6 +63,7 @@ class AdministrationPanelProvider extends PanelProvider
                 //
             ])
             ->plugins([
+                NorthwesternTheme::make(),
                 EnvironmentIndicatorPlugin::make()
                     ->visible(! app()->isProduction())
                     ->color(Color::Yellow),

@@ -1,0 +1,86 @@
+/* ==========================================================================
+   Navigation — Sidebar Items, Breadcrumbs, Tabs
+   ========================================================================== */
+
+.fi-sidebar-item-btn {
+    border-radius: var(--nu-border-radius) !important;
+    transition: background-color var(--nu-transition-fast);
+}
+
+.fi-sidebar-item-btn:hover {
+    background-color: var(--nu-purple-10) !important;
+}
+
+.fi-sidebar-item.fi-active .fi-sidebar-item-btn {
+    background-color: var(--nu-purple-10) !important;
+    color: var(--nu-purple-100);
+}
+
+.fi-sidebar-item.fi-active .fi-sidebar-item-btn .fi-sidebar-item-icon {
+    color: var(--nu-purple-100);
+}
+
+.fi-sidebar-item.fi-active .fi-sidebar-item-btn .fi-sidebar-item-label {
+    color: var(--nu-purple-100);
+    font-weight: 700;
+}
+
+.fi-sidebar-group-label {
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    color: var(--nu-black-50);
+}
+
+.fi-breadcrumbs-item a {
+    color: var(--nu-purple-100);
+}
+
+.fi-breadcrumbs-item a:hover {
+    color: var(--nu-purple-120);
+}
+
+.fi-tabs-item {
+    border-radius: var(--nu-border-radius) !important;
+}
+
+.fi-tabs-item.fi-active {
+    border-color: var(--nu-purple-100);
+}
+
+.fi-tenant-menu-trigger {
+    border-radius: var(--nu-border-radius) !important;
+}
+
+.fi-tenant-menu-trigger-tenant-name {
+    font-family: var(--nu-font-heading);
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.dark .fi-sidebar-item-btn:hover {
+    background-color: rgb(78 42 132 / 15%) !important;
+}
+
+.dark .fi-sidebar-item.fi-active .fi-sidebar-item-btn {
+    background-color: rgb(78 42 132 / 20%) !important;
+    color: var(--nu-purple-30);
+}
+
+.dark .fi-sidebar-item.fi-active .fi-sidebar-item-btn .fi-sidebar-item-icon,
+.dark .fi-sidebar-item.fi-active .fi-sidebar-item-btn .fi-sidebar-item-label {
+    color: var(--nu-purple-30);
+}
+
+.dark .fi-sidebar-group-label {
+    color: var(--nu-black-20);
+}
+
+.dark .fi-breadcrumbs-item a {
+    color: var(--nu-purple-40);
+}
+
+.dark .fi-breadcrumbs-item a:hover {
+    color: var(--nu-purple-30);
+}
