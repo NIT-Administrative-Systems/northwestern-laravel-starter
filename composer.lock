@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "eec546979fb5c463e830bfc87ce1d228",
+    "content-hash": "594bd43f102f61403d60333c2c18ca91",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -5202,16 +5202,16 @@
         },
         {
             "name": "northwestern-sysdev/northwestern-filament-theme",
-            "version": "v1.0.2",
+            "version": "v2.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/NIT-Administrative-Systems/northwestern-filament-theme",
-                "reference": "fb860e1a20c823b11b6a3b208977a8ff1f29dac7"
+                "reference": "dbcbc81a2add92f2e4025d72a69a08e318500273"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/NIT-Administrative-Systems/northwestern-filament-theme/zipball/fb860e1a20c823b11b6a3b208977a8ff1f29dac7",
-                "reference": "fb860e1a20c823b11b6a3b208977a8ff1f29dac7",
+                "url": "https://api.github.com/repos/NIT-Administrative-Systems/northwestern-filament-theme/zipball/dbcbc81a2add92f2e4025d72a69a08e318500273",
+                "reference": "dbcbc81a2add92f2e4025d72a69a08e318500273",
                 "shasum": ""
             },
             "require": {
@@ -5266,7 +5266,7 @@
                 "issues": "https://github.com/NIT-Administrative-Systems/northwestern-filament-theme/issues",
                 "source": "https://github.com/NIT-Administrative-Systems/northwestern-filament-theme"
             },
-            "time": "2026-03-16T16:06:35+00:00"
+            "time": "2026-03-16T19:23:09+00:00"
         },
         {
             "name": "northwestern-sysdev/northwestern-laravel-ui",

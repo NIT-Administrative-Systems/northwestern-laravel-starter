@@ -63,7 +63,8 @@ class AdministrationPanelProvider extends PanelProvider
                 //
             ])
             ->plugins([
-                NorthwesternTheme::make(),
+                NorthwesternTheme::make()
+                    ->withoutAssetRegistration(),
                 EnvironmentIndicatorPlugin::make()
                     ->visible(! app()->isProduction())
                     ->color(Color::Yellow),

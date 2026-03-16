@@ -1,5 +1,7 @@
 @import "tailwindcss";
 @import "../../../../vendor/filament/filament/resources/css/index.css";
+@import "../../../../vendor/northwestern-sysdev/northwestern-filament-theme/dist/theme.css";
+@import "../../../../vendor/northwestern-sysdev/northwestern-filament-theme/dist/tailwind-tokens.css";
 
 @source '../../../../app/Filament/**/*';
 @source '../../../../resources/views/filament/**/*';
