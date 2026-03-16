@@ -41,7 +41,17 @@ body.fi-body {
 }
 
 .fi-topbar .fi-global-search-field input::placeholder {
-    color: rgb(255 255 255 / 70%);
+    color: var(--nu-color-text-muted) !important;
+}
+
+.fi-topbar .fi-input-wrp:focus-within {
+    border-color: rgb(255 255 255 / 50%) !important;
+    box-shadow: 0 0 0 0.25rem rgb(255 255 255 / 20%) !important;
+}
+
+.dark .fi-topbar .fi-global-search-field .fi-input-wrp {
+    background-color: var(--nu-sidebar-bg) !important;
+    border-color: var(--nu-border-color) !important;
 }
 
 .fi-topbar-item.fi-active .fi-topbar-item-btn {
@@ -153,6 +163,7 @@ body.fi-body {
 }
 
 .dark .fi-global-search-results-ctn {
+    background-color: var(--nu-sidebar-bg);
     border-color: var(--nu-border-color);
 }
 

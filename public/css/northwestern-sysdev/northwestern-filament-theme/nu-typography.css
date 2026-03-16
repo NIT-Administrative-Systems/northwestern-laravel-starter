@@ -135,7 +135,6 @@ body.fi-body {
 .fi-ta-empty-state-heading,
 .fi-empty-state-heading,
 .fi-simple-header-heading,
-.fi-no-notification-title,
 .fi-wi-stats-overview-stat-label,
 .fi-account-widget-heading,
 .fi-callout-heading,
@@ -144,6 +143,10 @@ body.fi-body {
 .fi-fo-builder-item-header-label,
 .fi-fo-repeater-item-header-label {
     font-family: var(--nu-font-heading);
+}
+
+.fi-no-notification-title {
+    font-family: var(--nu-font-body);
 }
 
 .fi-header-heading {
