@@ -5202,16 +5202,16 @@
         },
         {
             "name": "northwestern-sysdev/northwestern-filament-theme",
-            "version": "v1.0.0",
+            "version": "v1.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/NIT-Administrative-Systems/northwestern-filament-theme",
-                "reference": "47345d48123434026fddb45af4907066cad60af3"
+                "reference": "34c63cf2bd7243d10ca5aa7cf572725bcc5f2435"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/NIT-Administrative-Systems/northwestern-filament-theme/zipball/47345d48123434026fddb45af4907066cad60af3",
-                "reference": "47345d48123434026fddb45af4907066cad60af3",
+                "url": "https://api.github.com/repos/NIT-Administrative-Systems/northwestern-filament-theme/zipball/34c63cf2bd7243d10ca5aa7cf572725bcc5f2435",
+                "reference": "34c63cf2bd7243d10ca5aa7cf572725bcc5f2435",
                 "shasum": ""
             },
             "require": {
@@ -5266,7 +5266,7 @@
                 "issues": "https://github.com/NIT-Administrative-Systems/northwestern-filament-theme/issues",
                 "source": "https://github.com/NIT-Administrative-Systems/northwestern-filament-theme"
             },
-            "time": "2026-03-16T13:49:01+00:00"
+            "time": "2026-03-16T15:01:49+00:00"
         },
         {
             "name": "northwestern-sysdev/northwestern-laravel-ui",
