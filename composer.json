@@ -29,6 +29,7 @@
         "mews/purifier": "^3.4",
         "mockery/mockery": "^1.6",
         "northwestern-sysdev/laravel-soa": "^11.2",
+        "northwestern-sysdev/northwestern-filament-theme": "^1.0",
         "northwestern-sysdev/northwestern-laravel-ui": "^4.0",
         "northwestern-sysdev/tdx-php-sdk": "^0.5.1",
         "owen-it/laravel-auditing": "^14.0",

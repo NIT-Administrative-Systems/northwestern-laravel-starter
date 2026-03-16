@@ -1,0 +1,273 @@
+/* ==========================================================================
+   Components — Modals, Dropdowns, Badges, Notifications, Widgets, Sections
+   ========================================================================== */
+
+.fi-modal-window {
+    border-radius: var(--nu-border-radius) !important;
+    box-shadow: 0 4px 24px rgb(0 0 0 / 15%) !important;
+}
+
+.fi-modal-header {
+    border-bottom: 1px solid var(--nu-border-color);
+    padding: 1rem 1.5rem;
+}
+
+.fi-modal-heading {
+    color: var(--nu-purple-100);
+}
+
+.dark .fi-modal-heading {
+    color: var(--nu-purple-40);
+}
+
+.fi-modal-content {
+    padding: 1rem 1.5rem;
+}
+
+.fi-modal-footer {
+    border-top: 1px solid var(--nu-border-color);
+    padding: 1rem 1.5rem;
+}
+
+.fi-dropdown-panel {
+    border-radius: var(--nu-border-radius) !important;
+    box-shadow: var(--nu-shadow-md) !important;
+    border: 1px solid var(--nu-border-color);
+}
+
+.fi-dropdown-list-item {
+    border-radius: var(--nu-border-radius) !important;
+    transition: background-color var(--nu-transition-fast);
+}
+
+.fi-badge {
+    border-radius: var(--nu-border-radius) !important;
+    border: 1px solid var(--nu-badge-border) !important;
+    box-shadow: none !important;
+}
+
+.dark .fi-badge {
+    border-color: var(--nu-border-color) !important;
+}
+
+.fi-no-notification {
+    border-radius: var(--nu-border-radius) !important;
+    box-shadow: var(--nu-shadow-md) !important;
+}
+
+.fi-wi-stats-overview-stat {
+    border-radius: var(--nu-border-radius) !important;
+    box-shadow: none !important;
+    border: 1px solid var(--nu-border-color);
+    --tw-ring-shadow: 0 0 #0000 !important;
+}
+
+.fi-section {
+    border-radius: var(--nu-border-radius) !important;
+    box-shadow: none !important;
+    --tw-ring-shadow: 0 0 #0000 !important;
+}
+
+.fi-section:not(.fi-section-not-contained) {
+    border: 1px solid var(--nu-border-color);
+}
+
+.fi-section-header {
+    border-bottom: 1px solid var(--nu-border-color);
+}
+
+.fi-in-entry {
+    border-radius: var(--nu-border-radius) !important;
+}
+
+.fi-callout {
+    border: 1px solid var(--nu-border-color);
+    border-radius: var(--nu-border-radius) !important;
+}
+
+.fi-callout-heading {
+    font-family: var(--nu-font-heading);
+    font-weight: 600;
+    font-size: 0.9375rem;
+}
+
+.fi-callout-description {
+    color: var(--nu-color-text-muted);
+}
+
+.fi-fieldset {
+    border: 1px solid var(--nu-border-color);
+    border-radius: var(--nu-border-radius) !important;
+}
+
+.fi-fieldset-label-required-mark {
+    color: var(--nu-color-danger);
+}
+
+.fi-empty-state-heading {
+    font-family: var(--nu-font-heading);
+    font-weight: 600;
+    color: var(--nu-color-text);
+}
+
+.fi-empty-state-description {
+    color: var(--nu-color-text-muted);
+}
+
+.fi-empty-state-icon-bg {
+    background-color: var(--nu-purple-10);
+}
+
+.fi-sc-wizard-header {
+    border-bottom: 1px solid var(--nu-border-color);
+    padding: 1rem 1.5rem;
+}
+
+.fi-sc-wizard-header-step-label {
+    font-family: var(--nu-font-heading);
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.fi-sc-wizard-header-step-description {
+    font-family: var(--nu-font-body);
+    color: var(--nu-color-text-muted);
+    font-size: 0.8125rem;
+}
+
+.fi-sc-wizard-footer {
+    border-top: none;
+    padding: 0;
+}
+
+.fi-pagination-item-btn {
+    border-radius: var(--nu-border-radius) !important;
+    transition:
+        background-color var(--nu-transition-fast),
+        color var(--nu-transition-fast);
+}
+
+.fi-pagination-item.fi-active .fi-pagination-item-btn {
+    font-weight: 700;
+}
+
+.fi-pagination-previous-btn,
+.fi-pagination-next-btn {
+    border-radius: var(--nu-border-radius) !important;
+}
+
+.fi-pagination-records-per-page-select-ctn {
+    font-size: 0.8125rem;
+}
+
+.fi-sortable-ghost {
+    opacity: 0.6;
+    background-color: var(--nu-purple-10);
+}
+
+.fi-loading-section {
+    color: var(--nu-purple-100);
+}
+
+.fi-in-entry-label {
+    font-family: var(--nu-font-body);
+    font-weight: 700;
+    font-size: 0.8125rem;
+    color: var(--nu-color-text-muted);
+}
+
+.fi-in-entry-content {
+    font-family: var(--nu-font-body);
+    font-size: 0.875rem;
+}
+
+.fi-in-placeholder {
+    color: var(--nu-color-text-muted);
+    font-style: italic;
+}
+
+.fi-in-repeatable-item,
+.fi-in-key-value {
+    border: 1px solid var(--nu-border-color);
+    border-radius: var(--nu-border-radius) !important;
+}
+
+.fi-theme-switcher-btn {
+    border-radius: var(--nu-border-radius) !important;
+}
+
+.fi-account-widget {
+    border: 1px solid var(--nu-border-color);
+    border-radius: var(--nu-border-radius) !important;
+}
+
+.fi-account-widget-heading {
+    font-family: var(--nu-font-heading);
+    font-weight: 600;
+}
+
+.dark .fi-modal-window {
+    box-shadow: 0 4px 24px rgb(0 0 0 / 40%) !important;
+}
+
+.dark .fi-modal-header {
+    border-bottom-color: var(--nu-border-color);
+}
+
+.dark .fi-modal-footer {
+    border-top-color: var(--nu-border-color);
+}
+
+.dark .fi-dropdown-panel {
+    border-color: var(--nu-border-color);
+    box-shadow: 0 4px 16px rgb(0 0 0 / 30%) !important;
+}
+
+.dark .fi-wi-stats-overview-stat {
+    border-color: var(--nu-border-color);
+}
+
+.dark .fi-section:not(.fi-section-not-contained) {
+    border-color: var(--nu-border-color);
+}
+
+.dark .fi-section-header {
+    border-bottom-color: var(--nu-border-color);
+}
+
+.dark .fi-no-notification {
+    box-shadow: 0 4px 16px rgb(0 0 0 / 30%) !important;
+}
+
+.dark .fi-callout {
+    border-color: var(--nu-border-color);
+}
+
+.dark .fi-fieldset {
+    border-color: var(--nu-border-color);
+}
+
+.dark .fi-empty-state-heading {
+    color: var(--nu-black-20);
+}
+
+.dark .fi-empty-state-icon-bg {
+    background-color: rgb(78 42 132 / 15%);
+}
+
+.dark .fi-sc-wizard-header {
+    border-bottom-color: var(--nu-border-color);
+}
+
+.dark .fi-in-entry-label {
+    color: var(--nu-black-20);
+}
+
+.dark .fi-in-repeatable-item,
+.dark .fi-in-key-value {
+    border-color: var(--nu-border-color);
+}
+
+.dark .fi-account-widget {
+    border-color: var(--nu-border-color);
+}

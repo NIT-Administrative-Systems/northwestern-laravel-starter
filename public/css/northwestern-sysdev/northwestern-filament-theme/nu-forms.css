@@ -1,0 +1,236 @@
+/* ==========================================================================
+   Forms — Inputs, Selects, Checkboxes, Radios, Toggles
+   ========================================================================== */
+
+.fi-input-wrp {
+    border-radius: var(--nu-border-radius) !important;
+    box-shadow: none !important;
+    border: 1px solid var(--nu-border-color);
+    transition:
+        border-color var(--nu-transition-fast),
+        box-shadow var(--nu-transition-fast);
+}
+
+.fi-input-wrp:focus-within {
+    border-color: var(--nu-focus-border) !important;
+    box-shadow: 0 0 0 0.25rem var(--nu-focus-shadow-color) !important;
+}
+
+.fi-select-input {
+    border-radius: var(--nu-border-radius) !important;
+}
+
+.fi-checkbox-input {
+    border-radius: var(--nu-border-radius) !important;
+    --tw-ring-color: var(--nu-black-20) !important;
+}
+
+.fi-checkbox-input:checked {
+    background-color: var(--nu-purple-100) !important;
+    --tw-ring-color: var(--nu-purple-100) !important;
+}
+
+.fi-checkbox-input:focus {
+    --tw-ring-color: var(--nu-purple-100) !important;
+    --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0
+        calc(1px + var(--tw-ring-offset-width))
+        var(--tw-ring-color, currentcolor) !important;
+    box-shadow:
+        var(--tw-ring-shadow),
+        0 0 0 0.25rem var(--nu-focus-shadow-color) !important;
+}
+
+.fi-radio-input {
+    --tw-ring-color: var(--nu-black-20) !important;
+}
+
+.fi-radio-input:checked {
+    background-color: var(--nu-purple-100) !important;
+    --tw-ring-color: var(--nu-purple-100) !important;
+}
+
+.fi-radio-input:focus {
+    --tw-ring-color: var(--nu-purple-100) !important;
+    --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0
+        calc(1px + var(--tw-ring-offset-width))
+        var(--tw-ring-color, currentcolor) !important;
+    box-shadow:
+        var(--tw-ring-shadow),
+        0 0 0 0.25rem var(--nu-focus-shadow-color) !important;
+}
+
+.dark .fi-checkbox-input,
+.dark .fi-radio-input {
+    --tw-ring-color: var(--nu-black-50) !important;
+}
+
+.dark .fi-checkbox-input:checked,
+.dark .fi-radio-input:checked {
+    background-color: var(--nu-purple-50) !important;
+    --tw-ring-color: var(--nu-purple-50) !important;
+}
+
+.fi-checkbox-input:disabled,
+.fi-radio-input:disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+    pointer-events: auto !important;
+}
+
+.fi-checkbox-input:disabled + label,
+.fi-radio-input:disabled + label {
+    cursor: not-allowed !important;
+    opacity: 0.5 !important;
+}
+
+.fi-fo-toggle {
+    box-shadow: none !important;
+}
+
+.fi-toggle.fi-toggle-on {
+    background-color: var(--nu-purple-100) !important;
+}
+
+.dark .fi-toggle.fi-toggle-on {
+    background-color: var(--nu-purple-50) !important;
+}
+
+.fi-toggle:disabled {
+    cursor: not-allowed !important;
+    pointer-events: auto !important;
+    opacity: 0.5 !important;
+}
+
+.fi-fo-file-upload {
+    border-radius: var(--nu-border-radius) !important;
+    box-shadow: none !important;
+}
+
+/* stylelint-disable selector-class-pattern */
+.fi-fo-file-upload .filepond--root {
+    font-family: var(--nu-font-body) !important;
+}
+
+.fi-fo-file-upload .filepond--drop-label label {
+    font-family: var(--nu-font-body) !important;
+}
+/* stylelint-enable selector-class-pattern */
+
+.fi-fo-textarea {
+    border-radius: var(--nu-border-radius) !important;
+}
+
+.fi-fo-rich-editor {
+    border-radius: var(--nu-border-radius) !important;
+}
+
+.fi-fo-rich-editor .fi-fo-rich-editor-toolbar {
+    border-radius: var(--nu-border-radius) var(--nu-border-radius) 0 0 !important;
+}
+
+.fi-fo-date-time-picker-panel {
+    border-radius: var(--nu-border-radius) !important;
+    box-shadow: var(--nu-shadow-lg) !important;
+    border: 1px solid var(--nu-border-color);
+}
+
+.fi-fo-date-time-picker-calendar-day-today {
+    font-weight: 700;
+}
+
+.fi-fo-color-picker-panel {
+    border-radius: var(--nu-border-radius) !important;
+    box-shadow: var(--nu-shadow-lg) !important;
+    border: 1px solid var(--nu-border-color);
+}
+
+.fi-fo-builder-item,
+.fi-fo-repeater-item {
+    border: 1px solid var(--nu-border-color);
+    border-radius: var(--nu-border-radius) !important;
+}
+
+.fi-fo-builder-item-header,
+.fi-fo-repeater-item-header {
+    border-bottom: 1px solid var(--nu-border-color);
+    background-color: var(--nu-surface-muted);
+}
+
+.fi-fo-builder-item-header-label,
+.fi-fo-repeater-item-header-label {
+    font-family: var(--nu-font-heading);
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.fi-fo-tags-input-wrp {
+    border-radius: var(--nu-border-radius) !important;
+}
+
+.fi-fo-key-value-add-action-ctn {
+    border-top: 1px solid var(--nu-border-color);
+    padding: 0.5rem;
+}
+
+.fi-fo-markdown-editor,
+.fi-fo-code-editor {
+    border: 1px solid var(--nu-border-color);
+    border-radius: var(--nu-border-radius) !important;
+}
+
+.fi-fo-checkbox-list-search-input-wrp {
+    border-bottom: 1px solid var(--nu-border-color);
+}
+
+.fi-fo-checkbox-list-option-label,
+.fi-fo-radio-label-text {
+    font-family: var(--nu-font-body);
+    font-size: 0.875rem;
+}
+
+.fi-fo-toggle-buttons-btn-ctn {
+    border-radius: var(--nu-border-radius) !important;
+}
+
+.fi-fo-field-wrp-error-message {
+    color: var(--nu-color-danger);
+    font-family: var(--nu-font-body);
+    font-size: 0.8125rem;
+}
+
+.dark .fi-input-wrp {
+    border-color: var(--nu-border-color);
+}
+
+.dark .fi-fo-date-time-picker-panel,
+.dark .fi-fo-color-picker-panel {
+    border-color: var(--nu-border-color);
+}
+
+.dark .fi-fo-builder-item,
+.dark .fi-fo-repeater-item {
+    border-color: var(--nu-border-color);
+}
+
+.dark .fi-fo-builder-item-header,
+.dark .fi-fo-repeater-item-header {
+    border-bottom-color: var(--nu-border-color);
+    background-color: var(--nu-surface-muted);
+}
+
+.dark .fi-fo-key-value-add-action-ctn {
+    border-top-color: var(--nu-border-color);
+}
+
+.dark .fi-fo-markdown-editor,
+.dark .fi-fo-code-editor {
+    border-color: var(--nu-border-color);
+}
+
+.dark .fi-fo-checkbox-list-search-input-wrp {
+    border-bottom-color: var(--nu-border-color);
+}
+
+.dark .fi-fo-field-wrp-error-message {
+    color: var(--nu-color-danger);
+}
