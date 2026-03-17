@@ -14,7 +14,6 @@ use Filament\Navigation\NavigationItem;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
-use Filament\Support\Colors\Color;
 use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -24,7 +23,6 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Northwestern\FilamentTheme\NorthwesternTheme;
-use pxlrbt\FilamentEnvironmentIndicator\EnvironmentIndicatorPlugin;
 
 class AdministrationPanelProvider extends PanelProvider
 {
@@ -64,10 +62,8 @@ class AdministrationPanelProvider extends PanelProvider
             ])
             ->plugins([
                 NorthwesternTheme::make()
+                    ->impersonationBanner()
                     ->withoutAssetRegistration(),
-                EnvironmentIndicatorPlugin::make()
-                    ->visible(! app()->isProduction())
-                    ->color(Color::Yellow),
             ])
             ->databaseNotifications()
             ->databaseNotificationsPolling('30s')
