@@ -3,9 +3,9 @@
         function getColorClass(string $color): string
         {
             return match ($color) {
-                'success' => 'text-green-600 dark:text-green-400',
-                'warning' => 'text-yellow-600 dark:text-yellow-400',
-                'danger' => 'text-red-600 dark:text-red-400',
+                'success' => 'text-nu-dark-green dark:text-nu-green',
+                'warning' => 'text-amber-700 dark:text-amber-400',
+                'danger' => 'text-red-700 dark:text-red-400',
                 default => 'text-gray-500 dark:text-gray-400',
             };
         }
