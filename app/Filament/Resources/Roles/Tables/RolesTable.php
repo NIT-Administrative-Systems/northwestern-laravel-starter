@@ -36,9 +36,10 @@ class RolesTable
                     ->label('Assignment Locked')
                     ->boolean()
                     ->trueIcon(Heroicon::LockClosed)
-                    ->falseIcon('')
+                    ->falseIcon(Heroicon::LockOpen)
                     ->trueColor('warning')
-                    ->tooltip(fn (Role $record) => $record->isAssignmentLocked() ? 'Assigned programmatically - cannot be changed in the UI' : null),
+                    ->falseColor('gray')
+                    ->tooltip(fn (Role $record) => $record->isAssignmentLocked() ? 'Assigned programmatically - cannot be changed in the UI' : 'Assignment is open'),
                 TextColumn::make('permissions_count')
                     ->label('Permissions')
                     ->badge()
