@@ -12,11 +12,9 @@ use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
-use Filament\Support\Facades\FilamentView;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Filament\View\PanelsRenderHook;
 use Illuminate\Support\ServiceProvider;
 
 class FilamentServiceProvider extends ServiceProvider
@@ -28,11 +26,6 @@ class FilamentServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        FilamentView::registerRenderHook(
-            PanelsRenderHook::BODY_START,
-            static fn () => view('components.filament.impersonation-banner')
-        );
-
         $timezone = fn () => once(fn () => auth()->user()->timezone ?? config('app.timezone'));
 
         Table::configureUsing(

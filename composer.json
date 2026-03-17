@@ -34,7 +34,6 @@
         "northwestern-sysdev/tdx-php-sdk": "^0.5.1",
         "owen-it/laravel-auditing": "^14.0",
         "phiki/phiki": "^2.0",
-        "pxlrbt/filament-environment-indicator": "^3.0",
         "sentry/sentry-laravel": "^4.13",
         "spatie/laravel-db-snapshots": "^2.7",
         "spatie/laravel-health": "^1.34",
