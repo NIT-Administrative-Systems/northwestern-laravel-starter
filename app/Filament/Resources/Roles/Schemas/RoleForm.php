@@ -186,8 +186,8 @@ class RoleForm
                         filled($systemPermissions) ? CheckboxList::make('system_permissions')
                             ->label('System Managed Permissions')
                             ->helperText(new HtmlString(<<<'HTML'
-        <div class="mt-3 rounded-md border border-red-500/40 bg-red-500/5 px-4 py-3 text-xs leading-relaxed text-red-400">
-            <p class="font-semibold text-red-400">Sensitive Permissions</p>
+        <div class="mt-3 rounded-md border border-red-500/40 bg-red-500/5 px-4 py-3 text-xs leading-relaxed text-red-700 dark:text-red-400">
+            <p class="font-semibold text-red-700 dark:text-red-400">Sensitive Permissions</p>
             <p class="mt-1">
                 These permissions are sensitive and should not be given out broadly. They are only visible to users with the
                 <span class="font-semibold">"Manage All"</span> permission.
