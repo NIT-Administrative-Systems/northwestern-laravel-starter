@@ -5202,29 +5202,29 @@
         },
         {
             "name": "northwestern-sysdev/northwestern-filament-theme",
-            "version": "v2.1.0",
+            "version": "v2.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/NIT-Administrative-Systems/northwestern-filament-theme",
-                "reference": "8493555238e804b95d5fb8a7e6dafb83cbb97437"
+                "reference": "083ce69c1b264387da860590981f8bc65dd8bced"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/NIT-Administrative-Systems/northwestern-filament-theme/zipball/8493555238e804b95d5fb8a7e6dafb83cbb97437",
-                "reference": "8493555238e804b95d5fb8a7e6dafb83cbb97437",
+                "url": "https://api.github.com/repos/NIT-Administrative-Systems/northwestern-filament-theme/zipball/083ce69c1b264387da860590981f8bc65dd8bced",
+                "reference": "083ce69c1b264387da860590981f8bc65dd8bced",
                 "shasum": ""
             },
             "require": {
                 "filament/filament": "^4.0||^5.0",
-                "illuminate/contracts": "^11.0||^12.0",
-                "php": "^8.2",
+                "illuminate/contracts": "^12.0||^13.0",
+                "php": "^8.3",
                 "spatie/laravel-package-tools": "^1.16"
             },
             "require-dev": {
                 "driftingly/rector-laravel": "^2.0",
                 "larastan/larastan": "^3.0",
                 "laravel/pint": "^1.21",
-                "orchestra/testbench": "^9.0||^10.0",
+                "orchestra/testbench": "^10.0||^11.0",
                 "pestphp/pest": "^3.0",
                 "rector/rector": "^2.0"
             },
@@ -5266,7 +5266,7 @@
                 "issues": "https://github.com/NIT-Administrative-Systems/northwestern-filament-theme/issues",
                 "source": "https://github.com/NIT-Administrative-Systems/northwestern-filament-theme"
             },
-            "time": "2026-03-17T04:40:37+00:00"
+            "time": "2026-03-19T15:32:56+00:00"
         },
         {
             "name": "northwestern-sysdev/northwestern-laravel-ui",
