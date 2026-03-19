@@ -104,6 +104,8 @@ class RolesTable
             ->toolbarActions([
                 ExportAction::make()
                     ->label('Export')
+                    ->icon(Heroicon::OutlinedArrowDownTray)
+                    ->color('gray')
                     ->exporter(RoleExporter::class),
             ])
             ->emptyStateHeading('No roles defined')
