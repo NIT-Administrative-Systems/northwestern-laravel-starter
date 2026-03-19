@@ -9,11 +9,15 @@ use App\Filament\Navigation\AdministrationNavGroup;
 use App\Filament\Resources\Roles\Pages\CreateRole;
 use App\Filament\Resources\Roles\Pages\EditRole;
 use App\Filament\Resources\Roles\Pages\ListRoles;
+use App\Filament\Resources\Roles\Pages\RoleDefinitionHistory;
 use App\Filament\Resources\Roles\Pages\ViewRole;
 use App\Filament\Resources\Roles\RelationManagers\UsersRelationManager;
 use App\Filament\Resources\Roles\Schemas\RoleForm;
 use App\Filament\Resources\Roles\Tables\RolesTable;
 use BackedEnum;
+use Filament\Navigation\NavigationItem;
+use Filament\Pages\Enums\SubNavigationPosition;
+use Filament\Resources\Pages\Page;
 use Filament\Resources\Pages\PageRegistration;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -38,6 +42,26 @@ class RoleResource extends Resource
     protected static ?int $navigationSort = 2;
 
     protected static ?string $description = 'Define roles and assign permissions to control user access.';
+
+    protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
+
+    /** @return array<NavigationItem> */
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        assert(method_exists($page, 'getRecord'));
+
+        /** @var Role $record */
+        $record = $page->getRecord();
+
+        $detailsPage = (! $record->isSystemManagedType() && static::canEdit($record))
+            ? EditRole::class
+            : ViewRole::class;
+
+        return $page->generateNavigationItems([
+            $detailsPage,
+            RoleDefinitionHistory::class,
+        ]);
+    }
 
     public static function form(Schema $schema): Schema
     {
@@ -65,6 +89,7 @@ class RoleResource extends Resource
             'create' => CreateRole::route('/create'),
             'view' => ViewRole::route('/{record}'),
             'edit' => EditRole::route('/{record}/edit'),
+            'history' => RoleDefinitionHistory::route('/{record}/history'),
         ];
     }
 

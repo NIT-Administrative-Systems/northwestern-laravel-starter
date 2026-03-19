@@ -9,8 +9,10 @@ use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\User;
 use App\Filament\Resources\Roles\RoleResource;
+use BackedEnum;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
@@ -21,6 +23,10 @@ use Illuminate\Support\Str;
 class EditRole extends EditRecord
 {
     protected static string $resource = RoleResource::class;
+
+    protected static ?string $navigationLabel = 'Details';
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedInformationCircle;
 
     public function mount(int|string $record): void
     {

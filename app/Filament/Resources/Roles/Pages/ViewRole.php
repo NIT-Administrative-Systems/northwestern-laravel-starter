@@ -7,6 +7,7 @@ namespace App\Filament\Resources\Roles\Pages;
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\Role;
 use App\Filament\Resources\Roles\RoleResource;
+use BackedEnum;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
@@ -20,6 +21,10 @@ use Filament\Support\Icons\Heroicon;
 class ViewRole extends ViewRecord
 {
     protected static string $resource = RoleResource::class;
+
+    protected static ?string $navigationLabel = 'Details';
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedInformationCircle;
 
     public function form(Schema $schema): Schema
     {
