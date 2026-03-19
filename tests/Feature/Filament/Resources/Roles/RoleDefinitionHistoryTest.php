@@ -190,7 +190,7 @@ class RoleDefinitionHistoryTest extends TestCase
         $this->assertStringContainsString('Name', $result->toHtml());
         $this->assertStringContainsString('Old Name', $result->toHtml());
         $this->assertStringContainsString('New Name', $result->toHtml());
-        $this->assertStringContainsString('&rarr;', $result->toHtml());
+        $this->assertStringContainsString('<svg', $result->toHtml());
     }
 
     public function test_summarize_changes_for_multiple_attribute_updates(): void
@@ -218,8 +218,9 @@ class RoleDefinitionHistoryTest extends TestCase
 
         $result = RoleDefinitionHistoryTable::summarizeChanges($audit);
 
-        $this->assertStringContainsString('+2 permissions', $result->toHtml());
-        $this->assertStringContainsString('View Users, Edit Users', $result->toHtml());
+        $this->assertStringContainsString('+ View Users', $result->toHtml());
+        $this->assertStringContainsString('+ Edit Users', $result->toHtml());
+        $this->assertStringContainsString('success', $result->toHtml());
         $this->assertStringNotContainsString('danger', $result->toHtml());
     }
 
@@ -234,8 +235,8 @@ class RoleDefinitionHistoryTest extends TestCase
 
         $result = RoleDefinitionHistoryTable::summarizeChanges($audit);
 
-        $this->assertStringContainsString('-1 permission', $result->toHtml());
-        $this->assertStringContainsString('View Users', $result->toHtml());
+        $this->assertStringContainsString('− View Users', $result->toHtml());
+        $this->assertStringContainsString('danger', $result->toHtml());
         $this->assertStringNotContainsString('success', $result->toHtml());
     }
 
@@ -252,10 +253,10 @@ class RoleDefinitionHistoryTest extends TestCase
 
         $result = RoleDefinitionHistoryTable::summarizeChanges($audit);
 
-        $this->assertStringContainsString('+1 permission', $result->toHtml());
-        $this->assertStringContainsString('Edit Users', $result->toHtml());
-        $this->assertStringContainsString('-1 permission', $result->toHtml());
-        $this->assertStringContainsString('View Users', $result->toHtml());
+        $this->assertStringContainsString('+ Edit Users', $result->toHtml());
+        $this->assertStringContainsString('success', $result->toHtml());
+        $this->assertStringContainsString('− View Users', $result->toHtml());
+        $this->assertStringContainsString('danger', $result->toHtml());
     }
 
     public function test_summarize_changes_for_role_type_change_resolves_label(): void
