@@ -109,17 +109,14 @@ Common use cases for a second panel:
     Consider which features from the Administration panel you want to carry over:
 
     ```php
-    ->colors(['primary' => Color::Purple])
-    ->favicon('https://common.northwestern.edu/v8/icons/favicon-32.png')
-    ->brandLogo(config('northwestern-theme.lockup'))
     ->databaseNotifications()
     ->databaseNotificationsPolling('30s')
     ->globalSearch()
     ->globalSearchDebounce('500ms')
     ->plugins([
-        EnvironmentIndicatorPlugin::make()
-            ->visible(! app()->isProduction())
-            ->color(Color::Yellow),
+        NorthwesternTheme::make()
+            ->impersonationBanner()
+            ->withoutAssetRegistration(),
     ])
     ```
 

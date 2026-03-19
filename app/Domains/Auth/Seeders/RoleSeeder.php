@@ -11,6 +11,7 @@ use App\Domains\Auth\Models\Role;
 use App\Domains\Auth\Models\RoleType;
 use App\Domains\Core\Attributes\AutoSeed;
 use App\Domains\Core\Contracts\IdempotentSeederInterface;
+use App\Domains\Core\Seeders\Concerns\AuditsSeederChanges;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Arr;
 use Spatie\Permission\PermissionRegistrar;
@@ -23,35 +24,39 @@ use Spatie\Permission\PermissionRegistrar;
 )]
 class RoleSeeder extends Seeder implements IdempotentSeederInterface
 {
+    use AuditsSeederChanges;
+
     public function run(): void
     {
         resolve(PermissionRegistrar::class)->forgetCachedPermissions();
 
-        $systemManagedRoleId = RoleType::where('slug', RoleTypeEnum::SystemManaged)->value('id');
+        $this->withAuditing([Role::class], function () {
+            $systemManagedRoleId = RoleType::where('slug', RoleTypeEnum::SystemManaged)->value('id');
 
-        $roles = collect([
-            [
-                'name' => SystemRole::SuperAdministrator,
-                'role_type_id' => $systemManagedRoleId,
-                'permissions' => SystemPermission::cases(),
-            ],
-            [
-                'name' => SystemRole::NorthwesternUser,
-                'role_type_id' => $systemManagedRoleId,
-                'assignment_locked' => true,
-                'permissions' => [
-                    // Add permissions as needed
+            $roles = collect([
+                [
+                    'name' => SystemRole::SuperAdministrator,
+                    'role_type_id' => $systemManagedRoleId,
+                    'permissions' => SystemPermission::cases(),
                 ],
-            ],
-        ]);
+                [
+                    'name' => SystemRole::NorthwesternUser,
+                    'role_type_id' => $systemManagedRoleId,
+                    'assignment_locked' => true,
+                    'permissions' => [
+                        // Add permissions as needed
+                    ],
+                ],
+            ]);
 
-        $roles->each(function (array $roleAttrs) {
-            $role = Role::updateOrCreate(
-                Arr::only($roleAttrs, ['name']),
-                Arr::except($roleAttrs, ['name', 'permissions']),
-            );
+            $roles->each(function (array $roleAttrs) {
+                $role = Role::updateOrCreate(
+                    Arr::only($roleAttrs, ['name']),
+                    Arr::except($roleAttrs, ['name', 'permissions']),
+                );
 
-            $role->syncPermissions($roleAttrs['permissions']);
+                $role->syncPermissionsWithAudit($roleAttrs['permissions']);
+            });
         });
     }
 }
