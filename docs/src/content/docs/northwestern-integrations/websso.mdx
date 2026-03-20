@@ -7,12 +7,14 @@ sidebar:
 
 import { Aside, Steps } from '@astrojs/starlight/components';
 
-Northwestern users authenticate via single sign-on. The starter supports two SSO providers through the [`northwestern-sysdev/laravel-soa`](https://github.com/NIT-Administrative-Systems/SysDev-laravel-soa) package's `WebSSOAuthentication` trait:
+Northwestern users authenticate via single sign-on. The starter supports two SSO providers through the [`northwestern-sysdev/laravel-soa`](https://github.com/NIT-Administrative-Systems/SysDev-laravel-soa) package's `WebSSOAuthentication` trait.
 
-- **Microsoft Entra ID** (formerly Azure AD) — OAuth2 authorization code flow directly to Microsoft
-- **Online Passport** (agentless WebSSO) — Cookie-based SSO via OpenAM/ForgeRock, validated through Apigee
+Providers:
 
-The starter **auto-detects** which provider to use based on your credentials. If a `WEBSSO_API_KEY` is set or `WEBSSO_STRATEGY` is `forgerock-direct`, the starter routes login/logout through Online Passport. Otherwise, it defaults to Entra ID. Only one provider is active at a time.
+- **Microsoft Entra ID** (formerly Azure AD) - OAuth2 authorization code flow directly to Microsoft
+- **Online Passport** (agentless WebSSO) - Cookie-based SSO via OpenAM/ForgeRock, validated through Apigee
+
+The starter **auto-detects** which provider to use based on your credentials. If `WEBSSO_API_KEY` is set or `WEBSSO_STRATEGY` is `forgerock-direct`, login/logout routes through Online Passport. Otherwise, it defaults to Entra ID. Only one provider is active at a time.
 
 For a higher-level overview of all authentication methods, see the [Authentication](/features/authentication/) documentation.
 
@@ -22,7 +24,7 @@ For a higher-level overview of all authentication methods, see the [Authenticati
 
 1. **User clicks "Sign in with NetID"**
 
-   The application redirects to Microsoft's login endpoint via `WebSSOController@oauthRedirect`. The OAuth2 authorization code flow goes directly to `login.microsoftonline.com` — it does not pass through Apigee or ForgeRock.
+   The application redirects to Microsoft's login endpoint via `WebSSOController@oauthRedirect`. The OAuth2 authorization code flow goes directly to `login.microsoftonline.com`, not through Apigee or ForgeRock.
 
 2. **User authenticates with Microsoft**
 
@@ -30,11 +32,11 @@ For a higher-level overview of all authentication methods, see the [Authenticati
 
 3. **Callback with token**
 
-   Microsoft redirects back to `/auth/azure-ad/callback` via a POST with an authorization code. The CSRF middleware is excluded for this route since the request originates from the identity provider. The `laravel-soa` package exchanges the code for tokens and validates the ID token JWT using Microsoft's signing keys.
+   Microsoft redirects back to `/auth/azure-ad/callback` via POST with an authorization code. CSRF middleware is excluded for this route since the request originates from the identity provider. The `laravel-soa` package exchanges the code for tokens and validates the ID token JWT using Microsoft's signing keys.
 
 4. **Directory Search lookup**
 
-   `WebSSOController::findUserByNetID()` calls `FindOrUpdateUserFromDirectory` to provision or update the user from Northwestern's directory. This includes a 3-attempt retry with 500ms delays — if all retries fail, a 503 error page is rendered.
+   `WebSSOController::findUserByNetID()` calls `FindOrUpdateUserFromDirectory` to provision or update the user from Northwestern's directory. This includes a 3-attempt retry with 500ms delays. If all retries fail, a 503 error page is rendered.
 
 5. **Session established**
 
@@ -60,7 +62,7 @@ For a higher-level overview of all authentication methods, see the [Authenticati
 
 4. **Directory Search lookup**
 
-   `WebSSOController::findUserByNetID()` calls `FindOrUpdateUserFromDirectory` to provision or update the user — identical to the Entra ID flow.
+   `WebSSOController::findUserByNetID()` calls `FindOrUpdateUserFromDirectory` to provision or update the user, identical to the Entra ID flow.
 
 5. **Session established**
 
@@ -95,8 +97,8 @@ For a higher-level overview of all authentication methods, see the [Authenticati
 
 The `oauthLogout()` method handles SSO session cleanup:
 
-- **Production** — Delegates to the `laravel-soa` trait's `oauthLogout()` method, which redirects to Entra ID's logout endpoint. The local session is cleared afterward.
-- **CI environment** — Short-circuits the Entra redirect and performs a local-only logout to avoid external service dependencies in CI.
+- **Production** - Delegates to the `laravel-soa` trait's `oauthLogout()` method, redirecting to Entra ID's logout endpoint. The local session is cleared afterward.
+- **CI environment** - Skips the Entra redirect and performs a local-only logout to avoid external service dependencies.
 
 ### Online Passport Logout
 
@@ -160,7 +162,7 @@ DUO_ENABLED=true
 | `DUO_ENABLED` | `false` | Enable Duo MFA (sets auth tree to `ldap-and-duo`) |
 
 <Aside type="note">
-The `apigee` strategy routes ForgeRock cookie validation through Northwestern's Apigee gateway. The `forgerock-direct` strategy validates cookies directly against the ForgeRock server. Both are for the Online Passport flow — Entra ID does not use either strategy.
+The `apigee` strategy routes ForgeRock cookie validation through Northwestern's Apigee gateway. The `forgerock-direct` strategy validates cookies directly against the ForgeRock server. Both are for the Online Passport flow; Entra ID does not use either strategy.
 </Aside>
 
 See the [laravel-soa documentation](https://nit-administrative-systems.github.io/SysDev-laravel-soa/) for full details on configuring Online Passport.

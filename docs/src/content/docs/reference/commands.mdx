@@ -307,7 +307,7 @@ class StripeValidator implements ConfigValidator
 **2. That's it.** The validator is automatically discovered from any `app/Domains/*/Services/ConfigValidation` directory. No registration or configuration needed.
 
 <Aside type="tip">
-The `description` parameter on `#[StarterValidator]` controls the label shown in the command output. The `shouldRun()` method determines whether the validator is relevant — return `false` for optional integrations that aren't configured to avoid false negatives.
+The `description` parameter on `#[StarterValidator]` controls the label shown in the command output. The `shouldRun()` method determines whether the validator is relevant. Return `false` for optional integrations that aren't configured to avoid false negatives.
 </Aside>
 
 ---

@@ -7,7 +7,7 @@ sidebar:
 
 import { Aside, Steps, Tabs, TabItem, Card, CardGrid } from '@astrojs/starlight/components';
 
-The starter implements a role-based access control (RBAC) system built on [Spatie Laravel Permission](https://spatie.be/docs/laravel-permission) with extensive enhancements — role types, permission metadata, auditable role changes, and API role segregation.
+The starter implements a role-based access control (RBAC) system built on [Spatie Laravel Permission](https://spatie.be/docs/laravel-permission) with added role types, permission metadata, auditable role changes, and API role segregation.
 
 ## How It Works
 
@@ -31,17 +31,17 @@ Every role belongs to a **role type** that determines how it can be managed and 
 
 | Type | Purpose | UI Editable | Assignable To |
 |------|---------|:-----------:|---------------|
-| **System Managed** | Critical roles managed by code (Super Administrator, Northwestern User) | No — read-only in Filament | All users (assignable by `ManageAll` users) |
+| **System Managed** | Critical roles managed by code (Super Administrator, Northwestern User) | No (read-only in Filament) | All users (assignable by `ManageAll` users) |
 | **Application Admin** | Administrative roles with elevated privileges | Yes | SSO and local users |
 | **Application Role** | Standard user roles for day-to-day access | Yes | SSO and local users |
 | **API Integration** | Roles for programmatic API consumers | Yes | API users only |
 
 ### When to Use Each Type
 
-- **System Managed** — Reserved for roles the starter ships with. Their definitions (name, permissions) are managed by seeders and cannot be edited or deleted through the admin panel. However, users with `ManageAll` **can** assign and remove system-managed roles from users via the UI (unless the role is also assignment-locked).
-- **Application Admin** — For roles that grant administrative capabilities within your application (e.g., "Department Manager", "Content Editor"). Created and managed by administrators in Filament.
-- **Application Role** — For standard user roles that grant specific feature access (e.g., "Report Viewer", "Data Entry"). The most common type you'll create.
-- **API Integration** — For API consumer roles. These can only be assigned to API users and only display API-relevant permissions in the role form.
+- **System Managed** - Reserved for roles the starter ships with. Their definitions (name, permissions) are seeder-managed and cannot be edited or deleted through the admin panel. Users with `ManageAll` **can** assign and remove system-managed roles from users via the UI (unless the role is also assignment-locked).
+- **Application Admin** - For roles that grant administrative capabilities within your application (e.g., "Department Manager", "Content Editor"). Created and managed by administrators in Filament.
+- **Application Role** - For standard user roles that grant specific feature access (e.g., "Report Viewer", "Data Entry"). The most common type you'll create.
+- **API Integration** - For API consumer roles. These can only be assigned to API users and only display API-relevant permissions in the role form.
 
 ---
 
@@ -71,11 +71,11 @@ The **Northwestern User** role serves as a baseline. It confirms the user has au
 
 ## Assignment-Locked Roles
 
-Assignment-locked roles have a per-role `assignment_locked` flag that prevents manual assignment or removal through the UI — regardless of permission level, including Super Administrators with `ManageAll`.
+Assignment-locked roles have a per-role `assignment_locked` flag that prevents manual assignment or removal through the UI, regardless of permission level, including Super Administrators with `ManageAll`.
 
 ### What It Is
 
-When a role is assignment-locked, it cannot be attached to or detached from users through Filament. The role is exclusively managed through programmatic processes (SSO provisioning, third-party API integrations, scheduled commands).
+When a role is assignment-locked, it cannot be attached to or detached from users through Filament. The role is managed through programmatic processes (SSO provisioning, third-party API integrations, scheduled commands).
 
 ### Distinction from System Managed
 
@@ -88,8 +88,8 @@ These are two independent concepts:
 | Assignment Locked only | Yes | No |
 | Both | No | No |
 
-- **System Managed** controls a role's *definition* — its name, permissions, and type are seeder-synced and cannot be edited in the UI.
-- **Assignment Locked** controls a role's *assignment* — it cannot be attached to or detached from users in the UI.
+- **System Managed** controls a role's *definition*. Its name, permissions, and type are seeder-synced and cannot be edited in the UI.
+- **Assignment Locked** controls a role's *assignment*. It cannot be attached to or detached from users in the UI.
 
 ### Use Cases
 
@@ -113,12 +113,12 @@ Role::updateOrCreate(
 
 ### Programmatic Assignment
 
-The audited methods (`assignRoleWithAudit`, `removeRoleWithAudit`) work normally for all origins. The lock is enforced at the UI layer — Filament hides attach/detach actions and filters locked roles from assignment dropdowns. Programmatic code is trusted and can assign or remove locked roles freely.
+The audited methods (`assignRoleWithAudit`, `removeRoleWithAudit`) work for all origins. The lock is enforced at the UI layer: Filament hides attach/detach actions and filters locked roles from assignment dropdowns. Programmatic code can assign or remove locked roles freely.
 
 ### Default Locked Roles
 
-- **Northwestern User** — assignment-locked (managed by SSO provisioning)
-- **Super Administrator** — intentionally *not* assignment-locked for onboarding
+- **Northwestern User** - assignment-locked (managed by SSO provisioning)
+- **Super Administrator** - intentionally *not* assignment-locked for onboarding
 
 ### Emergency Detachment
 
@@ -247,7 +247,7 @@ When testing new authorization logic, always test with a non-super-admin user. B
 
 ## Audited Role Changes
 
-The starter makes Spatie's built-in `assignRole()` and `removeRole()` methods **private** on the User model, forcing all role changes to go through audited methods instead.
+The starter makes Spatie's `assignRole()` and `removeRole()` methods **private** on the User model, forcing all role changes through audited methods.
 
 ### `assignRoleWithAudit()`
 
@@ -270,10 +270,10 @@ $user->removeRoleWithAudit(
 ```
 
 Both methods create an audit entry capturing:
-- **Before state** — all roles the user had before the change
-- **After state** — all roles the user has after the change
-- **Origin** — why the change happened
-- **Context** — optional additional metadata
+- **Before state** - all roles the user had before the change
+- **After state** - all roles the user has after the change
+- **Origin** - why the change happened
+- **Context** - optional additional metadata
 
 ### Origin Types
 
@@ -287,7 +287,7 @@ The `RoleModificationOrigin` tracks **why** a role change occurred:
 | `RemovedByDeletion` | No | Roles removed from users when a role is deleted |
 | `System` | No | Programmatic changes (seeders, Artisan commands) |
 
-The Filament UI prevents manual assignment and removal for assignment-locked roles. Programmatic origins are always allowed — the lock is not enforced at the domain layer.
+The Filament UI prevents manual assignment and removal for assignment-locked roles. Programmatic origins are allowed; the lock is not enforced at the domain layer.
 
 ### Audited Permission Sync
 
@@ -297,7 +297,7 @@ When editing a role's permissions in Filament, `syncPermissionsWithAudit()` crea
 
 ## Role-Specific Permission Checks
 
-The `TracksPermissionSources` trait on the User model enables fine-grained checks when you need to know not just *if* a user has a permission, but *which role* grants it.
+The `TracksPermissionSources` trait on the User model lets you check not just *if* a user has a permission, but *which role* grants it.
 
 | Method | Returns | Description |
 |--------|---------|-------------|

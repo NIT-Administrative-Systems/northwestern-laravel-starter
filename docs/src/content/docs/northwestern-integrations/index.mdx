@@ -7,7 +7,7 @@ sidebar:
 
 import { Card, CardGrid } from '@astrojs/starlight/components';
 
-The starter integrates with several Northwestern-specific services to handle identity management, user provisioning, lifecycle events, and ticketing. Most of these integrations are powered by the [`northwestern-sysdev/laravel-soa`](https://github.com/NIT-Administrative-Systems/SysDev-laravel-soa) package, which provides Laravel bindings for Northwestern's SOA APIs.
+The starter integrates with Northwestern-specific services for identity management, user provisioning, lifecycle events, and ticketing. Most integrations use the [`northwestern-sysdev/laravel-soa`](https://github.com/NIT-Administrative-Systems/SysDev-laravel-soa) package, which provides Laravel bindings for Northwestern's SOA APIs.
 
 ## Integrations
 
@@ -44,10 +44,10 @@ The starter integrates with several Northwestern-specific services to handle ide
 
 The [`northwestern-sysdev/laravel-soa`](https://github.com/NIT-Administrative-Systems/SysDev-laravel-soa) package provides:
 
-- **Directory Search** — LDAP user lookup by NetID, email, or employee ID
-- **WebSSO Authentication** — Entra ID (Azure AD) OAuth2 flow and Online Passport (agentless WebSSO via ForgeRock/Apigee)
-- **EventHub** — Webhook registration, HMAC verification middleware, and queue integration
-- **Apigee API Keys** — Middleware for verifying inbound Apigee API key headers
+- **Directory Search** - LDAP user lookup by NetID, email, or employee ID
+- **WebSSO Authentication** - Entra ID (Azure AD) OAuth2 flow and Online Passport (agentless WebSSO via ForgeRock/Apigee)
+- **EventHub** - Webhook registration, HMAC verification middleware, and queue integration
+- **Apigee API Keys** - Middleware for verifying inbound Apigee API key headers
 
 Full package documentation is available at [nit-administrative-systems.github.io/SysDev-laravel-soa](https://nit-administrative-systems.github.io/SysDev-laravel-soa/).
 

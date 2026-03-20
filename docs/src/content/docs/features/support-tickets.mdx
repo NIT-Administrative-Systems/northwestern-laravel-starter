@@ -7,7 +7,7 @@ sidebar:
 
 import { Card, CardGrid, Aside, Steps, Tabs, TabItem, FileTree, Badge } from '@astrojs/starlight/components';
 
-The starter includes a user-facing contact support form that submits tickets to a configurable backend. Out of the box, it ships with two gateway drivers - **Email** and **TeamDynamix** - and an automatic email fallback that ensures user requests are never silently lost.
+The starter includes a user-facing contact support form that submits tickets to a configurable backend. It ships with two gateway drivers, **Email** and **TeamDynamix**, and an automatic email fallback that ensures user requests are never lost.
 
 The feature is disabled by default and can be enabled with a single environment variable.
 
@@ -15,11 +15,11 @@ The feature is disabled by default and can be enabled with a single environment 
 
 The system follows a layered architecture:
 
-- **Contract** — `TicketSystemGateway` interface decouples the orchestration from gateway implementations
-- **Enum-driven resolution** — `TicketSystem::gatewayClass()` maps each driver to its concrete class
-- **Immutable value object** — `CreationResult` carries the outcome of every gateway call
-- **Repository** — Keeps persistence concerns out of the action
-- **Action** — `CreateSupportTicket` orchestrates the full workflow in one place
+- **Contract** - `TicketSystemGateway` interface decouples orchestration from gateway implementations
+- **Enum-driven resolution** - `TicketSystem::gatewayClass()` maps each driver to its concrete class
+- **Immutable value object** - `CreationResult` carries the outcome of each gateway call
+- **Repository** - Keeps persistence concerns out of the action
+- **Action** - `CreateSupportTicket` orchestrates the workflow in one place
 
 ---
 
@@ -54,7 +54,7 @@ When enabled, the contact form routes are registered and the submission log appe
 
 4. **Result is recorded**
 
-   The repository updates the ticket with the gateway's response — ticket number, system type, and any error message.
+   The repository updates the ticket with the gateway's response: ticket number, system type, and any error message.
 
 5. **Fallback fires if needed**
 
@@ -63,9 +63,9 @@ When enabled, the contact form routes are registered and the submission log appe
 6. **User receives feedback**
 
    The controller returns a contextual message:
-   - **Success** — includes the ticket reference number
-   - **Fallback sent** — confirms submission without exposing internal details
-   - **Both failed** — generic confirmation that the team will follow up
+   - **Success** - includes the ticket reference number
+   - **Fallback sent** - confirms submission without exposing internal details
+   - **Both failed** - generic confirmation that the team will follow up
 
 </Steps>
 
@@ -99,8 +99,8 @@ When enabled, the contact form routes are registered and the submission log appe
 
 The email gateway dispatches two queued emails per submission:
 
-1. **Team notification** (`SupportTicketMessage`) — Contains the full request body, submitter metadata, and a fallback warning when operating in fallback mode.
-2. **User confirmation** (`SupportTicketConfirmation`) — A clean, user-facing email with the reference number and next-step expectations. No internal details are exposed.
+1. **Team notification** (`SupportTicketMessage`) - Contains the full request body, submitter metadata, and a fallback warning when operating in fallback mode.
+2. **User confirmation** (`SupportTicketConfirmation`) - A user-facing email with the reference number and next-step expectations. No internal details are exposed.
 
 The reference prefix is configurable and only applies to the email gateway. External gateways like TeamDynamix return their own native ticket references.
 
@@ -114,7 +114,7 @@ When the email gateway is used as a fallback after a primary gateway failure, th
 
 ### TeamDynamix Gateway
 
-The [TeamDynamix](https://services.northwestern.edu/TDNext) (TDX) gateway submits tickets to the TDX REST API using the [`northwestern-sysdev/tdx-php-sdk`](https://github.com/NIT-Administrative-Systems/tdx-php-sdk) package. The SDK handles authentication and token management internally, and covers a broad surface beyond ticket creation — including people/group lookups, service catalog queries, and metadata management. Configuration is published to `config/team-dynamix.php`.
+The [TeamDynamix](https://services.northwestern.edu/TDNext) (TDX) gateway submits tickets to the TDX REST API using the [`northwestern-sysdev/tdx-php-sdk`](https://github.com/NIT-Administrative-Systems/tdx-php-sdk) package. The SDK handles authentication and token management, and covers a broad surface beyond ticket creation: people/group lookups, service catalog queries, and metadata management. Configuration is published to `config/team-dynamix.php`.
 
 The gateway resolves metadata IDs (ticket type, form, status, priority, service) through the `TeamDynamixCacheRepository`, which caches name-to-ID lookups for one week to avoid repeated API round-trips:
 
@@ -139,14 +139,14 @@ TDX_SERVICE="My Application"
 ```
 
 <Aside type="caution">
-`TDX_ASSIGNEE_ID` is required when using the TeamDynamix driver. This is the numeric ID of the TDX group that tickets should be assigned to — not a user ID.
+`TDX_ASSIGNEE_ID` is required when using the TeamDynamix driver. This is the numeric ID of the TDX group that tickets should be assigned to, not a user ID.
 </Aside>
 
 ---
 
 ## Automatic Fallback
 
-When the primary gateway is **not** the email driver and it fails, the system automatically dispatches the ticket via the `MailGateway` in fallback mode. This is a safety net — it cannot be disabled — ensuring that user requests are never silently lost.
+When the primary gateway is **not** the email driver and it fails, the system dispatches the ticket via the `MailGateway` in fallback mode. This safety net cannot be disabled, ensuring that user requests are never lost.
 
 The fallback only fires when:
 
@@ -224,7 +224,7 @@ Adding a new gateway requires three steps: add an enum case, implement the inter
 
 2. **Create the gateway class**
 
-   Implement the `TicketSystemGateway` interface. Your gateway **must never throw** — capture errors and return them via `CreationResult`.
+   Implement the `TicketSystemGateway` interface. Your gateway **must never throw**. Capture errors and return them via `CreationResult`.
 
    ```php
    // app/Domains/Support/Gateways/Jira/JiraGateway.php
@@ -291,7 +291,7 @@ Adding a new gateway requires three steps: add an enum case, implement the inter
 
 </Steps>
 
-That's it. The factory resolves gateways through the enum, so no additional wiring is needed. The automatic email fallback, admin panel, and submission recording all work with your new driver immediately.
+The factory resolves gateways through the enum, so no additional wiring is needed. The automatic email fallback, admin panel, and submission recording all work with your new driver.
 
 ### Alternative: Rebinding the Interface
 
@@ -313,7 +313,7 @@ This overrides the binding registered by `SupportServiceProvider` and gives you 
 
 ## Rate Limiting
 
-The contact form uses a tiered rate limiting strategy — per-minute, per-hour, and per-day — to allow short bursts while preventing sustained abuse over longer windows. All limits are per-user.
+The contact form uses tiered rate limiting (per-minute, per-hour, and per-day) to allow short bursts while preventing sustained abuse. All limits are per-user.
 
 | Variable | Default | Description |
 |----------|---------|-------------|

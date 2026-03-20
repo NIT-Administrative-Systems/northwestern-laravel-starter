@@ -7,21 +7,21 @@ sidebar:
 
 import { Aside, Steps, Badge, Tabs, TabItem } from '@astrojs/starlight/components';
 
-The starter ships with a single Filament panel — the **Administration** panel at `/administration` — for back-end staff tooling. However, many applications need more than just an admin area. If your application involves CRUD tables, data exports, filterable lists, info displays, or action-driven workflows, creating a **separate Filament panel** is often the most productive path.
+The starter ships with a single Filament panel, the **Administration** panel at `/administration`, for back-end staff tooling. If your application involves CRUD tables, data exports, filterable lists, info displays, or action-driven workflows, creating a **separate Filament panel** is often the most productive path.
 
 ## When to Use a Separate Panel
 
-The Bootstrap-based user-facing stack (Blade + Northwestern Laravel UI) is the right choice for public landing pages, branded content, and heavily custom interfaces. But for authenticated, data-driven experiences — especially those involving tables, forms, filters, and bulk actions — Filament's component library can save significant development time.
+The Bootstrap-based user-facing stack (Blade + Northwestern Laravel UI) is the right choice for public landing pages, branded content, and custom interfaces. For authenticated, data-driven experiences involving tables, forms, filters, and bulk actions, Filament's component library saves development time.
 
 Common use cases for a second panel:
 
-- **Student or applicant portals** — review status, upload documents, view decisions
-- **Faculty/staff dashboards** — manage courses, events, or departmental data
-- **Reviewer or coordinator tools** — evaluate submissions, assign reviewers, track progress
-- **Self-service data management** — any authenticated user managing their own records
+- **Student or applicant portals** - review status, upload documents, view decisions
+- **Faculty/staff dashboards** - manage courses, events, or departmental data
+- **Reviewer or coordinator tools** - evaluate submissions, assign reviewers, track progress
+- **Self-service data management** - authenticated users managing their own records
 
 <Aside type="tip">
-    You are never forced to choose one approach. The Bootstrap stack and any number of Filament panels coexist — the Bootstrap pages handle authentication and serve as a landing page, while Filament panels handle the data-heavy work.
+    You are never forced to choose one approach. The Bootstrap stack and any number of Filament panels coexist. The Bootstrap pages handle authentication and serve as a landing page, while Filament panels handle the data-heavy work.
 </Aside>
 
 ## Creating a New Panel
@@ -38,7 +38,7 @@ Common use cases for a second panel:
 
 2. **Define a panel ID constant**
 
-    Follow the pattern established by `AdministrationPanelProvider` — define a public `ID` constant and reference it consistently:
+    Follow the pattern from `AdministrationPanelProvider`. Define a public `ID` constant and reference it consistently:
 
     ```php
     // app/Providers/Filament/PortalPanelProvider.php
@@ -63,7 +63,7 @@ Common use cases for a second panel:
 
 3. **Configure the middleware stack**
 
-    Your new panel needs the same middleware foundation as the Administration panel. At minimum, include the `InjectLivewireAssets` middleware — it resolves a conflict between the Bootstrap stack's bundled Livewire assets and Filament's asset injection:
+    Your new panel needs the same middleware foundation as the Administration panel. At minimum, include the `InjectLivewireAssets` middleware, which resolves a conflict between the Bootstrap stack's bundled Livewire assets and Filament's asset injection:
 
     ```php
     ->middleware([
@@ -147,7 +147,7 @@ Define a new permission in `SystemPermission` for your panel:
 case AccessPortal = 'access-portal';
 ```
 
-Then add a description, set the system-managed flag, and configure the scope — following the patterns of the existing `AccessAdministrationPanel` permission.
+Then add a description, set the system-managed flag, and configure the scope, following the patterns of the existing `AccessAdministrationPanel` permission.
 
 ## Navigation Groups
 
@@ -206,7 +206,7 @@ The Administration panel establishes several patterns worth replicating:
 | **Nav group enum** | A `HasLabel` enum per panel for sidebar organization | `AdministrationNavGroup` |
 | **Heroicon constants** | Use the `Heroicon` enum instead of raw strings | `Heroicon::OutlinedUsers` |
 | **Resource separation** | Dedicated directories per panel under `app/Filament/` | `app/Filament/Resources/` |
-| **Policies** | Standard Laravel policies — Filament respects them automatically | `UserPolicy`, `RolePolicy` |
+| **Policies** | Standard Laravel policies (Filament respects them automatically) | `UserPolicy`, `RolePolicy` |
 
 <Aside type="tip">
     You do not need to check for `ManageAll` inside policies. The `Gate::before()` callback in `AppServiceProvider` automatically grants super-administrators full access to every panel and resource.

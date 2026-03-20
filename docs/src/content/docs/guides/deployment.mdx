@@ -7,7 +7,7 @@ sidebar:
 
 import { Aside, Steps } from '@astrojs/starlight/components';
 
-The starter does not prescribe a single deployment platform. Northwestern teams use a mix of AWS-native, container-based, and serverless architectures depending on application needs. The most common and fastest way to deploy a Laravel application internally is [Laravel Vapor](https://vapor.laravel.com), Laravel’s serverless orchestration platform for AWS.
+The starter does not prescribe a deployment platform. Northwestern teams use AWS-native, container-based, and serverless architectures depending on application needs. The most common way to deploy a Laravel application internally is [Laravel Vapor](https://vapor.laravel.com), Laravel’s serverless orchestration platform for AWS.
 
 This guide provides:
 
@@ -23,7 +23,7 @@ This guide provides:
 
 ## Choosing a Deployment Strategy
 <Aside>
-The starter intentionally does **not** bake in deployment infrastructure. Teams differ in their AWS permissions, hosting patterns, and operational constraints.
+The starter does **not** bake in deployment infrastructure. Teams differ in AWS permissions, hosting patterns, and operational constraints.
 </Aside>
 
 Your options typically include:
@@ -40,9 +40,9 @@ Laravel Vapor is a serverless deployment platform built specifically for Laravel
 - Builds and deploys your application as AWS Lambda functions
 - Creates API Gateway endpoints, CloudFront distributions, and supporting infrastructure
 - Manages environment variables, assets, S3 file uploads, and build artifacts
-- Works seamlessly with queues, scheduled tasks, and CLI operations
+- Works with queues, scheduled tasks, and CLI operations
 
-Vapor significantly reduces maintenance overhead for many small and medium-scale applications.
+Vapor reduces maintenance overhead for small and medium-scale applications.
 
 ### How Northwestern Uses Vapor
 
@@ -149,7 +149,7 @@ Use OpenTofu/Terraform to provision long-lived infrastructure, and use Vapor pri
 Below is a simplified GitHub Actions template that can be adapted for your application.
 
 <Aside type="danger">
-This workflow is a **reference implementation**. It includes branch-specific logic and environment variable patterns that you may not need or have configured. Treat it as a starting point rather than a drop-in solution.
+This workflow is a **reference implementation**. It includes branch-specific logic and environment variable patterns you may not need. Treat it as a starting point, not a drop-in solution.
 </Aside>
 
 ```yaml

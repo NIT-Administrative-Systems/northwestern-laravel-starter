@@ -7,9 +7,9 @@ sidebar:
 
 import { Card, CardGrid, Aside, Code } from '@astrojs/starlight/components';
 
-The starter includes a comprehensive audit logging system that automatically tracks all significant user actions and data changes throughout your application. This provides a complete historical record for compliance, security investigations, and debugging.
+The starter includes an audit logging system that tracks user actions and data changes throughout your application, providing a historical record for compliance, security investigations, and debugging.
 
-## Why Audit Logging Matters
+## Why Audit Logging
 
 <CardGrid>
   <Card title="Compliance & Regulations" icon="document">
@@ -54,7 +54,7 @@ The starter includes a comprehensive audit logging system that automatically tra
 
 ### Automatic Model Auditing
 
-All models extending `BaseModel` automatically log the following Eloquent events with complete before/after state:
+All models extending `BaseModel` log the following Eloquent events with before/after state:
 
 - **Created** - When a new record is inserted
 - **Updated** - When an existing record is modified
@@ -64,17 +64,17 @@ All models extending `BaseModel` automatically log the following Eloquent events
 Each audit log entry includes:
 
 - **Event Type** - The operation performed (created, updated, deleted, restored)
-- **User** - Who performed the action (authenticated user)
-- **Timestamp** - Exactly when the change occurred
-- **Old Values** - The state before the change (for updates and deletes)
-- **New Values** - The state after the change (for creates and updates)
+- **User** - Who performed the action
+- **Timestamp** - When the change occurred
+- **Old Values** - State before the change (for updates and deletes)
+- **New Values** - State after the change (for creates and updates)
 - **User Agent** - The browser/client that made the request
-- **IP Address** - Where the request originated from
+- **IP Address** - Request origin
 - **URL** - The route where the action occurred
 
 ### Custom Audit Events
 
-Beyond automatic model events, the system logs custom events for critical operations:
+The system also logs custom events for critical operations:
 
 **Role Assignment & Removal**
 
@@ -111,7 +111,7 @@ When administrators impersonate users:
 
 ## Audit Exclusions
 
-Certain fields can be excluded from audit logs to prevent storing sensitive or irrelevant data. You can configure exclusions at the model level:
+You can exclude fields from audit logs at the model level:
 
 ```php
 // Within an Eloquent model extending BaseModel
@@ -122,7 +122,7 @@ protected array $auditExclude = [
 ];
 ```
 
-### Why Exclude Fields?
+### Reasons to Exclude
 
 <CardGrid>
   <Card title="Security" icon="approve-check">
@@ -160,7 +160,7 @@ protected array $auditExclude = [
 
 ## Creating Custom Audit Events
 
-For actions that don't fit standard CRUD operations, you can log custom audit events. The `AuditsPermissions` and `AuditsRoles` traits demonstrate this pattern.
+For actions that don't fit standard CRUD operations, log custom audit events. The `AuditsPermissions` and `AuditsRoles` traits demonstrate this pattern.
 
 <Aside type="tip" title="Additional Resources">
 For more advanced audit logging patterns, refer to the [Laravel Auditing documentation](https://laravel-auditing.com/guide/audit-custom.html#example-custom-log-event).
@@ -170,7 +170,7 @@ For more advanced audit logging patterns, refer to the [Laravel Auditing documen
 
 ## Auditing in Seeders
 
-By default, [Laravel Auditing](https://laravel-auditing.com/) disables audit logging for console commands (the `audit.console` config is `false`). This means seeders that create or update Auditable models — such as `RoleSeeder` and `PermissionSeeder` — would not produce audit entries by default.
+By default, [Laravel Auditing](https://laravel-auditing.com/) disables audit logging for console commands (the `audit.console` config is `false`). Seeders that create or update Auditable models, such as `RoleSeeder` and `PermissionSeeder`, would not produce audit entries by default.
 
 For production seeders that manage security-relevant data (roles, permissions, stakeholder assignments), this creates a gap in the audit trail. The `AuditsSeederChanges` trait solves this by registering the `AuditableObserver` directly on specified models.
 
@@ -204,5 +204,5 @@ class RoleSeeder extends Seeder implements IdempotentSeederInterface
 The `StakeholderSeeder` uses `assignRoleWithAudit()` instead, which fires custom audit events that bypass the console check entirely.
 
 <Aside type="caution" title="Custom events vs. standard events">
-Custom audit events (like `role_assigned` and `permissions_modified`) use `AuditCustom` and bypass `isAuditingEnabled()` — they always fire regardless of environment. The `AuditsSeederChanges` trait is only needed for **standard** Eloquent events (`created`, `updated`, `deleted`) that go through the `AuditableObserver`.
+Custom audit events (like `role_assigned` and `permissions_modified`) use `AuditCustom` and bypass `isAuditingEnabled()`. They fire regardless of environment. The `AuditsSeederChanges` trait is only needed for **standard** Eloquent events (`created`, `updated`, `deleted`) that go through the `AuditableObserver`.
 </Aside>

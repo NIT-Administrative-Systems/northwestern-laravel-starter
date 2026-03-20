@@ -7,7 +7,7 @@ sidebar:
 
 import { Aside } from '@astrojs/starlight/components';
 
-The starter configures several opinionated behaviors across its service providers and bootstrap that differ from stock Laravel. These are active, running defaults that affect how you write code in this application. Understanding them helps avoid surprises.
+The starter configures opinionated behaviors across its service providers and bootstrap that differ from stock Laravel. These defaults affect how you write code in this application. Understanding them helps avoid surprises.
 
 ## Eloquent Behavior
 
@@ -23,7 +23,7 @@ Model::unguard();
 
 **Starter behavior:** All mass assignment is allowed on all models. `$fillable` and `$guarded` are ignored.
 
-**Rationale:** User input **MUST** pass through Laravel's form request validation before reaching models. The validator only returns known validated fields, solving the problem `$fillable` was designed for, without the maintenance burden of keeping arrays in sync with your schema.
+**Rationale:** User input **MUST** pass through Laravel's form request validation before reaching models. The validator returns only known validated fields, solving the problem `$fillable` was designed for, without keeping arrays in sync with your schema.
 
 ### Lazy Loading Prevention
 
@@ -31,7 +31,7 @@ Model::unguard();
 Model::preventLazyLoading(! App::isProduction());
 ```
 
-**Laravel default:** Lazy loading is allowed everywhere, silently introducing N+1 query problems.
+**Laravel default:** Lazy loading is allowed everywhere, which silently introduces N+1 query problems.
 
 **Starter behavior:** A two-tier approach:
 
@@ -49,11 +49,11 @@ If a lazy loading violation reaches production, it's reported to Sentry/logs rat
 Model::preventAccessingMissingAttributes(! App::isProduction());
 ```
 
-**Laravel default:** Accessing a non-existent attribute silently returns `null`.
+**Laravel default:** Accessing a non-existent attribute returns `null` with no warning.
 
 **Starter behavior:** Throws in non-production, falls back to `null` in production.
 
-This catches typos during development (e.g., `$user->frist_name` instead of `$user->first_name`) that would otherwise silently produce `null`.
+This catches typos during development (e.g., `$user->frist_name` instead of `$user->first_name`) that would otherwise produce `null`.
 
 ### Morph Map Convention
 
@@ -143,7 +143,7 @@ if (App::environment(['local', 'ci', 'testing'])) {
 }
 ```
 
-In local, CI, and testing environments, HTTP client exceptions include the full response body instead of truncating it. This makes debugging failed API calls significantly easier.
+In local, CI, and testing environments, HTTP client exceptions include the full response body instead of truncating it. This makes debugging failed API calls easier.
 
 ### Bootstrap 5 Pagination
 
