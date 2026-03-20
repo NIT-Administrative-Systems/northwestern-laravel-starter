@@ -15,6 +15,7 @@ use Filament\Actions\ExportAction;
 use Filament\Actions\ViewAction;
 use Filament\Support\Enums\FontFamily;
 use Filament\Support\Enums\FontWeight;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -214,6 +215,8 @@ class ApiRequestLogsTable
             ->toolbarActions([
                 ExportAction::make()
                     ->label('Export')
+                    ->icon(Heroicon::OutlinedArrowDownTray)
+                    ->color('gray')
                     ->exporter(ApiRequestLogExporter::class)
                     ->hidden(fn () => $table->getLivewire() instanceof ApiRequestLogsRelationManager),
             ])

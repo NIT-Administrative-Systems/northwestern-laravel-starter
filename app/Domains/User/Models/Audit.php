@@ -6,7 +6,11 @@ namespace App\Domains\User\Models;
 
 use App\Domains\Core\Models\BaseModel;
 use Carbon\CarbonInterface;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 /**
  * @property int $id
@@ -45,5 +49,51 @@ class Audit extends BaseModel
     public function impersonator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'impersonator_user_id');
+    }
+
+    /** @return MorphTo<Model, $this> */
+    public function auditable(): MorphTo
+    {
+        return $this->morphTo()->withTrashed();
+    }
+
+    /**
+     * Scope to role activity audit records (role_assigned / role_removed events for Users).
+     *
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
+    #[Scope]
+    protected function roleActivity(Builder $query): Builder
+    {
+        return $query
+            ->whereIn('event', ['role_assigned', 'role_removed'])
+            ->where('auditable_type', new User()->getMorphClass());
+    }
+
+    /**
+     * Derive the specific role(s) that changed by diffing old_values and new_values.
+     *
+     * Each entry includes id, name, and role_type as captured at the time of the change.
+     *
+     * @return list<array{id: int, name: string, role_type: string}>
+     */
+    public function getChangedRoles(): array
+    {
+        return once(function () {
+            /** @var list<array{id: int, name: string, role_type: string}> $oldRoles */
+            $oldRoles = $this->old_values['roles'] ?? [];
+            /** @var list<array{id: int, name: string, role_type: string}> $newRoles */
+            $newRoles = $this->new_values['roles'] ?? [];
+
+            $oldIds = array_column($oldRoles, 'id');
+            $newIds = array_column($newRoles, 'id');
+
+            return match ($this->event) {
+                'role_assigned' => array_values(array_filter($newRoles, fn (array $r): bool => ! in_array($r['id'], $oldIds))),
+                'role_removed' => array_values(array_filter($oldRoles, fn (array $r): bool => ! in_array($r['id'], $newIds))),
+                default => [],
+            };
+        });
     }
 }

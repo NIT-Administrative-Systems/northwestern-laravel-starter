@@ -151,6 +151,8 @@ class SupportTicketsTable
             ->toolbarActions([
                 ExportAction::make()
                     ->label('Export')
+                    ->icon(Heroicon::OutlinedArrowDownTray)
+                    ->color('gray')
                     ->exporter(SupportTicketExporter::class),
             ])
             ->emptyStateHeading('No support tickets')

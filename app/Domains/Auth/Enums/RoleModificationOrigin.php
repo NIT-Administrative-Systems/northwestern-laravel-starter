@@ -6,6 +6,10 @@ namespace App\Domains\Auth\Enums;
 
 use App\Domains\User\Actions\PersistUserWithUniqueUsername;
 use App\Domains\User\Listeners\ProcessNetIdUpdate;
+use Filament\Support\Contracts\HasColor;
+use Filament\Support\Contracts\HasIcon;
+use Filament\Support\Contracts\HasLabel;
+use Filament\Support\Icons\Heroicon;
 
 /**
  * Describes the origin or cause of a role assignment or removal.
@@ -33,11 +37,44 @@ use App\Domains\User\Listeners\ProcessNetIdUpdate;
  * **System** — A role was assigned or removed by a programmatic or automated
  * operation without a specific contextual origin (e.g., seeders, test setup).
  */
-enum RoleModificationOrigin: string
+enum RoleModificationOrigin: string implements HasColor, HasIcon, HasLabel
 {
     case UiAction = 'ui-action';
     case RemovedByDeletion = 'removed-by-deletion';
     case NetIdStatusChange = 'netid-status-change';
     case SsoProvisioning = 'sso-provisioning';
     case System = 'system';
+
+    public function getLabel(): string
+    {
+        return match ($this) {
+            self::UiAction => 'UI Action',
+            self::SsoProvisioning => 'SSO Provisioning',
+            self::NetIdStatusChange => 'NetID Event',
+            self::RemovedByDeletion => 'Role Deleted',
+            self::System => 'System',
+        };
+    }
+
+    public function getColor(): string
+    {
+        return match ($this) {
+            self::UiAction => 'gray',
+            self::SsoProvisioning => 'info',
+            self::NetIdStatusChange => 'warning',
+            self::RemovedByDeletion => 'danger',
+            self::System => 'gray',
+        };
+    }
+
+    public function getIcon(): Heroicon
+    {
+        return match ($this) {
+            self::UiAction => Heroicon::OutlinedCursorArrowRays,
+            self::SsoProvisioning => Heroicon::OutlinedCloudArrowDown,
+            self::NetIdStatusChange => Heroicon::OutlinedIdentification,
+            self::RemovedByDeletion => Heroicon::OutlinedTrash,
+            self::System => Heroicon::OutlinedCog6Tooth,
+        };
+    }
 }
