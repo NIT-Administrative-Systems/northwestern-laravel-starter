@@ -25,7 +25,7 @@ class ListRoles extends ListRecords
                 ->color('gray')
                 ->outlined()
                 ->url(RoleActivityResource::getUrl('index'))
-                ->visible(fn () => auth()->user()?->hasPermissionTo(SystemPermission::ViewAuditLogs)),
+                ->authorize(SystemPermission::ViewAuditLogs),
 
             CreateAction::make()
                 ->authorize(SystemPermission::EditRoles)

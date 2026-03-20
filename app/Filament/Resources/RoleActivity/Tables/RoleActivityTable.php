@@ -172,7 +172,7 @@ class RoleActivityTable
                 SelectFilter::make('role')
                     ->label('Role')
                     ->options(
-                        fn () => Role::query()
+                        fn () => Role::withTrashed()
                             ->orderBy('name')
                             ->pluck('name', 'name')
                             ->all()
