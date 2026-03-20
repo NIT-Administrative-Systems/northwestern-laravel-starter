@@ -7,7 +7,7 @@ sidebar:
 
 import { Card, CardGrid, Aside, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
 
-The Northwestern Laravel Starter provides a flexible, multi-method authentication system designed to handle both Northwestern users (via NetID/SSO) and external collaborators (via passwordless verification codes or Access Tokens).
+The Northwestern Laravel Starter provides a multi-method authentication system that handles Northwestern users (via NetID/SSO) and external collaborators (via passwordless verification codes or Access Tokens).
 
 ## Authentication Methods
 
@@ -49,7 +49,7 @@ The Northwestern Laravel Starter provides a flexible, multi-method authenticatio
 
 ## NetID Authentication
 
-Northwestern users authenticate via single sign-on using their NetID credentials. The starter supports two SSO providers — **Microsoft Entra ID** (OAuth2) and **Online Passport** (agentless WebSSO via ForgeRock) — and auto-detects which one to use based on your configured credentials. See the [WebSSO / Entra ID](/northwestern-integrations/websso/) documentation for provider-specific details.
+Northwestern users authenticate via single sign-on using their NetID credentials. The starter supports two SSO providers, **Microsoft Entra ID** (OAuth2) and **Online Passport** (agentless WebSSO via ForgeRock), and auto-detects which one to use based on your configured credentials. See the [WebSSO / Entra ID](/northwestern-integrations/websso/) documentation for provider-specific details.
 
 ### How It Works
 
@@ -247,7 +247,7 @@ See the [API Documentation](/features/api/) for complete Access Token management
 
 ## User Segmentation
 
-Every login creates a `UserLoginRecord` with a **segment** — a classification of the user at that moment. Segments are used by the login analytics dashboard (charts, stats, filters) and are captured at login time so historical metrics remain accurate even if user roles change later.
+Every login creates a `UserLoginRecord` with a **segment**, a classification of the user at that moment. Segments feed the login analytics dashboard (charts, stats, filters) and are captured at login time so historical metrics remain accurate even if user roles change later.
 
 ### Default Segments
 
@@ -259,7 +259,7 @@ Every login creates a `UserLoginRecord` with a **segment** — a classification 
 
 ### Adding a New Segment
 
-All charts, filters, exports, and stats dynamically pull from the `UserSegment`. Adding a new case automatically appears everywhere.
+All charts, filters, exports, and stats pull from the `UserSegment`. Adding a new case makes it appear everywhere.
 
 <Steps>
 
@@ -287,7 +287,7 @@ All charts, filters, exports, and stats dynamically pull from the `UserSegment`.
    };
    ```
 
-   Cases are evaluated top-to-bottom — order matters when a user could match multiple segments.
+   Cases are evaluated top-to-bottom. Order matters when a user could match multiple segments.
 
 </Steps>
 

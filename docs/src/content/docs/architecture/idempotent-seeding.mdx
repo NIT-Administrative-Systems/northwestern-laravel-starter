@@ -24,7 +24,7 @@ In the context of database seeders:
 
 Tables that are idempotently seeded typically follow a common schema: a unique `slug` mapped to an enum case, a label, and potentially other descriptive fields.
 
-The `App\Domains\Core\Seeders\IdempotentSeeder` can be used to populate such tables easily. It handles `INSERT`, `UPDATE`, and `DELETE` operations based on the values it's given. If something is removed or modified, the seeder will handle the change appropriately. It is aware of the `SoftDeletes` trait and can set (or unset) the `deleted_at` column correctly.
+The `App\Domains\Core\Seeders\IdempotentSeeder` populates such tables. It handles `INSERT`, `UPDATE`, and `DELETE` operations based on the values it's given. If something is removed or modified, the seeder will handle the change appropriately. It is aware of the `SoftDeletes` trait and can set (or unset) the `deleted_at` column correctly.
 
 ### `AutoSeed` Attribute
 

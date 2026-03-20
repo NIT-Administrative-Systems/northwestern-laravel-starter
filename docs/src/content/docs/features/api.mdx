@@ -7,7 +7,7 @@ sidebar:
 
 import { Aside, Steps, Badge } from '@astrojs/starlight/components';
 
-The starter includes a comprehensive API system designed for secure, monitored programmatic access to your application. The system provides token-based authentication, IP allowlisting, request logging, and detailed analytics.
+The starter includes an API system for secure, monitored programmatic access to your application. The system provides token-based authentication, IP allowlisting, request logging, and analytics.
 
 <Aside>
 If your application does not require an API, you can disable the entire feature set:
@@ -22,18 +22,18 @@ API_ENABLED=false
 
 The starter ships with a minimal set of API endpoints to support access token management and viewing user information. They live in `routes/api.php` and can be removed or extended as needed.
 
-- <Badge text="GET" variant="note" /> `/api/health` — Unauthenticated health check, exposed when `API_ENABLED=true`
-- <Badge text="GET" variant="note" /> `/api/v1/me` — Returns the authenticated API user profile
-- <Badge text="GET" variant="note" /> `/api/v1/me/tokens` — Paginated list of the user’s access tokens
-- <Badge text="POST" variant="success" /> `/api/v1/me/tokens` — Create a new access token
-- <Badge text="GET" variant="note" /> `/api/v1/me/tokens/{token}` — Fetch a single access token
-- <Badge text="DELETE" variant="danger" /> `/api/v1/me/tokens/{token}` — Revoke an access token
+- <Badge text="GET" variant="note" /> `/api/health` - Unauthenticated health check, exposed when `API_ENABLED=true`
+- <Badge text="GET" variant="note" /> `/api/v1/me` - Returns the authenticated API user profile
+- <Badge text="GET" variant="note" /> `/api/v1/me/tokens` - Paginated list of the user’s access tokens
+- <Badge text="POST" variant="success" /> `/api/v1/me/tokens` - Create a new access token
+- <Badge text="GET" variant="note" /> `/api/v1/me/tokens/{token}` - Fetch a single access token
+- <Badge text="DELETE" variant="danger" /> `/api/v1/me/tokens/{token}` - Revoke an access token
 
 View the [API Specification](/api) for a complete reference of these endpoints. If your project does not need these defaults, delete or adjust the corresponding routes in `routes/api.php`.
 
 ## Core Concepts
 
-The API architecture is designed to separate human identity from machine identity, utilizing a strict one-to-many relationship between API Users and their Access Tokens.
+The API architecture separates human identity from machine identity through a strict one-to-many relationship between API Users and their Access Tokens.
 
 ### API Users
 
@@ -46,13 +46,13 @@ An **API User** represents a specific machine actor.
 
 Each API user can possess multiple **Access Tokens**. These are the actual credentials used in the `Authorization` header.
 
-- **Immediate Activation** - Tokens are valid immediately upon creation.
+- **Immediate Activation** - Tokens are valid upon creation.
 - **Optional Expiration** - Tokens can be set to expire after a certain date, or remain valid indefinitely.
 - **Granular Restrictions** - Each token can have its own specific IP allowlist, independent of other tokens belonging to the same user.
 
 ## Strategy: Why Multiple Tokens?
 
-In production environments, it is best practice to issue a unique token for every distinct service connecting to your API, even if they represent the same "API User" or organization.
+In production, issue a unique token for each service connecting to your API, even if they represent the same "API User" or organization.
 
 - **Isolation** - A single compromised integration does not jeopardize others
 - **Safe Rotation** - Rotate one token without interrupting other consumers
@@ -64,7 +64,7 @@ In production environments, it is best practice to issue a unique token for ever
 
 - **Multi-Token Architecture** - Create unique credentials for every consumer
 - **Flexible Lifecycles** - Choose between ephemeral tokens with hard expiration dates or permanent keys for long-term usage
-- **Easy Revocation** - Invalidate compromised credentials instantly through the administration panel
+- **Revocation** - Invalidate compromised credentials through the administration panel
 
 ### IP Allowlisting
 
@@ -73,7 +73,7 @@ In production environments, it is best practice to issue a unique token for ever
 
 ### Request Logging & Monitoring
 
-- **Performance Metrics** - Every request is timed and logged, allowing you to spot slow endpoints
+- **Performance Metrics** - Requests are timed and logged so you can spot slow endpoints
 - **Traffic Analysis** - Built-in charts visualize API usage, error rates, and endpoint popularity over time
 - **Sampling** - Configurable logging rates to prevent database bloat in high-traffic environments
 
@@ -82,7 +82,7 @@ In production environments, it is best practice to issue a unique token for ever
 <Steps>
     1. **Token Creation**
 
-       An administrator creates an API user and generates a token through the administration panel. During creation, you may optionally set an **Expiration**. If omitted, the token remains valid indefinitely.
+       An administrator creates an API user and generates a token through the administration panel. You may set an **Expiration** during creation. If omitted, the token remains valid indefinitely.
 
     2. **Token Delivery**
 
@@ -118,12 +118,12 @@ In production environments, it is best practice to issue a unique token for ever
 </Steps>
 
 <Aside type="caution" title="APP_KEY Rotation Invalidates Tokens">
-Access tokens are stored as HMAC-SHA256 hashes derived from `APP_KEY`. If you rotate `APP_KEY`, **all existing API tokens will stop working** because their hashes will no longer match. Before rotating `APP_KEY`, coordinate with all API consumers to rotate their tokens immediately afterward using the administration panel.
+Access tokens are stored as HMAC-SHA256 hashes derived from `APP_KEY`. If you rotate `APP_KEY`, **all existing API tokens will stop working** because their hashes will no longer match. Before rotating `APP_KEY`, coordinate with all API consumers to rotate their tokens afterward using the administration panel.
 </Aside>
 
 ## Expiration Notifications
 
-To prevent service interruptions, the system automatically sends email notifications when a token is approaching its expiration date and the API User has an email address configured.
+The system sends email notifications when a token approaches its expiration date, provided the API User has an email address configured.
 
 By default, notifications are sent 30, 14, 7, and 3 days before expiration, as well as on the final day.
 
@@ -137,7 +137,7 @@ You can adjust these intervals in the configuration:
 ],
 ```
 
-If you do not wish to send expiration notifications, you can disable this feature entirely:
+To disable expiration notifications:
 
 ```php
 // .env
@@ -146,7 +146,7 @@ API_ACCESS_TOKEN_EXPIRATION_NOTIFICATIONS_ENABLED=false
 
 ## Request Logging
 
-Requests to protected API endpoints are automatically logged to the `api_request_logs` table. This provides a lightweight mechanism for monitoring API usage and debugging issues.
+Requests to protected API endpoints are logged to the `api_request_logs` table for monitoring API usage and debugging issues.
 
 ### What Gets Logged
 
@@ -187,10 +187,10 @@ Non-successful requests (`4xx`/`5xx`) are excluded from sampling and are **alway
 
 **This is a basic utility, not a replacement for full-scale observability solutions.**
 
-Database-based logging is immensely helpful during local development to spot slow endpoints, and monitor low-traffic non-production environments.
+Database-based logging helps during local development to spot slow endpoints, and works well for low-traffic non-production environments.
 
 For production applications expecting high volume:
-- **Opt for a dedicated APM:** Use legitimate tools like [New Relic](https://newrelic.com) or [Datadog](https://www.datadoghq.com) for deeper insights and to avoid database bloat.
+- **Use a dedicated APM:** Tools like [New Relic](https://newrelic.com) or [Datadog](https://www.datadoghq.com) provide deeper insights and avoid database bloat.
 - **Adjust sampling:** If you keep this feature enabled in production, consider setting a very low sampling rate (or disabling it entirely) to avoid the database write overhead.
 
 ## Rate Limiting
@@ -211,7 +211,7 @@ To handle granular access control for API users, the system leverages the existi
 
 ### API Integration Role Type
 
-API users can **ONLY** be assigned roles with a role type of **API Integration**. This is intentionally restrictive to prevent API users from being granted permissions that are not relevant or appropriate for programmatic access.
+API users can **ONLY** be assigned roles with a role type of **API Integration**. This prevents API users from receiving permissions that are not relevant to programmatic access.
 
 ### API-Relevant Permissions
 

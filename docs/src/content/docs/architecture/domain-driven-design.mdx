@@ -5,7 +5,7 @@ sidebar:
     order: 2
 ---
 
-The starter loosely follows Domain-Driven Design (DDD) principles to organize code in a scalable, maintainable way. It is structured around business domains rather than technical layers.
+The starter follows Domain-Driven Design (DDD) principles to organize code around business domains rather than technical layers.
 
 ## Directory Structure
 
@@ -124,7 +124,7 @@ The **User** domain handles everything related to user data and management:
 
 - Single method (usually `__invoke()` or `handle()`)
 - Focused on one specific operation
-- Easily testable
+- Testable in isolation
 - Can be injected into controllers or called from other actions
 
 **Example:**
@@ -185,7 +185,7 @@ enum AuthType: string implements HasLabel
 ```
 
 :::tip
-For enums that will be represented in the Filament UI, consider implementing [available interfaces](https://filamentphp.com/docs/5.x/advanced/enums) like `HasLabel` so they integrate seamlessly.
+For enums that will be represented in the Filament UI, consider implementing [available interfaces](https://filamentphp.com/docs/5.x/advanced/enums) like `HasLabel` for built-in integration.
 :::
 
 ### Models

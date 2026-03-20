@@ -25,7 +25,7 @@ The underlying API client is provided by the [`northwestern-sysdev/laravel-soa`]
 
 3. **Validation**
 
-   The response is validated to ensure required fields are present — `eduPersonPrimaryAffiliation` and `mail` must exist for the entry to be considered valid.
+   The response is validated to ensure required fields are present. `eduPersonPrimaryAffiliation` and `mail` must exist for the entry to be considered valid.
 
 4. **Field mapping**
 
@@ -52,7 +52,7 @@ The underlying API client is provided by the [`northwestern-sysdev/laravel-soa`]
 
 ## Post-Retrieval Jobs
 
-After a user is successfully synced and persisted, `FindOrUpdateUserFromDirectory` dispatches a configurable list of **post-retrieval jobs**. This is the primary extension point for running custom logic whenever a user is fetched from the directory — whether during SSO login, manual creation in Filament, or a scheduled directory sync.
+After a user is synced and persisted, `FindOrUpdateUserFromDirectory` dispatches a configurable list of **post-retrieval jobs**. This is the extension point for running custom logic when a user is fetched from the directory, whether during SSO login, manual creation in Filament, or a scheduled directory sync.
 
 Add your jobs to the `postRetrievalJobs()` method in `FindOrUpdateUserFromDirectory`:
 
@@ -106,12 +106,12 @@ The caller controls whether jobs run synchronously or are dispatched to the queu
 
 | Caller | `$immediate` | Behavior |
 |--------|:------------:|----------|
-| SSO login | `false` | Jobs are **queued** — login completes immediately |
-| Filament user creation | `true` | Jobs run **synchronously** — the admin sees the result before the page redirects |
-| Scheduled directory sync | `false` | Jobs are **queued** — sync processes users in bulk |
+| SSO login | `false` | Jobs are **queued**, login completes immediately |
+| Filament user creation | `true` | Jobs run **synchronously**, the admin sees the result before the page redirects |
+| Scheduled directory sync | `false` | Jobs are **queued**, sync processes users in bulk |
 
 <Aside type="tip">
-When jobs run synchronously (`$immediate = true`), failures are caught and reported via your exception handler — they will **not** break the login or creation flow.
+When jobs run synchronously (`$immediate = true`), failures are caught and reported via your exception handler. They will **not** break the login or creation flow.
 </Aside>
 
 The starter ships with [`DownloadWildcardPhotoJob`](/northwestern-integrations/wildcard-photos/) as a built-in post-retrieval job (enabled when `platform.wildcard_photo_sync` is `true`).
@@ -120,7 +120,7 @@ The starter ships with [`DownloadWildcardPhotoJob`](/northwestern-integrations/w
 
 ## Customizing Field Mappings
 
-The `SyncUserFromDirectory::syncDemographics()` method defines how LDAP directory attributes map onto User model fields. This is the place to customize when your project needs different directory fields, additional attributes, or different priority logic.
+The `SyncUserFromDirectory::syncDemographics()` method defines how LDAP directory attributes map onto User model fields. Customize this when your project needs different directory fields, additional attributes, or different priority logic.
 
 ### Default Mappings
 
@@ -165,7 +165,7 @@ To sync an additional directory attribute (e.g., building/office location):
 
 3. **Update the User model** (if needed)
 
-   Add a cast if the field requires one (e.g., `array`, `datetime`). No `$fillable` changes are needed — the starter runs `Model::unguard()` globally.
+   Add a cast if the field requires one (e.g., `array`, `datetime`). No `$fillable` changes are needed because the starter runs `Model::unguard()` globally.
 
 </Steps>
 
@@ -175,8 +175,8 @@ To sync an additional directory attribute (e.g., building/office location):
 
 When a directory lookup returns invalid data (missing required fields), the behavior depends on whether the user already exists:
 
-- **Existing user** — The account is marked with `netid_inactive = true` and `directory_sync_last_failed_at` is recorded. The user is not deleted.
-- **New user** — A `BadDirectoryEntry` exception is thrown, preventing account creation with incomplete data.
+- **Existing user** - The account is marked with `netid_inactive = true` and `directory_sync_last_failed_at` is recorded. The user is not deleted.
+- **New user** - A `BadDirectoryEntry` exception is thrown, preventing account creation with incomplete data.
 
 This ensures that transient directory issues don't destroy existing accounts while still preventing invalid new accounts.
 

@@ -7,11 +7,11 @@ sidebar:
 
 import { Aside, Steps } from '@astrojs/starlight/components';
 
-EventHub is Northwestern's enterprise messaging platform, combining an Amazon MQ (Apache ActiveMQ) message broker with a RESTful Messaging Center API. It enables loosely-coupled, platform-independent communication between applications through **topics** (one-to-many message distribution), **queues** (per-consumer message storage), and **webhooks** (automated HTTP delivery).
+EventHub is Northwestern's enterprise messaging platform, combining an Amazon MQ (Apache ActiveMQ) message broker with a RESTful Messaging Center API. Applications communicate through **topics** (one-to-many message distribution), **queues** (per-consumer message storage), and **webhooks** (automated HTTP delivery).
 
-EventHub supports a wide range of event types across Northwestern — identity lifecycle changes, student record updates, employee data changes, and custom application events, among others. Access to specific topics is managed through the [API Service Registry](https://apiserviceregistry.northwestern.edu/).
+EventHub supports many event types across Northwestern: identity lifecycle changes, student record updates, employee data changes, and custom application events. Access to specific topics is managed through the [API Service Registry](https://apiserviceregistry.northwestern.edu/).
 
-The starter includes a webhook endpoint that listens for **NetID status changes** from the `etidentity.ldap.netid.term` topic — deactivation, deprovisioning, and security holds — and automatically adjusts user access in response.
+The starter includes a webhook endpoint that listens for **NetID status changes** from the `etidentity.ldap.netid.term` topic (deactivation, deprovisioning, and security holds) and adjusts user access in response.
 
 The EventHub integration is provided by the [`northwestern-sysdev/laravel-soa`](https://github.com/NIT-Administrative-Systems/SysDev-laravel-soa) package, which handles webhook route registration, HMAC signature verification, and queue integration.
 
@@ -91,7 +91,7 @@ Route::middleware(['eventhub_hmac'])->prefix('eventhub')->group(function () {
 The `->eventHubWebhook()` macro registers the route with EventHub's webhook discovery system and associates it with the `etidentity.ldap.netid.term` topic. The `eventhub_hmac` middleware ensures all incoming requests carry a valid HMAC signature.
 
 <Aside type="caution">
-After uncommenting the route, you must subscribe to the `etidentity.ldap.netid.term` topic and register your application's webhook URL through the [API Service Registry](https://apiserviceregistry.northwestern.edu/). The `laravel-soa` package provides Artisan commands for managing webhook subscriptions — see the [package documentation](https://nit-administrative-systems.github.io/SysDev-laravel-soa/) for details.
+After uncommenting the route, you must subscribe to the `etidentity.ldap.netid.term` topic and register your application's webhook URL through the [API Service Registry](https://apiserviceregistry.northwestern.edu/). The `laravel-soa` package provides Artisan commands for managing webhook subscriptions. See the [package documentation](https://nit-administrative-systems.github.io/SysDev-laravel-soa/) for details.
 </Aside>
 
 ---

@@ -7,13 +7,13 @@ sidebar:
 
 import { Card, CardGrid, Aside, Tabs, TabItem, Steps } from '@astrojs/starlight/components';
 
-Before launching your application, customize these key settings to fit your project's needs.
+Customize these settings before launching your application.
 
 ---
 
 ## 1. Super Administrator Accounts
 
-*Super Administrators* have full access to the entire application and bypass all authorization checks. Commonly, these users are reserved for IT staff or core development team members.
+*Super Administrators* have full access to the application and bypass all authorization checks. These accounts are typically reserved for IT staff or core development team members.
 
 ### Configuration
 
@@ -61,7 +61,7 @@ The `StakeholderSeeder` requires a valid **Directory Search API key**. Ensure `D
 ## 2. Local Authentication (Passwordless)
 
 <Aside type="note">
-Local authentication allows external users (non-Northwestern) to access your application via emailed verification codes after they are invited by an administrator. Disable this if your app is only intended for Northwestern users.
+Local authentication allows external users (non-Northwestern) to access your application via emailed verification codes after an administrator invites them. Disable this if your app is Northwestern-only.
 </Aside>
 
 ### Configuration Options
@@ -206,7 +206,7 @@ ___
 
 The **Environment Lockdown** feature restricts application access to users who have been explicitly assigned application-specific roles. Users with only the default _Northwestern User_ role (automatically assigned during SSO login), or no roles, are redirected to a lockdown page explaining they need to be granted access by an administrator.
 
-This feature is particularly useful for **non-production** where you want to prevent unauthorized users from accessing the application if they discover the URL.
+This is most useful in **non-production** environments to prevent unauthorized users from accessing the application if they discover the URL.
 
 ### Default Behavior
 
@@ -232,7 +232,7 @@ ENVIRONMENT_LOCKDOWN_ENABLED=false
 ```
 
 <Aside type="tip">
-This is useful if you need to temporarily disable lockdown for testing or if you want to enable it in production for a closed beta launch.
+Useful for testing or for enabling lockdown in production during a closed beta launch.
 </Aside>
 
 ### Important: Production URL Configuration
