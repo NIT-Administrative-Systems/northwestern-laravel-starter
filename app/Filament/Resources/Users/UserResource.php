@@ -12,6 +12,7 @@ use App\Filament\Resources\Users\RelationManagers\AccessTokensRelationManager;
 use App\Filament\Resources\Users\RelationManagers\ApiRequestLogsRelationManager;
 use App\Filament\Resources\Users\RelationManagers\AuditsRelationManager;
 use App\Filament\Resources\Users\RelationManagers\LoginRecordsRelationManager;
+use App\Filament\Resources\Users\RelationManagers\RoleActivityRelationManager;
 use App\Filament\Resources\Users\RelationManagers\RolesRelationManager;
 use App\Filament\Resources\Users\Tables\UsersTable;
 use BackedEnum;
@@ -50,6 +51,7 @@ class UserResource extends Resource
     {
         return [
             RolesRelationManager::class,
+            RoleActivityRelationManager::class,
             AuditsRelationManager::class,
             LoginRecordsRelationManager::class,
             AccessTokensRelationManager::class,
