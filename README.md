@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-    <img src="https://img.shields.io/badge/PHP-8.4-blue" alt="PHP Version">
+    <img src="https://img.shields.io/badge/PHP-8.5-blue" alt="PHP Version">
     <img src="https://img.shields.io/badge/Laravel-12.x-red" alt="Laravel Version">
     <a href="https://coveralls.io/github/NIT-Administrative-Systems/northwestern-laravel-starter?branch=main"><img src="https://coveralls.io/repos/github/NIT-Administrative-Systems/northwestern-laravel-starter/badge.svg?branch=main" alt="Coverage Status"></a>
 </p>
