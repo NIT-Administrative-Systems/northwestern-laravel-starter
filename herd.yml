@@ -1,5 +1,5 @@
 name: northwestern-laravel-starter
-php: "8.4"
+php: "8.5"
 secured: true
 aliases: {}
 services:
