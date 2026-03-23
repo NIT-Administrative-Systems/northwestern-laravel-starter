@@ -7,7 +7,10 @@ use Rector\CodeQuality\Rector\Class_\CompleteDynamicPropertiesRector;
 use Rector\Config\RectorConfig;
 use Rector\DeadCode\Rector\StaticCall\RemoveParentCallWithoutParentRector;
 use Rector\EarlyReturn\Rector\Return_\ReturnBinaryOrToEarlyReturnRector;
-use Rector\Php84\Rector\Class_\DeprecatedAnnotationToDeprecatedAttributeRector;
+use Rector\Php83\Rector\ClassMethod\AddOverrideAttributeToOverriddenMethodsRector;
+use Rector\Php85\Rector\Expression\NestedFuncCallsToPipeOperatorRector;
+use Rector\Php85\Rector\Property\AddOverrideAttributeToOverriddenPropertiesRector;
+use Rector\Php85\Rector\StmtsAwareInterface\SequentialAssignmentsToPipeOperatorRector;
 use Rector\PHPUnit;
 use Rector\Set\ValueObject\SetList;
 use Rector\TypeDeclaration\Rector\ArrowFunction\AddArrowFunctionReturnTypeRector;
@@ -26,7 +29,7 @@ return RectorConfig::configure()
         __DIR__ . '/tests',
     ])
     ->withSets([
-        SetList::PHP_84,
+        SetList::PHP_85,
         SetList::CODE_QUALITY,
         SetList::DEAD_CODE,
         SetList::EARLY_RETURN,
@@ -47,7 +50,10 @@ return RectorConfig::configure()
         AddArrowFunctionReturnTypeRector::class,
         RemoveParentCallWithoutParentRector::class,
         CompleteDynamicPropertiesRector::class,
-        DeprecatedAnnotationToDeprecatedAttributeRector::class,
+        NestedFuncCallsToPipeOperatorRector::class,
+        SequentialAssignmentsToPipeOperatorRector::class,
+        AddOverrideAttributeToOverriddenMethodsRector::class,
+        AddOverrideAttributeToOverriddenPropertiesRector::class,
         // toArray() -> all() change breaks PHPStan type checking for Filament's HtmlString options
         RectorLaravel\Rector\MethodCall\ConvertEnumerableToArrayToAllRector::class => [
             __DIR__ . '/app/Filament/*/*',
