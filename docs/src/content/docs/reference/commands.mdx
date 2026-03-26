@@ -6,6 +6,7 @@ sidebar:
 ---
 
 import { Aside } from '@astrojs/starlight/components';
+import { PropertyTable, Property } from '@nu-appdev/northwestern-starlight-theme/components';
 
 The starter includes several custom Artisan commands for managing your application's database, configuration, and Northwestern integrations.
 
@@ -79,10 +80,14 @@ Create a snapshot of the current database state.
 php artisan db:snapshot:create my-snapshot-name
 ```
 
-**Options:**
-
-- `{name}` - (optional) Descriptive name for the snapshot. Defaults to `database-dump` if omitted.
-- `--skip-schema-validation` - Skip schema validation checks
+<PropertyTable title="Options">
+    <Property name="name" type="argument">
+        Descriptive name for the snapshot. Defaults to `database-dump` if omitted.
+    </Property>
+    <Property name="--skip-schema-validation" type="flag">
+        Skip schema validation checks
+    </Property>
+</PropertyTable>
 
 **What it does:**
 
@@ -113,11 +118,17 @@ Restore a previously created database snapshot.
 php artisan db:snapshot:restore my-snapshot-name
 ```
 
-**Options:**
-
-- `{name}` - (optional) Name of the snapshot to restore. Defaults to `database-dump` if omitted.
-- `--skip-schema-validation` - Skip schema validation checks
-- `--backup` - Create a backup of the current database before restoring
+<PropertyTable title="Options">
+    <Property name="name" type="argument">
+        Name of the snapshot to restore. Defaults to `database-dump` if omitted.
+    </Property>
+    <Property name="--skip-schema-validation" type="flag">
+        Skip schema validation checks
+    </Property>
+    <Property name="--backup" type="flag">
+        Create a backup of the current database before restoring
+    </Property>
+</PropertyTable>
 
 **What it does:**
 
@@ -157,9 +168,11 @@ Display detailed information about a specific snapshot.
 php artisan db:snapshot:info my-snapshot-name
 ```
 
-**Options:**
-
-- `{name}` - (optional) Name of the snapshot to inspect. If omitted, an interactive selector is shown.
+<PropertyTable title="Options">
+    <Property name="name" type="argument">
+        Name of the snapshot to inspect. If omitted, an interactive selector is shown.
+    </Property>
+</PropertyTable>
 
 **What it does:**
 
@@ -183,10 +196,14 @@ Delete a database snapshot and its associated metadata.
 php artisan db:snapshot:delete my-snapshot-name
 ```
 
-**Options:**
-
-- `{name}` - (optional) Name of the snapshot to delete. If omitted, an interactive selector is shown.
-- `--all` - Delete all snapshots
+<PropertyTable title="Options">
+    <Property name="name" type="argument">
+        Name of the snapshot to delete. If omitted, an interactive selector is shown.
+    </Property>
+    <Property name="--all" type="flag">
+        Delete all snapshots
+    </Property>
+</PropertyTable>
 
 **What it does:**
 
@@ -388,9 +405,11 @@ php artisan starter:check
 2. Queries the GitHub Releases API for newer versions
 3. Displays release notes and a compare URL for any available updates
 
-**Options:**
-
-- `--version-file` - Path to `.starter-version.yaml` (defaults to project root)
+<PropertyTable title="Options">
+    <Property name="--version-file" type="option">
+        Path to `.starter-version.yaml` (defaults to project root)
+    </Property>
+</PropertyTable>
 
 This command runs automatically via `composer install` and `composer update` in local environments. Results are cached for 4 hours to avoid unnecessary API calls.
 
@@ -412,11 +431,17 @@ In interactive mode, the command prompts for a slug, date, and title with sensib
 php artisan make:changelog 2026-03-01 --date=2026-03-01 --title="Search Improvements"
 ```
 
-**Options:**
-
-- `{slug}` - (optional) URL-safe identifier. Defaults to today's date.
-- `--date` - Authored date in `YYYY-MM-DD` format. Defaults to today.
-- `--title` - Human-readable title. Defaults to "Month Year Release" when the slug is a date.
+<PropertyTable title="Options">
+    <Property name="slug" type="argument">
+        URL-safe identifier. Defaults to today's date.
+    </Property>
+    <Property name="--date" type="option">
+        Authored date in `YYYY-MM-DD` format. Defaults to today.
+    </Property>
+    <Property name="--title" type="option">
+        Human-readable title. Defaults to "Month Year Release" when the slug is a date.
+    </Property>
+</PropertyTable>
 
 If a file with the same slug already exists, a numeric suffix is appended automatically.
 

@@ -2,33 +2,17 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import starlightLinksValidator from 'starlight-links-validator';
-import mermaid from 'astro-mermaid';
 import starlightOpenAPI, { openAPISidebarGroups } from 'starlight-openapi';
-
+import northwesternTheme from '@nu-appdev/northwestern-starlight-theme';
 
 // https://astro.build/config
 export default defineConfig({
 	integrations: [
-        mermaid({
-            theme: 'default',
-            autoTheme: true,
-        }),
 		starlight({
 			title: 'Northwestern Laravel Starter',
-            components: {
-              EditLink: './src/components/ConditionalEditLink.astro',
-              Hero: './src/components/Hero.astro'
-            },
             editLink: {
                 baseUrl: 'https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/edit/main/docs/',
             },
-            favicon: '/favicon.ico',
-            customCss: [
-              './src/styles/custom.css',
-                './src/styles/layout.css',
-                '@fontsource/poppins/400.css',
-                '@fontsource/poppins/600.css',
-            ],
 			social: [
                 { label: 'GitHub', icon: 'github', href: 'https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter' },
             ],
@@ -60,6 +44,7 @@ export default defineConfig({
                 ...openAPISidebarGroups,
             ],
             plugins: [
+                northwesternTheme({ homepage: { showTitle: false, imageWidth: "750px" } }),
                 starlightOpenAPI([
                     {
                         base: 'api',

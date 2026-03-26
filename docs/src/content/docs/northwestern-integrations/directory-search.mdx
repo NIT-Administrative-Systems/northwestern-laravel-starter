@@ -6,6 +6,7 @@ sidebar:
 ---
 
 import { Aside, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
+import { PropertyTable, Property } from '@nu-appdev/northwestern-starlight-theme/components';
 
 The Directory Search integration looks up Northwestern users by NetID, email, or employee ID via the LDAP-backed Directory Search API. It is the primary mechanism for user provisioning during SSO login and for keeping user profile data synchronized with Northwestern's identity system.
 
@@ -188,17 +189,16 @@ The `DirectorySearchCheck` class provides a [Spatie Health](https://spatie.be/do
 
 ---
 
-## Configuration
+## Environment Variables
 
-```bash
-# .env
-DIRECTORY_SEARCH_URL=https://northwestern-prod.apigee.net/directory-search
-DIRECTORY_SEARCH_API_KEY=your-api-key
-DIRECTORY_SEARCH_HEALTH_CHECK_NETID=swd2981
-```
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `DIRECTORY_SEARCH_URL` | `https://northwestern-prod.apigee.net/directory-search` | Directory Search API base URL |
-| `DIRECTORY_SEARCH_API_KEY` | — | Apigee API key for Directory Search |
-| `DIRECTORY_SEARCH_HEALTH_CHECK_NETID` | `swd2981` | NetID used for health check lookups |
+<PropertyTable>
+    <Property name="DIRECTORY_SEARCH_URL" default="https://northwestern-prod.apigee.net/directory-search">
+        Directory Search API base URL
+    </Property>
+    <Property name="DIRECTORY_SEARCH_API_KEY" required>
+        Apigee API key for Directory Search
+    </Property>
+    <Property name="DIRECTORY_SEARCH_HEALTH_CHECK_NETID" default="swd2981">
+        NetID used for health check lookups
+    </Property>
+</PropertyTable>

@@ -6,6 +6,7 @@ sidebar:
 ---
 
 import { Aside, Steps } from '@astrojs/starlight/components';
+import { PropertyTable, Property } from '@nu-appdev/northwestern-starlight-theme/components';
 
 The starter includes a public-facing changelog for communicating release notes and updates to your users. Entries are authored as Markdown files in the codebase and synced to the database when seeders run (e.g. `php artisan db:seed`), making your changelog version-controlled and reviewable through pull requests.
 
@@ -69,11 +70,17 @@ title: "Changelog & Notification Preferences"
 - Corrected a rendering issue in notification emails. (`GSTS-4395`)
 ```
 
-| Front matter | Required | Description |
-|--------------|----------|-------------|
-| `slug` | Yes | URL-safe identifier used as the filename and URL path segment |
-| `date` | Yes | Authored date in `YYYY-MM-DD` format |
-| `title` | Yes | Human-readable title displayed in the changelog header |
+<PropertyTable title="Front Matter">
+    <Property name="slug" required>
+        URL-safe identifier used as the filename and URL path segment
+    </Property>
+    <Property name="date" required>
+        Authored date in `YYYY-MM-DD` format
+    </Property>
+    <Property name="title" required>
+        Human-readable title displayed in the changelog header
+    </Property>
+</PropertyTable>
 
 Common section headings include `### New`, `### Enhancements`, `### Fixes`, `### Security`, `### Deprecations`, and `### Known Issues`. Use whichever are relevant to the release.
 
@@ -143,8 +150,14 @@ The changelog is public and does not require authentication.
 
 ### Environment Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `CHANGELOG_ENABLED` | `false` | Enable changelog routes and navigation |
-| `JIRA_URL` | `https://nuitadminsystems.atlassian.net` | Base URL of your Jira instance |
-| `JIRA_ISSUE_IDENTIFIER` | — | Jira project key for auto-linking (e.g. `GSTS`) |
+<PropertyTable>
+    <Property name="CHANGELOG_ENABLED" default="false">
+        Enable changelog routes and navigation
+    </Property>
+    <Property name="JIRA_URL" default="https://nuitadminsystems.atlassian.net">
+        Base URL of your Jira instance
+    </Property>
+    <Property name="JIRA_ISSUE_IDENTIFIER">
+        Jira project key for auto-linking (e.g. `GSTS`)
+    </Property>
+</PropertyTable>

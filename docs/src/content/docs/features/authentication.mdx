@@ -6,6 +6,7 @@ sidebar:
 ---
 
 import { Card, CardGrid, Aside, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
+import { PropertyTable, Property } from '@nu-appdev/northwestern-starlight-theme/components';
 
 The Northwestern Laravel Starter provides a multi-method authentication system that handles Northwestern users (via NetID/SSO) and external collaborators (via passwordless verification codes or Access Tokens).
 
@@ -299,18 +300,28 @@ Authentication endpoints use layered rate limiters to prevent brute force attack
 
 ### Passwordless Login
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `RATE_LIMIT_AUTH_LOGIN_CODE_REQUEST_PER_MINUTE` | `5` | Code request attempts per minute (per IP) |
-| `RATE_LIMIT_AUTH_LOGIN_CODE_REQUEST_PER_EMAIL_PER_MINUTE` | `3` | Code request attempts per minute (per email) |
-| `RATE_LIMIT_AUTH_LOGIN_CODE_VERIFY_PER_MINUTE` | `10` | Code verification attempts per minute (per IP) |
-| `RATE_LIMIT_AUTH_LOGIN_CODE_VERIFY_PER_CHALLENGE_PER_MINUTE` | `5` | Code verification attempts per minute (per challenge) |
+<PropertyTable title="Rate Limits">
+    <Property name="RATE_LIMIT_AUTH_LOGIN_CODE_REQUEST_PER_MINUTE" default="5">
+        Code request attempts per minute (per IP)
+    </Property>
+    <Property name="RATE_LIMIT_AUTH_LOGIN_CODE_REQUEST_PER_EMAIL_PER_MINUTE" default="3">
+        Code request attempts per minute (per email)
+    </Property>
+    <Property name="RATE_LIMIT_AUTH_LOGIN_CODE_VERIFY_PER_MINUTE" default="10">
+        Code verification attempts per minute (per IP)
+    </Property>
+    <Property name="RATE_LIMIT_AUTH_LOGIN_CODE_VERIFY_PER_CHALLENGE_PER_MINUTE" default="5">
+        Code verification attempts per minute (per challenge)
+    </Property>
+</PropertyTable>
 
 ### Impersonation
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `RATE_LIMIT_AUTH_IMPERSONATE_PER_MINUTE` | `10` | Impersonation actions per minute |
+<PropertyTable title="Rate Limits">
+    <Property name="RATE_LIMIT_AUTH_IMPERSONATE_PER_MINUTE" default="10">
+        Impersonation actions per minute
+    </Property>
+</PropertyTable>
 
 All rate limiters are defined in `config/rate-limiting.php`.
 

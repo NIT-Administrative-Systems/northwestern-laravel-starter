@@ -6,6 +6,7 @@ sidebar:
 ---
 
 import { Aside } from '@astrojs/starlight/components';
+import { PropertyTable, Property } from '@nu-appdev/northwestern-starlight-theme/components';
 
 <Aside type="note" title="User-Facing Components">
 The starter provides a series of custom Blade components that leverage **Bootstrap 5** styling. These components are specifically designed for the **user-facing interface** of your application. For more information about the dual UI architecture, see the [UI Architecture](/architecture/ui-architecture/) documentation.
@@ -23,24 +24,11 @@ A Bootstrap-based breadcrumb navigation component that automatically handles the
 
 #### Parameters
 
-<table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Type</th>
-<th>Required</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>breadcrumbs</code></td>
-<td><code>array&lt;string, string&gt;</code></td>
-<td>Yes</td>
-<td>An associative array where keys are route names (or URLs) and values are the display labels</td>
-</tr>
-</tbody>
-</table>
+<PropertyTable>
+    <Property name="breadcrumbs" type="array<string, string>" required>
+        An associative array where keys are route names (or URLs) and values are the display labels
+    </Property>
+</PropertyTable>
 
 #### Features
 
@@ -79,75 +67,32 @@ A feature-rich copy-to-clipboard component with visual feedback, tooltips, and f
 
 #### Parameters
 
-<table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Type</th>
-<th>Required</th>
-<th>Default</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>text</code></td>
-<td><code>string</code></td>
-<td>Yes</td>
-<td>-</td>
-<td>The text content to copy to the clipboard</td>
-</tr>
-<tr>
-<td><code>label</code></td>
-<td><code>string|null</code></td>
-<td>No</td>
-<td><code>null</code></td>
-<td>Optional label text to display alongside the icon</td>
-</tr>
-<tr>
-<td><code>isButton</code></td>
-<td><code>bool</code></td>
-<td>No</td>
-<td><code>true</code></td>
-<td>Render as a button (<code>true</code>) or inline span (<code>false</code>)</td>
-</tr>
-<tr>
-<td><code>buttonSize</code></td>
-<td><code>string|null</code></td>
-<td>No</td>
-<td><code>null</code></td>
-<td>Bootstrap button size: <code>sm</code> or <code>lg</code></td>
-</tr>
-<tr>
-<td><code>buttonVariant</code></td>
-<td><code>string</code></td>
-<td>No</td>
-<td><code>outline-secondary</code></td>
-<td>Bootstrap button variant for the default state</td>
-</tr>
-<tr>
-<td><code>successVariant</code></td>
-<td><code>string</code></td>
-<td>No</td>
-<td><code>outline-success</code></td>
-<td>Bootstrap button variant for the success state</td>
-</tr>
-<tr>
-<td><code>icon</code></td>
-<td><code>string</code></td>
-<td>No</td>
-<td><code>fa-copy</code></td>
-<td>Font Awesome icon class for the default state (e.g. <code>fa-copy</code>, <code>fa-rss</code>)</td>
-</tr>
-<tr>
-<td><code>iconPosition</code></td>
-<td><code>string</code></td>
-<td>No</td>
-<td><code>left</code></td>
-<td>Icon position: <code>left</code>, <code>right</code>, or <code>none</code></td>
-</tr>
-</tbody>
-</table>
+<PropertyTable showOptional>
+    <Property name="text" type="string" required>
+        The text content to copy to the clipboard
+    </Property>
+    <Property name="label" type="string | null" default="null">
+        Optional label text to display alongside the icon
+    </Property>
+    <Property name="isButton" type="bool" default="true">
+        Render as a button (`true`) or inline span (`false`)
+    </Property>
+    <Property name="buttonSize" type="string | null" default="null">
+        Bootstrap button size: `sm` or `lg`
+    </Property>
+    <Property name="buttonVariant" type="string" default="outline-secondary">
+        Bootstrap button variant for the default state
+    </Property>
+    <Property name="successVariant" type="string" default="outline-success">
+        Bootstrap button variant for the success state
+    </Property>
+    <Property name="icon" type="string" default="fa-copy">
+        Font Awesome icon class for the default state (e.g. `fa-copy`, `fa-rss`)
+    </Property>
+    <Property name="iconPosition" type="string" default="left">
+        Icon position: `left`, `right`, or `none`
+    </Property>
+</PropertyTable>
 
 #### Valid Button Variants
 
@@ -246,82 +191,35 @@ A searchable select component built on [Tom Select](https://tom-select.js.org) w
 
 #### Parameters
 
-<table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Type</th>
-<th>Required</th>
-<th>Default</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>id</code></td>
-<td><code>string</code></td>
-<td>Yes</td>
-<td>-</td>
-<td>Unique identifier for the select element</td>
-</tr>
-<tr>
-<td><code>options</code></td>
-<td><code>array|Collection</code></td>
-<td>Yes</td>
-<td>-</td>
-<td>Options for the select (arrays, Collections, or Enums)</td>
-</tr>
-<tr>
-<td><code>settings</code></td>
-<td><code>array</code></td>
-<td>No</td>
-<td><code>[]</code></td>
-<td>Additional Tom Select settings (merged with defaults)</td>
-</tr>
-<tr>
-<td><code>plugins</code></td>
-<td><code>array</code></td>
-<td>No</td>
-<td><code>[]</code></td>
-<td>Tom Select plugins to enable with optional configurations</td>
-</tr>
-<tr>
-<td><code>searchable</code></td>
-<td><code>bool</code></td>
-<td>No</td>
-<td><code>true</code></td>
-<td>Enable/disable search functionality</td>
-</tr>
-<tr>
-<td><code>searchUrl</code></td>
-<td><code>string</code></td>
-<td>No</td>
-<td><code>''</code></td>
-<td>URL for asynchronous search API endpoint</td>
-</tr>
-<tr>
-<td><code>optionCountSingularNoun</code></td>
-<td><code>string</code></td>
-<td>No</td>
-<td><code>Item</code></td>
-<td>Singular noun for the option count plugin</td>
-</tr>
-<tr>
-<td><code>optionCountPluralNoun</code></td>
-<td><code>string|null</code></td>
-<td>No</td>
-<td>Auto-generated</td>
-<td>Plural noun for the option count plugin</td>
-</tr>
-<tr>
-<td><code>maxOptions</code></td>
-<td><code>int|null</code></td>
-<td>No</td>
-<td><code>30</code></td>
-<td>Maximum number of options to display</td>
-</tr>
-</tbody>
-</table>
+<PropertyTable showOptional>
+    <Property name="id" type="string" required>
+        Unique identifier for the select element
+    </Property>
+    <Property name="options" type="array | Collection" required>
+        Options for the select (arrays, Collections, or Enums)
+    </Property>
+    <Property name="settings" type="array" default="[]">
+        Additional Tom Select settings (merged with defaults)
+    </Property>
+    <Property name="plugins" type="array" default="[]">
+        Tom Select plugins to enable with optional configurations
+    </Property>
+    <Property name="searchable" type="bool" default="true">
+        Enable/disable search functionality
+    </Property>
+    <Property name="searchUrl" type="string" default="''">
+        URL for asynchronous search API endpoint
+    </Property>
+    <Property name="optionCountSingularNoun" type="string" default="Item">
+        Singular noun for the option count plugin
+    </Property>
+    <Property name="optionCountPluralNoun" type="string | null" default="Auto-generated">
+        Plural noun for the option count plugin
+    </Property>
+    <Property name="maxOptions" type="int | null" default="30">
+        Maximum number of options to display
+    </Property>
+</PropertyTable>
 
 #### Available Plugins
 
@@ -495,24 +393,11 @@ Displays a user's Wildcard ID photo from Northwestern's identity system. The com
 
 #### Parameters
 
-<table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Type</th>
-<th>Required</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>user</code></td>
-<td><code>User|null</code></td>
-<td>Yes</td>
-<td>The User model instance to display the photo for</td>
-</tr>
-</tbody>
-</table>
+<PropertyTable>
+    <Property name="user" type="User | null" required>
+        The User model instance to display the photo for
+    </Property>
+</PropertyTable>
 
 #### Features
 
