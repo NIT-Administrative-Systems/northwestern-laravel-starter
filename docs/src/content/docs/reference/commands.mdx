@@ -22,10 +22,11 @@ php artisan db:rebuild
 
 **What it does:**
 
-1. Drops all tables, views, and types
-2. Runs all migrations
-3. Executes all seeders marked with `#[AutoSeed]` attribute
-4. Regenerates IDE helper files
+1. Clears application cache, queue, and schedule cache
+2. Runs `migrate:fresh` (drops all tables and re-runs migrations)
+3. Executes all seeders via `db:seed`
+4. Seeds demo data via `DemoSeeder`
+5. Regenerates IDE model helper annotations
 
 <Aside type="caution" title="Destructive Operation">
 This command will **completely wipe your database**. Only use in local and testing environments. Never run this in production.
@@ -50,6 +51,18 @@ Display all auto-discovered seeders with their dependencies and execution order.
 php artisan db:seed:list
 ```
 
+<PropertyTable title="Options">
+    <Property name="--show-dependencies" type="flag">
+        Show full dependency tree
+    </Property>
+    <Property name="--mermaid" type="flag">
+        Output as Mermaid diagram
+    </Property>
+    <Property name="--json" type="flag">
+        Output as JSON
+    </Property>
+</PropertyTable>
+
 **Output example:**
 
 ```
@@ -72,7 +85,7 @@ php artisan db:seed:list
 
 ---
 
-### `db:snapshot:create {name}`
+### `db:snapshot:create {filename?}`
 
 Create a snapshot of the current database state.
 
@@ -81,7 +94,7 @@ php artisan db:snapshot:create my-snapshot-name
 ```
 
 <PropertyTable title="Options">
-    <Property name="name" type="argument">
+    <Property name="filename" type="argument">
         Descriptive name for the snapshot. Defaults to `database-dump` if omitted.
     </Property>
     <Property name="--skip-schema-validation" type="flag">
@@ -110,7 +123,7 @@ Use descriptive snapshot names like `clean-test-data` or `before-feature-x` to m
 
 ---
 
-### `db:snapshot:restore {name}`
+### `db:snapshot:restore {filename?}`
 
 Restore a previously created database snapshot.
 
@@ -119,7 +132,7 @@ php artisan db:snapshot:restore my-snapshot-name
 ```
 
 <PropertyTable title="Options">
-    <Property name="name" type="argument">
+    <Property name="filename" type="argument">
         Name of the snapshot to restore. Defaults to `database-dump` if omitted.
     </Property>
     <Property name="--skip-schema-validation" type="flag">
@@ -127,6 +140,9 @@ php artisan db:snapshot:restore my-snapshot-name
     </Property>
     <Property name="--backup" type="flag">
         Create a backup of the current database before restoring
+    </Property>
+    <Property name="--force" type="flag">
+        Skip confirmation prompt
     </Property>
 </PropertyTable>
 
@@ -160,7 +176,7 @@ php artisan db:snapshot:list
 
 ---
 
-### `db:snapshot:info {name}`
+### `db:snapshot:info {filename?}`
 
 Display detailed information about a specific snapshot.
 
@@ -169,7 +185,7 @@ php artisan db:snapshot:info my-snapshot-name
 ```
 
 <PropertyTable title="Options">
-    <Property name="name" type="argument">
+    <Property name="filename" type="argument">
         Name of the snapshot to inspect. If omitted, an interactive selector is shown.
     </Property>
 </PropertyTable>
@@ -188,7 +204,7 @@ php artisan db:snapshot:info my-snapshot-name
 
 ---
 
-### `db:snapshot:delete {name}`
+### `db:snapshot:delete {filename?}`
 
 Delete a database snapshot and its associated metadata.
 
@@ -197,7 +213,7 @@ php artisan db:snapshot:delete my-snapshot-name
 ```
 
 <PropertyTable title="Options">
-    <Property name="name" type="argument">
+    <Property name="filename" type="argument">
         Name of the snapshot to delete. If omitted, an interactive selector is shown.
     </Property>
     <Property name="--all" type="flag">
@@ -225,6 +241,15 @@ Wake up a potentially-inactive serverless RDS database by establishing a connect
 ```bash
 php artisan db:wake
 ```
+
+<PropertyTable title="Options">
+    <Property name="--max-attempts" type="option" default="5">
+        Maximum number of connection attempts (1-20)
+    </Property>
+    <Property name="--delay" type="option" default="5">
+        Seconds to wait between attempts (1-30)
+    </Property>
+</PropertyTable>
 
 **What it does:**
 
@@ -370,6 +395,7 @@ Validates connectivity and configuration for:
 - **Debug Mode** - Ensures debug mode is off (non-local)
 - **Optimized App** - Ensures app is optimized (non-local)
 - **Security Advisories** - Checks for known package vulnerabilities
+- **Redis** - Redis connectivity (when Redis driver is in use)
 - **Directory Search** - API connectivity and test query
 
 **When to use:**
@@ -384,7 +410,7 @@ Validates connectivity and configuration for:
 The `/api/health` endpoint also runs these checks for automated monitoring:
 
 ```bash
-curl https://your-app.northwestern.edu/api/health
+curl -H "X-Secret-Token: your-secret-token" https://your-app.northwestern.edu/api/health
 ```
 
 ---

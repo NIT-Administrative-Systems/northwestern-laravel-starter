@@ -163,6 +163,7 @@ Every log entry includes:
     <Property name="ip_address">Source IP address</Property>
     <Property name="status_code">HTTP status code</Property>
     <Property name="duration_ms">Request duration in milliseconds</Property>
+    <Property name="request_bytes">Size of the request body in bytes (if measurable)</Property>
     <Property name="response_bytes">Size of the response body in bytes (if measurable)</Property>
     <Property name="user_agent">User agent string from the request (if provided)</Property>
     <Property name="failure_reason">Authentication or request failure reason, if any</Property>
@@ -177,7 +178,7 @@ To manage the database load, you can configure probabilistic sampling through en
 // .env
 
 API_REQUEST_LOGGING_SAMPLING_ENABLED=true
-API_REQUEST_LOGGING_SAMPLING_RATE=0.1 // Log 10% of requests
+API_REQUEST_LOGGING_SAMPLE_RATE=0.1 // Log 10% of requests
 ```
 
 :::tip[Failures are always logged]

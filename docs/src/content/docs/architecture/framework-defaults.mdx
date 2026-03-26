@@ -38,7 +38,7 @@ Model::preventLazyLoading(! App::isProduction());
 | Environment | Behavior |
 |-------------|----------|
 | Local with debug mode | **Throws an exception**, you see the N+1 immediately |
-| Non-production without debug | **Throws an exception**, caught during testing and CI |
+| Non-production without debug | **Silently reports** to your exception handler, caught in logs during testing and CI |
 | Production | **Silently reports** to your exception handler, never breaks for users |
 
 If a lazy loading violation reaches production, it's reported to Sentry/logs rather than showing an error page.

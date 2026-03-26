@@ -51,8 +51,17 @@ The EventHub integration is provided by the [`northwestern-sysdev/laravel-soa`](
 The `ProcessNetIdUpdate` listener handles the default deprovisioning behavior (role removal and marking the NetID inactive) inside a database transaction. To add your own business logic, revoking API tokens, sending notifications, archiving data, etc., edit the transaction block in the listener:
 
 ```php title="app/Domains/User/Listeners/ProcessNetIdUpdate.php"
-DB::transaction(static function () use ($user, $event) {
-    // Default: remove non-default roles and mark inactive
+DB::transaction(static function () use ($event) {
+    $user = User::query()
+        ->sso()
+        ->lockForUpdate()
+        ->with('roles')
+        ->firstWhere('username', $event->netId);
+
+    if (! $user) {
+        return;
+    }
+
     $user->roles
         ->reject(fn (Role $role) => $role->name === SystemRole::NorthwesternUser->value)
         ->whenNotEmpty(fn ($roles) => $user->removeRoleWithAudit(
@@ -63,9 +72,7 @@ DB::transaction(static function () use ($user, $event) {
 
     $user->update(['netid_inactive' => true]);
 
-    // Add your custom deprovisioning logic here:
-    $user->access_tokens()->delete();           // Revoke API tokens
-    $user->notify(new AccountDeactivated);      // Send notification
+    // Add custom deprovisioning logic here, if needed
 });
 ```
 

@@ -61,8 +61,7 @@ Add your jobs to the `postRetrievalJobs()` method in `FindOrUpdateUserFromDirect
 private function postRetrievalJobs(): array
 {
     $jobs = [
-        AssignDepartmentJob::class,
-        SyncPermissionsFromDirectoryJob::class,
+        // Add your custom post-retrieval jobs here — see docs for the full job contract.
     ];
 
     if (config('platform.wildcard_photo_sync')) {
@@ -134,6 +133,7 @@ The `SyncUserFromDirectory::syncDemographics()` method defines how LDAP director
 | `phone` | `telephoneNumber` | Students prepend `nuAllStudentCurrentPhone` |
 | `departments` | `nuAllDepartmentName` | Multi-value (stored as JSON array) |
 | `job_titles` | `nuAllTitle` | Suppressed for students |
+| `hr_employee_id` | `employeeNumber` | Set when both `employeeNumber` and `nuStudentNumber` exist and differ |
 | `timezone` | — | Set from `config('platform.default_user_timezone')` (default: `America/Chicago`) |
 
 For students, student-specific LDAP fields are prepended to the key arrays so they take priority. The `findValue()` helper returns the first non-empty match, so earlier keys win.

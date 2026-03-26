@@ -247,7 +247,7 @@ When testing new authorization logic, always test with a non-super-admin user. B
 
 ## Audited Role Changes
 
-The starter makes Spatie's `assignRole()` and `removeRole()` methods **private** on the User model, forcing all role changes through audited methods.
+The starter makes Spatie's `assignRole()`, `removeRole()`, and `syncRoles()` methods **private** on the User model, forcing all role changes through audited methods.
 
 ### `assignRoleWithAudit()`
 
