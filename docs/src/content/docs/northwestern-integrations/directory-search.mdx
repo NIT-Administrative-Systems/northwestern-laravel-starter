@@ -150,7 +150,7 @@ To sync an additional directory attribute (e.g., building/office location):
    php artisan make:migration add_building_to_users_table
    ```
 
-   ```php
+   ```php ins={2}
    Schema::table('users', function (Blueprint $table) {
        $table->string('building')->nullable();
    });
@@ -160,7 +160,7 @@ To sync an additional directory attribute (e.g., building/office location):
 
    In `SyncUserFromDirectory::syncDemographics()`, add the new mapping alongside the existing ones:
 
-   ```php title="app/Domains/User/Actions/Directory/SyncUserFromDirectory.php"
+   ```php ins={1} title="app/Domains/User/Actions/Directory/SyncUserFromDirectory.php"
    $user->building = $this->findValue($directoryData, ['nuPosition1Building', 'postalAddress']);
    ```
 

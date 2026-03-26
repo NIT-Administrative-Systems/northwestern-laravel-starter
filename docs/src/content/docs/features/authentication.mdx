@@ -266,7 +266,7 @@ All charts, filters, exports, and stats pull from the `UserSegment`. Adding a ne
 
 1. **Add a case to the enum**
 
-   ```php title="app/Domains/User/Enums/UserSegment.php"
+   ```php ins={3} title="app/Domains/User/Enums/UserSegment.php"
    case SuperAdmin = 'super-admin';
    case ExternalUser = 'external-user';
    case Faculty = 'faculty'; // New segment
@@ -279,7 +279,7 @@ All charts, filters, exports, and stats pull from the `UserSegment`. Adding a ne
 
    In `DetermineUserSegment`, add a check **above** the `default` case:
 
-   ```php title="app/Domains/User/Actions/DetermineUserSegment.php"
+   ```php ins={4} title="app/Domains/User/Actions/DetermineUserSegment.php"
    return match (true) {
        $this->isSuperAdmin($user) => UserSegment::SuperAdmin,
        $this->isExternalUser($user) => UserSegment::ExternalUser,

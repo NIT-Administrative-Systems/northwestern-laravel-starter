@@ -163,7 +163,7 @@ Permissions are defined as cases in `SystemPermission`, the **single source of t
 
 1. **Add a case to `SystemPermission`**
 
-   ```php title="app/Domains/Auth/Enums/SystemPermission.php"
+   ```php ins={1} title="app/Domains/Auth/Enums/SystemPermission.php"
    case ViewReports = 'view-reports';
    ```
 
@@ -171,7 +171,7 @@ Permissions are defined as cases in `SystemPermission`, the **single source of t
 
    Three `match` blocks need the new case:
 
-   ```php
+   ```php ins={6,16}
    // Is this permission too sensitive for non-super-admins to assign?
    public function isSystemManaged(): bool
    {
@@ -206,7 +206,7 @@ Permissions are defined as cases in `SystemPermission`, the **single source of t
 
 3. **Add a description**
 
-   ```php
+   ```php ins={5}
    public function description(): string
    {
        return match ($this) {

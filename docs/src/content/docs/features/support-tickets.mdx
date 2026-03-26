@@ -192,7 +192,7 @@ Adding a new gateway requires three steps: add an enum case, implement the inter
 
 1. **Add a case to `TicketSystem`**
 
-   ```php
+   ```php ins={8,15,24}
    // app/Domains/Support/Enums/TicketSystem.php
 
    enum TicketSystem: string implements HasLabel
