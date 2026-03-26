@@ -79,7 +79,11 @@ class StakeholderSeeder extends Seeder
                     continue;
                 }
 
-                $user->assignRoleWithAudit($roles->all(), RoleModificationOrigin::System);
+                $missingRoles = $roles->reject(fn (Role $role) => $user->hasRole($role));
+
+                if ($missingRoles->isNotEmpty()) {
+                    $user->assignRoleWithAudit($missingRoles->all(), RoleModificationOrigin::System);
+                }
             } catch (Throwable) {
                 $this->command->getOutput()->writeln(
                     "<error>Could not load directory info for user, skipping:</error> {$netId}"
