@@ -6,6 +6,7 @@ sidebar:
 ---
 
 import { Card, CardGrid, Aside, Steps, Tabs, TabItem, FileTree, Badge } from '@astrojs/starlight/components';
+import { PropertyTable, Property, PropertyGroup } from '@nu-appdev/northwestern-starlight-theme/components';
 
 The starter includes a user-facing contact support form that submits tickets to a configurable backend. It ships with two gateway drivers, **Email** and **TeamDynamix**, and an automatic email fallback that ensures user requests are never lost.
 
@@ -191,7 +192,7 @@ Adding a new gateway requires three steps: add an enum case, implement the inter
 
 1. **Add a case to `TicketSystem`**
 
-   ```php
+   ```php ins={8,15,24}
    // app/Domains/Support/Enums/TicketSystem.php
 
    enum TicketSystem: string implements HasLabel
@@ -315,11 +316,17 @@ This overrides the binding registered by `SupportServiceProvider` and gives you 
 
 The contact form uses tiered rate limiting (per-minute, per-hour, and per-day) to allow short bursts while preventing sustained abuse. All limits are per-user.
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `RATE_LIMIT_SUPPORT_CONTACT_PER_MINUTE` | `2` | Submissions per minute |
-| `RATE_LIMIT_SUPPORT_CONTACT_PER_HOUR` | `5` | Submissions per hour |
-| `RATE_LIMIT_SUPPORT_CONTACT_PER_DAY` | `10` | Submissions per day |
+<PropertyTable>
+    <Property name="RATE_LIMIT_SUPPORT_CONTACT_PER_MINUTE" default="2">
+        Submissions per minute
+    </Property>
+    <Property name="RATE_LIMIT_SUPPORT_CONTACT_PER_HOUR" default="5">
+        Submissions per hour
+    </Property>
+    <Property name="RATE_LIMIT_SUPPORT_CONTACT_PER_DAY" default="10">
+        Submissions per day
+    </Property>
+</PropertyTable>
 
 All rate limiters are defined in `config/rate-limiting.php`.
 
@@ -327,21 +334,55 @@ All rate limiters are defined in `config/rate-limiting.php`.
 
 ## Environment Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `SUPPORT_ENABLED` | `false` | Enable the contact form and submission routes |
-| `SUPPORT_LIMITED_WARNING` | `true` (non-production) | Show limited support warning banner |
-| `SUPPORT_DRIVER` | `mail` | Gateway driver (`mail`, `team-dynamix`) |
-| `SUPPORT_MAIL_TO` | `your-team@northwestern.edu` | Support team email address |
-| `SUPPORT_REFERENCE_PREFIX` | `SUP` | Reference prefix for mail gateway (e.g. `SUP-47`) |
-| `TDX_API_BASE_URL` | — | TDX REST API base URL |
-| `TDX_USERNAME` | — | TDX service account username |
-| `TDX_PASSWORD` | — | TDX service account password |
-| `TDX_TICKET_APP_NAME` | — | TDX application name |
-| `TDX_CLIENT_APP_NAME` | — | TDX client application name |
-| `TDX_ASSIGNEE_ID` | — | TDX group ID for ticket assignment (required for TDX driver) |
-| `TDX_TICKET_TYPE` | `Default` | TDX ticket type name |
-| `TDX_FORM_TYPE` | `NU Base Service Request` | TDX form type name |
-| `TDX_TICKET_STATUS` | `New` | TDX ticket status name |
-| `TDX_TICKET_PRIORITY` | `Low (P4)` | TDX ticket priority name |
-| `TDX_SERVICE` | `APP_NAME` | TDX service name (defaults to application name) |
+<PropertyTable>
+    <PropertyGroup title="General" />
+    <Property name="SUPPORT_ENABLED" default="false">
+        Enable the contact form and submission routes
+    </Property>
+    <Property name="SUPPORT_LIMITED_WARNING" default="true (non-production)">
+        Show limited support warning banner
+    </Property>
+    <Property name="SUPPORT_DRIVER" default="mail">
+        Gateway driver (`mail`, `team-dynamix`)
+    </Property>
+    <Property name="SUPPORT_MAIL_TO" default="your-team@northwestern.edu">
+        Support team email address
+    </Property>
+    <Property name="SUPPORT_REFERENCE_PREFIX" default="SUP">
+        Reference prefix for mail gateway (e.g. `SUP-47`)
+    </Property>
+    <PropertyGroup title="TeamDynamix" />
+    <Property name="TDX_API_BASE_URL" required>
+        TDX REST API base URL
+    </Property>
+    <Property name="TDX_USERNAME" required>
+        TDX service account username
+    </Property>
+    <Property name="TDX_PASSWORD" required>
+        TDX service account password
+    </Property>
+    <Property name="TDX_TICKET_APP_NAME" required>
+        TDX application name
+    </Property>
+    <Property name="TDX_CLIENT_APP_NAME" required>
+        TDX client application name
+    </Property>
+    <Property name="TDX_ASSIGNEE_ID" required>
+        TDX group ID for ticket assignment (required for TDX driver)
+    </Property>
+    <Property name="TDX_TICKET_TYPE" default="Default">
+        TDX ticket type name
+    </Property>
+    <Property name="TDX_FORM_TYPE" default="NU Base Service Request">
+        TDX form type name
+    </Property>
+    <Property name="TDX_TICKET_STATUS" default="New">
+        TDX ticket status name
+    </Property>
+    <Property name="TDX_TICKET_PRIORITY" default="Low (P4)">
+        TDX ticket priority name
+    </Property>
+    <Property name="TDX_SERVICE" default="APP_NAME">
+        TDX service name (defaults to application name)
+    </Property>
+</PropertyTable>

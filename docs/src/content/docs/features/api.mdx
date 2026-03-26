@@ -6,6 +6,7 @@ sidebar:
 ---
 
 import { Aside, Steps, Badge } from '@astrojs/starlight/components';
+import { PropertyTable, Property } from '@nu-appdev/northwestern-starlight-theme/components';
 
 The starter includes an API system for secure, monitored programmatic access to your application. The system provides token-based authentication, IP allowlisting, request logging, and analytics.
 
@@ -152,21 +153,22 @@ Requests to protected API endpoints are logged to the `api_request_logs` table f
 
 Every log entry includes:
 
-| Field             | Description                                               |
-|-------------------|-----------------------------------------------------------|
-| `trace_id`        | Unique request identifier                                 |
-| `user_id`         | ID of the authenticated user                              |
-| `access_token_id` | ID of the Access Token used for authentication (nullable) |
-| `method`          | HTTP method (GET, POST, etc.)                             |
-| `path`            | Request path (relative URL)                               |
-| `route_name`      | Named route for the request (if applicable)               |
-| `ip_address`      | Source IP address                                         |
-| `status_code`     | HTTP status code                                          |
-| `duration_ms`     | Request duration in milliseconds                          |
-| `response_bytes`  | Size of the response body in bytes (if measurable)        |
-| `user_agent`      | User agent string from the request (if provided)          |
-| `failure_reason`  | Authentication or request failure reason, if any          |
-| `created_at`      | Timestamp when the request was logged                     |
+<PropertyTable>
+    <Property name="trace_id">Unique request identifier</Property>
+    <Property name="user_id">ID of the authenticated user</Property>
+    <Property name="access_token_id">ID of the Access Token used for authentication (nullable)</Property>
+    <Property name="method">HTTP method (GET, POST, etc.)</Property>
+    <Property name="path">Request path (relative URL)</Property>
+    <Property name="route_name">Named route for the request (if applicable)</Property>
+    <Property name="ip_address">Source IP address</Property>
+    <Property name="status_code">HTTP status code</Property>
+    <Property name="duration_ms">Request duration in milliseconds</Property>
+    <Property name="request_bytes">Size of the request body in bytes (if measurable)</Property>
+    <Property name="response_bytes">Size of the response body in bytes (if measurable)</Property>
+    <Property name="user_agent">User agent string from the request (if provided)</Property>
+    <Property name="failure_reason">Authentication or request failure reason, if any</Property>
+    <Property name="created_at">Timestamp when the request was logged</Property>
+</PropertyTable>
 
 ### Sampling Configuration
 
@@ -176,7 +178,7 @@ To manage the database load, you can configure probabilistic sampling through en
 // .env
 
 API_REQUEST_LOGGING_SAMPLING_ENABLED=true
-API_REQUEST_LOGGING_SAMPLING_RATE=0.1 // Log 10% of requests
+API_REQUEST_LOGGING_SAMPLE_RATE=0.1 // Log 10% of requests
 ```
 
 :::tip[Failures are always logged]
@@ -197,9 +199,11 @@ For production applications expecting high volume:
 
 API routes are globally rate-limited via the `throttleApi()` middleware in `bootstrap/app.php`, keyed by the authenticated user ID (or by IP for unauthenticated requests).
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `RATE_LIMIT_API_PER_MINUTE` | `1800` | Maximum API requests per minute per user/IP |
+<PropertyTable title="Rate Limits">
+    <Property name="RATE_LIMIT_API_PER_MINUTE" default="1800">
+        Maximum API requests per minute per user/IP
+    </Property>
+</PropertyTable>
 
 All rate limiters are defined in `config/rate-limiting.php`.
 

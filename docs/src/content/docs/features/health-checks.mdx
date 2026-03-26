@@ -20,6 +20,7 @@ The following health checks are registered by default in `HealthServiceProvider`
 | Debug Mode | Ensures debug mode is disabled | Non-local |
 | Optimized App | Ensures app is optimized | Non-local |
 | Security Advisories | Checks for known package vulnerabilities | All |
+| Redis | Verifies Redis connectivity | When Redis driver is in use |
 | Directory Search | Verifies Northwestern Directory Search API | All |
 
 Additional checks are available for services like Redis, Horizon, Octane, and more. See the [available checks documentation](https://spatie.be/docs/laravel-health/v1/available-checks/overview) for a complete list. To add a check, register it in the `HealthServiceProvider`.

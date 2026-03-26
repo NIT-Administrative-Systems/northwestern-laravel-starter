@@ -6,6 +6,7 @@ sidebar:
 ---
 
 import { Aside, Steps } from '@astrojs/starlight/components';
+import { PropertyTable, Property } from '@nu-appdev/northwestern-starlight-theme/components';
 
 EventHub is Northwestern's enterprise messaging platform, combining an Amazon MQ (Apache ActiveMQ) message broker with a RESTful Messaging Center API. Applications communicate through **topics** (one-to-many message distribution), **queues** (per-consumer message storage), and **webhooks** (automated HTTP delivery).
 
@@ -50,8 +51,17 @@ The EventHub integration is provided by the [`northwestern-sysdev/laravel-soa`](
 The `ProcessNetIdUpdate` listener handles the default deprovisioning behavior (role removal and marking the NetID inactive) inside a database transaction. To add your own business logic, revoking API tokens, sending notifications, archiving data, etc., edit the transaction block in the listener:
 
 ```php title="app/Domains/User/Listeners/ProcessNetIdUpdate.php"
-DB::transaction(static function () use ($user, $event) {
-    // Default: remove non-default roles and mark inactive
+DB::transaction(static function () use ($event) {
+    $user = User::query()
+        ->sso()
+        ->lockForUpdate()
+        ->with('roles')
+        ->firstWhere('username', $event->netId);
+
+    if (! $user) {
+        return;
+    }
+
     $user->roles
         ->reject(fn (Role $role) => $role->name === SystemRole::NorthwesternUser->value)
         ->whenNotEmpty(fn ($roles) => $user->removeRoleWithAudit(
@@ -62,9 +72,7 @@ DB::transaction(static function () use ($user, $event) {
 
     $user->update(['netid_inactive' => true]);
 
-    // Add your custom deprovisioning logic here:
-    $user->access_tokens()->delete();           // Revoke API tokens
-    $user->notify(new AccountDeactivated);      // Send notification
+    // Add custom deprovisioning logic here, if needed
 });
 ```
 
@@ -129,24 +137,28 @@ The trait reads HMAC configuration from `config/nusoa.php` to generate the corre
 
 ---
 
-## Configuration
+## Environment Variables
 
-```bash
-# .env
-EVENT_HUB_BASE_URL=https://northwestern-prod.apigee.net/event-hub
-EVENT_HUB_API_KEY=your-api-key
-EVENT_HUB_HMAC_VERIFICATION_SHARED_SECRET=your-shared-secret
-
-# Local development — mock mode (default: true on local)
-EVENT_HUB_MOCK_ENABLED=true
-```
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `EVENT_HUB_BASE_URL` | — | EventHub API base URL |
-| `EVENT_HUB_API_KEY` | — | Apigee API key for EventHub |
-| `EVENT_HUB_HMAC_VERIFICATION_SHARED_SECRET` | — | Shared secret for HMAC signature verification |
-| `EVENT_HUB_HMAC_VERIFICATION_HEADER` | `X-HMAC-Signature` | HTTP header containing the HMAC signature |
-| `EVENT_HUB_HMAC_VERIFICATION_ALGORITHM_TYPE_REGISTRATION` | `HmacSHA256` | Algorithm name sent to EventHub during registration |
-| `EVENT_HUB_HMAC_VERIFICATION_ALGORITHM_TYPE_PHP` | `sha256` | PHP `hash_hmac` algorithm name |
-| `EVENT_HUB_MOCK_ENABLED` | `true` (local) | Enable mock mode for local development |
+<PropertyTable>
+    <Property name="EVENT_HUB_BASE_URL" required>
+        EventHub API base URL
+    </Property>
+    <Property name="EVENT_HUB_API_KEY" required>
+        Apigee API key for EventHub
+    </Property>
+    <Property name="EVENT_HUB_HMAC_VERIFICATION_SHARED_SECRET" required>
+        Shared secret for HMAC signature verification
+    </Property>
+    <Property name="EVENT_HUB_HMAC_VERIFICATION_HEADER" default="X-HMAC-Signature">
+        HTTP header containing the HMAC signature
+    </Property>
+    <Property name="EVENT_HUB_HMAC_VERIFICATION_ALGORITHM_TYPE_REGISTRATION" default="HmacSHA256">
+        Algorithm name sent to EventHub during registration
+    </Property>
+    <Property name="EVENT_HUB_HMAC_VERIFICATION_ALGORITHM_TYPE_PHP" default="sha256">
+        PHP `hash_hmac` algorithm name
+    </Property>
+    <Property name="EVENT_HUB_MOCK_ENABLED" default="true (local)">
+        Enable mock mode for local development
+    </Property>
+</PropertyTable>

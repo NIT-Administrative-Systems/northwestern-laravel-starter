@@ -19,6 +19,7 @@ use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
+use Northwestern\SysDev\SOA\Auth\Strategy\WebSSOStrategy;
 use Northwestern\SysDev\SOA\Auth\WebSSOAuthentication;
 
 class WebSSOController extends Controller
@@ -91,5 +92,17 @@ class WebSSOController extends Controller
         Session::regenerateToken();
 
         return $response;
+    }
+
+    /**
+     * Override the trait's logout to also invalidate the Laravel session.
+     */
+    public function logout(WebSSOStrategy $ssoStrategy): RedirectResponse
+    {
+        Auth::logout();
+        Session::invalidate();
+        Session::regenerateToken();
+
+        return $ssoStrategy->logout('login-selection');
     }
 }
