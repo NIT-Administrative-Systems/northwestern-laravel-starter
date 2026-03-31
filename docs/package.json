@@ -8,14 +8,14 @@
         "start": "astro dev"
     },
     "dependencies": {
-        "@astrojs/starlight": "^0.37.7",
-        "@nu-appdev/northwestern-starlight-theme": "^1.3.0",
-        "astro": "^5.18.1",
-        "astro-mermaid": "^1.4.0",
+        "@astrojs/starlight": "^0.38.2",
+        "@nu-appdev/northwestern-starlight-theme": "^1.3.2",
+        "astro": "^6.1.1",
+        "astro-mermaid": "^2.0.1",
         "mermaid": "^11.13.0",
         "sharp": "^0.34.5",
-        "starlight-links-validator": "^0.19.2",
-        "starlight-openapi": "^0.22.1"
+        "starlight-links-validator": "^0.21.0",
+        "starlight-openapi": "^0.24.0"
     },
     "engines": {
         "node": ">= 22.0.0",

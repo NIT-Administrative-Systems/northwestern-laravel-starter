@@ -31,7 +31,7 @@ jobs:
           ref: ${{ github.head_ref }}
 
       - name: 🔎 Detect Changed Files
-        uses: dorny/paths-filter@v3
+        uses: dorny/paths-filter@v4
         id: changes
         with:
           filters: |
@@ -59,7 +59,7 @@ jobs:
           ref: ${{ github.head_ref }}
 
       - name: 📦 Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
         with:
           version: ${{ env.PNPM_VERSION }}
 
@@ -267,7 +267,7 @@ jobs:
 
       - name: 📊 Publish PHPStan Report
         if: github.actor != 'dependabot[bot]' && always()
-        uses: lcollins/checkstyle-github-action@v3.1.0
+        uses: lcollins/checkstyle-github-action@v3.2.0
         with:
           name: "📊 PHPStan Analysis Report"
           path: "phpstan-report.xml"
@@ -436,7 +436,7 @@ jobs:
 
       - name: 💬 Coverage PR Comment
         if: github.event_name == 'pull_request' && steps.coverage.outputs.file != ''
-        uses: marocchino/sticky-pull-request-comment@v2
+        uses: marocchino/sticky-pull-request-comment@v3
         with:
           recreate: true
           path: code-coverage-results.md

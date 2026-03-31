@@ -64,7 +64,7 @@ runs:
 
     - name: 📦 Setup pnpm
       if: ${{ inputs['php-only'] != 'true' }}
-      uses: pnpm/action-setup@v4
+      uses: pnpm/action-setup@v5
       with:
         version: ${{ inputs['pnpm-version'] }}
 

@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [v1.13.3] - 2026-03-31
+
+### Changed
+
+- Upgraded docs site to Astro 6: `astro` ^5.18.1 to ^6.1.1, `@astrojs/starlight` ^0.37.7 to ^0.38.2, `astro-mermaid` ^1.4.0 to ^2.0.1, `starlight-links-validator` ^0.19.2 to ^0.21.0, `starlight-openapi` ^0.22.1 to ^0.24.0.
+- Updated `@nu-appdev/northwestern-starlight-theme` from ^1.3.0 to ^1.3.2.
+- Added `minimumReleaseAgeExclude` for `@nu-appdev/*` packages in `docs/pnpm-workspace.yaml`, exempting internal packages from the 72-hour minimum release age constraint.
+- Updated GitHub Actions: `pnpm/action-setup` v4 to v5, `dorny/paths-filter` v3 to v4, `marocchino/sticky-pull-request-comment` v2 to v3, `lcollins/checkstyle-github-action` v3.1.0 to v3.2.0.
+- Updated Composer dependencies: `filament/filament` 5.4.1 to 5.4.3, `fruitcake/laravel-debugbar` 4.1.3 to 4.2.1, `laravel/telescope` 5.18.0 to 5.19.0, `livewire/livewire` 4.2.1 to 4.2.3, `owen-it/laravel-auditing` 14.0.2 to 14.0.3, `sentry/sentry-laravel` 4.23.0 to 4.24.0, `brianium/paratest` 7.19.2 to 7.20.0.
+- Updated npm dependencies: `@pierre/diffs` ^1.0.11 to ^1.1.7, `@sentry/browser` ^10.40.0 to ^10.46.0, `cypress` ^15.10.0 to ^15.13.0, `axios` ^1.13.5 to ^1.14.0, `sass` ^1.97.3 to ^1.98.0, `vite` ^8.0.0 to ^8.0.3, and other minor dev dependency bumps.
+
 ## [v1.13.2] - 2026-03-31
 
 ### Added
@@ -605,7 +616,8 @@ First stable release. For installation, configuration, and usage guides, visit t
 - **CI pipeline**: GitHub Actions workflow with PHP/Node setup, database provisioning, Pest and Cypress test execution; Dependabot configuration.
 - **Developer tooling**: `.editorconfig`, `.prettierrc`, `.nvmrc` (Node v24), custom stubs, Rector configuration.
 
-[Unreleased]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.13.2...HEAD
+[Unreleased]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.13.3...HEAD
+[v1.13.3]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.13.2...v1.13.3
 [v1.13.2]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.13.1...v1.13.2
 [v1.13.1]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.13.0...v1.13.1
 [v1.13.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.12.0...v1.13.0
