@@ -143,16 +143,16 @@ jobs:
         working-directory: test-project
         run: test -f public/build/manifest.json || { echo "::error::Vite manifest not found"; exit 1; }
 
-      - name: 🔒 Cache configuration
+      - name: 🧪 Run test suite
+        working-directory: test-project
+        run: php artisan test --parallel
+
+      - name: 🔒 Verify config and route caching
         working-directory: test-project
         run: |
           php artisan config:cache
           php artisan route:cache
           php artisan event:cache
-
-      - name: 🧪 Run test suite
-        working-directory: test-project
-        run: php artisan test --parallel
 
       - name: 🚀 Boot application
         working-directory: test-project
