@@ -189,6 +189,13 @@ class StarterCheckCommand extends Command
             "<fg=cyan>{$compareUrl}</>",
         );
 
+        $changelogUrl = 'https://github.com/' . self::REPO . '/blob/main/CHANGELOG.md';
+
+        $this->components->twoColumnDetail(
+            '  <fg=white;options=bold>Changelog</>',
+            "<fg=cyan>{$changelogUrl}</>",
+        );
+
         $this->newLine();
         $this->line('  <fg=gray>Review the releases above to see if any changes are relevant to your project.</>');
         $this->line("  <fg=gray>To suppress these notices, set</> <fg=white;options=bold>version: {$latestVersion}</> <fg=gray>in</> <fg=white;options=bold>.starter-version.yaml</>");

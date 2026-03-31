@@ -92,5 +92,5 @@ jobs:
         run: |
           gh release create "$VERSION" \
             --title "$VERSION" \
-            --generate-notes \
+            --notes "See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for details." \
             --verify-tag
