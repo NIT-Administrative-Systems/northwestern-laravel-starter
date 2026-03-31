@@ -1,5 +1,5 @@
 name: Smoke Test
-run-name: "Smoke Test | ${{ inputs.version || github.event.release.tag_name || 'dev-main' }}"
+run-name: "Smoke Test | ${{ inputs.version || github.event.release.tag_name || format('dev-{0}', github.ref_name) }}"
 
 env:
   NODE_VERSION: '25'
@@ -40,6 +40,7 @@ jobs:
           RELEASE_TAG: ${{ github.event.release.tag_name }}
           INPUT_VERSION: ${{ inputs.version }}
           GH_REPO: ${{ github.repository }}
+          REF_NAME: ${{ github.ref_name }}
         run: |
           if [ "$EVENT_NAME" = "release" ]; then
             TAG="$RELEASE_TAG"
@@ -50,8 +51,8 @@ jobs:
             COMPOSER="${TAG#v}"
             VCS=""
           else
-            TAG="dev-main"
-            COMPOSER="dev-main"
+            TAG="dev-$REF_NAME"
+            COMPOSER="dev-$REF_NAME"
             VCS="--repository={\"type\":\"vcs\",\"url\":\"https://github.com/$GH_REPO\"} --stability=dev"
           fi
 
@@ -106,7 +107,7 @@ jobs:
 
           echo "--- Checking .starter-version.yaml exists ---"
           test -f .starter-version.yaml || { echo "::error::.starter-version.yaml not found"; exit 1; }
-          if [ "$VERSION" != "dev-main" ]; then
+          if [[ "$VERSION" != dev-* ]]; then
             echo "--- Checking .starter-version.yaml matches release ---"
             grep -q "version: $VERSION" .starter-version.yaml || { echo "::error::.starter-version.yaml does not contain $VERSION"; exit 1; }
           fi
@@ -137,6 +138,21 @@ jobs:
       - name: 🏗️ Build frontend assets
         working-directory: test-project
         run: pnpm build
+
+      - name: ✅ Verify Vite manifest
+        working-directory: test-project
+        run: test -f public/build/manifest.json || { echo "::error::Vite manifest not found"; exit 1; }
+
+      - name: 🔒 Cache configuration
+        working-directory: test-project
+        run: |
+          php artisan config:cache
+          php artisan route:cache
+          php artisan event:cache
+
+      - name: 🧪 Run test suite
+        working-directory: test-project
+        run: php artisan test --parallel
 
       - name: 🚀 Boot application
         working-directory: test-project
