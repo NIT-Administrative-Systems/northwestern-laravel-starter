@@ -12,6 +12,7 @@ use App\Domains\User\Models\User;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Timebox;
 use PHPUnit\Framework\Attributes\CoversClass;
 use RuntimeException;
@@ -23,6 +24,10 @@ class SendLoginCodeControllerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        if (! Route::has('login-code.send')) {
+            $this->markTestSkipped('Local auth routes are not registered.');
+        }
 
         config(['local-auth.enabled' => true]);
         config(['local-auth.rate_limit_per_hour' => 5]);

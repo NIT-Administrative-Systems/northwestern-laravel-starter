@@ -19,6 +19,10 @@ abstract class ApiTestCase extends TestCase
     {
         parent::setUp();
 
+        if (! config('api.enabled')) {
+            $this->markTestSkipped('API is disabled.');
+        }
+
         $this->apiUser = User::factory()
             ->api()
             ->has(AccessToken::factory()->state([

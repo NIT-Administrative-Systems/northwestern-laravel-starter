@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [v1.14.0] - 2026-03-31
+
+### Added
+
+- Smoke test workflow runs the full test suite (`php artisan test --parallel`) and verifies the Vite manifest before booting the application.
+- Smoke test `workflow_dispatch` accepts any branch. Untagged runs resolve to `dev-<branch-name>`.
+- Feature flag baseline in `phpunit.xml`: `API_ENABLED`, `LOCAL_AUTH_ENABLED`, `SUPPORT_ENABLED`, and `CHANGELOG_ENABLED` set to `true`. Fresh `composer create-project` installs pass the test suite without `.env` adjustments.
+
+### Fixed
+
+- Smoke test step ordering: `config:cache` ran before the test suite, so `phpunit.xml` env overrides (`DB_CONNECTION=phpunit`) had no effect. Moved tests before config/route/event caching.
+- Local auth and support controller tests (`ShowLoginCodeRequestControllerTest`, `ShowLoginCodeFormControllerTest`, `SendLoginCodeControllerTest`, `VerifyLoginCodeControllerTest`, `ContactControllerTest`) and `ApiTestCase` check `Route::has()` or `config()` in `setUp()` and call `markTestSkipped()` when the required routes are absent. Disabling `LOCAL_AUTH_ENABLED` or `SUPPORT_ENABLED` skips these tests instead of failing them.
+
 ## [v1.13.3] - 2026-03-31
 
 ### Changed
@@ -616,7 +629,8 @@ First stable release. For installation, configuration, and usage guides, visit t
 - **CI pipeline**: GitHub Actions workflow with PHP/Node setup, database provisioning, Pest and Cypress test execution; Dependabot configuration.
 - **Developer tooling**: `.editorconfig`, `.prettierrc`, `.nvmrc` (Node v24), custom stubs, Rector configuration.
 
-[Unreleased]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.13.3...HEAD
+[Unreleased]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.14.0...HEAD
+[v1.14.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.13.3...v1.14.0
 [v1.13.3]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.13.2...v1.13.3
 [v1.13.2]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.13.1...v1.13.2
 [v1.13.1]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.13.0...v1.13.1
