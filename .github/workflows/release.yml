@@ -57,6 +57,31 @@ jobs:
             fi
           fi
 
+      - name: Validate changelog entry
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          CHANGELOG_HEADING=$(grep -m1 "^## \[$VERSION\] -" CHANGELOG.md || true)
+          if [ -z "$CHANGELOG_HEADING" ]; then
+            echo "::error::Could not find changelog entry for $VERSION in CHANGELOG.md"
+            exit 1
+          fi
+
+          CHANGELOG_ANCHOR=$(python3 -c '
+          import re
+          import sys
+          import unicodedata
+
+          heading = re.sub(r"^#+\s*", "", sys.argv[1]).strip().lower()
+          heading = unicodedata.normalize("NFKD", heading)
+          heading = "".join(c for c in heading if not unicodedata.combining(c))
+          heading = re.sub(r"[^\w\- ]", "", heading)
+          heading = re.sub(r"\s+", "-", heading)
+          print(heading)
+          ' "$CHANGELOG_HEADING")
+
+          echo "CHANGELOG_ANCHOR=$CHANGELOG_ANCHOR" >> "$GITHUB_ENV"
+
       - name: Bump .starter-version.yaml
         env:
           VERSION: ${{ inputs.version }}
@@ -74,7 +99,7 @@ jobs:
           version: $VERSION
           EOF
 
-      - name: Commit and tag
+      - name: Commit and push
         env:
           VERSION: ${{ inputs.version }}
         run: |
@@ -82,8 +107,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add .starter-version.yaml
           git commit -m "chore: bump starter version to $VERSION [skip ci]"
-          git tag "$VERSION"
-          git push origin main --tags
+          git push origin main
 
       - name: Create GitHub release
         env:
@@ -91,6 +115,6 @@ jobs:
           GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
         run: |
           gh release create "$VERSION" \
+            --target main \
             --title "$VERSION" \
-            --notes "See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for details." \
-            --verify-tag
+            --notes "See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md#$CHANGELOG_ANCHOR) for details."
