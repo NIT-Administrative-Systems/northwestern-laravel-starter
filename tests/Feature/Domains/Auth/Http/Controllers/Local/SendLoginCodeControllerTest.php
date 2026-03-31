@@ -12,9 +12,9 @@ use App\Domains\User\Models\User;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Timebox;
 use PHPUnit\Framework\Attributes\CoversClass;
-use Illuminate\Support\Facades\Route;
 use RuntimeException;
 use Tests\TestCase;
 
