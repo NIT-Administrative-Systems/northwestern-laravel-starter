@@ -46,7 +46,7 @@ jobs:
             TAG="$RELEASE_TAG"
             COMPOSER="${TAG#v}"
             VCS=""
-          elif [ -n "$INPUT_VERSION" ] && [[ "$INPUT_VERSION" =~ ^v?[0-9] ]]; then
+          elif [ -n "$INPUT_VERSION" ] && [[ "$INPUT_VERSION" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+ ]]; then
             TAG="$INPUT_VERSION"
             COMPOSER="${TAG#v}"
             VCS=""
