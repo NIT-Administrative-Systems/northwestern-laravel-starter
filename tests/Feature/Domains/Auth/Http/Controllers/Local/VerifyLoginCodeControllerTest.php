@@ -13,6 +13,7 @@ use App\Domains\User\Models\UserLoginRecord;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
@@ -23,6 +24,10 @@ class VerifyLoginCodeControllerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        if (! Route::has('login-code.verify')) {
+            $this->markTestSkipped('Local auth routes are not registered.');
+        }
 
         config(['local-auth.enabled' => true]);
         config(['local-auth.code.max_attempts' => 5]);

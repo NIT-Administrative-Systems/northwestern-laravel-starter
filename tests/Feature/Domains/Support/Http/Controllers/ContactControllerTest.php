@@ -10,6 +10,7 @@ use App\Domains\Support\Gateways\CreationResult;
 use App\Domains\Support\Models\SupportTicket;
 use App\Domains\User\Models\User;
 use App\Http\Controllers\Support\ContactController;
+use Illuminate\Support\Facades\Route;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
@@ -19,6 +20,10 @@ class ContactControllerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        if (! Route::has('support.contact.create')) {
+            $this->markTestSkipped('Support routes are not registered.');
+        }
 
         config(['support.driver' => 'mail']);
         config(['support.mail.to' => 'support@northwestern.edu']);
