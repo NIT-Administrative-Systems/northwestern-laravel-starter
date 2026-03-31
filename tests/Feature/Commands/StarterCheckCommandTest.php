@@ -64,6 +64,7 @@ class StarterCheckCommandTest extends TestCase
         $this->assertStringContainsString('v1.6.0', $output);
         $this->assertStringContainsString('2026-02-20', $output);
         $this->assertStringContainsString('compare/v1.4.0...v1.6.1', $output);
+        $this->assertStringContainsString('CHANGELOG.md', $output);
     }
 
     public function test_shows_release_links(): void

@@ -1,0 +1,638 @@
+# Changelog
+
+All notable changes to the [Northwestern Laravel Starter](https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter) are documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
+
+## [Unreleased]
+
+## [v1.13.2] - 2026-03-31
+
+### Added
+
+- `CHANGELOG.md` with backfilled release history.
+
+### Fixed
+
+- The `pnpm-workspace.yaml` files incorrectly nested the `minimumReleaseAge` under a `settings` key. This has been moved to the root level.
+
+## [v1.13.1] - 2026-03-31
+
+### Added
+
+- `pnpm-workspace.yaml` files in both the project root and `docs/` directory with a `minimumReleaseAge` setting of 4320 minutes (72 hours). pnpm will only install npm package versions published for at least 3 days, reducing exposure to compromised or typosquatted packages in their first hours of publication.
+
+## [v1.13.0] - 2026-03-26
+
+### Added
+
+- `WebSSOController::logout()` method that invalidates the Laravel session (`Auth::logout()`, `Session::invalidate()`, `Session::regenerateToken()`) before delegating to the SSO strategy's logout. The trait's default logout did not clear server-side session state.
+- `PropertyTable` and `Property` components from `@nu-appdev/northwestern-starlight-theme/components` are now used throughout the documentation site for all parameter/config tables, replacing raw HTML `<table>` elements. Affected docs include: component-library, changelog, authentication, authorization, API, support-tickets, commands, directory-search, EventHub, and WebSSO reference pages.
+- Documentation for `db:seed:list` command options (`--show-dependencies`, `--mermaid`, `--json`) and `db:snapshot:restore --force` flag.
+- Documentation corrections for `db:snapshot` commands: argument names changed from `{name}` to `{filename?}` and `db:rebuild` steps updated to reflect the actual implementation (cache clearing, `migrate:fresh`, `DemoSeeder` invocation, IDE helper regeneration).
+
+### Changed
+
+- Upgraded docs theme from custom CSS/components to `@nu-appdev/northwestern-starlight-theme` v1.3.0. This replaced the custom `Hero.astro` component, `ConditionalEditLink.astro` component, `custom.css` (Northwestern purple branding, navigation styling), and `layout.css` with the shared theme plugin configured via `northwesternTheme({ homepage: { showTitle: false, imageWidth: "750px" } })` in `astro.config.mjs`.
+- Removed the custom `favicon.ico` from the docs site (now provided by the theme).
+- Removed `astro-mermaid` integration config from `astro.config.mjs` (the package is still a dependency but Mermaid setup is now handled by the theme).
+- Updated docs dependencies: `@astrojs/starlight` to ^0.37.7, `astro` to ^5.18.1, `astro-mermaid` to ^1.4.0, `mermaid` to ^11.13.0, `starlight-openapi` to ^0.22.1.
+- Lowered docs Node.js engine requirement from >= 25.0.0 to >= 22.0.0.
+- `StakeholderSeeder::createAndAssignRole()` now checks for already-assigned roles before calling `assignRoleWithAudit()`, filtering out roles the user already has via `$roles->reject(fn (Role $role) => $user->hasRole($role))`. Prevents duplicate audit entries and redundant role assignments during re-seeding.
+
+## [v1.12.0] - 2026-03-23
+
+### Changed
+
+- Bumped minimum PHP version from ^8.4 to ^8.5 across `composer.json`, CI workflows (`.github/actions/common-setup/action.yml`, `check-pr.yml`, `smoke-test.yml`), Herd configuration (`herd.yml`), and README badge.
+- Upgraded Vite from ^7.0.0 to ^8.0.0 and `laravel-vite-plugin` from ^2.1.0 to ^3.0.0.
+- Updated `@tailwindcss/vite` to ^4.2.2 and `tailwindcss` to ^4.2.2.
+- Upgraded `northwestern-sysdev/tdx-php-sdk` from ^0.5.1 to ^0.6.
+- Updated Rector configuration from PHP 8.4 to PHP 8.5 rule sets (`SetList::PHP_85`), replacing `DeprecatedAnnotationToDeprecatedAttributeRector` with PHP 8.5-specific skip rules: `NestedFuncCallsToPipeOperatorRector`, `SequentialAssignmentsToPipeOperatorRector`, `AddOverrideAttributeToOverriddenMethodsRector`, and `AddOverrideAttributeToOverriddenPropertiesRector`.
+- Updated `config/database.php` MySQL SSL config from deprecated `PDO::MYSQL_ATTR_SSL_CA` to `Pdo\Mysql::ATTR_SSL_CA` (PHP 8.5 namespaced PDO driver constant).
+- Streamlined README prose: shortened descriptions for features, overview, and acknowledgements sections without removing content.
+- Rebuilt Filament frontend assets (`app.css`, `app.js`, various component JS files).
+
+## [v1.11.0] - 2026-03-20
+
+### Added
+
+- **Role Activity page** (`RoleActivityResource`) accessible from the Roles list via a "Role Activity" header action button. Displays a filterable, searchable table of all `role_assigned` and `role_removed` audit events across the system. The table shows the event type (with color-coded badges), affected user, changed role(s) rendered as Filament-styled pill badges with links, modification origin (UI Action, SSO Provisioning, NetID Event, Role Deleted, or System), performing user (with impersonation indicator), and timestamp. Includes filters for event type, role, user, performer, origin, and date range. Located at `/admin/roles/activity`.
+- **Role Activity stats widget** (`RoleActivityStatsWidget`) displayed above the Role Activity table showing total assignments, total removals, counts from the last 7 days, and time since last activity.
+- **Role Activity CSV export** (`RoleActivityExporter`) with CSV formula sanitization, exporting event, user NetID/name, role name/type, origin, performer, impersonator, and date columns.
+- **Role Activity relation manager** (`RoleActivityRelationManager`) on the User resource's view page, showing a "Role History" tab with per-user role assignment/removal history. Only visible for non-API users when the viewer has the `ViewAuditLogs` permission.
+- **Role Definition History page** (`RoleDefinitionHistory`) as a new sub-navigation tab on individual role view/edit pages. Displays a timeline of all audit events for a specific role (`created`, `updated`, `deleted`, `restored`, `permissions_modified`) with an expandable collapsible panel showing a full JSON diff viewer for each entry. The table summarizes attribute changes inline (e.g., name changes shown as old -> new with color-coded badges, permission additions/removals shown as pill groups). Located at `/admin/roles/{record}/history`.
+- Sub-navigation on the Role resource configured with `SubNavigationPosition::Top`, showing "Details" and "Definition History" tabs on role view/edit pages.
+- `AuditsSeederChanges` trait (`App\Domains\Core\Seeders\Concerns\AuditsSeederChanges`) enables audit logging in seeders by registering the `AuditableObserver` on specified model classes, bypassing the global `audit.console` config. Skips observer registration in testing/CI environments.
+- `RoleSeeder` and `PermissionSeeder` now use the `AuditsSeederChanges` trait to produce audit entries for role/permission creation and updates during deployment seeding. `RoleSeeder` also switched from `syncPermissions()` to `syncPermissionsWithAudit()`.
+- `StakeholderSeeder` switched from `$user->roles()->sync()` to `$user->assignRoleWithAudit()` with `RoleModificationOrigin::System`, producing audit trail entries for stakeholder role assignments.
+- `Audit` model gained an `auditable()` MorphTo relationship (with `withTrashed()`), a `roleActivity` query scope filtering to `role_assigned`/`role_removed` events for User models, and a `getChangedRoles()` method that diffs `old_values`/`new_values` to extract the specific roles that were added or removed.
+- `RoleModificationOrigin` enum now implements Filament's `HasColor`, `HasIcon`, and `HasLabel` contracts, providing labels (e.g., "SSO Provisioning", "NetID Event"), colors, and Heroicons for each origin type for display in tables and badges.
+- Reusable `diff-toolbar` Blade component (`resources/views/components/diff-toolbar.blade.php`) with split/unified layout toggle and wrap/scroll text overflow toggle, used in both the audit diff viewer and the new role definition history collapsible panels.
+- Documentation for the `AuditsSeederChanges` trait in the audit logging docs, explaining usage, which seeders use it, and the distinction between custom audit events and standard Eloquent events.
+
+### Changed
+
+- All export toolbar actions across the application (Roles, Users, Audits, API Request Logs, Support Tickets, User Login Records) now display a consistent gray-colored download icon (`Heroicon::OutlinedArrowDownTray`) instead of appearing as unstyled buttons.
+
+## [v1.10.0] - 2026-03-17
+
+### Added
+
+- Impersonation banner is now provided by the `northwestern-filament-theme` package (v2.1.0) via `NorthwesternTheme::make()->impersonationBanner()`, replacing the custom `impersonation-banner.blade.php` view and `FilamentView::registerRenderHook()` call in `FilamentServiceProvider`.
+
+### Changed
+
+- Removed the `pxlrbt/filament-environment-indicator` package dependency. The `northwestern-filament-theme` package (upgraded from v2.0.0 to v2.1.0) now handles environment indicators, removing the separate `EnvironmentIndicatorPlugin` configuration in `AdministrationPanelProvider`.
+- Roles table "Assignment Locked" column now shows a gray `LockOpen` icon with an "Assignment is open" tooltip for unlocked roles, instead of showing no icon and no tooltip. Locked roles continue to show the yellow `LockClosed` icon.
+
+### Fixed
+
+- Default profile photo SVG (`public/images/default-profile-photo.svg`) viewBox cropped from `0 0 700 700` to `120 50 460 460` to remove excess whitespace around the avatar graphic. Now renders at the correct visual size in Filament user menus and avatars.
+- WCAG color contrast fix in the role form's "Sensitive Permissions" warning box. Text color classes changed from `text-red-400` (insufficient contrast in light mode) to `text-red-700 dark:text-red-400`, meeting contrast requirements in both light and dark modes.
+
+## [v1.9.2] - 2026-03-16
+
+### Changed
+
+- Extracted the Northwestern Filament theme CSS from inline `public/css/northwestern-sysdev/northwestern-filament-theme/` files (9 CSS modules: variables, buttons, components, forms, layout, navigation, tables, typography, utilities) into the external `northwestern-sysdev/northwestern-filament-theme` package, upgraded from v1.x to v2.0.0
+- Theme CSS is now imported via `resources/css/filament/administration/theme.css` from the vendor directory (`dist/theme.css` and `dist/tailwind-tokens.css`) instead of being maintained in the project repository
+- `AdministrationPanelProvider` now calls `NorthwesternTheme::make()->withoutAssetRegistration()` since the theme CSS is loaded through the Tailwind build pipeline rather than Filament's asset system
+- Updated UI preview screenshots in `art/` directory with the latest Filament theme appearance
+
+## [v1.9.1] - 2026-03-16
+
+### Added
+
+- User avatars in the Filament admin panel via Wildcard photos. The `User` model now implements `HasAvatar` and provides `getFilamentAvatarUrl()`, which returns the user's Wildcard photo URL when `platform.wildcard_photo_sync` is enabled
+
+### Fixed
+
+- CSS refinements to the Northwestern Filament theme: `nu-components.css` tweaks, expanded `nu-layout.css` styles, adjusted `nu-tables.css`, updated `nu-typography.css` and `nu-utilities.css`, and corrected a `nu-variables.css` value
+
+## [v1.9.0] - 2026-03-16
+
+### Added
+
+- Northwestern Filament theme: a custom CSS theme for the Filament admin panel, delivered as 9 modular CSS files (nu-variables, nu-buttons, nu-components, nu-forms, nu-layout, nu-navigation, nu-tables, nu-typography, nu-utilities) implementing Northwestern brand design tokens (purple palette, typography, spacing) and styling for all Filament components
+- `northwestern-sysdev/northwestern-filament-theme` v1.0 Composer dependency, providing the `NorthwesternTheme` Filament plugin
+- Auto-discovery for configuration validators: new `#[StarterValidator]` PHP attribute and `ConfigValidatorResolver` service that scans `app/Domains/**/Services/ConfigValidation` directories for classes implementing `ConfigValidator`, removing the need to register validators in the command
+- `ConfigValidator` interface now includes a `shouldRun()` method, allowing validators to declare themselves as not applicable (e.g., for optional integrations that are not configured); skipped validators are displayed with a distinct "Skipped (not applicable)" indicator in the output
+- `ResolvedValidator` value object to carry the validator instance alongside its `#[StarterValidator]` description
+- `ValidateConfigurationCommand` logs warnings when a validator throws an exception, including the validator class, description, and exception details
+- `RedisCheck` added to `HealthServiceProvider`. Registers when any of the cache, queue, session, or Redis client drivers use Redis
+- Login page (`login-selection.blade.php`) renders SSO and local auth cards based on configuration, and shows a "No Sign-in Methods Available" fallback linking to the authentication documentation when neither provider is configured
+- Auth routes are now conditionally registered based on feature configuration: local auth routes (`login-code.*`) only register when `local-auth.enabled` is true, Entra ID routes only when `AZURE_CLIENT_ID` and `AZURE_CLIENT_SECRET` are set, and WebSSO routes only when the agentless WebSSO API key or `forgerock-direct` strategy is configured
+
+### Changed
+
+- Enum naming convention overhaul: dropped the `Enum` suffix and switched from `SCREAMING_SNAKE_CASE` to `PascalCase` for enum cases across the entire codebase. Key renames include: `PermissionEnum` to `SystemPermission`, `AccessTokenStatusEnum` to `AccessTokenStatus`, `AuthTypeEnum` to `AuthType`, `AffiliationEnum` to `Affiliation`, `PermissionScopeEnum` to `PermissionScope`, `RoleModificationOriginEnum` to `RoleModificationOrigin`, `TokenExpirationEnum` to `TokenExpiration`, `UserSegmentEnum` to `UserSegment`, `NetIdUpdateActionEnum` to `NetIdUpdateAction`, `ApiRequestFailureEnum` to `ApiRequestFailure`, `ExternalServiceEnum` to `ExternalService`, `TicketSystemEnum` to `TicketSystem`, `SystemRoleEnum` to `SystemRole`
+- Exception naming convention overhaul: added the `Exception` suffix. `NoRollback` to `NoRollbackException`, `MissingRequestIpForRestrictedToken` to `MissingRequestIpForRestrictedTokenException`, `TdxLookupFailed` to `TdxLookupFailedException`
+- Mailable renamed from `LoginCodeNotification` to `LoginCodeMail` to match Laravel conventions
+- Value object `CreationResult` moved from `App\Domains\Support\Gateway` to `App\Domains\Support\Gateways` namespace
+- `DirectorySearchCheck` health check: renamed variables (`$result` to `$healthResult`, `$info` to `$directoryLookup`)
+- `LoginSelectionController` and `LogoutSelectionController` now detect whether Entra ID credentials are configured (both `client_id` and `client_secret` must be present) before redirecting to OAuth, and fall back when no SSO provider is configured
+- `ValidateConfigurationCommand` summary reports passed, failed, and skipped counts separately
+- Migration stubs updated with modernized `return new class extends Migration` formatting
+- `ConfigValidator` interface: replaced `name(): string` with `shouldRun(): bool`
+
+### Fixed
+
+- `Http::preventStrayRequests()` now scoped to `ci` and `testing` environments instead of running globally, which broke HTTP calls in local development and production
+- `LogoutSelectionController` now handles logout when no SSO provider is configured, falling back to local session invalidation instead of attempting an SSO logout redirect that would fail
+
+## [v1.8.0] - 2026-03-09
+
+### Added
+
+- Assignment-locked roles: a new `assignment_locked` boolean column on the `roles` table (via migration `2026_03_02_000000_add_assignment_locked_to_roles_table`) that prevents role assignment/removal through the Filament admin panel. The `Northwestern User` system role is seeded with `assignment_locked: true` by default
+- `Role::isAssignmentLocked()` method and `Role::assignable()` query scope for filtering to roles that can be modified through the UI
+- `RolePolicy` now includes `attachUser` and `detachUser` authorization methods that check `PermissionEnum::ASSIGN_ROLES` and deny access for system-managed roles. The `update` and `delete` methods now receive the `Role` model and deny modification of system-managed types
+- `ForceDetachRoleCommand` (`php artisan role:force-detach`): an emergency Artisan command to remove any role from a user (including assignment-locked roles), with interactive user/role search prompts, mandatory audit trail reason, and `--force` flag for non-interactive environments
+- `RoleFactory::assignmentLocked()` state method for testing
+- Assignment locked indicator in the Roles table: a lock icon column (`IconColumn`) with warning color and tooltip explaining the role is assigned programmatically
+- Warning banner on the View Role page for assignment-locked roles, displaying "This role's assignment is managed programmatically and cannot be changed through the admin panel"
+- `assignment_locked` property exposed in the API schema for the Role resource
+- CI workflow: added a "Fail on Errors" step in `check-pr.yml` that fails the "Unit Test Results" job when test shards report failures. Fixes a bug where `publish-unit-test-result-action` could attach to unrelated workflows and bypass branch protection rulesets
+
+### Changed
+
+- Removed `Role::canBeManaged()` method (which performed inline permission checks) in favor of policy-based authorization via `RolePolicy::attachUser()` and `RolePolicy::detachUser()`
+- Roles table edit action now uses `Gate::allows('update', $record)` instead of inline permission checks
+- `UsersRelationManager` on roles and `RolesRelationManager` on users updated to respect the new policy methods
+- System Managed role warning section label shortened from "System Managed Role" to "System Managed" in the View Role page
+
+### Fixed
+
+- `Http::preventStrayRequests()` scoped to CI and testing environments only. Was blocking real HTTP requests in development and production
+- `ApiRequestLogsTable` "View User" action now handles unauthenticated API request logs by checking for `user_id` before generating the URL, and shows "Unauthenticated" placeholder text for the username column when no user is associated
+
+## [v1.7.2] - 2026-03-03
+
+### Added
+
+- `SSOValidator`: a new configuration validator that detects the active SSO authentication strategy (Microsoft Entra ID or Online Passport/agentless WebSSO) and validates the appropriate credentials. When Online Passport is detected (via `WEBSSO_API_KEY` or `forgerock-direct` strategy), it checks for `WEBSSO_API_KEY` and `WEBSSO_API_URL_BASE`; otherwise it validates `AZURE_CLIENT_ID` and `AZURE_CLIENT_SECRET`
+- `DirectorySearchValidator`: checks whether `DIRECTORY_SEARCH_API_KEY` is configured, replacing the check bundled inside `EnvironmentVariablesValidator`
+- `EventHubValidator` now supports a "skipped" state: when all EventHub environment variables are blank, it reports as passed with a "not configured (optional)" message instead of failing, recognizing EventHub as an optional integration. Partial configuration (some variables set, others missing) still reports as a failure with a new hint suggesting removal of all `EVENT_HUB_*` variables if EventHub is not needed
+
+### Changed
+
+- Replaced `EnvironmentVariablesValidator` (which checked `AZURE_CLIENT_SECRET` and `DIRECTORY_SEARCH_API_KEY` together) with the more granular `SSOValidator` and `DirectorySearchValidator`
+- `ValidateConfigurationCommand` now registers `SSOValidator` and `DirectorySearchValidator` in place of the removed `EnvironmentVariablesValidator`
+- Reorganized `.env.example` into labeled sections (Authentication, API, Northwestern Integrations, Features, Third-Party Services, Testing) with descriptive separator comments, and regrouped rate-limiting variables to sit alongside their related features
+
+## [v1.7.1] - 2026-03-02
+
+### Added
+
+- Smoke test CI workflow (`.github/workflows/smoke-test.yml`): an end-to-end test that runs on every release (or on-demand via `workflow_dispatch`). Performs `composer create-project`, validates post-install hooks (`.env` creation, `APP_KEY` generation, `.starter-version.yaml` version match), runs migrations and seeders, builds frontend assets with pnpm, and boots the application server to verify a successful HTTP response
+- "Applying Upstream Updates" documentation guide (`docs/src/content/docs/guides/applying-upstream-updates.mdx`): explains how to add the starter as a Git remote, cherry-pick commits into downstream projects, use the `starter:check` command to discover new releases, and an alternative patch-file workflow
+
+### Changed
+
+- Audits table URL column now displays with a monospace font (`FontFamily::Mono`) and has a proper "URL" label
+- OpenAPI schema annotations for API resources (`AccessTokenResource`, `PermissionResource`, `RoleResource`, `UserResource`): reordered `example` before `enum` properties to fix schema generation ordering issues
+- Release workflow (`.github/workflows/release.yml`) updated to trigger the smoke test
+
+## [v1.7.0] - 2026-03-02
+
+### Added
+
+- Agentless WebSSO (Online Passport) support as an alternative to Microsoft Entra ID for SSO authentication. New routes registered under `auth/websso/` prefix: `login-websso` and `login-websso-logout`
+- `.env.example` now includes configuration variables for the agentless WebSSO provider: `WEBSSO_URL_BASE`, `WEBSSO_API_URL_BASE`, `WEBSSO_API_KEY`, and `DUO_ENABLED`
+
+### Changed
+
+- `LoginSelectionController` now determines the SSO route based on whether WebSSO is configured (via `WEBSSO_API_KEY` or `forgerock-direct` strategy). When WebSSO credentials are present, users are directed to the `login-websso` route; otherwise they are sent to the Entra ID `login-oauth-redirect` route
+- `LogoutSelectionController` mirrors the same detection logic for logout, routing to either `login-websso-logout` or `login-oauth-logout` based on the active SSO provider
+- `WebSSOController` constructor sets `login_route_name` to `login-websso` and `logout_return_to_route` to `login-selection`, and moved the `WebSSOAuthentication` trait alias to the top of the class body
+- Login selection Blade view now receives the `ssoRoute` and `localEnabled` variables from the controller instead of computing them inline
+
+### Fixed
+
+- `LoginSelectionController` always redirected non-local-auth users to the Entra ID OAuth flow, even when the application was configured for agentless WebSSO. The controller now detects the active SSO strategy and redirects accordingly
+
+## [v1.6.2] - 2026-03-02
+
+### Changed
+
+- Upgraded GitHub Actions artifact actions in the CI workflow (`check-pr.yml`): `actions/upload-artifact` from v6 to v7 and `actions/download-artifact` from v7 to v8
+- Added `@var` type annotations to Eloquent Builder return values in `RoleResource`, `SupportTicketResource`, and `UserResource` to satisfy PHPStan
+- Reordered `enum`/`example`/`nullable` property keys in the OpenAPI schema (`api-schema.yaml`) to follow a consistent attribute ordering convention
+- Moved the health check route group below the protected API route group in `routes/api.php` and replaced the inline FQCN with an explicit `use` import for `HealthCheckJsonResultsController`
+- Updated `composer.lock` with minor dependency version bumps
+
+## [v1.6.1] - 2026-02-28
+
+### Added
+
+- `RAY_ENABLED=false` entry in `.env.example` for the Spatie Ray debugging tool
+
+### Fixed
+
+- `StarterCheckCommand` now catches `PDOException` in its `handle()` method and returns success, preventing `composer create-project` from failing when the database does not yet exist (e.g., on a fresh install before migrations have run)
+
+## [v1.6.0] - 2026-02-28
+
+### Added
+
+- `RolePolicy::delete()` authorization gate requiring `DELETE_ROLES` permission before deleting a role
+- Per-IP rate limiting on `SendLoginCodeController` (configurable via `local-auth.rate_limit_per_ip_per_hour`, default 20), preventing a single IP from exhausting multiple accounts' per-email rate limits (targeted account lockout DoS)
+- Rate-limit slot consumption for unknown email addresses in `SendLoginCodeController`, eliminating response timing differentials that could enable user enumeration
+- CSV formula injection protection (`sanitizeCsvFormula()`) across all Filament exporters: `ApiRequestLogExporter`, `AuditExporter`, `SupportTicketExporter`, and `UserLoginRecordExporter`. Values starting with `=`, `+`, `-`, `@`, tab, or carriage return are prefixed with a single quote
+- Authorization checks on `UsersRelationManager` for role assignment and removal, calling `abort_unless($role->canBeManaged(), 403)` before attaching or detaching users
+- Guard in `HandlesImpersonation::canBeImpersonated()` preventing users without `MANAGE_ALL` from impersonating users who hold that permission (privilege escalation prevention)
+- Maximum expiration validation on `StoreAccessTokenRequest` (`max:` 10 years from now) to prevent creation of effectively-permanent API tokens
+- `HEALTH_SECRET_TOKEN` environment variable added to `.env.example`; health check endpoint documentation updated to reflect it requires the `X-Secret-Token` header
+- Test coverage for all new security behaviors: `SendLoginCodeControllerTest` per-IP and per-email rate limiting, `RolePolicyTest::delete`, `ProblemDetailsRendererTest` for `UnauthorizedHttpException`, `CreateLocalUserTest` retry logic, `HandlesImpersonationTest` privilege guard, `DownloadWildcardPhotoTest` strict base64 decoding
+
+### Changed
+
+- `AccessTokenApiController::show()` and `destroy()` now scope token lookup through the authenticated user's relationship (`$request->user()->access_tokens()->findOrFail($token)`) instead of route model binding with a manual `abort_if` ownership check. Returns 404 instead of 403 for tokens that don't belong to the requester
+- `AccessToken::hashFromPlain()` now strips the `base64:` prefix from `APP_KEY` and decodes it before passing to `hash_hmac`, fixing HMAC computation when the key uses Laravel's default base64-encoded format
+- `AccessToken::status` attribute now returns `REVOKED` when `token_hash` is null (orphaned or cleared tokens)
+- Token session keys in `AccessTokenSchemas` split from a single `SESSION_KEY` into three distinct keys: `SESSION_KEY_CREATE`, `SESSION_KEY_CREATE_API_USER`, and `SESSION_KEY_ROTATE`, preventing cross-wizard session conflicts
+- Raw access tokens are now encrypted with `Crypt::encryptString()` before being stored in the session and decrypted on read, preventing plaintext token exposure in session storage
+- `CreateAccessTokenAction` and `CreateApiUserAction` now check `Session::has()` for their respective keys before re-executing token creation, preventing duplicate token generation on wizard step re-validation
+- `CreateNorthwesternUserAction` validation now performs a lightweight `DirectorySearch::lookup()` instead of calling the full `FindOrUpdateUserFromDirectory` action, avoiding premature user creation during form validation
+- `CreateLocalUser` wraps the database transaction in a `retry(3)` with `UniqueConstraintViolationException` handling for race conditions on username generation, and wraps the login challenge dispatch in a try/catch that reports failures instead of throwing
+- `ProblemDetailsRenderer` now returns the `UnauthorizedHttpException` message and headers in the response instead of a generic unauthorized response
+- `DirectorySearchCheck` health check no longer includes `tested_netid` in the `meta` array, removing PII from health check output
+- `MakeChangelogCommand` date validation now catches `InvalidFormatException` instead of checking `instanceof Carbon`
+- `SendAccessTokenExpirationNotificationsCommand` refactored to use `lazyById(100)` cursor iteration instead of loading all matching tokens into memory at once
+- `ProcessNetIdUpdate` listener now acquires a `lockForUpdate()` on the user record inside the transaction to prevent concurrent update races
+- `DownloadWildcardPhotoJob` now uses `strict: true` on `base64_decode` and validates the decoded result before storing, returning early on invalid photo data
+- `ContactController` flash message changed from `status-success` to `status-danger` when both primary and fallback ticket submission fail
+- Audit table event filter changed from a dynamic database-derived distinct query to a static options array (`created`, `updated`, `deleted`, `restored`, `role_assigned`, `role_removed`, `permissions_modified`)
+- `AuditsTable::modelTypeOptionsGrouped()` wrapped in `once()` for per-request memoization, and filter option closures deferred with `fn ()` to avoid eager database queries during table construction
+- System permissions in `CreateRole` and `EditRole` pages are now restricted to users with the `MANAGE_ALL` permission; non-super-admins cannot assign or remove system-managed permissions, and existing system permissions are preserved on edit
+- `TelescopeServiceProvider` now hides the `authorization` header in request details to prevent Bearer token leakage in Telescope logs
+
+## [v1.5.2] - 2026-02-27
+
+### Changed
+
+- Default cache store changed from `database` to `file` in both `config/cache.php` and `.env.example`. Avoids a `PDOException` on fresh installs before migration
+- Release workflow commit message now includes `[skip ci]` suffix to prevent recursive CI triggers on version bump commits
+- Documentation references updated: corrected `NetIdUpdateController` namespace path from `App\Http\Controllers\Webhooks` to `App\Domains\User\Http\Controllers\Webhooks`, fixed Filament version reference from "4" to "5", updated `PermissionEnum` file path from `User/Enums` to `Auth/Enums`, corrected `AuthTypeEnum` and `IssueLoginChallenge` import paths, fixed environment lockdown exempted routes documentation to reference `config/platform.php` instead of the removed `EXEMPTED_ROUTES` constant, added missing Support and Foundation domains to DDD file tree, and corrected CI/test environment wording for WebSSO logout behavior
+- Health check documentation updated to list the actual registered checks (Database, Queue, Cache, Schedule, Debug Mode, Optimized App, Security Advisories, Directory Search) instead of the prior incorrect list
+- Authorization documentation corrected: `ACCESS_ADMINISTRATION_PANEL` and `MANAGE_IMPERSONATION` marked as system-managed, `ACCESS_ADMINISTRATION_PANEL` removed from the default Northwestern User role permissions
+
+### Fixed
+
+- Database cache store threw `PDOException` on fresh installs before migrations. Changed default to `file` store, which works without database access
+
+## [v1.5.1] - 2026-02-27
+
+### Added
+
+- `StarterCheckCommand` (`php artisan starter:check`): reads the current version from `.starter-version.yaml`, queries the GitHub Releases API for newer versions, and displays release notes with a compare URL; results are cached for 4 hours; automatically runs via `composer install` and `composer update` hooks in local environments; skipped in production, staging, QA, develop, and CI
+- `RecordLogin` action class that captures login metadata (segment, IP address, user agent) and is now called from both `WebSSOController` and `VerifyLoginCodeController`, replacing inline login recording logic
+- GitHub Actions release workflow (`.github/workflows/release.yml`) with `workflow_dispatch` trigger: validates semver format, prevents duplicate and non-ascending tags, bumps `.starter-version.yaml`, commits, tags, pushes, and creates a GitHub release with auto-generated notes
+- MIT License file (`LICENSE`) and `license: MIT` field in `composer.json`
+- Documentation pages: "Framework Defaults" (Eloquent behavior, auth, HTTP/security, Filament defaults, error handling), "Authorization" (roles, permissions, policies), "Adding a Filament Panel" guide, "Directory Search" integration reference
+- Chart description Blade component (`chart-description.blade.php`) for rendering metric summaries beneath API request chart widgets
+
+### Changed
+
+- API request duration chart widget (`ApiRequestDurationChartWidget`) replaced "Max Duration" series with "P95 Duration" using `PERCENTILE_CONT(0.95)` SQL aggregate, added a dashed "Slow Threshold" reference line (configurable via `api.request_logging.slow_request_threshold_ms`), and color-codes P95 data points red when they exceed the threshold
+- API requests by status chart widget (`ApiRequestsByStatusChartWidget`) converted chart options from a PHP array to `RawJs` and added tooltip callbacks showing request counts with percentage of total for each status category
+- `VerifyLoginCodeController` refactored: extracted `decryptChallengeId()`, `resolveChallenge()`, and `authenticateUser()` private methods from `__invoke()`; login recording delegated to the new `RecordLogin` action
+- `ImpersonationController` refactored: extracted `storeReturnUrl()` and `resolveRedirect()` private methods, and `leave()` now uses the same redirect resolution logic as `take()`
+- `EnvironmentLockdown` middleware moved the hardcoded `EXEMPTED_ROUTES` constant into `config('platform.lockdown.exempted_routes')`, making exempted routes configurable without modifying middleware source code
+- `config/platform.php` reorganized: added `default_user_timezone` setting, moved lockdown config to its own section with the new `exempted_routes` array, and added `wildcard_photo_sync` toggle
+- Platform overview page sections use Filament's `heading` and `icon` attributes on `<x-filament::section>` instead of composed heading slots
+- Login records table and user infolists now display IP address and user agent columns
+
+## [v1.5.0] - 2026-02-25
+
+### Added
+
+- Interactive JSON diff viewer for audit log entries using the `@pierre/diffs` library, rendered via an Alpine.js component (`auditDiffViewer`) with split/unified view modes, word-level diffs, and dark mode support. Includes a custom Vite plugin (`shikiMinimalBundle`) that replaces Shiki's full language/theme bundles with minimal stubs, reducing bundle size from ~200 language chunks to JSON only
+- Record history timeline view on audit log detail pages (`record-timeline.blade.php`) showing the complete change history for a given auditable record
+- `SupportTicketExporter` for CSV export of support ticket data from the Filament admin panel
+- `ValidIpOrCidrRule` validation rule supporting both individual IP addresses (v4/v6) and CIDR ranges with proper prefix length validation
+- `Auditable` trait enhanced with `auditCustomTags` and `auditCustomContext` support, allowing audit trait compositions (e.g., `AuditsRoles`) to attach structured metadata tags to audit entries
+- `RateLimitingServiceProvider` with named rate limiters for API requests (`api`), login code request/verify flows (`auth:login-code:request`, `auth:login-code:verify`), impersonation (`auth:impersonate`), and support contact form (`support:contact`), each with configurable thresholds
+- `config/api.php` with settings for API enable/disable toggle, auth realm, request logging (slow request threshold, retention days, sampling rate), expiration notification intervals, and demo user token
+- `config/local-auth.php` extracted from inline configuration with settings for local auth enable/disable, fixed verification codes, rate limits, redirect destination, and code parameters (digits, expiry, max attempts, lockout, cooldown, retention)
+- `config/rate-limiting.php` with per-route rate limit values for API, auth, impersonation, and support flows
+- `config/platform.php` expanded with production URL, app name/abbreviation, datetime display format, user timezone, and wildcard photo sync settings
+- Documentation pages for Northwestern integrations: Directory Search, EventHub, WebSSO, Wildcard Photos, and a hub index page
+- Test coverage additions: `AuditableTest`, `SupportTicketConfirmationTest`, `SupportTicketMessageTest`, `TeamDynamixCacheRepositoryTest`, `TeamDynamixGatewayTest`, `ChangelogControllerTest`, `ChangelogFeedControllerTest`, `ContactFormRequestTest`, `WildcardPhotoTest`, `UserRoleAccessTest`, `GateSuperAdminBypassTest`, `RotateAccessTokenTest`, `StartImpersonationTest`, `ClipboardTest`, `FixedNumericOneTimeCodeGeneratorTest`, `RandomNumericOneTimeCodeGeneratorTest`, `TokenExpirationEnumTest`, `SchemaFileCollectionTest`, `SchemaSnapshotTest`, `SeederInfoTest`, `SnapshotListItemTest`, `ValidIpOrCidrRuleTest`, `IdempotentSeederResolverTest`, and others
+- PHPUnit test coverage reporting via Coveralls in CI, with sharded coverage collection and merge
+
+### Changed
+
+- Framework config files `config/app.php`, `config/auth.php`, and `config/session.php` replaced with dedicated starter config files (`config/api.php`, `config/local-auth.php`, `config/platform.php`, `config/rate-limiting.php`), extracting application-specific settings from Laravel framework defaults
+- `StoreAccessTokenRequest` validation rules enhanced: `expires_at` now requires a minimum of 1 day in the future, and `allowed_ips` items validated with `ValidIpOrCidrRule`
+- PHPStan level increased with additional type annotations across the codebase
+- CI workflow (`check-pr.yml`) optimized: common setup action refactored, coverage report templates added, sharded test execution
+- Test database seeding strategy changed from per-test to per-process for performance
+- Filament audit infolist (`AuditInfolist`) redesigned with restructured layout
+- Filament chart widgets converted from PHP array options to `RawJs` for JavaScript-level tooltip and interaction customization
+
+## [v1.4.0] - 2026-02-11
+
+### Added
+
+- Support ticketing system with gateway abstraction: `TicketSystemGateway` contract, `TicketSystemGatewayFactory`, `TicketSystemEnum` (`team-dynamix` and `mail` drivers), and `CreateSupportTicket` action with automatic mail fallback when the primary gateway fails
+- `TeamDynamixGateway` for submitting tickets to TeamDynamix (TDX) via its REST API, with `TeamDynamixCacheRepository` for caching TDX metadata lookups (ticket types, forms, statuses, services, priorities)
+- `MailGateway` for email-based ticket submission, sending both a `SupportTicketMessage` to the support team and a `SupportTicketConfirmation` to the requester, with auto-generated reference numbers (e.g., `SUP-47`)
+- `SupportTicket` model with `SupportTicketRepository` for persistence, tracking ticketing system, ticket number, delivery status, error messages, and fallback timestamps
+- `SupportTicketResource` Filament resource with list and view pages, `SupportTicketInfolist` detail view, `SupportTicketsTable` with filtering and search, and `SupportTicketSubmissionLogBanner` widget
+- `ContactController` and `ContactFormRequest` for the public-facing `/support/contact` form (requires authentication)
+- `VIEW_SUPPORT_TICKETS` permission added to `PermissionEnum` as a system-managed permission
+- `config/support.php` with driver selection (`SUPPORT_DRIVER`), TeamDynamix API credentials and metadata mappings, mail gateway settings (recipient, from address, reference prefix), and feature toggle
+- Changelog system: `Changelog` model backed by Markdown files in `resources/changelogs/`, synced to the database via `ChangelogSeeder` on each deployment
+- `ChangelogController` and `ChangelogFeedController` with public web routes at `/support/changelog` and `/support/changelog/feed.rss`
+- `make:changelog` Artisan command for scaffolding new changelog Markdown files with YAML front matter, interactive prompts for slug/date/title, automatic deduplication for conflicting filenames, and a stub template
+- `MarkdownWithJiraLinksCast` Eloquent cast that transforms backtick-wrapped JIRA issue identifiers (e.g., `` `PROJ-1234` ``) into clickable links using configurable identifier prefix and base URL from `config/changelog.jira.*)`
+- `config/changelog.php` with settings for enabling the changelog, Jira integration, and Markdown rendering options
+- `SupportServiceProvider` registering the `TicketSystemGateway` binding and `SupportTicketRepository`
+- Database migrations for `changelogs` and `support_tickets` tables
+- Tests: `CreateSupportTicketTest`, `TicketSystemGatewayFactoryTest`, `MailGatewayTest`, `ContactControllerTest`, `SupportTicketRepositoryTest`, and `MarkdownWithJiraLinksCastTest`
+- Documentation pages for the changelog feature and support ticketing system
+
+## [v1.3.1] - 2026-02-05
+
+### Added
+
+- Date range preset filter on the `ApiRequestLogsTable` with "Today", "Last 7 Days", "Last 30 Days", and "Last 90 Days" options
+- Resource descriptions (`$description`) on `UserResource`, `RoleResource`, `AuditResource`, `UserLoginRecordResource`, and `ApiRequestLogResource` for contextual help text in the admin panel
+- Empty state headings, descriptions, and icons on all major Filament tables (`UsersTable`, `RolesTable`, `AuditsTable`, `ApiRequestLogsTable`, `UserLoginRecordsTable`) when no records exist
+- Filter trigger buttons (styled as `->button()`) on the Roles and Login Records tables for a more consistent filter UI
+- `Vite::useAggressivePrefetching()` in `AppServiceProvider` for faster frontend asset loading
+- `Http::preventStrayRequests()` to guard against unintended outbound HTTP calls during development and testing
+- OTP input responsive breakpoints at 420px and 340px in the `otp.blade.php` component for small-screen devices
+- Purple focus ring styles (`box-shadow`) on links, buttons, form controls, and OTP inputs for WCAG-compliant keyboard navigation indicators
+- Loading spinner animation on the login code verify button (icon changes to `fa-circle-notch fa-spin`, text changes to "Verifying...")
+- Badge-style resend countdown timer on the login code verification form (replaces plain text)
+
+### Changed
+
+- `ApiRequestLogResource` navigation label renamed from "Activity" to "API Requests"; slug changed from `activity` to `requests`
+- Users table "Auth Type" column and filter renamed to "Authentication"
+- `AdministrationPanelProvider` developer tools navigation items now open in new tabs, with visibility guards (MinIO requires `minio_console` config to be filled; MailPit requires `viewTelescope` permission); MinIO renamed to "MinIO Console"; MailPit icon changed from `OutlinedInbox` to `OutlinedEnvelope`
+- Button hover color for `.btn-primary` changed from `#b6acd1` (light purple) to `$purple-dark` for better contrast
+- Button transition CSS standardized to `color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out`
+- `AppServiceProvider::configureExceptions()` renamed to `configureRequests()` and expanded to include `Http::preventStrayRequests()`
+
+### Fixed
+
+- Decoy challenge ID handling in `ShowLoginCodeFormController` and `VerifyLoginCodeController` now uses `ctype_digit()` to check if the challenge ID is numeric before querying the database, preventing SQL errors when non-numeric UUID decoy values (stored for non-existent users to prevent timing enumeration) are passed to `LoginChallenge::find()`
+
+## [v1.3.0] - 2026-02-03
+
+### Added
+
+- `TracksPermissionSources` trait on the `User` model providing `hasPermissionFromRole()`, `getPermissionsFromRole()`, and `getRolesGrantingPermission()` methods for fine-grained permission source checking, useful when authorization logic depends on which specific role grants a permission
+- New `Platform\Overview` page replacing the old `ConfigurationPage`, displaying environment info (PHP/Laravel version, lockdown mode), services (database, cache, queue, session, broadcasting, mail), storage details (S3 bucket, region, endpoint), observability settings (Sentry DSN and sample rates), external integrations (EventHub, Directory Search with live/mock status), and a live health check dashboard powered by `EloquentHealthResultStore`
+- `create_health_tables` migration for `health_check_result_history_items` to support persistent health check result storage
+- `--force` flag on `db:snapshot:restore` to skip the confirmation prompt (useful for CI)
+- Automatic permission cache clearing step after snapshot restore via `PermissionRegistrar::forgetCachedPermissions()`
+- Dependabot grouping configuration for patch and minor updates across Composer, npm, npm/docs, and GitHub Actions ecosystems
+
+### Changed
+
+- Health check result store switched from `InMemoryHealthResultStore` to `EloquentHealthResultStore` with 5-day retention, enabling the new Platform Overview health dashboard to display historical results
+- Replaced `fruitcake/laravel-telescope-toolbar` with `fruitcake/laravel-debugbar` (`^4.0`) for local development debugging; removed associated Telescope toolbar accessibility CSS overrides from `app.scss`
+- `AppServiceProvider` refactored: rate limiting logic extracted from `configureRoutes()` into a dedicated `configureRateLimiting()` method; login code verification rate limiter simplified to use decrypted challenge key directly instead of `md5`-hashed fallback
+- All auth controllers (`SendLoginCodeController`, `ShowLoginCodeFormController`, `VerifyLoginCodeController`, `LogoutSelectionController`, `ImpersonationController`, `WebSSOController`) refactored from `session()` helper to `Session` facade for consistency
+- `VerifyLoginCodeController` now calls both `Session::regenerate()` and `Session::regenerateToken()` after login (before, only the session was regenerated)
+- Rector configuration expanded: added `SetList::PHP_84`, `SetList::CODE_QUALITY`, `SetList::DEAD_CODE`, `SetList::EARLY_RETURN`, `SetList::TYPE_DECLARATION` rule sets
+
+### Removed
+
+- `Filament\Pages\Platform\ConfigurationPage` and its Blade template `configuration-page.blade.php`, replaced by the `Platform\Overview` page
+
+### Fixed
+
+- `login-code-verify` rate limiter falls back to IP address when challenge ID cannot be decrypted
+- Session regeneration after login now also regenerates CSRF token
+- Database snapshot restore no longer silently skips in non-interactive CI
+- Permission cache clearing after database snapshot restore
+
+## [v1.2.0] - 2026-01-23
+
+### Added
+
+- **Filament data export system**: five new `Exporter` classes (`ApiRequestLogExporter`, `AuditExporter`, `RoleExporter`, `UserExporter`, `UserLoginRecordExporter`) enabling CSV export from all major admin tables; exports are stored on S3 and auto-pruned after 7 days via the `Export` model's `prunable()` method
+- `ApiCluster` Filament cluster grouping API-related pages under a dedicated "API" navigation section in the Platform group, with an `Overview` page displaying API configuration, active tokens, expiring tokens, 24-hour request volume, success rates, average response times, rate limits, and notification settings
+- `WelcomeWidget` for the Filament dashboard
+- `Export` model (`App\Domains\User\Models\Export`) extending Filament's base export model with automatic pruning of exports older than 7 days and S3 file cleanup
+- Database migrations for `notifications`, `imports`, `exports`, and `failed_import_rows` tables to support Filament's notification and import/export infrastructure
+- Database notifications enabled on the admin panel with 30-second polling
+- Role delete confirmation modal now shows a dynamic warning with affected user count (e.g., "This role is assigned to 3 users") before deletion
+- Health checks documentation page covering registered checks, API endpoint, notifications, result storage, and custom check creation
+- `.env.example` additions for `HEALTH_NOTIFICATIONS_ENABLED` and `HEALTH_NOTIFICATION_EMAIL`
+
+### Changed
+
+- Administration panel `maxContentWidth` set to `Width::Full` for a wider layout
+- Navigation group renamed from `AdministrationNavGroup::DEBUG` to `AdministrationNavGroup::DEVELOPER_TOOLS`
+- Filament cluster auto-discovery enabled via `discoverClusters()` in `AdministrationPanelProvider`
+- `RunsSteps` trait: step failures now render full exception stack traces, not just the message
+- API request logs resource now uses the `ApiCluster` as its parent cluster
+- Health config: notifications now configurable via `HEALTH_NOTIFICATIONS_ENABLED` env var; notification email uses `HEALTH_NOTIFICATION_EMAIL` env var instead of hardcoded placeholder
+
+## [v1.1.0] - 2026-01-13
+
+### Added
+
+- `.starter-version.yaml` file to track the upstream starter template version (initially set to `1.1.0`), enabling downstream projects to compare against newer releases
+- `RunsSteps` trait (`App\Console\Commands\Concerns\RunsSteps`) providing a reusable step-by-step command execution framework with spinner animations, pass/fail tracking per step, and a summary display
+- `DeleteDatabaseSnapshotCommand` (`db:snapshot:delete`) for removing individual snapshots or all snapshots at once (`--all`), including cleanup of associated metadata from the checksum map
+- `InfoDatabaseSnapshotCommand` (`db:snapshot:info`) for displaying detailed snapshot information including file path, size, creation timestamp, schema checksum, migration/seeder counts, and comparison with current codebase schema
+- `AppKeyValidator` config validator checking that `APP_KEY` is set, starts with `base64:`, and decodes to at least 32 bytes
+- `EventHubValidator` config validator checking EventHub credentials (`EVENT_HUB_BASE_URL`, `EVENT_HUB_API_KEY`, `EVENT_HUB_HMAC_VERIFICATION_SHARED_SECRET`) when mock mode is disabled, auto-passing when `EVENT_HUB_MOCK_ENABLED=true`
+- `ConfigValidator` interface expanded with `name(): string` for human-readable validator labels and `hints(): array` for actionable remediation suggestions shown on failure
+
+### Changed
+
+- Node.js version bumped from 24 to 25 across `.nvmrc`, GitHub Actions workflows, CI configuration, and documentation
+- Frontend dependency upgrades: Vite 6 to 7, `@sentry/browser` 9 to 10, `@fortawesome/fontawesome-free` 6 to 7, Cypress 14 to 15, `laravel-vite-plugin` 1 to 2
+- FontAwesome 7 integration: SCSS imports changed from `@import` to `@use` module syntax with explicit `$font-path` configuration; added `.sr-only` class (removed in FontAwesome 7 but needed for backward compatibility)
+- GitHub Actions: `actions/cache` upgraded from v4 to v5, `actions/upload-artifact` from v5 to v6, `actions/download-artifact` from v6 to v7
+- `CreateDatabaseSnapshotCommand` rewritten to use `RunsSteps` trait: removed `--force` flag, added `--skip-schema-validation` flag; blocks execution in production
+- `RestoreDatabaseSnapshotCommand` rewritten to use `RunsSteps` trait: added `--backup` flag to auto-create a backup before restoring; added `--skip-schema-validation` flag; interactive snapshot selection when no name provided
+- `RebuildDatabaseCommand` rewritten to use `RunsSteps` trait with spinner-based execution
+- `ValidateConfigurationCommand` rewritten to use `RunsSteps` with per-validator step display showing name, pass/fail status, and failure hints
+- All existing config validators (`DatabaseValidator`, `EnvironmentVariablesValidator`, `FilesystemValidator`, `QueueValidator`) refactored to implement the new `name()` and `hints()` methods
+- Documentation sidebar ordering switched from `order` frontmatter key to `sidebar.order` object syntax across all doc pages
+
+## [v1.0.0] - 2026-01-08
+
+First stable release. For installation, configuration, and usage guides, visit the [documentation](https://laravel-starter.entapp.northwestern.edu).
+
+### Changed
+
+- Default `SESSION_LIFETIME` in `.env.example` increased from `120` (2 hours) to `480` (8 hours) to better accommodate typical workday sessions
+- Removed `flowframe/laravel-trend` package from Composer dependencies
+- Added `@php artisan ide-helper:models -N` to the `post-update-cmd` Composer script for automatic model PHPDoc generation
+- Moved `sass` from devDependencies to dependencies in `package.json` and consolidated duplicate entries
+- README cleaned up: removed emoji prefixes from section headings; removed the "System Requirements" section (now covered in documentation); simplified to point to the documentation site
+
+## [v0.5.0] - 2025-12-28
+
+### Added
+
+- New `Auth` domain (`app/Domains/Auth/`) as a dedicated bounded context, extracting all authentication and authorization concerns out of the `User` domain. The Auth domain now owns models (`AccessToken`, `ApiRequestLog`, `LoginChallenge`, `Permission`, `Role`, `RoleType`), enums, HTTP controllers, middleware, policies, seeders, and mail notifications.
+- `OneTimeCodeGenerator` contract with two implementations: `RandomNumericOneTimeCodeGenerator` for production use and `FixedNumericOneTimeCodeGenerator` (generates deterministic `123456...` sequences) for CI environments. The appropriate implementation is bound as a singleton in `AppServiceProvider` based on the running environment.
+- Consolidated `SendLoginCodeController` in the Auth domain that handles both initial code sends and resends in a single controller. Implements timing-based user enumeration protection using Laravel's `Timebox` with a minimum 500ms response time plus random jitter.
+- `VerifyLoginCodeController` in the Auth domain with encrypted challenge ID decryption, database-level locking (`lockForUpdate`) during code verification, and lockout duration messaging.
+- Cypress end-to-end test suites for authentication: `login.cy.ts` covering login selection, local login code request, OTP code entry with auto-submit, and invalid code rejection; `logout.cy.ts` covering session clearing and protected page access after logout.
+- Per-challenge rate limiting on login code verification, keyed by both IP address and the encrypted challenge ID.
+
+### Changed
+
+- All authentication and authorization code relocated from `App\Domains\User` and `App\Http\Controllers` to `App\Domains\Auth`. The `User` domain now focuses exclusively on user data management, directory integration, and user-specific concerns.
+- Impersonation routes changed from `GET` to `POST` method for both `impersonate/take` and `impersonate/leave`, improving CSRF protection.
+- Impersonation "Leave Impersonation" links converted from `<a>` tags to `<form>` POST submissions with CSRF tokens.
+- Documentation filenames switched from numeric-prefix ordering (`01-introduction.mdx`) to descriptive names (`introduction.mdx`) with explicit `order` frontmatter properties for sidebar sorting. Emoji prefixes removed from all documentation sidebar labels.
+
+## [v0.4.0] - 2025-12-23
+
+### Added
+
+- Email OTP verification login flow replacing the previous magic link system. New controllers: `SendLoginCodeController`, `ShowLoginCodeFormController`, `ShowLoginCodeRequestController`, `VerifyLoginCodeController`, and `ResendLoginCodeController`. New actions: `IssueLoginChallenge`, `VerifyLoginChallengeCode`, and `GenerateOneTimeCode`.
+- `LoginChallenge` model replacing `UserLoginLink`, with fields for hashed verification codes, attempt tracking, lockout support (`locked_until`), and expiration.
+- `LoginCodeSession` value object centralizing session key constants used across the login code flow.
+- `SendLoginCodeEmailJob` queued job for dispatching verification code emails, replacing the synchronous magic link approach.
+- OTP input Blade component (`resources/views/components/otp.blade.php`) built with Alpine.js, supporting configurable digit length, numeric-only mode, auto-advance between fields, paste handling, separator display, keyboard navigation, and automatic form submission on completion.
+- Full REST API endpoints for access token and user management: `AccessTokenApiController` (list, create, show, rotate, revoke tokens), `UserApiController` (show authenticated user with roles and permissions).
+- API resource classes: `AccessTokenResource`, `PermissionResource`, `RoleResource`, and `UserResource` under `App\Http\Resources\Api\V1` with full OpenAPI attribute annotations.
+- `ProblemDetails` response class implementing RFC 9457 structured error responses for the API.
+- OpenAPI schema definition (`docs/schemas/api-schema.yaml`) documenting all API v1 endpoints with request/response schemas.
+- Authentication configuration expanded with `code` section: `digits` (6), `expires_in_minutes` (10), `max_attempts` (8), `lock_minutes` (15), and `resend_cooldown_seconds` (30).
+
+### Changed
+
+- Login selection view updated text from "Magic Link" references to "Email" sign-in.
+- `EnvironmentLockdown` middleware exempted routes updated from `login-link.*` to `login-code.*` pattern.
+- API routes reorganized with protected endpoints for token management (`/api/v1/me/tokens`) and user profile (`/api/v1/me`).
+
+### Removed
+
+- Magic link authentication system: `SendLoginLink` and `ValidateLoginLink` actions, `LoginLinkController`, `LoginLinkNotification` mailable, `UserLoginLink` model, and `user_login_links` migration.
+
+## [v0.3.0] - 2025-12-10
+
+### Added
+
+- `AccessToken` model replacing `ApiToken`, with `token_prefix` encryption, `AccessTokenStatusEnum` (Active/Expired/Revoked with Filament color and icon support), `orderByRelevance` and `active` query scopes, and `rotated_from_token`/`rotated_by_user` relationships for rotation tracking.
+- `TokenExpirationEnum` providing predefined expiration periods (1 day through 1 year, plus "No Expiration") with human-readable labels and `expiresAt()` date calculation.
+- `PermissionScopeEnum` distinguishing between `SYSTEM_WIDE` and `PERSONAL` permission scopes, with Filament badge rendering.
+- `RoleModificationOriginEnum` tracking the source of role changes: `UI_ACTION`, `REMOVED_BY_DELETION`, and `NETID_STATUS_CHANGE`.
+- `SystemRoleEnum` defining `SUPER_ADMINISTRATOR` and `NORTHWESTERN_USER` as non-modifiable system roles.
+- `EnvironmentLockdown` middleware restricts application access in non-production environments to users with roles beyond the default "Northwestern User" role. Configured via `platform.lockdown.enabled`.
+- NetID update webhook system: `NetIdUpdateController` processing webhook payloads from Northwestern's Identity system, `NetIdUpdated` event, and `ProcessNetIdUpdate` queued listener that removes all non-default roles and marks the user's NetID as inactive.
+- `TestNetIdUpdateCommand` (`php artisan netid:update:test`) for simulating NetID webhook messages during development.
+- `AuditsPermissions` trait providing `syncPermissionsWithAudit()` with detailed before/after permission diffs in audit logs.
+- `AuditsRoles` trait updated to accept single or multiple roles with a `RoleModificationOriginEnum` origin and optional context array for audit trail enrichment.
+- Permission definitions reorganized in `PermissionEnum` with logical groupings and renamed permissions (`ACCESS_ADMIN_PANEL` to `ACCESS_ADMINISTRATION_PANEL`, `MODIFY_ROLES` to `EDIT_ROLES`, `MANAGE_USER_ROLES` to `ASSIGN_ROLES`).
+- Documentation site built with Starlight: architecture guides, feature documentation, getting started guides, deployment guide, and reference documentation.
+- Documentation deployment workflow (`.github/workflows/deploy-docs.yml`).
+
+### Changed
+
+- `ApiToken` model renamed to `AccessToken` throughout the codebase, including Filament resources, factories, actions, middleware, commands, and notifications.
+- User actions reorganized into subdirectories: `Api/`, `Directory/`, `Impersonation/`, and `Local/`.
+- `users` database migration updated with `netid_inactive` boolean column.
+- `ApiRequestLog` model updated with configurable pruning retention (`auth.api.request_logging.retention_days`, default 90 days).
+- `ImpersonateEvent` listener renamed to `LogImpersonationAccess`.
+
+### Fixed
+
+- Model pruning for `ApiRequestLog` corrected to use the `MassPrunable` trait with proper retention day configuration.
+
+## [v0.2.0] - 2025-11-24
+
+### Added
+
+- Redesigned 500 error page with conditional exception detail visibility: non-production environments display full exception details; production restricts to users with `MANAGE_ALL` permission. Includes an embedded Sentry feedback form.
+- `#[AutomaticallyOrdered]` PHP attribute replacing the previous scope class, supporting configurable primary/secondary sort columns and directions.
+- `UserBuilder` custom query builder with typed scopes: `sso()`, `local()`, `api()`, `whereEmailEquals()`, `searchByName()`, `firstSsoByEmail()`, `firstLocalByEmail()`, `firstExistingByEmailOrNewSso()`, and `firstExistingSsoByNetIdOrNew()`.
+- `FindOrUpdateUserFromDirectory` action replacing `CreateUserByLookup`, with `PersistUserWithUniqueUsername` for safe concurrent user creation via `UniqueConstraintViolationException` handling.
+- `AuditsRoles` trait providing `assignRoleWithAudit()` and `removeRoleWithAudit()` with complete before/after role snapshots in custom audit events.
+- `AuditsPermissions` trait providing `syncPermissionsWithAudit()` with permission diff tracking (added/removed).
+- `MissingRequestIpForRestrictedToken` exception reported when an IP-restricted API token receives a request without a client IP address.
+- Polling support added to API Request Log Filament widgets for automatic data refresh.
+- Test suite expansion covering commands, models, actions, policies, controllers, and middleware.
+
+### Changed
+
+- `UserRepository` removed; all user queries now use `UserBuilder` methods or Eloquent query builder.
+- `LoginLink` model renamed to `UserLoginLink` for consistency with the database table name.
+- `ImpersonationController` moved from `App\Http\Controllers\Admin` to `App\Http\Controllers\Auth`.
+- Session encryption enabled by default (`config/session.php` `encrypt` changed from `false` to `true`).
+- `AuthenticatesApiTokens` middleware hardened: raw token variable `unset()` after hashing; IP allowlist check handles missing request IPs; token usage tracking simplified to `increment()`.
+- `SentryExceptionHandler` guards against early bootstrap errors by checking resolved guards before accessing the authenticated user.
+
+### Fixed
+
+- Open redirect vulnerability in `ImpersonationController`: the referer-based return URL is now validated against the application's configured host. An explicit `MANAGE_IMPERSONATION` permission check was also added.
+- Session fixation risk in `LoginLinkController` mitigated by wrapping login link verification in a database transaction.
+- Sentry exception handler crash during early application bootstrap when authentication guards had not yet been resolved.
+- Model pruning for `ApiRequestLog` records not functioning due to incorrect console schedule configuration and missing `MassPrunable` trait.
+
+### Removed
+
+- `spatie/laravel-ignition` package dependency.
+
+## [v0.1.0] - 2025-11-18
+
+### Added
+
+- Initial release of the Northwestern Laravel Starter, an enterprise Laravel application template.
+- **Domain-Driven Design architecture** with two domains: `Core` (base models, enums, exceptions, health checks, database utilities, seeding infrastructure) and `User` (user management, authentication, authorization, audit logging, API tokens).
+- **Multi-method authentication system**: WebSSO/Entra ID single sign-on via `WebSSOController`, passwordless magic link login via `LoginLinkController` (configurable via `auth.local.enabled`), and Bearer token authentication for API consumers via `AuthenticatesApiTokens` middleware.
+- **Role-based access control** using Spatie Permission with custom `Role` and `Permission` models, `RoleType` classification, Filament-based role management, and user role assignment through relation managers.
+- **Audit logging** via `owen-it/laravel-auditing` with custom `Auditable` concern on `BaseModel`, dedicated `Audit` model, and Filament audit resource with infolist display.
+- **API token management system**: `ApiToken` model with HMAC-SHA256 hashing, IP allowlist support, usage tracking, token rotation, revocation, and Filament UI.
+- **API request logging**: `ApiRequestLog` model recording endpoint, method, status, duration, and failure reasons; `LogsApiRequests` middleware; configurable sampling; Filament resource with chart widgets and date range filtering.
+- **API token expiration notifications**: `SendApiTokenExpirationNotificationsCommand` scheduled command sending email reminders at configurable intervals.
+- **User impersonation**: `StartImpersonation` and `StopImpersonation` actions, `ImpersonationController`, `ImpersonationLog` model, and Filament impersonation banner.
+- **Northwestern Directory Search integration**: `CreateUserByLookup` action, `SyncUserFromDirectory`, `DirectorySearchCheck` health check, and `DownloadWildcardPhotoJob` for ID photo caching.
+- **User segmentation**: `DetermineUserSegment` action and `UserSegmentEnum` classifying users by affiliation for login trend analytics.
+- **Filament administration panel** with resources for Users, Roles, Audits, API Request Logs, and User Login Records; `ConfigurationPage`; login trend and API analytics chart widgets.
+- **RFC 9457 Problem Details error responses** via `ProblemDetailsRenderer` for API endpoints.
+- **Database snapshot system**: `CreateDatabaseSnapshotCommand`, `RestoreDatabaseSnapshotCommand`, `ListDatabaseSnapshotsCommand` with schema checksum tracking.
+- **Idempotent seeding infrastructure**: `IdempotentSeeder` base class, `#[AutoSeed]` attribute, `AutoSeedListCommand` for production-safe, rerunnable database seeders.
+- **Configuration validation**: `ValidateConfigurationCommand` with pluggable validators (`DatabaseValidator`, `EnvironmentVariablesValidator`, `FilesystemValidator`, `QueueValidator`).
+- **Custom error pages** (401, 402, 403, 404, 419, 429, 500, 503, database-paused) with Northwestern branding.
+- **Custom Blade components**: `<x-breadcrumbs>`, `<x-clipboard>`, `<x-default-profile-photo>`, `<x-select>` (with Tom Select), `<x-tooltip>`, `<x-wildcard-photo>`.
+- **CI pipeline**: GitHub Actions workflow with PHP/Node setup, database provisioning, Pest and Cypress test execution; Dependabot configuration.
+- **Developer tooling**: `.editorconfig`, `.prettierrc`, `.nvmrc` (Node v24), custom stubs, Rector configuration.
+
+[Unreleased]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.13.2...HEAD
+[v1.13.2]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.13.1...v1.13.2
+[v1.13.1]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.13.0...v1.13.1
+[v1.13.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.12.0...v1.13.0
+[v1.12.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.11.0...v1.12.0
+[v1.11.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.10.0...v1.11.0
+[v1.10.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.9.2...v1.10.0
+[v1.9.2]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.9.1...v1.9.2
+[v1.9.1]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.9.0...v1.9.1
+[v1.9.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.8.0...v1.9.0
+[v1.8.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.7.2...v1.8.0
+[v1.7.2]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.7.1...v1.7.2
+[v1.7.1]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.7.0...v1.7.1
+[v1.7.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.6.2...v1.7.0
+[v1.6.2]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.6.1...v1.6.2
+[v1.6.1]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.6.0...v1.6.1
+[v1.6.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.5.2...v1.6.0
+[v1.5.2]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.5.1...v1.5.2
+[v1.5.1]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.5.0...v1.5.1
+[v1.5.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.4.0...v1.5.0
+[v1.4.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.3.1...v1.4.0
+[v1.3.1]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.3.0...v1.3.1
+[v1.3.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.2.0...v1.3.0
+[v1.2.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.1.0...v1.2.0
+[v1.1.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.0.0...v1.1.0
+[v1.0.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v0.5.0...v1.0.0
+[v0.5.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v0.4.0...v0.5.0
+[v0.4.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v0.3.0...v0.4.0
+[v0.3.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v0.2.0...v0.3.0
+[v0.2.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v0.1.0...v0.2.0
+[v0.1.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/releases/tag/v0.1.0

@@ -11,3 +11,4 @@
 
 .github/workflows/release.yml             export-ignore
 .github/workflows/smoke-test.yml          export-ignore
+CHANGELOG.md                                    export-ignore
