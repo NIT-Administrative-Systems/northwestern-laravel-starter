@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Version to test (e.g., v1.7.0). Defaults to dev-main."
+        description: "Tagged version to test (e.g., v1.7.0). Leave empty to test the selected branch."
         required: false
         type: string
 
@@ -46,13 +46,14 @@ jobs:
             TAG="$RELEASE_TAG"
             COMPOSER="${TAG#v}"
             VCS=""
-          elif [ -n "$INPUT_VERSION" ]; then
+          elif [ -n "$INPUT_VERSION" ] && [[ "$INPUT_VERSION" =~ ^v?[0-9] ]]; then
             TAG="$INPUT_VERSION"
             COMPOSER="${TAG#v}"
             VCS=""
           else
-            TAG="dev-$REF_NAME"
-            COMPOSER="dev-$REF_NAME"
+            BRANCH="${INPUT_VERSION:-$REF_NAME}"
+            TAG="dev-$BRANCH"
+            COMPOSER="dev-$BRANCH"
             VCS="--repository={\"type\":\"vcs\",\"url\":\"https://github.com/$GH_REPO\"} --stability=dev"
           fi
 
