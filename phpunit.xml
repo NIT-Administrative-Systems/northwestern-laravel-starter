@@ -143,6 +143,10 @@
         <env name="BROADCAST_CONNECTION" value="log" />
         <env name="SESSION_DRIVER" value="array" />
         <env name="TELESCOPE_ENABLED" value="false" />
+        <env name="API_ENABLED" value="true" />
+        <env name="LOCAL_AUTH_ENABLED" value="true" />
+        <env name="SUPPORT_ENABLED" value="true" />
+        <env name="CHANGELOG_ENABLED" value="true" />
         <env name="WILDCARD_PHOTO_SYNC_ENABLED" value="true" />
     </php>
 </phpunit>
