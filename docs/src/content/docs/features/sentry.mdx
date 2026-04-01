@@ -164,7 +164,7 @@ The plugin reads `SENTRY_AUTH_TOKEN` from the environment automatically and crea
 
 These are configured at the org level and should already exist:
 
-- `SENTRY_AUTH_TOKEN` and `SENTRY_ORG` (`northwestern-university`) as GitHub org-level secrets
+- `SENTRY_AUTH_TOKEN` as a GitHub org-level secret and `SENTRY_ORG` (`northwestern-university`) as an org-level variable
 - `SENTRY_AUTH_TOKEN` granted to the repository (request access from an org admin)
 - The [Sentry GitHub integration](https://docs.sentry.io/organization/integrations/source-code-mgmt/github/) connected to the Northwestern GitHub org
 
@@ -189,7 +189,7 @@ These are configured at the org level and should already exist:
           - name: Build Frontend & Upload Source Maps
             env:
               SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-              SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+              SENTRY_ORG: ${{ vars.SENTRY_ORG }}
               SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT }}
               SENTRY_RELEASE: ${{ github.sha }}
             run: pnpm build
