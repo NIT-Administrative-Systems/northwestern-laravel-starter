@@ -4,7 +4,8 @@
         "lib": ["ES2015", "dom"],
         "allowJs": true,
         "types": ["cypress", "cypress-wait-until", "cypress-axe", "node"],
-        "noEmit": false
+        "noEmit": false,
+        "ignoreDeprecations": "6.0"
     },
     "include": ["**/*.ts"]
 }
