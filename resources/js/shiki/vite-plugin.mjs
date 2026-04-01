@@ -28,21 +28,26 @@ export function shikiMinimalBundle() {
     return {
         name: "shiki-minimal-bundle",
         enforce: "pre",
-        resolveId(source, importer) {
-            if (source === "@shikijs/langs/json" && importer === shikiLangsStub) {
-                return shikiJsonLanguageModule;
-            }
+        resolveId: {
+            filter: {
+                id: /^(\.\/langs\.mjs|\.\/themes\.mjs|@shikijs\/langs\/json)$/,
+            },
+            handler(source, importer) {
+                if (source === "@shikijs/langs/json" && importer === shikiLangsStub) {
+                    return shikiJsonLanguageModule;
+                }
 
-            // Coupled to shiki's internal directory layout — if shiki
-            // restructures its dist/ folder this guard may need updating.
-            if (!importer?.includes("/shiki/dist/")) {
+                // Coupled to shiki's internal directory layout — if shiki
+                // restructures its dist/ folder this guard may need updating.
+                if (!importer?.includes("/shiki/dist/")) {
+                    return null;
+                }
+
+                if (source === "./langs.mjs") return shikiLangsStub;
+                if (source === "./themes.mjs") return shikiThemesStub;
+
                 return null;
-            }
-
-            if (source === "./langs.mjs") return shikiLangsStub;
-            if (source === "./themes.mjs") return shikiThemesStub;
-
-            return null;
+            },
         },
     };
 }
