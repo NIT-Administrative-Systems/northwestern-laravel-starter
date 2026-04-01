@@ -6,7 +6,7 @@ import { shikiMinimalBundle } from "./resources/js/shiki/vite-plugin.mjs";
 
 export default defineConfig({
     build: {
-        sourcemap: true,
+        sourcemap: "hidden",
     },
     css: {
         devSourcemap: true,
