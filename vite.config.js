@@ -1,3 +1,4 @@
+import { sentryVitePlugin } from "@sentry/vite-plugin";
 import tailwindcss from "@tailwindcss/vite";
 import autoprefixer from "autoprefixer";
 import laravel from "laravel-vite-plugin";
@@ -6,7 +7,7 @@ import { shikiMinimalBundle } from "./resources/js/shiki/vite-plugin.mjs";
 
 export default defineConfig({
     build: {
-        sourcemap: "hidden",
+        sourcemap: true,
     },
     css: {
         devSourcemap: true,
@@ -25,6 +26,21 @@ export default defineConfig({
                 "resources/css/filament/administration/theme.css",
             ],
             refresh: true,
+        }),
+        sentryVitePlugin({
+            org: process.env.SENTRY_ORG,
+            project: process.env.SENTRY_PROJECT,
+            disable: !process.env.SENTRY_AUTH_TOKEN,
+            telemetry: false,
+            release: {
+                name: process.env.SENTRY_RELEASE,
+                setCommits: {
+                    auto: true,
+                },
+            },
+            sourcemaps: {
+                filesToDeleteAfterUpload: "public/build/assets/*.map",
+            },
         }),
     ],
 });
