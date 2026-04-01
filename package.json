@@ -29,7 +29,7 @@
         "concurrently": "^9.2.1",
         "cypress": "^15.13.0",
         "cypress-axe": "^1.7.0",
-        "cypress-ctrf-json-reporter": "^0.0.13",
+        "cypress-ctrf-json-reporter": "^0.0.14",
         "cypress-wait-until": "^3.0.2",
         "laravel-vite-plugin": "^3.0.0",
         "prettier": "^3.8.1",
@@ -38,7 +38,7 @@
         "prettier-plugin-packagejson": "^3.0.2",
         "sass": "^1.98.0",
         "tailwindcss": "^4.2.2",
-        "typescript": "^5.9.3",
+        "typescript": "^6.0.2",
         "vite": "^8.0.3"
     },
     "engines": {
