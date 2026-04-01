@@ -1,4 +1,9 @@
-import * as Sentry from "@sentry/browser";
+import {
+    browserTracingIntegration,
+    captureFeedback,
+    init as sentryInit,
+    setUser as sentrySetUser,
+} from "@sentry/browser";
 import axios from "axios";
 import "bootstrap";
 import * as bootstrap from "bootstrap";
@@ -15,4 +20,9 @@ window.axios.defaults.headers.common["X-Requested-With"] = "XMLHttpRequest";
 
 window.bootstrap = bootstrap;
 
-window.Sentry = Sentry;
+window.Sentry = {
+    browserTracingIntegration,
+    captureFeedback,
+    init: sentryInit,
+    setUser: sentrySetUser,
+};

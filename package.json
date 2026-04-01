@@ -20,6 +20,7 @@
         "@fortawesome/fontawesome-free": "^7.2.0",
         "@popperjs/core": "^2.11.8",
         "@prettier/plugin-xml": "^3.4.2",
+        "@sentry/vite-plugin": "^5.1.1",
         "@shufo/prettier-plugin-blade": "^1.16.2",
         "@tailwindcss/vite": "^4.2.2",
         "@types/alpinejs": "^3.13.11",
@@ -29,7 +30,7 @@
         "concurrently": "^9.2.1",
         "cypress": "^15.13.0",
         "cypress-axe": "^1.7.0",
-        "cypress-ctrf-json-reporter": "^0.0.13",
+        "cypress-ctrf-json-reporter": "^0.0.14",
         "cypress-wait-until": "^3.0.2",
         "laravel-vite-plugin": "^3.0.0",
         "prettier": "^3.8.1",
@@ -38,7 +39,7 @@
         "prettier-plugin-packagejson": "^3.0.2",
         "sass": "^1.98.0",
         "tailwindcss": "^4.2.2",
-        "typescript": "^5.9.3",
+        "typescript": "^6.0.2",
         "vite": "^8.0.3"
     },
     "engines": {

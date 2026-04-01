@@ -3,11 +3,9 @@
         "target": "ES2015",
         "lib": ["ES2019", "DOM"],
         "types": ["cypress", "cypress-wait-until", "cypress-axe", "node"],
-        "moduleResolution": "Node",
-        "allowSyntheticDefaultImports": true,
+        "moduleResolution": "Bundler",
         "noEmit": true,
-        "module": "ES2015",
-        "esModuleInterop": false
+        "module": "ES2015"
     },
     "include": ["cypress/e2e/**/*"]
 }

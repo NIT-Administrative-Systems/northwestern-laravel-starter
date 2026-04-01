@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [v1.15.0] - 2026-04-01
+
+### Added
+
+- `@sentry/vite-plugin` in `vite.config.js` for source map uploads, release creation, and commit association ("Suspect Commits"). Disabled when `SENTRY_AUTH_TOKEN` is absent. Deletes `.map` files after upload.
+- Sentry documentation page (`docs/src/content/docs/features/sentry.mdx`) covering JS initialization, selective imports, adding SDK features, PHP configuration, and source map setup for deploy workflows.
+
+### Changed
+
+- Sentry JS imports in `resources/js/bootstrap.js` changed from `import * as Sentry` to four named imports (`browserTracingIntegration`, `captureFeedback`, `init`, `setUser`). The namespace import bundled the entire SDK, including Replay and Feedback integrations no application uses. `app.js` dropped from 859 KB to 562 KB minified (34%).
+- `config/sentry.php` release identifier changed from `env('SENTRY_RELEASE')` to `env('VAPOR_COMMIT_HASH')`. Vapor sets this env var when deploying with the `--commit` flag, already present in deploy workflows.
+- Shiki Vite plugin (`resources/js/shiki/vite-plugin.mjs`) refactored from a plain `resolveId()` function to Rolldown's `resolveId.filter` + `resolveId.handler` object form. The filter regex skips the hook for non-matching module IDs, avoiding a function call on every resolve.
+- TypeScript upgraded from ^5.9.3 to ^6.0.2. Root `tsconfig.json`: `moduleResolution` changed from `Node` to `Bundler`, removed `allowSyntheticDefaultImports` and `esModuleInterop` (defaults changed in TS6). Cypress `tsconfig.json`: `target` and `lib` changed from `es5` to `ES2015`, added `ignoreDeprecations: "6.0"` for webpack preprocessor compatibility.
+- Pinned `livewire/livewire` from `^4.0` to `4.2.2` to work around a regression in later 4.x releases.
+- Updated `laravel/tinker` from ^2.10.1 to ^3.0, `cypress-ctrf-json-reporter` from ^0.0.13 to ^0.0.14.
+
 ## [v1.14.0] - 2026-03-31
 
 ### Added
@@ -629,7 +645,8 @@ First stable release. For installation, configuration, and usage guides, visit t
 - **CI pipeline**: GitHub Actions workflow with PHP/Node setup, database provisioning, Pest and Cypress test execution; Dependabot configuration.
 - **Developer tooling**: `.editorconfig`, `.prettierrc`, `.nvmrc` (Node v24), custom stubs, Rector configuration.
 
-[Unreleased]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.14.0...HEAD
+[Unreleased]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.15.0...HEAD
+[v1.15.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.14.0...v1.15.0
 [v1.14.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.13.3...v1.14.0
 [v1.13.3]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.13.2...v1.13.3
 [v1.13.2]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.13.1...v1.13.2
