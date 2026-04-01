@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
+use Northwestern\SysDev\UI\Providers\NorthwesternUiServiceProvider;
 use Spatie\DbSnapshots\DbDumperFactory;
 
 class AppServiceProvider extends ServiceProvider
@@ -51,13 +52,16 @@ class AppServiceProvider extends ServiceProvider
         $this->configureCommands();
         $this->configureRoutes();
         $this->configureRequests();
+        $this->configureSentry();
     }
 
+    /** Configure Vite asset handling and prefetching strategy. */
     protected function configureVite(): void
     {
         Vite::useAggressivePrefetching();
     }
 
+    /** Register the custom user provider and configure the super-admin gate bypass. */
     public function configureAuthentication(): void
     {
         Auth::provider('eager-load-eloquent', static function (Application $application, array $config): EagerLoadEloquentUserProvider {
@@ -75,11 +79,13 @@ class AppServiceProvider extends ServiceProvider
         });
     }
 
+    /** Prevent destructive database commands (migrate:fresh, db:wipe, etc.) in production. */
     public function configureCommands(): void
     {
         DB::prohibitDestructiveCommands(App::isProduction());
     }
 
+    /** Force HTTPS in deployed environments. */
     public function configureRoutes(): void
     {
         if (! App::environment(['ci', 'testing'])) {
@@ -87,6 +93,7 @@ class AppServiceProvider extends ServiceProvider
         }
     }
 
+    /** Show full HTTP exception bodies locally and prevent unmocked HTTP calls in tests. */
     public function configureRequests(): void
     {
         if (App::environment(['local', 'ci', 'testing'])) {
@@ -96,5 +103,28 @@ class AppServiceProvider extends ServiceProvider
         if (App::environment(['ci', 'testing'])) {
             Http::preventStrayRequests();
         }
+    }
+
+    /**
+     * Registers user context for the browser Sentry SDK. The northwestern-laravel-ui
+     * Blade template calls `Sentry.setUser()` with the object on every page load,
+     * so JS errors carry user identity. PHP-side context is handled separately by
+     * {@see \App\Domains\Core\Exceptions\SentryExceptionHandler}.
+     */
+    public function configureSentry(): void
+    {
+        NorthwesternUiServiceProvider::setSentryUserContext(static function (?User $user) {
+            if (! $user instanceof User) {
+                return null;
+            }
+
+            return [
+                'id' => $user->id,
+                'username' => $user->username,
+                'email' => $user->email,
+                'primary_affiliation' => $user->primary_affiliation,
+                'auth_type' => $user->auth_type,
+            ];
+        });
     }
 }

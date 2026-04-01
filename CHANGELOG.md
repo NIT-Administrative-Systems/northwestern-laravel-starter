@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+### Fixed
+
+- Added `captureException` to the selective Sentry JS imports and `window.Sentry` object. The v1.15.0 migration to named imports omitted it, breaking `Sentry.captureException()` calls from inline scripts and the browser console.
+- Registered `setSentryUserContext` in `AppServiceProvider` so the `northwestern-laravel-ui` Blade template calls `Sentry.setUser()` on every page load. Without this, JS errors reported from the browser had no user context attached.
+
 ## [v1.15.0] - 2026-04-01
 
 ### Added
