@@ -1,5 +1,6 @@
 import {
     browserTracingIntegration,
+    captureException,
     captureFeedback,
     init as sentryInit,
     setUser as sentrySetUser,
@@ -22,6 +23,7 @@ window.bootstrap = bootstrap;
 
 window.Sentry = {
     browserTracingIntegration,
+    captureException,
     captureFeedback,
     init: sentryInit,
     setUser: sentrySetUser,

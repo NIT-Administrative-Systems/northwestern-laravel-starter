@@ -26,17 +26,18 @@ The Blade layout in `northwestern-laravel-ui` (`purple-chrome.blade.php`) initia
 </script>
 ```
 
-The template reads a `$sentry_config` array from the PHP side (populated by the `northwestern-laravel-ui` service provider) and calls `Sentry.init()`, `Sentry.setUser()`, and `Sentry.browserTracingIntegration()` on the global `window.Sentry` object. The custom 500 error page also calls `Sentry.captureFeedback()` to submit user feedback.
+The template reads a `$sentry_config` array from the PHP side (populated by the `northwestern-laravel-ui` service provider) and calls `Sentry.init()`, `Sentry.setUser()`, and `Sentry.browserTracingIntegration()` on the global `window.Sentry` object. The custom 500 error page calls `Sentry.captureFeedback()` to submit user feedback, and `Sentry.captureException()` is available for inline scripts and console debugging.
 
 ### Selective Imports
 
 The starter does **not** use `import * as Sentry`. A namespace import pulls the entire SDK into the bundle, including Session Replay, User Feedback UI, and Canvas integrations that most applications never use. That adds roughly 300 KB to the minified output.
 
-Instead, `resources/js/bootstrap.js` imports only the four methods the blade template and error page call:
+Instead, `resources/js/bootstrap.js` imports only the methods the blade template and error page need:
 
 ```js
 import {
     browserTracingIntegration,
+    captureException,
     captureFeedback,
     init as sentryInit,
     setUser as sentrySetUser,
@@ -44,6 +45,7 @@ import {
 
 window.Sentry = {
     browserTracingIntegration,
+    captureException,
     captureFeedback,
     init: sentryInit,
     setUser: sentrySetUser,
@@ -54,16 +56,17 @@ The `window.Sentry` object acts as the bridge between the Vite-bundled JS and th
 
 ### Adding SDK Features
 
-If your application needs a Sentry feature beyond those four methods, add it to the import and the `window.Sentry` object.
+If your application needs a Sentry feature beyond these, add it to the import and the `window.Sentry` object.
 
 For example, to enable [Session Replay](https://docs.sentry.io/platforms/javascript/session-replay/):
 
 <Steps>
 1. **Add the import** in `resources/js/bootstrap.js`:
 
-    ```js ins={5}
+    ```js ins={6}
     import {
         browserTracingIntegration,
+        captureException,
         captureFeedback,
         init as sentryInit,
         replayIntegration,
@@ -73,9 +76,10 @@ For example, to enable [Session Replay](https://docs.sentry.io/platforms/javascr
 
 2. **Export it** on `window.Sentry`:
 
-    ```js ins={4}
+    ```js ins={5}
     window.Sentry = {
         browserTracingIntegration,
+        captureException,
         captureFeedback,
         replayIntegration,
         init: sentryInit,
