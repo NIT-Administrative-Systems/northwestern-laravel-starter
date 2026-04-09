@@ -42,11 +42,11 @@ Cypress.Commands.add("getBySelLike", (selector, ...args) => {
     return cy.get(`[id*=${selector}]`, ...args);
 });
 
-Cypress.Commands.add("loadDatabaseSnapshot", () => {
-    cy.log("Loading DB snapshot...");
+Cypress.Commands.add("loadDatabaseSnapshot", (filename: string = "cypress") => {
+    cy.log(`Loading DB snapshot: ${filename}`);
     cy.artisan(
         "db:snapshot:restore",
-        { "--force": true, "--skip-schema-validation": true },
+        { filename, "--force": true, "--skip-schema-validation": true },
         { log: false },
     );
 });
