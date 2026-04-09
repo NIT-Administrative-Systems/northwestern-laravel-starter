@@ -65,6 +65,9 @@ return [
             ]),
             'throw' => false,
             'report' => false,
+            'http' => [
+                'verify' => env('AWS_SSL_VERIFY', true),
+            ],
 
             // Important for large file handling
             'stream_reads' => env('S3_STREAM_READS', true),
