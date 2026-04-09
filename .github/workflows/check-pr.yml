@@ -411,7 +411,7 @@ jobs:
         with:
           php-version: ${{ env.PHP_VERSION }}
           coverage: pcov
-          tools: phpunit/phpcov
+          tools: phpunit/phpcov:^12
 
       - name: 📥 Download Coverage Shards
         uses: actions/download-artifact@v8
