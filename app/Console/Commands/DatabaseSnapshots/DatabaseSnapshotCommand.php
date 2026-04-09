@@ -18,12 +18,10 @@ abstract class DatabaseSnapshotCommand extends Command
 {
     use ConfirmableTrait;
 
-    public const string DEFAULT_SNAPSHOT_NAME = 'database-dump';
-
     /**
      * Get the full path to a snapshot file.
      */
-    public static function snapshotPath(string $snapshotName = self::DEFAULT_SNAPSHOT_NAME): string
+    public static function snapshotPath(string $snapshotName): string
     {
         return database_path("snapshots/{$snapshotName}.sql");
     }
@@ -98,14 +96,10 @@ abstract class DatabaseSnapshotCommand extends Command
     }
 
     /**
-     * Get a normalized snapshot name from user input.
+     * Get a normalized snapshot name from user input (strips file extension if present).
      */
-    protected function normalizeSnapshotName(?string $inputName): string
+    protected function normalizeSnapshotName(string $inputName): string
     {
-        if ($inputName === null) {
-            return self::DEFAULT_SNAPSHOT_NAME;
-        }
-
         return pathinfo($inputName, PATHINFO_FILENAME);
     }
 }

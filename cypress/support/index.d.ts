@@ -96,9 +96,9 @@ declare namespace Cypress {
         refreshDatabase(options?: object): Chainable<any>;
 
         /**
-         * Resets the database state to the snapshot created in the Cypress `before:run` hook.
+         * Resets the database state to the given snapshot file (defaults to "cypress").
          */
-        loadDatabaseSnapshot(): Chainable<void>;
+        loadDatabaseSnapshot(filename?: string): Chainable<void>;
 
         /**
          * Run Artisan's db:seed command.

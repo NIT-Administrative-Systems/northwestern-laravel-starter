@@ -25,7 +25,7 @@ class CreateDatabaseSnapshotCommand extends DatabaseSnapshotCommand
     use RunsSteps;
 
     protected $signature = 'db:snapshot:create
-                            {filename? : The name of the snapshot file to generate}
+                            {filename : The name of the snapshot file to generate}
                             {--skip-schema-validation : Skip schema validation checks}';
 
     protected $description = 'Creates a database snapshot with schema validation';

@@ -33,7 +33,7 @@ class RestoreDatabaseSnapshotCommand extends DatabaseSnapshotCommand
     use RunsSteps;
 
     protected $signature = 'db:snapshot:restore
-                            {filename? : The snapshot file name (without extension) to restore}
+                            {filename : The snapshot file name (without extension) to restore}
                             {--skip-schema-validation : Skip schema validation checks}
                             {--backup : Create a backup before restoring}
                             {--force : Skip confirmation prompt}';

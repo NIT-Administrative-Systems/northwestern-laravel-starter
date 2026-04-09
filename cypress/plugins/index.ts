@@ -73,7 +73,7 @@ export default (on, config) => {
                 });
             }
 
-            await artisan("db:snapshot:create");
+            await artisan("db:snapshot:create", { filename: "cypress" });
         }
         await artisan("cache:clear");
     });
