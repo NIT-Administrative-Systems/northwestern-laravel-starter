@@ -6,10 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [v1.15.1] - 2026-04-09
+
 ### Fixed
 
 - Added `captureException` to the selective Sentry JS imports and `window.Sentry` object. The v1.15.0 migration to named imports omitted it, breaking `Sentry.captureException()` calls from inline scripts and the browser console.
 - Registered `setSentryUserContext` in `AppServiceProvider` so the `northwestern-laravel-ui` Blade template calls `Sentry.setUser()` on every page load. Without this, JS errors reported from the browser had no user context attached.
+- Pinned `phpunit/phpcov` to `^12` in the CI coverage workflow. Unpinned installs pulled an incompatible version, failing the coverage merge step.
+- Added `AWS_SSL_VERIFY` option to the S3 filesystem config so MinIO and other S3-compatible stores with self-signed certificates work in local development.
+
+### Changed
+
+- Database snapshot `create` and `restore` commands now require an explicit filename argument. The implicit `database-dump` default was removed. `delete` and `info` remain optional with interactive selection. The Cypress plugin creates snapshots as `cypress`, and `loadDatabaseSnapshot()` defaults to that name.
 
 ## [v1.15.0] - 2026-04-01
 
@@ -650,7 +658,8 @@ First stable release. For installation, configuration, and usage guides, visit t
 - **CI pipeline**: GitHub Actions workflow with PHP/Node setup, database provisioning, Pest and Cypress test execution; Dependabot configuration.
 - **Developer tooling**: `.editorconfig`, `.prettierrc`, `.nvmrc` (Node v24), custom stubs, Rector configuration.
 
-[Unreleased]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.15.0...HEAD
+[Unreleased]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.15.1...HEAD
+[v1.15.1]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.15.0...v1.15.1
 [v1.15.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.14.0...v1.15.0
 [v1.14.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.13.3...v1.14.0
 [v1.13.3]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.13.2...v1.13.3
