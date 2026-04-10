@@ -11,7 +11,7 @@ use Database\Factories\Domains\Support\Models\SupportTicketFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Mews\Purifier\Casts\CleanHtml;
+use Stevebauman\Purify\Casts\PurifyHtmlOnSet;
 
 /**
  * A user-submitted support ticket persisted as a local submission record.
@@ -30,7 +30,7 @@ class SupportTicket extends BaseModel
         'posted_to_ticketing_system_at' => 'datetime',
         'fallback_sent_at' => 'datetime',
         'post_error' => 'boolean',
-        'details' => CleanHtml::class,
+        'details' => PurifyHtmlOnSet::class,
     ];
 
     /** @return BelongsTo<User, $this> */
