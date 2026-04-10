@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Domains\Auth\Http\Controllers;
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function () {
@@ -35,7 +35,7 @@ Route::prefix('auth')->group(function () {
         Route::prefix('azure-ad')->group(function () {
             Route::get('redirect', [Controllers\WebSSOController::class, 'oauthRedirect'])->name('login-oauth-redirect');
             Route::post('callback', [Controllers\WebSSOController::class, 'oauthCallback'])->name('login-oauth-callback')
-                ->withoutMiddleware([VerifyCsrfToken::class]);
+                ->withoutMiddleware([PreventRequestForgery::class]);
             Route::get('oauth-logout', [Controllers\WebSSOController::class, 'oauthLogout'])->name('login-oauth-logout');
         });
     }
@@ -51,4 +51,4 @@ Route::prefix('auth')->group(function () {
 Route::post('/impersonate/take/{id}/{guardName?}', [Controllers\ImpersonationController::class, 'take'])->middleware('throttle:auth:impersonate')->name('impersonate');
 Route::post('/impersonate/leave', [Controllers\ImpersonationController::class, 'leave'])->middleware('throttle:auth:impersonate')->name('impersonate.leave');
 
-Route::sentryTunnel(withoutMiddleware: [VerifyCsrfToken::class]);
+Route::sentryTunnel(withoutMiddleware: [PreventRequestForgery::class]);
