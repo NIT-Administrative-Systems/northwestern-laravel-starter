@@ -10,12 +10,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ### Changed
 
-- Health check scheduling and registration reworked for scale-to-zero RDS environments.
-    - `DispatchQueueCheckJobsCommand` and `RunHealthChecksCommand` gated behind `App::isProduction()` in `routes/console.php`. Non-prod environments no longer keep the database awake with per-minute health traffic.
-    - Queue heartbeat moved from `everyMinute()` to `everyFiveMinutes()` in prod. `QueueCheck::failWhenHealthJobTakesLongerThanMinutes(15)` raised to 15 min to match.
-    - `HealthServiceProvider` registers `DatabaseCheck`, `RedisCheck`, and `QueueCheck` with fluent `->if(...)` gates in a single `Health::checks([...])` array, replacing imperative `if ($condition) { $checks[] = ... }` appends.
-    - `SecurityAdvisoriesCheck` and `DirectorySearchCheck` tick at `->everyFifteenMinutes()` and `->everyFiveMinutes()` respectively, down from every minute.
-- Dropped `EnsureApiEnabled` from the `/api/health` route in `routes/api.php`. The endpoint is gated by `RequiresSecretToken` and feeds uptime monitors / AWS target-group health checks, so it needs to stay reachable even when the rest of the API is disabled via `config('api.enabled')`.
+- Reworked health check scheduling and registration for scale-to-zero RDS environments.
+    - Gated `DispatchQueueCheckJobsCommand` and `RunHealthChecksCommand` behind `App::isProduction()` in `routes/console.php`. Non-prod no longer keeps the database awake with per-minute health traffic; run `php artisan health:check` on demand in local/dev.
+    - Dropped the queue heartbeat from `everyMinute()` to `everyFiveMinutes()` in prod. Raised the `QueueCheck` staleness threshold from 5 to 15 min (`failWhenHealthJobTakesLongerThanMinutes(15)`) to match the new cadence without flapping at the boundary.
+    - Rewrote `HealthServiceProvider` to register `DatabaseCheck`, `RedisCheck`, and `QueueCheck` with fluent `->if(...)` gates inside a single `Health::checks([...])` array, replacing the imperative `if ($condition) { $checks[] = ... }` appends. `DatabaseCheck` and `QueueCheck` gate on `App::isProduction()`; `RedisCheck` gates on `usesRedisDriver()`.
+    - Scheduled `ScheduleCheckHeartbeatCommand` every minute in all environments. It writes a single cache entry (no DB or queue traffic) so it's safe in non-prod, and without it Spatie's `ScheduleCheck` reports "the schedule did not run yet" indefinitely.
+- Dropped `EnsureApiEnabled` from the `/api/health` route in `routes/api.php`. `RequiresSecretToken` already gates the endpoint, which feeds uptime monitors and AWS target-group health checks, so it needs to stay reachable even when the rest of the API is disabled via `config('api.enabled')`.
 
 ## [v1.15.1] - 2026-04-09
 

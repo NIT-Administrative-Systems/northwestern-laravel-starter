@@ -10,6 +10,7 @@ use Laravel\Telescope\Console\PruneCommand as TelescopePruneCommand;
 use Livewire\Features\SupportConsoleCommands\Commands\S3CleanupCommand as CleanTemporaryS3FilesCommand;
 use Spatie\Health\Commands\DispatchQueueCheckJobsCommand;
 use Spatie\Health\Commands\RunHealthChecksCommand;
+use Spatie\Health\Commands\ScheduleCheckHeartbeatCommand;
 
 /*
 |--------------------------------------------------------------------------|
@@ -98,9 +99,15 @@ if (config('api.expiration_notifications.enabled')) {
 | to handle time-sensitive data or events.
 */
 
+// ScheduleCheckHeartbeatCommand writes a single cache entry — no DB or queue
+// traffic — so it runs in every environment. Without it, Spatie's ScheduleCheck
+// reports "the schedule did not run yet" indefinitely.
+Schedule::command(ScheduleCheckHeartbeatCommand::class)->everyMinute();
+
 if (App::isProduction()) {
-    // Both commands touch infrastructure on every tick and have no consumer
-    // in non-prod. Run `php artisan health:check` on demand in local/dev.
+    // The other two health commands touch infrastructure on every tick and have
+    // no consumer in non-prod. Run `php artisan health:check` on demand in
+    // local/dev when you need a snapshot.
     //
     // Queue heartbeat runs every 5 min (QueueCheck staleness threshold is 15 min
     // in HealthServiceProvider so there's no flapping). RunHealthChecksCommand

@@ -49,18 +49,18 @@ class HealthServiceProvider extends ServiceProvider
             OptimizedAppCheck::new()
                 ->unless(App::isLocal()),
 
-            // Packagist publishes advisories at most hourly; polling every minute is
-            // wasteful outbound traffic for data that rarely moves.
+            // Per-check `everyXMinutes()` schedules only average out cleanly when
+            // `RunHealthChecksCommand` ticks every minute on the scheduler. When
+            // the endpoint runs checks on-demand (non-prod), any tick off-schedule
+            // records the check as "skipped" instead of its real state. Leaving
+            // these at the default every-minute cadence avoids that false reading;
+            // Packagist + Directory Search are cheap enough to poll at that rate.
             SecurityAdvisoriesCheck::new()
-                ->everyFifteenMinutes()
                 ->ignoredPackages([
                     //
                 ]),
 
-            // Directory Search is an external HTTP probe. A slower cadence keeps the
-            // upstream service happy without noticeably delaying failure detection.
-            DirectorySearchCheck::new()
-                ->everyFiveMinutes(),
+            DirectorySearchCheck::new(),
         ]);
     }
 
