@@ -21,35 +21,47 @@ class HealthServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        $checks = [
-            QueueCheck::new(),
+        Health::checks([
+            // Sub-production databases scale to zero on AWS RDS. During idle periods
+            // the check would trip on connection timeouts and report noise, so
+            // the probe is prod-only.
+            DatabaseCheck::new()
+                ->if(App::isProduction()),
+
+            // Only monitor Redis when the app actually talks to it.
+            RedisCheck::new()
+                ->if($this->usesRedisDriver()),
+
+            // QueueCheck reads a heartbeat written by the `health:queue-check-heartbeat`
+            // scheduled command. That command is prod-only (see routes/console.php), so
+            // the check is prod-only too — otherwise non-prod would always report the
+            // queue as stale. Heartbeat dispatch runs every 5 min in prod, so the
+            // staleness threshold is 15 min to leave headroom and avoid flapping.
+            QueueCheck::new()
+                ->if(App::isProduction())
+                ->failWhenHealthJobTakesLongerThanMinutes(15),
+
             CacheCheck::new(),
             ScheduleCheck::new(),
+
             DebugModeCheck::new()
                 ->unless(App::isLocal()),
             OptimizedAppCheck::new()
                 ->unless(App::isLocal()),
+
+            // Per-check `everyXMinutes()` schedules only average out cleanly when
+            // `RunHealthChecksCommand` ticks every minute on the scheduler. When
+            // the endpoint runs checks on-demand (non-prod), any tick off-schedule
+            // records the check as "skipped" instead of its real state. Leaving
+            // these at the default every-minute cadence avoids that false reading;
+            // Packagist + Directory Search are cheap enough to poll at that rate.
             SecurityAdvisoriesCheck::new()
                 ->ignoredPackages([
                     //
                 ]),
+
             DirectorySearchCheck::new(),
-        ];
-
-        if ($this->usesRedisDriver()) {
-            $checks[] = RedisCheck::new();
-        }
-
-        /**
-         * Commonly, sub-production databases are hosted through AWS RDS and scale to
-         * zero when not in use. This causes intermittent connection failures that
-         * would trigger false alarms in health checks.
-         */
-        if (App::isProduction()) {
-            array_unshift($checks, DatabaseCheck::new());
-        }
-
-        Health::checks($checks);
+        ]);
     }
 
     private function usesRedisDriver(): bool

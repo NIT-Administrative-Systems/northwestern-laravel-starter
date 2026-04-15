@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [v1.15.2] - 2026-04-15
+
+### Changed
+
+- Reworked health check scheduling and registration for scale-to-zero RDS environments.
+    - Gated `DispatchQueueCheckJobsCommand` and `RunHealthChecksCommand` behind `App::isProduction()` in `routes/console.php`. Non-prod no longer keeps the database awake with per-minute health traffic; run `php artisan health:check` on demand in local/dev.
+    - Dropped the queue heartbeat from `everyMinute()` to `everyFiveMinutes()` in prod. Raised the `QueueCheck` staleness threshold from 5 to 15 min (`failWhenHealthJobTakesLongerThanMinutes(15)`) to match the new cadence without flapping at the boundary.
+    - Rewrote `HealthServiceProvider` to register `DatabaseCheck`, `RedisCheck`, and `QueueCheck` with fluent `->if(...)` gates inside a single `Health::checks([...])` array, replacing the imperative `if ($condition) { $checks[] = ... }` appends. `DatabaseCheck` and `QueueCheck` gate on `App::isProduction()`; `RedisCheck` gates on `usesRedisDriver()`.
+    - Scheduled `ScheduleCheckHeartbeatCommand` every minute in all environments. It writes a single cache entry (no DB or queue traffic) so it's safe in non-prod, and without it Spatie's `ScheduleCheck` reports "the schedule did not run yet" indefinitely.
+- Dropped `EnsureApiEnabled` from the `/api/health` route in `routes/api.php`. `RequiresSecretToken` already gates the endpoint, which feeds uptime monitors and AWS target-group health checks, so it needs to stay reachable even when the rest of the API is disabled via `config('api.enabled')`.
+
 ## [v1.15.1] - 2026-04-09
 
 ### Fixed
@@ -658,7 +669,8 @@ First stable release. For installation, configuration, and usage guides, visit t
 - **CI pipeline**: GitHub Actions workflow with PHP/Node setup, database provisioning, Pest and Cypress test execution; Dependabot configuration.
 - **Developer tooling**: `.editorconfig`, `.prettierrc`, `.nvmrc` (Node v24), custom stubs, Rector configuration.
 
-[Unreleased]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.15.1...HEAD
+[Unreleased]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.15.2...HEAD
+[v1.15.2]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.15.1...v1.15.2
 [v1.15.1]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.15.0...v1.15.1
 [v1.15.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.14.0...v1.15.0
 [v1.14.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.13.3...v1.14.0
