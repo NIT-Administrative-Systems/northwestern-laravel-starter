@@ -23,7 +23,7 @@ class HealthServiceProvider extends ServiceProvider
     {
         Health::checks([
             // Sub-production databases scale to zero on AWS RDS. During idle periods
-            // the check would trip on connection timeouts and report noises, so
+            // the check would trip on connection timeouts and report noise, so
             // the probe is prod-only.
             DatabaseCheck::new()
                 ->if(App::isProduction()),
