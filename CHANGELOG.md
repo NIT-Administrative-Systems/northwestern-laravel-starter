@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+### Changed
+
+- Health check scheduling and registration reworked for scale-to-zero RDS environments.
+  - `DispatchQueueCheckJobsCommand` and `RunHealthChecksCommand` gated behind `App::isProduction()` in `routes/console.php`. Non-prod environments no longer keep the database awake with per-minute health traffic.
+  - Queue heartbeat moved from `everyMinute()` to `everyFiveMinutes()` in prod. `QueueCheck::failWhenHealthJobTakesLongerThanMinutes(15)` raised to 15 min to match.
+  - `HealthServiceProvider` registers `DatabaseCheck`, `RedisCheck`, and `QueueCheck` with fluent `->if(...)` gates in a single `Health::checks([...])` array, replacing imperative `if ($condition) { $checks[] = ... }` appends.
+  - `SecurityAdvisoriesCheck` and `DirectorySearchCheck` tick at `->everyFifteenMinutes()` and `->everyFiveMinutes()` respectively, down from every minute.
+- Dropped `EnsureApiEnabled` from the `/api/health` route in `routes/api.php`. The endpoint is gated by `RequiresSecretToken` and feeds uptime monitors / AWS target-group health checks, so it needs to stay reachable even when the rest of the API is disabled via `config('api.enabled')`.
+
 ## [v1.15.1] - 2026-04-09
 
 ### Fixed

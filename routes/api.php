@@ -49,7 +49,7 @@ Route::middleware([EnsureApiEnabled::class, LogsApiRequests::class, Authenticate
 | token authentication. Set HEALTH_SECRET_TOKEN in your .env file.
 */
 
-Route::middleware([EnsureApiEnabled::class, RequiresSecretToken::class])->group(function () {
+Route::middleware([RequiresSecretToken::class])->group(function () {
     Route::get('health', HealthCheckJsonResultsController::class);
 });
 
