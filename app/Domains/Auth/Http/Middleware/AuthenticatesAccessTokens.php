@@ -110,20 +110,13 @@ class AuthenticatesAccessTokens
             return true;
         }
 
-        /**
-         * IP restrictions ARE configured, but the request IP is missing.
-         * This can happen when the app is behind a proxy or load
-         * balancer that does not forward the client IP, or when
-         * the request comes from an internal service without
-         * a client IP.
-         */
+        // Missing request IP (e.g. proxy stripped it, or internal dispatch) — cannot satisfy restrictions.
         if (blank($requestIp)) {
             report(new MissingRequestIpForRestrictedTokenException(array_values($allowedIps)));
 
             return false;
         }
 
-        // IP restrictions ARE configured and the request IP is present
         return IpUtils::checkIp($requestIp, $allowedIps);
     }
 

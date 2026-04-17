@@ -235,28 +235,11 @@ class IdempotentSeederResolver
     }
 
     /**
-     * Sorts seeders using topological sorting to ensure dependencies run before dependents.
+     * Topologically sort seeders so every dependency runs before its dependents.
      *
-     * **Why This is Needed:**
-     * Seeders often have dependencies on each other. For example:
-     * - PermissionSeeder creates permissions
-     * - RoleSeeder depends on PermissionSeeder (needs permissions to assign to roles)
-     * - UserSeeder depends on RoleSeeder (needs roles to assign to users)
+     * @return list<SeederInfo>
      *
-     * Without topological sorting, seeders might run in the wrong order and fail because
-     * their dependencies haven't been seeded yet. For example, if UserSeeder runs before
-     * RoleSeeder, it would fail trying to assign non-existent roles.
-     *
-     * **Circular Dependency Detection:**
-     * If seeders have circular dependencies (A → B → C → A), no valid ordering exists.
-     * The algorithm detects this during traversal and throws an exception with a
-     * helpful message showing the circular chain.
-     *
-     * @return list<SeederInfo> Seeders ordered such that all dependencies run first
-     *
-     * @throws RuntimeException If circular dependencies are detected
-     *
-     * @see visitNode() for the DFS implementation
+     * @throws RuntimeException If circular dependencies are detected.
      */
     private function topologicalSort(): array
     {
@@ -271,33 +254,19 @@ class IdempotentSeederResolver
     }
 
     /**
-     * Recursively visits a seeder node using depth-first search for topological sorting.
+     * DFS visit used by {@see topologicalSort()}.
      *
-     * **State Tracking:**
-     * The algorithm maintains two state arrays:
-     * - `$this->resolved`: Seeders that have been fully processed (node and all dependencies)
-     * - `$this->resolving`: Seeders currently being processed (on the call stack)
+     * @param  SeederClass  $seederClass
+     * @param  array<SeederInfo>  $ordered
      *
-     * **Dependency-First Ordering:**
-     * By recursively visiting all dependencies before adding the current seeder to `$ordered`,
-     * we ensure dependencies always appear earlier in the final list. This is the key insight
-     * of topological sorting via DFS.
-     *
-     * @param  SeederClass  $seederClass  The seeder to visit
-     * @param  array<SeederInfo>  $ordered  The output array being built (passed by reference)
-     *
-     * @throws RuntimeException If circular dependency or missing seeder is detected
-     *
-     * @see topologicalSort() for the main sorting algorithm
+     * @throws RuntimeException If a circular or missing dependency is detected.
      */
     private function visitNode(string $seederClass, array &$ordered): void
     {
-        // Already processed - skip
         if (in_array($seederClass, $this->resolved, true)) {
             return;
         }
 
-        // Currently processing - circular dependency detected
         if (in_array($seederClass, $this->resolving, true)) {
             throw new RuntimeException(sprintf(
                 'Circular dependency detected: %s',
@@ -315,7 +284,6 @@ class IdempotentSeederResolver
         $this->resolving[] = $seederClass;
         $seederInfo = $this->seeders[$seederClass];
 
-        // Recursively visit all dependencies first
         foreach ($seederInfo->dependsOn as $dependency) {
             $this->visitNode($dependency, $ordered);
         }
