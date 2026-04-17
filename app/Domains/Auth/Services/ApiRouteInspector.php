@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Domains\Core\Services;
+namespace App\Domains\Auth\Services;
 
 use App\Domains\Auth\Http\Middleware\AuthenticatesAccessTokens;
 use Illuminate\Routing\Router;

@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [v1.17.0] - 2026-04-17
+
+### Changed
+
+- Bumped `northwestern-sysdev/northwestern-filament-theme` from v2.4.1 to v2.5.0.
+- Extracted `TracksBroadcastDateRange` trait from the `UserLoginRecords` widgets (`LoginRecordsStatsWidget`, `LoginTrendsChartWidget`, `LoginsBySegmentChartWidget`), mirroring the `BaseApiRequestChartWidget` pattern already used on the API side. Dropped ~45 lines of byte-identical mount/listener/property code.
+- Consolidated the two identical filter-widget Blade views (API request logs, user login records) into a single shared `resources/views/filament/support/widgets/filter-widget.blade.php`.
+- Shared PHPStan docblock shapes between audit writers and readers: `Audit::getChangedRoles` now imports `RoleData` from `AuditsRoles`, `RoleDefinitionHistoryTable` imports `PermissionData` from `AuditsPermissions`, and `Platform\Overview` uses a class-level `InfoRow` type instead of repeating the shape inline.
+- Stripped ~30 comments that only restated the following call site across console commands, middleware, controllers, audit concerns, and Filament tables. Tightened narrative docblocks in `SchemaChecksumManager` and `IdempotentSeederResolver::topologicalSort` to concise summaries.
+
+### Breaking
+
+- Moved `ApiRouteInspector` from `App\Domains\Core\Services` to `App\Domains\Auth\Services` to match its actual responsibility (inspecting routes for the `AuthenticatesAccessTokens` middleware). This breaks the `App\Domains\Core ↔ App\Domains\Auth` circular dependency. Downstream projects referencing the old FQCN must update the `use` statement.
+
 ## [v1.16.0] - 2026-04-17
 
 ### Changed
@@ -679,7 +693,8 @@ First stable release. For installation, configuration, and usage guides, visit t
 - **CI pipeline**: GitHub Actions workflow with PHP/Node setup, database provisioning, Pest and Cypress test execution; Dependabot configuration.
 - **Developer tooling**: `.editorconfig`, `.prettierrc`, `.nvmrc` (Node v24), custom stubs, Rector configuration.
 
-[Unreleased]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.16.0...HEAD
+[Unreleased]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.17.0...HEAD
+[v1.17.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.16.0...v1.17.0
 [v1.16.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.15.2...v1.16.0
 [v1.15.2]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.15.1...v1.15.2
 [v1.15.1]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.15.0...v1.15.1

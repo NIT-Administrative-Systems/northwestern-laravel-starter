@@ -5,36 +5,17 @@ declare(strict_types=1);
 namespace App\Filament\Resources\UserLoginRecords\Widgets;
 
 use App\Domains\User\Models\UserLoginRecord;
+use App\Filament\Resources\UserLoginRecords\Widgets\Concerns\TracksBroadcastDateRange;
 use Carbon\Carbon;
 use Filament\Support\Icons\Heroicon;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
-use Livewire\Attributes\On;
 
 class LoginRecordsStatsWidget extends BaseWidget
 {
-    public ?string $startDate = null;
-
-    public ?string $endDate = null;
+    use TracksBroadcastDateRange;
 
     protected ?string $pollingInterval = null;
-
-    public function mount(): void
-    {
-        $now = Carbon::now(auth()->user()->timezone);
-
-        $this->startDate = $now->copy()->subDays(29)->startOfDay()->utc()->toDateTimeString();
-        $this->endDate = $now->copy()->endOfDay()->utc()->toDateTimeString();
-    }
-
-    #[On(DateRangeFilterWidget::EVENT_DATE_RANGE_UPDATED)]
-    public function updateDateRange(string $startDate, string $endDate): void
-    {
-        $this->startDate = $startDate;
-        $this->endDate = $endDate;
-
-        $this->dispatch('$refresh');
-    }
 
     protected function getStats(): array
     {

@@ -74,19 +74,16 @@ class RestoreDatabaseSnapshotCommand extends DatabaseSnapshotCommand
         $this->displaySnapshotInfo($snapshotPath);
         $this->newLine();
 
-        // Validate schema unless skipped
         if (! $this->option('skip-schema-validation') && ! $this->validateSnapshotSchema($snapshotName)) {
             return self::FAILURE;
         }
 
-        // Confirm before destructive operation (skip if --force is passed)
         if (! $this->option('force') && ! confirm('This will replace your current database. Continue?', default: false)) {
             $this->components->warn('Restore cancelled.');
 
             return self::SUCCESS;
         }
 
-        // Create backup if requested
         if ($this->option('backup')) {
             $backupName = $snapshotName . '-pre-restore-' . now()->format('Y-m-d-His');
             if (! $this->runStep('Creating backup before restore', fn () => $this->createBackup($backupName))) {
@@ -96,7 +93,6 @@ class RestoreDatabaseSnapshotCommand extends DatabaseSnapshotCommand
             }
         }
 
-        // Perform the restore steps
         if (! $this->runStep('Dropping all tables', fn () => $this->dropAllTables())) {
             $this->displaySummary();
 

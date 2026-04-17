@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domains\User\Models;
 
 use App\Domains\Core\Models\BaseModel;
+use App\Domains\User\Models\Concerns\AuditsRoles;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
@@ -29,6 +30,8 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property CarbonInterface $created_at
  * @property CarbonInterface $updated_at
  * @property int|null $impersonator_user_id
+ *
+ * @phpstan-import-type RoleData from AuditsRoles
  */
 class Audit extends BaseModel
 {
@@ -76,14 +79,14 @@ class Audit extends BaseModel
      *
      * Each entry includes id, name, and role_type as captured at the time of the change.
      *
-     * @return list<array{id: int, name: string, role_type: string}>
+     * @return list<RoleData>
      */
     public function getChangedRoles(): array
     {
         return once(function () {
-            /** @var list<array{id: int, name: string, role_type: string}> $oldRoles */
+            /** @var list<RoleData> $oldRoles */
             $oldRoles = $this->old_values['roles'] ?? [];
-            /** @var list<array{id: int, name: string, role_type: string}> $newRoles */
+            /** @var list<RoleData> $newRoles */
             $newRoles = $this->new_values['roles'] ?? [];
 
             $oldIds = array_column($oldRoles, 'id');

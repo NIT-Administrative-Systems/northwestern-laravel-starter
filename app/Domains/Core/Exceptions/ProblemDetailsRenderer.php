@@ -128,7 +128,6 @@ class ProblemDetailsRenderer
                 fn () => $this->setFailure(ApiRequestFailure::ServerError)
             ),
 
-            // Catch specific database exceptions
             $e instanceof PDOException => tap(
                 ProblemDetails::internalServerError(
                     detail: 'A database error occurred while processing the request.'

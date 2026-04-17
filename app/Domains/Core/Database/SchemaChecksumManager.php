@@ -116,15 +116,12 @@ class SchemaChecksumManager
         }
 
         try {
-            // Load existing map or create new
             $checksumMap = File::exists($mapPath)
                 ? json_decode(File::get($mapPath), true, 512, JSON_THROW_ON_ERROR)
                 : [];
 
-            // Update map with new snapshot info
             $checksumMap[$snapshotName] = $snapshot->toArray();
 
-            // Attempt to write the updated map
             if (! File::put(
                 $mapPath,
                 json_encode($checksumMap, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT)

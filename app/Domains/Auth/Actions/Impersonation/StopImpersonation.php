@@ -27,10 +27,8 @@ class StopImpersonation
 
         $this->manager->leave();
 
-        // Retrieve the stored return URL and clear it from session
         $returnUrl = Session::pull('impersonation.return_url');
 
-        // If we have a stored URL, return it; otherwise fall back to default
         return $returnUrl ?: $this->manager->getLeaveRedirectTo();
     }
 }

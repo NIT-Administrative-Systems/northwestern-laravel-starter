@@ -16,6 +16,9 @@ use Spatie\Health\ResultStores\StoredCheckResults\StoredCheckResult;
 use Spatie\Health\ResultStores\StoredCheckResults\StoredCheckResults;
 use UnitEnum;
 
+/**
+ * @phpstan-type InfoRow array{value: string, mono?: bool}
+ */
 class Overview extends Page
 {
     protected static string|null|BackedEnum $navigationIcon = Heroicon::OutlinedSquares2x2;
@@ -40,7 +43,7 @@ class Overview extends Page
     }
 
     /**
-     * @return array<string, array{value: string, mono?: bool}>
+     * @return array<string, InfoRow>
      */
     public function getEnvironmentInfo(): array
     {
@@ -57,7 +60,7 @@ class Overview extends Page
     }
 
     /**
-     * @return array<string, array{value: string, mono?: bool}>
+     * @return array<string, InfoRow>
      */
     public function getServicesInfo(): array
     {
@@ -91,7 +94,7 @@ class Overview extends Page
     }
 
     /**
-     * @return array<string, array{value: string, mono?: bool}>
+     * @return array<string, InfoRow>
      */
     public function getObservabilityInfo(): array
     {
@@ -107,7 +110,7 @@ class Overview extends Page
     }
 
     /**
-     * @return array<string, array{value: string, mono?: bool}>
+     * @return array<string, InfoRow>
      */
     public function getStorageInfo(): array
     {
