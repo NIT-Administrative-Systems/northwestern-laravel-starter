@@ -6,6 +6,7 @@ namespace App\Filament\Resources\Roles\Tables;
 
 use App\Domains\Auth\Models\RoleType;
 use App\Domains\User\Models\Audit;
+use App\Domains\User\Models\Concerns\AuditsPermissions;
 use App\Filament\Support\Filters\DateRangeFilter;
 use App\Filament\Support\Formatting\BadgePillRenderer;
 use Filament\Support\Icons\Heroicon;
@@ -20,6 +21,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 
+/**
+ * @phpstan-import-type PermissionData from AuditsPermissions
+ */
 class RoleDefinitionHistoryTable
 {
     public static function configure(Table $table): Table
@@ -199,9 +203,9 @@ class RoleDefinitionHistoryTable
      */
     private static function summarizePermissionChanges(Audit $audit): string
     {
-        /** @var list<array{name: string, label: string}> $oldPermissionData */
+        /** @var list<PermissionData> $oldPermissionData */
         $oldPermissionData = $audit->old_values['permissions'] ?? [];
-        /** @var list<array{name: string, label: string}> $newPermissionData */
+        /** @var list<PermissionData> $newPermissionData */
         $newPermissionData = $audit->new_values['permissions'] ?? [];
 
         $oldPermissions = collect($oldPermissionData);
