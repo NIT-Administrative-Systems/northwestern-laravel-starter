@@ -6,39 +6,19 @@ namespace App\Filament\Resources\UserLoginRecords\Widgets;
 
 use App\Domains\User\Enums\UserSegment;
 use App\Domains\User\Models\UserLoginRecord;
-use Carbon\Carbon;
+use App\Filament\Resources\UserLoginRecords\Widgets\Concerns\TracksBroadcastDateRange;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Collection;
-use Livewire\Attributes\On;
 
 class LoginsBySegmentChartWidget extends ChartWidget
 {
+    use TracksBroadcastDateRange;
+
     protected ?string $heading = 'Logins by Segment';
-
-    public ?string $startDate = null;
-
-    public ?string $endDate = null;
 
     protected ?string $maxHeight = '235px';
 
     protected ?string $pollingInterval = null;
-
-    public function mount(): void
-    {
-        $now = Carbon::now(auth()->user()->timezone);
-
-        $this->startDate = $now->copy()->subDays(29)->startOfDay()->utc()->toDateTimeString();
-        $this->endDate = $now->copy()->endOfDay()->utc()->toDateTimeString();
-    }
-
-    #[On(DateRangeFilterWidget::EVENT_DATE_RANGE_UPDATED)]
-    public function updateDateRange(string $startDate, string $endDate): void
-    {
-        $this->startDate = $startDate;
-        $this->endDate = $endDate;
-
-        $this->dispatch('$refresh');
-    }
 
     protected function getData(): array
     {
