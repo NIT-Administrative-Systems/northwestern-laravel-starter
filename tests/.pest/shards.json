@@ -34,7 +34,7 @@
         "Tests\\Feature\\Domains\\Core\\Health\\DirectorySearchCheckTest": 0.1973,
         "Tests\\Feature\\Domains\\Core\\Models\\Concerns\\AuditableTest": 0.3782,
         "Tests\\Feature\\Domains\\Core\\Seeders\\Concerns\\AuditsSeederChangesTest": 0.4869,
-        "Tests\\Feature\\Domains\\Core\\Services\\ApiRouteInspectorTest": 0.2228,
+        "Tests\\Feature\\Domains\\Auth\\Services\\ApiRouteInspectorTest": 0.2228,
         "Tests\\Feature\\Domains\\Core\\Services\\DateTimeFormatterTest": 0.3889,
         "Tests\\Feature\\Domains\\Foundation\\Casts\\MarkdownWithJiraLinksCastTest": 1.05,
         "Tests\\Feature\\Domains\\Support\\Actions\\CreateSupportTicketTest": 0.3081,
