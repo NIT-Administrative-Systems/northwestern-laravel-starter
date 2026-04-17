@@ -10,7 +10,9 @@ use App\Domains\Auth\Enums\RoleTypeEnum;
 use App\Domains\Auth\Models\Role;
 use App\Domains\User\Enums\Affiliation;
 use App\Domains\User\Models\User;
-use App\Filament\Resources\Users\UserResource;
+use App\Domains\User\QueryBuilders\UserBuilder;
+use App\Domains\User\Support\UserOptionLabel;
+use App\Domains\User\Support\UserSearch;
 use Filament\Actions\AttachAction;
 use Filament\Actions\DetachAction;
 use Filament\Forms\Components\Select;
@@ -135,32 +137,31 @@ class UsersRelationManager extends RelationManager
                                     : 'Search by name, NetID, or email')
                                 ->searchable()
                                 ->noSearchResultsMessage('No users match your search, or all matching users already have this role assigned.')
-                                ->getSearchResultsUsing(function (string $search, RelationManager $livewire) use ($isApiRole) {
+                                ->getSearchResultsUsing(function (string $search, RelationManager $livewire) use ($isApiRole): array {
                                     /** @var Role $role */
                                     $role = $livewire->getOwnerRecord();
 
-                                    return User::query()
-                                        ->where(function (Builder $query) use ($search) {
-                                            $query->searchByName($search)
-                                                ->orWhere('username', 'ilike', "%{$search}%")
-                                                ->orWhere('email', 'ilike', "%{$search}%");
-                                        })
-                                        ->when($isApiRole, fn (Builder $query) => $query->api())
-                                        ->unless($isApiRole, fn (Builder $query) => $query->where('auth_type', '!=', AuthType::API))
-                                        ->whereDoesntHave('roles', function (Builder $query) use ($role) {
-                                            $query->where('id', $role->id);
-                                        })
-                                        ->limit(50)
-                                        ->get()
-                                        ->mapWithKeys(fn (User $user) => [
-                                            $user->id => sprintf('%s (%s)', $user->clerical_name, $user->username),
-                                        ]);
-                                })
-                                ->getOptionLabelUsing(function ($value) {
-                                    $user = User::find($value);
+                                    return resolve(UserSearch::class)->options(
+                                        search: $search,
+                                        format: UserOptionLabel::FormatClericalName,
+                                        modifyQuery: function (UserBuilder $query) use ($isApiRole, $role): void {
+                                            if ($isApiRole) {
+                                                $query->api();
+                                            } else {
+                                                $query->where('auth_type', '!=', AuthType::API);
+                                            }
 
-                                    return $user ? sprintf('%s (%s)', $user->clerical_name, $user->username) : null;
+                                            $query->whereDoesntHave('roles', function (Builder $query) use ($role): void {
+                                                $query->where('id', $role->id);
+                                            });
+                                        },
+                                    );
                                 })
+                                ->getOptionLabelUsing(fn (int|string|null $value): ?string => resolve(UserSearch::class)->label(
+                                    id: $value,
+                                    format: UserOptionLabel::FormatClericalName,
+                                    withUsername: true,
+                                ))
                                 ->required(),
                         ];
                     })
@@ -192,7 +193,7 @@ class UsersRelationManager extends RelationManager
                     })
                     ->successNotificationTitle('User assigned'),
             ])
-            ->recordUrl(fn (User $record) => UserResource::getUrl('view', ['record' => $record]))
+            ->recordUrl(fn (User $record) => route('filament.administration.resources.users.view', ['record' => $record]))
             ->recordActions([
                 DetachAction::make()
                     ->authorize(function () {

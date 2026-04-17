@@ -7,8 +7,6 @@ namespace App\Filament\Resources\ApiRequestLogs\Tables;
 use App\Domains\Auth\Models\ApiRequestLog;
 use App\Domains\Core\Enums\ApiRequestFailure;
 use App\Filament\Exports\ApiRequestLogExporter;
-use App\Filament\Resources\Users\RelationManagers\ApiRequestLogsRelationManager;
-use App\Filament\Resources\Users\UserResource;
 use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Actions\ExportAction;
@@ -25,10 +23,8 @@ use Illuminate\Support\Number;
 
 class ApiRequestLogsTable
 {
-    public static function configure(Table $table): Table
+    public static function configure(Table $table, bool $isRelationManager = false): Table
     {
-        $isRelationManager = $table->getLivewire() instanceof ApiRequestLogsRelationManager;
-
         return $table
             ->poll()
             ->recordClasses(fn (ApiRequestLog $record): ?string => $record->duration_ms > (int) config('api.request_logging.slow_request_threshold_ms')
@@ -47,7 +43,7 @@ class ApiRequestLogsTable
                     ->fontFamily(FontFamily::Mono)
                     ->placeholder('Unauthenticated')
                     ->searchable()
-                    ->hiddenOn(ApiRequestLogsRelationManager::class),
+                    ->hidden($isRelationManager),
 
                 TextColumn::make('access_token.id')
                     ->label('Token ID')
@@ -209,7 +205,7 @@ class ApiRequestLogsTable
             ->recordActions([
                 ViewAction::make()
                     ->label('View User')
-                    ->url(fn (ApiRequestLog $record) => $record->user_id ? UserResource::getUrl('view', ['record' => $record->user]) : null)
+                    ->url(fn (ApiRequestLog $record) => $record->user_id ? route('filament.administration.resources.users.view', ['record' => $record->user]) : null)
                     ->hidden(fn (ApiRequestLog $record) => $isRelationManager || ! $record->user_id),
             ])
             ->toolbarActions([
@@ -218,7 +214,7 @@ class ApiRequestLogsTable
                     ->icon(Heroicon::OutlinedArrowDownTray)
                     ->color('gray')
                     ->exporter(ApiRequestLogExporter::class)
-                    ->hidden(fn () => $table->getLivewire() instanceof ApiRequestLogsRelationManager),
+                    ->hidden($isRelationManager),
             ])
             ->emptyStateHeading('No API requests recorded')
             ->emptyStateDescription('API request logs will appear here as protected endpoints are called.')

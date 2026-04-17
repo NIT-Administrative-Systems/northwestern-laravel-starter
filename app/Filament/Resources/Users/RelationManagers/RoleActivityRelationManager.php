@@ -8,7 +8,7 @@ use App\Domains\Auth\Enums\AuthType;
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\User\Models\Audit;
 use App\Domains\User\Models\User;
-use App\Filament\Resources\RoleActivity\RoleActivityResource;
+use App\Filament\Resources\RoleActivity\Tables\RoleActivityTable;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Support\Icons\Heroicon;
@@ -21,8 +21,6 @@ class RoleActivityRelationManager extends RelationManager
     protected static string $relationship = 'audits';
 
     protected static ?string $title = 'Role History';
-
-    protected static ?string $relatedResource = RoleActivityResource::class;
 
     public static function canViewForRecord(Model $ownerRecord, string $pageClass): bool
     {
@@ -39,7 +37,7 @@ class RoleActivityRelationManager extends RelationManager
 
     public function table(Table $table): Table
     {
-        return RoleActivityResource::table($table)
+        return RoleActivityTable::configure($table, true)
             ->modifyQueryUsing(function (Builder $query) {
                 return Audit::query()
                     ->roleActivity()

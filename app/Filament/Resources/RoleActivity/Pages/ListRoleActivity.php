@@ -6,7 +6,6 @@ namespace App\Filament\Resources\RoleActivity\Pages;
 
 use App\Filament\Resources\RoleActivity\RoleActivityResource;
 use App\Filament\Resources\RoleActivity\Widgets\RoleActivityStatsWidget;
-use App\Filament\Resources\Roles\RoleResource;
 use Filament\Resources\Pages\ListRecords;
 
 class ListRoleActivity extends ListRecords
@@ -37,7 +36,7 @@ class ListRoleActivity extends ListRecords
     public function getBreadcrumbs(): array
     {
         return [
-            RoleResource::getUrl('index') => 'Roles',
+            route('filament.administration.resources.roles.index') => 'Roles',
             '' => 'Role Activity',
         ];
     }

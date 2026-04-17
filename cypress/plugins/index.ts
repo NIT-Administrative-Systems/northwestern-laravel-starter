@@ -14,12 +14,17 @@ import * as https from "node:https";
 import seeders from "../support/seeders";
 import { activateCypressEnvFile, activateLocalEnvFile } from "./swap-env";
 
-type ArtisanParameters = Record<string, any>;
+type ArtisanParameter = string | number | boolean | null;
+
+type ArtisanParameters = Record<string, ArtisanParameter>;
 
 /**
  * @type {Cypress.PluginConfig}
  */
-export default (on, config) => {
+export default (
+    on: Cypress.PluginEvents,
+    config: Cypress.PluginConfigOptions,
+): void => {
     const artisan = async (
         command: string,
         parameters: ArtisanParameters = {},
@@ -44,8 +49,8 @@ export default (on, config) => {
             );
 
             console.log(`✅ ${command} ${JSON.stringify(parameters)}`);
-        } catch (error) {
-            console.log(error);
+        } catch (error: unknown) {
+            console.log(error instanceof Error ? error.message : String(error));
             throw new Error(`Failed to run artisan command: ${command}`);
         }
     };

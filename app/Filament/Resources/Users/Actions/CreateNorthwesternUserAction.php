@@ -8,7 +8,6 @@ use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\User\Actions\Directory\FindOrUpdateUserFromDirectory;
 use App\Domains\User\Enums\DirectorySearchType;
 use App\Domains\User\Models\User;
-use App\Filament\Resources\Users\UserResource;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
@@ -100,7 +99,7 @@ class CreateNorthwesternUserAction extends Action
                             ->send();
                     }
 
-                    return redirect()->to(UserResource::getUrl('view', ['record' => $user]));
+                    return redirect()->route('filament.administration.resources.users.view', ['record' => $user]);
                 } catch (Throwable $e) {
                     Notification::make()
                         ->title('User creation failed')

@@ -8,7 +8,6 @@ use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\User\Actions\Directory\FindOrUpdateUserFromDirectory;
 use App\Domains\User\Models\User;
 use App\Filament\Resources\Users\Support\NetIdStatus;
-use App\Filament\Resources\Users\UserResource;
 use Filament\Actions\Action;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
@@ -221,7 +220,7 @@ class NorthwesternUserInfolist
                                                     ->send();
                                             }
 
-                                            return redirect()->to(UserResource::getUrl('view', ['record' => $user]));
+                                            return redirect()->route('filament.administration.resources.users.view', ['record' => $user]);
                                         }),
                                 ]),
 

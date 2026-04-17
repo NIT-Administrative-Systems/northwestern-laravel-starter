@@ -9,7 +9,6 @@ use App\Domains\User\Models\Audit;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
-use Throwable;
 
 /**
  * @phpstan-require-extends \Illuminate\Database\Eloquent\Model
@@ -70,22 +69,20 @@ trait Auditable
      */
     protected function extractLivewireComponentName(): ?string
     {
-        // Check if this is a Livewire request with components data
         $livewireSnapshot = request('components.0.snapshot');
 
         if (! $livewireSnapshot) {
             return null;
         }
 
-        try {
-            // The snapshot is a JSON string, so we need to decode it
-            $decodedSnapshot = json_decode((string) $livewireSnapshot, true, 512, JSON_THROW_ON_ERROR);
+        $decodedSnapshot = json_decode((string) $livewireSnapshot, true);
 
-            return data_get($decodedSnapshot, 'memo.name');
-        } catch (Throwable) {
-            // Extracting the component name isn't critical, we can ignore any errors and return null
-
+        if (! is_array($decodedSnapshot)) {
             return null;
         }
+
+        $componentName = data_get($decodedSnapshot, 'memo.name');
+
+        return is_string($componentName) && $componentName !== '' ? $componentName : null;
     }
 }

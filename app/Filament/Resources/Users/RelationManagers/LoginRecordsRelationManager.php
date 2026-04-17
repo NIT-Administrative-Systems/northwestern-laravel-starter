@@ -7,7 +7,7 @@ namespace App\Filament\Resources\Users\RelationManagers;
 use App\Domains\Auth\Enums\AuthType;
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\User\Models\User;
-use App\Filament\Resources\UserLoginRecords\UserLoginRecordResource;
+use App\Filament\Resources\UserLoginRecords\Tables\UserLoginRecordsTable;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Support\Icons\Heroicon;
@@ -17,8 +17,6 @@ use Illuminate\Database\Eloquent\Model;
 class LoginRecordsRelationManager extends RelationManager
 {
     protected static string $relationship = 'login_records';
-
-    protected static ?string $relatedResource = UserLoginRecordResource::class;
 
     public static function canViewForRecord(Model $ownerRecord, string $pageClass): bool
     {
@@ -35,9 +33,6 @@ class LoginRecordsRelationManager extends RelationManager
 
     public function table(Table $table): Table
     {
-        return $table
-            ->headerActions([
-                //
-            ]);
+        return UserLoginRecordsTable::configure($table, true);
     }
 }

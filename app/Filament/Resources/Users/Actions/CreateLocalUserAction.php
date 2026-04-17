@@ -6,7 +6,6 @@ namespace App\Filament\Resources\Users\Actions;
 
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\User\Actions\Local\CreateLocalUser;
-use App\Filament\Resources\Users\UserResource;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Textarea;
@@ -109,7 +108,7 @@ class CreateLocalUserAction extends Action
                     ->body("User {$user->full_name} ({$user->email}) has been created.")
                     ->send();
 
-                return redirect()->to(UserResource::getUrl('view', ['record' => $user]));
+                return redirect()->route('filament.administration.resources.users.view', ['record' => $user]);
             });
     }
 }

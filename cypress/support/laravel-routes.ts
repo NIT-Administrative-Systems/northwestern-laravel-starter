@@ -1,7 +1,9 @@
+type LaravelRouteParameters = Record<string, JsonPrimitive>;
+
 Cypress.Laravel = {
     routes: {},
 
-    route: (name, parameters = {}) => {
+    route: (name: string, parameters: LaravelRouteParameters = {}) => {
         assert(
             Cypress.Laravel.routes.hasOwnProperty(name),
             `Laravel route "${name}" does not exist.`,
@@ -11,7 +13,7 @@ Cypress.Laravel = {
             Object.keys(parameters).forEach((parameter) => {
                 uri = uri.replace(
                     new RegExp(`{${parameter}}`),
-                    parameters[parameter],
+                    String(parameters[parameter]),
                 );
             });
 

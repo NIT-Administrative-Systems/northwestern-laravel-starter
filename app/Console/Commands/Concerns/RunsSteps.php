@@ -37,7 +37,7 @@ trait RunsSteps
     /**
      * Run a step with a spinner, display the result immediately, and track it.
      *
-     * @param  callable(): mixed  $callback
+     * @param  callable(): void  $callback
      */
     protected function runStep(string $name, callable $callback): bool
     {
