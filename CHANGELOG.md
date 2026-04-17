@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [v1.16.0] - 2026-04-17
+
+### Changed
+
+- Refactored Filament admin resources and relation managers to reuse shared table builders and named routes instead of depending directly on resource classes. API request logs, user login records, role activity, audits, role assignment flows, and user creation redirects now share the same configuration paths in both resource pages and relation-manager tabs.
+- Simplified Filament search, filter, and badge rendering code by reusing shared helpers. Role activity and role definition history now use the common `DateRangeFilter`, `BadgePillRenderer`, `UserSearch`, and `UserOptionLabel` services rather than duplicating query, date-range, badge markup, and user-label logic inline.
+- Tightened Cypress support typings and command implementations. The plugin and custom commands now use explicit JSON, route, and Artisan parameter types, the custom `visit()` overwrite is typed for route targets, selector helpers accept typed get options, and Axe excluded selectors are parsed correctly as comma-delimited values.
+- Tightened several PHP and TypeScript type declarations in audit, auth, config validation, console, and EventHub helper code, including safer Livewire snapshot decoding in `Auditable` and narrower JSON value typing for the audit diff viewer.
+- Added automated Pest shard maintenance for CI. Composer now exposes `test:update-shards`, the repository now tracks `tests/.pest/shards.json`, and a scheduled GitHub Actions workflow refreshes shard timings weekly and opens a PR when they drift.
+
 ## [v1.15.2] - 2026-04-15
 
 ### Changed
@@ -669,7 +679,8 @@ First stable release. For installation, configuration, and usage guides, visit t
 - **CI pipeline**: GitHub Actions workflow with PHP/Node setup, database provisioning, Pest and Cypress test execution; Dependabot configuration.
 - **Developer tooling**: `.editorconfig`, `.prettierrc`, `.nvmrc` (Node v24), custom stubs, Rector configuration.
 
-[Unreleased]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.15.2...HEAD
+[Unreleased]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.16.0...HEAD
+[v1.16.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.15.2...v1.16.0
 [v1.15.2]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.15.1...v1.15.2
 [v1.15.1]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.15.0...v1.15.1
 [v1.15.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.14.0...v1.15.0

@@ -49,6 +49,6 @@ class ApiRequestLogsRelationManager extends RelationManager
 
     public function table(Table $table): Table
     {
-        return ApiRequestLogsTable::configure($table);
+        return ApiRequestLogsTable::configure($table, true);
     }
 }

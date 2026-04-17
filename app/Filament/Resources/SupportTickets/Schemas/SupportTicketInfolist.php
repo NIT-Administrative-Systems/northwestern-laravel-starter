@@ -6,7 +6,6 @@ namespace App\Filament\Resources\SupportTickets\Schemas;
 
 use App\Domains\Support\Enums\TicketSystem;
 use App\Domains\Support\Models\SupportTicket;
-use App\Filament\Resources\Users\UserResource;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
@@ -123,7 +122,7 @@ class SupportTicketInfolist
                                     ->label('Name')
                                     ->icon(Heroicon::OutlinedUser)
                                     ->url(fn (SupportTicket $record) => $record->user
-                                        ? UserResource::getUrl('view', ['record' => $record->user])
+                                        ? route('filament.administration.resources.users.view', ['record' => $record->user])
                                         : null)
                                     ->openUrlInNewTab(),
 

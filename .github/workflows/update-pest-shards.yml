@@ -1,0 +1,72 @@
+name: Update Pest Shards
+
+env:
+  PHP_VERSION: '8.5'
+
+on:
+  schedule:
+    - cron: '0 3 * * 0'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  update-shards:
+    name: 🧪 Update Pest Shards
+    runs-on: ubuntu-latest
+    environment: ci-cd
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: root
+          POSTGRES_DB: root
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 3s --health-timeout 3s --health-retries 5
+
+    steps:
+      - name: 📂 Checkout Repository
+        uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.EACD_BOT_FOR_COMMIT_PAT || github.token }}
+
+      - name: 🔁 Setup Environment
+        uses: ./.github/actions/common-setup
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          php-only: true
+          run-ide-helper: false
+
+      - name: 🧮 Regenerate Pest Shard Timings
+        run: composer test:update-shards
+
+      - name: 🔍 Check for Shard Timing Changes
+        id: diff
+        run: |
+          if git diff --quiet tests/.pest/shards.json; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: 📝 Open Pull Request
+        if: steps.diff.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.EACD_BOT_FOR_COMMIT_PAT || github.token }}
+          commit-message: 'chore(ci): refresh pest shard timings'
+          title: 'chore(ci): refresh pest shard timings'
+          body: |
+            Automated refresh of `tests/.pest/shards.json` from the latest test suite run.
+
+            Pest uses these timings to distribute test files across shards in `check-pr.yml` so each shard finishes in roughly the same amount of time. Regenerated weekly.
+          branch: chore/refresh-pest-shards
+          delete-branch: true
+          add-paths: tests/.pest/shards.json
+          committer: 'ADOES Bot <DL_NUIT_ET_SysDev@e.northwestern.edu>'
+          author: 'ADOES Bot <DL_NUIT_ET_SysDev@e.northwestern.edu>'

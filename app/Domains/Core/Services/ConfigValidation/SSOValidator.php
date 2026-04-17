@@ -37,7 +37,7 @@ class SSOValidator implements ConfigValidator
             : $this->entraIdVariables();
 
         $this->missingVariables = $variables
-            ->filter(fn ($value): bool => blank($value))
+            ->filter(fn (string|int|float|bool|null $value): bool => blank($value))
             ->keys();
 
         return $this->missingVariables->isEmpty();
@@ -76,7 +76,7 @@ class SSOValidator implements ConfigValidator
             || config('nusoa.sso.strategy') === 'forgerock-direct';
     }
 
-    /** @return Collection<string, mixed> */
+    /** @return Collection<string, string|null> */
     protected function entraIdVariables(): Collection
     {
         return collect([
@@ -85,7 +85,7 @@ class SSOValidator implements ConfigValidator
         ]);
     }
 
-    /** @return Collection<string, mixed> */
+    /** @return Collection<string, string|null> */
     protected function onlinePassportVariables(): Collection
     {
         return collect([

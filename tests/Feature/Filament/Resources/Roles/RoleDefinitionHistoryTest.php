@@ -13,11 +13,8 @@ use App\Filament\Resources\Roles\Pages\RoleDefinitionHistory;
 use App\Filament\Resources\Roles\Tables\RoleDefinitionHistoryTable;
 use Illuminate\Support\HtmlString;
 use Livewire\Livewire;
-use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
-#[CoversClass(RoleDefinitionHistory::class)]
-#[CoversClass(RoleDefinitionHistoryTable::class)]
 class RoleDefinitionHistoryTest extends TestCase
 {
     private User $admin;

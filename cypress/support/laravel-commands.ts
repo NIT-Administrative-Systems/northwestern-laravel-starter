@@ -9,19 +9,48 @@
  */
 /// <reference types="./" />
 
-Cypress.Commands.add("login", (attributes = {}) => {
+type FactoryState = string[] | JsonObject;
+
+interface FactoryRequest {
+    model: string;
+    count: number;
+    attributes: JsonObject;
+    load: FactoryState;
+    state: FactoryState;
+}
+
+type FactoryRequestBody = FactoryRequest | JsonObject;
+type RouteVisitTarget = {
+    route: string;
+    parameters?: CypressRouteParameters;
+};
+
+const isPlainObject = (
+    value: JsonObject | string[] | string | number | boolean | null | undefined,
+): value is JsonObject => {
+    return typeof value === "object" && value !== null && !Array.isArray(value);
+};
+
+const isRouteVisitTarget = (
+    value: string | RouteVisitTarget,
+): value is RouteVisitTarget => {
+    return typeof value === "object" && value !== null;
+};
+
+Cypress.Commands.add("login", (attributes: JsonObject = {}) => {
     cy.clearCookies();
 
-    // Are we using the new object system.
-    let requestBody =
-        attributes.attributes || attributes.state || attributes.load
+    const requestBody: JsonObject =
+        "attributes" in attributes ||
+        "state" in attributes ||
+        "load" in attributes
             ? attributes
             : { attributes };
 
     return cy
         .csrfToken()
-        .then((token) => {
-            return cy.request({
+        .then((token: string) => {
+            return cy.request<JsonObject>({
                 method: "POST",
                 url: "/__cypress__/login",
                 body: { ...requestBody, _token: token },
@@ -46,24 +75,22 @@ Cypress.Commands.add("login", (attributes = {}) => {
  * @example cy.currentUser();
  */
 Cypress.Commands.add("currentUser", () => {
-    return cy.csrfToken().then((token) => {
-        return cy
-            .request({
+    return cy
+        .csrfToken()
+        .then((token: string) =>
+            cy.request<JsonObject | null>({
                 method: "POST",
                 url: "/__cypress__/current-user",
                 body: { _token: token },
                 log: false,
-            })
-            .then((response) => {
-                if (!response.body) {
-                    cy.log("No authenticated user found.");
-                }
+            }),
+        )
+        .its("body", { log: false })
+        .then((body: JsonObject | null) => {
+            Cypress.Laravel.currentUser = body;
 
-                Cypress.Laravel.currentUser = response?.body;
-
-                return response?.body;
-            });
-    });
+            return body;
+        }) as unknown as Cypress.Chainable<JsonObject | null>;
 });
 
 /**
@@ -72,10 +99,9 @@ Cypress.Commands.add("currentUser", () => {
  * @example cy.logout();
  */
 Cypress.Commands.add("logout", () => {
-    return cy
-        .csrfToken()
-        .then((token) => {
-            return cy.request({
+    cy.csrfToken()
+        .then((token: string) => {
+            cy.request({
                 method: "POST",
                 url: "/__cypress__/logout",
                 body: { _token: token },
@@ -94,7 +120,7 @@ Cypress.Commands.add("logout", () => {
  */
 Cypress.Commands.add("csrfToken", () => {
     return cy
-        .request({
+        .request<string>({
             method: "GET",
             url: "/__cypress__/csrf_token",
             log: false,
@@ -108,25 +134,27 @@ Cypress.Commands.add("csrfToken", () => {
  * @example cy.refreshRoutes();
  */
 Cypress.Commands.add("refreshRoutes", () => {
-    return cy.csrfToken().then((token) => {
+    return cy.csrfToken().then((token: string) => {
         return cy
-            .request({
+            .request<CypressRouteTable>({
                 method: "POST",
                 url: "/__cypress__/routes",
                 body: { _token: token },
                 log: false,
             })
             .its("body", { log: false })
-            .then((routes) => {
-                cy.writeFile(
-                    Cypress.config().supportFolder + "/routes.json",
-                    routes,
-                    {
-                        log: false,
-                    },
-                );
-
+            .then((routes: CypressRouteTable) => {
                 Cypress.Laravel.routes = routes;
+
+                return cy
+                    .writeFile(
+                        Cypress.config().supportFolder + "/routes.json",
+                        routes,
+                        {
+                            log: false,
+                        },
+                    )
+                    .then(() => routes);
             });
     });
 });
@@ -138,17 +166,36 @@ Cypress.Commands.add("refreshRoutes", () => {
  *          cy.visit({ route: 'home' });
  *          cy.visit({ route: 'team', parameters: { team: 1 } });
  */
-Cypress.Commands.overwrite("visit", (originalFn, subject, options) => {
-    if (subject.route) {
-        return originalFn({
+Cypress.Commands.overwrite("visit", ((
+    originalFn: any,
+    subject: any,
+    options: any,
+) => {
+    if (isRouteVisitTarget(subject)) {
+        const visitOptions: Partial<Cypress.VisitOptions> & {
+            url: string;
+            method: Cypress.VisitOptions["method"];
+        } = {
             url: Cypress.Laravel.route(subject.route, subject.parameters || {}),
-            method: Cypress.Laravel.routes[subject.route].method[0],
+            method: Cypress.Laravel.routes[subject.route]
+                .method[0] as Cypress.VisitOptions["method"],
             ...options,
-        });
+        };
+
+        return (
+            originalFn as unknown as (
+                options: Partial<Cypress.VisitOptions> & { url: string },
+            ) => Cypress.Chainable<Cypress.AUTWindow>
+        )(visitOptions);
     }
 
-    return originalFn(subject, options);
-});
+    return (
+        originalFn as unknown as (
+            url: string,
+            options?: Partial<Cypress.VisitOptions>,
+        ) => Cypress.Chainable<Cypress.AUTWindow>
+    )(subject as unknown as string, options);
+}) as any);
 
 /**
  * Create a new Eloquent factory.
@@ -172,33 +219,49 @@ Cypress.Commands.overwrite("visit", (originalFn, subject, options) => {
  */
 Cypress.Commands.add(
     "create",
-    (model, count = 1, attributes = {}, load = [], state = []) => {
-        let requestBody = {};
+    (
+        model: string | JsonObject,
+        count: number | string[] | JsonObject = 1,
+        attributes: JsonObject | string[] = {},
+        load: FactoryState = [],
+        state: FactoryState = [],
+    ) => {
+        let requestBody: FactoryRequestBody;
+        let messageModel = "";
+        let messageCount = 1;
 
-        if (typeof model !== "object") {
+        if (typeof model === "string") {
             if (Array.isArray(count)) {
                 state = attributes;
                 attributes = {};
                 load = count;
                 count = 1;
-            }
-
-            if (typeof count === "object") {
+            } else if (isPlainObject(count)) {
                 state = load;
                 load = attributes;
                 attributes = count;
                 count = 1;
             }
 
-            requestBody = { model, state, attributes, load, count };
+            messageModel = model;
+            messageCount = count;
+            requestBody = {
+                model,
+                state,
+                attributes: isPlainObject(attributes) ? attributes : {},
+                load,
+                count,
+            };
         } else {
             requestBody = model;
+            messageModel = typeof model.model === "string" ? model.model : "";
+            messageCount = typeof model.count === "number" ? model.count : 1;
         }
 
         return cy
             .csrfToken()
-            .then((token) => {
-                return cy.request({
+            .then((token: string) => {
+                return cy.request<JsonObject | JsonObject[]>({
                     method: "POST",
                     url: "/__cypress__/factory",
                     body: { ...requestBody, _token: token },
@@ -209,11 +272,9 @@ Cypress.Commands.add(
                 Cypress.log({
                     name: "create",
                     message:
-                        requestBody.model +
-                        (requestBody.count > 1
-                            ? ` (${requestBody.count} times)`
-                            : ""),
-                    consoleProps: () => ({ [model]: response.body }),
+                        messageModel +
+                        (messageCount > 1 ? ` (${messageCount} times)` : ""),
+                    consoleProps: () => ({ [messageModel]: response.body }),
                 });
             })
             .its("body", { log: false });
@@ -228,9 +289,12 @@ Cypress.Commands.add(
  * @example cy.refreshDatabase();
  *          cy.refreshDatabase({ '--drop-views': true });
  */
-Cypress.Commands.add("refreshDatabase", (options = {}) => {
-    return cy.artisan("migrate:fresh", options);
-});
+Cypress.Commands.add(
+    "refreshDatabase",
+    (options: Record<string, JsonPrimitive> = {}) => {
+        return cy.artisan("migrate:fresh", options);
+    },
+);
 
 /**
  * Seed the database.
@@ -240,8 +304,8 @@ Cypress.Commands.add("refreshDatabase", (options = {}) => {
  * @example cy.seed();
  *          cy.seed('PlansTableSeeder');
  */
-Cypress.Commands.add("seed", (seederClass = "") => {
-    let options = {};
+Cypress.Commands.add("seed", (seederClass: string = "") => {
+    const options: Record<string, JsonPrimitive> = {};
 
     if (seederClass) {
         options["--class"] = seederClass;
@@ -259,35 +323,46 @@ Cypress.Commands.add("seed", (seederClass = "") => {
  *
  * @example cy.artisan('cache:clear');
  */
-Cypress.Commands.add("artisan", (command, parameters = {}, options = {}) => {
-    options = Object.assign({}, { log: true }, options);
+Cypress.Commands.add(
+    "artisan",
+    (
+        command: string,
+        parameters: Record<string, JsonPrimitive> = {},
+        options: { log?: boolean } = {},
+    ) => {
+        const resolvedOptions = { log: true, ...options };
 
-    if (options.log) {
-        Cypress.log({
-            name: "artisan",
-            message: (() => {
-                let message = command;
+        if (resolvedOptions.log) {
+            Cypress.log({
+                name: "artisan",
+                message: (() => {
+                    let message = command;
 
-                for (let key in parameters) {
-                    message += ` ${key}="${parameters[key]}"`;
-                }
+                    for (const key in parameters) {
+                        message += ` ${key}="${parameters[key]}"`;
+                    }
 
-                return message;
-            })(),
-            consoleProps: () => ({ command, parameters }),
+                    return message;
+                })(),
+                consoleProps: () => ({ command, parameters }),
+            });
+        }
+
+        return cy.csrfToken().then((token: string) => {
+            return cy.request({
+                method: "POST",
+                url: "/__cypress__/artisan",
+                body: {
+                    command: command,
+                    parameters: parameters,
+                    _token: token,
+                },
+                log: false,
+                timeout: 90000,
+            });
         });
-    }
-
-    return cy.csrfToken().then((token) => {
-        return cy.request({
-            method: "POST",
-            url: "/__cypress__/artisan",
-            body: { command: command, parameters: parameters, _token: token },
-            log: false,
-            timeout: 90000,
-        });
-    });
-});
+    },
+);
 
 /**
  * Execute arbitrary PHP.
@@ -297,11 +372,11 @@ Cypress.Commands.add("artisan", (command, parameters = {}, options = {}) => {
  * @example cy.php('2 + 2');
  *          cy.php('App\\User::count()');
  */
-Cypress.Commands.add("php", (command) => {
+Cypress.Commands.add("php", (command: string) => {
     return cy
         .csrfToken()
-        .then((token) => {
-            return cy.request({
+        .then((token: string) => {
+            return cy.request<{ result: string }>({
                 method: "POST",
                 url: "/__cypress__/run-php",
                 body: { command: command, _token: token },

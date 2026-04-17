@@ -9,7 +9,6 @@ use App\Domains\Auth\Enums\RoleTypeEnum;
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\User;
-use App\Filament\Resources\Roles\RoleResource;
 use Filament\Actions\AttachAction;
 use Filament\Actions\DetachAction;
 use Filament\Forms\Components\Select;
@@ -159,7 +158,7 @@ class RolesRelationManager extends RelationManager
                     })
                     ->successNotificationTitle('Role assigned'),
             ])
-            ->recordUrl(fn (Role $record) => RoleResource::getUrl('view', ['record' => $record]))
+            ->recordUrl(fn (Role $record) => route('filament.administration.resources.roles.view', ['record' => $record]))
             ->recordActions([
                 DetachAction::make()
                     ->label('Remove')

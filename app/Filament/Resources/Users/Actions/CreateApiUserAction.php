@@ -8,7 +8,6 @@ use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\User\Actions\Api\CreateApiUser;
 use App\Domains\User\Models\User;
 use App\Filament\Resources\AccessTokens\Schemas\AccessTokenSchemas;
-use App\Filament\Resources\Users\UserResource;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -157,7 +156,7 @@ class CreateApiUserAction extends Action
 
                 if ($userId) {
                     /** @var User $user */
-                    $user = UserResource::getModel()::find($userId);
+                    $user = User::query()->find($userId);
                     if ($user) {
                         Notification::make()
                             ->title('API user created')
@@ -165,7 +164,7 @@ class CreateApiUserAction extends Action
                             ->success()
                             ->send();
 
-                        return redirect()->to(UserResource::getUrl('view', ['record' => $user]));
+                        return redirect()->route('filament.administration.resources.users.view', ['record' => $user]);
                     }
                 }
             });

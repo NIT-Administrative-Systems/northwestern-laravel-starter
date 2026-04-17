@@ -1,13 +1,39 @@
 /// <reference types="cypress" />
 
+type JsonPrimitive = string | number | boolean | null;
+
+interface JsonObject {
+    [key: string]: JsonValue;
+}
+
+type JsonValue = JsonPrimitive | JsonObject | JsonValue[];
+
+interface CypressRouteDefinition {
+    name: string;
+    domain: string | null;
+    action: string;
+    uri: string;
+    method: string[];
+}
+
+type CypressRouteTable = Record<string, CypressRouteDefinition>;
+type CypressRouteParameters = Record<string, JsonPrimitive>;
+
 declare namespace Cypress {
     interface Cypress {
         Laravel: {
-            routes: {};
-            currentUser?: any;
-            route: (name: string, parameters?: any) => any;
+            routes: CypressRouteTable;
+            currentUser?: JsonObject | null;
+            route: (
+                name: string,
+                parameters?: CypressRouteParameters,
+            ) => string;
         };
     }
+
+    type GetCommandOptions = Partial<
+        Loggable & Timeoutable & Withinable & Shadow
+    >;
 
     interface Chainable<Subject> {
         /**
@@ -17,7 +43,7 @@ declare namespace Cypress {
          * cy.login()
          * cy.login({ id: 1 })
          */
-        login(attributes?: object): Chainable<Response<any>>;
+        login(attributes?: JsonObject): Chainable<JsonObject>;
 
         /**
          * Log in as the given user.
@@ -43,7 +69,7 @@ declare namespace Cypress {
          * @example
          * cy.logout()
          */
-        logout(): Chainable<any>;
+        logout(): Chainable<void>;
 
         /**
          * Fetch the currently authenticated user.
@@ -51,7 +77,7 @@ declare namespace Cypress {
          * @example
          * cy.currentUser()
          */
-        currentUser(): Chainable<any>;
+        currentUser(): Chainable<JsonObject | null>;
 
         /**
          * Fetch a CSRF token from the server.
@@ -59,7 +85,7 @@ declare namespace Cypress {
          * @example
          * cy.logout()
          */
-        csrfToken(): Chainable<any>;
+        csrfToken(): Chainable<string>;
 
         /**
          * Fetch a fresh list of URI routes from the server.
@@ -67,7 +93,7 @@ declare namespace Cypress {
          * @example
          * cy.logout()
          */
-        refreshRoutes(): Chainable<any>;
+        refreshRoutes(): Chainable<CypressRouteTable>;
 
         /**
          * Create and persist a new Eloquent record using Laravel model factories.
@@ -79,12 +105,12 @@ declare namespace Cypress {
          * cy.create({ model: 'App\\User', state: ['guest'], relations: ['profile'], count: 2 }
          */
         create(
-            model: string | object,
-            count?: number | any[],
-            attributes?: object,
-            load?: any[],
-            state?: any[],
-        ): Chainable<Response<any>>;
+            model: string | JsonObject,
+            count?: number | string[] | JsonObject,
+            attributes?: JsonObject,
+            load?: string[],
+            state?: string[],
+        ): Chainable<JsonObject | JsonObject[]>;
 
         /**
          * Refresh the database state using Laravel's migrate:fresh command.
@@ -93,7 +119,9 @@ declare namespace Cypress {
          * cy.refreshDatabase()
          * cy.refreshDatabase({ '--drop-views': true }
          */
-        refreshDatabase(options?: object): Chainable<any>;
+        refreshDatabase(
+            options?: Record<string, JsonPrimitive>,
+        ): Chainable<Response<JsonValue>>;
 
         /**
          * Resets the database state to the given snapshot file (defaults to "cypress").
@@ -107,7 +135,7 @@ declare namespace Cypress {
          * cy.seed()
          * cy.seed('PlansTableSeeder')
          */
-        seed(seederClass?: string): Chainable<any>;
+        seed(seederClass?: string): Chainable<Response<JsonValue>>;
 
         /**
          * Run an Artisan command.
@@ -117,9 +145,9 @@ declare namespace Cypress {
          */
         artisan(
             command: string,
-            parameters?: object,
-            options?: object,
-        ): Chainable<Response<any>>;
+            parameters?: Record<string, JsonPrimitive>,
+            options?: { log?: boolean },
+        ): Chainable<Response<JsonValue>>;
 
         /**
          * Execute arbitrary PHP on the server.
@@ -148,7 +176,7 @@ declare namespace Cypress {
          */
         getBySel(
             selector: string,
-            ...args: any[]
+            ...args: [options?: GetCommandOptions]
         ): Chainable<JQuery<HTMLElement>>;
 
         /**
@@ -156,7 +184,7 @@ declare namespace Cypress {
          */
         getBySelLike(
             selector: string,
-            ...args: any[]
+            ...args: [options?: GetCommandOptions]
         ): Chainable<JQuery<HTMLElement>>;
 
         /**
@@ -175,7 +203,7 @@ declare namespace Cypress {
          */
         getByLivewireProperty(
             selector: string,
-            ...args: any[]
+            ...args: [options?: GetCommandOptions]
         ): Chainable<JQuery<HTMLElement>>;
     }
 }
