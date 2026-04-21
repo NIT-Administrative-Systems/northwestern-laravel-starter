@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [v2.0.0] - 2026-04-21
+
+### Breaking
+
+- Upgraded `laravel/framework` from `^12.0` to `^13.0`. Downstream projects will need to follow the [Laravel 13 upgrade guide](https://laravel.com/docs/13.x/upgrade) for any project-level customizations.
+- Replaced the `Illuminate\Foundation\Http\Middleware\VerifyCsrfToken` middleware with its Laravel 13 successor `Illuminate\Foundation\Http\Middleware\PreventRequestForgery` in `routes/auth.php` (Azure AD OAuth callback and Sentry tunnel) and `ImpersonationControllerTest`. Downstream projects with `withoutMiddleware()` calls, custom `except` lists, or other references to `VerifyCsrfToken` must update to `PreventRequestForgery`.
+- Updated default cache, Redis, and session prefixes in `config/cache.php`, `config/database.php`, and `config/session.php` to the Laravel 13 format (hyphen-separated with `Str::slug()`, snake-cased session cookie). Cache, Redis, and session keys from pre-upgrade deployments will not be found under the new prefixes — expect a one-time cache miss and logged-out sessions on deploy, or override the `CACHE_PREFIX`, `REDIS_PREFIX`, and `SESSION_COOKIE` env vars to preserve the old values.
+- Bumped `northwestern-sysdev/laravel-soa` from `^11.2` to `^12.0`. The `WebSSOAuthentication` trait now regenerates the session on login and invalidates it on logout to prevent session fixation. See the [laravel-soa v12 changelog](https://github.com/NIT-Administrative-Systems/SysDev-laravel-soa/blob/main/CHANGELOG.md) for details.
+
+### Changed
+
+- Bumped `mews/purifier` from `^3.4` to `^3.4.4` for Laravel 13 support.
+- Bumped `laracasts/cypress` to `3.0.4` to pick up the Laravel 13 `illuminate/support` constraint.
+- Annotated `AutomaticallyOrderedScope` with `@implements Scope<Model>` to satisfy the now-generic `Illuminate\Database\Eloquent\Scope` interface in Laravel 13. Downstream custom scopes implementing `Scope` will need the same annotation to stay PHPStan-clean.
+- Updated Laravel version references in documentation from `12.x` to `13.x`.
+
 ## [v1.17.0] - 2026-04-17
 
 ### Changed
