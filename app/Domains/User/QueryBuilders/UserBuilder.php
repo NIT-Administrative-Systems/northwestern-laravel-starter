@@ -72,11 +72,21 @@ class UserBuilder extends Builder
      */
     public function searchByName(string $term): static
     {
-        return $this->where(function (Builder $query) use ($term) {
-            $query->where('first_name', 'ilike', "%{$term}%")
-                ->orWhere('last_name', 'ilike', "%{$term}%")
-                ->orWhereRaw("CONCAT_WS(' ', first_name, last_name) ilike ?", ["%{$term}%"])
-                ->orWhereRaw("CONCAT_WS(', ', last_name, first_name) ilike ?", ["%{$term}%"]);
+        $wildcardTerm = "%{$term}%";
+        $canUseIndex = $this->getModel()->getConnection()->getDriverName() === 'pgsql'
+            && ! str_contains($term, ',');
+
+        return $this->where(function (Builder $query) use ($wildcardTerm, $canUseIndex) {
+            if ($canUseIndex) {
+                $query->where('full_name', 'ilike', $wildcardTerm);
+
+                return;
+            }
+
+            $query->where('first_name', 'ilike', $wildcardTerm)
+                ->orWhere('last_name', 'ilike', $wildcardTerm)
+                ->orWhereRaw("CONCAT_WS(' ', first_name, last_name) ilike ?", [$wildcardTerm])
+                ->orWhereRaw("CONCAT_WS(', ', last_name, first_name) ilike ?", [$wildcardTerm]);
         });
     }
 
