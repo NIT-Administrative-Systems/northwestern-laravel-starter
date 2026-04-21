@@ -9,7 +9,7 @@ use App\Domains\Auth\Actions\Impersonation\StopImpersonation;
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Http\Controllers\ImpersonationController;
 use App\Domains\User\Models\User;
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Support\Facades\Session;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
@@ -23,7 +23,7 @@ class ImpersonationControllerTest extends TestCase
     {
         parent::setUp();
 
-        $this->withoutMiddleware(VerifyCsrfToken::class);
+        $this->withoutMiddleware(PreventRequestForgery::class);
 
         $this->authorizedUser = User::factory()->create();
         $this->authorizedUser->givePermissionTo(SystemPermission::ManageImpersonation);
