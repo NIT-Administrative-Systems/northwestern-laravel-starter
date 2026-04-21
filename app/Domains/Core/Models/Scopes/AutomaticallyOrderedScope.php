@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\Schema;
  *
  * This scope can be automatically registered with the {@see AutomaticallyOrdered} attribute.
  * It orders by a primary column, and then a secondary column.
+ *
+ * @implements Scope<Model>
  */
 readonly class AutomaticallyOrderedScope implements Scope
 {

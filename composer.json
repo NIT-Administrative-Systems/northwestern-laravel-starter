@@ -28,7 +28,7 @@
         "livewire/livewire": "^4.0",
         "stevebauman/purify": "^6.3",
         "mockery/mockery": "^1.6",
-        "northwestern-sysdev/laravel-soa": "^11.2",
+        "northwestern-sysdev/laravel-soa": "^12.0",
         "northwestern-sysdev/northwestern-filament-theme": "^2.0",
         "northwestern-sysdev/northwestern-laravel-ui": "^4.0",
         "northwestern-sysdev/tdx-php-sdk": "^0.6",
