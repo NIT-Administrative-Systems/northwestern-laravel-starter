@@ -720,7 +720,8 @@ First stable release. For installation, configuration, and usage guides, visit t
 - **CI pipeline**: GitHub Actions workflow with PHP/Node setup, database provisioning, Pest and Cypress test execution; Dependabot configuration.
 - **Developer tooling**: `.editorconfig`, `.prettierrc`, `.nvmrc` (Node v24), custom stubs, Rector configuration.
 
-[Unreleased]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.17.0...HEAD
+[Unreleased]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.0.0...HEAD
+[v2.0.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.17.0...v2.0.0
 [v1.17.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.16.0...v1.17.0
 [v1.16.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.15.2...v1.16.0
 [v1.15.2]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.15.1...v1.15.2
