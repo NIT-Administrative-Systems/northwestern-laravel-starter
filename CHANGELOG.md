@@ -15,12 +15,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - Updated default cache, Redis, and session prefixes in `config/cache.php`, `config/database.php`, and `config/session.php` to the Laravel 13 format (hyphen-separated with `Str::slug()`, snake-cased session cookie). Cache, Redis, and session keys from pre-upgrade deployments will not be found under the new prefixes — expect a one-time cache miss and logged-out sessions on deploy, or override the `CACHE_PREFIX`, `REDIS_PREFIX`, and `SESSION_COOKIE` env vars to preserve the old values.
 - Bumped `northwestern-sysdev/laravel-soa` from `^11.2` to `^12.0`. The `WebSSOAuthentication` trait now regenerates the session on login and invalidates it on logout to prevent session fixation. See the [laravel-soa v12 changelog](https://github.com/NIT-Administrative-Systems/SysDev-laravel-soa/blob/main/CHANGELOG.md) for details.
 
+### Added
+
+- Stored generated `users.full_name` column plus a `pg_trgm` GIN trigram index (`2026_04_21_120000_add_trigram_index_to_users_full_name.php`, PostgreSQL only). `UserBuilder::searchByName` takes the indexed fast path for comma-less terms; on a 50k-row synthetic dataset an unanchored `ILIKE '%term%'` drops from a ~54ms sequential scan to a ~1ms bitmap-index scan. Non-PostgreSQL drivers continue to use the portable `CONCAT_WS` fallback, so downstream MySQL projects are unaffected.
+- Redesigned the `Overview` admin page (`/administration/overview`) with operational widgets: a slim health-status ribbon, a queue alert card that surfaces failed-job counts alongside the latest exception excerpt and a top-three breakdown of pending job classes, a Login Activity 7×24 heatmap with per-cell tooltips, an API Traffic sparkline with inline p95 latency (gated on `config('api.enabled')`), a consolidated Feature Flags section, and a Scheduled Tasks table sourced from `php artisan schedule:list --json`. The Environment / Services / Storage / Error Tracking blocks are now grouped inside a single `Configuration` card with description-list layouts instead of four stacked sections, and Lockdown Mode moved from Environment to Feature Flags alongside the other runtime toggles.
+
 ### Changed
 
 - Bumped `mews/purifier` from `^3.4` to `^3.4.4` for Laravel 13 support.
 - Bumped `laracasts/cypress` to `3.0.4` to pick up the Laravel 13 `illuminate/support` constraint.
 - Annotated `AutomaticallyOrderedScope` with `@implements Scope<Model>` to satisfy the now-generic `Illuminate\Database\Eloquent\Scope` interface in Laravel 13. Downstream custom scopes implementing `Scope` will need the same annotation to stay PHPStan-clean.
 - Updated Laravel version references in documentation from `12.x` to `13.x`.
+- Aligned the `User::fullName` accessor with the new generated-column expression (`trim(($first_name ?? '').' '.($last_name ?? ''))`) so PHP and SQL produce byte-identical values regardless of read path or database driver. The accessor prefers the stored column when it's loaded on the model and falls back to the computed value for unpersisted instances; `full_name` was dropped from `$appends` now that it's a real column.
+
+### Fixed
+
+- Stored cross-site scripting in the impersonation global-alert sink. An administrator with the `CreateUsers` permission could plant HTML or JavaScript in a user's `first_name`/`last_name`; when a separate administrator with `ManageImpersonation` later impersonated that user, the payload executed in the impersonator's session through the `{!! $activeAlert['message'] !!}` sink in `northwestern-sysdev/northwestern-laravel-ui`. `auth()->user()->full_name` is now wrapped with `e()` before being interpolated into the alert's heredoc.
+- `Overview::getQueueStatus` no longer silently reports zero pending jobs on non-database queue drivers. The earlier `config('queue.default') === 'database'` guard meant Redis-backed projects (the starter default) saw no pending-job count in the queue alert even when work was stuck.
 
 ## [v1.17.0] - 2026-04-17
 

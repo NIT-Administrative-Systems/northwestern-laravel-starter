@@ -74,10 +74,6 @@ class User extends Authenticatable implements Auditable, FilamentUser, HasAvatar
         'remember_token',
     ];
 
-    protected $appends = [
-        'full_name',
-    ];
-
     protected $casts = [
         'auth_type' => AuthType::class,
         'primary_affiliation' => Affiliation::class,
@@ -160,7 +156,8 @@ class User extends Authenticatable implements Auditable, FilamentUser, HasAvatar
     protected function fullName(): Attribute
     {
         return Attribute::make(
-            get: fn (): string => "{$this->first_name} {$this->last_name}",
+            get: fn (?string $value): string => $value
+                ?? trim(($this->first_name ?? '') . ' ' . ($this->last_name ?? '')),
         );
     }
 
