@@ -34,13 +34,19 @@ Cypress.Commands.add("loginAsSuperAdmin", () => {
     cy.loginAs("nuit.admin");
 });
 
-Cypress.Commands.add("getBySel", (selector, ...args) => {
-    return cy.get(`[data-cy=${selector}]`, ...args);
-});
+Cypress.Commands.add(
+    "getBySel",
+    (selector: string, ...args: [options?: Cypress.GetCommandOptions]) => {
+        return cy.get(`[data-cy=${selector}]`, ...args);
+    },
+);
 
-Cypress.Commands.add("getBySelLike", (selector, ...args) => {
-    return cy.get(`[id*=${selector}]`, ...args);
-});
+Cypress.Commands.add(
+    "getBySelLike",
+    (selector: string, ...args: [options?: Cypress.GetCommandOptions]) => {
+        return cy.get(`[id*=${selector}]`, ...args);
+    },
+);
 
 Cypress.Commands.add("loadDatabaseSnapshot", (filename: string = "cypress") => {
     cy.log(`Loading DB snapshot: ${filename}`);
@@ -57,17 +63,22 @@ Cypress.Commands.add("checkAxeViolations", () => {
         rules: [{ id: "duplicate-id", enabled: false }],
     });
 
-    cy.env(["axe_skip_failures", "axe_excluded_selectors"]).then(
-        ({ axe_skip_failures, axe_excluded_selectors }) => {
-            if (axe_skip_failures === "true") {
-                cy.checkA11y(null, null, null, true);
-            } else if (axe_excluded_selectors) {
-                cy.checkA11y({
-                    exclude: (axe_excluded_selectors as string).split(),
-                });
-            } else {
-                cy.checkA11y();
-            }
-        },
-    );
+    const axeSkipFailures = Cypress.env("axe_skip_failures");
+    const axeExcludedSelectors = Cypress.env("axe_excluded_selectors");
+
+    if (axeSkipFailures === "true") {
+        cy.checkA11y(undefined, undefined, undefined, true);
+    } else if (
+        typeof axeExcludedSelectors === "string" &&
+        axeExcludedSelectors !== ""
+    ) {
+        cy.checkA11y({
+            exclude: axeExcludedSelectors
+                .split(",")
+                .map((selector) => selector.trim())
+                .filter(Boolean),
+        });
+    } else {
+        cy.checkA11y();
+    }
 });

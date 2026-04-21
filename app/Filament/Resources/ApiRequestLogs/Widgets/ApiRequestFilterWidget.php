@@ -37,7 +37,7 @@ class ApiRequestFilterWidget extends Widget implements HasForms
 
     public ?int $userId = null;
 
-    protected string $view = 'filament.resources.api-request-logs.widgets.filter-widget';
+    protected string $view = 'filament.support.widgets.filter-widget';
 
     public function mount(): void
     {

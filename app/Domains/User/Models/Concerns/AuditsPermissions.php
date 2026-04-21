@@ -53,7 +53,6 @@ trait AuditsPermissions
         $addedPermissionNames = array_diff($newPermissionNames, $oldPermissionNames);
         $removedPermissionNames = array_diff($oldPermissionNames, $newPermissionNames);
 
-        // Only create audit if there were changes
         if (filled($addedPermissionNames) || filled($removedPermissionNames)) {
             $this->auditPermissionChange($oldPermissions, $newPermissions);
         }

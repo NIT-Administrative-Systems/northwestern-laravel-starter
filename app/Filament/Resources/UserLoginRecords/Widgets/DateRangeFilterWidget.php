@@ -38,7 +38,7 @@ class DateRangeFilterWidget extends Widget implements HasForms
 
     public ?string $formEndDate = null;
 
-    protected string $view = 'filament.resources.user-login-records.widgets.date-range-filter-widget';
+    protected string $view = 'filament.support.widgets.filter-widget';
 
     public function mount(): void
     {

@@ -18,7 +18,7 @@ describe("Authentication - Login", () => {
     });
 
     context("Local login", () => {
-        beforeEach(() => {
+        beforeEach(function () {
             cy.php("config('local-auth.enabled')").then((enabled) => {
                 if (!enabled) {
                     cy.log("Local auth disabled, skipping test");

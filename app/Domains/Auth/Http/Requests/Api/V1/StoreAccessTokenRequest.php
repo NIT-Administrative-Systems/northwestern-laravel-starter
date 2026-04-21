@@ -15,7 +15,7 @@ class StoreAccessTokenRequest extends FormRequest
     }
 
     /**
-     * @return array<string, array<int, mixed>>
+     * @return array<string, list<string|ValidIpOrCidrRule>>
      */
     public function rules(): array
     {

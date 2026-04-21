@@ -314,7 +314,6 @@ class AuditsTable
      */
     private static function modelTypeValueToLabelMap(): array
     {
-        // flatten the grouped options
         return collect(self::modelTypeOptionsGrouped())
             ->flatMap(fn ($grp) => $grp)
             ->all();

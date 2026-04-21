@@ -9,20 +9,17 @@ use App\Domains\Auth\Enums\RoleTypeEnum;
 use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\Audit;
 use App\Domains\User\Models\User;
+use App\Domains\User\Support\UserOptionLabel;
+use App\Domains\User\Support\UserSearch;
 use App\Filament\Exports\RoleActivityExporter;
-use App\Filament\Resources\Audits\AuditResource;
-use App\Filament\Resources\Roles\RoleResource;
-use App\Filament\Resources\Users\RelationManagers\RoleActivityRelationManager;
-use App\Filament\Resources\Users\UserResource;
-use Carbon\Carbon;
+use App\Filament\Support\Filters\DateRangeFilter;
+use App\Filament\Support\Formatting\BadgePillRenderer;
 use Filament\Actions\Action;
 use Filament\Actions\ExportAction;
 use Filament\Actions\ViewAction;
-use Filament\Forms\Components\DatePicker;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
-use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -30,7 +27,7 @@ use Illuminate\Support\HtmlString;
 
 class RoleActivityTable
 {
-    public static function configure(Table $table): Table
+    public static function configure(Table $table, bool $isRelationManager = false): Table
     {
         return $table
             ->columns([
@@ -71,19 +68,14 @@ class RoleActivityTable
                         return $user?->username;
                     })
                     ->searchable(query: function (Builder $query, string $search): Builder {
-                        return $query
-                            ->orWhereHas('auditable', function (Builder $q) use ($search) {
-                                $q->where('username', 'ilike', "%{$search}%")
-                                    ->orWhere('first_name', 'ilike', "%{$search}%")
-                                    ->orWhere('last_name', 'ilike', "%{$search}%");
-                            });
+                        return resolve(UserSearch::class)->applyToRelation($query, 'auditable', $search, includeEmail: false, boolean: 'or');
                     })
                     ->url(
                         fn (Audit $record) => $record->auditable
-                        ? UserResource::getUrl('view', ['record' => $record->auditable])
+                        ? route('filament.administration.resources.users.view', ['record' => $record->auditable])
                         : null
                     )
-                    ->hiddenOn(RoleActivityRelationManager::class),
+                    ->hidden($isRelationManager),
 
                 TextColumn::make('changed_roles')
                     ->label('Role')
@@ -146,9 +138,11 @@ class RoleActivityTable
                         : Heroicon::OutlinedCpuChip)
                     ->color(fn (Audit $record) => $record->impersonator ? 'warning' : null)
                     ->searchable(query: function (Builder $query, string $search): Builder {
-                        return $query
-                            ->orWhereRelation('user', 'username', 'ilike', "%{$search}%")
-                            ->orWhereRelation('impersonator', 'username', 'ilike', "%{$search}%");
+                        $userSearch = resolve(UserSearch::class);
+
+                        $userSearch->applyToRelation($query, 'user', $search, includeEmail: false, boolean: 'or');
+
+                        return $userSearch->applyToRelation($query, 'impersonator', $search, includeEmail: false, boolean: 'or');
                     }),
 
                 TextColumn::make('created_at')
@@ -194,53 +188,41 @@ class RoleActivityTable
 
                 SelectFilter::make('auditable_id')
                     ->label('User')
-                    ->hiddenOn(RoleActivityRelationManager::class)
+                    ->hidden($isRelationManager)
                     ->searchable()
                     ->getSearchResultsUsing(
-                        fn (string $search) => User::query()
-                            ->where(
-                                fn (Builder $q) => $q
-                                    ->where('username', 'ilike', "%{$search}%")
-                                    ->orWhere('first_name', 'ilike', "%{$search}%")
-                                    ->orWhere('last_name', 'ilike', "%{$search}%")
-                            )
-                            ->orderBy('last_name')
-                            ->limit(50)
-                            ->get()
-                            ->mapWithKeys(fn (User $user) => [$user->id => "{$user->clerical_name} ({$user->username})"])
-                            ->all()
+                        fn (string $search): array => resolve(UserSearch::class)->options(
+                            search: $search,
+                            format: UserOptionLabel::FormatClericalName,
+                            withUsername: true,
+                            includeEmail: false,
+                        )
                     )
                     ->getOptionLabelUsing(
-                        function (int $value): ?string {
-                            $user = User::find($value);
-
-                            return $user ? "{$user->clerical_name} ({$user->username})" : null;
-                        }
+                        fn (int $value): ?string => resolve(UserSearch::class)->label(
+                            id: $value,
+                            format: UserOptionLabel::FormatClericalName,
+                            withUsername: true,
+                        )
                     ),
 
                 SelectFilter::make('user_id')
                     ->label('Performed By')
                     ->searchable()
                     ->getSearchResultsUsing(
-                        fn (string $search) => User::query()
-                            ->where(
-                                fn (Builder $q) => $q
-                                    ->where('username', 'ilike', "%{$search}%")
-                                    ->orWhere('first_name', 'ilike', "%{$search}%")
-                                    ->orWhere('last_name', 'ilike', "%{$search}%")
-                            )
-                            ->orderBy('last_name')
-                            ->limit(50)
-                            ->get()
-                            ->mapWithKeys(fn (User $user) => [$user->id => "{$user->full_name} ({$user->username})"])
-                            ->all()
+                        fn (string $search): array => resolve(UserSearch::class)->options(
+                            search: $search,
+                            format: UserOptionLabel::FormatFullName,
+                            withUsername: true,
+                            includeEmail: false,
+                        )
                     )
                     ->getOptionLabelUsing(
-                        function (int $value): ?string {
-                            $user = User::find($value);
-
-                            return $user ? "{$user->full_name} ({$user->username})" : null;
-                        }
+                        fn (int $value): ?string => resolve(UserSearch::class)->label(
+                            id: $value,
+                            format: UserOptionLabel::FormatFullName,
+                            withUsername: true,
+                        )
                     ),
 
                 SelectFilter::make('origin')
@@ -262,57 +244,28 @@ class RoleActivityTable
                         return $query->where('tags', 'like', "%{$value}%");
                     }),
 
-                Filter::make('created_at_range')
-                    ->label('Date Range')
+                resolve(DateRangeFilter::class)->make(
+                    name: 'created_at_range',
+                    label: 'Date Range',
+                    column: 'created_at',
+                    mode: DateRangeFilter::ModeDateTime,
+                    icon: Heroicon::Calendar,
+                    limitUntilToToday: true,
+                )
                     ->columns(2)
-                    ->schema([
-                        DatePicker::make('from')
-                            ->label('From')
-                            ->native(false)
-                            ->prefixIcon(Heroicon::Calendar)
-                            ->closeOnDateSelection(),
-                        DatePicker::make('to')
-                            ->label('To')
-                            ->native(false)
-                            ->prefixIcon(Heroicon::Calendar)
-                            ->closeOnDateSelection()
-                            ->minDate(fn (callable $get) => $get('from'))
-                            ->maxDate(Carbon::today()),
-                    ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        return $query
-                            ->when(
-                                filled($data['from'] ?? null),
-                                fn (Builder $q) => $q->where('created_at', '>=', \Illuminate\Support\Carbon::parse($data['from'])->startOfDay())
-                            )
-                            ->when(
-                                filled($data['to'] ?? null),
-                                fn (Builder $q) => $q->where('created_at', '<=', \Illuminate\Support\Carbon::parse($data['to'])->endOfDay())
-                            );
-                    })
-                    ->indicateUsing(function (array $data): array {
-                        $indicators = [];
-                        if (filled($data['from'] ?? null)) {
-                            $indicators[] = 'From: ' . \Illuminate\Support\Carbon::parse($data['from'])->toDateString();
-                        }
-                        if (filled($data['to'] ?? null)) {
-                            $indicators[] = 'To: ' . \Illuminate\Support\Carbon::parse($data['to'])->toDateString();
-                        }
-
-                        return $indicators;
-                    }),
+                    ->columnSpan(2),
             ], layout: FiltersLayout::AboveContent)
             ->filtersFormColumns(3)
             ->recordActions([
                 ViewAction::make()
                     ->label('View Audit')
-                    ->url(fn (Audit $record) => AuditResource::getUrl('view', ['record' => $record])),
+                    ->url(fn (Audit $record) => route('filament.administration.resources.audits.view', ['record' => $record])),
                 Action::make('view_user')
                     ->label('View User')
                     ->icon(Heroicon::OutlinedUser)
                     ->url(
                         fn (Audit $record) => $record->auditable
-                        ? UserResource::getUrl('view', ['record' => $record->auditable])
+                        ? route('filament.administration.resources.users.view', ['record' => $record->auditable])
                         : null
                     )
                     ->hidden(fn (Audit $record) => ! $record->auditable),
@@ -359,12 +312,12 @@ class RoleActivityTable
                 $tooltip = e(json_encode(['content' => 'This role has been deleted.', 'theme' => 'light']));
 
                 return '<span x-tooltip="' . $tooltip . '">'
-                    . self::pill($role['name'], 'gray', 'line-through opacity-60')
+                    . resolve(BadgePillRenderer::class)->render($role['name'], 'gray', 'line-through opacity-60')
                     . '</span>';
             }
 
-            $pill = self::pill($role['name'], $roleType?->getColor() ?? 'gray');
-            $url = RoleResource::getUrl('view', ['record' => $role['id']]);
+            $pill = resolve(BadgePillRenderer::class)->render($role['name'], $roleType?->getColor() ?? 'gray');
+            $url = route('filament.administration.resources.roles.view', ['record' => $role['id']]);
 
             return '<a href="' . e($url) . '">' . $pill . '</a>';
         }, $visible);
@@ -373,33 +326,10 @@ class RoleActivityTable
             $overflowRoles = array_slice($changedRoles, $maxVisible);
             $tooltip = implode(', ', array_column($overflowRoles, 'name'));
             $parts[] = '<span x-tooltip="' . e(json_encode(['content' => $tooltip, 'theme' => 'light'])) . '">'
-                . self::pill('+' . $remaining . ' more', 'gray')
+                . resolve(BadgePillRenderer::class)->render('+' . $remaining . ' more', 'gray')
                 . '</span>';
         }
 
         return '<div class="flex flex-wrap items-center gap-1">' . implode('', $parts) . '</div>';
-    }
-
-    /**
-     * Render a small pill/badge matching Filament's fi-badge styling.
-     *
-     * Reuses the same pattern from RoleDefinitionHistoryTable::pill().
-     */
-    private static function pill(string $text, string $color, string $extraClasses = ''): string
-    {
-        $colors = match ($color) {
-            'success' => 'fi-color-success bg-success-50 text-success-600 ring-success-600/10 dark:bg-success-400/10 dark:text-success-400 dark:ring-success-400/20',
-            'danger' => 'fi-color-danger bg-danger-50 text-danger-600 ring-danger-600/10 dark:bg-danger-400/10 dark:text-danger-400 dark:ring-danger-400/20',
-            'warning' => 'fi-color-warning bg-warning-50 text-warning-600 ring-warning-600/10 dark:bg-warning-400/10 dark:text-warning-400 dark:ring-warning-400/20',
-            'primary' => 'fi-color-primary bg-primary-50 text-primary-600 ring-primary-600/10 dark:bg-primary-400/10 dark:text-primary-400 dark:ring-primary-400/20',
-            default => 'fi-color-gray bg-gray-50 text-gray-600 ring-gray-600/10 dark:bg-gray-400/10 dark:text-gray-400 dark:ring-gray-400/20',
-        };
-
-        $classes = 'fi-badge fi-size-sm inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ' . $colors;
-        if ($extraClasses !== '') {
-            $classes .= ' ' . $extraClasses;
-        }
-
-        return '<span class="' . $classes . '">' . e($text) . '</span>';
     }
 }

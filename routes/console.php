@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 use App\Console\Commands\SendAccessTokenExpirationNotificationsCommand;
 use Illuminate\Database\Console\PruneCommand;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Schedule;
 use Laravel\Telescope\Console\PruneCommand as TelescopePruneCommand;
 use Livewire\Features\SupportConsoleCommands\Commands\S3CleanupCommand as CleanTemporaryS3FilesCommand;
 use Spatie\Health\Commands\DispatchQueueCheckJobsCommand;
 use Spatie\Health\Commands\RunHealthChecksCommand;
+use Spatie\Health\Commands\ScheduleCheckHeartbeatCommand;
 
 /*
 |--------------------------------------------------------------------------|
@@ -97,5 +99,20 @@ if (config('api.expiration_notifications.enabled')) {
 | to handle time-sensitive data or events.
 */
 
-Schedule::command(DispatchQueueCheckJobsCommand::class)->everyMinute();
-Schedule::command(RunHealthChecksCommand::class)->everyMinute();
+// ScheduleCheckHeartbeatCommand writes a single cache entry — no DB or queue
+// traffic — so it runs in every environment. Without it, Spatie's ScheduleCheck
+// reports "the schedule did not run yet" indefinitely.
+Schedule::command(ScheduleCheckHeartbeatCommand::class)->everyMinute();
+
+if (App::isProduction()) {
+    // The other two health commands touch infrastructure on every tick and have
+    // no consumer in non-prod. Run `php artisan health:check` on demand in
+    // local/dev when you need a snapshot.
+    //
+    // Queue heartbeat runs every 5 min (QueueCheck staleness threshold is 15 min
+    // in HealthServiceProvider so there's no flapping). RunHealthChecksCommand
+    // ticks every minute so individual checks decide their own cadence via
+    // ->everyMinute() / ->everyFiveMinutes() etc. on the Check instance.
+    Schedule::command(DispatchQueueCheckJobsCommand::class)->everyFiveMinutes();
+    Schedule::command(RunHealthChecksCommand::class)->everyMinute();
+}

@@ -12,7 +12,15 @@ declare global {
     }
 }
 
-type AuditValues = Record<string, unknown> | null | undefined;
+type JsonPrimitive = string | number | boolean | null;
+
+interface JsonObject {
+    [key: string]: JsonValue;
+}
+
+type JsonValue = JsonPrimitive | JsonObject | JsonValue[];
+
+type AuditValues = JsonValue | null;
 
 function getFilamentTheme(): Exclude<ThemeTypes, "system"> {
     return document.documentElement.classList.contains("dark")

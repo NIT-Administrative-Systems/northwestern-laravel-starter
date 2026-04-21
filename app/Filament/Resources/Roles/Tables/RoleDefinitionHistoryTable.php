@@ -6,22 +6,24 @@ namespace App\Filament\Resources\Roles\Tables;
 
 use App\Domains\Auth\Models\RoleType;
 use App\Domains\User\Models\Audit;
-use App\Filament\Resources\Users\UserResource;
-use Carbon\Carbon;
-use Filament\Forms\Components\DatePicker;
+use App\Domains\User\Models\Concerns\AuditsPermissions;
+use App\Filament\Support\Filters\DateRangeFilter;
+use App\Filament\Support\Formatting\BadgePillRenderer;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\Layout\Panel;
 use Filament\Tables\Columns\Layout\Split;
 use Filament\Tables\Columns\Layout\View;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
-use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 
+/**
+ * @phpstan-import-type PermissionData from AuditsPermissions
+ */
 class RoleDefinitionHistoryTable
 {
     public static function configure(Table $table): Table
@@ -77,7 +79,7 @@ class RoleDefinitionHistoryTable
                         ->color(fn (Audit $record) => $record->impersonator ? 'warning' : null)
                         ->url(
                             fn (Audit $record) => $record->user
-                            ? UserResource::getUrl('view', ['record' => $record->user])
+                            ? route('filament.administration.resources.users.view', ['record' => $record->user])
                             : null
                         )
                         ->grow(false)
@@ -115,46 +117,15 @@ class RoleDefinitionHistoryTable
                     ->searchable()
                     ->preload(),
 
-                Filter::make('created_at_range')
-                    ->label('Date Range')
-                    ->columnSpan(2)
-                    ->columns(2)
-                    ->schema([
-                        DatePicker::make('from')
-                            ->label('From')
-                            ->native(false)
-                            ->prefixIcon(Heroicon::Calendar)
-                            ->closeOnDateSelection(),
-                        DatePicker::make('to')
-                            ->label('To')
-                            ->native(false)
-                            ->prefixIcon(Heroicon::Calendar)
-                            ->closeOnDateSelection()
-                            ->minDate(fn (callable $get) => $get('from'))
-                            ->maxDate(Carbon::today()),
-                    ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        return $query
-                            ->when(
-                                filled($data['from'] ?? null),
-                                fn (Builder $q) => $q->where('created_at', '>=', \Illuminate\Support\Carbon::parse($data['from'])->startOfDay())
-                            )
-                            ->when(
-                                filled($data['to'] ?? null),
-                                fn (Builder $q) => $q->where('created_at', '<=', \Illuminate\Support\Carbon::parse($data['to'])->endOfDay())
-                            );
-                    })
-                    ->indicateUsing(function (array $data): array {
-                        $indicators = [];
-                        if (filled($data['from'] ?? null)) {
-                            $indicators[] = 'From: ' . \Illuminate\Support\Carbon::parse($data['from'])->toDateString();
-                        }
-                        if (filled($data['to'] ?? null)) {
-                            $indicators[] = 'To: ' . \Illuminate\Support\Carbon::parse($data['to'])->toDateString();
-                        }
-
-                        return $indicators;
-                    }),
+                resolve(DateRangeFilter::class)->make(
+                    name: 'created_at_range',
+                    label: 'Date Range',
+                    column: 'created_at',
+                    mode: DateRangeFilter::ModeDateTime,
+                    icon: Heroicon::Calendar,
+                    limitUntilToToday: true,
+                )
+                    ->columnSpan(2),
             ], layout: FiltersLayout::AboveContent)
             ->filtersFormColumns(3)
             ->emptyStateHeading('No definition history yet')
@@ -168,9 +139,9 @@ class RoleDefinitionHistoryTable
     public static function summarizeChanges(Audit $audit): HtmlString
     {
         $html = match ($audit->event) {
-            'created' => self::pill('Role created', 'success'),
-            'deleted' => self::pill('Role deleted', 'danger'),
-            'restored' => self::pill('Role restored', 'success'),
+            'created' => resolve(BadgePillRenderer::class)->render('Role created', 'success'),
+            'deleted' => resolve(BadgePillRenderer::class)->render('Role deleted', 'danger'),
+            'restored' => resolve(BadgePillRenderer::class)->render('Role restored', 'success'),
             'updated' => self::summarizeAttributeChanges($audit),
             'permissions_modified' => self::summarizePermissionChanges($audit),
             default => '<span class="text-sm text-gray-500">No details</span>',
@@ -232,9 +203,9 @@ class RoleDefinitionHistoryTable
      */
     private static function summarizePermissionChanges(Audit $audit): string
     {
-        /** @var list<array{name: string, label: string}> $oldPermissionData */
+        /** @var list<PermissionData> $oldPermissionData */
         $oldPermissionData = $audit->old_values['permissions'] ?? [];
-        /** @var list<array{name: string, label: string}> $newPermissionData */
+        /** @var list<PermissionData> $newPermissionData */
         $newPermissionData = $audit->new_values['permissions'] ?? [];
 
         $oldPermissions = collect($oldPermissionData);

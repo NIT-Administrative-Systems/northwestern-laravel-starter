@@ -29,12 +29,10 @@ class EnvironmentLockdownController extends Controller
 
     public function __invoke(Request $request): View|RedirectResponse
     {
-        // If the user has non-default roles, they shouldn't be here - redirect to home
         if ($request->user()->non_default_roles->isNotEmpty()) {
             return to_route('home');
         }
 
-        // Show lockdown page to users with only the "Northwestern User" role (or no roles)
         return view('platform.environment-lockdown');
     }
 }

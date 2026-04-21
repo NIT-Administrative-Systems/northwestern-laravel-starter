@@ -7,8 +7,6 @@ namespace App\Filament\Resources\UserLoginRecords\Tables;
 use App\Domains\User\Enums\UserSegment;
 use App\Domains\User\Models\UserLoginRecord;
 use App\Filament\Exports\UserLoginRecordExporter;
-use App\Filament\Resources\Users\RelationManagers\LoginRecordsRelationManager;
-use App\Filament\Resources\Users\UserResource;
 use Filament\Actions\Action;
 use Filament\Actions\ExportAction;
 use Filament\Actions\ViewAction;
@@ -21,10 +19,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 class UserLoginRecordsTable
 {
-    public static function configure(Table $table): Table
+    public static function configure(Table $table, bool $isRelationManager = false): Table
     {
-        $isRelationManager = $table->getLivewire() instanceof LoginRecordsRelationManager;
-
         return $table
             ->columns([
                 TextColumn::make('user.clerical_name')
@@ -33,13 +29,13 @@ class UserLoginRecordsTable
                         /** @phpstan-ignore-next-line  */
                         return $query->orWhereHas('user', fn (Builder $q) => $q->searchByName($search));
                     })
-                    ->hiddenOn(LoginRecordsRelationManager::class),
+                    ->hidden($isRelationManager),
                 TextColumn::make('user.username')
                     ->label('Username')
                     ->fontFamily(FontFamily::Mono)
                     ->sortable()
                     ->searchable()
-                    ->hiddenOn(LoginRecordsRelationManager::class),
+                    ->hidden($isRelationManager),
                 TextColumn::make('logged_in_at')
                     ->label('Logged In At')
                     ->since()
@@ -69,7 +65,7 @@ class UserLoginRecordsTable
                 SelectFilter::make('segment')
                     ->multiple()
                     ->options(UserSegment::class)
-                    ->hiddenOn(LoginRecordsRelationManager::class),
+                    ->hidden($isRelationManager),
             ])
             ->filtersTriggerAction(
                 fn (Action $action) => $action
@@ -79,7 +75,7 @@ class UserLoginRecordsTable
             ->recordActions([
                 ViewAction::make()
                     ->label('View User')
-                    ->url(fn (UserLoginRecord $record) => UserResource::getUrl('view', ['record' => $record->user]))
+                    ->url(fn (UserLoginRecord $record) => route('filament.administration.resources.users.view', ['record' => $record->user]))
                     ->hidden($isRelationManager),
             ])
             ->toolbarActions([
@@ -88,7 +84,7 @@ class UserLoginRecordsTable
                     ->icon(Heroicon::OutlinedArrowDownTray)
                     ->color('gray')
                     ->exporter(UserLoginRecordExporter::class)
-                    ->hidden(fn () => $table->getLivewire() instanceof LoginRecordsRelationManager),
+                    ->hidden($isRelationManager),
             ])
             ->emptyStateHeading('No login activity')
             ->emptyStateDescription('Login records will appear here as users authenticate.')

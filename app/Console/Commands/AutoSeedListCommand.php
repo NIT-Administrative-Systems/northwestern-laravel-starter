@@ -96,7 +96,6 @@ class AutoSeedListCommand extends Command
             return "<fg=yellow>{$dependencies[0]}</>";
         }
 
-        // Show first 2 and indicate if there are more
         $shown = array_slice($dependencies, 0, 2);
         $formatted = array_map(fn (string $dep) => "<fg=yellow>{$dep}</>", $shown);
 
@@ -196,7 +195,6 @@ class AutoSeedListCommand extends Command
     {
         $processedNodes = [];
 
-        // Define all nodes with labels
         foreach ($seeders as $seeder) {
             $nodeName = $this->toMermaidNodeName($seeder->getShortName());
 
@@ -210,7 +208,6 @@ class AutoSeedListCommand extends Command
             }
         }
 
-        // Define relationships
         foreach ($seeders as $seeder) {
             if ($seeder->hasDependencies()) {
                 $nodeName = $this->toMermaidNodeName($seeder->getShortName());

@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Audits\Schemas;
 
 use App\Domains\User\Models\Audit;
-use App\Filament\Resources\Audits\AuditResource;
-use App\Filament\Resources\Users\UserResource;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ViewEntry;
 use Filament\Schemas\Components\Grid;
@@ -98,7 +96,7 @@ class AuditInfolist
                                                 ? "{$r->user->full_name} ({$r->user->username})"
                                                 : ($r->user->username ?? '—'))
                                             ->icon(Heroicon::OutlinedUser)
-                                            ->url(fn (Audit $r) => $r->user ? UserResource::getUrl('view', ['record' => $r->user]) : null)
+                                            ->url(fn (Audit $r) => $r->user ? route('filament.administration.resources.users.view', ['record' => $r->user]) : null)
                                             ->openUrlInNewTab(),
 
                                         TextEntry::make('impersonator.username')
@@ -109,7 +107,7 @@ class AuditInfolist
                                                 : ($record->impersonator->username ?? '—'))
                                             ->icon(Heroicon::OutlinedUser)
                                             ->color('warning')
-                                            ->url(fn (Audit $record) => $record->impersonator ? UserResource::getUrl('view', ['record' => $record->impersonator]) : null)
+                                            ->url(fn (Audit $record) => $record->impersonator ? route('filament.administration.resources.users.view', ['record' => $record->impersonator]) : null)
                                             ->openUrlInNewTab(),
 
                                         TextEntry::make('url')
@@ -147,9 +145,7 @@ class AuditInfolist
                                             ->tooltip('Correlate this change with API request logs and other events using the same Trace ID')
                                             ->copyable()
                                             ->color('primary')
-                                            ->url(fn (Audit $record) => AuditResource::getUrl('index', [
-                                                'search' => $record->trace_id,
-                                            ]))
+                                            ->url(fn (Audit $record) => route('filament.administration.resources.audits.index', ['search' => $record->trace_id]))
                                             ->openUrlInNewTab(),
 
                                         TextEntry::make('tags')

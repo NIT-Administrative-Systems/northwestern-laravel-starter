@@ -5,16 +5,14 @@ declare(strict_types=1);
 namespace App\Filament\Resources\UserLoginRecords\Widgets;
 
 use App\Domains\User\Models\UserLoginRecord;
+use App\Filament\Resources\UserLoginRecords\Widgets\Concerns\TracksBroadcastDateRange;
 use Carbon\Carbon;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Collection;
-use Livewire\Attributes\On;
 
 class LoginTrendsChartWidget extends ChartWidget
 {
-    public ?string $startDate = null;
-
-    public ?string $endDate = null;
+    use TracksBroadcastDateRange;
 
     protected ?string $maxHeight = '300px';
 
@@ -32,23 +30,6 @@ class LoginTrendsChartWidget extends ChartWidget
         }
 
         return 'Login Trends';
-    }
-
-    public function mount(): void
-    {
-        $now = Carbon::now(auth()->user()->timezone);
-
-        $this->startDate = $now->copy()->subDays(29)->startOfDay()->utc()->toDateTimeString();
-        $this->endDate = $now->copy()->endOfDay()->utc()->toDateTimeString();
-    }
-
-    #[On(DateRangeFilterWidget::EVENT_DATE_RANGE_UPDATED)]
-    public function updateDateRange(string $startDate, string $endDate): void
-    {
-        $this->startDate = $startDate;
-        $this->endDate = $endDate;
-
-        $this->dispatch('$refresh');
     }
 
     protected function getData(): array
@@ -77,7 +58,7 @@ class LoginTrendsChartWidget extends ChartWidget
             $uniqueData = [];
 
             for ($hour = 0; $hour < 24; $hour++) {
-                // Format hour directly - the hour from DB is already in user's timezone
+                // Hour comes back already in the user's timezone, so format directly.
                 $dates[] = date('g A', (int) mktime($hour, 0));
                 $stats = $hourlyStats->get((string) $hour) ?? (object) [
                     'total_count' => 0,
