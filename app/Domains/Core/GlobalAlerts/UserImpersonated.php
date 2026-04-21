@@ -20,7 +20,7 @@ class UserImpersonated extends GlobalAlert
     {
         /** @var User $user */
         $user = auth()->user();
-        $username = $user->full_name ?? $user->username;
+        $username = e($user->full_name ?? $user->username);
 
         $leaveUrl = route('impersonate.leave');
         $leaveForm = <<<HTML
