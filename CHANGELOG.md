@@ -27,7 +27,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - Annotated `AutomaticallyOrderedScope` with `@implements Scope<Model>` to satisfy the now-generic `Illuminate\Database\Eloquent\Scope` interface in Laravel 13. Downstream custom scopes implementing `Scope` will need the same annotation to stay PHPStan-clean.
 - Updated Laravel version references in documentation from `12.x` to `13.x`.
 - Aligned the `User::fullName` accessor with the new generated-column expression (`trim(($first_name ?? '').' '.($last_name ?? ''))`) so PHP and SQL produce byte-identical values regardless of read path or database driver. The accessor prefers the stored column when it's loaded on the model and falls back to the computed value for unpersisted instances; `full_name` was dropped from `$appends` now that it's a real column.
-- Switched `Overview::getQueueStatus` from a direct `DB::table('jobs')->count()` (previously gated to `queue.default === 'database'`) to the driver-agnostic `Queue::size()` / `Queue::pendingJobs()` methods added in [Laravel 13.6](https://github.com/laravel/framework/pull/59511). Pending-job counts now work on Redis and Beanstalkd without a driver check, and the alert uses the `InspectedJob` payload to surface the top pending job classes instead of manually decoding JSON payloads.
 
 ### Fixed
 
