@@ -507,7 +507,7 @@ jobs:
       - name: 🪣 Create Minio Bucket
         run: |
           if [ ! -f ./mc ]; then
-            curl -o ./mc -# https://dl.min.io/client/mc/release/linux-amd64/mc
+            curl -Lo ./mc -# https://dl.min.io/client/mc/release/linux-amd64/mc
           fi
           chmod +x ./mc
           ./mc alias set gha http://localhost:9000 s3admin s3secret
