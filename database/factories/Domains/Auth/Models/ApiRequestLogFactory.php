@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Database\Factories\Domains\Auth\Models;
 
 use App\Domains\Auth\Models\ApiRequestLog;
-use App\Domains\Core\Enums\ApiRequestFailure;
 use App\Domains\User\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Arr;
+use Northwestern\SysDev\Chassis\Enums\ApiRequestFailure;
 
 /**
  * @extends Factory<ApiRequestLog>

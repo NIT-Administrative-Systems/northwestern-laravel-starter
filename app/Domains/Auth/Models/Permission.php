@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Domains\Auth\Models;
 
 use App\Domains\Auth\Enums\PermissionScope;
-use App\Domains\Core\Models\Concerns\Auditable as AuditableConcern;
+use Northwestern\SysDev\Chassis\Models\Concerns\Auditable as AuditableConcern;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\Permission\Models\Permission as SpatiePermission;
 

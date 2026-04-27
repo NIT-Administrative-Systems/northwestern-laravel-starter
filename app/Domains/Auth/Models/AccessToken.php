@@ -9,18 +9,21 @@ use App\Domains\Core\Models\BaseModel;
 use App\Domains\User\Models\User;
 use Carbon\Carbon;
 use Database\Factories\Domains\Auth\Models\AccessTokenFactory;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Schema;
+use Northwestern\SysDev\Chassis\Contracts\AccessTokenContract;
 use SensitiveParameter;
 
 /**
  * @property list<string> $allowed_ips List of IP addresses from which this token can be used.
  */
-class AccessToken extends BaseModel
+class AccessToken extends BaseModel implements AccessTokenContract
 {
     /** @use HasFactory<AccessTokenFactory> */
     use HasFactory;
@@ -152,5 +155,56 @@ class AccessToken extends BaseModel
         }
 
         return hash_hmac('sha256', $token, $key);
+    }
+
+    public function getTokenHash(): string
+    {
+        return (string) $this->token_hash;
+    }
+
+    public function isActive(): bool
+    {
+        return $this->token_hash !== null
+            && $this->revoked_at === null
+            && ! $this->isExpired();
+    }
+
+    public function isExpired(): bool
+    {
+        return $this->expires_at?->isPast() ?? false;
+    }
+
+    public function getAllowedIps(): ?array
+    {
+        return $this->allowed_ips === [] ? null : $this->allowed_ips;
+    }
+
+    public function getUserId(): int
+    {
+        return (int) $this->user_id;
+    }
+
+    public function getTokenId(): int
+    {
+        return (int) $this->getKey();
+    }
+
+    public function recordUsage(?string $ipAddress): void
+    {
+        $extra = ['last_used_at' => now()];
+
+        if ($ipAddress !== null && Schema::hasColumn($this->getTable(), 'last_ip_used')) {
+            $extra['last_ip_used'] = $ipAddress;
+        }
+
+        $this->increment(
+            column: 'usage_count',
+            extra: $extra
+        );
+    }
+
+    public function getUser(): ?Authenticatable
+    {
+        return $this->user;
     }
 }

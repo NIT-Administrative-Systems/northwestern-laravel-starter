@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
-use App\Domains\Core\Services\DateTimeFormatter;
-use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 
 /**
@@ -23,7 +21,5 @@ class ViewServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $dateTimeFormatter = resolve(DateTimeFormatter::class);
-        Blade::directive('datetime', $dateTimeFormatter->buildDatetimeDirective());
     }
 }

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Filament\Resources\ApiRequestLogs\Tables;
 
 use App\Domains\Auth\Models\ApiRequestLog;
-use App\Domains\Core\Enums\ApiRequestFailure;
 use App\Filament\Exports\ApiRequestLogExporter;
 use Carbon\Carbon;
 use Filament\Actions\Action;
@@ -20,6 +19,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Number;
+use Northwestern\SysDev\Chassis\Enums\ApiRequestFailure;
 
 class ApiRequestLogsTable
 {

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Domains\Core\Services\ConfigValidation;
 
-use App\Domains\Core\Attributes\StarterValidator;
-use App\Domains\Core\Contracts\ConfigValidator;
 use Illuminate\Support\Collection;
+use Northwestern\SysDev\Chassis\Attributes\ValidatesConfig;
+use Northwestern\SysDev\Chassis\Contracts\ConfigValidator;
 
 /**
  * Validates SSO credentials based on the active authentication strategy.
@@ -15,7 +15,7 @@ use Illuminate\Support\Collection;
  * Online Passport (agentless WebSSO via ForgeRock). This validator detects
  * which provider is active and checks the appropriate credentials.
  */
-#[StarterValidator(description: 'SSO Authentication')]
+#[ValidatesConfig(description: 'SSO Authentication')]
 class SSOValidator implements ConfigValidator
 {
     /** @var Collection<int, string> */

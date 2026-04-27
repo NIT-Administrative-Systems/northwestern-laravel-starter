@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Domains\Core\Services\ConfigValidation;
 
-use App\Domains\Core\Attributes\StarterValidator;
-use App\Domains\Core\Contracts\ConfigValidator;
+use Northwestern\SysDev\Chassis\Attributes\ValidatesConfig;
+use Northwestern\SysDev\Chassis\Contracts\ConfigValidator;
 
 /**
  * Validates that the application key is set and properly formatted.
  */
-#[StarterValidator(description: 'Application Key')]
+#[ValidatesConfig(description: 'Application Key')]
 class AppKeyValidator implements ConfigValidator
 {
     protected ?string $errorReason = null;

@@ -8,8 +8,6 @@ use App\Domains\Auth\Actions\Local\FixedNumericOneTimeCodeGenerator;
 use App\Domains\Auth\Actions\Local\RandomNumericOneTimeCodeGenerator;
 use App\Domains\Auth\Contracts\OneTimeCodeGenerator;
 use App\Domains\Auth\Enums\SystemPermission;
-use App\Domains\Core\Database\ConfigurableDbDumperFactory;
-use App\Domains\Core\Exceptions\ProblemDetailsRenderer;
 use App\Domains\User\Models\User;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Foundation\Application;
@@ -23,6 +21,8 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
+use Northwestern\SysDev\Chassis\Database\ConfigurableDbDumperFactory;
+use Northwestern\SysDev\Chassis\Exceptions\ProblemDetailsRenderer;
 use Northwestern\SysDev\UI\Providers\NorthwesternUiServiceProvider;
 use Spatie\DbSnapshots\DbDumperFactory;
 

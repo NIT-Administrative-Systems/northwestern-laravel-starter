@@ -6,8 +6,8 @@ use App\Domains\Auth\Http\Controllers\Api\V1\AccessTokenApiController;
 use App\Domains\Auth\Http\Middleware\AuthenticatesAccessTokens;
 use App\Domains\Auth\Http\Middleware\LogsApiRequests;
 use App\Domains\User\Http\Controllers\Api\V1\UserApiController;
-use App\Http\Middleware\EnsureApiEnabled;
 use Illuminate\Support\Facades\Route;
+use Northwestern\SysDev\Chassis\Http\Middleware\EnsureFeatureEnabled;
 use Spatie\Health\Http\Controllers\HealthCheckJsonResultsController;
 use Spatie\Health\Http\Middleware\RequiresSecretToken;
 
@@ -19,7 +19,7 @@ use Spatie\Health\Http\Middleware\RequiresSecretToken;
 | accessible resources.
 */
 
-Route::middleware([EnsureApiEnabled::class])->group(function () {
+Route::middleware([EnsureFeatureEnabled::class . ':api.enabled'])->group(function () {
     //
 });
 
@@ -31,7 +31,7 @@ Route::middleware([EnsureApiEnabled::class])->group(function () {
 | through the API request logging middleware.
 */
 
-Route::middleware([EnsureApiEnabled::class, LogsApiRequests::class, AuthenticatesAccessTokens::class])->group(function () {
+Route::middleware([EnsureFeatureEnabled::class . ':api.enabled', LogsApiRequests::class, AuthenticatesAccessTokens::class])->group(function () {
     Route::prefix('v1')->group(function () {
         Route::get('me', [UserApiController::class, 'me']);
         Route::get('me/tokens', [AccessTokenApiController::class, 'index']);

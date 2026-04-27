@@ -4,48 +4,23 @@ declare(strict_types=1);
 
 namespace App\Domains\Core\Exceptions;
 
-use App\Domains\User\Models\User;
-use Sentry\State\Scope;
-use Throwable;
-
-use function Sentry\configureScope;
+use Illuminate\Contracts\Auth\Authenticatable;
+use Northwestern\SysDev\Chassis\Exceptions\SentryExceptionHandler as BaseSentryExceptionHandler;
 
 /**
  * Handles reporting exceptions to Sentry with enriched user context.
  */
-class SentryExceptionHandler
+class SentryExceptionHandler extends BaseSentryExceptionHandler
 {
-    public function report(Throwable $exception): void
+    protected function userContext(Authenticatable $user): array
     {
-        if (! app()->bound('sentry')) {
-            return;
-        }
-
-        $this->addSentryContext();
-        resolve('sentry')->captureException($exception);
-    }
-
-    private function addSentryContext(): void
-    {
-        if (! app()->bound('app') || ! auth()->hasResolvedGuards()) {
-            return;
-        }
-
-        if (! auth()->check()) {
-            return;
-        }
-
-        configureScope(function (Scope $scope) {
-            /** @var User $user */
-            $user = auth()->user();
-
-            $scope->setUser([
-                'id' => $user->id,
-                'username' => $user->username,
-                'email' => $user->email,
-                'primary_affiliation' => $user->primary_affiliation,
-                'auth_type' => $user->auth_type,
-            ]);
-        });
+        /** @var \App\Domains\User\Models\User $user */
+        return [
+            'id' => $user->id,
+            'username' => $user->username,
+            'email' => $user->email,
+            'primary_affiliation' => $user->primary_affiliation,
+            'auth_type' => $user->auth_type,
+        ];
     }
 }

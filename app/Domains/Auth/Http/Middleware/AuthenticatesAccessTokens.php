@@ -6,124 +6,28 @@ namespace App\Domains\Auth\Http\Middleware;
 
 use App\Domains\Auth\Enums\AuthType;
 use App\Domains\Auth\Models\AccessToken;
-use App\Domains\Core\Enums\ApiRequestFailure;
-use App\Domains\Core\Exceptions\MissingRequestIpForRestrictedTokenException;
-use App\Domains\Core\ValueObjects\ApiRequestContext;
-use Closure;
-use Illuminate\Auth\AuthenticationException;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Context;
-use Illuminate\Support\Str;
-use Symfony\Component\HttpFoundation\IpUtils;
-use Symfony\Component\HttpFoundation\Response;
+use Northwestern\SysDev\Chassis\Contracts\AccessTokenContract;
+use Northwestern\SysDev\Chassis\Exceptions\MissingRequestIpForRestrictedTokenException;
+use Northwestern\SysDev\Chassis\Http\Middleware\AuthenticatesAccessTokens as BaseAuthenticatesAccessTokens;
 
-/**
- * Authenticates API requests using Bearer token authentication with {@see AccessToken} records.
- *
- * This middleware:
- * 1. Validates Bearer token from Authorization header
- * 2. Checks for active Access Tokens and associated API users
- * 3. Enforces IP-based access control if configured on the token
- * 4. Updates the {@see AccessToken::$last_used_at} timestamp and usage count
- * 5. Authenticates the user for the current request
- */
-class AuthenticatesAccessTokens
+class AuthenticatesAccessTokens extends BaseAuthenticatesAccessTokens
 {
-    /**
-     * Authenticates API requests using Bearer tokens with IP-based access control.
-     *
-     * This method validates Bearer tokens against stored HMAC-SHA256 hashes and enforces
-     * IP allowlists when configured. Failed authentication attempts are logged with
-     * specific failure reasons for security monitoring.
-     *
-     * @param  Request  $request  The incoming HTTP request
-     * @param  Closure(Request): (Response)  $next  The next middleware in the pipeline
-     *
-     * @throws AuthenticationException When authentication fails for any reason
-     *
-     * @see ApiRequestFailure for the specific failure reasons tracked in logs
-     * @see AccessToken for token management
-     */
-    public function handle(Request $request, Closure $next): Response
+    protected function findActiveToken(string $tokenHash): ?AccessTokenContract
     {
-        Context::add(ApiRequestContext::TRACE_ID, Str::uuid()->toString());
-
-        $authHeader = (string) $request->header('Authorization', '');
-
-        if (! str_starts_with($authHeader, 'Bearer ')) {
-            $this->fail(ApiRequestFailure::InvalidHeaderFormat);
-        }
-
-        $rawToken = trim(Str::after($authHeader, 'Bearer '));
-
-        if (blank($rawToken)) {
-            $this->fail(ApiRequestFailure::MissingCredentials);
-        }
-
-        $tokenHash = AccessToken::hashFromPlain($rawToken);
-        unset($rawToken);
-
-        $accessToken = AccessToken::query()
+        return AccessToken::query()
             ->withWhereHas('user', fn ($query) => $query->where('auth_type', AuthType::API))
             ->where('token_hash', $tokenHash)
             ->active()
             ->first();
-
-        if (! $accessToken || ! $accessToken->user) {
-            $this->fail(ApiRequestFailure::TokenInvalidOrExpired);
-        }
-
-        $user = $accessToken->user;
-
-        Context::add(ApiRequestContext::USER_ID, $user->getKey());
-        Context::add(ApiRequestContext::TOKEN_ID, $accessToken->getKey());
-
-        if (! $this->isIpAllowed($request->ip(), $accessToken->allowed_ips)) {
-            $this->fail(ApiRequestFailure::IpDenied);
-        }
-
-        AccessToken::withoutAuditing(fn () => $accessToken->increment(
-            column: 'usage_count',
-            extra: ['last_used_at' => now(), 'last_ip_used' => $request->ip()]
-        ));
-
-        Auth::onceUsingId($user->getKey());
-
-        return $next($request);
     }
 
-    /**
-     * Check if the request IP is allowed by the token's IP allowlist.
-     *
-     * Supports both individual IP addresses and CIDR notation for IP ranges.
-     * If no IP restrictions are configured on the token, all IPs are allowed.
-     *
-     * @param  string|null  $requestIp  The IP address of the incoming request
-     * @param  array<string>|null  $allowedIps  List of allowed IPs or CIDR ranges
-     * @return bool True if the IP is allowed, false otherwise
-     */
-    private function isIpAllowed(?string $requestIp, ?array $allowedIps): bool
+    protected function hashToken(#[\SensitiveParameter] string $plainToken): string
     {
-        // No IP restrictions configured
-        if (blank($allowedIps)) {
-            return true;
-        }
-
-        // Missing request IP (e.g. proxy stripped it, or internal dispatch) — cannot satisfy restrictions.
-        if (blank($requestIp)) {
-            report(new MissingRequestIpForRestrictedTokenException(array_values($allowedIps)));
-
-            return false;
-        }
-
-        return IpUtils::checkIp($requestIp, $allowedIps);
+        return AccessToken::hashFromPlain($plainToken);
     }
 
-    private function fail(ApiRequestFailure $reason): never
+    protected function reportMissingIp(array $allowedIps): void
     {
-        Context::add(ApiRequestContext::FAILURE_REASON, $reason->value);
-
-        throw new AuthenticationException();
+        report(new MissingRequestIpForRestrictedTokenException(array_values($allowedIps)));
     }
 }

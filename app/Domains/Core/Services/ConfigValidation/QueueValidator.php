@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace App\Domains\Core\Services\ConfigValidation;
 
-use App\Domains\Core\Attributes\StarterValidator;
-use App\Domains\Core\Contracts\ConfigValidator;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Redis;
+use Northwestern\SysDev\Chassis\Attributes\ValidatesConfig;
+use Northwestern\SysDev\Chassis\Contracts\ConfigValidator;
 use Throwable;
 
 /**
  * Validates the queue connection is configured and accessible.
  */
-#[StarterValidator(description: 'Queue Connection')]
+#[ValidatesConfig(description: 'Queue Connection')]
 class QueueValidator implements ConfigValidator
 {
     public function shouldRun(): bool

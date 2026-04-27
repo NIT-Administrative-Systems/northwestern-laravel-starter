@@ -7,7 +7,6 @@ namespace App\Domains\Auth\Http\Controllers\Api\V1;
 use App\Domains\Auth\Actions\Api\IssueAccessToken;
 use App\Domains\Auth\Http\Requests\Api\V1\StoreAccessTokenRequest;
 use App\Domains\Auth\Http\Resources\Api\V1\AccessTokenResource;
-use App\Domains\Core\ValueObjects\ApiRequestContext;
 use App\Http\Controllers\Api\V1\ApiController;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -16,6 +15,7 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Validation\ValidationException;
+use Northwestern\SysDev\Chassis\ValueObjects\ApiRequestContext;
 use OpenApi\Attributes as OA;
 
 #[OA\Tag(

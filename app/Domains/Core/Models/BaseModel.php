@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Domains\Core\Models;
 
-use App\Domains\Core\Attributes\AutomaticallyOrdered;
-use App\Domains\Core\Models\Concerns\Auditable as AuditableConcern;
-use App\Domains\Core\Models\Scopes\AutomaticallyOrderedScope;
 use Illuminate\Database\Eloquent\Model;
+use Northwestern\SysDev\Chassis\Attributes\AutomaticallyOrdered;
+use Northwestern\SysDev\Chassis\Models\Concerns\Auditable as AuditableConcern;
+use Northwestern\SysDev\Chassis\Models\Scopes\AutomaticallyOrderedScope;
 use OwenIt\Auditing\Contracts\Auditable;
 use ReflectionClass;
 

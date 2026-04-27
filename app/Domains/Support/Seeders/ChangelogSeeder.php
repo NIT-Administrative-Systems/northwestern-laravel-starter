@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Domains\Support\Seeders;
 
-use App\Domains\Core\Attributes\AutoSeed;
-use App\Domains\Core\Seeders\IdempotentSeeder;
 use App\Domains\Support\Models\Changelog;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
@@ -18,6 +16,8 @@ use League\CommonMark\Extension\CommonMark\CommonMarkCoreExtension;
 use League\CommonMark\Extension\FrontMatter\FrontMatterExtension;
 use League\CommonMark\Extension\FrontMatter\Output\RenderedContentWithFrontMatter;
 use League\CommonMark\MarkdownConverter;
+use Northwestern\SysDev\Chassis\Attributes\AutoSeed;
+use Northwestern\SysDev\Chassis\Seeding\IdempotentSeeder;
 use Symfony\Component\Finder\Finder;
 
 /**

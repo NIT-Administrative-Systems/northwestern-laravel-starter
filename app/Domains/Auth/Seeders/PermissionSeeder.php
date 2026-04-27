@@ -6,11 +6,11 @@ namespace App\Domains\Auth\Seeders;
 
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\Permission;
-use App\Domains\Core\Attributes\AutoSeed;
-use App\Domains\Core\Contracts\IdempotentSeederInterface;
-use App\Domains\Core\Seeders\Concerns\AuditsSeederChanges;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Arr;
+use Northwestern\SysDev\Chassis\Attributes\AutoSeed;
+use Northwestern\SysDev\Chassis\Contracts\IdempotentSeederInterface;
+use Northwestern\SysDev\Chassis\Seeding\Concerns\AuditsSeederChanges;
 use Spatie\Permission\Exceptions\PermissionAlreadyExists;
 
 #[AutoSeed]

@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
-use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Northwestern\SysDev\Chassis\Http\Middleware\EnvironmentLockdown as BaseEnvironmentLockdown;
 
 /**
  * Restricts application access to users with assigned roles beyond the default Northwestern User role.
@@ -23,42 +22,27 @@ use Symfony\Component\HttpFoundation\Response;
  * - User is impersonating another user
  * - User has at least one role besides Northwestern User
  * - Request is to an authentication or lockdown route
- *
- * @see \App\Http\Controllers\Platform\EnvironmentLockdownController
  */
-class EnvironmentLockdown
+class EnvironmentLockdown extends BaseEnvironmentLockdown
 {
-    /**
-     * @param  Closure(Request): Response  $next
-     */
-    public function handle(Request $request, Closure $next): Response
+    protected function isEnabled(): bool
     {
-        // Skip lockdown if the feature is disabled
-        if (! config('platform.lockdown.enabled')) {
-            return $next($request);
-        }
+        return (bool) config('platform.lockdown.enabled');
+    }
 
-        // Allow guests through so they can log in
-        if (! $request->user()) {
-            return $next($request);
-        }
+    protected function isAuthorized(Request $request): bool
+    {
+        return $request->user()->isImpersonated()
+            || $request->user()->non_default_roles->isNotEmpty();
+    }
 
-        // Allow impersonators through (they already have access)
-        if ($request->user()->isImpersonated()) {
-            return $next($request);
-        }
+    protected function redirectRoute(): string
+    {
+        return 'platform.environment-lockdown';
+    }
 
-        // Allow users with non-default roles through
-        if ($request->user()->non_default_roles->isNotEmpty()) {
-            return $next($request);
-        }
-
-        // Allow access to authentication and lockdown routes
-        if ($request->routeIs(config('platform.lockdown.exempted_routes', []))) {
-            return $next($request);
-        }
-
-        // Redirect users without roles to lockdown page
-        return redirect()->route('platform.environment-lockdown');
+    protected function exemptedRoutePatterns(): array
+    {
+        return config('platform.lockdown.exempted_routes', []);
     }
 }

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Domains\Auth\ValueObjects\LoginCodeSession;
-use App\Http\Responses\ProblemDetails;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Http\Request;
@@ -13,6 +12,7 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\ServiceProvider;
+use Northwestern\SysDev\Chassis\Http\Responses\ProblemDetails;
 
 class RateLimitingServiceProvider extends ServiceProvider
 {

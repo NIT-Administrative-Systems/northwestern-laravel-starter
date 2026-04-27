@@ -6,7 +6,6 @@ namespace App\Filament\Resources\AccessTokens\Actions;
 
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\AccessToken;
-use App\Domains\Core\Rules\ValidIpOrCidrRule;
 use App\Filament\Resources\AccessTokens\Schemas\AccessTokenSchemas;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TagsInput;
@@ -14,6 +13,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Support\Enums\Size;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Str;
+use Northwestern\SysDev\Chassis\Rules\ValidIpOrCidrRule;
 
 class EditAccessTokenIpRestrictionsAction extends Action
 {
