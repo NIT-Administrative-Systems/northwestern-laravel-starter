@@ -107,8 +107,8 @@
         "format:frontend": "pnpm run format",
         "analyse:php": "vendor/bin/phpstan analyse --memory-limit=2G",
         "test:update-shards": "@php -d memory_limit=-1 ./vendor/bin/pest --update-shards --colors=always",
-        "openapi:generate": "@php ./vendor/bin/openapi app/",
-        "openapi:generate:v1": "@php ./vendor/bin/openapi app/ --exclude Api/V2 --output docs/schemas/api-schema.yaml",
+        "openapi:generate": "@php ./vendor/bin/openapi app/ vendor/northwestern-sysdev/chassis/src/",
+        "openapi:generate:v1": "@php ./vendor/bin/openapi app/ vendor/northwestern-sysdev/chassis/src/ --exclude Api/V2 --output docs/schemas/api-schema.yaml",
         "ide-helper:generate": [
             "@php artisan ide-helper:generate",
             "@php artisan ide-helper:meta",
