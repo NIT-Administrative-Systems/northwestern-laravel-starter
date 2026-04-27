@@ -679,58 +679,6 @@ components:
               page: null
               active: false
       type: object
-    ProblemDetails:
-      description: 'Standard RFC 9457 problem details envelope.'
-      required:
-        - type
-        - title
-        - status
-        - instance
-      properties:
-        type:
-          description: 'RFC 9457 compliant problem details response builder.'
-          type: string
-          format: uri
-          example: 'about:blank'
-        title:
-          type: string
-          example: Unauthorized
-        status:
-          type: integer
-          example: 401
-        detail:
-          type: string
-          example: 'Authentication failed'
-          nullable: true
-        instance:
-          type: string
-          format: uri-reference
-          example: /api/v1/me
-        trace_id:
-          description: 'Unique identifier for the API request (if available).'
-          type: string
-          example: b4f5aa7a-1470-4d92-8d3c-98e7c7de9f5f
-          nullable: true
-      type: object
-    ValidationProblemDetails:
-      allOf:
-        -
-          $ref: '#/components/schemas/ProblemDetails'
-        -
-          properties:
-            errors:
-              description: 'Validation errors keyed by input field.'
-              type: object
-              example:
-                name:
-                  - 'The name field is required.'
-                expires_at:
-                  - 'The expires at must be at least 24 hours from now.'
-              additionalProperties:
-                type: array
-                items:
-                  type: string
-          type: object
   securitySchemes:
     bearerToken:
       type: http
