@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Domains\Auth\Models;
 
 use App\Domains\Auth\Enums\RoleTypeEnum;
-use App\Domains\Core\Models\Concerns\Auditable as AuditableConcern;
 use App\Domains\User\Models\Concerns\AuditsPermissions;
 use App\Domains\User\Models\User;
 use Database\Factories\Domains\Auth\Models\RoleFactory;
@@ -15,6 +14,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Northwestern\SysDev\Chassis\Models\Concerns\Auditable as AuditableConcern;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\Permission\Models\Role as SpatieRole;
 

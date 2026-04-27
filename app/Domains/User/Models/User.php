@@ -11,7 +11,6 @@ use App\Domains\Auth\Models\AccessToken;
 use App\Domains\Auth\Models\ApiRequestLog;
 use App\Domains\Auth\Models\LoginChallenge;
 use App\Domains\Auth\Models\Role;
-use App\Domains\Core\Models\Concerns\Auditable as AuditableConcern;
 use App\Domains\Support\Models\SupportTicket;
 use App\Domains\User\Enums\Affiliation;
 use App\Domains\User\Models\Concerns\AuditsRoles;
@@ -35,6 +34,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Northwestern\SysDev\Chassis\Models\Concerns\Auditable as AuditableConcern;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\Permission\Traits\HasRoles;
 

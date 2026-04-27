@@ -6,8 +6,8 @@ namespace App\Domains\Auth\Seeders;
 
 use App\Domains\Auth\Enums\RoleTypeEnum;
 use App\Domains\Auth\Models\RoleType;
-use App\Domains\Core\Attributes\AutoSeed;
-use App\Domains\Core\Seeders\IdempotentSeeder;
+use Northwestern\SysDev\Chassis\Attributes\AutoSeed;
+use Northwestern\SysDev\Chassis\Seeding\IdempotentSeeder;
 
 #[AutoSeed]
 class RoleTypeSeeder extends IdempotentSeeder

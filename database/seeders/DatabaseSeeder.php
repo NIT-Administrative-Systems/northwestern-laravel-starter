@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Domains\Core\Attributes\AutoSeed;
-use App\Domains\Core\Services\IdempotentSeederResolver;
 use Illuminate\Database\Seeder;
+use Northwestern\SysDev\Chassis\Attributes\AutoSeed;
+use Northwestern\SysDev\Chassis\Seeding\IdempotentSeederResolver;
 
 /**
  * Production-safe database seeder that runs across all environments.

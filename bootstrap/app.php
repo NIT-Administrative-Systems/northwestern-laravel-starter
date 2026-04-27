@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Domains\Core\Exceptions\ProblemDetailsRenderer;
 use App\Domains\Core\Exceptions\SentryExceptionHandler;
 use App\Http\Middleware\EnvironmentLockdown;
 use Illuminate\Foundation\Application;
@@ -10,6 +9,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Northwestern\SysDev\Chassis\Exceptions\ProblemDetailsRenderer;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(

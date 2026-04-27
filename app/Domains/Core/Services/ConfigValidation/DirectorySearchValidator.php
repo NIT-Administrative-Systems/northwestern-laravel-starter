@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domains\Core\Services\ConfigValidation;
 
-use App\Domains\Core\Attributes\StarterValidator;
-use App\Domains\Core\Contracts\ConfigValidator;
+use Northwestern\SysDev\Chassis\Attributes\ValidatesConfig;
+use Northwestern\SysDev\Chassis\Contracts\ConfigValidator;
 
 /**
  * Validates that the Directory Search API key is configured.
@@ -13,7 +13,7 @@ use App\Domains\Core\Contracts\ConfigValidator;
  * The Directory Search API is required for user provisioning during
  * SSO login and for stakeholder seeding.
  */
-#[StarterValidator(description: 'Directory Search')]
+#[ValidatesConfig(description: 'Directory Search')]
 class DirectorySearchValidator implements ConfigValidator
 {
     public function shouldRun(): bool

@@ -6,14 +6,14 @@ namespace Tests\Feature\Domains\Auth\Http\Middleware;
 
 use App\Domains\Auth\Http\Middleware\AuthenticatesAccessTokens;
 use App\Domains\Auth\Models\AccessToken;
-use App\Domains\Core\Enums\ApiRequestFailure;
-use App\Domains\Core\ValueObjects\ApiRequestContext;
 use App\Domains\User\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
+use Northwestern\SysDev\Chassis\Enums\ApiRequestFailure;
+use Northwestern\SysDev\Chassis\ValueObjects\ApiRequestContext;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;

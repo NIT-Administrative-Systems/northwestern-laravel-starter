@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Domains\Core\Services\ConfigValidation;
 
-use App\Domains\Core\Attributes\StarterValidator;
-use App\Domains\Core\Contracts\ConfigValidator;
 use Illuminate\Support\Collection;
+use Northwestern\SysDev\Chassis\Attributes\ValidatesConfig;
+use Northwestern\SysDev\Chassis\Contracts\ConfigValidator;
 
 /**
  * Validates EventHub configuration when mock mode is disabled.
@@ -16,7 +16,7 @@ use Illuminate\Support\Collection;
  * When no EventHub credentials are configured at all, the validator
  * is skipped since EventHub is an optional integration.
  */
-#[StarterValidator(description: 'EventHub')]
+#[ValidatesConfig(description: 'EventHub')]
 class EventHubValidator implements ConfigValidator
 {
     /** @var Collection<int, string> */

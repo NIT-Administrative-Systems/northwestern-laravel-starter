@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Domains\Auth\Models;
 
-use App\Domains\Core\Enums\ApiRequestFailure;
 use App\Domains\User\Models\User;
 use Database\Factories\Domains\Auth\Models\ApiRequestLogFactory;
 use Illuminate\Database\Eloquent\Builder;
@@ -12,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Northwestern\SysDev\Chassis\Enums\ApiRequestFailure;
 
 class ApiRequestLog extends Model
 {

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domains\Auth\Http\Requests\Api\V1;
 
-use App\Domains\Core\Rules\ValidIpOrCidrRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Northwestern\SysDev\Chassis\Rules\ValidIpOrCidrRule;
 
 class StoreAccessTokenRequest extends FormRequest
 {

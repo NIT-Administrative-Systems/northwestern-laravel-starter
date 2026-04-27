@@ -7,7 +7,6 @@ namespace App\Filament\Resources\AccessTokens\Schemas;
 use App\Domains\Auth\Enums\AccessTokenStatus;
 use App\Domains\Auth\Enums\TokenExpiration;
 use App\Domains\Auth\Models\AccessToken;
-use App\Domains\Core\Rules\ValidIpOrCidrRule;
 use Carbon\CarbonInterface;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
@@ -23,6 +22,7 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\HtmlString;
+use Northwestern\SysDev\Chassis\Rules\ValidIpOrCidrRule;
 use Phiki\Grammar\Grammar;
 
 /**

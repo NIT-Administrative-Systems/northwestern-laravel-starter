@@ -65,8 +65,6 @@
             <!-- Seeders -->
             <directory>app/Domains/Auth/Seeders</directory>
             <directory>app/Domains/Support/Seeders</directory>
-            <directory>app/Domains/User/Seeders</directory>
-            <file>app/Domains/Core/Seeders/IdempotentSeeder.php</file>
 
             <!-- Config validators -->
             <file
@@ -80,12 +78,10 @@
 
             <!-- Contracts / Interfaces -->
             <directory>app/Domains/Auth/Contracts</directory>
-            <directory>app/Domains/Core/Contracts</directory>
             <directory>app/Domains/Support/Contracts</directory>
 
             <!-- Value Objects (constants, readonly data containers) -->
             <directory>app/Domains/Auth/ValueObjects</directory>
-            <directory>app/Domains/Core/ValueObjects</directory>
             <file>app/Domains/Support/Gateways/CreationResult.php</file>
 
             <!-- API Resources -->
@@ -94,9 +90,6 @@
 
             <!-- Framework boilerplate / third-party -->
             <directory>app/Domains/Core/Concerns</directory>
-            <file
-            >app/Domains/Core/Database/ConfigurableDbDumperFactory.php</file>
-            <file>app/Domains/Core/Database/SchemaChecksumManager.php</file>
             <directory>app/Domains/Core/Exceptions</directory>
             <directory>app/Domains/Core/GlobalAlerts</directory>
             <directory>app/Domains/User/Exceptions</directory>
@@ -126,9 +119,6 @@
             <file>app/Console/Commands/RebuildDatabaseCommand.php</file>
             <file>app/Console/Commands/MakeChangelogCommand.php</file>
             <file>app/Console/Commands/TestNetIdUpdateCommand.php</file>
-            <file>app/Console/Commands/ValidateConfigurationCommand.php</file>
-            <file>app/Console/Commands/Concerns/RunsSteps.php</file>
-            <directory>app/Console/Commands/DatabaseSnapshots</directory>
         </exclude>
     </source>
     <php>
