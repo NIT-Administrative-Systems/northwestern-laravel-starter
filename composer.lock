@@ -5026,16 +5026,16 @@
         },
         {
             "name": "northwestern-sysdev/chassis",
-            "version": "v1.0.0-rc.2",
+            "version": "v1.0.0-rc.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/NIT-Administrative-Systems/chassis",
-                "reference": "7ec90447d2329b8c405364d88d89ed7ab1238897"
+                "reference": "4e98cf686607323bbeeff9fad7bda71c1a221ee8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/NIT-Administrative-Systems/chassis/zipball/7ec90447d2329b8c405364d88d89ed7ab1238897",
-                "reference": "7ec90447d2329b8c405364d88d89ed7ab1238897",
+                "url": "https://api.github.com/repos/NIT-Administrative-Systems/chassis/zipball/4e98cf686607323bbeeff9fad7bda71c1a221ee8",
+                "reference": "4e98cf686607323bbeeff9fad7bda71c1a221ee8",
                 "shasum": ""
             },
             "require": {
@@ -5090,7 +5090,7 @@
                 "issues": "https://github.com/NIT-Administrative-Systems/chassis/issues",
                 "source": "https://github.com/NIT-Administrative-Systems/chassis"
             },
-            "time": "2026-04-27T17:22:28+00:00"
+            "time": "2026-04-27T17:37:35+00:00"
         },
         {
             "name": "northwestern-sysdev/event-hub-php-sdk",
