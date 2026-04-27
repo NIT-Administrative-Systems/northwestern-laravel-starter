@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4280308adb9603065f5ba27278eb6592",
+    "content-hash": "41f614eea7e4fb397c9c7a39f0c47897",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -5026,16 +5026,16 @@
         },
         {
             "name": "northwestern-sysdev/chassis",
-            "version": "v1.0.0-rc.3",
+            "version": "v1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/NIT-Administrative-Systems/chassis",
-                "reference": "4e98cf686607323bbeeff9fad7bda71c1a221ee8"
+                "reference": "d5a07005f6fc866e83174030ed0c7ae5d44b83a9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/NIT-Administrative-Systems/chassis/zipball/4e98cf686607323bbeeff9fad7bda71c1a221ee8",
-                "reference": "4e98cf686607323bbeeff9fad7bda71c1a221ee8",
+                "url": "https://api.github.com/repos/NIT-Administrative-Systems/chassis/zipball/d5a07005f6fc866e83174030ed0c7ae5d44b83a9",
+                "reference": "d5a07005f6fc866e83174030ed0c7ae5d44b83a9",
                 "shasum": ""
             },
             "require": {
@@ -5090,7 +5090,7 @@
                 "issues": "https://github.com/NIT-Administrative-Systems/chassis/issues",
                 "source": "https://github.com/NIT-Administrative-Systems/chassis"
             },
-            "time": "2026-04-27T17:37:35+00:00"
+            "time": "2026-04-27T17:49:30+00:00"
         },
         {
             "name": "northwestern-sysdev/event-hub-php-sdk",
@@ -17407,7 +17407,6 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "northwestern-sysdev/chassis": 5,
         "roave/security-advisories": 20
     },
     "prefer-stable": true,
