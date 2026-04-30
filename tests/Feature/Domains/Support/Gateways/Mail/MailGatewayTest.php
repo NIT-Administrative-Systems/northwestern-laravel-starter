@@ -14,7 +14,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(MailGateway::class)]
-class MailGatewayTest extends TestCase
+final class MailGatewayTest extends TestCase
 {
     protected function setUp(): void
     {

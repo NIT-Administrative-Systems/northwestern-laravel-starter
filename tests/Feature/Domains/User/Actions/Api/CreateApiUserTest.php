@@ -13,7 +13,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(CreateApiUser::class)]
-class CreateApiUserTest extends TestCase
+final class CreateApiUserTest extends TestCase
 {
     protected function setUp(): void
     {

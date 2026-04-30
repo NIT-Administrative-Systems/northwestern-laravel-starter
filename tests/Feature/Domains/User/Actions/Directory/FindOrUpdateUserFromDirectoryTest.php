@@ -16,7 +16,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(FindOrUpdateUserFromDirectory::class)]
-class FindOrUpdateUserFromDirectoryTest extends TestCase
+final class FindOrUpdateUserFromDirectoryTest extends TestCase
 {
     public function test_invoke(): void
     {
@@ -108,7 +108,7 @@ class FindOrUpdateUserFromDirectoryTest extends TestCase
 
         $result = $this->service()('api-user');
 
-        $this->assertNull($result);
+        $this->assertNotInstanceOf(User::class, $result);
     }
 
     public function test_catches_exception_during_immediate_job_dispatch(): void
@@ -269,7 +269,7 @@ class FindOrUpdateUserFromDirectoryTest extends TestCase
         $directoryApi = $this->createStub(DirectorySearch::class);
         $directoryApi->method('getLastError')->willReturn('Foobar error');
 
-        $this->assertEquals('Foobar error', $this->service(['directorySearch' => $directoryApi])->getLastError());
+        $this->assertSame('Foobar error', $this->service(['directorySearch' => $directoryApi])->getLastError());
     }
 
     public function test_empty_search_value_throws_exception(): void

@@ -14,7 +14,7 @@ use PHPUnit\Framework\Attributes\CoversTrait;
 use Tests\TestCase;
 
 #[CoversTrait(AuditsPermissions::class)]
-class AuditsPermissionsTest extends TestCase
+final class AuditsPermissionsTest extends TestCase
 {
     public function test_sync_permissions_creates_audit_when_permissions_change(): void
     {

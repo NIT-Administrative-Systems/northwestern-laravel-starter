@@ -12,7 +12,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(IssueAccessToken::class)]
-class IssueAccessTokenTest extends TestCase
+final class IssueAccessTokenTest extends TestCase
 {
     public function test_issues_token_for_api_user(): void
     {

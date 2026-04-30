@@ -9,7 +9,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(SSOValidator::class)]
-class SSOValidatorTest extends TestCase
+final class SSOValidatorTest extends TestCase
 {
     public function test_should_always_run(): void
     {
@@ -166,6 +166,6 @@ class SSOValidatorTest extends TestCase
 
         $hints = $validator->hints();
         $lastHint = end($hints);
-        $this->assertStringContainsString('WebSSO / Entra ID', $lastHint);
+        $this->assertStringContainsString('WebSSO / Entra ID', (string) $lastHint);
     }
 }

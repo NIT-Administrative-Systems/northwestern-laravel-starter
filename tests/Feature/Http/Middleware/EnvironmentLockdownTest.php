@@ -15,7 +15,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(EnvironmentLockdown::class)]
-class EnvironmentLockdownTest extends TestCase
+final class EnvironmentLockdownTest extends TestCase
 {
     private string $endpoint = '/lockdown-test';
 

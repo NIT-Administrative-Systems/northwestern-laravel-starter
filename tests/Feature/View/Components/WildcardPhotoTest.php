@@ -11,7 +11,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(WildcardPhoto::class)]
-class WildcardPhotoTest extends TestCase
+final class WildcardPhotoTest extends TestCase
 {
     protected function setUp(): void
     {

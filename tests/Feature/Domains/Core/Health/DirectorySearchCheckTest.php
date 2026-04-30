@@ -14,7 +14,7 @@ use Spatie\Health\Enums\Status;
 use Tests\TestCase;
 
 #[CoversClass(DirectorySearchCheck::class)]
-class DirectorySearchCheckTest extends TestCase
+final class DirectorySearchCheckTest extends TestCase
 {
     private DirectorySearchCheck $check;
 
@@ -56,7 +56,7 @@ class DirectorySearchCheckTest extends TestCase
 
         $this->assertInstanceOf(Result::class, $result);
         $this->assertEquals(Status::ok(), $result->status);
-        $this->assertEquals('Ok', $result->getShortSummary());
+        $this->assertSame('Ok', $result->getShortSummary());
         $this->assertArrayNotHasKey('tested_netid', $result->meta);
     }
 
@@ -74,8 +74,8 @@ class DirectorySearchCheckTest extends TestCase
         $result = $this->check->run();
 
         $this->assertEquals(Status::failed(), $result->status);
-        $this->assertEquals('Failed', $result->getShortSummary());
-        $this->assertEquals("Directory Search API error - {$apiError}", $result->getNotificationMessage());
+        $this->assertSame('Failed', $result->getShortSummary());
+        $this->assertSame("Directory Search API error - {$apiError}", $result->getNotificationMessage());
     }
 
     public function test_check_fails_on_empty_response(): void
@@ -91,8 +91,8 @@ class DirectorySearchCheckTest extends TestCase
         $result = $this->check->run();
 
         $this->assertEquals(Status::failed(), $result->status);
-        $this->assertEquals('Failed', $result->getShortSummary());
-        $this->assertEquals("Directory Search API returned no data for test NetID: {$this->testNetId}", $result->getNotificationMessage());
+        $this->assertSame('Failed', $result->getShortSummary());
+        $this->assertSame("Directory Search API returned no data for test NetID: {$this->testNetId}", $result->getNotificationMessage());
     }
 
     public function test_check_fails_on_invalid_response_structure_missing_uid(): void
@@ -109,8 +109,8 @@ class DirectorySearchCheckTest extends TestCase
         $result = $this->check->run();
 
         $this->assertEquals(Status::failed(), $result->status);
-        $this->assertEquals('Failed', $result->getShortSummary());
-        $this->assertEquals("Directory Search API response missing required 'uid' field for NetID: {$this->testNetId}", $result->getNotificationMessage());
+        $this->assertSame('Failed', $result->getShortSummary());
+        $this->assertSame("Directory Search API response missing required 'uid' field for NetID: {$this->testNetId}", $result->getNotificationMessage());
     }
 
     public function test_check_warns_when_health_check_netid_is_missing(): void
@@ -122,7 +122,7 @@ class DirectorySearchCheckTest extends TestCase
         $result = $this->check->run();
 
         $this->assertEquals(Status::warning(), $result->status);
-        $this->assertEquals('Configuration missing', $result->getShortSummary());
-        $this->assertEquals('Health check skipped: Test NetID not configured', $result->getNotificationMessage());
+        $this->assertSame('Configuration missing', $result->getShortSummary());
+        $this->assertSame('Health check skipped: Test NetID not configured', $result->getNotificationMessage());
     }
 }

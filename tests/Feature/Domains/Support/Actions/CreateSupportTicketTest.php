@@ -17,7 +17,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(CreateSupportTicket::class)]
-class CreateSupportTicketTest extends TestCase
+final class CreateSupportTicketTest extends TestCase
 {
     public function test_successful_primary_submission_does_not_trigger_fallback(): void
     {

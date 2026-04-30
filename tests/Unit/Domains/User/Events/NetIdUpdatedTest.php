@@ -11,7 +11,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass(NetIdUpdated::class)]
-class NetIdUpdatedTest extends TestCase
+final class NetIdUpdatedTest extends TestCase
 {
     public function test_it_parses_valid_webhook_payload(): void
     {
@@ -19,8 +19,8 @@ class NetIdUpdatedTest extends TestCase
 
         $event = NetIdUpdated::fromPayload($payload);
 
-        $this->assertEquals('abc123', $event->netId);
-        $this->assertEquals(NetIdUpdateAction::Deactivate, $event->action);
+        $this->assertSame('abc123', $event->netId);
+        $this->assertSame(NetIdUpdateAction::Deactivate, $event->action);
     }
 
     public function test_it_normalizes_netid_to_lowercase(): void
@@ -29,7 +29,7 @@ class NetIdUpdatedTest extends TestCase
 
         $event = NetIdUpdated::fromPayload($payload);
 
-        $this->assertEquals('abc123', $event->netId);
+        $this->assertSame('abc123', $event->netId);
     }
 
     public function test_it_normalizes_action_to_lowercase(): void
@@ -38,7 +38,7 @@ class NetIdUpdatedTest extends TestCase
 
         $event = NetIdUpdated::fromPayload($payload);
 
-        $this->assertEquals(NetIdUpdateAction::Deactivate, $event->action);
+        $this->assertSame(NetIdUpdateAction::Deactivate, $event->action);
     }
 
     public function test_it_handles_url_encoded_characters(): void
@@ -47,7 +47,7 @@ class NetIdUpdatedTest extends TestCase
 
         $event = NetIdUpdated::fromPayload($payload);
 
-        $this->assertEquals('test@user', $event->netId);
+        $this->assertSame('test@user', $event->netId);
     }
 
     public function test_it_throws_exception_when_netid_missing(): void
@@ -96,8 +96,8 @@ class NetIdUpdatedTest extends TestCase
 
         $event = NetIdUpdated::fromPayload($payload);
 
-        $this->assertEquals('abc123', $event->netId);
-        $this->assertEquals(NetIdUpdateAction::Deactivate, $event->action);
+        $this->assertSame('abc123', $event->netId);
+        $this->assertSame(NetIdUpdateAction::Deactivate, $event->action);
     }
 
     public function test_it_handles_parameters_in_different_order(): void
@@ -106,15 +106,15 @@ class NetIdUpdatedTest extends TestCase
 
         $event = NetIdUpdated::fromPayload($payload);
 
-        $this->assertEquals('abc123', $event->netId);
-        $this->assertEquals(NetIdUpdateAction::Deactivate, $event->action);
+        $this->assertSame('abc123', $event->netId);
+        $this->assertSame(NetIdUpdateAction::Deactivate, $event->action);
     }
 
     public function test_constructor_accepts_typed_values_directly(): void
     {
         $event = new NetIdUpdated('abc123', NetIdUpdateAction::Deactivate);
 
-        $this->assertEquals('abc123', $event->netId);
-        $this->assertEquals(NetIdUpdateAction::Deactivate, $event->action);
+        $this->assertSame('abc123', $event->netId);
+        $this->assertSame(NetIdUpdateAction::Deactivate, $event->action);
     }
 }

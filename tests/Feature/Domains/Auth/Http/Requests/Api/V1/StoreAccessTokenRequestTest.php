@@ -10,7 +10,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(StoreAccessTokenRequest::class)]
-class StoreAccessTokenRequestTest extends TestCase
+final class StoreAccessTokenRequestTest extends TestCase
 {
     public function test_authorize_returns_true(): void
     {

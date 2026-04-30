@@ -11,7 +11,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(AccessTokenExpirationNotification::class)]
-class AccessTokenExpirationNotificationTest extends TestCase
+final class AccessTokenExpirationNotificationTest extends TestCase
 {
     public function test_envelope_has_correct_subject(): void
     {

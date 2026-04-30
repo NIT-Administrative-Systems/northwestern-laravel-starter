@@ -14,7 +14,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(DetermineUserSegment::class)]
-class DetermineUserSegmentTest extends TestCase
+final class DetermineUserSegmentTest extends TestCase
 {
     public function test_determines_super_admin(): void
     {
@@ -29,7 +29,7 @@ class DetermineUserSegmentTest extends TestCase
 
         $segment = $this->action()($user);
 
-        $this->assertEquals(UserSegment::SuperAdmin, $segment);
+        $this->assertSame(UserSegment::SuperAdmin, $segment);
     }
 
     public function test_determines_external_user(): void
@@ -38,7 +38,7 @@ class DetermineUserSegmentTest extends TestCase
 
         $segment = $this->action()($user);
 
-        $this->assertEquals(UserSegment::ExternalUser, $segment);
+        $this->assertSame(UserSegment::ExternalUser, $segment);
     }
 
     public function test_determines_other(): void
@@ -47,7 +47,7 @@ class DetermineUserSegmentTest extends TestCase
 
         $segment = $this->action()($user);
 
-        $this->assertEquals(UserSegment::Other, $segment);
+        $this->assertSame(UserSegment::Other, $segment);
     }
 
     protected function action(): DetermineUserSegment

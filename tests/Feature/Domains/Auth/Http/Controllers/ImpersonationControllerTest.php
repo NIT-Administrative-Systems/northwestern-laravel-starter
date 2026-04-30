@@ -15,7 +15,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(ImpersonationController::class)]
-class ImpersonationControllerTest extends TestCase
+final class ImpersonationControllerTest extends TestCase
 {
     private User $authorizedUser;
 
@@ -45,7 +45,7 @@ class ImpersonationControllerTest extends TestCase
 
         $this->mock(StartImpersonation::class, function ($mock) {
             $mock->expects('__invoke')
-                ->with($this->equalTo($this->authorizedUser), $this->equalTo(2), $this->equalTo('web'))
+                ->with($this->authorizedUser, 2, 'web')
                 ->andReturns('https://example.com/dashboard');
         });
 

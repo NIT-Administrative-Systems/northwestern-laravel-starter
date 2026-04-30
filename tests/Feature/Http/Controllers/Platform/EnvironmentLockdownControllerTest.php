@@ -13,7 +13,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(EnvironmentLockdownController::class)]
-class EnvironmentLockdownControllerTest extends TestCase
+final class EnvironmentLockdownControllerTest extends TestCase
 {
     private Role $adminRole;
 

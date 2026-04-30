@@ -19,7 +19,7 @@ use RuntimeException;
 use Tests\TestCase;
 
 #[CoversClass(SendLoginCodeController::class)]
-class SendLoginCodeControllerTest extends TestCase
+final class SendLoginCodeControllerTest extends TestCase
 {
     protected function setUp(): void
     {
@@ -150,7 +150,7 @@ class SendLoginCodeControllerTest extends TestCase
 
         $response->assertRedirect();
         $response->assertSessionHas('status');
-        $this->assertStringContainsString('wait', session('status'));
+        $this->assertStringContainsString('wait', (string) session('status'));
     }
 
     public function test_resend_allows_request_when_cooldown_expired(): void

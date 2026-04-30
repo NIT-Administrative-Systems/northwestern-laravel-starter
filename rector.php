@@ -39,6 +39,10 @@ return RectorConfig::configure()
         deadCode: true,
         codeQuality: true,
         typeDeclarations: true,
+        phpunitCodeQuality: true,
+    )
+    ->withComposerBased(
+        phpunit: true,
     )
     ->withSkip([
         __DIR__ . '/vendor',
@@ -111,14 +115,8 @@ return RectorConfig::configure()
         PHPUnit\PHPUnit100\Rector\Class_\StaticDataProviderClassMethodRector::class,
 
         // PHPUnit: assertion modernizations + code quality
-        PHPUnit\PHPUnit90\Rector\MethodCall\ReplaceAtMethodWithDesiredMatcherRector::class,
         PHPUnit\PHPUnit80\Rector\MethodCall\SpecificAssertContainsRector::class,
         PHPUnit\PHPUnit100\Rector\MethodCall\PropertyExistsWithoutAssertRector::class,
-        PHPUnit\CodeQuality\Rector\MethodCall\AssertNotOperatorRector::class,
-        PHPUnit\CodeQuality\Rector\MethodCall\AssertCompareOnCountableWithMethodToAssertCountRector::class,
-        PHPUnit\CodeQuality\Rector\MethodCall\FlipAssertRector::class,
-        PHPUnit\CodeQuality\Rector\FuncCall\AssertFuncCallToPHPUnitAssertRector::class,
-        PHPUnit\CodeQuality\Rector\Class_\PreferPHPUnitThisCallRector::class,
     ])
     ->withCache(
         cacheDirectory: sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'rector',

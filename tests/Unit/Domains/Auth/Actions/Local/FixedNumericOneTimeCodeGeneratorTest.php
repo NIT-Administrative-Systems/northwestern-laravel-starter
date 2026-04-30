@@ -12,7 +12,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 #[CoversClass(FixedNumericOneTimeCodeGenerator::class)]
-class FixedNumericOneTimeCodeGeneratorTest extends TestCase
+final class FixedNumericOneTimeCodeGeneratorTest extends TestCase
 {
     private FixedNumericOneTimeCodeGenerator $generator;
 
@@ -71,13 +71,11 @@ class FixedNumericOneTimeCodeGeneratorTest extends TestCase
         ($this->generator)(6);
     }
 
-    /** @return array<string, array{0: string}> */
-    public static function blockedEnvironmentProvider(): array
+    /** @return \Iterator<string, array{string}> */
+    public static function blockedEnvironmentProvider(): \Iterator
     {
-        return [
-            'production' => ['production'],
-            'develop' => ['develop'],
-            'qa' => ['qa'],
-        ];
+        yield 'production' => ['production'];
+        yield 'develop' => ['develop'];
+        yield 'qa' => ['qa'];
     }
 }

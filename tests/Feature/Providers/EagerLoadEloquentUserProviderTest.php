@@ -12,7 +12,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(EagerLoadEloquentUserProvider::class)]
-class EagerLoadEloquentUserProviderTest extends TestCase
+final class EagerLoadEloquentUserProviderTest extends TestCase
 {
     public function test_eager_loads_user_relationships(): void
     {

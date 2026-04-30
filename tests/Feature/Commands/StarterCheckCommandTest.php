@@ -14,7 +14,7 @@ use PHPUnit\Framework\Attributes\TestWith;
 use Tests\TestCase;
 
 #[CoversClass(StarterCheckCommand::class)]
-class StarterCheckCommandTest extends TestCase
+final class StarterCheckCommandTest extends TestCase
 {
     private string $tempVersionFile;
 

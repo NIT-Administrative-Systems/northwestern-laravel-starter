@@ -15,7 +15,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 #[CoversClass(SyncUserFromDirectory::class)]
-class SyncUserFromDirectoryTest extends TestCase
+final class SyncUserFromDirectoryTest extends TestCase
 {
     /**
      * @param  array<string, mixed>  $directoryData
@@ -32,58 +32,53 @@ class SyncUserFromDirectoryTest extends TestCase
     }
 
     /**
-     * @return array<string, mixed>
+     * @return \Iterator<string, mixed>
      */
-    public static function directoryDataProvider(): array
+    public static function directoryDataProvider(): \Iterator
     {
-        return [
-            'student w/ job at NU too' => [self::studentData(), ['first_name' => 'Studie', 'last_name' => 'NU', 'primary_affiliation' => 'student', 'email' => 'StudieNU20XX@u.northwestern.edu']],
-            'student, short employeeNumber' => [self::customDirectoryData('student', ['employeeNumber' => '123456', 'nuStudentNumber' => '7654321']),
-                ['employee_id' => '7654321', 'hr_employee_id' => '123456']],
-            'student, short nuStudentNumber' => [self::customDirectoryData('student', ['nuStudentNumber' => '654321', 'employeeNumber' => '1234567']),
-                ['employee_id' => '1234567', 'hr_employee_id' => '1234567']],
-            'student, short id numbers' => [self::customDirectoryData('student', ['employeeNumber' => '123456', 'nuStudentNumber' => '654321']),
-                ['employee_id' => null, 'hr_employee_id' => '123456']],
-            'student, null nuStudentNumber with valid employeeNumber' => [
-                self::customDirectoryData('student', ['nuStudentNumber' => null, 'employeeNumber' => '1109225']),
-                ['employee_id' => '1109225', 'hr_employee_id' => null],
-            ],
-
-            'faculty, with a staff affiliation' => [self::facultyData(), ['primary_affiliation' => 'faculty', 'email' => 'faculty@northwestern.edu']],
-            'faculty, short employeeNumber' => [self::customDirectoryData('faculty', ['employeeNumber' => '123456', 'nuStudentNumber' => '7654321']),
-                ['employee_id' => '7654321', 'hr_employee_id' => '123456']],
-            'faculty, short nuStudentNumber' => [self::customDirectoryData('faculty', ['nuStudentNumber' => '654321', 'employeeNumber' => '1234567']),
-                ['employee_id' => '1234567', 'hr_employee_id' => '1234567']],
-            'faculty, short id numbers' => [self::customDirectoryData('faculty', ['employeeNumber' => '123456', 'nuStudentNumber' => '654321']),
-                ['employee_id' => null, 'hr_employee_id' => '123456']],
-            'faculty, null nuStudentNumber with valid employeeNumber' => [
-                self::customDirectoryData('faculty', ['nuStudentNumber' => null, 'employeeNumber' => '1109225']),
-                ['employee_id' => '1109225', 'hr_employee_id' => null],
-            ],
-
-            'staff, no other affiliation' => [self::staffData(), ['primary_affiliation' => 'staff', 'email' => 'staff@northwestern.edu']],
-            'staff, short employeeNumber' => [self::customDirectoryData('staff', ['employeeNumber' => '123456', 'nuStudentNumber' => '7654321']),
-                ['employee_id' => '7654321', 'hr_employee_id' => '123456']],
-            'staff, short nuStudentNumber' => [self::customDirectoryData('staff', ['nuStudentNumber' => '654321', 'employeeNumber' => '1234567']),
-                ['employee_id' => '1234567', 'hr_employee_id' => '1234567']],
-            'staff, short id numbers' => [self::customDirectoryData('staff', ['employeeNumber' => '123456', 'nuStudentNumber' => '654321']),
-                ['employee_id' => null, 'hr_employee_id' => '123456']],
-            'staff, null nuStudentNumber with valid employeeNumber' => [
-                self::customDirectoryData('staff', ['nuStudentNumber' => null, 'employeeNumber' => '1109225']),
-                ['employee_id' => '1109225', 'hr_employee_id' => null],
-            ],
-
-            'contractor w/ affiliate netID' => [self::contractorData(), ['primary_affiliation' => 'affiliate', 'email' => 'contractor@northwestern.edu']],
-            'contractor, short employeeNumber' => [self::customDirectoryData('contractor', ['employeeNumber' => '123456', 'nuStudentNumber' => '7654321']),
-                ['employee_id' => '7654321', 'hr_employee_id' => '123456']],
-            'contractor, short nuStudentNumber' => [self::customDirectoryData('contractor', ['nuStudentNumber' => '654321', 'employeeNumber' => '1234567']),
-                ['employee_id' => '1234567', 'hr_employee_id' => '1234567']],
-            'contractor, short id numbers' => [self::customDirectoryData('contractor', ['employeeNumber' => '123456', 'nuStudentNumber' => '654321']),
-                ['employee_id' => null, 'hr_employee_id' => '123456']],
-            'contractor, null nuStudentNumber with valid employeeNumber' => [
-                self::customDirectoryData('contractor', ['nuStudentNumber' => null, 'employeeNumber' => '1109225']),
-                ['employee_id' => '1109225', 'hr_employee_id' => null],
-            ],
+        yield 'student w/ job at NU too' => [self::studentData(), ['first_name' => 'Studie', 'last_name' => 'NU', 'primary_affiliation' => 'student', 'email' => 'StudieNU20XX@u.northwestern.edu']];
+        yield 'student, short employeeNumber' => [self::customDirectoryData('student', ['employeeNumber' => '123456', 'nuStudentNumber' => '7654321']),
+            ['employee_id' => '7654321', 'hr_employee_id' => '123456']];
+        yield 'student, short nuStudentNumber' => [self::customDirectoryData('student', ['nuStudentNumber' => '654321', 'employeeNumber' => '1234567']),
+            ['employee_id' => '1234567', 'hr_employee_id' => '1234567']];
+        yield 'student, short id numbers' => [self::customDirectoryData('student', ['employeeNumber' => '123456', 'nuStudentNumber' => '654321']),
+            ['employee_id' => null, 'hr_employee_id' => '123456']];
+        yield 'student, null nuStudentNumber with valid employeeNumber' => [
+            self::customDirectoryData('student', ['nuStudentNumber' => null, 'employeeNumber' => '1109225']),
+            ['employee_id' => '1109225', 'hr_employee_id' => null],
+        ];
+        yield 'faculty, with a staff affiliation' => [self::facultyData(), ['primary_affiliation' => 'faculty', 'email' => 'faculty@northwestern.edu']];
+        yield 'faculty, short employeeNumber' => [self::customDirectoryData('faculty', ['employeeNumber' => '123456', 'nuStudentNumber' => '7654321']),
+            ['employee_id' => '7654321', 'hr_employee_id' => '123456']];
+        yield 'faculty, short nuStudentNumber' => [self::customDirectoryData('faculty', ['nuStudentNumber' => '654321', 'employeeNumber' => '1234567']),
+            ['employee_id' => '1234567', 'hr_employee_id' => '1234567']];
+        yield 'faculty, short id numbers' => [self::customDirectoryData('faculty', ['employeeNumber' => '123456', 'nuStudentNumber' => '654321']),
+            ['employee_id' => null, 'hr_employee_id' => '123456']];
+        yield 'faculty, null nuStudentNumber with valid employeeNumber' => [
+            self::customDirectoryData('faculty', ['nuStudentNumber' => null, 'employeeNumber' => '1109225']),
+            ['employee_id' => '1109225', 'hr_employee_id' => null],
+        ];
+        yield 'staff, no other affiliation' => [self::staffData(), ['primary_affiliation' => 'staff', 'email' => 'staff@northwestern.edu']];
+        yield 'staff, short employeeNumber' => [self::customDirectoryData('staff', ['employeeNumber' => '123456', 'nuStudentNumber' => '7654321']),
+            ['employee_id' => '7654321', 'hr_employee_id' => '123456']];
+        yield 'staff, short nuStudentNumber' => [self::customDirectoryData('staff', ['nuStudentNumber' => '654321', 'employeeNumber' => '1234567']),
+            ['employee_id' => '1234567', 'hr_employee_id' => '1234567']];
+        yield 'staff, short id numbers' => [self::customDirectoryData('staff', ['employeeNumber' => '123456', 'nuStudentNumber' => '654321']),
+            ['employee_id' => null, 'hr_employee_id' => '123456']];
+        yield 'staff, null nuStudentNumber with valid employeeNumber' => [
+            self::customDirectoryData('staff', ['nuStudentNumber' => null, 'employeeNumber' => '1109225']),
+            ['employee_id' => '1109225', 'hr_employee_id' => null],
+        ];
+        yield 'contractor w/ affiliate netID' => [self::contractorData(), ['primary_affiliation' => 'affiliate', 'email' => 'contractor@northwestern.edu']];
+        yield 'contractor, short employeeNumber' => [self::customDirectoryData('contractor', ['employeeNumber' => '123456', 'nuStudentNumber' => '7654321']),
+            ['employee_id' => '7654321', 'hr_employee_id' => '123456']];
+        yield 'contractor, short nuStudentNumber' => [self::customDirectoryData('contractor', ['nuStudentNumber' => '654321', 'employeeNumber' => '1234567']),
+            ['employee_id' => '1234567', 'hr_employee_id' => '1234567']];
+        yield 'contractor, short id numbers' => [self::customDirectoryData('contractor', ['employeeNumber' => '123456', 'nuStudentNumber' => '654321']),
+            ['employee_id' => null, 'hr_employee_id' => '123456']];
+        yield 'contractor, null nuStudentNumber with valid employeeNumber' => [
+            self::customDirectoryData('contractor', ['nuStudentNumber' => null, 'employeeNumber' => '1109225']),
+            ['employee_id' => '1109225', 'hr_employee_id' => null],
         ];
     }
 

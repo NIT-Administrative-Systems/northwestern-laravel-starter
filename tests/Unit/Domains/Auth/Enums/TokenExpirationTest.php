@@ -11,7 +11,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass(TokenExpiration::class)]
-class TokenExpirationTest extends TestCase
+final class TokenExpirationTest extends TestCase
 {
     #[DataProvider('labelProvider')]
     public function test_get_label(TokenExpiration $enum, string $expected): void
@@ -19,19 +19,17 @@ class TokenExpirationTest extends TestCase
         $this->assertSame($expected, $enum->getLabel());
     }
 
-    /** @return array<string, array{0: TokenExpiration, 1: string}> */
-    public static function labelProvider(): array
+    /** @return \Iterator<string, array{TokenExpiration, string}> */
+    public static function labelProvider(): \Iterator
     {
-        return [
-            'one day' => [TokenExpiration::OneDay, '1 Day'],
-            'one week' => [TokenExpiration::OneWeek, '7 Days'],
-            'one month' => [TokenExpiration::OneMonth, '30 Days'],
-            'two months' => [TokenExpiration::TwoMonths, '60 Days'],
-            'three months' => [TokenExpiration::ThreeMonths, '90 Days'],
-            'six months' => [TokenExpiration::SixMonths, '180 Days'],
-            'one year' => [TokenExpiration::OneYear, '1 Year'],
-            'never' => [TokenExpiration::Never, 'No Expiration'],
-        ];
+        yield 'one day' => [TokenExpiration::OneDay, '1 Day'];
+        yield 'one week' => [TokenExpiration::OneWeek, '7 Days'];
+        yield 'one month' => [TokenExpiration::OneMonth, '30 Days'];
+        yield 'two months' => [TokenExpiration::TwoMonths, '60 Days'];
+        yield 'three months' => [TokenExpiration::ThreeMonths, '90 Days'];
+        yield 'six months' => [TokenExpiration::SixMonths, '180 Days'];
+        yield 'one year' => [TokenExpiration::OneYear, '1 Year'];
+        yield 'never' => [TokenExpiration::Never, 'No Expiration'];
     }
 
     public function test_never_expires_at_returns_null(): void
@@ -53,25 +51,23 @@ class TokenExpirationTest extends TestCase
         $expected = Carbon::parse('2026-01-01 00:00:00')->addDays($expectedDays);
         $result = $enum->expiresAt($from);
 
-        $this->assertNotNull($result);
+        $this->assertInstanceOf(Carbon::class, $result);
         $this->assertTrue(
             $expected->equalTo($result),
             "Expected {$expectedDays} days added for {$enum->name}"
         );
     }
 
-    /** @return array<string, array{0: TokenExpiration, 1: int}> */
-    public static function expiresAtProvider(): array
+    /** @return \Iterator<string, array{TokenExpiration, int}> */
+    public static function expiresAtProvider(): \Iterator
     {
-        return [
-            'one day' => [TokenExpiration::OneDay, 1],
-            'one week' => [TokenExpiration::OneWeek, 7],
-            'one month' => [TokenExpiration::OneMonth, 30],
-            'two months' => [TokenExpiration::TwoMonths, 60],
-            'three months' => [TokenExpiration::ThreeMonths, 90],
-            'six months' => [TokenExpiration::SixMonths, 180],
-            'one year' => [TokenExpiration::OneYear, 365],
-        ];
+        yield 'one day' => [TokenExpiration::OneDay, 1];
+        yield 'one week' => [TokenExpiration::OneWeek, 7];
+        yield 'one month' => [TokenExpiration::OneMonth, 30];
+        yield 'two months' => [TokenExpiration::TwoMonths, 60];
+        yield 'three months' => [TokenExpiration::ThreeMonths, 90];
+        yield 'six months' => [TokenExpiration::SixMonths, 180];
+        yield 'one year' => [TokenExpiration::OneYear, 365];
     }
 
     public function test_expires_at_defaults_to_now_when_no_from_date(): void

@@ -17,7 +17,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(LogsApiRequests::class)]
-class LogsApiRequestsTest extends TestCase
+final class LogsApiRequestsTest extends TestCase
 {
     private string $endpoint = '/api/test';
 

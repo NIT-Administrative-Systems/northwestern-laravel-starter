@@ -12,7 +12,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\ApiTestCase;
 
 #[CoversClass(AccessTokenApiController::class)]
-class AccessTokenApiControllerTest extends ApiTestCase
+final class AccessTokenApiControllerTest extends ApiTestCase
 {
     public function endpoint(): string
     {
@@ -21,7 +21,10 @@ class AccessTokenApiControllerTest extends ApiTestCase
 
     public static function methods(): array
     {
-        return ['get', 'post'];
+        return [
+            'get',
+            'post',
+        ];
     }
 
     public function test_requires_authentication(): void

@@ -15,7 +15,7 @@ use Illuminate\Support\HtmlString;
 use Livewire\Livewire;
 use Tests\TestCase;
 
-class RoleDefinitionHistoryTest extends TestCase
+final class RoleDefinitionHistoryTest extends TestCase
 {
     private User $admin;
 
@@ -112,7 +112,7 @@ class RoleDefinitionHistoryTest extends TestCase
             ->latest('id')
             ->first();
 
-        $this->assertNotNull($audit);
+        $this->assertInstanceOf(Audit::class, $audit);
 
         Livewire::test(RoleDefinitionHistory::class, ['record' => $this->role->getKey()])
             ->assertCanSeeTableRecords([$audit]);

@@ -13,7 +13,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(TicketSystemGatewayFactory::class)]
-class TicketSystemGatewayFactoryTest extends TestCase
+final class TicketSystemGatewayFactoryTest extends TestCase
 {
     public function test_default_returns_mail_gateway_when_driver_is_mail(): void
     {

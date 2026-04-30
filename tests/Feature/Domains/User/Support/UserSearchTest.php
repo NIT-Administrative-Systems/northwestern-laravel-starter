@@ -14,7 +14,7 @@ use Tests\TestCase;
 
 #[CoversClass(UserSearch::class)]
 #[CoversClass(UserOptionLabel::class)]
-class UserSearchTest extends TestCase
+final class UserSearchTest extends TestCase
 {
     public function test_searches_by_username_first_name_last_name_and_email(): void
     {

@@ -14,7 +14,7 @@ use PHPUnit\Framework\Attributes\CoversTrait;
 use Tests\TestCase;
 
 #[CoversTrait(HandlesImpersonation::class)]
-class HandlesImpersonationTest extends TestCase
+final class HandlesImpersonationTest extends TestCase
 {
     public function test_can_impersonate_returns_true_when_user_has_permission_and_not_impersonated(): void
     {

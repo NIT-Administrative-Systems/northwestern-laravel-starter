@@ -10,7 +10,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(SendLoginCodeRequest::class)]
-class SendLoginCodeRequestTest extends TestCase
+final class SendLoginCodeRequestTest extends TestCase
 {
     public function test_authorize_returns_true(): void
     {

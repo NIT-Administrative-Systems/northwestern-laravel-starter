@@ -11,7 +11,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(LoginCodeMail::class)]
-class LoginCodeMailTest extends TestCase
+final class LoginCodeMailTest extends TestCase
 {
     public function test_envelope_has_correct_subject(): void
     {

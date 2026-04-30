@@ -12,7 +12,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(VerifyLoginChallengeCode::class)]
-class VerifyLoginChallengeCodeTest extends TestCase
+final class VerifyLoginChallengeCodeTest extends TestCase
 {
     public function test_verifies_correct_code_and_consumes_challenge(): void
     {

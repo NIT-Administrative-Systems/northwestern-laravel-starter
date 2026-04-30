@@ -21,7 +21,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(TeamDynamixCacheRepository::class)]
-class TeamDynamixCacheRepositoryTest extends TestCase
+final class TeamDynamixCacheRepositoryTest extends TestCase
 {
     protected function setUp(): void
     {

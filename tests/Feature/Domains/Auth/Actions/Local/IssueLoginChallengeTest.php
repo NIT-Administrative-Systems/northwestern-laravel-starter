@@ -16,7 +16,7 @@ use RuntimeException;
 use Tests\TestCase;
 
 #[CoversClass(IssueLoginChallenge::class)]
-class IssueLoginChallengeTest extends TestCase
+final class IssueLoginChallengeTest extends TestCase
 {
     protected function setUp(): void
     {

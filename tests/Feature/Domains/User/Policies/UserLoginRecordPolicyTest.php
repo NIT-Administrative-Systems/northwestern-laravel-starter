@@ -11,7 +11,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(UserLoginRecordPolicy::class)]
-class UserLoginRecordPolicyTest extends TestCase
+final class UserLoginRecordPolicyTest extends TestCase
 {
     public function test_view_any_denies_user_without_permission(): void
     {

@@ -10,7 +10,7 @@ use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\User;
 use Tests\TestCase;
 
-class GateSuperAdminBypassTest extends TestCase
+final class GateSuperAdminBypassTest extends TestCase
 {
     public function test_user_with_manage_all_can_pass_any_gate_check(): void
     {

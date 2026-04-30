@@ -11,7 +11,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(AuditPolicy::class)]
-class AuditPolicyTest extends TestCase
+final class AuditPolicyTest extends TestCase
 {
     public function test_view_any_denies_user_without_permission(): void
     {

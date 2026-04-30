@@ -17,7 +17,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(ShowLoginCodeFormController::class)]
-class ShowLoginCodeFormControllerTest extends TestCase
+final class ShowLoginCodeFormControllerTest extends TestCase
 {
     protected function setUp(): void
     {

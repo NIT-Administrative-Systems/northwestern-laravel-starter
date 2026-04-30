@@ -13,7 +13,7 @@ use PHPUnit\Framework\Attributes\CoversTrait;
 use Tests\TestCase;
 
 #[CoversTrait(TracksPermissionSources::class)]
-class TracksPermissionSourcesTest extends TestCase
+final class TracksPermissionSourcesTest extends TestCase
 {
     private User $user;
 

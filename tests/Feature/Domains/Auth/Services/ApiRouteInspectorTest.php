@@ -12,7 +12,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(ApiRouteInspector::class)]
-class ApiRouteInspectorTest extends TestCase
+final class ApiRouteInspectorTest extends TestCase
 {
     protected function setUp(): void
     {

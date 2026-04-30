@@ -12,7 +12,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(CreateLocalUser::class)]
-class CreateLocalUserTest extends TestCase
+final class CreateLocalUserTest extends TestCase
 {
     protected function setUp(): void
     {
@@ -164,7 +164,7 @@ class CreateLocalUserTest extends TestCase
             ->where('email', $user->email)
             ->first();
 
-        $this->assertNotNull($loginChallenge);
+        $this->assertInstanceOf(LoginChallenge::class, $loginChallenge);
         $this->assertEquals('203.0.113.42', $loginChallenge->requested_ip);
     }
 

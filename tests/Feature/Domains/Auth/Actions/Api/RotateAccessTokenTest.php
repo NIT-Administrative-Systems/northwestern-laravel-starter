@@ -15,7 +15,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(RotateAccessToken::class)]
-class RotateAccessTokenTest extends TestCase
+final class RotateAccessTokenTest extends TestCase
 {
     public function test_it_rotates_a_token(): void
     {
@@ -31,7 +31,7 @@ class RotateAccessTokenTest extends TestCase
 
         $newTokenString = $rotator($oldToken, $oldToken->name);
 
-        $this->assertNotEquals($oldTokenString, $newTokenString);
+        $this->assertNotSame($oldTokenString, $newTokenString);
 
         $oldToken->refresh();
         $newToken = AccessToken::where('token_hash', AccessToken::hashFromPlain($newTokenString))->first();

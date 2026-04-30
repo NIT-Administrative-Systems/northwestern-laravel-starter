@@ -15,7 +15,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(ContactController::class)]
-class ContactControllerTest extends TestCase
+final class ContactControllerTest extends TestCase
 {
     protected function setUp(): void
     {

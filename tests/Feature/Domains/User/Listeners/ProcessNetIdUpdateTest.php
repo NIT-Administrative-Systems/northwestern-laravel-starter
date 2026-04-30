@@ -15,7 +15,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(ProcessNetIdUpdate::class)]
-class ProcessNetIdUpdateTest extends TestCase
+final class ProcessNetIdUpdateTest extends TestCase
 {
     private ?Role $adminRole = null;
 

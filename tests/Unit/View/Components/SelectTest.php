@@ -9,7 +9,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(Select::class)]
-class SelectTest extends TestCase
+final class SelectTest extends TestCase
 {
     public function test_renders_select_view(): void
     {

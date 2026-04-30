@@ -13,7 +13,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(AsyncSelectOptionsRequest::class)]
-class AsyncSelectOptionsRequestTest extends TestCase
+final class AsyncSelectOptionsRequestTest extends TestCase
 {
     public function test_authorize_returns_false_if_not_authenticated(): void
     {

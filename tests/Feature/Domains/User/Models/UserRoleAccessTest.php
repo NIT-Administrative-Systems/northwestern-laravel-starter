@@ -13,7 +13,7 @@ use Mockery;
 use ReflectionMethod;
 use Tests\TestCase;
 
-class UserRoleAccessTest extends TestCase
+final class UserRoleAccessTest extends TestCase
 {
     public function test_assign_role_is_not_publicly_callable(): void
     {

@@ -12,7 +12,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(DownloadWildcardPhotoJob::class)]
-class DownloadWildcardPhotoTest extends TestCase
+final class DownloadWildcardPhotoTest extends TestCase
 {
     protected function setUp(): void
     {
@@ -43,7 +43,7 @@ class DownloadWildcardPhotoTest extends TestCase
 
         $directorySearch->expects($this->once())
             ->method('lookupByNetId')
-            ->with($this->equalTo($user->username))
+            ->with($user->username)
             ->willReturn(false);
 
         $job = new DownloadWildcardPhotoJob($user);
@@ -60,7 +60,7 @@ class DownloadWildcardPhotoTest extends TestCase
 
         $directorySearch->expects($this->once())
             ->method('lookupByNetId')
-            ->with($this->equalTo($user->username))
+            ->with($user->username)
             ->willReturn([]);
 
         $job = new DownloadWildcardPhotoJob($user);
@@ -86,7 +86,7 @@ class DownloadWildcardPhotoTest extends TestCase
 
         $directorySearch->expects($this->once())
             ->method('lookupByNetId')
-            ->with($this->equalTo($user->username))
+            ->with($user->username)
             ->willReturn([]);
 
         $job = new DownloadWildcardPhotoJob($user);
@@ -107,7 +107,7 @@ class DownloadWildcardPhotoTest extends TestCase
 
         $directorySearch->expects($this->once())
             ->method('lookupByNetId')
-            ->with($this->equalTo($user->username))
+            ->with($user->username)
             ->willReturn(['jpegPhoto' => '!!!invalid-base64!!!']);
 
         $job = new DownloadWildcardPhotoJob($user);
@@ -133,7 +133,7 @@ class DownloadWildcardPhotoTest extends TestCase
 
         $directorySearch->expects($this->once())
             ->method('lookupByNetId')
-            ->with($this->equalTo($user->username))
+            ->with($user->username)
             ->willReturn(['jpegPhoto' => $base64Photo]);
 
         $expectedPath = "wildcard-photos/{$user->username}.jpg";
@@ -162,7 +162,7 @@ class DownloadWildcardPhotoTest extends TestCase
 
         $directorySearch->expects($this->once())
             ->method('lookupByNetId')
-            ->with($this->equalTo($user->username))
+            ->with($user->username)
             ->willReturn(['jpegPhoto' => $base64Photo]);
 
         Storage::shouldReceive('disk')

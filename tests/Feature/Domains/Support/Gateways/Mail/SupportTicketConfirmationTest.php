@@ -11,7 +11,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(SupportTicketConfirmation::class)]
-class SupportTicketConfirmationTest extends TestCase
+final class SupportTicketConfirmationTest extends TestCase
 {
     public function test_build_sets_subject_markdown_and_view_data(): void
     {

@@ -11,7 +11,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 #[CoversClass(Clipboard::class)]
-class ClipboardTest extends TestCase
+final class ClipboardTest extends TestCase
 {
     public function test_creates_with_defaults(): void
     {
@@ -73,13 +73,11 @@ class ClipboardTest extends TestCase
         new Clipboard(text: 'Test', successVariant: $variant);
     }
 
-    /** @return array<string, array{0: string}> */
-    public static function invalidVariantProvider(): array
+    /** @return \Iterator<string, array{string}> */
+    public static function invalidVariantProvider(): \Iterator
     {
-        return [
-            'completely invalid' => ['nope'],
-            'typo' => ['primry'],
-        ];
+        yield 'completely invalid' => ['nope'];
+        yield 'typo' => ['primry'];
     }
 
     public function test_throws_for_invalid_button_size(): void

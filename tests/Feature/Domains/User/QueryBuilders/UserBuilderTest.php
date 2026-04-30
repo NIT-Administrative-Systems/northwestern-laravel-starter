@@ -11,7 +11,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(UserBuilder::class)]
-class UserBuilderTest extends TestCase
+final class UserBuilderTest extends TestCase
 {
     public function test_scope_sso_only_returns_sso_users(): void
     {

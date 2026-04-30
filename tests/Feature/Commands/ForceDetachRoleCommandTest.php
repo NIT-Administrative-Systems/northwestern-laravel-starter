@@ -9,7 +9,7 @@ use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\User;
 use Tests\TestCase;
 
-class ForceDetachRoleCommandTest extends TestCase
+final class ForceDetachRoleCommandTest extends TestCase
 {
     public function test_fails_when_user_not_found(): void
     {

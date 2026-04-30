@@ -19,7 +19,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(VerifyLoginCodeController::class)]
-class VerifyLoginCodeControllerTest extends TestCase
+final class VerifyLoginCodeControllerTest extends TestCase
 {
     protected function setUp(): void
     {

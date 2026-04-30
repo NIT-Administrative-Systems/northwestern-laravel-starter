@@ -11,7 +11,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass(DirectorySearchType::class)]
-class DirectorySearchTypeTest extends TestCase
+final class DirectorySearchTypeTest extends TestCase
 {
     #[DataProvider('validSearchValuesProvider')]
     public function test_it_detects_search_type(string $searchValue, DirectorySearchType $expectedType): void
@@ -76,32 +76,28 @@ class DirectorySearchTypeTest extends TestCase
     }
 
     /**
-     * @return array<string, array{string, DirectorySearchType}>
+     * @return \Iterator<string, array{string, DirectorySearchType}>
      */
-    public static function validSearchValuesProvider(): array
+    public static function validSearchValuesProvider(): \Iterator
     {
-        return [
-            'typical email' => ['example@northwestern.edu', DirectorySearchType::Email],
-            'another email format' => ['user@domain.com', DirectorySearchType::Email],
-            'complex email' => ['test.email+tag@example.org', DirectorySearchType::Email],
-            'employee ID 7 digits' => ['1234567', DirectorySearchType::EmployeeId],
-            'netid alphanumeric' => ['abc123', DirectorySearchType::NetId],
-            'netid short' => ['abc', DirectorySearchType::NetId],
-            'netid long' => ['abcd1234', DirectorySearchType::NetId],
-            'netid with hyphens' => ['test-user', DirectorySearchType::NetId],
-            'netid longer format' => ['missing-mail-format', DirectorySearchType::NetId],
-            'netid alphabetic only' => ['notanemail', DirectorySearchType::NetId],
-        ];
+        yield 'typical email' => ['example@northwestern.edu', DirectorySearchType::Email];
+        yield 'another email format' => ['user@domain.com', DirectorySearchType::Email];
+        yield 'complex email' => ['test.email+tag@example.org', DirectorySearchType::Email];
+        yield 'employee ID 7 digits' => ['1234567', DirectorySearchType::EmployeeId];
+        yield 'netid alphanumeric' => ['abc123', DirectorySearchType::NetId];
+        yield 'netid short' => ['abc', DirectorySearchType::NetId];
+        yield 'netid long' => ['abcd1234', DirectorySearchType::NetId];
+        yield 'netid with hyphens' => ['test-user', DirectorySearchType::NetId];
+        yield 'netid longer format' => ['missing-mail-format', DirectorySearchType::NetId];
+        yield 'netid alphabetic only' => ['notanemail', DirectorySearchType::NetId];
     }
 
     /**
-     * @return array<string, array{string, string}>
+     * @return \Iterator<string, array{string, string}>
      */
-    public static function invalidSearchValuesProvider(): array
+    public static function invalidSearchValuesProvider(): \Iterator
     {
-        return [
-            'empty string' => ['', 'Search value cannot be empty'],
-            'whitespace only' => ['   ', 'Search value cannot be empty'],
-        ];
+        yield 'empty string' => ['', 'Search value cannot be empty'];
+        yield 'whitespace only' => ['   ', 'Search value cannot be empty'];
     }
 }

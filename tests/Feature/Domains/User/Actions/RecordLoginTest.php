@@ -13,7 +13,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(RecordLogin::class)]
-class RecordLoginTest extends TestCase
+final class RecordLoginTest extends TestCase
 {
     public function test_creates_login_record_with_request_metadata(): void
     {

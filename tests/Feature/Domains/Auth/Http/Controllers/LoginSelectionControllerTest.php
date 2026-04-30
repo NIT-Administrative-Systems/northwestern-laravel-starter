@@ -10,7 +10,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(LoginSelectionController::class)]
-class LoginSelectionControllerTest extends TestCase
+final class LoginSelectionControllerTest extends TestCase
 {
     protected function setUp(): void
     {

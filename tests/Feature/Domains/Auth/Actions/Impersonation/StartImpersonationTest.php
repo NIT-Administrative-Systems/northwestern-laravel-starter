@@ -13,7 +13,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\TestCase;
 
 #[CoversClass(StartImpersonation::class)]
-class StartImpersonationTest extends TestCase
+final class StartImpersonationTest extends TestCase
 {
     public function test_user_cannot_impersonate_throws_403(): void
     {
@@ -32,7 +32,7 @@ class StartImpersonationTest extends TestCase
             $this->fail('Expected exception to be thrown');
         } catch (\Throwable $e) {
             $this->assertInstanceOf(HttpException::class, $e);
-            $this->assertEquals(403, $e->getStatusCode());
+            $this->assertSame(403, $e->getStatusCode());
         }
     }
 
@@ -63,7 +63,7 @@ class StartImpersonationTest extends TestCase
             $this->fail('Expected exception to be thrown');
         } catch (\Throwable $e) {
             $this->assertInstanceOf(HttpException::class, $e);
-            $this->assertEquals(403, $e->getStatusCode());
+            $this->assertSame(403, $e->getStatusCode());
         }
     }
 
@@ -95,7 +95,7 @@ class StartImpersonationTest extends TestCase
             $this->fail('Expected exception to be thrown');
         } catch (\Throwable $e) {
             $this->assertInstanceOf(HttpException::class, $e);
-            $this->assertEquals(403, $e->getStatusCode());
+            $this->assertSame(403, $e->getStatusCode());
         }
     }
 
@@ -130,7 +130,7 @@ class StartImpersonationTest extends TestCase
             $this->fail('Expected exception to be thrown');
         } catch (\Throwable $e) {
             $this->assertInstanceOf(HttpException::class, $e);
-            $this->assertEquals(404, $e->getStatusCode());
+            $this->assertSame(404, $e->getStatusCode());
         }
     }
 
@@ -172,7 +172,7 @@ class StartImpersonationTest extends TestCase
         $action = new StartImpersonation($managerMock);
         $redirectUrl = $action($userMock, 2, 'web');
 
-        $this->assertEquals('https://example.com/dashboard', $redirectUrl);
+        $this->assertSame('https://example.com/dashboard', $redirectUrl);
     }
 
     public function test_user_that_cannot_be_impersonated_redirects_back(): void
@@ -212,6 +212,6 @@ class StartImpersonationTest extends TestCase
         $action = new StartImpersonation($managerMock);
         $redirectUrl = $action($userMock, 2, 'web');
 
-        $this->assertEquals('back', $redirectUrl);
+        $this->assertSame('back', $redirectUrl);
     }
 }

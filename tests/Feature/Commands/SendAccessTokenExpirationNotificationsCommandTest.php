@@ -14,7 +14,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(SendAccessTokenExpirationNotificationsCommand::class)]
-class SendAccessTokenExpirationNotificationsCommandTest extends TestCase
+final class SendAccessTokenExpirationNotificationsCommandTest extends TestCase
 {
     protected function setUp(): void
     {

@@ -10,7 +10,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(RandomNumericOneTimeCodeGenerator::class)]
-class RandomNumericOneTimeCodeGeneratorTest extends TestCase
+final class RandomNumericOneTimeCodeGeneratorTest extends TestCase
 {
     private RandomNumericOneTimeCodeGenerator $generator;
 

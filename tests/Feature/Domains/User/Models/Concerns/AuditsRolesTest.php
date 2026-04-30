@@ -15,7 +15,7 @@ use PHPUnit\Framework\Attributes\CoversTrait;
 use Tests\TestCase;
 
 #[CoversTrait(AuditsRoles::class)]
-class AuditsRolesTest extends TestCase
+final class AuditsRolesTest extends TestCase
 {
     private User $user;
 
@@ -117,7 +117,7 @@ class AuditsRolesTest extends TestCase
             ->first();
 
         $this->assertNotNull($audit);
-        $this->assertStringContainsString('ui-action', $audit->tags);
+        $this->assertStringContainsString('ui-action', (string) $audit->tags);
     }
 
     public function test_audit_includes_context_as_tags(): void
@@ -130,8 +130,8 @@ class AuditsRolesTest extends TestCase
             ->first();
 
         $this->assertNotNull($audit);
-        $this->assertStringContainsString('system', $audit->tags);
-        $this->assertStringContainsString('reason: test', $audit->tags);
+        $this->assertStringContainsString('system', (string) $audit->tags);
+        $this->assertStringContainsString('reason: test', (string) $audit->tags);
     }
 
     public function test_assign_role_with_audit_accepts_array_of_roles(): void

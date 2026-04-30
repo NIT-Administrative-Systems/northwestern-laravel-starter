@@ -11,7 +11,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(SupportTicketMessage::class)]
-class SupportTicketMessageTest extends TestCase
+final class SupportTicketMessageTest extends TestCase
 {
     public function test_build_sets_subject_markdown_and_view_data_for_primary_email(): void
     {

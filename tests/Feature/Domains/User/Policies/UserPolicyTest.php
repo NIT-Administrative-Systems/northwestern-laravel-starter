@@ -11,7 +11,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(UserPolicy::class)]
-class UserPolicyTest extends TestCase
+final class UserPolicyTest extends TestCase
 {
     public function test_allows_user_to_view_self(): void
     {

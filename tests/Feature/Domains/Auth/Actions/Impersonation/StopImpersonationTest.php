@@ -15,7 +15,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(StopImpersonation::class)]
-class StopImpersonationTest extends TestCase
+final class StopImpersonationTest extends TestCase
 {
     public function test_stop_impersonation(): void
     {
@@ -36,7 +36,7 @@ class StopImpersonationTest extends TestCase
         $stopImpersonation = new StopImpersonation(resolve('impersonate'));
         $redirectTo = $stopImpersonation();
 
-        $this->assertEquals('/', $redirectTo);
+        $this->assertSame('/', $redirectTo);
         $this->assertFalse($staffUser->isImpersonated());
 
         Event::assertDispatched(LeaveImpersonation::class);

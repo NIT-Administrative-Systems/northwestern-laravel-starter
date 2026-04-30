@@ -12,7 +12,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(WildcardPhotoController::class)]
-class WildcardPhotoControllerTest extends TestCase
+final class WildcardPhotoControllerTest extends TestCase
 {
     private User $user;
 

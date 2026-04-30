@@ -11,7 +11,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(LogoutSelectionController::class)]
-class LogoutSelectionControllerTest extends TestCase
+final class LogoutSelectionControllerTest extends TestCase
 {
     protected function setUp(): void
     {

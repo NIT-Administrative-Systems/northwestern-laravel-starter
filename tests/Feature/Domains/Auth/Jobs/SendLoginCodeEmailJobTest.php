@@ -15,7 +15,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(SendLoginCodeEmailJob::class)]
-class SendLoginCodeEmailJobTest extends TestCase
+final class SendLoginCodeEmailJobTest extends TestCase
 {
     protected function setUp(): void
     {

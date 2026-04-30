@@ -15,7 +15,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(PersistUserWithUniqueUsername::class)]
-class PersistUserWithUniqueUsernameTest extends TestCase
+final class PersistUserWithUniqueUsernameTest extends TestCase
 {
     public function test_it_saves_user_if_username_is_unique(): void
     {

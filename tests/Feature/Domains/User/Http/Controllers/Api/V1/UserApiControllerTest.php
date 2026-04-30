@@ -10,7 +10,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\ApiTestCase;
 
 #[CoversClass(UserApiController::class)]
-class UserApiControllerTest extends ApiTestCase
+final class UserApiControllerTest extends ApiTestCase
 {
     public function endpoint(): string
     {

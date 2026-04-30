@@ -12,7 +12,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(LogImpersonationAccess::class)]
-class LogImpersonationAccessTest extends TestCase
+final class LogImpersonationAccessTest extends TestCase
 {
     public function test_impersonation_log_is_created(): void
     {

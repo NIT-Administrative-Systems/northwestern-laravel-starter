@@ -9,7 +9,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(DirectorySearchValidator::class)]
-class DirectorySearchValidatorTest extends TestCase
+final class DirectorySearchValidatorTest extends TestCase
 {
     public function test_should_always_run(): void
     {

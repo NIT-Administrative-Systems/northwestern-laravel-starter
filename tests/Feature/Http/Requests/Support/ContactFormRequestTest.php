@@ -10,7 +10,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(ContactFormRequest::class)]
-class ContactFormRequestTest extends TestCase
+final class ContactFormRequestTest extends TestCase
 {
     public function test_authorize_returns_true(): void
     {

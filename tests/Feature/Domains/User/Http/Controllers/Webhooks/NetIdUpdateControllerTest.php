@@ -18,7 +18,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(NetIdUpdateController::class)]
-class NetIdUpdateControllerTest extends TestCase
+final class NetIdUpdateControllerTest extends TestCase
 {
     use MocksEventHub, RefreshDatabase, WithoutMiddleware;
 

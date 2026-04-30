@@ -11,7 +11,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(ChangelogController::class)]
-class ChangelogControllerTest extends TestCase
+final class ChangelogControllerTest extends TestCase
 {
     protected function setUp(): void
     {

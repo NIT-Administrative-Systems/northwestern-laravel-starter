@@ -13,7 +13,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(SupportTicketRepository::class)]
-class SupportTicketRepositoryTest extends TestCase
+final class SupportTicketRepositoryTest extends TestCase
 {
     public function test_create_persists_ticket_with_user_association(): void
     {

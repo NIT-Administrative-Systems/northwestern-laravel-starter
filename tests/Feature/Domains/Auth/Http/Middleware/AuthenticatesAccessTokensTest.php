@@ -19,7 +19,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 #[CoversClass(AuthenticatesAccessTokens::class)]
-class AuthenticatesAccessTokensTest extends TestCase
+final class AuthenticatesAccessTokensTest extends TestCase
 {
     private string $endpoint = '/api/test';
 
@@ -101,16 +101,14 @@ class AuthenticatesAccessTokensTest extends TestCase
         );
     }
 
-    /** @return array<string, array{0: string|null, 1: ApiRequestFailure}> */
-    public static function malformedAuthHeaderProvider(): array
+    /** @return \Iterator<string, array{(string | null), ApiRequestFailure}> */
+    public static function malformedAuthHeaderProvider(): \Iterator
     {
-        return [
-            'no header' => [null, ApiRequestFailure::InvalidHeaderFormat],
-            'empty header' => ['', ApiRequestFailure::InvalidHeaderFormat],
-            'wrong scheme' => ['Basic abc123', ApiRequestFailure::InvalidHeaderFormat],
-            'bearer with no token' => ['Bearer', ApiRequestFailure::InvalidHeaderFormat],
-            'bearer with space only' => ['Bearer   ', ApiRequestFailure::MissingCredentials],
-        ];
+        yield 'no header' => [null, ApiRequestFailure::InvalidHeaderFormat];
+        yield 'empty header' => ['', ApiRequestFailure::InvalidHeaderFormat];
+        yield 'wrong scheme' => ['Basic abc123', ApiRequestFailure::InvalidHeaderFormat];
+        yield 'bearer with no token' => ['Bearer', ApiRequestFailure::InvalidHeaderFormat];
+        yield 'bearer with space only' => ['Bearer   ', ApiRequestFailure::MissingCredentials];
     }
 
     public function test_unknown_token_is_rejected(): void
@@ -203,21 +201,18 @@ class AuthenticatesAccessTokensTest extends TestCase
         ]);
     }
 
-    /** @return array<string, array{0: array<string, mixed>}> */
-    public static function invalidTokenProvider(): array
+    /** @return \Iterator<string, array{array<string, mixed>}> */
+    public static function invalidTokenProvider(): \Iterator
     {
         $now = CarbonImmutable::parse('2025-05-16 09:00');
-
-        return [
-            'expired token' => [
-                [
-                    'expires_at' => $now->subDay(),
-                ],
+        yield 'expired token' => [
+            [
+                'expires_at' => $now->subDay(),
             ],
-            'revoked token' => [
-                [
-                    'revoked_at' => $now->subHour(),
-                ],
+        ];
+        yield 'revoked token' => [
+            [
+                'revoked_at' => $now->subHour(),
             ],
         ];
     }

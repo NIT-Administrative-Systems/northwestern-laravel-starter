@@ -21,7 +21,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(TeamDynamixGateway::class)]
-class TeamDynamixGatewayTest extends TestCase
+final class TeamDynamixGatewayTest extends TestCase
 {
     protected function setUp(): void
     {

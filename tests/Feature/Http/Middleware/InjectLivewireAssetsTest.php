@@ -11,7 +11,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(InjectLivewireAssets::class)]
-class InjectLivewireAssetsTest extends TestCase
+final class InjectLivewireAssetsTest extends TestCase
 {
     public function test_it_calls_livewire_force_asset_injection(): void
     {

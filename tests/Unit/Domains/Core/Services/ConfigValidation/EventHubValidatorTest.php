@@ -9,7 +9,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(EventHubValidator::class)]
-class EventHubValidatorTest extends TestCase
+final class EventHubValidatorTest extends TestCase
 {
     public function test_should_not_run_when_mock_mode_is_enabled(): void
     {

@@ -11,7 +11,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(HomeController::class)]
-class HomeControllerTest extends TestCase
+final class HomeControllerTest extends TestCase
 {
     protected function setUp(): void
     {
