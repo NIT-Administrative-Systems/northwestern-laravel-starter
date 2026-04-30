@@ -103,7 +103,7 @@
         ],
         "rector": "vendor/bin/rector process --ansi",
         "rector:dry": "vendor/bin/rector process --dry-run --ansi",
-        "format:php": "vendor/bin/pint --ansi",
+        "format:php": "vendor/bin/pint --parallel --ansi",
         "format:frontend": "pnpm run format",
         "analyse:php": "vendor/bin/phpstan analyse --memory-limit=2G",
         "test:update-shards": "@php -d memory_limit=-1 ./vendor/bin/pest --update-shards --colors=always",
