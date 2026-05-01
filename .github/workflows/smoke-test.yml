@@ -73,7 +73,7 @@ jobs:
           ini-values: memory_limit=-1
 
       - name: 📦 Setup pnpm
-        uses: pnpm/action-setup@v5
+        uses: pnpm/action-setup@v6
         with:
           version: ${{ env.PNPM_VERSION }}
 
