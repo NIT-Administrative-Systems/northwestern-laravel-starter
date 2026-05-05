@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [v2.1.1] - 2026-05-05
+
+### Changed
+
+- Updated Rector's PHPUnit configuration to use composer-aware PHPUnit rules and the PHPUnit code-quality prepared set, then refreshed affected tests with the resulting provider and assertion modernizations.
+- Changed the Composer `format:php` script to run Pint with `--parallel`.
+
 ## [v2.1.0] - 2026-04-27
 
 ### Changed
@@ -726,7 +733,8 @@ First stable release. For installation, configuration, and usage guides, visit t
 - **CI pipeline**: GitHub Actions workflow with PHP/Node setup, database provisioning, Pest and Cypress test execution; Dependabot configuration.
 - **Developer tooling**: `.editorconfig`, `.prettierrc`, `.nvmrc` (Node v24), custom stubs, Rector configuration.
 
-[Unreleased]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.1.1...HEAD
+[v2.1.1]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.1.0...v2.1.1
 [v2.1.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.0.0...v2.1.0
 [v2.0.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.17.0...v2.0.0
 [v1.17.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v1.16.0...v1.17.0
