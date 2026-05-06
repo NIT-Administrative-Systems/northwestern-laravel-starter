@@ -70,7 +70,7 @@ class Select extends Component
     /** @var string The plural noun for option counting. */
     public string $optionCountPluralNoun;
 
-    /** @var int Default maximum number of options to display in the dropdown. */
+    /** @var ?int Default maximum number of options to display in the dropdown. */
     public const DEFAULT_MAX_OPTIONS = 30;
 
     /**
