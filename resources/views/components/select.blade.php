@@ -5,9 +5,7 @@
            id="label-{{ $id }}"
            for="{{ $id }}">Select an option</label>
     <select id="{{ $id }}"
-            role="combobox"
             aria-labelledby="label-{{ $id }}"
-            aria-expanded="false"
             wire:key="select-{{ $id }}"
             {{ $attributes->merge(['class' => 'form-select']) }}
             autocomplete="off"
