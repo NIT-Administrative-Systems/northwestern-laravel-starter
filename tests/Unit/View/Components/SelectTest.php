@@ -254,6 +254,12 @@ final class SelectTest extends TestCase
         $this->assertNull($component->getTomSelectConfig()['maxOptions']);
     }
 
+    public function test_null_max_options_renders_as_javascript_null(): void
+    {
+        $this->blade('<x-select id="test" :options="[]" search-url="/api/search" :max-options="null" />')
+            ->assertSee('l: null,', false);
+    }
+
     public function test_max_options_casts_string_to_int(): void
     {
         $component = new Select('test', [], maxOptions: '75');
