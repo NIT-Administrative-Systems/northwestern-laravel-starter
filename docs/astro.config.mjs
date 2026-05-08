@@ -23,27 +23,27 @@ export default defineNorthwesternConfig({
 		sidebar: [
 			{
 				label: 'Getting Started',
-				autogenerate: { directory: 'getting-started' },
+				items: [{ autogenerate: { directory: 'getting-started' } }],
 			},
 			{
 				label: 'Architecture',
-				autogenerate: { directory: 'architecture' },
+				items: [{ autogenerate: { directory: 'architecture' } }],
 			},
 			{
 				label: 'Features',
-				autogenerate: { directory: 'features' },
+				items: [{ autogenerate: { directory: 'features' } }],
 			},
 			{
 				label: 'Northwestern Integrations',
-				autogenerate: { directory: 'northwestern-integrations' },
+				items: [{ autogenerate: { directory: 'northwestern-integrations' } }],
 			},
 			{
 				label: 'Guides',
-				autogenerate: { directory: 'guides' },
+				items: [{ autogenerate: { directory: 'guides' } }],
 			},
 			{
 				label: 'Reference',
-				autogenerate: { directory: 'reference' },
+				items: [{ autogenerate: { directory: 'reference' } }],
 			},
 			...openAPISidebarGroups,
 		],

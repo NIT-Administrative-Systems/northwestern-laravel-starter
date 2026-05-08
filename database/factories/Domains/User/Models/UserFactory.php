@@ -40,7 +40,10 @@ class UserFactory extends Factory
         ];
     }
 
-    public function configure(): static
+    /**
+     * @return static
+     */
+    public function configure()
     {
         return $this->afterCreating(function (User $user) {
             if ($user->auth_type === AuthType::SSO) {
