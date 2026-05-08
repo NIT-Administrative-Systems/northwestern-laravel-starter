@@ -36,7 +36,7 @@
                 loadCallback(query, callback) {
                     const params = new URLSearchParams({
                         q: query,
-                        l: {{ $maxOptions() }}
+                        l: {{ \Illuminate\Support\Js::encode($maxOptions()) }},
                     });
 
                     fetch("{{ $searchUrl }}?" + params.toString(), {
