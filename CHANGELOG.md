@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [v2.1.3] - 2026-06-04
+
+### Changed
+
+- Updated PHP dependencies, including Laravel `13.13.0`, Filament `5.6.6`, Livewire `4.3.1`, Pest `4.7.2`, PHPUnit `12.5.28`, Rector `2.4.5`, and related transitive packages. Filament frontend assets were republished after the package update.
+- Updated `spatie/laravel-permission` from `7.4.1` to `8.0.0`.
+- Updated frontend dependencies, including Vite `8.0.16`, Tom Select `2.6.1`, Cypress `15.16.0`, `@sentry/browser` `10.55.0`, Tailwind CSS `4.3.0`, Sass `1.100.0`, and related tooling.
+- Updated the documentation site to Astro `6.4.2`, Starlight `0.39.2`, Mermaid `11.15.0`, Vite `8.0.16`, and `starlight-openapi` `0.25.3`.
+- Updated GitHub Actions dependencies: `pnpm/action-setup` from `v5` to `v6` in the shared setup action and `clearlyip/code-coverage-report-action` from `v6` to `v7`.
+
 ## [v2.1.2] - 2026-05-08
 
 ### Fixed
@@ -748,7 +758,8 @@ First stable release. For installation, configuration, and usage guides, visit t
 - **CI pipeline**: GitHub Actions workflow with PHP/Node setup, database provisioning, Pest and Cypress test execution; Dependabot configuration.
 - **Developer tooling**: `.editorconfig`, `.prettierrc`, `.nvmrc` (Node v24), custom stubs, Rector configuration.
 
-[Unreleased]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.1.2...HEAD
+[Unreleased]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.1.3...HEAD
+[v2.1.3]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.1.2...v2.1.3
 [v2.1.2]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.1.1...v2.1.2
 [v2.1.1]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.1.0...v2.1.1
 [v2.1.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.0.0...v2.1.0
