@@ -427,7 +427,7 @@ jobs:
 
       - name: 📊 Generate Coverage Report
         id: coverage
-        uses: clearlyip/code-coverage-report-action@v6
+        uses: clearlyip/code-coverage-report-action@v7
         with:
           filename: .build/clover.xml
           artifact_download_workflow_names: "Check PR"
