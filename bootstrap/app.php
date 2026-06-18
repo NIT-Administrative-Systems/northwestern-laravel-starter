@@ -9,6 +9,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Northwestern\SysDev\Chassis\Database\DatabasePausedDetector;
 use Northwestern\SysDev\Chassis\Exceptions\ProblemDetailsRenderer;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -35,9 +36,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->throttleApi();
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        // Database timeout errors (custom handling for web)
-        $exceptions->render(function (PDOException $e): ?Response {
-            if (str_contains($e->getMessage(), 'timeout expired')) {
+        // Database pause errors (custom handling for web)
+        $exceptions->render(function (Throwable $e, Request $request): ?Response {
+            if (resolve(DatabasePausedDetector::class)->causedByPausedDatabase($e)) {
                 return response()->view('errors.database-paused', [], 500);
             }
 
@@ -45,8 +46,12 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         // Skip reporting database timeout noise in non-production environments - these are common when RDS is waking up
-        $exceptions->report(function (PDOException $e): bool {
-            return ! (! app()->environment('production') && str_contains($e->getMessage(), 'timeout expired'));
+        $exceptions->report(function (Throwable $e): bool {
+            if (app()->environment('production')) {
+                return true;
+            }
+
+            return ! resolve(DatabasePausedDetector::class)->causedByPausedDatabase($e);
         });
 
         $exceptions->reportable(function (Throwable $e) {
