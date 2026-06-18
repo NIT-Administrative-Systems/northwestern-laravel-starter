@@ -1,7 +1,11 @@
 import * as fs from "node:fs";
 
+function shouldSwapEnvFiles(): boolean {
+    return !process.env.CI;
+}
+
 export function activateCypressEnvFile() {
-    if (fs.existsSync(".env.cypress")) {
+    if (shouldSwapEnvFiles() && fs.existsSync(".env.cypress")) {
         fs.renameSync(".env", ".env.backup");
         fs.renameSync(".env.cypress", ".env");
     }
@@ -10,7 +14,7 @@ export function activateCypressEnvFile() {
 }
 
 export function activateLocalEnvFile() {
-    if (fs.existsSync(".env.backup")) {
+    if (shouldSwapEnvFiles() && fs.existsSync(".env.backup")) {
         fs.renameSync(".env", ".env.cypress");
         fs.renameSync(".env.backup", ".env");
     }
