@@ -3,7 +3,7 @@ name: Deploy Documentation
 env:
   DOCS_CNAME: 'laravel-starter.entapp.northwestern.edu'
   NODE_VERSION: '25'
-  PNPM_VERSION: '10.x.x'
+  PNPM_VERSION: '11.x.x'
 
 on:
   push:
@@ -22,7 +22,7 @@ jobs:
 
     steps:
       - name: 📂 Checkout Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.ref_name }}
 

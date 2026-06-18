@@ -3,7 +3,7 @@ run-name: "Smoke Test | ${{ inputs.version || github.event.release.tag_name || f
 
 env:
   NODE_VERSION: '25'
-  PNPM_VERSION: '10.x.x'
+  PNPM_VERSION: '11.x.x'
   PHP_VERSION: '8.5'
 
 on:
