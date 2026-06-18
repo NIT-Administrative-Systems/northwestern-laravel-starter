@@ -6,6 +6,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [v2.2.0] - 2026-06-18
+
+### Added
+
+- Adopted `northwestern-sysdev/chassis` `v1.1.1` database pause detection in the application exception bootstrap. RDS/Aurora Serverless wake-up failures, including Blade-wrapped `ViewException` instances, now render the branded `errors.database-paused` response instead of falling through to the generic 500 page. A PHPUnit feature test covers the wrapped PostgreSQL timeout path.
+
+### Changed
+
+- Updated PHP dependencies, including Laravel `13.16.1`, Filament `5.6.7`, `northwestern-sysdev/chassis` `v1.1.1`, `northwestern-sysdev/northwestern-filament-theme` `v3.0.2`, `sentry/sentry-laravel` `4.26.0`, and related transitive packages. Filament frontend assets were republished after the package update.
+- Updated frontend dependencies, including `@pierre/diffs` `1.2.11`, `@sentry/browser` `10.58.0`, Cypress `15.17.0`, Axios `1.18.0`, Tailwind CSS `4.3.1`, Sass `1.101.0`, Prettier `3.8.4`, and related tooling. The root workspace now targets pnpm `11.x` and records explicit build approvals for packages that need install-time scripts.
+- Updated the documentation site to Starlight `0.40.0`, Astro `6.4.8`, `astro-mermaid` `2.0.4`, Sharp `0.35.1`, and `starlight-links-validator` `0.24.1`. Installation docs now reference pnpm `latest-11`, and the deployment guide was reformatted with the current docs formatter.
+- Updated GitHub Actions workflow maintenance dependencies, including `actions/checkout` from `v6` to `v7` and pnpm setup from `10.x.x` to `11.x.x` across PR checks, documentation deployment, smoke tests, and release automation.
+- Changed Cypress environment swapping so `.env` / `.env.cypress` file renames only happen during local runs. CI keeps the provisioned environment in place, which allows Chassis database snapshot commands to restore the intended test database instead of accidentally switching to the local Cypress environment file.
+
+### Removed
+
+- Removed the scheduled Pest shard refresh workflow and the `composer test:update-shards` script now that shard timing maintenance is no longer part of the starter template.
+
 ## [v2.1.3] - 2026-06-04
 
 ### Changed
@@ -758,7 +776,8 @@ First stable release. For installation, configuration, and usage guides, visit t
 - **CI pipeline**: GitHub Actions workflow with PHP/Node setup, database provisioning, Pest and Cypress test execution; Dependabot configuration.
 - **Developer tooling**: `.editorconfig`, `.prettierrc`, `.nvmrc` (Node v24), custom stubs, Rector configuration.
 
-[Unreleased]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.1.3...HEAD
+[Unreleased]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.2.0...HEAD
+[v2.2.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.1.3...v2.2.0
 [v2.1.3]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.1.2...v2.1.3
 [v2.1.2]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.1.1...v2.1.2
 [v2.1.1]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.1.0...v2.1.1

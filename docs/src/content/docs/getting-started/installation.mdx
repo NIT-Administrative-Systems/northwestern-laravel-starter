@@ -5,7 +5,7 @@ sidebar:
     order: 3
 ---
 
-import { Steps, Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+import { Steps, Aside, Tabs, TabItem } from "@astrojs/starlight/components";
 
 ## Initial Setup
 
@@ -76,6 +76,7 @@ The application expects specific services to exist before you can begin local de
         - name: northwestern-laravel-starter
         + name: your-project-name
         ```
+
 </Steps>
 
 ### 4. Install Dependencies
@@ -90,7 +91,7 @@ php artisan key:generate
 
 nvm install
 nvm use v25
-npm install -g pnpm@latest-10 # If pnpm is not already installed
+npm install -g pnpm@latest-11 # If pnpm is not already installed
 
 pnpm install
 pnpm build
@@ -115,6 +116,7 @@ In your **LOCAL** `.env` file, configure credentials depending on your authentic
     <Aside type="tip">
     `AZURE_CLIENT_ID` can also be set in `.env.example` as a shared default for your team.
     </Aside>
+
   </TabItem>
 
   <TabItem label="Online Passport (WebSSO)" icon="seti:lock">
@@ -132,6 +134,7 @@ In your **LOCAL** `.env` file, configure credentials depending on your authentic
     <Aside type="tip">
     Setting `WEBSSO_API_KEY` automatically switches the starter from Entra ID to Online Passport. See the [WebSSO / Entra ID](/northwestern-integrations/websso/#online-passport-configuration) docs for additional configuration options like `WEBSSO_STRATEGY` and `DUO_ENABLED`.
     </Aside>
+
   </TabItem>
 </Tabs>
 
@@ -178,4 +181,3 @@ php artisan serve
 ```
 
 Visit the application in your browser. You should see the homepage.
-
