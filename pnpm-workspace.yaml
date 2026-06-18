@@ -1,1 +1,6 @@
-minimumReleaseAge: 4320
+allowBuilds:
+  '@parcel/watcher': true
+  '@sentry/cli': true
+  core-js-pure: false
+  cypress: true
+  esbuild: true
