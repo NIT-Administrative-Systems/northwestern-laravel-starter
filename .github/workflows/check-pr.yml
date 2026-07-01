@@ -70,7 +70,7 @@ jobs:
           cache: pnpm
 
       - name: 📷 pnpm Dependencies Cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: |
             docs/node_modules
@@ -182,7 +182,7 @@ jobs:
           build-frontend-assets: false
 
       - name: 📷 Rector Cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: /tmp/rector
           key: ${{ runner.os }}-rector-${{ hashFiles('rector.php', 'composer.lock') }}
@@ -190,7 +190,7 @@ jobs:
             ${{ runner.os }}-rector-
 
       - name: 📷 Pint Cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ./storage/pint.cache
           key: ${{ runner.os }}-pint-${{ hashFiles('pint.json', 'composer.lock') }}
@@ -198,7 +198,7 @@ jobs:
             ${{ runner.os }}-pint-
 
       - name: 📷 Prettier Cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: |
             node_modules/.cache/prettier
@@ -254,7 +254,7 @@ jobs:
         run: git restore 'app/Domains/*/Models/*.php'
 
       - name: 📷 PHPStan Result Cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: /tmp/phpstan
           key: phpstan-results-${{ hashFiles('phpstan.neon', 'composer.lock') }}
@@ -323,7 +323,7 @@ jobs:
           coverage: pcov
 
       - name: 📷 PHPUnit Cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ./.phpunit.cache
           key: ${{ runner.os }}-phpunit-${{ hashFiles('phpunit.xml', 'composer.lock') }}
@@ -499,7 +499,7 @@ jobs:
 
       - name: 📷 Minio Client Cache
         id: mc-cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ./mc
           key: minio-mc-linux-amd64
