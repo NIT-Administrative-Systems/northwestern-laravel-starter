@@ -27,9 +27,6 @@ class SupportTicketConfirmation extends Mailable implements ShouldQueue
         //
     }
 
-    /**
-     * @return $this
-     */
     public function build(): static
     {
         return $this->subject(sprintf(

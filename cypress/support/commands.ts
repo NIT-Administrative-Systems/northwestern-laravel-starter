@@ -82,3 +82,16 @@ Cypress.Commands.add("checkAxeViolations", () => {
         cy.checkA11y();
     }
 });
+
+Cypress.Commands.add("registerStandardIntercepts", () => {
+    cy.intercept({ url: "/livewire/update", method: "POST" }).as(
+        "livewireUpdate",
+    );
+
+    cy.intercept("/broadcasting/auth", (req) => {
+        req.reply({
+            statusCode: 200,
+            body: {},
+        });
+    }).as("broadcastAuthBlocker");
+});

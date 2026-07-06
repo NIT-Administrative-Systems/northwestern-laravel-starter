@@ -205,5 +205,13 @@ declare namespace Cypress {
             selector: string,
             ...args: [options?: GetCommandOptions]
         ): Chainable<JQuery<HTMLElement>>;
+
+        /**
+         * Registers standard URL intercepts that are used by most tests:
+         *
+         *  - @livewireUpdate hooks the /livewire/update route that all components communicate with.
+         *  - @broadcastAuthBlocker hooks /broadcasting/auth to disable the constant spam of 403s.
+         */
+        registerStandardIntercepts(): void;
     }
 }
