@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [v2.3.0] - 2026-07-06
+
+### Changed
+
+- Updated PHP dependencies, including Laravel `13.18.1`, Filament `5.6.8`, Livewire `4.3.3`, `spatie/laravel-permission` `8.3.0`, `zircote/swagger-php` `6.3.1`, `northwestern-sysdev/chassis` `v1.1.2`, `owen-it/laravel-auditing` `v14.0.6`, `league/flysystem-aws-s3-v3` `3.35.2`, Pest `4.7.4`, PHPUnit `12.5.30`, Rector `2.5.4`, and related transitive packages. Filament frontend assets were republished after the package update.
+- Modernized three application classes with the updated Rector ruleset: `FilesystemValidator` now type-hints the closure parameter passed to `array_all`, and the `SupportTicketConfirmation` and `SupportTicketMessage` mailables drop their redundant `@return $this` docblocks now that `build(): static` declares the return type.
+- Updated frontend dependencies, including Vite `8.1.3`, `@sentry/browser` `10.63.0`, Cypress `15.18.0`, Tailwind CSS `4.3.2`, `@fortawesome/fontawesome-free` `7.3.0`, Axios `1.18.1`, Prettier `3.9.4`, and related tooling.
+- Updated the documentation site to Astro `7.0.6`, Starlight `0.41.3`, `astro-mermaid` `2.1.0`, Mermaid `11.16.0`, Sharp `0.35.3`, `starlight-links-validator` `0.25.2`, and `starlight-openapi` `0.26.0`.
+
 ## [v2.2.0] - 2026-06-18
 
 ### Added
@@ -776,7 +785,8 @@ First stable release. For installation, configuration, and usage guides, visit t
 - **CI pipeline**: GitHub Actions workflow with PHP/Node setup, database provisioning, Pest and Cypress test execution; Dependabot configuration.
 - **Developer tooling**: `.editorconfig`, `.prettierrc`, `.nvmrc` (Node v24), custom stubs, Rector configuration.
 
-[Unreleased]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.2.0...HEAD
+[Unreleased]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.3.0...HEAD
+[v2.3.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.2.0...v2.3.0
 [v2.2.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.1.3...v2.2.0
 [v2.1.3]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.1.2...v2.1.3
 [v2.1.2]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.1.1...v2.1.2
