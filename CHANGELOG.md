@@ -8,12 +8,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [v2.3.0] - 2026-07-06
 
+### Added
+
+- Added a `registerStandardIntercepts()` Cypress command that aliases the `/livewire/update` route as `@livewireUpdate` and stubs `/broadcasting/auth` as `@broadcastAuthBlocker`, replying `200` to silence the recurring broadcast-auth `403` responses during end-to-end runs.
+
 ### Changed
 
 - Updated PHP dependencies, including Laravel `13.18.1`, Filament `5.6.8`, Livewire `4.3.3`, `spatie/laravel-permission` `8.3.0`, `zircote/swagger-php` `6.3.1`, `northwestern-sysdev/chassis` `v1.1.2`, `owen-it/laravel-auditing` `v14.0.6`, `league/flysystem-aws-s3-v3` `3.35.2`, Pest `4.7.4`, PHPUnit `12.5.30`, Rector `2.5.4`, and related transitive packages. Filament frontend assets were republished after the package update.
 - Modernized three application classes with the updated Rector ruleset: `FilesystemValidator` now type-hints the closure parameter passed to `array_all`, and the `SupportTicketConfirmation` and `SupportTicketMessage` mailables drop their redundant `@return $this` docblocks now that `build(): static` declares the return type.
 - Updated frontend dependencies, including Vite `8.1.3`, `@sentry/browser` `10.63.0`, Cypress `15.18.0`, Tailwind CSS `4.3.2`, `@fortawesome/fontawesome-free` `7.3.0`, Axios `1.18.1`, Prettier `3.9.4`, and related tooling.
 - Updated the documentation site to Astro `7.0.6`, Starlight `0.41.3`, `astro-mermaid` `2.1.0`, Mermaid `11.16.0`, Sharp `0.35.3`, `starlight-links-validator` `0.25.2`, and `starlight-openapi` `0.26.0`.
+- Enabled Cypress `experimentalMemoryManagement` and capped `numTestsKeptInMemory` at `5` to reduce browser memory pressure across long end-to-end runs, and removed the per-suite `after()` hook that reactivated the local `.env` file and cleared cached config now that Cypress environment swapping is scoped to local runs.
 
 ## [v2.2.0] - 2026-06-18
 

@@ -28,11 +28,6 @@ before(() => {
     cy.refreshRoutes();
 });
 
-after(() => {
-    cy.task("activateLocalEnvFile", {}, { log: false });
-    cy.artisan("config:clear", {}, { log: false });
-});
-
 Cypress.on("uncaught:exception", (err, runnable) => {
     if (err.message.includes("is not valid JSON")) {
         return false;

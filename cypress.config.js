@@ -28,6 +28,8 @@ export default defineConfig({
     retries: {
         runMode: 2,
     },
+    experimentalMemoryManagement: true,
+    numTestsKeptInMemory: 5,
     video: false,
     watchForFileChanges: false,
     videosFolder: "cypress/videos",
