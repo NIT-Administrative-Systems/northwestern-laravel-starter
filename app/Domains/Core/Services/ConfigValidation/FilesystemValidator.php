@@ -87,6 +87,6 @@ class FilesystemValidator implements ConfigValidator
             'filesystems.disks.s3.bucket',
         ];
 
-        return array_all($requiredConfig, fn ($config) => filled(config($config)));
+        return array_all($requiredConfig, fn (string $config) => filled(config($config)));
     }
 }

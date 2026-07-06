@@ -28,9 +28,6 @@ class SupportTicketMessage extends Mailable implements ShouldQueue
         //
     }
 
-    /**
-     * @return $this
-     */
     public function build(): static
     {
         $user = $this->ticket->user;
