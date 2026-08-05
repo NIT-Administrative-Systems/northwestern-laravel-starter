@@ -22,7 +22,7 @@ class ForceDetachRoleCommand extends Command implements PromptsForMissingInput
         {--reason= : The reason for this emergency detachment}
         {--force : Skip confirmation prompt (for non-interactive environments)}';
 
-    protected $description = 'Emergency detach a role from a user, bypassing assignment lock, with audit trail';
+    protected $description ='Emergency detach a role from a user, bypassing assignment lock, with audit trail';
 
     public function handle(): int
     {
