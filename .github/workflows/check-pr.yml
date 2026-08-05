@@ -157,6 +157,7 @@ jobs:
     permissions:
         contents: write
         actions: read
+        checks: write
     services:
       postgres:
         image: postgres:16
