@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domains\Support\Models;
 
+use App\Domains\Core\Casts\MarkdownWithJiraLinksCast;
 use App\Domains\Core\Models\BaseModel;
-use App\Domains\Foundation\Casts\MarkdownWithJiraLinksCast;
 use App\Domains\Support\Seeders\ChangelogSeeder;
 use Database\Factories\Domains\Support\Models\ChangelogFactory;
 use Illuminate\Database\Eloquent\Builder;
