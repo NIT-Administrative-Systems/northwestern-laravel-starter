@@ -21,7 +21,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - Updated frontend dependencies, including Vite `8.2.1`, Cypress `15.20.1`, `@sentry/browser` `10.70.0`, Tailwind CSS `4.3.3`, `@pierre/diffs` `1.3.5`, `laravel-vite-plugin` `3.2.0`, Axios `1.19.0`, Sass `1.102.0`, Prettier `3.9.6`, `@fortawesome/fontawesome-free` `7.3.1`, and related tooling.
 - Updated the documentation site to Astro `7.2.1`, Starlight `0.41.7`, `@nu-appdev/northwestern-starlight-theme` `1.6.0`, Mermaid `11.16.1`, `starlight-links-validator` `0.25.3`, and `starlight-openapi` `0.26.1`.
 - Updated GitHub Actions dependencies: `actions/setup-node` from `v6` to `v7`, `actions/cache` from `v5` to `v6`, `lcollins/checkstyle-github-action` from `v3.2.0` to `v4.0.0`, and the commented OpenTofu validation examples to `opentofu/setup-opentofu@v2` and `borchero/terraform-plan-comment@v3`. The shared setup action now defaults to Node.js `26` and pnpm `11.x`, and the deployment guide's example workflow references the current action versions.
-- Removed the ADOES Bot personal access token from the PR check workflow; jobs now declare explicit `permissions` blocks and authenticate with the default `GITHUB_TOKEN`.
+- Removed the ADOES Bot personal access token from the PR check workflow; jobs now declare explicit `permissions` blocks and authenticate with the default `GITHUB_TOKEN`, including the scope detection, unit test result publishing, and coverage report jobs.
 
 ## [v2.3.0] - 2026-07-06
 

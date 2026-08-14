@@ -20,6 +20,9 @@ jobs:
     name: 🎯 Determine Scope
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+        contents: read
+        pull-requests: read
     outputs:
       iac: ${{ steps.changes.outputs.iac }}
       docs: ${{ steps.changes.outputs.docs }}
@@ -368,6 +371,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     if: always() && github.actor != 'dependabot[bot]' && needs.determine-scope.outputs.code == 'true'
+    permissions:
+        contents: read
+        checks: write
+        pull-requests: write
+        actions: read
 
     steps:
       - name: 📥 Download Test Results
@@ -404,6 +412,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     if: always() && github.actor != 'dependabot[bot]' && needs.determine-scope.outputs.code == 'true'
+    permissions:
+        contents: read
+        actions: read
+        pull-requests: write
     steps:
       - name: 📂 Checkout Repository
         uses: actions/checkout@v7
