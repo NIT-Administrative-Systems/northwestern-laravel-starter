@@ -3,3 +3,6 @@ allowBuilds:
   sharp: true
 minimumReleaseAgeExclude:
   - "@nu-appdev/*"
+
+overrides:
+  form-data: ">=4.0.6"
