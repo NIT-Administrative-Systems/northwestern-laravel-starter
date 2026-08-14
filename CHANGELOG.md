@@ -25,6 +25,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - Updated GitHub Actions dependencies: `actions/setup-node` from `v6` to `v7`, `actions/cache` from `v5` to `v6`, `lcollins/checkstyle-github-action` from `v3.2.0` to `v4.0.0`, and the commented OpenTofu validation examples to `opentofu/setup-opentofu@v2` and `borchero/terraform-plan-comment@v3`. The shared setup action now defaults to Node.js `26` and pnpm `11.x`, and the deployment guide's example workflow references the current action versions.
 - Removed the ADOES Bot personal access token from the PR check workflow; jobs now declare explicit `permissions` blocks and authenticate with the default `GITHUB_TOKEN`, including the scope detection, unit test result publishing, and coverage report jobs.
 
+### Security
+
+- Patched two high-severity advisories in the documentation site's transitive dependencies: `js-yaml` `4.3.1` (CVE-2026-59870, quadratic CPU consumption in `!!omap` resolution) and `form-data` `4.0.6` (CRLF injection in multipart field names), the latter enforced with a pnpm override until `httpsnippet` raises its own constraint.
+- Pinned every third-party GitHub Action across workflows and the shared setup action to a full commit SHA with a version comment, preventing mutable-tag supply chain attacks.
+- Hardened the PR check workflows: read-only jobs no longer check out the PR head branch (they now test the merge commit) and disable git credential persistence, and the unit test, docs validation, smoke test, and docs deployment jobs declare explicit token `permissions`. The release-triggered smoke test also disables Node package-manager caching to close its cache-poisoning surface.
+
 ## [v2.3.0] - 2026-07-06
 
 ### Added
