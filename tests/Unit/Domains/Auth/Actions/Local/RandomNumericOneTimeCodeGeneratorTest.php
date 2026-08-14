@@ -48,7 +48,7 @@ final class RandomNumericOneTimeCodeGeneratorTest extends TestCase
     public function test_throws_for_zero_digits(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Digits must be >= 1.');
+        $this->expectExceptionMessageIsOrContains('Digits must be >= 1.');
 
         ($this->generator)(0); // @phpstan-ignore argument.type
     }
@@ -56,7 +56,7 @@ final class RandomNumericOneTimeCodeGeneratorTest extends TestCase
     public function test_throws_for_negative_digits(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Digits must be >= 1.');
+        $this->expectExceptionMessageIsOrContains('Digits must be >= 1.');
 
         ($this->generator)(-1); // @phpstan-ignore argument.type
     }

@@ -38,7 +38,7 @@ final class TicketSystemGatewayFactoryTest extends TestCase
         config(['support.driver' => 'jira']);
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Unsupported support driver: [jira]');
+        $this->expectExceptionMessageIsOrContains('Unsupported support driver: [jira]');
 
         $this->factory()->default();
     }

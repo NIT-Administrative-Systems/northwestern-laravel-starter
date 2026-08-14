@@ -53,7 +53,7 @@ final class NetIdUpdatedTest extends TestCase
     public function test_it_throws_exception_when_netid_missing(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Webhook payload missing required fields: netid and action');
+        $this->expectExceptionMessageIsOrContains('Webhook payload missing required fields: netid and action');
 
         $payload = 'action=deactivate';
 
@@ -63,7 +63,7 @@ final class NetIdUpdatedTest extends TestCase
     public function test_it_throws_exception_when_action_missing(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Webhook payload missing required fields: netid and action');
+        $this->expectExceptionMessageIsOrContains('Webhook payload missing required fields: netid and action');
 
         $payload = 'netid=abc123';
 
@@ -73,7 +73,7 @@ final class NetIdUpdatedTest extends TestCase
     public function test_it_throws_exception_when_both_fields_missing(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Webhook payload missing required fields: netid and action');
+        $this->expectExceptionMessageIsOrContains('Webhook payload missing required fields: netid and action');
 
         $payload = '';
 
@@ -83,7 +83,7 @@ final class NetIdUpdatedTest extends TestCase
     public function test_it_throws_exception_for_unknown_action(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Unknown action type: unknownaction');
+        $this->expectExceptionMessageIsOrContains('Unknown action type: unknownaction');
 
         $payload = 'netid=test&action=unknownaction';
 

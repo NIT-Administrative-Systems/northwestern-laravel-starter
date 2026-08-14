@@ -25,7 +25,7 @@ final class DirectorySearchTypeTest extends TestCase
     public function test_invalid_search_values_throw_exception(string $searchValue, string $expectedMessage): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage($expectedMessage);
+        $this->expectExceptionMessageIsOrContains($expectedMessage);
 
         DirectorySearchType::fromSearchValue($searchValue);
     }

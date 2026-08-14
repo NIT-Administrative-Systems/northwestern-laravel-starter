@@ -118,7 +118,7 @@ final class TeamDynamixCacheRepositoryTest extends TestCase
         $repo = new TeamDynamixCacheRepository($tdx);
 
         $this->expectException(TdxLookupFailedException::class);
-        $this->expectExceptionMessage("Unable to find Ticket Type with value 'Default' in TeamDynamix.");
+        $this->expectExceptionMessageIsOrContains("Unable to find Ticket Type with value 'Default' in TeamDynamix.");
 
         $repo->findTicketTypeId('Default');
     }

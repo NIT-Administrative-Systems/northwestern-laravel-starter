@@ -52,7 +52,7 @@ final class FindOrUpdateUserFromDirectoryTest extends TestCase
         ]);
 
         $this->expectException(BadDirectoryEntry::class);
-        $this->expectExceptionMessage('missing');
+        $this->expectExceptionMessageIsOrContains('missing');
 
         $this->service(['directorySearch' => $directoryApi])('missing');
     }
@@ -95,7 +95,7 @@ final class FindOrUpdateUserFromDirectoryTest extends TestCase
         ]);
 
         $this->expectException(BadDirectoryEntry::class);
-        $this->expectExceptionMessage('no-email');
+        $this->expectExceptionMessageIsOrContains('no-email');
         $this->service(['directorySearch' => $directoryApi])('no-email');
     }
 
@@ -195,7 +195,7 @@ final class FindOrUpdateUserFromDirectoryTest extends TestCase
         $directoryApi->method('lookup')->willReturn([]);
 
         $this->expectException(BadDirectoryEntry::class);
-        $this->expectExceptionMessage('nonexistent');
+        $this->expectExceptionMessageIsOrContains('nonexistent');
         $this->service(['directorySearch' => $directoryApi])('nonexistent');
     }
 
@@ -275,7 +275,7 @@ final class FindOrUpdateUserFromDirectoryTest extends TestCase
     public function test_empty_search_value_throws_exception(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Search value cannot be empty');
+        $this->expectExceptionMessageIsOrContains('Search value cannot be empty');
 
         $this->service()(''); // @phpstan-ignore argument.type
     }
@@ -283,7 +283,7 @@ final class FindOrUpdateUserFromDirectoryTest extends TestCase
     public function test_whitespace_only_search_value_throws_exception(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Search value cannot be empty');
+        $this->expectExceptionMessageIsOrContains('Search value cannot be empty');
 
         $this->service()('   ');
     }

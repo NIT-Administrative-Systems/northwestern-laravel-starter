@@ -40,7 +40,7 @@ final class IssueAccessTokenTest extends TestCase
     public function test_fails_if_user_is_not_api_user(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Tokens can only be issued for API users.');
+        $this->expectExceptionMessageIsOrContains('Tokens can only be issued for API users.');
 
         $user = User::factory()->affiliate()->create();
 

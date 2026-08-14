@@ -50,7 +50,7 @@ final class ClipboardTest extends TestCase
     public function test_throws_for_blank_text(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Text cannot be blank.');
+        $this->expectExceptionMessageIsOrContains('Text cannot be blank.');
 
         new Clipboard(text: '');
     }
@@ -59,7 +59,7 @@ final class ClipboardTest extends TestCase
     public function test_throws_for_invalid_button_variant(string $variant): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage("Invalid button variant '{$variant}'");
+        $this->expectExceptionMessageIsOrContains("Invalid button variant '{$variant}'");
 
         new Clipboard(text: 'Test', buttonVariant: $variant);
     }
@@ -68,7 +68,7 @@ final class ClipboardTest extends TestCase
     public function test_throws_for_invalid_success_variant(string $variant): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage("Invalid button variant '{$variant}'");
+        $this->expectExceptionMessageIsOrContains("Invalid button variant '{$variant}'");
 
         new Clipboard(text: 'Test', successVariant: $variant);
     }
@@ -83,7 +83,7 @@ final class ClipboardTest extends TestCase
     public function test_throws_for_invalid_button_size(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage("Invalid button size 'xl'");
+        $this->expectExceptionMessageIsOrContains("Invalid button size 'xl'");
 
         new Clipboard(text: 'Test', buttonSize: 'xl');
     }
@@ -91,7 +91,7 @@ final class ClipboardTest extends TestCase
     public function test_throws_for_invalid_icon_position(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage("Invalid icon position 'center'");
+        $this->expectExceptionMessageIsOrContains("Invalid icon position 'center'");
 
         new Clipboard(text: 'Test', iconPosition: 'center');
     }
