@@ -53,7 +53,7 @@ final class RotateAccessTokenTest extends TestCase
         $rotator = new RotateAccessToken(new IssueAccessToken());
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('A user performing the rotation must be provided or an authenticated session must be active.');
+        $this->expectExceptionMessageIsOrContains('A user performing the rotation must be provided or an authenticated session must be active.');
 
         $rotator($oldToken, 'Rotated Token');
     }

@@ -47,7 +47,7 @@ final class FixedNumericOneTimeCodeGeneratorTest extends TestCase
     public function test_throws_for_zero_digits(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Digits must be >= 1.');
+        $this->expectExceptionMessageIsOrContains('Digits must be >= 1.');
 
         ($this->generator)(0); // @phpstan-ignore argument.type
     }
@@ -55,7 +55,7 @@ final class FixedNumericOneTimeCodeGeneratorTest extends TestCase
     public function test_throws_for_negative_digits(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Digits must be >= 1.');
+        $this->expectExceptionMessageIsOrContains('Digits must be >= 1.');
 
         ($this->generator)(-1); // @phpstan-ignore argument.type
     }
@@ -66,7 +66,7 @@ final class FixedNumericOneTimeCodeGeneratorTest extends TestCase
         $this->app['env'] = $environment;
 
         $this->expectException(LogicException::class);
-        $this->expectExceptionMessage('must not be used in production, develop, or QA environments');
+        $this->expectExceptionMessageIsOrContains('must not be used in production, develop, or QA environments');
 
         ($this->generator)(6);
     }

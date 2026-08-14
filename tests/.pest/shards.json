@@ -36,7 +36,7 @@
         "Tests\\Feature\\Domains\\Core\\Seeders\\Concerns\\AuditsSeederChangesTest": 0.4869,
         "Tests\\Feature\\Domains\\Auth\\Services\\ApiRouteInspectorTest": 0.2228,
         "Tests\\Feature\\Domains\\Core\\Services\\DateTimeFormatterTest": 0.3889,
-        "Tests\\Feature\\Domains\\Foundation\\Casts\\MarkdownWithJiraLinksCastTest": 1.05,
+        "Tests\\Feature\\Domains\\Core\\Casts\\MarkdownWithJiraLinksCastTest": 1.05,
         "Tests\\Feature\\Domains\\Support\\Actions\\CreateSupportTicketTest": 0.3081,
         "Tests\\Feature\\Domains\\Support\\Gateways\\Mail\\MailGatewayTest": 0.4208,
         "Tests\\Feature\\Domains\\Support\\Gateways\\Mail\\SupportTicketConfirmationTest": 0.0923,

@@ -1,7 +1,7 @@
 name: Check PR
 
 env:
-  NODE_VERSION: '25'
+  NODE_VERSION: '26'
   PNPM_VERSION: '11.x.x'
   PHP_VERSION: '8.5'
 
@@ -20,6 +20,9 @@ jobs:
     name: 🎯 Determine Scope
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+        contents: read
+        pull-requests: read
     outputs:
       iac: ${{ steps.changes.outputs.iac }}
       docs: ${{ steps.changes.outputs.docs }}
@@ -64,13 +67,13 @@ jobs:
           version: ${{ env.PNPM_VERSION }}
 
       - name: 🟢 Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
 
       - name: 📷 pnpm Dependencies Cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: |
             docs/node_modules
@@ -101,7 +104,7 @@ jobs:
 #          ref: ${{ github.head_ref }}
 #
 #      - name: 🌱 Setup OpenTofu
-#        uses: opentofu/setup-opentofu@v1
+#        uses: opentofu/setup-opentofu@v2
 #        with:
 #          tofu_version: 1.10.2
 #
@@ -132,7 +135,7 @@ jobs:
 #          tofu plan -no-color -var="master_password=${{ secrets.DB_PASSWORD }}" -out=.planfile
 #
 #      - name: 📊 Comment OpenTofu Plan
-#        uses: borchero/terraform-plan-comment@v2
+#        uses: borchero/terraform-plan-comment@v3
 #        if: always()
 #        with:
 #          header: 📝 OpenTofu Plan
@@ -184,7 +187,7 @@ jobs:
           build-frontend-assets: false
 
       - name: 📷 Rector Cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: /tmp/rector
           key: ${{ runner.os }}-rector-${{ hashFiles('rector.php', 'composer.lock') }}
@@ -192,7 +195,7 @@ jobs:
             ${{ runner.os }}-rector-
 
       - name: 📷 Pint Cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ./storage/pint.cache
           key: ${{ runner.os }}-pint-${{ hashFiles('pint.json', 'composer.lock') }}
@@ -200,7 +203,7 @@ jobs:
             ${{ runner.os }}-pint-
 
       - name: 📷 Prettier Cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: |
             node_modules/.cache/prettier
@@ -256,7 +259,7 @@ jobs:
         run: git restore 'app/Domains/*/Models/*.php'
 
       - name: 📷 PHPStan Result Cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: /tmp/phpstan
           key: phpstan-results-${{ hashFiles('phpstan.neon', 'composer.lock') }}
@@ -269,7 +272,7 @@ jobs:
 
       - name: 📊 Publish PHPStan Report
         if: github.actor != 'dependabot[bot]' && always()
-        uses: lcollins/checkstyle-github-action@v3.2.0
+        uses: lcollins/checkstyle-github-action@v4.0.0
         with:
           name: "📊 PHPStan Analysis Report"
           path: "phpstan-report.xml"
@@ -325,7 +328,7 @@ jobs:
           coverage: pcov
 
       - name: 📷 PHPUnit Cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ./.phpunit.cache
           key: ${{ runner.os }}-phpunit-${{ hashFiles('phpunit.xml', 'composer.lock') }}
@@ -368,6 +371,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     if: always() && github.actor != 'dependabot[bot]' && needs.determine-scope.outputs.code == 'true'
+    permissions:
+        contents: read
+        checks: write
+        pull-requests: write
+        actions: read
 
     steps:
       - name: 📥 Download Test Results
@@ -404,6 +412,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     if: always() && github.actor != 'dependabot[bot]' && needs.determine-scope.outputs.code == 'true'
+    permissions:
+        contents: read
+        actions: read
+        pull-requests: write
     steps:
       - name: 📂 Checkout Repository
         uses: actions/checkout@v7
@@ -413,7 +425,7 @@ jobs:
         with:
           php-version: ${{ env.PHP_VERSION }}
           coverage: pcov
-          tools: phpunit/phpcov:^12
+          tools: phpunit/phpcov:^13
 
       - name: 📥 Download Coverage Shards
         uses: actions/download-artifact@v8
@@ -504,7 +516,7 @@ jobs:
 
       - name: 📷 Minio Client Cache
         id: mc-cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ./mc
           key: minio-mc-linux-amd64

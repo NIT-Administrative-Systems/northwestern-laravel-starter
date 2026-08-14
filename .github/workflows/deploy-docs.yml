@@ -2,7 +2,7 @@ name: Deploy Documentation
 
 env:
   DOCS_CNAME: 'laravel-starter.entapp.northwestern.edu'
-  NODE_VERSION: '25'
+  NODE_VERSION: '26'
   PNPM_VERSION: '11.x.x'
 
 on:

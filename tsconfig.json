@@ -7,5 +7,5 @@
         "noEmit": true,
         "module": "ES2015"
     },
-    "include": ["cypress/e2e/**/*"]
+    "include": ["cypress/e2e/**/*", "cypress/support/**/*"]
 }

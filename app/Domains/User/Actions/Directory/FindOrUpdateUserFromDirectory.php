@@ -117,11 +117,15 @@ readonly class FindOrUpdateUserFromDirectory
      */
     private function findExistingUser(string $searchValue, DirectorySearchType $searchType): ?User
     {
-        return match ($searchType) {
-            DirectorySearchType::Email => User::whereEmailEquals($searchValue)->first(),
-            DirectorySearchType::NetId => User::whereUsernameEquals($searchValue)->first(),
-            DirectorySearchType::EmployeeId => User::where('employee_id', $searchValue)->first(),
+        // Selecting the query (rather than `return match`) keeps the match line
+        // attributable by the coverage driver; see php-code-coverage#1257.
+        $query = match ($searchType) {
+            DirectorySearchType::Email => User::whereEmailEquals($searchValue),
+            DirectorySearchType::NetId => User::whereUsernameEquals($searchValue),
+            DirectorySearchType::EmployeeId => User::where('employee_id', $searchValue),
         };
+
+        return $query->first();
     }
 
     /**

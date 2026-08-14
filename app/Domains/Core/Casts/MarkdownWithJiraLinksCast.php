@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Domains\Foundation\Casts;
+namespace App\Domains\Core\Casts;
 
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 use Illuminate\Database\Eloquent\Model;

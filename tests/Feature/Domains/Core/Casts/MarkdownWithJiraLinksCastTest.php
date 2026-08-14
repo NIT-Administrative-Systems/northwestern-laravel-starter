@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\Domains\Foundation\Casts;
+namespace Tests\Feature\Domains\Core\Casts;
 
-use App\Domains\Foundation\Casts\MarkdownWithJiraLinksCast;
+use App\Domains\Core\Casts\MarkdownWithJiraLinksCast;
 use App\Domains\Support\Models\Changelog;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;

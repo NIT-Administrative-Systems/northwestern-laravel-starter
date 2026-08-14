@@ -67,7 +67,7 @@ final class IssueLoginChallengeTest extends TestCase
         $this->action()('ratelimit@example.com', null, null);
 
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Too many login attempts.');
+        $this->expectExceptionMessageIsOrContains('Too many login attempts.');
 
         $this->action()('ratelimit@example.com', null, null);
     }
