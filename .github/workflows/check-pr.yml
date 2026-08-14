@@ -29,12 +29,12 @@ jobs:
       code: ${{ steps.changes.outputs.code }}
     steps:
       - name: 📂 Checkout Repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.head_ref }}
+          persist-credentials: false
 
       - name: 🔎 Detect Changed Files
-        uses: dorny/paths-filter@v4
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
         id: changes
         with:
           filters: |
@@ -54,26 +54,28 @@ jobs:
     runs-on: ubuntu-latest
     environment: ci-cd
     timeout-minutes: 5
+    permissions:
+        contents: read
 
     steps:
       - name: 📂 Checkout Repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.head_ref }}
+          persist-credentials: false
 
       - name: 📦 Setup pnpm
-        uses: pnpm/action-setup@v6
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
         with:
           version: ${{ env.PNPM_VERSION }}
 
       - name: 🟢 Setup Node.js
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
 
       - name: 📷 pnpm Dependencies Cache
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
             docs/node_modules
@@ -99,7 +101,7 @@ jobs:
 #
 #    steps:
 #      - name: 📂 Checkout Repository
-#        uses: actions/checkout@v7
+#        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 #        with:
 #          ref: ${{ github.head_ref }}
 #
@@ -174,7 +176,7 @@ jobs:
 
     steps:
       - name: 📂 Checkout Repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.head_ref }}
 
@@ -187,7 +189,7 @@ jobs:
           build-frontend-assets: false
 
       - name: 📷 Rector Cache
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: /tmp/rector
           key: ${{ runner.os }}-rector-${{ hashFiles('rector.php', 'composer.lock') }}
@@ -195,7 +197,7 @@ jobs:
             ${{ runner.os }}-rector-
 
       - name: 📷 Pint Cache
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ./storage/pint.cache
           key: ${{ runner.os }}-pint-${{ hashFiles('pint.json', 'composer.lock') }}
@@ -203,7 +205,7 @@ jobs:
             ${{ runner.os }}-pint-
 
       - name: 📷 Prettier Cache
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
             node_modules/.cache/prettier
@@ -259,7 +261,7 @@ jobs:
         run: git restore 'app/Domains/*/Models/*.php'
 
       - name: 📷 PHPStan Result Cache
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: /tmp/phpstan
           key: phpstan-results-${{ hashFiles('phpstan.neon', 'composer.lock') }}
@@ -272,7 +274,7 @@ jobs:
 
       - name: 📊 Publish PHPStan Report
         if: github.actor != 'dependabot[bot]' && always()
-        uses: lcollins/checkstyle-github-action@v4.0.0
+        uses: lcollins/checkstyle-github-action@832a70dc40e28517ddb45ac5ac8b2ad1279bd54d # v4.0.0
         with:
           name: "📊 PHPStan Analysis Report"
           path: "phpstan-report.xml"
@@ -298,6 +300,8 @@ jobs:
     runs-on: ubuntu-latest
     environment: ci-cd
     timeout-minutes: 20
+    permissions:
+        contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -315,9 +319,9 @@ jobs:
 
     steps:
       - name: 📂 Checkout Repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.head_ref }}
+          persist-credentials: false
 
       - name: 🔁 Setup Environment
         uses: ./.github/actions/common-setup
@@ -328,7 +332,7 @@ jobs:
           coverage: pcov
 
       - name: 📷 PHPUnit Cache
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ./.phpunit.cache
           key: ${{ runner.os }}-phpunit-${{ hashFiles('phpunit.xml', 'composer.lock') }}
@@ -336,7 +340,7 @@ jobs:
             ${{ runner.os }}-phpunit-
 
       - name: 🎯 Configure PHPUnit Matcher
-        uses: mheap/phpunit-matcher-action@v1
+        uses: mheap/phpunit-matcher-action@dcbd4ead41890163b65d0b21534387ce72980ee5 # v1.4.0
 
       # If you need to debug tests or follow the execution order more clearly, replace `--teamcity` with `--verbose`
       - name: 🧪 PHPUnit
@@ -350,7 +354,7 @@ jobs:
           --teamcity
 
       - name: 📦 Upload Test Results
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
           name: Test Results PR${{ github.event.pull_request.number }} Run${{ github.run_id }} Shard${{ matrix.shard }}
@@ -358,7 +362,7 @@ jobs:
           retention-days: 1
 
       - name: 📦 Upload Coverage Data
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
           name: Coverage Shard${{ matrix.shard }}
@@ -379,7 +383,7 @@ jobs:
 
     steps:
       - name: 📥 Download Test Results
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           path: artifacts
           pattern: Test Results PR${{ github.event.pull_request.number }} Run${{ github.run_id }}*
@@ -387,7 +391,7 @@ jobs:
 
       - name: 📊 Publish Unit Test Results
         id: test-results
-        uses: EnricoMi/publish-unit-test-result-action@v2
+        uses: EnricoMi/publish-unit-test-result-action@d0a4676d0e0b938bc201470d88276b7c74c712b3 # v2.24.0
         with:
           check_name: "📊 PHPUnit Test Results"
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -418,17 +422,19 @@ jobs:
         pull-requests: write
     steps:
       - name: 📂 Checkout Repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: 🐘 Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
         with:
           php-version: ${{ env.PHP_VERSION }}
           coverage: pcov
           tools: phpunit/phpcov:^13
 
       - name: 📥 Download Coverage Shards
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           path: .build/coverage-shards
           pattern: Coverage Shard*
@@ -441,7 +447,7 @@ jobs:
 
       - name: 📊 Generate Coverage Report
         id: coverage
-        uses: clearlyip/code-coverage-report-action@v7
+        uses: clearlyip/code-coverage-report-action@110af9d4ec87b6706f182fd90e3102af9e5203bf # v7.0
         with:
           filename: .build/clover.xml
           artifact_download_workflow_names: "Check PR"
@@ -450,7 +456,7 @@ jobs:
 
       - name: 💬 Coverage PR Comment
         if: github.event_name == 'pull_request' && steps.coverage.outputs.file != ''
-        uses: marocchino/sticky-pull-request-comment@v3
+        uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
         with:
           recreate: true
           path: code-coverage-results.md
@@ -459,7 +465,7 @@ jobs:
       # the COVERALLS_REPO_TOKEN secret in your repository settings and remove the `if` condition below.
       - name: 📤 Upload to Coveralls
         if: github.repository == 'NIT-Administrative-Systems/northwestern-laravel-starter'
-        uses: coverallsapp/github-action@v2
+        uses: coverallsapp/github-action@8d6379e14d29928660c4ba802d8e85393440b329 # v2.3.8
         with:
           file: .build/clover.xml
           fail-on-error: false
@@ -501,9 +507,9 @@ jobs:
 
     steps:
       - name: 📂 Checkout Repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.head_ref }}
+          persist-credentials: false
 
       - name: 🔁 Setup Environment
         uses: ./.github/actions/common-setup
@@ -516,7 +522,7 @@ jobs:
 
       - name: 📷 Minio Client Cache
         id: mc-cache
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ./mc
           key: minio-mc-linux-amd64
@@ -531,7 +537,7 @@ jobs:
           ./mc mb gha/northwestern-laravel-starter
 
       - name: 🌲 Cypress
-        uses: cypress-io/github-action@v7
+        uses: cypress-io/github-action@c32f12761482a282d24ca0fd7466d8ae86f54ba8 # v7.4.2
         with:
           config: baseUrl=http://localhost:8000
           start: php artisan serve --port=8000 --no-reload
@@ -554,7 +560,7 @@ jobs:
 
       # This step can be removed if your project records results directly to Cypress Cloud
       - name: 📜 Publish Test Summary Results
-        uses: ctrf-io/github-test-reporter@v1
+        uses: ctrf-io/github-test-reporter@e500b992f936420eb633c91644cf10d4d71df700 # v1.1.0
         with:
           report-path: .build/ctrf-report.json
           pull-request: true

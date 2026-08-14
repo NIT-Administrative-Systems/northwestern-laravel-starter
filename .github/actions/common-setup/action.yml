@@ -51,7 +51,7 @@ runs:
   steps:
     - name: 🐘 Setup PHP
       if: ${{ inputs.docs-only != 'true' }}
-      uses: shivammathur/setup-php@v2
+      uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
       with:
         php-version: ${{ inputs['php-version'] }}
         coverage: ${{ inputs.coverage }}
@@ -64,20 +64,20 @@ runs:
 
     - name: 📦 Setup pnpm
       if: ${{ inputs['php-only'] != 'true' }}
-      uses: pnpm/action-setup@v6
+      uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
       with:
         version: ${{ inputs['pnpm-version'] }}
 
     - name: 🟢 Setup Node.js
       if: ${{ inputs['php-only'] != 'true' }}
-      uses: actions/setup-node@v7
+      uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
       with:
         node-version: ${{ inputs['node-version'] }}
         cache: pnpm
 
     - name: 📷 pnpm Dependencies Cache
       if: ${{ inputs.docs-only != 'true' && inputs['php-only'] != 'true' }}
-      uses: actions/cache@v6
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: |
           node_modules
@@ -98,7 +98,7 @@ runs:
 
     - name: 📷 Composer Dependencies Cache
       if: ${{ inputs.docs-only != 'true' }}
-      uses: actions/cache@v6
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: vendor
         key: ${{ runner.os }}-vendor-${{ hashFiles('composer.lock') }}

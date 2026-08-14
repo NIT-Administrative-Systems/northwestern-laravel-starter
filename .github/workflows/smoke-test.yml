@@ -21,6 +21,8 @@ jobs:
     name: composer create-project
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    permissions:
+        contents: read
     services:
       postgres:
         image: postgres:16
@@ -63,7 +65,7 @@ jobs:
           echo "Testing version: $TAG (composer: $COMPOSER)"
 
       - name: 🐘 Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
         with:
           php-version: ${{ env.PHP_VERSION }}
           extensions: >-
@@ -73,14 +75,16 @@ jobs:
           ini-values: memory_limit=-1
 
       - name: 📦 Setup pnpm
-        uses: pnpm/action-setup@v6
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
         with:
           version: ${{ env.PNPM_VERSION }}
 
       - name: 🟢 Setup Node.js
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: ${{ env.NODE_VERSION }}
+          # Release-triggered workflow: keep the cache surface closed against poisoning.
+          package-manager-cache: false
 
       - name: 📦 composer create-project
         env:
