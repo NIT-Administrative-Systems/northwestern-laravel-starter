@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [v2.4.0] - 2026-08-14
+
+### Added
+
+- Added a `typecheck` package script that runs `tsc --noEmit` against the root TypeScript config, and widened that config's `include` to cover `cypress/support/**/*` so the custom Cypress command type augmentations in `cypress/support/index.d.ts` resolve during type-checking.
+
+### Changed
+
+- Updated PHP dependencies, including Laravel `13.25.0`, Filament `5.7.6`, Livewire `4.4.0`, Telescope `5.22.1`, `northwestern-sysdev/chassis` `v1.1.3`, `sentry/sentry-laravel` `4.27.0`, `zircote/swagger-php` `6.5.3`, `spatie/laravel-health` `1.40.2`, Rector `2.6.2`, Pint `1.30.5`, and related transitive packages. Filament frontend assets were republished after the package update.
+- Updated Pest from `4.7.4` to `5.1.1` and PHPUnit from `12.5.30` to `13.3.0`. Tests that assert on exception message fragments now use `expectExceptionMessageIsOrContains()` to accommodate PHPUnit 13's stricter `expectExceptionMessage()` semantics, and the PR check workflow's coverage merge tool moved from `phpunit/phpcov:^12` to `^13` to match the new `php-code-coverage` major version.
+- Updated TypeScript from `6.0.3` to `7.0.2`, adopting the native compiler. Prettier's organize-imports plugin and both Cypress TypeScript configs were verified against the new toolchain.
+- Updated Node.js from `25` to `26` and `@types/node` to `26.2.0`, aligned across `.nvmrc`, the package `engines` field, GitHub Actions workflows, the shared setup action, and documentation examples.
+- Updated frontend dependencies, including Vite `8.2.1`, Cypress `15.20.1`, `@sentry/browser` `10.70.0`, Tailwind CSS `4.3.3`, `@pierre/diffs` `1.3.5`, `laravel-vite-plugin` `3.2.0`, Axios `1.19.0`, Sass `1.102.0`, Prettier `3.9.6`, `@fortawesome/fontawesome-free` `7.3.1`, and related tooling.
+- Updated the documentation site to Astro `7.2.1`, Starlight `0.41.7`, `@nu-appdev/northwestern-starlight-theme` `1.6.0`, Mermaid `11.16.1`, `starlight-links-validator` `0.25.3`, and `starlight-openapi` `0.26.1`.
+- Updated GitHub Actions dependencies: `actions/setup-node` from `v6` to `v7`, `actions/cache` from `v5` to `v6`, `lcollins/checkstyle-github-action` from `v3.2.0` to `v4.0.0`, and the commented OpenTofu validation examples to `opentofu/setup-opentofu@v2` and `borchero/terraform-plan-comment@v3`. The shared setup action now defaults to Node.js `26` and pnpm `11.x`, and the deployment guide's example workflow references the current action versions.
+- Removed the ADOES Bot personal access token from the PR check workflow; jobs now declare explicit `permissions` blocks and authenticate with the default `GITHUB_TOKEN`.
+
 ## [v2.3.0] - 2026-07-06
 
 ### Added
@@ -790,7 +807,8 @@ First stable release. For installation, configuration, and usage guides, visit t
 - **CI pipeline**: GitHub Actions workflow with PHP/Node setup, database provisioning, Pest and Cypress test execution; Dependabot configuration.
 - **Developer tooling**: `.editorconfig`, `.prettierrc`, `.nvmrc` (Node v24), custom stubs, Rector configuration.
 
-[Unreleased]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.3.0...HEAD
+[Unreleased]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.4.0...HEAD
+[v2.4.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.3.0...v2.4.0
 [v2.3.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.2.0...v2.3.0
 [v2.2.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.1.3...v2.2.0
 [v2.1.3]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.1.2...v2.1.3
