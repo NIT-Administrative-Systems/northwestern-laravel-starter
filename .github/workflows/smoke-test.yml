@@ -59,9 +59,11 @@ jobs:
             VCS="--repository={\"type\":\"vcs\",\"url\":\"https://github.com/$GH_REPO\"} --stability=dev"
           fi
 
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-          echo "composer=$COMPOSER" >> "$GITHUB_OUTPUT"
-          echo "vcs=$VCS" >> "$GITHUB_OUTPUT"
+          {
+            echo "tag=$TAG"
+            echo "composer=$COMPOSER"
+            echo "vcs=$VCS"
+          } >> "$GITHUB_OUTPUT"
           echo "Testing version: $TAG (composer: $COMPOSER)"
 
       - name: 🐘 Setup PHP
@@ -91,6 +93,7 @@ jobs:
           VERSION: ${{ steps.version.outputs.composer }}
           VCS_ARGS: ${{ steps.version.outputs.vcs }}
         run: |
+          # shellcheck disable=SC2086 # VCS_ARGS intentionally word-splits into optional flags
           composer create-project \
             northwestern-sysdev/northwestern-laravel-starter \
             test-project \
@@ -165,7 +168,7 @@ jobs:
           php artisan serve --port=8000 &
 
           echo "Waiting for server..."
-          for i in $(seq 1 30); do
+          for _ in $(seq 1 30); do
             if curl -sf http://localhost:8000 > /dev/null 2>&1; then
               echo "Server is ready."
               break

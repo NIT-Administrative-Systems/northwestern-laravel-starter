@@ -27,6 +27,7 @@ jobs:
       iac: ${{ steps.changes.outputs.iac }}
       docs: ${{ steps.changes.outputs.docs }}
       code: ${{ steps.changes.outputs.code }}
+      workflows: ${{ steps.changes.outputs.workflows }}
     steps:
       - name: 📂 Checkout Repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -42,6 +43,8 @@ jobs:
               - 'iac/**'
             docs:
               - 'docs/**'
+            workflows:
+              - '.github/**'
             code:
               - '**'
               - '!iac/**'
@@ -91,6 +94,34 @@ jobs:
         run: |
           cd docs/
           pnpm build
+
+  # Lints the workflows themselves: actionlint for correctness (expressions, needs/outputs
+  # wiring, shellcheck on run blocks), zizmor for security posture (action pinning, credential
+  # persistence, injection). Suppressions live in .github/zizmor.yml with rationale.
+  lint-workflows:
+    name: 🔬 Lint Workflows
+    needs: determine-scope
+    if: needs.determine-scope.outputs.workflows == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+        contents: read
+    steps:
+      - name: 📂 Checkout Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: 🧹 actionlint
+        run: |
+          # The problem matcher turns actionlint's output into inline PR annotations.
+          echo "::add-matcher::.github/actionlint-matcher.json"
+          bash <(curl -sSfL https://raw.githubusercontent.com/rhysd/actionlint/v1.7.12/scripts/download-actionlint.bash) 1.7.12
+          ./actionlint -color
+
+      - name: 🛡️ zizmor Security Audit
+        # --format github emits workflow commands, so findings annotate the workflow files.
+        run: pipx run zizmor==1.29.0 --no-online-audits --no-progress --format github .github/workflows/ .github/actions/
 
 #  validate-infrastructure:
 #    name: 🏗️ Validate Infrastructure
@@ -231,7 +262,7 @@ jobs:
       - name: ❌ Remove Debug Code from Tests
         run: |
           # Remove it.only() from Cypress tests
-          files=`grep -lR 'it.only' cypress/e2e/*.cy.ts || true`
+          files=$(grep -lR 'it.only' cypress/e2e/*.cy.ts || true)
           if [ ! -z "$files" ]; then
             echo "Found 'it.only()' in the following files: $files"
             for file in $files; do
@@ -240,7 +271,7 @@ jobs:
           fi
 
           # Remove describe.only() from Cypress tests
-          files=`grep -lR 'describe.only' cypress/e2e/*.cy.ts || true`
+          files=$(grep -lR 'describe.only' cypress/e2e/*.cy.ts || true)
           if [ ! -z "$files" ]; then
             echo "Found 'describe.only()' in the following files: $files"
             for file in $files; do
@@ -249,7 +280,7 @@ jobs:
           fi
 
           # Remove test.only() from PHP tests
-          files=`grep -lR 'test\.only' tests/ || true`
+          files=$(grep -lR 'test\.only' tests/ || true)
           if [ ! -z "$files" ]; then
             echo "Found 'test.only()' in the following files: $files"
             for file in $files; do
@@ -282,7 +313,7 @@ jobs:
 
       - name: 🔍 Check for Uncommitted Changes
         id: file-changes
-        run: echo "changes=$(if git diff --quiet; then echo 'false'; else echo 'true'; fi)" >> $GITHUB_OUTPUT
+        run: echo "changes=$(if git diff --quiet; then echo 'false'; else echo 'true'; fi)" >> "$GITHUB_OUTPUT"
 
       - name: 📝 Auto-Commit Code Style Fixes
         if: steps.file-changes.outputs.changes == 'true'
@@ -371,7 +402,7 @@ jobs:
 
   publish-test-results:
     name: 📊 Unit Test Results
-    needs: unit-tests
+    needs: [unit-tests, determine-scope]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     if: always() && github.actor != 'dependabot[bot]' && needs.determine-scope.outputs.code == 'true'
