@@ -1,18 +1,18 @@
 # zizmor (GitHub Actions security auditor) configuration. CI fails on any unsuppressed finding.
 # Docs: https://docs.zizmor.sh/
 rules:
-    unpinned-uses:
-        config:
-            policies:
-                # Every action must be pinned to a full commit SHA (with a version comment for
-                # readability). Mutable tag refs are rejected to prevent supply chain attacks.
-                "*": hash-pin
+  unpinned-uses:
+    config:
+      policies:
+        # Every action must be pinned to a full commit SHA (with a version comment for
+        # readability). Mutable tag refs are rejected to prevent supply chain attacks.
+        "*": hash-pin
 
-    artipacked:
-        # Deliberate: these two checkouts must persist git credentials because their jobs push.
-        # Every other checkout in the repo sets `persist-credentials: false`.
-        ignore:
-            # The lint job commits automated formatting fixes back to the PR branch.
-            - check-pr.yml:209
-            # The release job commits the .starter-version.yaml bump and pushes it to main.
-            - release.yml:29
+  artipacked:
+    # Deliberate: these two checkouts must persist git credentials because their jobs push.
+    # Every other checkout in the repo sets `persist-credentials: false`.
+    ignore:
+      # The lint job commits automated formatting fixes back to the PR branch.
+      - check-pr.yml:209
+      # The release job commits the .starter-version.yaml bump and pushes it to main.
+      - release.yml:29
