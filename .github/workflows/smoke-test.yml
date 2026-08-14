@@ -21,6 +21,8 @@ jobs:
     name: composer create-project
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    permissions:
+        contents: read
     services:
       postgres:
         image: postgres:16
@@ -57,13 +59,15 @@ jobs:
             VCS="--repository={\"type\":\"vcs\",\"url\":\"https://github.com/$GH_REPO\"} --stability=dev"
           fi
 
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-          echo "composer=$COMPOSER" >> "$GITHUB_OUTPUT"
-          echo "vcs=$VCS" >> "$GITHUB_OUTPUT"
+          {
+            echo "tag=$TAG"
+            echo "composer=$COMPOSER"
+            echo "vcs=$VCS"
+          } >> "$GITHUB_OUTPUT"
           echo "Testing version: $TAG (composer: $COMPOSER)"
 
       - name: 🐘 Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
         with:
           php-version: ${{ env.PHP_VERSION }}
           extensions: >-
@@ -73,20 +77,23 @@ jobs:
           ini-values: memory_limit=-1
 
       - name: 📦 Setup pnpm
-        uses: pnpm/action-setup@v6
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
         with:
           version: ${{ env.PNPM_VERSION }}
 
       - name: 🟢 Setup Node.js
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: ${{ env.NODE_VERSION }}
+          # Release-triggered workflow: keep the cache surface closed against poisoning.
+          package-manager-cache: false
 
       - name: 📦 composer create-project
         env:
           VERSION: ${{ steps.version.outputs.composer }}
           VCS_ARGS: ${{ steps.version.outputs.vcs }}
         run: |
+          # shellcheck disable=SC2086 # VCS_ARGS intentionally word-splits into optional flags
           composer create-project \
             northwestern-sysdev/northwestern-laravel-starter \
             test-project \
@@ -161,7 +168,7 @@ jobs:
           php artisan serve --port=8000 &
 
           echo "Waiting for server..."
-          for i in $(seq 1 30); do
+          for _ in $(seq 1 30); do
             if curl -sf http://localhost:8000 > /dev/null 2>&1; then
               echo "Server is ready."
               break
