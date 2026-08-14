@@ -263,7 +263,7 @@ jobs:
         run: |
           # Remove it.only() from Cypress tests
           files=$(grep -lR 'it.only' cypress/e2e/*.cy.ts || true)
-          if [ ! -z "$files" ]; then
+          if [ -n "$files" ]; then
             echo "Found 'it.only()' in the following files: $files"
             for file in $files; do
               sed -i -e 's/it.only/it/g' "$file"
@@ -272,7 +272,7 @@ jobs:
 
           # Remove describe.only() from Cypress tests
           files=$(grep -lR 'describe.only' cypress/e2e/*.cy.ts || true)
-          if [ ! -z "$files" ]; then
+          if [ -n "$files" ]; then
             echo "Found 'describe.only()' in the following files: $files"
             for file in $files; do
               sed -i -e 's/describe.only/describe/g' "$file"
@@ -281,7 +281,7 @@ jobs:
 
           # Remove test.only() from PHP tests
           files=$(grep -lR 'test\.only' tests/ || true)
-          if [ ! -z "$files" ]; then
+          if [ -n "$files" ]; then
             echo "Found 'test.only()' in the following files: $files"
             for file in $files; do
               sed -i -e 's/test\.only(/test(/g' "$file"
