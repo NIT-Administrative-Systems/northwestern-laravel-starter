@@ -8,15 +8,15 @@
         "start": "astro dev"
     },
     "dependencies": {
-        "@astrojs/starlight": "^0.41.7",
-        "@nu-appdev/northwestern-starlight-theme": "^1.6.0",
-        "astro": "^7.2.1",
+        "@astrojs/starlight": "^0.41.10",
+        "@nu-appdev/northwestern-starlight-theme": "^1.6.3",
+        "astro": "^7.2.9",
         "astro-mermaid": "^2.1.0",
-        "mermaid": "^11.16.1",
-        "sharp": "^0.35.3",
+        "mermaid": "^11.17.2",
+        "sharp": "^0.35.4",
         "starlight-links-validator": "^0.25.3",
         "starlight-openapi": "^0.26.1",
-        "vite": "^8.2.1"
+        "vite": "^8.2.2"
     },
     "engines": {
         "node": ">= 22.0.0",
