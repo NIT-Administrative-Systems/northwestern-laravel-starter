@@ -9,6 +9,6 @@ services:
   redis:
     version: 7.0.0
     port: "${REDIS_PORT}"
-  minio:
-    version: RELEASE.2024-06-29
+  rustfs:
+    version: 1.0.0
     port: "${AWS_ENDPOINT}"

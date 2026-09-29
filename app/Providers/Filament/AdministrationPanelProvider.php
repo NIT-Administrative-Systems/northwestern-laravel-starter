@@ -74,9 +74,9 @@ class AdministrationPanelProvider extends PanelProvider
                     ->group(AdministrationNavGroup::DeveloperTools)
                     ->icon(Heroicon::OutlinedEye)
                     ->sort(1001),
-                NavigationItem::make('MinIO Console')
-                    ->url(config('filesystems.disks.s3.minio_console'), shouldOpenInNewTab: true)
-                    ->visible(fn (): bool => filled(config('filesystems.disks.s3.minio_console')) && auth()->user()->can('viewTelescope'))
+                NavigationItem::make('RustFS Console')
+                    ->url(config('filesystems.disks.s3.console_url'), shouldOpenInNewTab: true)
+                    ->visible(fn (): bool => filled(config('filesystems.disks.s3.console_url')) && auth()->user()->can('viewTelescope'))
                     ->group(AdministrationNavGroup::DeveloperTools)
                     ->icon(Heroicon::OutlinedCloud)
                     ->sort(1002),

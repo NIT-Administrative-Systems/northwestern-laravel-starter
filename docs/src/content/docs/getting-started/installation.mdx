@@ -38,13 +38,34 @@ The application expects specific services to exist before you can begin local de
         your_project_name_test    # PHPUnit test database
         ```
 
-    2. **Create MinIO Bucket**
+    2. **Create RustFS Bucket**
 
-        Create a bucket for local object storage:
+        Create a bucket for local object storage in the RustFS console (`http://localhost:9001` in Herd, signing in as `herd` / `secretkey`):
 
         ```text
         your-project-name
         ```
+
+        Then open the bucket's settings, edit **Bucket CORS**, and save the default rule. Livewire uploads files directly from the browser to the bucket, and RustFS sends no CORS headers until a rule exists.
+
+        With **Serve over HTTPS** enabled in Herd's RustFS service settings, the S3 API is available at `https://rustfs.herd.<tld>` on macOS and `https://rustfs-9000.herd.<tld>` on Windows, where `<tld>` is your Herd TLD.
+
+        You can also create the bucket and its CORS rule from the command line with the RustFS CLI, [`rc`](https://github.com/rustfs/cli) (`brew install rustfs/tap/rc` on macOS):
+
+        ```bash
+        rc alias set local https://rustfs.herd.test herd secretkey
+        rc bucket create local/your-project-name
+        echo '{"CORSRules":[{"AllowedOrigins":["*"],"AllowedMethods":["GET","PUT","POST","DELETE","HEAD"],"AllowedHeaders":["*"],"ExposeHeaders":["ETag"]}]}' \
+            | rc bucket cors set local/your-project-name -
+        ```
+
+        <Aside type="caution" title="Windows">
+        Herd's **Internal API Port** (Settings → General) defaults to `9001`, the same port as the RustFS console. Change it to another port, such as `9009`, before starting RustFS, or the `herd` CLI can fail with access denied errors.
+        </Aside>
+
+        <Aside type="note">
+        Herd's RustFS `1.0.0` service, which `herd.yml` requests, is currently only published for Apple silicon. On an Intel Mac, install the RustFS version Herd offers and change the `version` in your local `herd.yml`.
+        </Aside>
 
 </Steps>
 

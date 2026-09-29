@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+### Breaking
+
+- Renamed the S3 disk's `minio_console` config key to `console_url` and its `AWS_MINIO_CONSOLE` environment variable to `S3_CONSOLE_URL`. `.env.example` sets it to the RustFS console at `http://localhost:9001`. The key no longer falls back to a stale Homestead address, so the administration panel's "RustFS Console" developer tools link (formerly "MinIO Console") only appears when the URL is configured. Downstream projects must rename `AWS_MINIO_CONSOLE` to `S3_CONSOLE_URL` in their `.env` files and deployed environments, and update any references to `filesystems.disks.s3.minio_console`.
+
+### Changed
+
+- Replaced MinIO with RustFS `1.0.0` for local development. `herd.yml` now provisions Herd's `rustfs` service, and `.env.example` points `AWS_ENDPOINT` at Herd's `https://rustfs.herd.adoes.northwestern.edu` domain, which requires "Serve over HTTPS" in the RustFS service settings. RustFS sends no CORS headers by default, so the installation guide now has developers save the console's default Bucket CORS rule to allow Livewire's direct browser uploads, with an equivalent `rc` CLI alternative. It also covers Herd's Windows differences (the `rustfs-9000.herd` domain and the Internal API Port that collides with the RustFS console on `9001`) and notes that Herd publishes RustFS `1.0.0` only for Apple silicon.
+- `AWS_URL` in `.env.example` now includes the bucket name, matching Herd's documented configuration, so `Storage::url()` builds correct path-style URLs.
+
+### Fixed
+
+- Replaced the MinIO service container in the Cypress job with RustFS `1.0.0`, pinned by digest. MinIO has archived its open-source repository and removed the `minio/minio` and `minio/mc` images from Docker Hub, so `minio/minio:edge-cicd` no longer resolves. The Quay mirror no longer allows anonymous pulls, and `dl.min.io` answers `410` for the `mc` client that created the bucket. The bucket is now created with the AWS CLI already on the runner, which also applies a CORS rule for `http://localhost:8000` so Livewire can upload directly from the browser with signed `PUT` requests. The S3 credentials moved to shared workflow-level `S3_USERNAME` and `S3_PASSWORD` variables, and the unused RustFS console is disabled.
+- Updated `phpunit/php-code-coverage` from `14.3.0` to `14.3.5`, with `nikic/php-parser` `5.9.0` as its required dependency, so the PR check workflow's coverage merge works again. `php-code-coverage` `14.3.5` bumped the `.cov` serialization format from version 3 to 4, and the workflow's floating `phpunit/phpcov:^13` tool resolved to `13.1.1`, which requires it and rejects the version 3 shards the locked `14.3.0` wrote.
+
 ## [v2.4.0] - 2026-08-14
 
 ### Added
