@@ -12,7 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ### Changed
 
-- Replaced MinIO with RustFS `1.0.0` for local development. `herd.yml` now provisions Herd's `rustfs` service, and `.env.example` points `AWS_ENDPOINT` at Herd's `https://rustfs.adoes.northwestern.edu` domain, which requires "Serve over HTTPS" in the RustFS service settings. RustFS sends no CORS headers by default, so the installation guide now has developers save the console's default Bucket CORS rule to allow Livewire's direct browser uploads, and notes that Herd publishes RustFS `1.0.0` only for Apple silicon.
+- Replaced MinIO with RustFS `1.0.0` for local development. `herd.yml` now provisions Herd's `rustfs` service, and `.env.example` points `AWS_ENDPOINT` at Herd's `https://rustfs.herd.adoes.northwestern.edu` domain, which requires "Serve over HTTPS" in the RustFS service settings. RustFS sends no CORS headers by default, so the installation guide now has developers save the console's default Bucket CORS rule to allow Livewire's direct browser uploads, with an equivalent `rc` CLI alternative. It also covers Herd's Windows differences (the `rustfs-9000.herd` domain and the Internal API Port that collides with the RustFS console on `9001`) and notes that Herd publishes RustFS `1.0.0` only for Apple silicon.
 - `AWS_URL` in `.env.example` now includes the bucket name, matching Herd's documented configuration, so `Storage::url()` builds correct path-style URLs.
 
 ### Fixed
