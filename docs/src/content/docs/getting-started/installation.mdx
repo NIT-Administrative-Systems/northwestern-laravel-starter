@@ -38,13 +38,19 @@ The application expects specific services to exist before you can begin local de
         your_project_name_test    # PHPUnit test database
         ```
 
-    2. **Create MinIO Bucket**
+    2. **Create RustFS Bucket**
 
-        Create a bucket for local object storage:
+        Create a bucket for local object storage in the RustFS console (`http://localhost:9001` in Herd, signing in as `herd` / `secretkey`):
 
         ```text
         your-project-name
         ```
+
+        Then open the bucket's settings, edit **Bucket CORS**, and save the default rule. Livewire uploads files directly from the browser to the bucket, and RustFS sends no CORS headers until a rule exists.
+
+        <Aside type="note">
+        Herd's RustFS `1.0.0` service, which `herd.yml` requests, is currently only published for Apple silicon. On an Intel Mac, install the RustFS version Herd offers and change the `version` in your local `herd.yml`.
+        </Aside>
 
 </Steps>
 

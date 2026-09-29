@@ -56,7 +56,7 @@ return [
             'region' => env('AWS_DEFAULT_REGION'),
             'bucket' => env('AWS_BUCKET'),
             'url' => env('AWS_URL'),
-            'minio_console' => env('AWS_MINIO_CONSOLE', 'http://192.168.10.10:9600'),
+            'console_url' => env('S3_CONSOLE_URL'),
             'endpoint' => env('AWS_ENDPOINT'),
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
             'options' => array_filter([
