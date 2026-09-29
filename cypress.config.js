@@ -20,6 +20,9 @@ function getBaseUrlFromEnv() {
 
 export default defineConfig({
     defaultCommandTimeout: 5000,
+    // Cypress 16 lowered the default from 10ms to 0. The OTP input moves focus on Alpine's next tick,
+    // so typing a code with no delay lands every digit before focus advances and scrambles it.
+    keystrokeDelay: 10,
     chromeWebSecurity: false,
     expose: {
         axe_skip_failures: "false",
