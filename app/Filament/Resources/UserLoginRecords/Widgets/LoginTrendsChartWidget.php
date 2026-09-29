@@ -60,7 +60,7 @@ class LoginTrendsChartWidget extends ChartWidget
             for ($hour = 0; $hour < 24; $hour++) {
                 // Hour comes back already in the user's timezone, so format directly.
                 $dates[] = date('g A', (int) mktime($hour, 0));
-                $stats = $hourlyStats->get((string) $hour) ?? (object) [
+                $stats = $hourlyStats->get($hour) ?? (object) [
                     'total_count' => 0,
                     'unique_count' => 0,
                 ];
@@ -70,7 +70,7 @@ class LoginTrendsChartWidget extends ChartWidget
             }
         } else {
             // Daily data for multi-day range - group by date in user's timezone
-            /** @var Collection<int, object{date: string, total_count: string, unique_count: string}> $dailyStats */
+            /** @var Collection<string, object{date: string, total_count: string, unique_count: string}> $dailyStats */
             $dailyStats = UserLoginRecord::query()
                 ->whereBetween('logged_in_at', [$this->startDate, $this->endDate])
                 ->selectRaw("
