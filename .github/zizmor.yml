@@ -16,3 +16,8 @@ rules:
       - check-pr.yml:211
       # The release job commits the .starter-version.yaml bump and pushes it to main.
       - release.yml:29
+
+  self-repository:
+    # zizmor 1.30 recommends GitHub's `$/` self-repository syntax for local actions, but actionlint 1.7.12
+    # rejects it as a missing ref (rhysd/actionlint#711). Re-enable once actionlint accepts `$/`.
+    disable: true
