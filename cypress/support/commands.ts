@@ -63,8 +63,8 @@ Cypress.Commands.add("checkAxeViolations", () => {
         rules: [{ id: "duplicate-id", enabled: false }],
     });
 
-    const axeSkipFailures = Cypress.env("axe_skip_failures");
-    const axeExcludedSelectors = Cypress.env("axe_excluded_selectors");
+    const axeSkipFailures = Cypress.expose("axe_skip_failures");
+    const axeExcludedSelectors = Cypress.expose("axe_excluded_selectors");
 
     if (axeSkipFailures === "true") {
         cy.checkA11y(undefined, undefined, undefined, true);

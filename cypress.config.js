@@ -21,14 +21,13 @@ function getBaseUrlFromEnv() {
 export default defineConfig({
     defaultCommandTimeout: 5000,
     chromeWebSecurity: false,
-    env: {
+    expose: {
         axe_skip_failures: "false",
         axe_excluded_selectors: "",
     },
     retries: {
         runMode: 2,
     },
-    experimentalMemoryManagement: true,
     numTestsKeptInMemory: 5,
     video: false,
     watchForFileChanges: false,
