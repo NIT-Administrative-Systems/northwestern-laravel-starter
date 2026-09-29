@@ -98,8 +98,11 @@ final class TeamDynamixCacheRepositoryTest extends TestCase
 
         $repo = new TeamDynamixCacheRepository($tdx);
 
-        $this->assertSame(99, $repo->findTicketTypeId('Default'));
-        $this->assertSame(99, $repo->findTicketTypeId('Default'));
+        $first = $repo->findTicketTypeId('Default');
+        $second = $repo->findTicketTypeId('Default');
+
+        $this->assertSame(99, $first);
+        $this->assertSame(99, $second);
     }
 
     public function test_it_throws_when_lookup_value_is_missing(): void
