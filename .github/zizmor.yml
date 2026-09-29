@@ -13,6 +13,6 @@ rules:
     # Every other checkout in the repo sets `persist-credentials: false`.
     ignore:
       # The lint job commits automated formatting fixes back to the PR branch.
-      - check-pr.yml:209
+      - check-pr.yml:211
       # The release job commits the .starter-version.yaml bump and pushes it to main.
       - release.yml:29

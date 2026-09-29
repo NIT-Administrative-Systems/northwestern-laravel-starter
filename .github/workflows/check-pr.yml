@@ -4,6 +4,8 @@ env:
   NODE_VERSION: '26'
   PNPM_VERSION: '11.x.x'
   PHP_VERSION: '8.5'
+  S3_USERNAME: 's3admin'
+  S3_PASSWORD: 's3secret'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -519,13 +521,14 @@ jobs:
     #    containers: [1, 2, 3, 4]
     services:
       s3:
-        image: minio/minio:edge-cicd
+        image: rustfs/rustfs:1.0.0@sha256:8cc9801755448b71a786705ce76692c77e14936cccd87cf2fc31842e58f4d1ff
         ports:
           - 9000:9000
         env:
-          MINIO_ROOT_USER: s3admin
-          MINIO_ROOT_PASSWORD: s3secret
-        options: --health-cmd "curl -s http://localhost:9000/minio/health/live" --health-interval 3s --health-timeout 3s --health-retries 5
+          RUSTFS_ACCESS_KEY: ${{ env.S3_USERNAME }}
+          RUSTFS_SECRET_KEY: ${{ env.S3_PASSWORD }}
+          RUSTFS_CONSOLE_ENABLE: 'false'
+        options: --health-cmd "curl -fsS http://localhost:9000/health/ready" --health-interval 3s --health-timeout 3s --health-retries 20
       postgres:
         image: postgres:16
         env:
@@ -551,21 +554,17 @@ jobs:
           install-cypress: true
           run-ide-helper: false
 
-      - name: 📷 Minio Client Cache
-        id: mc-cache
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ./mc
-          key: minio-mc-linux-amd64
-
-      - name: 🪣 Create Minio Bucket
+      - name: 🪣 Create S3 Bucket and Configure Uploads
         run: |
-          if [ ! -f ./mc ]; then
-            curl -Lo ./mc -# https://dl.min.io/client/mc/release/linux-amd64/mc
-          fi
-          chmod +x ./mc
-          ./mc alias set gha http://localhost:9000 s3admin s3secret
-          ./mc mb gha/northwestern-laravel-starter
+          aws --endpoint-url http://localhost:9000 s3api create-bucket --bucket northwestern-laravel-starter
+          # Livewire uploads directly from the browser to S3 using a signed PUT.
+          aws --endpoint-url http://localhost:9000 s3api put-bucket-cors \
+            --bucket northwestern-laravel-starter \
+            --cors-configuration '{"CORSRules":[{"AllowedOrigins":["http://localhost:8000"],"AllowedMethods":["GET","PUT","HEAD"],"AllowedHeaders":["*"],"ExposeHeaders":["ETag"]}]}'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ env.S3_USERNAME }}
+          AWS_SECRET_ACCESS_KEY: ${{ env.S3_PASSWORD }}
+          AWS_DEFAULT_REGION: us-east-1
 
       - name: 🌲 Cypress
         uses: cypress-io/github-action@c32f12761482a282d24ca0fd7466d8ae86f54ba8 # v7.4.2
@@ -581,8 +580,8 @@ jobs:
         env:
           # CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          AWS_ACCESS_KEY_ID: s3admin
-          AWS_SECRET_ACCESS_KEY: s3secret
+          AWS_ACCESS_KEY_ID: ${{ env.S3_USERNAME }}
+          AWS_SECRET_ACCESS_KEY: ${{ env.S3_PASSWORD }}
           PHP_CLI_SERVER_WORKERS: 4
 
       - name: 📜 Display Laravel Logs

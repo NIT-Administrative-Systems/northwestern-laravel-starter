@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+### Fixed
+
+- Replaced the MinIO service container in the Cypress job with RustFS `1.0.0`, pinned by digest. MinIO has archived its open-source repository and removed the `minio/minio` and `minio/mc` images from Docker Hub, so `minio/minio:edge-cicd` no longer resolves. The Quay mirror no longer allows anonymous pulls, and `dl.min.io` answers `410` for the `mc` client that created the bucket. The bucket is now created with the AWS CLI already on the runner, which also applies a CORS rule for `http://localhost:8000` so Livewire can upload directly from the browser with signed `PUT` requests. The S3 credentials moved to shared workflow-level `S3_USERNAME` and `S3_PASSWORD` variables, and the unused RustFS console is disabled.
+
 ## [v2.4.0] - 2026-08-14
 
 ### Added
