@@ -63,6 +63,9 @@ class Audit extends BaseModel
     /**
      * Scope to role activity audit records (role_assigned / role_removed events for Users).
      *
+     * Backed by the partial `audits_role_activity_index`, whose predicate repeats this
+     * event list. Change both together.
+     *
      * @param  Builder<self>  $query
      * @return Builder<self>
      */
