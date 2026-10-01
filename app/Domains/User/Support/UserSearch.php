@@ -9,6 +9,7 @@ use App\Domains\User\QueryBuilders\UserBuilder;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 /**
  * Encapsulates reusable user search and option-label behavior for Filament UIs.
@@ -88,15 +89,22 @@ class UserSearch
         bool $includeEmail = true,
         string $boolean = 'and',
     ): Builder {
+        $callback = function (Builder $userQuery) use ($search, $includeEmail): void {
+            /** @var UserBuilder<User> $userQuery */
+            $this->apply($userQuery, $search, $includeEmail);
+        };
+
+        // whereHas() on a MorphTo constrains the parent model's builder rather than the user
+        // builder, so polymorphic relations must name the user type explicitly.
+        if ($query->getModel()->{$relation}() instanceof MorphTo) {
+            $method = $boolean === 'or' ? 'orWhereHasMorph' : 'whereHasMorph';
+
+            return $query->{$method}($relation, [User::class], $callback);
+        }
+
         $method = $boolean === 'or' ? 'orWhereHas' : 'whereHas';
 
-        return $query->{$method}(
-            $relation,
-            function (Builder $userQuery) use ($search, $includeEmail): void {
-                /** @var UserBuilder<User> $userQuery */
-                $this->apply($userQuery, $search, $includeEmail);
-            },
-        );
+        return $query->{$method}($relation, $callback);
     }
 
     /**
