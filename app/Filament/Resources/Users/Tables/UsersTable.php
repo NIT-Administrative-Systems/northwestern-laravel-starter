@@ -63,7 +63,6 @@ class UsersTable
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('timezone')
-                    ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('primary_affiliation')
@@ -76,8 +75,7 @@ class UsersTable
                     ->searchable()
                     ->toggleable(),
                 TextColumn::make('roles.name')
-                    ->badge()
-                    ->searchable(),
+                    ->badge(),
                 IconColumn::make('netid_inactive')
                     ->label('NetID Status')
                     ->getStateUsing(fn (User $record) => NetIdStatus::getState($record))
@@ -115,6 +113,8 @@ class UsersTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            // Roles are not searchable: each search term would add a roles subquery, and the Role
+            // filter already matches roles exactly.
             ->modifyQueryUsing(fn (Builder $query) => $query->with('roles'))
             ->defaultSort(function (Builder $query) {
                 return $query->orderBy('last_name')->orderBy('first_name');

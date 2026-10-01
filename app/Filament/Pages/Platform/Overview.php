@@ -216,7 +216,8 @@ class Overview extends Page
 
     public function getHealthResults(): ?StoredCheckResults
     {
-        return resolve(EloquentHealthResultStore::class)->latestResults();
+        // The view, getHealthSummary(), and getHealthLastChecked() each read the latest results.
+        return once(fn () => resolve(EloquentHealthResultStore::class)->latestResults());
     }
 
     /**

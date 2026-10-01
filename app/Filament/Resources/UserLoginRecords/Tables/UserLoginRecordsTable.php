@@ -43,24 +43,25 @@ class UserLoginRecordsTable
                     ->sortable(),
                 TextColumn::make('segment')
                     ->badge()
-                    ->searchable()
                     ->sortable(),
                 TextColumn::make('ip_address')
                     ->label('IP Address')
                     ->fontFamily(FontFamily::Mono)
                     ->copyable()
-                    ->searchable()
+                    ->searchable(isIndividual: true, isGlobal: false)
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('user_agent')
                     ->label('User Agent')
                     ->limit(40)
                     ->tooltip(fn ($state) => $state)
-                    ->searchable()
+                    ->searchable(isIndividual: true, isGlobal: false)
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('logged_in_at', direction: 'desc')
             ->heading('Login Records')
             ->searchable(! $isRelationManager)
+            ->splitSearchTerms(false)
+            ->searchDebounce('750ms')
             ->filters([
                 SelectFilter::make('segment')
                     ->multiple()

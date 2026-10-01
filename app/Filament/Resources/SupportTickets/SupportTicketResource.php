@@ -29,6 +29,10 @@ class SupportTicketResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'subject';
 
+    protected static bool $isGloballySearchable = true;
+
+    protected static int $globalSearchResultsLimit = 10;
+
     protected static string|null|UnitEnum $navigationGroup = AdministrationNavGroup::Platform;
 
     protected static ?int $navigationSort = 10;

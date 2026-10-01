@@ -29,7 +29,14 @@ class TopApiRequestsByEndpointChartWidget extends BaseApiRequestChartWidget
 
         $baseQuery = $this->baseQuery();
 
-        $this->cachedTotalCount = (int) (clone $baseQuery)->count();
+        /** @var object{total: int, unique_endpoints: int} $totals */
+        $totals = (clone $baseQuery)
+            ->toBase()
+            ->selectRaw('COUNT(*) as total, COUNT(DISTINCT path) as unique_endpoints')
+            ->first();
+
+        $this->cachedTotalCount = (int) $totals->total;
+        $this->cachedUniqueEndpoints = (int) $totals->unique_endpoints;
 
         $this->cachedEndpointStats = (clone $baseQuery)
             ->selectRaw('path, COUNT(*) as request_count')
@@ -37,10 +44,6 @@ class TopApiRequestsByEndpointChartWidget extends BaseApiRequestChartWidget
             ->orderByDesc('request_count')
             ->limit(10)
             ->get();
-
-        $this->cachedUniqueEndpoints = (int) (clone $baseQuery)
-            ->selectRaw('COUNT(DISTINCT path) as cnt')
-            ->value('cnt');
 
         if ($this->cachedEndpointStats->isEmpty()) {
             return [

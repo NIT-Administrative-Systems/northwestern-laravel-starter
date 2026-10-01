@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\User\Support;
 
+use App\Domains\User\Models\Audit;
 use App\Domains\User\Models\User;
 use App\Domains\User\Models\UserLoginRecord;
 use App\Domains\User\QueryBuilders\UserBuilder;
@@ -147,6 +148,28 @@ final class UserSearchTest extends TestCase
 
         $this->assertSame([$matchingRecord->id], $andIds);
         $this->assertEqualsCanonicalizing([$matchingRecord->id, $otherRecord->id], $orIds);
+    }
+
+    public function test_apply_to_relation_supports_polymorphic_user_relations(): void
+    {
+        $matchingUser = User::factory()->create([
+            'username' => 'morph-match',
+            'first_name' => 'Mina',
+            'last_name' => 'Stone',
+        ]);
+        User::factory()->create([
+            'username' => 'morph-miss',
+            'first_name' => 'Noah',
+            'last_name' => 'Fields',
+        ]);
+
+        $auditableIds = resolve(UserSearch::class)->applyToRelation(
+            Audit::query()->where('auditable_type', $matchingUser->getMorphClass()),
+            'auditable',
+            'Mina',
+        )->pluck('auditable_id')->unique()->values()->all();
+
+        $this->assertSame([$matchingUser->id], $auditableIds);
     }
 
     public function test_label_returns_null_for_blank_input_and_formats_found_users(): void

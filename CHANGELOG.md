@@ -6,6 +6,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [v2.6.0] - 2026-10-01
+
+### Breaking
+
+- The administration panel's global search is now opt-in per resource (`globalSearchResourceOptIn()`), so each new resource no longer adds a query to every global search keystroke. Users, Roles, and Support Tickets opt in and return at most 10 results each, and the global search debounce rose from `500ms` to `750ms`. Downstream projects with their own globally searchable resources must add `protected static bool $isGloballySearchable = true;` to keep them in global search.
+
+### Added
+
+- Added two `audits` indexes, built concurrently so the migration does not block audit writes: `created_at` for the Audit Logs default sort, and a partial index for the Role Activity table, its stats widget, and its search. With 2M audit rows, the first page of each table drops from seconds to under 10 ms.
+
+### Changed
+
+- The Audit Logs and API Requests tables use simple pagination, which shows previous and next links instead of a total count and page numbers, and skips the `COUNT(*)` that ran on every request and every API Requests auto-refresh.
+- Narrowed table search on the Users, Audit Logs, API Requests, Login Records, and Role Activity tables. Text columns hidden by default (URL, user agent, trace ID, IP address, token name, and route name) are searched individually instead of globally. Columns that a filter already covers, plus timezone, are no longer searchable. The log tables match the search as a single phrase with a `750ms` debounce.
+- Consolidated widget and overview queries: the Role Activity stats widget runs one aggregate query instead of five, the Login Records stats widget two instead of four, the API Requests status and top-endpoint charts one fewer each, and the API overview's 24-hour request stats one instead of three. The Platform overview reads the latest health check results once per render.
+- The Audit Logs "Record" filter loads its options with a loose index scan over the morph index instead of `SELECT DISTINCT` across every audit row.
+- The Role Definition History table loads role types once per request instead of querying for each role type change it displays.
+
+### Fixed
+
+- Fixed a `TypeError` that broke Role Activity table search for any input. `UserSearch::applyToRelation()` now uses `whereHasMorph()` for polymorphic relations.
+- Fixed a `TypeError` that broke the Users list page when `API_ENABLED` resolved to a non-boolean string such as `'1'`.
+
 ## [v2.5.0] - 2026-09-29
 
 ### Breaking
@@ -850,7 +873,8 @@ First stable release. For installation, configuration, and usage guides, visit t
 - **CI pipeline**: GitHub Actions workflow with PHP/Node setup, database provisioning, Pest and Cypress test execution; Dependabot configuration.
 - **Developer tooling**: `.editorconfig`, `.prettierrc`, `.nvmrc` (Node v24), custom stubs, Rector configuration.
 
-[Unreleased]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.5.0...HEAD
+[Unreleased]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.6.0...HEAD
+[v2.6.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.5.0...v2.6.0
 [v2.5.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.4.0...v2.5.0
 [v2.4.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.3.0...v2.4.0
 [v2.3.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.2.0...v2.3.0

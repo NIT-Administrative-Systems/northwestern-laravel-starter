@@ -33,6 +33,10 @@ class UserResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'full_name';
 
+    protected static bool $isGloballySearchable = true;
+
+    protected static int $globalSearchResultsLimit = 10;
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUsers;
 
     protected static string|null|UnitEnum $navigationGroup = AdministrationNavGroup::UserManagement;

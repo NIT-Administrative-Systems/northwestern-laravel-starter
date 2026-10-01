@@ -19,32 +19,30 @@ class LoginRecordsStatsWidget extends BaseWidget
 
     protected function getStats(): array
     {
+        /** @var object{total: int, unique_users: int} $totals */
+        $totals = UserLoginRecord::query()
+            ->whereBetween('logged_in_at', [$this->startDate, $this->endDate])
+            ->toBase()
+            ->selectRaw('count(*) as total, count(distinct user_id) as unique_users')
+            ->first();
+
         return [
-            $this->getTotalLoginsState(),
-            $this->getUniqueUsersState(),
+            $this->getTotalLoginsState((int) $totals->total),
+            $this->getUniqueUsersState((int) $totals->unique_users),
             $this->getMostActiveSegmentStat(),
-            $this->getAverageLoginsPerDayStat(),
+            $this->getAverageLoginsPerDayStat((int) $totals->total),
         ];
     }
 
-    protected function getTotalLoginsState(): Stat
+    protected function getTotalLoginsState(int $total): Stat
     {
-        $total = UserLoginRecord::query()
-            ->whereBetween('logged_in_at', [$this->startDate, $this->endDate])
-            ->count();
-
         return Stat::make('Total Logins', number_format($total))
             ->icon(Heroicon::ArrowRightEndOnRectangle)
             ->color('primary');
     }
 
-    protected function getUniqueUsersState(): Stat
+    protected function getUniqueUsersState(int $uniqueUsers): Stat
     {
-        $uniqueUsers = UserLoginRecord::query()
-            ->whereBetween('logged_in_at', [$this->startDate, $this->endDate])
-            ->distinct('user_id')
-            ->count('user_id');
-
         return Stat::make('Unique Users', number_format($uniqueUsers))
             ->icon(Heroicon::UserGroup)
             ->color('success');
@@ -74,15 +72,11 @@ class LoginRecordsStatsWidget extends BaseWidget
             ->color($segmentEnum->getColor());
     }
 
-    protected function getAverageLoginsPerDayStat(): Stat
+    protected function getAverageLoginsPerDayStat(int $total): Stat
     {
         $start = Carbon::parse($this->startDate);
         $end = Carbon::parse($this->endDate);
         $daysDiff = $start->diffInDays($end) + 1;
-
-        $total = UserLoginRecord::query()
-            ->whereBetween('logged_in_at', [$this->startDate, $this->endDate])
-            ->count();
 
         $averagePerDay = $daysDiff > 0
             ? (int) round($total / $daysDiff)

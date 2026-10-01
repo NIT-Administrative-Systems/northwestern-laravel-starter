@@ -112,13 +112,16 @@ Common use cases for a second panel:
     ->databaseNotifications()
     ->databaseNotificationsPolling('30s')
     ->globalSearch()
-    ->globalSearchDebounce('500ms')
+    ->globalSearchResourceOptIn()
+    ->globalSearchDebounce('750ms')
     ->plugins([
         NorthwesternTheme::make()
             ->impersonationBanner()
             ->withoutAssetRegistration(),
     ])
     ```
+
+    With `globalSearchResourceOptIn()`, a resource appears in global search only when it declares `protected static bool $isGloballySearchable = true;`. Every searchable resource runs its own query on each keystroke, so opt in only the resources people look up by name.
 
 </Steps>
 

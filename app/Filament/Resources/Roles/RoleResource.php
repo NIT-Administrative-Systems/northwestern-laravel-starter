@@ -37,6 +37,10 @@ class RoleResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    protected static bool $isGloballySearchable = true;
+
+    protected static int $globalSearchResultsLimit = 10;
+
     protected static string|null|UnitEnum $navigationGroup = AdministrationNavGroup::UserManagement;
 
     protected static ?int $navigationSort = 2;

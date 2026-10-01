@@ -15,6 +15,7 @@ use Filament\Support\Enums\FontFamily;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Enums\PaginationMode;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -48,7 +49,7 @@ class AuditsTable
                 TextColumn::make('trace_id')
                     ->label('Trace ID')
                     ->fontFamily(FontFamily::Mono)
-                    ->searchable()
+                    ->searchable(isIndividual: true, isGlobal: false)
                     ->copyable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
@@ -81,8 +82,7 @@ class AuditsTable
                         $className = Relation::getMorphedModel($state) ?? $state;
 
                         return Str::afterLast($className, '\\') ?: $className;
-                    })
-                    ->searchable(),
+                    }),
                 TextColumn::make('auditable_id')
                     ->label('Record ID')
                     ->numeric()
@@ -93,7 +93,7 @@ class AuditsTable
                     ->fontFamily(FontFamily::Mono)
                     ->formatStateUsing(fn ($state) => str_replace(config('app.url'), '', $state))
                     ->limit(50)
-                    ->searchable(),
+                    ->searchable(isIndividual: true, isGlobal: false),
                 TextColumn::make('user.username')
                     ->label('NetID')
                     ->fontFamily(FontFamily::Mono)
@@ -130,14 +130,14 @@ class AuditsTable
                     ->label('IP Address')
                     ->fontFamily(FontFamily::Mono)
                     ->copyable()
-                    ->searchable()
+                    ->searchable(isIndividual: true, isGlobal: false)
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('user_agent')
                     ->label('User Agent')
-                    ->searchable()
+                    ->searchable(isIndividual: true, isGlobal: false)
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('tags')
-                    ->searchable()
+                    ->searchable(isIndividual: true, isGlobal: false)
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->label('Created At')
@@ -146,6 +146,12 @@ class AuditsTable
                     ->sortable(),
             ])
             ->defaultSort('created_at', direction: 'desc')
+            // Audits grow without bound; skip the full COUNT(*) the default paginator runs on every request.
+            ->paginationMode(PaginationMode::Simple)
+            // Global search covers only the user and impersonator columns. The free-text columns above
+            // search individually, so a global term does not scan every audit's URL and user agent.
+            ->splitSearchTerms(false)
+            ->searchDebounce('750ms')
             ->filters([
                 SelectFilter::make('event')
                     ->label('Event')
@@ -275,11 +281,23 @@ class AuditsTable
     private static function modelTypeOptionsGrouped(): array
     {
         return once(function () {
-            $all = Audit::query()
-                ->select('auditable_type')
-                ->distinct()
-                ->orderBy('auditable_type')
-                ->pluck('auditable_type');
+            $audit = new Audit();
+            $connection = $audit->getConnection();
+            $table = $connection->getQueryGrammar()->wrapTable($audit->getTable());
+
+            // The filter renders on every table request. SELECT DISTINCT would read every audit row, so
+            // this recursive CTE walks the (auditable_type, auditable_id) morph index one distinct type
+            // at a time instead (a loose index scan), touching one index entry per type.
+            $all = collect($connection->select(<<<SQL
+                WITH RECURSIVE types AS (
+                    SELECT MIN(auditable_type) AS type FROM {$table}
+                    UNION ALL
+                    SELECT (SELECT MIN(auditable_type) FROM {$table} WHERE auditable_type > types.type)
+                    FROM types
+                    WHERE types.type IS NOT NULL
+                )
+                SELECT type FROM types WHERE type IS NOT NULL
+                SQL))->pluck('type');
 
             return $all
                 ->map(function (string $fullClass) {
