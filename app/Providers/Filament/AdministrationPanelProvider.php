@@ -102,6 +102,9 @@ class AdministrationPanelProvider extends PanelProvider
                 Authenticate::class,
             ])
             ->globalSearch()
-            ->globalSearchDebounce('500ms');
+            // Resources join global search only by declaring $isGloballySearchable = true, so each
+            // new resource does not add its queries to every global search keystroke.
+            ->globalSearchResourceOptIn()
+            ->globalSearchDebounce('750ms');
     }
 }

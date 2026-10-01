@@ -21,8 +21,6 @@ class UserLoginRecordResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChartBarSquare;
 
-    protected static bool $isGloballySearchable = false;
-
     protected static ?string $recordTitleAttribute = 'id';
 
     protected static ?string $modelLabel = 'Login Record';

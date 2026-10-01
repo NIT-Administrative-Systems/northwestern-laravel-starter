@@ -23,8 +23,6 @@ class AuditResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentList;
 
-    protected static bool $isGloballySearchable = false;
-
     protected static ?string $recordTitleAttribute = 'id';
 
     protected static ?string $navigationLabel = 'Audit Logs';

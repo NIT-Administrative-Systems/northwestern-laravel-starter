@@ -19,8 +19,6 @@ class RoleActivityResource extends Resource
 
     protected static ?string $navigationLabel = 'Role Activity';
 
-    protected static bool $isGloballySearchable = false;
-
     public static function shouldRegisterNavigation(): bool
     {
         return false;
