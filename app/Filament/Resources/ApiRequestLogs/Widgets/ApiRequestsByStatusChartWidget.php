@@ -6,28 +6,30 @@ namespace App\Filament\Resources\ApiRequestLogs\Widgets;
 
 use Carbon\Carbon;
 use Filament\Support\RawJs;
+use Illuminate\Support\Collection;
 use Illuminate\Support\HtmlString;
 
 class ApiRequestsByStatusChartWidget extends BaseApiRequestChartWidget
 {
+    /**
+     * Request totals per status range, summed from the chart query so the description
+     * does not scan the date range a second time.
+     *
+     * @var Collection<string, int>|null
+     */
+    private ?Collection $cachedStatusCounts = null;
+
     public function getDescription(): HtmlString|string|null
     {
         if (! $this->startDate || ! $this->endDate) {
             return null;
         }
 
-        $statusCounts = $this->baseQuery()
-            ->selectRaw("
-                CASE
-                    WHEN status_code >= 100 AND status_code < 400 THEN '1xx-3xx'
-                    WHEN status_code >= 400 AND status_code < 500 THEN '4xx'
-                    WHEN status_code >= 500 THEN '5xx'
-                END as status_range,
-                COUNT(*) as count
-            ")
-            ->groupBy('status_range')
-            ->get()
-            ->pluck('count', 'status_range');
+        if (! $this->cachedStatusCounts instanceof Collection) {
+            $this->getCachedData();
+        }
+
+        $statusCounts = $this->cachedStatusCounts ?? collect();
 
         return new HtmlString(
             view('filament.resources.api-request-logs.widgets.chart-description', [
@@ -118,6 +120,10 @@ class ApiRequestsByStatusChartWidget extends BaseApiRequestChartWidget
                 $current->addDay();
             }
         }
+
+        $this->cachedStatusCounts = $requestsPerPeriodPerStatus
+            ->groupBy('status_range')
+            ->map(fn (Collection $rows): int => (int) $rows->sum('count'));
 
         $successData = array_fill(0, count($labels), 0);
         $clientErrorData = array_fill(0, count($labels), 0);

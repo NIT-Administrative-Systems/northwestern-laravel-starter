@@ -321,7 +321,8 @@ class RoleDefinitionHistoryTable
         }
 
         if ($key === 'role_type_id') {
-            $roleType = RoleType::find($value);
+            // Load every role type once per request instead of querying for each diffed value.
+            $roleType = once(fn () => RoleType::all()->keyBy('id'))->get($value);
 
             return $roleType?->slug?->getLabel() ?? (string) $value;
         }

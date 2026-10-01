@@ -93,23 +93,27 @@ class Overview extends Page
             ->whereBetween('expires_at', [$now, $now->copy()->addDays(30)])
             ->count();
 
-        $totalRequests24h = ApiRequestLog::query()
+        /**
+         * One pass over the last day of request logs instead of a query per stat.
+         *
+         * @var object{total: int, failed: int, avg_duration: float|string|null} $requestStats24h
+         */
+        $requestStats24h = ApiRequestLog::query()
             ->where('created_at', '>=', $now->copy()->subDay())
-            ->count();
+            ->toBase()
+            ->selectRaw('count(*) as total')
+            ->selectRaw('count(failure_reason) as failed')
+            ->selectRaw('avg(duration_ms) as avg_duration')
+            ->first();
 
-        $failedRequests24h = ApiRequestLog::query()
-            ->where('created_at', '>=', $now->copy()->subDay())
-            ->whereNotNull('failure_reason')
-            ->count();
+        $totalRequests24h = (int) $requestStats24h->total;
+        $failedRequests24h = (int) $requestStats24h->failed;
 
         $successRate24h = $totalRequests24h > 0
             ? round((($totalRequests24h - $failedRequests24h) / $totalRequests24h) * 100, 1)
             : 100.0;
 
-        $avgResponseTime24h = ApiRequestLog::query()
-            ->where('created_at', '>=', $now->copy()->subDay())
-            ->whereNotNull('duration_ms')
-            ->avg('duration_ms');
+        $avgResponseTime24h = $requestStats24h->avg_duration;
 
         return [
             'api_enabled' => (bool) config('api.enabled', true),

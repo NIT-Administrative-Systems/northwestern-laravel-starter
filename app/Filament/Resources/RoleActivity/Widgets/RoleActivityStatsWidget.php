@@ -16,21 +16,28 @@ class RoleActivityStatsWidget extends BaseWidget
 
     protected function getStats(): array
     {
-        $baseQuery = Audit::query()->roleActivity();
+        $recentSince = now()->subDays(7);
 
-        $assignmentCount = (clone $baseQuery)->where('event', 'role_assigned')->count();
-        $removalCount = (clone $baseQuery)->where('event', 'role_removed')->count();
-        $lastActivity = (clone $baseQuery)->max('created_at');
+        /**
+         * One pass over the role activity index instead of a query per stat.
+         *
+         * @var object{assignments: int, removals: int, recent_assignments: int, recent_removals: int, last_activity: string|null} $stats
+         */
+        $stats = Audit::query()
+            ->roleActivity()
+            ->toBase()
+            ->selectRaw("count(*) filter (where event = 'role_assigned') as assignments")
+            ->selectRaw("count(*) filter (where event = 'role_removed') as removals")
+            ->selectRaw("count(*) filter (where event = 'role_assigned' and created_at >= ?) as recent_assignments", [$recentSince])
+            ->selectRaw("count(*) filter (where event = 'role_removed' and created_at >= ?) as recent_removals", [$recentSince])
+            ->selectRaw('max(created_at) as last_activity')
+            ->first();
 
-        $recentAssignments = (clone $baseQuery)
-            ->where('event', 'role_assigned')
-            ->where('created_at', '>=', now()->subDays(7))
-            ->count();
-
-        $recentRemovals = (clone $baseQuery)
-            ->where('event', 'role_removed')
-            ->where('created_at', '>=', now()->subDays(7))
-            ->count();
+        $assignmentCount = (int) $stats->assignments;
+        $removalCount = (int) $stats->removals;
+        $recentAssignments = (int) $stats->recent_assignments;
+        $recentRemovals = (int) $stats->recent_removals;
+        $lastActivity = $stats->last_activity;
 
         return [
             Stat::make('Assignments', number_format($assignmentCount))
