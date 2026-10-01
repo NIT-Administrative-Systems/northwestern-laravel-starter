@@ -61,8 +61,7 @@ class UsersRelationManager extends RelationManager
                     ->searchable()
                     ->badge(),
                 TextColumn::make('roles.name')
-                    ->badge()
-                    ->searchable(),
+                    ->badge(),
                 TextColumn::make('first_name')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -89,7 +88,6 @@ class UsersRelationManager extends RelationManager
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('timezone')
-                    ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('auth_type')

@@ -14,6 +14,7 @@ use Filament\Support\Enums\FontFamily;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\PaginationMode;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -34,7 +35,7 @@ class ApiRequestLogsTable
                 TextColumn::make('trace_id')
                     ->label('Trace ID')
                     ->fontFamily(FontFamily::Mono)
-                    ->searchable()
+                    ->searchable(isIndividual: true, isGlobal: false)
                     ->copyable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
@@ -54,7 +55,7 @@ class ApiRequestLogsTable
                     ->label('Token Name')
                     ->placeholder('N/A')
                     ->copyable()
-                    ->searchable()
+                    ->searchable(isIndividual: true, isGlobal: false)
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('method')
@@ -82,7 +83,7 @@ class ApiRequestLogsTable
                     ->tooltip('The named route for this request')
                     ->wrap()
                     ->fontFamily(FontFamily::Mono)
-                    ->searchable()
+                    ->searchable(isIndividual: true, isGlobal: false)
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('status_code')
@@ -102,8 +103,7 @@ class ApiRequestLogsTable
                     ->placeholder('N/A')
                     ->badge()
                     ->tooltip(fn (ApiRequestLog $record) => $record->failure_reason?->getDescription())
-                    ->sortable()
-                    ->searchable(),
+                    ->sortable(),
 
                 TextColumn::make('duration_ms')
                     ->label('Duration')
@@ -131,7 +131,7 @@ class ApiRequestLogsTable
                     ->label('IP Address')
                     ->fontFamily(FontFamily::Mono)
                     ->copyable()
-                    ->searchable()
+                    ->searchable(isIndividual: true, isGlobal: false)
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('created_at')
@@ -144,6 +144,11 @@ class ApiRequestLogsTable
             ->defaultSort('created_at', 'desc')
             ->heading('API Request Logs')
             ->searchable(! $isRelationManager)
+            // The table polls; skip the full COUNT(*) the default paginator runs on every refresh.
+            ->paginationMode(PaginationMode::Simple)
+            // Global search covers the user and endpoint. Hidden columns search individually.
+            ->splitSearchTerms(false)
+            ->searchDebounce('750ms')
             ->defaultPaginationPageOption(10)
             ->filters([
                 SelectFilter::make('date_preset')

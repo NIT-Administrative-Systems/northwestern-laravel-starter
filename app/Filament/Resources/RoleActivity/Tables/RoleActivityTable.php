@@ -153,6 +153,9 @@ class RoleActivityTable
             ])
             ->recordClasses('transition-colors hover:bg-gray-50 dark:hover:bg-white/5')
             ->defaultSort('created_at', direction: 'desc')
+            // Each search term adds three user subqueries; match the term as one phrase instead.
+            ->splitSearchTerms(false)
+            ->searchDebounce('750ms')
             ->filters([
                 SelectFilter::make('event')
                     ->label('Event')
