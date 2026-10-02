@@ -28,15 +28,7 @@ if (config('platform.wildcard_photo_sync')) {
     Route::get('users/{user}/wildcard-photo', [App\Domains\User\Http\Controllers\WildcardPhotoController::class, 'show'])->name('users.wildcard-photo');
 }
 
-Route::prefix('support')->name('support.')->group(function () {
-    if (config('changelog.enabled')) {
-        Route::get('changelog/feed.rss', Controllers\Support\ChangelogFeedController::class)->name('changelog.feed');
-    }
-
-    if (config('support.enabled')) {
-        Route::middleware('auth')->group(function () {
-            Route::get('contact', [Controllers\Support\ContactController::class, 'create'])->name('contact.create');
-            Route::post('contact', [Controllers\Support\ContactController::class, 'store'])->middleware('throttle:support:contact')->name('contact.store');
-        });
-    }
-});
+if (config('changelog.enabled')) {
+    // The feed is XML, not a page, so it doesn't need the public layout's panel context.
+    Route::get('support/changelog/feed.rss', Controllers\Support\ChangelogFeedController::class)->name('support.changelog.feed');
+}

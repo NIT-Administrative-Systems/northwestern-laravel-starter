@@ -50,7 +50,8 @@ class AppPanelProvider extends PanelProvider
             ->spaUrlExceptions([
                 url('/auth/*'),
                 url('/impersonate/*'),
-                url('/support/*'),
+                url('/support/changelog'),
+                url('/support/changelog/*'),
                 url('/' . AdministrationPanelProvider::ID),
                 url('/' . AdministrationPanelProvider::ID . '/*'),
             ])
@@ -103,12 +104,6 @@ class AppPanelProvider extends PanelProvider
                     ->group(AppNavGroup::Help)
                     ->icon(Heroicon::OutlinedNewspaper)
                     ->sort(1),
-                NavigationItem::make('Contact Support')
-                    ->url(fn (): ?string => Route::has('support.contact.create') ? route('support.contact.create') : null)
-                    ->visible(fn (): bool => Route::has('support.contact.create'))
-                    ->group(AppNavGroup::Help)
-                    ->icon(Heroicon::OutlinedLifebuoy)
-                    ->sort(2),
             ])
             ->middleware([
                 InjectLivewireAssets::class,
