@@ -28,7 +28,7 @@ blockquote {
 }
 
 a {
-    color: #3869D4;
+    color: #4e2a84;
 }
 
 a img {
@@ -109,12 +109,16 @@ img {
     text-decoration: none;
 }
 
-/* Logo */
+/* Eyebrow above the app name (text, because many email clients don't render SVG) */
 
-.logo {
-    height: 75px;
-    max-height: 75px;
-    width: 75px;
+.header-eyebrow {
+    color: #e4e0ee;
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: 0.08em;
+    margin: 0 0 6px;
+    text-align: center;
+    text-transform: uppercase;
 }
 
 /* Body */
@@ -176,7 +180,7 @@ img {
 }
 
 .footer a {
-    color: #b0adc5;
+    color: #b6acd1;
     text-decoration: underline;
 }
 

@@ -1,14 +1,10 @@
 @props(['url'])
 <tr>
     <td class="header">
+        {{-- Text, not the SVG wordmark: many email clients, including Gmail, don't render SVG. --}}
+        <p class="header-eyebrow">Northwestern University</p>
         <a href="{{ $url }}" style="display: inline-block;">
-            @if (trim($slot) === 'Laravel')
-                <img class="logo"
-                     src="https://laravel.com/img/notification-logo.png"
-                     alt="Laravel Logo">
-            @else
-                {{ $slot }}
-            @endif
+            {{ $slot }}
         </a>
     </td>
 </tr>
