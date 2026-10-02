@@ -1,7 +1,6 @@
 <x-layouts.public :title="$entry->title ?? $entry->slug">
     <div class="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
-        <x-filament::link :href="route('support.changelog.index')"
-                          icon="heroicon-m-arrow-left">
+        <x-filament::link :href="route('support.changelog.index')" icon="heroicon-m-arrow-left">
             Changelog
         </x-filament::link>
 

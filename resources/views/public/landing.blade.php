@@ -25,8 +25,8 @@
                 Sign in
             </x-filament::button>
 
-            <x-filament::button tag="a"
-                                href="https://laravel-starter.entapp.northwestern.edu/"
+            <x-filament::button href="https://laravel-starter.entapp.northwestern.edu/"
+                                tag="a"
                                 target="_blank"
                                 color="gray"
                                 outlined
@@ -35,8 +35,8 @@
                 Documentation
             </x-filament::button>
 
-            <x-filament::button tag="a"
-                                href="https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter"
+            <x-filament::button href="https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter"
+                                tag="a"
                                 target="_blank"
                                 color="gray"
                                 outlined

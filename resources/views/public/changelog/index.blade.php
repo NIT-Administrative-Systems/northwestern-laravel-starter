@@ -17,9 +17,9 @@
             <article class="grid gap-x-8 gap-y-2 border-b border-gray-200 py-10 last:border-b-0 md:grid-cols-[10rem_1fr]"
                      id="{{ $entry->slug }}">
                 <div class="text-sm font-semibold text-gray-500 md:sticky md:top-6 md:self-start md:text-right">
-                    <a class="hover:text-nu-purple-100"
-                       href="{{ route('support.changelog.show', $entry) }}">
-                        <time datetime="{{ $entry->created_at->toDateString() }}">{{ $entry->created_at->format('F j, Y') }}</time>
+                    <a class="hover:text-nu-purple-100" href="{{ route('support.changelog.show', $entry) }}">
+                        <time
+                              datetime="{{ $entry->created_at->toDateString() }}">{{ $entry->created_at->format('F j, Y') }}</time>
                     </a>
                 </div>
 

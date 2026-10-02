@@ -19,8 +19,7 @@
 @endphp
 
 <!DOCTYPE html>
-<html class="fi min-h-screen"
-      lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html class="fi min-h-screen" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
     <meta charset="utf-8">
@@ -30,7 +29,7 @@
     <title>{{ filled($title) ? "{$title} - {$appName}" : $appName }}</title>
 
     @if ($favicon = filament()->getFavicon())
-        <link rel="icon" href="{{ $favicon }}">
+        <link href="{{ $favicon }}" rel="icon">
     @endif
 
     <style>
@@ -72,26 +71,25 @@
 
         <div class="border-b border-gray-200 bg-white">
             <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
-                <a class="font-nu-heading text-nu-purple-100 text-lg font-bold sm:text-xl"
-                   href="{{ url('/') }}">
+                <a class="font-nu-heading text-nu-purple-100 text-lg font-bold sm:text-xl" href="{{ url('/') }}">
                     {{ $appName }}
                 </a>
 
                 @if ($user)
                     <div class="flex items-center gap-3">
                         <span class="hidden text-sm text-gray-600 sm:inline">{{ $user->getFilamentName() }}</span>
-                        <x-filament::button tag="a"
+                        <x-filament::button data-cy="back-to-app-link"
+                                            tag="a"
                                             :href="$appPanel->getUrl()"
                                             color="gray"
-                                            outlined
-                                            data-cy="back-to-app-link">
+                                            outlined>
                             Back to app
                         </x-filament::button>
                     </div>
                 @else
-                    <x-filament::button tag="a"
-                                        :href="$appPanel->getLoginUrl()"
-                                        data-cy="sign-in-link">
+                    <x-filament::button data-cy="sign-in-link"
+                                        tag="a"
+                                        :href="$appPanel->getLoginUrl()">
                         Sign in
                     </x-filament::button>
                 @endif
@@ -99,8 +97,7 @@
         </div>
     </header>
 
-    <main class="flex-1"
-          id="main">
+    <main class="flex-1" id="main">
         {{ $slot }}
     </main>
 
