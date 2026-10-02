@@ -6,7 +6,7 @@ describe("Home Page", () => {
     context("Unauthenticated users", () => {
         it("should redirect to login selection page", () => {
             cy.visit("/");
-            cy.url().should("include", "/auth/type");
+            cy.url().should("include", "/app/login");
         });
     });
 

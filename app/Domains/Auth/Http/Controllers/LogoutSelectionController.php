@@ -21,7 +21,7 @@ class LogoutSelectionController extends Controller
         $user = $request->user();
 
         if (! $user) {
-            return redirect(route('login-selection'));
+            return redirect(route('filament.app.auth.login'));
         }
 
         $webssoConfigured = filled(config('nusoa.sso.apigeeApiKey'))
@@ -45,6 +45,6 @@ class LogoutSelectionController extends Controller
         Session::invalidate();
         Session::regenerateToken();
 
-        return redirect(route('login-selection'));
+        return redirect(route('filament.app.auth.login'));
     }
 }

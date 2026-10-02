@@ -112,7 +112,7 @@ final class ImpersonationControllerTest extends TestCase
 
         $response = $this->post(route('impersonate', 2));
 
-        $response->assertRedirect('/auth/type');
+        $response->assertRedirect('/app/login');
 
         $this->assertGuest();
     }

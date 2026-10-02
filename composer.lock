@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f4309685417e0eedc47f5dee6ca61ded",
+    "content-hash": "ef96b00ddaa0ce3376a2e299268507db",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -5457,16 +5457,16 @@
         },
         {
             "name": "northwestern-sysdev/northwestern-filament-theme",
-            "version": "v3.0.2",
+            "version": "v4.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/NIT-Administrative-Systems/northwestern-filament-theme",
-                "reference": "48f41763568aec531872cf64e7938bfe2e70a87f"
+                "reference": "b4bc8ca5d4834c26ed26f348e25bd892055a8527"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/NIT-Administrative-Systems/northwestern-filament-theme/zipball/48f41763568aec531872cf64e7938bfe2e70a87f",
-                "reference": "48f41763568aec531872cf64e7938bfe2e70a87f",
+                "url": "https://api.github.com/repos/NIT-Administrative-Systems/northwestern-filament-theme/zipball/b4bc8ca5d4834c26ed26f348e25bd892055a8527",
+                "reference": "b4bc8ca5d4834c26ed26f348e25bd892055a8527",
                 "shasum": ""
             },
             "require": {
@@ -5476,12 +5476,12 @@
                 "spatie/laravel-package-tools": "^1.16"
             },
             "require-dev": {
-                "driftingly/rector-laravel": "^2.0",
-                "larastan/larastan": "^3.0",
-                "laravel/pint": "^1.21",
+                "driftingly/rector-laravel": "^2.6",
+                "larastan/larastan": "^3.12",
+                "laravel/pint": "^1.32",
                 "orchestra/testbench": "^10.0||^11.0",
-                "pestphp/pest": "^3.0||^4.0",
-                "rector/rector": "^2.0"
+                "pestphp/pest": "^4.0||^5.0",
+                "rector/rector": "^2.6"
             },
             "suggest": {
                 "northwestern-sysdev/northwestern-laravel-ui": "Provides Northwestern brand lockup and office contact configuration automatically."
@@ -5521,7 +5521,7 @@
                 "issues": "https://github.com/NIT-Administrative-Systems/northwestern-filament-theme/issues",
                 "source": "https://github.com/NIT-Administrative-Systems/northwestern-filament-theme"
             },
-            "time": "2026-06-18T22:55:44+00:00"
+            "time": "2026-10-02T19:12:38+00:00"
         },
         {
             "name": "northwestern-sysdev/northwestern-laravel-ui",

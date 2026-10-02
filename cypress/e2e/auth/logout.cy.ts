@@ -16,7 +16,7 @@ describe("Authentication - Logout", () => {
 
         cy.get(".fi-user-menu").click();
         cy.getBySel("sign-out-menu-link").click();
-        cy.url().should("include", "/auth/type");
+        cy.url().should("include", "/app/login");
     });
 
     it("should prevent access to protected pages after logout", () => {
@@ -28,6 +28,6 @@ describe("Authentication - Logout", () => {
         cy.getBySel("sign-out-menu-link").click();
 
         cy.visit("/administration", { failOnStatusCode: false });
-        cy.url().should("include", "/auth/type");
+        cy.url().should("include", "/app/login");
     });
 });

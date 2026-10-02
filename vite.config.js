@@ -24,6 +24,7 @@ export default defineConfig({
                 "resources/js/app.js",
                 "resources/js/audit-diff.ts",
                 "resources/css/filament/administration/theme.css",
+                "resources/css/filament/app/theme.css",
             ],
             refresh: true,
         }),

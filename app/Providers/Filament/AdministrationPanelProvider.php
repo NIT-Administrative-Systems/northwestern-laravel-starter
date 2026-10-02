@@ -31,7 +31,6 @@ class AdministrationPanelProvider extends PanelProvider
     public function panel(Panel $panel): Panel
     {
         return $panel
-            ->default()
             ->spa()
             ->spaUrlExceptions([
                 url('/auth/*'),

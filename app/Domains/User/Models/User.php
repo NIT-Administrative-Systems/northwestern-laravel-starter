@@ -19,6 +19,7 @@ use App\Domains\User\Models\Concerns\TracksPermissionSources;
 use App\Domains\User\QueryBuilders\UserBuilder;
 use App\Http\Middleware\EnvironmentLockdown;
 use App\Providers\Filament\AdministrationPanelProvider;
+use App\Providers\Filament\AppPanelProvider;
 use Database\Factories\Domains\User\Models\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
@@ -239,6 +240,7 @@ class User extends Authenticatable implements Auditable, FilamentUser, HasAvatar
          * @phpstan-ignore match.unhandled
          */
         return match ($panel->getId()) {
+            AppPanelProvider::ID => true,
             AdministrationPanelProvider::ID => $this->can(SystemPermission::AccessAdministrationPanel),
         };
     }

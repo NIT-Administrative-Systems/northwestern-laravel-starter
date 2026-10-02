@@ -11,6 +11,8 @@ use App\Domains\User\Models\Audit;
 use App\Domains\User\Models\User;
 use App\Filament\Resources\Roles\Pages\RoleDefinitionHistory;
 use App\Filament\Resources\Roles\Tables\RoleDefinitionHistoryTable;
+use App\Providers\Filament\AdministrationPanelProvider;
+use Filament\Facades\Filament;
 use Illuminate\Support\HtmlString;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -24,6 +26,8 @@ final class RoleDefinitionHistoryTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        Filament::setCurrentPanel(AdministrationPanelProvider::ID);
 
         $this->admin = User::factory()->create();
         $this->admin->givePermissionTo(SystemPermission::ViewRoles);

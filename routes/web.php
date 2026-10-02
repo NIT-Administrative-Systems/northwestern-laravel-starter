@@ -27,7 +27,3 @@ Route::prefix('support')->name('support.')->group(function () {
         });
     }
 });
-
-Route::prefix('platform')->name('platform.')->group(function () {
-    Route::get('access-restricted', Controllers\Platform\EnvironmentLockdownController::class)->name('environment-lockdown');
-});
