@@ -6,8 +6,10 @@ describe("Authentication - Logout", () => {
     it("should log out user and clear session", () => {
         cy.loginAsGenericUser();
 
-        cy.getBySel("sign-out-link").click();
-        cy.getBySel("logged-in").should("not.exist");
+        cy.get(".fi-user-menu").click();
+        cy.getBySel("sign-out-menu-link").click();
+        cy.url().should("include", "/app/login");
+        cy.get(".fi-user-menu").should("not.exist");
     });
 
     it("should redirect to home after logout", () => {

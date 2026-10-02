@@ -25,7 +25,7 @@ class ChangelogController extends Controller
         /** @var int $perPage */
         $perPage = config('changelog.pagination.per_page', 10);
 
-        return view('support.changelog.index', [
+        return view('public.changelog.index', [
             'entries' => Changelog::paginate($perPage),
             'feedUrl' => route('support.changelog.feed'),
         ]);
@@ -36,7 +36,7 @@ class ChangelogController extends Controller
      */
     public function show(Changelog $changelog): View
     {
-        return view('support.changelog.show', [
+        return view('public.changelog.show', [
             'entry' => $changelog,
         ]);
     }

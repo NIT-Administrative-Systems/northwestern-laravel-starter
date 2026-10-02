@@ -28,7 +28,7 @@
     @endauth
 
     <li class="nav-item dropdown px-md-1">
-        <a class="nav-link dropdown-toggle {{ Route::is('support.changelog.*', 'support.contact.*') ? 'active' : '' }}"
+        <a class="nav-link dropdown-toggle {{ Route::is('support.changelog.*') ? 'active' : '' }}"
            data-bs-toggle="dropdown"
            href="#"
            role="button"
@@ -49,8 +49,8 @@
             @if (config('support.enabled'))
                 @auth
                     <li>
-                        <a class="dropdown-item {{ Route::is('support.contact.*') ? 'active' : '' }}"
-                           href="{{ route('support.contact.create') }}">
+                        <a class="dropdown-item"
+                           href="{{ \App\Filament\App\Pages\ContactSupport::getUrl(panel: \App\Providers\Filament\AppPanelProvider::ID) }}">
                             <i class="fas fa-headset fa-fw me-2" aria-hidden="true"></i>
                             Contact Support
                         </a>

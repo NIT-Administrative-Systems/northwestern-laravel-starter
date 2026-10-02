@@ -20,11 +20,13 @@ use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Icons\Heroicon;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Route;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Northwestern\FilamentTheme\NorthwesternTheme;
@@ -48,7 +50,8 @@ class AppPanelProvider extends PanelProvider
             ->spaUrlExceptions([
                 url('/auth/*'),
                 url('/impersonate/*'),
-                url('/support/*'),
+                url('/support/changelog'),
+                url('/support/changelog/*'),
                 url('/' . AdministrationPanelProvider::ID),
                 url('/' . AdministrationPanelProvider::ID . '/*'),
             ])
@@ -65,6 +68,7 @@ class AppPanelProvider extends PanelProvider
                     ->name('environment-lockdown');
             })
             ->viteTheme('resources/css/filament/app/theme.css')
+            ->renderHook(PanelsRenderHook::HEAD_END, fn (): string => Blade::render('<x-sentry-browser />'))
             ->userMenuItems([
                 'administration' => Action::make('administration')
                     ->label('Administration')
@@ -100,12 +104,6 @@ class AppPanelProvider extends PanelProvider
                     ->group(AppNavGroup::Help)
                     ->icon(Heroicon::OutlinedNewspaper)
                     ->sort(1),
-                NavigationItem::make('Contact Support')
-                    ->url(fn (): ?string => Route::has('support.contact.create') ? route('support.contact.create') : null)
-                    ->visible(fn (): bool => Route::has('support.contact.create'))
-                    ->group(AppNavGroup::Help)
-                    ->icon(Heroicon::OutlinedLifebuoy)
-                    ->sort(2),
             ])
             ->middleware([
                 InjectLivewireAssets::class,

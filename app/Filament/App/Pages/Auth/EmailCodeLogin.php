@@ -199,7 +199,8 @@ class EmailCodeLogin extends SimplePage
         Session::regenerateToken();
         LoginCodeSession::forget();
 
-        return redirect()->intended(config('local-auth.redirect_after_login'));
+        // Every sign-in path lands on `/`, where HomeController decides where signed-in users go.
+        return redirect()->intended('/');
     }
 
     public function resendCode(): void

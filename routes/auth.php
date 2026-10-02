@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Domains\Auth\Http\Controllers;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Support\Facades\Route;
+use Northwestern\SysDev\Chassis\Http\Controllers\SentryTunnelController;
 
 Route::prefix('auth')->group(function () {
     Route::post('logout', Controllers\LogoutSelectionController::class)->name('logout');
@@ -34,4 +35,6 @@ Route::prefix('auth')->group(function () {
 Route::post('/impersonate/take/{id}/{guardName?}', [Controllers\ImpersonationController::class, 'take'])->middleware('throttle:auth:impersonate')->name('impersonate');
 Route::post('/impersonate/leave', [Controllers\ImpersonationController::class, 'leave'])->middleware('throttle:auth:impersonate')->name('impersonate.leave');
 
-Route::sentryTunnel(withoutMiddleware: [PreventRequestForgery::class]);
+Route::post('sentry/tunnel', SentryTunnelController::class)
+    ->withoutMiddleware([PreventRequestForgery::class])
+    ->name('sentry.tunnel');

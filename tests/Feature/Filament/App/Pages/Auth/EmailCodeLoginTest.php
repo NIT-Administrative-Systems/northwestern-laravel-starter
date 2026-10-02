@@ -142,6 +142,18 @@ final class EmailCodeLoginTest extends TestCase
         }
     }
 
+    public function test_valid_code_returns_users_to_the_page_they_asked_for(): void
+    {
+        $user = User::factory()->affiliate()->create(['email' => 'test@example.com']);
+        $this->startFlow($user->email, $this->challengeFor($user->email, '123456'));
+        session(['url.intended' => url('/app/some-page')]);
+
+        Livewire::test(EmailCodeLogin::class)
+            ->fillForm(['code' => '123456'], 'codeForm')
+            ->call('verifyCode')
+            ->assertRedirect(url('/app/some-page'));
+    }
+
     public function test_invalid_code_shows_an_error_on_the_code_field(): void
     {
         $user = User::factory()->affiliate()->create();

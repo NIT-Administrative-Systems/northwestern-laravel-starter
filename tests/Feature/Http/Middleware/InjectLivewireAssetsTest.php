@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Http\Middleware;
 
 use App\Http\Middleware\InjectLivewireAssets;
-use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 use Livewire;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
@@ -17,13 +17,11 @@ final class InjectLivewireAssetsTest extends TestCase
     {
         Livewire::spy();
 
-        Route::middleware(InjectLivewireAssets::class)
-            ->get('/test-livewire-middleware', fn () => response('OK'));
+        // Call the middleware directly: a full request would also run Livewire's
+        // response-time asset injection against the spy.
+        $response = (new InjectLivewireAssets())->handle(Request::create('/'), fn () => response('OK'));
 
-        $response = $this->get('/test-livewire-middleware');
-
-        $response->assertOk();
-        $response->assertSee('OK');
+        $this->assertSame('OK', $response->getContent());
 
         /** @phpstan-ignore-next-line  */
         Livewire::shouldHaveReceived('forceAssetInjection')->once();

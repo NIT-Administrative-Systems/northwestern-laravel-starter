@@ -16,11 +16,13 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Northwestern\FilamentTheme\NorthwesternTheme;
 
@@ -40,6 +42,7 @@ class AdministrationPanelProvider extends PanelProvider
             ->path(self::ID)
             ->maxContentWidth(Width::Full)
             ->viteTheme('resources/css/filament/administration/theme.css')
+            ->renderHook(PanelsRenderHook::HEAD_END, fn (): string => Blade::render('<x-sentry-browser />'))
             ->userMenuItems([
                 'logout' => fn (Action $action) => $action
                     ->label('Sign out')
