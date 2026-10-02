@@ -1,60 +1,35 @@
-@extends('northwestern::purple-container')
+<x-layouts.error title="Database Paused">
+    <section class="mx-auto max-w-2xl px-4 py-20 text-center sm:px-6 lg:py-28">
+        <h1 class="font-nu-heading text-nu-purple-100 text-4xl font-bold tracking-tight">Database Paused</h1>
 
-@php
-    $page_title = 'Database Paused';
-@endphp
+        <p class="mt-6 text-lg text-gray-600">
+            Our <span class="bg-gray-100 px-1.5 py-0.5 font-mono text-sm font-semibold text-gray-700">{{ strtoupper(config('app.env')) }}</span>
+            environment uses an auto-scaling database that pauses during periods of inactivity to optimize resource usage and costs.
+        </p>
 
-@section('content')
-    <div class="row justify-content-center min-vh-75 align-items-center">
-        <div class="col-md-10 col-lg-8 col-xl-6">
-            <div class="card border-warning">
-                <div class="card-body p-4 text-center">
-                    <div class="mb-4">
-                        <div
-                             class="d-inline-flex align-items-center justify-content-center bg-warning border-warnings mb-3 bg-opacity-10 p-3">
-                            <i class="fas fa-database fa-2x text-warning" aria-hidden="true"></i>
-                        </div>
-                        <h1 class="h2 fw-bold text-dark mb-2">Database Paused</h1>
-                    </div>
-
-                    <div class="mb-4 p-4">
-                        <p class="mb-0">
-                            Our <span class="badge bg-secondary">{{ strtoupper(config('app.env')) }}</span>
-                            environment uses an auto-scaling database that pauses during periods of inactivity
-                            to optimize resource usage and costs.
-                        </p>
-                    </div>
-
-                    <div class="d-flex align-items-center justify-content-center mb-4">
-                        <div class="spinner-border text-primary me-3"
-                             role="status"
-                             aria-hidden="true"
-                             style="width: 1.5rem; height: 1.5rem;"></div>
-                        <span class="text-muted">Database is starting up...</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="mt-3 text-center">
-                <small class="text-muted">
-                    <i class="fas fa-info-circle me-1" aria-hidden="true"></i>
-                    This page will automatically refresh in <span class="fw-semibold text-primary" id="countdown">30</span>
-                    seconds
-                </small>
-            </div>
+        <div class="mt-8 flex items-center justify-center gap-3 text-gray-600"
+             role="status">
+            <span class="border-nu-purple-100 size-5 animate-spin rounded-full border-2 border-t-transparent"
+                  aria-hidden="true"></span>
+            Database is starting up...
         </div>
-    </div>
+
+        <p class="mt-6 text-sm text-gray-500">
+            This page will automatically refresh in
+            <span class="text-nu-purple-100 font-semibold"
+                  id="countdown">30</span>
+            seconds.
+        </p>
+    </section>
 
     @push('scripts')
-        <script lang="text/javascript">
+        <script>
             let countdown = 30;
             const countdownElement = document.getElementById('countdown');
 
             const timer = setInterval(() => {
                 countdown--;
-                if (countdownElement) {
-                    countdownElement.textContent = countdown;
-                }
+                countdownElement.textContent = countdown;
 
                 if (countdown <= 0) {
                     clearInterval(timer);
@@ -63,4 +38,4 @@
             }, 1000);
         </script>
     @endpush
-@endsection
+</x-layouts.error>

@@ -24,6 +24,7 @@ export default defineConfig({
                 "resources/js/app.js",
                 "resources/js/audit-diff.ts",
                 "resources/js/sentry.js",
+                "resources/css/errors.css",
                 "resources/css/filament/administration/theme.css",
                 "resources/css/filament/app/theme.css",
             ],

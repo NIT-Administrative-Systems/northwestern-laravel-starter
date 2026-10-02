@@ -1,11 +1,5 @@
 @php
     use App\Domains\Auth\Enums\SystemPermission;
-@endphp
-
-@extends('northwestern::purple-container')
-
-@php
-    $page_title = 'Error';
 
     /**
      * Exception Detail Visibility Logic
@@ -19,200 +13,132 @@
      * This safeguards sensitive system information from being exposed to the general user base, while still granting
      * administrators immediate access to stack traces. This allows for rapid diagnosis of live issues without having
      * to cross-reference external logs or Sentry data.
+     *
+     * This page can render because the database is unavailable, so anything that may query it is wrapped in
+     * rescue() and fails closed.
      */
     $isProduction = app()->environment('production');
-    $userCanViewDetails = auth()->check() && auth()->user()->can(SystemPermission::ManageAll);
-
-    $showDetails = !$isProduction || $userCanViewDetails;
+    $user = rescue(fn () => auth()->user(), null, report: false);
+    $userCanViewDetails = (bool) rescue(fn () => $user?->can(SystemPermission::ManageAll), false, report: false);
+    $showDetails = ! $isProduction || $userCanViewDetails;
+    $sentryEventId = app()->bound('sentry') ? app('sentry')->getLastEventId() : null;
 @endphp
 
-@section('content')
-    <div class="row justify-content-center">
-        <div class="col-12 col-md-10 col-lg-8 main-content">
+<x-layouts.error title="Something went wrong">
+    <section class="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:py-20">
+        <div class="text-center">
+            <h1 class="font-nu-heading text-nu-purple-100 text-4xl font-bold tracking-tight">Something went wrong</h1>
 
-            <div class="card border-danger mb-5">
-                <div class="card-header bg-danger py-3 text-center text-white">
-                    <h2 class="h4 fw-bold mb-0 text-white">
-                        <i class="fa fa-exclamation-triangle me-2"></i> Something went wrong
-                    </h2>
-                </div>
+            <p class="mt-6 text-lg text-gray-600">Please wait a moment and try again.</p>
 
-                <div class="card-body p-md-5 p-4">
-                    <div class="text-center">
-                        <p class="lead">Please wait for a moment and try again.</p>
-                        <p class="text-muted">
-                            If the problem persists, please contact the
-                            <b><a class="text-decoration-none"
-                                   href="https://www.it.northwestern.edu/support/service-desk/"
-                                   target="_blank">
-                                    IT Service Desk <i class="fa fa-external-link-alt fa-xs"></i>
-                                </a></b> for assistance.
-                        </p>
-                    </div>
+            <p class="mt-2 text-gray-600">
+                If the problem persists, please contact the
+                <a class="text-nu-purple-100 font-semibold underline"
+                   href="https://www.it.northwestern.edu/support/service-desk/"
+                   target="_blank"
+                   rel="noopener noreferrer">IT Service Desk</a>
+                for assistance.
+            </p>
 
-                    @if (app()->bound('sentry') && app('sentry')->getLastEventId())
-                        <hr class="my-4">
-
-                        <div class="alert alert-light border">
-                            <h5 class="h6 fw-bold text-secondary mb-3">
-                                <i class="fa fa-comment-dots me-1"></i> Help us fix this
-                            </h5>
-                            <p class="small text-muted">If you'd like to help, please tell us what happened below:</p>
-
-                            <form id="errorReportForm">
-                                <div class="row g-3 mb-3">
-                                    <div class="col-12 col-md-6">
-                                        <label class="form-label fw-bold small text-uppercase" for="nameInput">Name</label>
-                                        <input class="form-control"
-                                               id="nameInput"
-                                               type="text"
-                                               value="{{ auth()->user()->full_name ?? '' }}"
-                                               placeholder="Your Name">
-                                    </div>
-                                    <div class="col-12 col-md-6">
-                                        <label class="form-label fw-bold small text-uppercase"
-                                               for="emailInput">Email</label>
-                                        <input class="form-control"
-                                               id="emailInput"
-                                               type="email"
-                                               value="{{ auth()->user()->email ?? '' }}"
-                                               placeholder="name@northwestern.edu">
-                                    </div>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label class="form-label fw-bold small text-uppercase" for="commentInput">What
-                                        happened?</label>
-                                    <textarea class="form-control"
-                                              id="commentInput"
-                                              style="resize: none;"
-                                              rows="4"
-                                              placeholder="Describe what you were doing when the error occurred..."></textarea>
-                                </div>
-
-                                <div class="d-grid d-md-flex justify-content-md-end gap-2">
-                                    <button class="btn btn-primary" type="submit">
-                                        <i class="fa fa-paper-plane me-2" aria-hidden="true"></i>
-                                        Submit Report
-                                    </button>
-                                </div>
-                            </form>
-
-                            <div class="alert alert-success alert-dismissible fade show mt-3"
-                                 id="feedbackAlert"
-                                 role="alert"
-                                 style="display: none;">
-                                <strong><i class="fa fa-check-circle"></i> Success!</strong> Your feedback has been
-                                submitted. Thank you!
-                                <button class="btn-close"
-                                        data-bs-dismiss="alert"
-                                        type="button"
-                                        aria-label="Close"></button>
-                            </div>
-                        </div>
-                    @endif
-
-                    @if ($showDetails && isset($exception))
-                        <div class="mt-5">
-                            <div class="d-flex align-items-center justify-content-between mb-2">
-                                <h5 class="fw-bold text-secondary mb-0">
-                                    <i class="fa fa-terminal me-2"></i> Technical Details
-                                </h5>
-
-                                @if ($isProduction)
-                                    <span class="badge bg-danger border-danger border text-white shadow-sm">
-                                        <i class="fa fa-lock me-1"></i> Administrators Only
-                                    </span>
-                                @else
-                                    <span class="badge bg-warning text-dark border-warning border shadow-sm">
-                                        <i class="fa fa-eye-slash me-1"></i> Non-Production Only
-                                    </span>
-                                @endif
-                            </div>
-
-                            <div class="card border-secondary bg-white shadow-sm">
-                                <div class="card-body p-3">
-                                    <div class="mb-3">
-                                        <label class="fw-bold text-uppercase text-muted small"
-                                               style="font-size: 0.7rem;">Error Message</label>
-                                        <div
-                                             class="border-danger bg-light text-danger font-monospace text-break fw-bold border border-2 p-3">
-                                            <i class="fa fa-times-circle me-2"></i> {{ $exception->getMessage() }}
-                                        </div>
-                                    </div>
-
-                                    <details>
-                                        <summary
-                                                 class="btn btn-dark btn-sm w-100 d-flex justify-content-between align-items-center text-start">
-                                            <span><i class="fa fa-code me-2"></i> View Full Stack Trace</span>
-                                            <i class="fa fa-chevron-down small"></i>
-                                        </summary>
-                                        <div class="mt-2">
-                                            <pre class="bg-dark text-light mb-0 border p-3 shadow-inner"
-                                                 style="font-size: 0.75rem; max-height: 400px; overflow: auto; white-space: pre-wrap; font-family: 'Consolas', 'Monaco', monospace;">{{ $exception->getTraceAsString() }}</pre>
-                                        </div>
-                                    </details>
-                                </div>
-                            </div>
-                        </div>
-                    @endif
-                </div>
-
-                @if (app()->bound('sentry') && app('sentry')->getLastEventId())
-                    <div class="card-footer bg-light py-3 text-center">
-                        <small class="text-muted fw-bold font-monospace text-uppercase">
-                            <i class="fa fa-fingerprint text-secondary me-1"></i>
-                            Error ID: {{ app('sentry')->getLastEventId() }}
-                        </small>
-                    </div>
-                @endif
-            </div>
-
+            @if ($sentryEventId)
+                <p class="mt-4 font-mono text-xs uppercase tracking-wide text-gray-500">Error ID: {{ $sentryEventId }}</p>
+            @endif
         </div>
-    </div>
-@endsection
 
-@if (app()->bound('sentry') && app('sentry')->getLastEventId())
-    @push('scripts')
-        <script lang="text/javascript">
-            document.addEventListener('DOMContentLoaded', function() {
-                const form = document.getElementById('errorReportForm');
-                if (form) {
-                    form.addEventListener('submit', function(event) {
-                        event.preventDefault();
+        @if ($sentryEventId)
+            <div class="mt-12 border border-gray-200 bg-gray-50 p-6">
+                <h2 class="font-nu-heading text-lg font-bold text-gray-900">Help us fix this</h2>
+                <p class="mt-1 text-sm text-gray-600">If you'd like to help, tell us what happened.</p>
 
-                        const btn = form.querySelector('button[type="submit"]');
-                        const originalBtnContent = btn.innerHTML;
+                <form class="mt-6 space-y-4"
+                      id="error-report-form">
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <label class="block text-sm font-semibold text-gray-700">
+                            Name
+                            <input class="focus:border-nu-purple-100 focus:ring-nu-purple-100 mt-1 block w-full border border-gray-300 bg-white px-3 py-2 font-normal"
+                                   name="name"
+                                   type="text"
+                                   value="{{ $user->full_name ?? '' }}"
+                                   autocomplete="name">
+                        </label>
+                        <label class="block text-sm font-semibold text-gray-700">
+                            Email
+                            <input class="focus:border-nu-purple-100 focus:ring-nu-purple-100 mt-1 block w-full border border-gray-300 bg-white px-3 py-2 font-normal"
+                                   name="email"
+                                   type="email"
+                                   value="{{ $user->email ?? '' }}"
+                                   autocomplete="email">
+                        </label>
+                    </div>
+                    <label class="block text-sm font-semibold text-gray-700">
+                        What happened?
+                        <textarea class="focus:border-nu-purple-100 focus:ring-nu-purple-100 mt-1 block w-full resize-none border border-gray-300 bg-white px-3 py-2 font-normal"
+                                  name="message"
+                                  rows="4"
+                                  placeholder="Describe what you were doing when the error occurred..."></textarea>
+                    </label>
+                    <div class="flex items-center justify-end gap-4">
+                        <p class="text-sm text-gray-600"
+                           id="error-report-status"
+                           role="status"></p>
+                        <button class="bg-nu-purple-100 hover:bg-nu-purple-120 px-5 py-2 text-sm font-semibold text-white disabled:opacity-60"
+                                type="submit">
+                            Submit report
+                        </button>
+                    </div>
+                </form>
+            </div>
+        @endif
 
-                        btn.disabled = true;
-                        btn.innerHTML = '<i class="fa fa-spinner fa-spin me-2"></i> Sending...';
+        @if ($showDetails && isset($exception))
+            <div class="mt-12">
+                <div class="flex items-center justify-between gap-4">
+                    <h2 class="font-nu-heading text-lg font-bold text-gray-900">Technical details</h2>
+                    <span class="{{ $isProduction ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800' }} px-2 py-1 text-xs font-semibold uppercase">
+                        {{ $isProduction ? 'Administrators only' : 'Non-production only' }}
+                    </span>
+                </div>
 
-                        const userFeedback = {
-                            associatedEventId: '{{ app('sentry')->getLastEventId() }}',
-                            name: document.getElementById('nameInput').value,
-                            email: document.getElementById('emailInput').value,
-                            message: document.getElementById('commentInput').value,
-                        };
+                <p class="mt-3 break-words border-l-4 border-red-600 bg-red-50 p-4 font-mono text-sm font-semibold text-red-800">
+                    {{ $exception->getMessage() }}
+                </p>
 
-                        try {
-                            Sentry.captureFeedback(userFeedback);
+                <details class="mt-3">
+                    <summary class="cursor-pointer bg-gray-900 px-4 py-2 text-sm font-semibold text-white">View full stack trace</summary>
+                    <pre class="max-h-96 overflow-auto whitespace-pre-wrap bg-gray-900 p-4 font-mono text-xs text-gray-100">{{ $exception->getTraceAsString() }}</pre>
+                </details>
+            </div>
+        @endif
+    </section>
 
-                            const feedbackAlert = document.getElementById('feedbackAlert');
-                            feedbackAlert.style.display = 'block';
+    @if ($sentryEventId)
+        @push('scripts')
+            <script>
+                document.getElementById('error-report-form')?.addEventListener('submit', (event) => {
+                    event.preventDefault();
 
-                            btn.classList.remove('btn-primary');
-                            btn.classList.add('btn-success');
-                            btn.innerHTML = '<i class="fa fa-check me-2"></i> Sent';
-                            form.reset();
-                        } catch (e) {
-                            console.error(e);
-                            btn.disabled = false;
-                            btn.innerHTML = originalBtnContent;
-                            alert('Failed to send report. Please try again.');
-                        }
+                    const form = event.currentTarget;
+                    const button = form.querySelector('button[type="submit"]');
+                    const status = document.getElementById('error-report-status');
+
+                    if (!window.Sentry?.captureFeedback) {
+                        status.textContent = 'Error reporting is unavailable.';
+
+                        return;
+                    }
+
+                    window.Sentry.captureFeedback({
+                        associatedEventId: @js($sentryEventId),
+                        name: form.elements.name.value,
+                        email: form.elements.email.value,
+                        message: form.elements.message.value,
                     });
-                }
-            });
-        </script>
-    @endpush
-@endif
+
+                    form.reset();
+                    button.disabled = true;
+                    status.textContent = 'Thank you. Your report has been sent.';
+                });
+            </script>
+        @endpush
+    @endif
+</x-layouts.error>
