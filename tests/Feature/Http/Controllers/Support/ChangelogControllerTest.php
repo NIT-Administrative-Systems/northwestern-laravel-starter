@@ -6,22 +6,12 @@ namespace Tests\Feature\Http\Controllers\Support;
 
 use App\Domains\Support\Models\Changelog;
 use App\Http\Controllers\Support\ChangelogController;
-use Illuminate\Support\Facades\Route;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(ChangelogController::class)]
 final class ChangelogControllerTest extends TestCase
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        Route::get('/support/changelog', [ChangelogController::class, 'index'])->name('support.changelog.index');
-        Route::get('/support/changelog/feed.rss', fn () => 'feed')->name('support.changelog.feed');
-        Route::get('/support/changelog/{changelog}', [ChangelogController::class, 'show'])->name('support.changelog.show');
-    }
-
     public function test_index_returns_view_with_paginated_entries_and_feed_url(): void
     {
         config(['changelog.pagination.per_page' => 2]);
@@ -33,7 +23,9 @@ final class ChangelogControllerTest extends TestCase
         $response = $this->get(route('support.changelog.index'));
 
         $response->assertOk();
-        $response->assertViewIs('support.changelog.index');
+        $response->assertViewIs('public.changelog.index');
+        $response->assertSee('Copy RSS feed URL');
+        $response->assertSee('Showing');
         $response->assertViewHas('feedUrl', route('support.changelog.feed'));
 
         $entries = $response->viewData('entries');
@@ -49,11 +41,25 @@ final class ChangelogControllerTest extends TestCase
             'authored_at' => now(),
         ]);
 
-        $controller = new ChangelogController();
-        $view = $controller->show($entry);
-        $data = $view->getData();
+        $this->get(route('support.changelog.show', $entry))
+            ->assertOk()
+            ->assertViewIs('public.changelog.show')
+            ->assertViewHas('entry', fn (Changelog $shown): bool => $shown->is($entry))
+            ->assertSee('February update');
+    }
 
-        $this->assertSame('support.changelog.show', $view->name());
-        $this->assertTrue($data['entry']->is($entry));
+    public function test_changelog_is_public_and_renders_on_the_public_layout(): void
+    {
+        $this->get(route('support.changelog.index'))
+            ->assertOk()
+            ->assertSee('data-cy="sign-in-link"', escape: false)
+            ->assertSee('Privacy Statement');
+    }
+
+    public function test_feed_url_is_not_treated_as_an_entry_slug(): void
+    {
+        $this->get(route('support.changelog.feed'))
+            ->assertOk()
+            ->assertHeader('Content-Type', 'application/rss+xml; charset=UTF-8');
     }
 }

@@ -13,6 +13,15 @@ use Illuminate\Support\Facades\Route;
  */
 Route::middleware(['panel:' . AppPanelProvider::ID, InjectLivewireAssets::class])->group(function () {
     Route::get('/', Controllers\HomeController::class)->name('home');
+
+    if (config('changelog.enabled')) {
+        Route::prefix('support/changelog')->name('support.changelog.')->group(function () {
+            Route::get('/', [Controllers\Support\ChangelogController::class, 'index'])->name('index');
+            Route::get('{changelog}', [Controllers\Support\ChangelogController::class, 'show'])
+                ->where('changelog', '^(?!feed\.rss$).+')
+                ->name('show');
+        });
+    }
 });
 
 if (config('platform.wildcard_photo_sync')) {
@@ -21,11 +30,7 @@ if (config('platform.wildcard_photo_sync')) {
 
 Route::prefix('support')->name('support.')->group(function () {
     if (config('changelog.enabled')) {
-        Route::prefix('changelog')->name('changelog.')->group(function () {
-            Route::get('/', [Controllers\Support\ChangelogController::class, 'index'])->name('index');
-            Route::get('feed.rss', Controllers\Support\ChangelogFeedController::class)->name('feed');
-            Route::get('{changelog}', [Controllers\Support\ChangelogController::class, 'show'])->name('show');
-        });
+        Route::get('changelog/feed.rss', Controllers\Support\ChangelogFeedController::class)->name('changelog.feed');
     }
 
     if (config('support.enabled')) {
