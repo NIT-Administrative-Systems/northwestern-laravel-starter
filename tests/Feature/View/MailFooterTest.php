@@ -1,0 +1,63 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Feature\View;
+
+use App\Domains\Auth\Mail\LoginCodeMail;
+use Carbon\CarbonImmutable;
+use Illuminate\Mail\Markdown;
+use Illuminate\Support\Facades\Crypt;
+use Tests\TestCase;
+
+final class MailFooterTest extends TestCase
+{
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        config([
+            'northwestern-theme.office.name' => 'Example Office',
+            'northwestern-theme.office.addr' => '633 Clark Street',
+            'northwestern-theme.office.city' => 'Evanston, IL 60208',
+            'northwestern-theme.office.phone' => '847-555-0100',
+            'northwestern-theme.office.email' => 'office@northwestern.edu',
+        ]);
+    }
+
+    public function test_html_mail_footer_has_the_unit_and_the_required_links(): void
+    {
+        $html = $this->loginCodeMail()->render();
+
+        $this->assertStringContainsString('Example Office', $html);
+        $this->assertStringContainsString('633 Clark Street, Evanston, IL 60208', $html);
+        $this->assertStringContainsString('office@northwestern.edu', $html);
+        $this->assertStringContainsString('href="https://www.northwestern.edu/accessibility/report/"', $html);
+        $this->assertStringContainsString('href="https://www.northwestern.edu/privacy/"', $html);
+        $this->assertStringContainsString('Northwestern University. All rights reserved.', $html);
+        $this->assertStringNotContainsString('laravel.com', $html);
+    }
+
+    public function test_text_mail_footer_spells_out_the_links(): void
+    {
+        $text = (string) resolve(Markdown::class)->renderText('mail.auth.login-code', ['code' => '123456', 'expiresInMinutes' => 10]);
+
+        $this->assertStringContainsString('Example Office | 633 Clark Street, Evanston, IL 60208 | 847-555-0100 | office@northwestern.edu', $text);
+        $this->assertStringContainsString('Accessibility: https://www.northwestern.edu/accessibility/report/', $text);
+        $this->assertStringContainsString('Privacy Statement: https://www.northwestern.edu/privacy/', $text);
+    }
+
+    public function test_empty_unit_fields_are_left_out(): void
+    {
+        config(['northwestern-theme.office.phone' => '']);
+
+        $text = (string) resolve(Markdown::class)->renderText('mail.auth.login-code', ['code' => '123456', 'expiresInMinutes' => 10]);
+
+        $this->assertStringContainsString('Example Office | 633 Clark Street, Evanston, IL 60208 | office@northwestern.edu', $text);
+    }
+
+    private function loginCodeMail(): LoginCodeMail
+    {
+        return new LoginCodeMail(Crypt::encryptString('123456'), CarbonImmutable::now()->addMinutes(10));
+    }
+}

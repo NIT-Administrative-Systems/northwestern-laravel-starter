@@ -1,0 +1,10 @@
+/*
+ * Styles for error pages. They render without Filament, auth or the database, so they
+ * load the Northwestern tokens and Tailwind directly instead of a panel theme.
+ */
+@import "tailwindcss";
+@import "../../vendor/northwestern-sysdev/northwestern-filament-theme/dist/tokens.css";
+@import "../../vendor/northwestern-sysdev/northwestern-filament-theme/dist/tailwind-tokens.css";
+
+@source '../views/errors/**/*';
+@source '../views/components/layouts/error.blade.php';

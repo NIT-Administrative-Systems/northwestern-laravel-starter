@@ -36,7 +36,8 @@ class SentryBrowser extends Component
      */
     private function config(): array
     {
-        $user = auth()->user();
+        // Error pages render this when the database may be down, so a failed user lookup means no user context.
+        $user = rescue(fn () => auth()->user(), null, report: false);
 
         return [
             'dsn' => config('sentry.dsn'),
