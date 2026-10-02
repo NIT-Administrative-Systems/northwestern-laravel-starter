@@ -6,34 +6,35 @@ namespace Tests\Feature\Http\Controllers;
 
 use App\Domains\User\Models\User;
 use App\Http\Controllers\HomeController;
-use Illuminate\Support\Facades\Route;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(HomeController::class)]
 final class HomeControllerTest extends TestCase
 {
-    protected function setUp(): void
+    public function test_guests_see_the_landing_page(): void
     {
-        parent::setUp();
-
-        Route::get('/', HomeController::class)->name('home');
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertViewIs('public.landing')
+            ->assertSee(config('app.name'))
+            ->assertSee('href="' . url('/app/login') . '"', escape: false);
     }
 
-    public function test_redirects_guest_users_to_login(): void
+    public function test_signed_in_users_are_sent_to_the_app_panel(): void
     {
-        $response = $this->get(route('home'));
-
-        $response->assertRedirectToRoute('filament.app.auth.login');
+        $this->actingAs(User::factory()->create())
+            ->get(route('home'))
+            ->assertRedirect('/app');
     }
 
-    public function test_renders_default_home_view_for_authenticated_users(): void
+    public function test_the_landing_page_uses_the_light_only_public_layout_with_the_footer(): void
     {
-        $user = User::factory()->create();
-
-        $response = $this->actingAs($user)->get(route('home'));
-
-        $response->assertOk();
-        $response->assertViewIs('default-home');
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('<html class="fi min-h-screen"', escape: false)
+            ->assertSee('data-cy="sign-in-link"', escape: false)
+            ->assertSee('Privacy Statement')
+            ->assertSee('Report a Concern');
     }
 }

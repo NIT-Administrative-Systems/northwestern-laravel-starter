@@ -15,10 +15,8 @@ Cypress.Commands.add("loginAs", (username: string) => {
         },
         {
             validate() {
-                cy.visit("/");
-                cy.getBySel("sign-out-link").should("be.visible");
-                cy.contains("Sign out").should("be.visible");
-                cy.getBySel("logged-in").should("be.visible");
+                cy.visit("/app");
+                cy.get(".fi-user-menu").should("be.visible");
             },
         },
     );

@@ -4,8 +4,17 @@ describe("Home Page", () => {
     });
 
     context("Unauthenticated users", () => {
-        it("should redirect to login selection page", () => {
+        it("should display the landing page", () => {
             cy.visit("/");
+            cy.url().should("not.include", "/app");
+            cy.get("h1").should("contain.text", "Northwestern Laravel Starter");
+            cy.getBySel("sign-in-link").should("be.visible");
+            cy.checkAxeViolations();
+        });
+
+        it("should link to the login page", () => {
+            cy.visit("/");
+            cy.getBySel("sign-in-link").click();
             cy.url().should("include", "/app/login");
         });
     });
@@ -15,18 +24,16 @@ describe("Home Page", () => {
             cy.loginAsGenericUser();
         });
 
-        it("should display the home page with logout link", () => {
+        it("should be sent to the app panel", () => {
             cy.visit("/");
-            cy.get("h1")
-                .should("contain.text", "Northwestern Laravel Starter")
-                .should("have.css", "opacity", "1");
-            cy.getBySel("sign-out-link").should("be.visible");
-            cy.getBySel("logged-in").should("be.visible");
+            cy.url().should("include", "/app");
+            cy.get(".fi-user-menu").should("be.visible");
             cy.checkAxeViolations();
         });
 
         it("should not display admin panel link for users without permissions", () => {
-            cy.visit("/");
+            cy.visit("/app");
+            cy.get(".fi-user-menu").click();
             cy.getBySel("admin-panel-link").should("not.exist");
         });
     });
@@ -37,16 +44,14 @@ describe("Home Page", () => {
         });
 
         it("should display admin panel link for authorized users", () => {
-            cy.visit("/");
-            cy.get("h1")
-                .should("contain.text", "Northwestern Laravel Starter")
-                .should("have.css", "opacity", "1");
+            cy.visit("/app");
+            cy.get(".fi-user-menu").click();
             cy.getBySel("admin-panel-link").should("be.visible");
-            cy.checkAxeViolations();
         });
 
         it("should navigate to Filament panel when clicking admin link", () => {
-            cy.visit("/");
+            cy.visit("/app");
+            cy.get(".fi-user-menu").click();
             cy.getBySel("admin-panel-link").click();
             cy.url().should("include", "/administration");
         });

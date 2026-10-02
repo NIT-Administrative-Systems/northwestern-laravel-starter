@@ -3,9 +3,17 @@
 declare(strict_types=1);
 
 use App\Http\Controllers;
+use App\Http\Middleware\InjectLivewireAssets;
+use App\Providers\Filament\AppPanelProvider;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', Controllers\HomeController::class)->name('home');
+/*
+ * Public pages render on the public layout (`<x-layouts.public>`) in the app panel's
+ * context, so they load its theme and can use Filament's Blade components.
+ */
+Route::middleware(['panel:' . AppPanelProvider::ID, InjectLivewireAssets::class])->group(function () {
+    Route::get('/', Controllers\HomeController::class)->name('home');
+});
 
 if (config('platform.wildcard_photo_sync')) {
     Route::get('users/{user}/wildcard-photo', [App\Domains\User\Http\Controllers\WildcardPhotoController::class, 'show'])->name('users.wildcard-photo');

@@ -55,7 +55,8 @@ describe("Authentication - Login", () => {
             cy.getBySel("verify-button").click();
 
             cy.url().should("not.include", "/app/login");
-            cy.getBySel("logged-in").should("be.visible");
+            cy.url().should("include", "/app");
+            cy.get(".fi-user-menu").should("be.visible");
         });
 
         it("should reject invalid login codes", () => {

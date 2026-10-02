@@ -5,4 +5,6 @@
 
 @source '../../../../app/Filament/App/**/*';
 @source '../../../../resources/views/filament/app/**/*';
+@source '../../../../resources/views/components/layouts/**/*';
+@source '../../../../resources/views/public/**/*';
 @source '../../../../vendor/filament/**/*';

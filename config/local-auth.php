@@ -33,9 +33,6 @@ return [
     // multiple accounts' per-email rate limits)
     'rate_limit_per_ip_per_hour' => (int) env('LOCAL_AUTH_RATE_LIMIT_PER_IP_PER_HOUR', 20),
 
-    // Where to send users after a successful login (route name or path)
-    'redirect_after_login' => env('LOCAL_AUTH_REDIRECT_AFTER_LOGIN', '/'),
-
     'code' => [
         // Number of digits in the verification code
         'digits' => (int) env('LOCAL_AUTH_CODE_DIGITS', 6),
