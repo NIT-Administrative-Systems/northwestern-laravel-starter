@@ -20,11 +20,13 @@ use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Icons\Heroicon;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Route;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Northwestern\FilamentTheme\NorthwesternTheme;
@@ -65,6 +67,7 @@ class AppPanelProvider extends PanelProvider
                     ->name('environment-lockdown');
             })
             ->viteTheme('resources/css/filament/app/theme.css')
+            ->renderHook(PanelsRenderHook::HEAD_END, fn (): string => Blade::render('<x-sentry-browser />'))
             ->userMenuItems([
                 'administration' => Action::make('administration')
                     ->label('Administration')

@@ -8,6 +8,7 @@ use App\Domains\Auth\Actions\Local\FixedNumericOneTimeCodeGenerator;
 use App\Domains\Auth\Actions\Local\RandomNumericOneTimeCodeGenerator;
 use App\Domains\Auth\Contracts\OneTimeCodeGenerator;
 use App\Domains\Auth\Enums\SystemPermission;
+use App\Domains\Core\Exceptions\SentryExceptionHandler;
 use App\Domains\User\Models\User;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Foundation\Application;
@@ -106,25 +107,14 @@ class AppServiceProvider extends ServiceProvider
     }
 
     /**
-     * Registers user context for the browser Sentry SDK. The northwestern-laravel-ui
-     * Blade template calls `Sentry.setUser()` with the object on every page load,
-     * so JS errors carry user identity. PHP-side context is handled separately by
-     * {@see \App\Domains\Core\Exceptions\SentryExceptionHandler}.
+     * Registers user context for the browser Sentry SDK on the remaining
+     * northwestern-laravel-ui pages, which call `Sentry.setUser()` with it on
+     * every page load. It is the same context PHP reports use.
      */
     public function configureSentry(): void
     {
-        NorthwesternUiServiceProvider::setSentryUserContext(static function (?User $user) {
-            if (! $user instanceof User) {
-                return null;
-            }
-
-            return [
-                'id' => $user->id,
-                'username' => $user->username,
-                'email' => $user->email,
-                'primary_affiliation' => $user->primary_affiliation,
-                'auth_type' => $user->auth_type,
-            ];
-        });
+        NorthwesternUiServiceProvider::setSentryUserContext(static fn (?User $user): ?array => $user instanceof User
+            ? resolve(SentryExceptionHandler::class)->userContext($user)
+            : null);
     }
 }
