@@ -66,7 +66,7 @@ final class EnvironmentLockdownTest extends TestCase
 
         $this->actingAs($user)
             ->get($this->endpoint)
-            ->assertRedirect(route('platform.environment-lockdown'));
+            ->assertRedirect(route('filament.app.environment-lockdown'));
     }
 
     public function test_redirects_users_with_no_roles(): void
@@ -77,7 +77,7 @@ final class EnvironmentLockdownTest extends TestCase
 
         $this->actingAs($user)
             ->get($this->endpoint)
-            ->assertRedirect(route('platform.environment-lockdown'));
+            ->assertRedirect(route('filament.app.environment-lockdown'));
     }
 
     public function test_allows_users_with_non_default_roles(): void
@@ -147,7 +147,7 @@ final class EnvironmentLockdownTest extends TestCase
 
         $this->actingAs($user)
             ->get($this->endpoint)
-            ->assertRedirect(route('platform.environment-lockdown'));
+            ->assertRedirect(route('filament.app.environment-lockdown'));
     }
 
     public function test_all_exempted_routes_allow_users_with_only_default_role(): void
@@ -178,6 +178,6 @@ final class EnvironmentLockdownTest extends TestCase
 
         $this->actingAs($user)
             ->get($this->endpoint)
-            ->assertRedirect(route('platform.environment-lockdown'));
+            ->assertRedirect(route('filament.app.environment-lockdown'));
     }
 }

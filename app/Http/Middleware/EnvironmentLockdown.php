@@ -38,7 +38,7 @@ class EnvironmentLockdown extends BaseEnvironmentLockdown
 
     protected function redirectRoute(): string
     {
-        return 'platform.environment-lockdown';
+        return 'filament.app.environment-lockdown';
     }
 
     protected function exemptedRoutePatterns(): array

@@ -12,5 +12,6 @@ return [
     App\Providers\HealthServiceProvider::class,
     App\Providers\SupportServiceProvider::class,
     App\Providers\FilamentServiceProvider::class,
+    App\Providers\Filament\AppPanelProvider::class,
     App\Providers\Filament\AdministrationPanelProvider::class,
 ];

@@ -38,7 +38,7 @@ class WebSSOController extends Controller
         protected RecordLogin $recordLogin,
     ) {
         $this->login_route_name = 'login-websso';
-        $this->logout_return_to_route = 'login-selection';
+        $this->logout_return_to_route = 'filament.app.auth.login';
     }
 
     protected function findUserByNetID(FindOrUpdateUserFromDirectory $findOrUpdateUserFromDirectory, ?string $netid = null): ?Authenticatable
@@ -84,10 +84,10 @@ class WebSSOController extends Controller
             Session::invalidate();
             Session::regenerateToken();
 
-            return redirect()->route('login-selection');
+            return redirect()->route('filament.app.auth.login');
         }
 
-        $response = $this->webSSOAuthOauthLogout(route('login-selection'));
+        $response = $this->webSSOAuthOauthLogout(route('filament.app.auth.login'));
         Session::invalidate();
         Session::regenerateToken();
 
@@ -103,6 +103,6 @@ class WebSSOController extends Controller
         Session::invalidate();
         Session::regenerateToken();
 
-        return $ssoStrategy->logout('login-selection');
+        return $ssoStrategy->logout('filament.app.auth.login');
     }
 }

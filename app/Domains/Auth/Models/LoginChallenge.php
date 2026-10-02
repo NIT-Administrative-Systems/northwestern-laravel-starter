@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Domains\Auth\Models;
 
+use App\Domains\Auth\Actions\Local\AuthenticateWithLoginCode;
 use App\Domains\Auth\Actions\Local\IssueLoginChallenge;
+use App\Domains\Auth\Actions\Local\RequestLoginCode;
 use App\Domains\Auth\Actions\Local\VerifyLoginChallengeCode;
-use App\Domains\Auth\Http\Controllers\Local\SendLoginCodeController;
-use App\Domains\Auth\Http\Controllers\Local\VerifyLoginCodeController;
 use App\Domains\Auth\Jobs\SendLoginCodeEmailJob;
 use App\Domains\Core\Models\BaseModel;
 use Carbon\CarbonImmutable;
@@ -18,8 +18,8 @@ use InvalidArgumentException;
 /**
  * Represents the OTP challenge state for a local user authentication attempt.
  *
- * @see SendLoginCodeController
- * @see VerifyLoginCodeController
+ * @see RequestLoginCode
+ * @see AuthenticateWithLoginCode
  * @see IssueLoginChallenge
  * @see VerifyLoginChallengeCode
  * @see SendLoginCodeEmailJob

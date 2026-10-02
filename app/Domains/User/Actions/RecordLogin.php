@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\User\Actions;
 
-use App\Domains\Auth\Http\Controllers\Local\VerifyLoginCodeController;
+use App\Domains\Auth\Actions\Local\AuthenticateWithLoginCode;
 use App\Domains\Auth\Http\Controllers\WebSSOController;
 use App\Domains\User\Models\User;
 use Illuminate\Http\Request;
@@ -17,7 +17,7 @@ use Illuminate\Http\Request;
  * authentication controller after the user has been verified.
  *
  * @see WebSSOController
- * @see VerifyLoginCodeController
+ * @see AuthenticateWithLoginCode
  * @see DetermineUserSegment
  */
 readonly class RecordLogin

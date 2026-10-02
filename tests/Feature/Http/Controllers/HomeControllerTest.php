@@ -24,7 +24,7 @@ final class HomeControllerTest extends TestCase
     {
         $response = $this->get(route('home'));
 
-        $response->assertRedirectToRoute('login-selection');
+        $response->assertRedirectToRoute('filament.app.auth.login');
     }
 
     public function test_renders_default_home_view_for_authenticated_users(): void

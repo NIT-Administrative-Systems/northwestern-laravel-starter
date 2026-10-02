@@ -101,20 +101,16 @@ return [
             'login-oauth-redirect',
             'login-oauth-callback',
             'login-oauth-logout',
-            'login-selection',
+            'filament.app.auth.login',
+            'filament.app.auth.login-code',
             'logout',
-            'login-code.request',
-            'login-code.send',
-            'login-code.verify',
-            'login-code.code',
-            'login-code.resend',
 
             // Impersonation
             'impersonate',
             'impersonate.leave',
 
             // Lockdown Page
-            'platform.environment-lockdown',
+            'filament.app.environment-lockdown',
         ],
     ],
 

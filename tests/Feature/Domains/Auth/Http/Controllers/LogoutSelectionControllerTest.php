@@ -32,7 +32,7 @@ final class LogoutSelectionControllerTest extends TestCase
     {
         $response = $this->post(route('logout'));
 
-        $response->assertRedirect(route('login-selection'));
+        $response->assertRedirect(route('filament.app.auth.login'));
     }
 
     public function test_logs_out_local_user_and_redirects_to_login_selection(): void
@@ -47,7 +47,7 @@ final class LogoutSelectionControllerTest extends TestCase
 
         $response = $this->post(route('logout'));
 
-        $response->assertRedirect(route('login-selection'));
+        $response->assertRedirect(route('filament.app.auth.login'));
         $this->assertGuest();
 
         $this->assertNotEquals($oldSessionId, session()->getId());
@@ -102,7 +102,7 @@ final class LogoutSelectionControllerTest extends TestCase
 
         $response = $this->post(route('logout'));
 
-        $response->assertRedirect(route('login-selection'));
+        $response->assertRedirect(route('filament.app.auth.login'));
         $this->assertGuest();
 
         $this->assertNotEquals($oldSessionId, session()->getId());

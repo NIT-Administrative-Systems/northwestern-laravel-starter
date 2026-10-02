@@ -22,7 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__ . '/../routes/console.php',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->redirectGuestsTo(fn () => route('login-selection'));
+        $middleware->redirectGuestsTo(fn () => route('filament.app.auth.login'));
         $middleware->redirectUsersTo('/');
 
         $middleware->validateCsrfTokens(except: [

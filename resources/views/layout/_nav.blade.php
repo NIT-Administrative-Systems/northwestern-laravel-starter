@@ -101,7 +101,7 @@
 
         @guest
             <li class='nav-item d-flex align-items-center'>
-                <a class="nav-link" href="{{ route('login-selection') }}">
+                <a class="nav-link" href="{{ route('filament.app.auth.login') }}">
                     <i class="fas fa-sign-in-alt fa-fw me-1" aria-hidden="true"></i>
                     Sign in
                 </a>
