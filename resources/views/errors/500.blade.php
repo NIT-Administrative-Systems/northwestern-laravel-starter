@@ -18,9 +18,9 @@
      * rescue() and fails closed.
      */
     $isProduction = app()->environment('production');
-    $user = rescue(fn () => auth()->user(), null, report: false);
-    $userCanViewDetails = (bool) rescue(fn () => $user?->can(SystemPermission::ManageAll), false, report: false);
-    $showDetails = ! $isProduction || $userCanViewDetails;
+    $user = rescue(fn() => auth()->user(), null, report: false);
+    $userCanViewDetails = (bool) rescue(fn() => $user?->can(SystemPermission::ManageAll), false, report: false);
+    $showDetails = !$isProduction || $userCanViewDetails;
     $sentryEventId = app()->bound('sentry') ? app('sentry')->getLastEventId() : null;
 @endphp
 
@@ -41,7 +41,8 @@
             </p>
 
             @if ($sentryEventId)
-                <p class="mt-4 font-mono text-xs uppercase tracking-wide text-gray-500">Error ID: {{ $sentryEventId }}</p>
+                <p class="mt-4 font-mono text-xs uppercase tracking-wide text-gray-500">Error ID: {{ $sentryEventId }}
+                </p>
             @endif
         </div>
 
@@ -50,8 +51,7 @@
                 <h2 class="font-nu-heading text-lg font-bold text-gray-900">Help us fix this</h2>
                 <p class="mt-1 text-sm text-gray-600">If you'd like to help, tell us what happened.</p>
 
-                <form class="mt-6 space-y-4"
-                      id="error-report-form">
+                <form class="mt-6 space-y-4" id="error-report-form">
                     <div class="grid gap-4 sm:grid-cols-2">
                         <label class="block text-sm font-semibold text-gray-700">
                             Name
@@ -94,17 +94,20 @@
             <div class="mt-12">
                 <div class="flex items-center justify-between gap-4">
                     <h2 class="font-nu-heading text-lg font-bold text-gray-900">Technical details</h2>
-                    <span class="{{ $isProduction ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800' }} px-2 py-1 text-xs font-semibold uppercase">
+                    <span
+                          class="{{ $isProduction ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800' }} px-2 py-1 text-xs font-semibold uppercase">
                         {{ $isProduction ? 'Administrators only' : 'Non-production only' }}
                     </span>
                 </div>
 
-                <p class="mt-3 break-words border-l-4 border-red-600 bg-red-50 p-4 font-mono text-sm font-semibold text-red-800">
+                <p
+                   class="mt-3 break-words border-l-4 border-red-600 bg-red-50 p-4 font-mono text-sm font-semibold text-red-800">
                     {{ $exception->getMessage() }}
                 </p>
 
                 <details class="mt-3">
-                    <summary class="cursor-pointer bg-gray-900 px-4 py-2 text-sm font-semibold text-white">View full stack trace</summary>
+                    <summary class="cursor-pointer bg-gray-900 px-4 py-2 text-sm font-semibold text-white">View full
+                        stack trace</summary>
                     <pre class="max-h-96 overflow-auto whitespace-pre-wrap bg-gray-900 p-4 font-mono text-xs text-gray-100">{{ $exception->getTraceAsString() }}</pre>
                 </details>
             </div>

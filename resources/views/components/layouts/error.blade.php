@@ -14,8 +14,7 @@
 @endphp
 
 <!DOCTYPE html>
-<html class="min-h-screen"
-      lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html class="min-h-screen" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
     <meta charset="utf-8">
@@ -24,7 +23,7 @@
 
     <title>{{ $title }} - {{ $appName }}</title>
 
-    <link rel="icon" href="https://common.northwestern.edu/favicon.ico">
+    <link href="https://common.northwestern.edu/favicon.ico" rel="icon">
 
     @vite('resources/css/errors.css')
     <x-sentry-browser />
@@ -43,8 +42,7 @@
 
         <div class="border-b border-gray-200 bg-white">
             <div class="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-                <a class="font-nu-heading text-nu-purple-100 text-lg font-bold sm:text-xl"
-                   href="{{ url('/') }}">
+                <a class="font-nu-heading text-nu-purple-100 text-lg font-bold sm:text-xl" href="{{ url('/') }}">
                     {{ $appName }}
                 </a>
             </div>
