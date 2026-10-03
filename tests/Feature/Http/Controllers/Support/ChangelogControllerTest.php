@@ -27,6 +27,10 @@ final class ChangelogControllerTest extends TestCase
         $response->assertViewIs('public.changelog.index');
         $response->assertSee('RSS Feed');
         $response->assertSee('Showing');
+        // The published pagination view labels Previous and Next as plain text, with a role on the disabled one.
+        $response->assertSee('<span role="link" aria-disabled="true" aria-label="Previous">', escape: false);
+        $response->assertSee('aria-label="Next"', escape: false);
+        $response->assertDontSee('aria-label="&amp;laquo;', escape: false);
         $response->assertViewHas('feedUrl', route('support.changelog.feed'));
 
         $entries = $response->viewData('entries');

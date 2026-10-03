@@ -8,7 +8,7 @@
 @source '../../../../resources/views/components/**/*';
 @source '../../../../resources/views/public/**/*';
 @source '../../../../resources/views/errors/**/*';
-@source '../../../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/tailwind.blade.php';
+@source '../../../../resources/views/vendor/pagination/tailwind.blade.php';
 @source '../../../../vendor/filament/**/*';
 
 /* The app panel's simple pages show the environment badge in <x-site-header>, not above the card. */
