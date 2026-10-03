@@ -1,5 +1,8 @@
 <p align="center">
-    <img width="650px" src="art/readme-lockup.png" alt="Logo lockup for the Northwestern Laravel Starter"/>
+    <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="art/lockup-dark.svg">
+        <img width="650" src="art/lockup-light.svg" alt="Northwestern Laravel Starter">
+    </picture>
 </p>
 
 <p align="center">
@@ -17,24 +20,24 @@
     <tr>
       <td align="center">
         <a href="art/ui-preview-1.png" target="_blank">
-          <img src="art/ui-preview-1.png" width="500" alt="Authentication screen and homepage UI" />
+          <img src="art/ui-preview-1.png" width="500" alt="The public landing page, and the sign-in page on a phone" />
         </a>
       </td>
       <td align="center">
         <a href="art/ui-preview-2.png" target="_blank">
-          <img src="art/ui-preview-2.png" width="500" alt="User profile and table UI" />
+          <img src="art/ui-preview-2.png" width="500" alt="The component gallery, and the app panel with its notifications open" />
         </a>
       </td>
     </tr>
     <tr>
       <td align="center">
         <a href="art/ui-preview-3.png" target="_blank">
-          <img src="art/ui-preview-3.png" width="500" alt="API user profile, role creation form, and audit log UI" />
+          <img src="art/ui-preview-3.png" width="500" alt="The users list, and an audit record of a role assignment" />
         </a>
       </td>
       <td align="center">
         <a href="art/ui-preview-4.png" target="_blank">
-          <img src="art/ui-preview-4.png" width="500" alt="API Request Log and Login Records dashboard UI" />
+          <img src="art/ui-preview-4.png" width="500" alt="Login records, and API request analytics" />
         </a>
       </td>
     </tr>
