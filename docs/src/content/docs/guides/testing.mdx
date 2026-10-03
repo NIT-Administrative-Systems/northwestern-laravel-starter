@@ -1,0 +1,189 @@
+---
+title: Testing
+description: Writing and running the PHP tests, the Cypress end-to-end tests and the axe accessibility checks
+sidebar:
+    order: 2
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The starter has two test suites. PHP tests in `tests/` run with Pest and cover actions, models, controllers, commands and Filament pages. Cypress specs in `cypress/e2e/` drive a running application in a browser, and one of them checks every page with axe.
+
+## PHP tests
+
+### Running them
+
+| Task                         | Command                                               |
+| ---------------------------- | ----------------------------------------------------- |
+| Every test, in parallel      | `vendor/bin/pest --parallel`                          |
+| One file                     | `vendor/bin/pest tests/Feature/Path/To/SomeTest.php`  |
+| Tests whose name matches     | `vendor/bin/pest --filter=test_administration_panel` |
+| Tests in uncommitted files   | `vendor/bin/pest --dirty`                             |
+| Stop at the first failure    | `vendor/bin/pest --bail`                              |
+| Every test, with coverage    | `vendor/bin/pest --parallel --coverage`               |
+
+`--filter` takes a test class or method name, or a regular expression. `--coverage` needs the PCOV or Xdebug extension.
+
+Tests run against the database in `DB_PHPUNIT_DATABASE`, through the `phpunit` connection in `config/database.php`. `Tests\TestCase` refreshes and seeds it, and turns off Vite. With `--parallel`, Laravel creates a copy for each process (`your_project_name_test_test_1` and so on), so the database user needs permission to create databases.
+
+`phpunit.xml` sets the rest of the test environment: the `sync` queue, the `array` mailer, cache and session, and the optional features (the API, local sign-in, Contact Support, the changelog and the Wildcard photo sync) turned on so their tests run.
+
+### Where tests go
+
+Tests mirror the namespace of the class they test, under `tests/Feature` or `tests/Unit`. A regression test goes in the existing test file for that class.
+
+| Class                                                  | Test                                                                 |
+| ------------------------------------------------------ | -------------------------------------------------------------------- |
+| `App\Domains\Auth\Actions\Local\RequestLoginCode`      | `tests/Feature/Domains/Auth/Actions/Local/RequestLoginCodeTest.php`  |
+| `App\Providers\Filament\AppPanelProvider`              | `tests/Feature/Providers/Filament/AppPanelProviderTest.php`          |
+| `App\Domains\User\Events\NetIdUpdated`                 | `tests/Unit/Domains/User/Events/NetIdUpdatedTest.php`                |
+
+The starter's tests are PHPUnit classes with `test_` methods, which Pest runs. Mark each class with `#[CoversClass]`, or `#[CoversTrait]` when it tests a trait:
+
+```php
+// tests/Feature/Domains/Auth/Actions/Local/RequestLoginCodeTest.php
+use PHPUnit\Framework\Attributes\CoversClass;
+use Tests\TestCase;
+
+#[CoversClass(RequestLoginCode::class)]
+final class RequestLoginCodeTest extends TestCase
+{
+    public function test_issues_a_challenge_for_an_existing_local_user(): void
+    {
+        // ...
+    }
+}
+```
+
+The coverage exclusions in `phpunit.xml` must not include a class or trait that a test names in one of these attributes; PHPUnit warns when coverage runs.
+
+### Factories
+
+Create models with factories rather than by hand. The `User` factory's states:
+
+| State          | Gives you                                                                                       |
+| -------------- | ----------------------------------------------------------------------------------------------- |
+| (none)         | An SSO user with the **Northwestern User** role, assigned after the user is created             |
+| `->affiliate()` | A local (passwordless) user with the Affiliate affiliation and no roles                        |
+| `->api()`      | An API user with an `api-` username and no roles                                                |
+| `->faculty()`, `->staff()`, `->student()` | An SSO user with the **Northwestern User** role and that primary affiliation |
+
+Mock external services such as `Northwestern\SysDev\SOA\DirectorySearch` rather than calling them, and use `Event::fake()` and `Queue::fake()` to assert on dispatched events and jobs.
+
+### API endpoint tests
+
+Tests of an API endpoint extend `Tests\ApiTestCase`. Its `setUp()` creates an API user (`$this->apiUser`) with a non-expiring access token, and it skips the test when the API is disabled. A subclass names its endpoint and HTTP methods:
+
+```php
+use Tests\ApiTestCase;
+
+#[CoversClass(WidgetApiController::class)]
+final class WidgetApiControllerTest extends ApiTestCase
+{
+    public function endpoint(): string
+    {
+        return '/api/v1/widgets';
+    }
+
+    public static function methods(): array
+    {
+        return ['get', 'post'];
+    }
+
+    public function test_index_lists_widgets(): void
+    {
+        $this->authenticatedGet()->assertOk();
+    }
+}
+```
+
+`authenticatedGet()`, `authenticatedPost()`, `authenticatedPut()`, `authenticatedPatch()`, `authenticatedDelete()` and `authenticatedJson()` send the request with the token's bearer header. The inherited `test_requires_authentication()` checks that each method in `methods()` answers 401 without a token. See [API](/features/api/).
+
+### Panel tests
+
+- **`app` is the default panel.** Livewire tests of administration pages must call `Filament::setCurrentPanel(AdministrationPanelProvider::ID)` first, usually in `setUp()`.
+- **Render hooks persist for the rest of a test.** A panel registers its render hooks when it boots, and they stay registered for the rest of the test. When you assert on panel chrome, such as the footer, request `/app` and `/administration` in separate tests. `tests/Feature/Providers/Filament/AppPanelProviderTest.php` shows the pattern.
+
+### Test shards
+
+CI splits the PHP tests into three shards that run in parallel jobs (`--shard 1/3`, `2/3` and `3/3`). `tests/.pest/shards.json` records how long each test class took, and Pest uses those timings to give every shard about the same amount of work. A test class missing from the file is assigned round-robin, and Pest prints a warning that the file is out of date.
+
+Refresh the timings after adding test classes:
+
+```bash
+vendor/bin/pest --parallel --update-shards
+```
+
+Pest writes `tests/.pest/shards.json` only when the run passes. Commit the file. To change the number of shards, edit both the `matrix.shard` list and the `--shard ${{ matrix.shard }}/3` argument in `.github/workflows/check-pr.yml`.
+
+## End-to-end tests with Cypress
+
+### Running them
+
+| Command                      | What it does                                                         |
+| ---------------------------- | -------------------------------------------------------------------- |
+| `pnpm test:e2e`              | Opens the Cypress app and rebuilds the test database before the run |
+| `pnpm test:e2e:skip-rebuild` | Opens the Cypress app and reuses the existing `cypress` snapshot    |
+| `pnpm test:e2e:headless`     | Runs every spec headless and reuses the existing `cypress` snapshot |
+
+A run needs:
+
+- **The application running** at the `APP_URL` in `.env`, served by Herd or `composer dev`. Cypress reads `APP_URL` from `.env` and falls back to `http://localhost:8000`.
+- **A non-production environment.** Cypress drives the app through the `/__cypress__/*` routes from `laracasts/cypress`, which are not registered in production.
+- **Assets built** with `pnpm build`, or Vite running.
+
+### The test database
+
+Unless `SKIP_DATABASE_REBUILD` is set, Cypress prepares the database before the run (`cypress/plugins/index.ts`):
+
+1. `migrate:fresh --seed`
+2. The seeders listed in `cypress/support/seeders.ts` (`Sample\DemoUserSeeder`, which creates the `generic.user` and `nuit.admin` accounts the specs sign in as)
+3. `db:snapshot:create cypress`
+
+Each spec then calls `cy.loadDatabaseSnapshot()` in `beforeEach` to restore the `cypress` snapshot, so every test starts from the same data. The headless and skip-rebuild scripts set `SKIP_DATABASE_REBUILD`, so they need a `cypress` snapshot from an earlier rebuild. See [Database Snapshots](/features/database-snapshots/).
+
+<Aside type="caution" title="The rebuild wipes the database">
+    `migrate:fresh` runs against the database the application is configured for. Point a separate `.env.cypress` at a database you can lose (see below), or expect to run `php artisan db:rebuild` afterwards.
+</Aside>
+
+On a local run, if `.env.cypress` exists, Cypress moves `.env` to `.env.backup` and `.env.cypress` into its place before the run, and swaps them back afterwards. `.env.cypress` is ignored by Git. If a run stops before swapping back, `php artisan restore-env-files` restores your `.env` ([reference](/reference/commands/#restore-env-files)). CI never swaps the files; it uses the environment from `.env.ci`.
+
+### Specs
+
+| Spec                                 | Covers                                                                                         |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------- |
+| `cypress/e2e/home.cy.ts`             | The landing page, and where guests and signed-in users are sent                                 |
+| `cypress/e2e/auth/login.cy.ts`       | The sign-in page and the email code flow                                                        |
+| `cypress/e2e/auth/logout.cy.ts`      | Signing out and losing access to protected pages                                                |
+| `cypress/e2e/accessibility.cy.ts`    | axe checks on every page the starter ships                                                      |
+
+Custom commands are declared in `cypress/support/index.d.ts`. The ones specs use most: `cy.loginAsGenericUser()`, `cy.loginAsSuperAdmin()`, `cy.loginAs(username)`, `cy.php(code)` to run PHP in the app, `cy.artisan(command)`, `cy.getBySel(name)` for `data-cy` attributes, and `cy.checkAxeViolations()`.
+
+## Accessibility checks
+
+`cypress/e2e/accessibility.cy.ts` visits every page the starter ships and fails on any axe violation. Pages are listed in three groups: guests, signed-in users (`generic.user`) and administrators (`nuit.admin`). Add each page your application adds to the lists for the people who can see it.
+
+When a third-party widget has a violation you can't fix, exclude its element by selector and say why in a comment:
+
+```ts
+// The @pierre/diffs viewer renders syntax colors on its change backgrounds inside a shadow
+// DOM, and none of its themes meet color contrast there.
+cy.checkAxeViolations(["diffs-container"]);
+```
+
+`cy.checkAxeViolations()` turns off two axe rules for every page: `duplicate-id`, and `empty-table-header`, because Filament leaves the actions column's header cell empty in every table.
+
+### Rules that keep pages passing
+
+- **Filament callout headings are always `<h4>`.** A callout directly under a page title or a top-level section skips heading levels and fails axe. Leave the heading off and open the description with bold text:
+
+    ```php
+    Callout::make()
+        ->description(new HtmlString(
+            '<strong>Starter placeholder.</strong> Replace this dashboard with your own.'
+        ))
+        ->warning(),
+    ```
+
+- **Clickable table rows wrap every cell in a link.** A table with a record URL renders each cell as an `<a>`, so a cell that can be empty becomes a link with no text. Give that column a `->placeholder()`, such as `->placeholder('—')`.
+- **Tailwind only compiles classes from files it is told about.** A view outside `app/Filament/App/` and `resources/views/filament/app/` must be covered by an `@source` line in `resources/css/filament/app/theme.css` (or the administration theme), or its classes do nothing. See [The public layout](/building/public-pages/#adding-a-public-page).
