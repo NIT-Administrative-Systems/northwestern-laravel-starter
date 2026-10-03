@@ -31,7 +31,7 @@ Every role belongs to a **role type** that determines how it can be managed and 
 
 | Type | Purpose | UI Editable | Assignable To |
 |------|---------|:-----------:|---------------|
-| **System Managed** | Critical roles managed by code (Super Administrator, Northwestern User) | No (read-only in Filament) | All users (assignable by `ManageAll` users) |
+| **System Managed** | Critical roles managed by code (Super Administrator, Northwestern User) | No (read-only in Filament) | SSO and local users (assignable only by `ManageAll` users) |
 | **Application Admin** | Administrative roles with elevated privileges | Yes | SSO and local users |
 | **Application Role** | Standard user roles for day-to-day access | Yes | SSO and local users |
 | **API Integration** | Roles for programmatic API consumers | Yes | API users only |
@@ -202,7 +202,7 @@ Permissions are defined as cases in `SystemPermission`, the **single source of t
    }
    ```
 
-   The `getLabel()` method auto-generates a label from the value (e.g., `'view-reports'` → `"View Reports"`). Add an explicit case only if the auto-generated label isn't right.
+   The `getLabel()` method builds a label from the value (e.g., `'view-reports'` → `"View Reports"`). If the generated label isn't right, wrap that pipeline in a `match` with a case for your permission and the pipeline as the `default`.
 
 3. **Add a description**
 
@@ -279,13 +279,15 @@ Both methods create an audit entry capturing:
 
 The `RoleModificationOrigin` tracks **why** a role change occurred:
 
-| Origin | Manual | Used When |
-|--------|:------:|-----------|
-| `UiAction` | Yes | Admin assigns/removes a role in Filament |
-| `SsoProvisioning` | No | Northwestern User role assigned on first SSO login |
-| `NetIdStatusChange` | No | Roles stripped when a NetID is deactivated via EventHub |
-| `RemovedByDeletion` | No | Roles removed from users when a role is deleted |
-| `System` | No | Programmatic changes (seeders, Artisan commands) |
+| Origin | Initiated By | Used When |
+|--------|--------------|-----------|
+| `UiAction` | An administrator | Admin assigns/removes a role in Filament |
+| `SsoProvisioning` | The application | Northwestern User role assigned on first SSO login |
+| `NetIdStatusChange` | The application | Roles stripped when a NetID is deactivated via EventHub |
+| `RemovedByDeletion` | The application | Roles removed from users when a role is deleted |
+| `System` | The application | Programmatic changes (seeders, Artisan commands) |
+
+The enum only provides a label, color and icon for each origin. The "Initiated By" column is descriptive; the code has no manual or programmatic flag.
 
 The Filament UI prevents manual assignment and removal for assignment-locked roles. Programmatic origins are allowed; the lock is not enforced at the domain layer.
 
@@ -314,7 +316,7 @@ The `TracksPermissionSources` trait on the User model lets you check not just *i
 | `SystemPermission` | Single source of truth for all permissions (cases, metadata, seeder) |
 | `RoleTypeEnum` | Defines role type categories and their behavioral rules |
 | `SystemRole` | Names for the two system-managed roles |
-| `RoleModificationOrigin` | Tracks why role changes occurred, classifies manual vs. programmatic |
+| `RoleModificationOrigin` | Records why a role change occurred, with a label, color and icon for each origin |
 | `AuditsRoles` | Trait providing `assignRoleWithAudit()` / `removeRoleWithAudit()` |
 | `AuditsPermissions` | Trait providing `syncPermissionsWithAudit()` |
 | `TracksPermissionSources` | Trait for querying which roles grant which permissions |

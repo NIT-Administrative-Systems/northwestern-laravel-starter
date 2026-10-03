@@ -69,7 +69,7 @@ Add another panel when a distinct audience needs its own navigation, its own per
         AddQueuedCookiesToResponse::class,
         StartSession::class,
         ShareErrorsFromSession::class,
-        VerifyCsrfToken::class,
+        PreventRequestForgery::class,
         SubstituteBindings::class,
         DisableBladeIconComponents::class,
         DispatchServingFilamentEvent::class,
@@ -82,13 +82,19 @@ Add another panel when a distinct audience needs its own navigation, its own per
 
 4. **Configure SPA mode**
 
-    SPA mode gives Filament a single-page-app feel with client-side navigation. If you enable it, exclude the authentication and impersonation routes so full page loads occur for those flows:
+    SPA mode gives Filament a single-page-app feel with client-side navigation. If you enable it, exclude the authentication and impersonation routes so full page loads occur for those flows.
+
+    Each panel loads its own theme stylesheet, so navigation between panels must also be a full page load. List the other panels' paths in the new panel's exceptions, and add the new panel's path to the exceptions of any panel that links to it, as `AppPanelProvider` does for the Administration panel:
 
     ```php
     ->spa()
     ->spaUrlExceptions([
         url('/auth/*'),
         url('/impersonate/*'),
+        url('/' . AppPanelProvider::ID),
+        url('/' . AppPanelProvider::ID . '/*'),
+        url('/' . AdministrationPanelProvider::ID),
+        url('/' . AdministrationPanelProvider::ID . '/*'),
     ])
     ```
 
@@ -102,7 +108,36 @@ Add another panel when a distinct audience needs its own navigation, its own per
     ->discoverWidgets(in: app_path('Filament/Portal/Widgets'), for: 'App\Filament\Portal\Widgets')
     ```
 
-6. **Add optional features**
+6. **Give the panel a theme**
+
+    The Northwestern theme plugin is required. It is registered with `->withoutAssetRegistration()`, so the panel gets its styles from its own Vite theme instead. Create `resources/css/filament/portal/theme.css` with the App theme's imports, and point its `@source` lines at the new panel's directories and the Blade components it renders:
+
+    ```css
+    /* resources/css/filament/portal/theme.css */
+    @import "tailwindcss";
+    @import "../../../../vendor/filament/filament/resources/css/index.css";
+    @import "../../../../vendor/northwestern-sysdev/northwestern-filament-theme/dist/theme.css";
+    @import "../../../../vendor/northwestern-sysdev/northwestern-filament-theme/dist/tailwind-tokens.css";
+
+    @source '../../../../app/Filament/Portal/**/*';
+    @source '../../../../resources/views/filament/portal/**/*';
+    @source '../../../../resources/views/components/**/*';
+    @source '../../../../vendor/filament/**/*';
+    ```
+
+    Add the file to the `input` array in `vite.config.js`, then register the theme, the plugin, and the application name beside the wordmark:
+
+    ```php
+    ->viteTheme('resources/css/filament/portal/theme.css')
+    ->renderHook(PanelsRenderHook::TOPBAR_LOGO_AFTER, fn (): string => Blade::render('<x-panel-brand />'))
+    ->plugins([
+        NorthwesternTheme::make()
+            ->impersonationBanner()
+            ->withoutAssetRegistration(),
+    ])
+    ```
+
+7. **Add optional features**
 
     Consider which features from the Administration panel you want to carry over:
 
@@ -112,11 +147,6 @@ Add another panel when a distinct audience needs its own navigation, its own per
     ->globalSearch()
     ->globalSearchResourceOptIn()
     ->globalSearchDebounce('750ms')
-    ->plugins([
-        NorthwesternTheme::make()
-            ->impersonationBanner()
-            ->withoutAssetRegistration(),
-    ])
     // Browser error reporting, as in the other panels
     ->renderHook(PanelsRenderHook::HEAD_END, fn (): string => Blade::render('<x-sentry-browser />'))
     ```
@@ -211,6 +241,7 @@ The Administration panel establishes several patterns worth replicating:
 | **Heroicon constants** | Use the `Heroicon` enum instead of raw strings | `Heroicon::OutlinedUsers` |
 | **Resource separation** | Dedicated directories per panel under `app/Filament/` | `app/Filament/App/` |
 | **Policies** | Standard Laravel policies (Filament respects them automatically) | `UserPolicy`, `RolePolicy` |
+| **Accessibility tests** | Add the new panel's pages to the axe checks | `cypress/e2e/accessibility.cy.ts` |
 
 <Aside type="tip">
     You do not need to check for `ManageAll` inside policies. The `Gate::before()` callback in `AppServiceProvider` automatically grants super-administrators full access to every panel and resource.

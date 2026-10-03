@@ -76,7 +76,8 @@ usage guides.
 
 ### Authentication & Authorization
 
-- **Multi-Authentication Methods**: Support for Entra ID SSO, Access Tokens, and passwordless email-based verification codes.
+- **Multi-Authentication Methods**: Support for single sign-on through Entra ID or Online Passport (WebSSO), Access Tokens,
+  and passwordless email-based verification codes.
 - **Role-Based Access Control**: Fine-grained role and permissions system with a built-in management interface.
 - **User Impersonation**: Secure ability to troubleshoot user-specific issues and simulate user experiences.
 
@@ -94,6 +95,7 @@ usage guides.
 
 - **Full Audit Trail**: Logs all model changes and user actions with before/after history.
 - **Secure Data Handling**: Sensitive information is hashed or encrypted to limit data exposure risk.
+- **Data Retention**: Configurable retention periods, with records past them pruned daily.
 
 ### Northwestern Integrations
 
@@ -103,17 +105,20 @@ usage guides.
 
 ### Frontend & UX
 
-- **Modular Filament UI**: Ready-to-use administration panel with pre-built tables, forms, and dashboards for managing
-  application data.
-- **Brand Compliance**: Pre-built components, layouts, and styling that adhere to the University's branding guidelines.
+- **Filament Panels**: An app panel at `/app` for your application's features, with database notifications, and an
+  administration panel at `/administration` for users, roles, access tokens, audits, and analytics.
+- **Public Pages**: A landing page, sign-in, a public changelog, and branded error pages.
+- **Contact Support**: A support request form that opens TeamDynamix tickets or sends email.
+- **Brand Compliance**: Filament themed to the University's branding guidelines, with the unit footer the Web Style Guide
+  requires.
 - **Responsive Design**: Consistent user experience across devices with various screen sizes.
-- **WCAG 2.1 Accessibility**: Built with accessibility best practices.
+- **WCAG 2.1 Accessibility**: Every page the starter ships is checked with axe in Cypress.
 
 ### Developer Experience
 
 - **Local Development**: Schema-validated database snapshots, configuration validation, and database rebuild
   utilities.
-- **Testing**: Parallelized PHPUnit execution and end-to-end testing
+- **Testing**: Parallel [Pest](https://pestphp.com) tests and end-to-end testing
   with [Cypress](https://www.cypress.io).
 - **CI/CD Ready**: Pre-configured GitHub Actions workflows for static analysis, formatting, and automated testing.
 

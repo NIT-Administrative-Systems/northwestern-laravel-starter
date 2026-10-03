@@ -172,8 +172,8 @@ php artisan make:filament-resource User --generate --model-namespace=App\\Domain
 
 #### Relation Managers
 
-To facilitate relationships between resources (e.g., users belonging to a role), you use *Relation Managers*. You must specify the related model's full path:
+To facilitate relationships between resources (e.g., users belonging to a role), you use *Relation Managers*. You must specify the related model's full path, and the panel when the resource is not in the app panel. `RoleResource` is in the administration panel:
 ```bash
 # Example: Generating a manager for the Role::users() relationship
-php artisan make:filament-relation-manager --related-model=App\\Domains\\User\\Models\\User --attach Role users username
+php artisan make:filament-relation-manager --related-model=App\\Domains\\User\\Models\\User --attach --panel=administration Role users username
 ```

@@ -24,15 +24,24 @@ In the context of database seeders:
 
 Tables that are idempotently seeded typically follow a common schema: a unique `slug` mapped to an enum case, a label, and potentially other descriptive fields.
 
-The `App\Domains\Core\Seeders\IdempotentSeeder` populates such tables. It handles `INSERT`, `UPDATE`, and `DELETE` operations based on the values it's given. If something is removed or modified, the seeder will handle the change appropriately. It is aware of the `SoftDeletes` trait and can set (or unset) the `deleted_at` column correctly.
+`Northwestern\SysDev\Chassis\Seeding\IdempotentSeeder`, from the `northwestern-sysdev/chassis` package, populates such tables. It handles `INSERT`, `UPDATE`, and `DELETE` operations based on the values it's given. If something is removed or modified, the seeder will handle the change appropriately. It is aware of the `SoftDeletes` trait and can set (or unset) the `deleted_at` column correctly.
+
+Orphan deletion is on by default: a row whose slug is no longer in `data()` is deleted (soft-deleted on a `SoftDeletes` model). Set `protected bool $deleteOrphans = false;` to keep rows that are not in the seed data.
+
+A seeder that does not fit this template can extend `Illuminate\Database\Seeder` and implement `Northwestern\SysDev\Chassis\Contracts\IdempotentSeederInterface` instead, writing its own idempotent `run()`. `App\Domains\Auth\Seeders\RoleSeeder` does this with `updateOrCreate()`.
 
 ### `AutoSeed` Attribute
 
-To register an idempotent seeder to be run by `db:seed` and during deployments, provide the `#[AutoSeed]` attribute on the seeder class. It will be automatically discovered and executed.
+To register an idempotent seeder to be run by `db:seed` and during deployments, provide the `Northwestern\SysDev\Chassis\Attributes\AutoSeed` attribute on the seeder class. It will be automatically discovered and executed.
+
+Discovery only scans `app/Domains/{Domain}/Seeders/`. A seeder with `#[AutoSeed]` anywhere else never runs. A class in those directories that carries `#[AutoSeed]` but does not implement `IdempotentSeederInterface` fails discovery with an error.
 
 If the data relies on other tables being seeded first, you can specify dependencies using the `dependsOn` parameter:
 
 ```php
+use Northwestern\SysDev\Chassis\Attributes\AutoSeed;
+use Northwestern\SysDev\Chassis\Seeding\IdempotentSeeder;
+
 #[AutoSeed(dependsOn: [OtherSeeder::class])]
 class MySeeder extends IdempotentSeeder
 {
@@ -87,6 +96,9 @@ Provided below is an example of a simple idempotent seeder. The `$model` propert
     </TabItem>
     <TabItem label="ProductStatusSeeder.php">
         ```php
+        use Northwestern\SysDev\Chassis\Attributes\AutoSeed;
+        use Northwestern\SysDev\Chassis\Seeding\IdempotentSeeder;
+
         #[AutoSeed]
         class ProductStatusSeeder extends IdempotentSeeder
         {

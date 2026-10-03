@@ -106,14 +106,25 @@ After uncommenting the route, you must subscribe to the `etidentity.ldap.netid.t
 
 ## Testing
 
-The `MocksEventHub` trait allows you to send synthetic webhook payloads through the HTTP kernel with valid HMAC signatures in tests and Artisan commands:
+The `MocksEventHub` trait allows you to send synthetic webhook payloads through the HTTP kernel with valid HMAC signatures in tests and Artisan commands. It finds the webhook route by topic, so the route must be registered. While it is still commented out in `routes/api.php`, register it in `setUp()`, as `tests/Feature/Domains/User/Http/Controllers/Webhooks/NetIdUpdateControllerTest.php` does:
 
 ```php
 use App\Domains\Core\Concerns\MocksEventHub;
+use App\Domains\User\Http\Controllers\Webhooks\NetIdUpdateController;
+use Illuminate\Support\Facades\Route;
 
 class MyTest extends TestCase
 {
     use MocksEventHub;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Route::post('netid-update', NetIdUpdateController::class)
+            ->eventHubWebhook('etidentity.ldap.netid.term')
+            ->name('netid-update');
+    }
 
     public function test_handles_netid_deactivation(): void
     {

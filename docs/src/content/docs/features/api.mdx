@@ -23,7 +23,7 @@ API_ENABLED=false
 
 The starter ships with a minimal set of API endpoints to support access token management and viewing user information. They live in `routes/api.php` and can be removed or extended as needed.
 
-- <Badge text="GET" variant="note" /> `/api/health` - Unauthenticated health check, exposed when `API_ENABLED=true`
+- <Badge text="GET" variant="note" /> `/api/health` - [Health check](/features/health-checks/) results. It takes no bearer token and isn't affected by `API_ENABLED`; it requires an `X-Secret-Token` header matching `HEALTH_SECRET_TOKEN` and returns 403 for every request until that is set
 - <Badge text="GET" variant="note" /> `/api/v1/me` - Returns the authenticated API user profile
 - <Badge text="GET" variant="note" /> `/api/v1/me/tokens` - Paginated list of the user’s access tokens
 - <Badge text="POST" variant="success" /> `/api/v1/me/tokens` - Create a new access token
@@ -98,7 +98,7 @@ In production, issue a unique token for each service connecting to your API, eve
        The external client includes the token in the request header:
 
         ```http
-        GET /api/users HTTP/1.1
+        GET /api/v1/me HTTP/1.1
         Host: your-app.northwestern.edu
         Authorization: Bearer abc123def456ghi789jkl012mno345pqr678stu901vwx234yz
         ```
@@ -111,11 +111,12 @@ In production, issue a unique token for each service connecting to your API, eve
        2. **Identity:** Locates the API User by the token hash
        3. **Validity:** Checks if the token has been revoked or expired
        4. **Security:** Verifies the request IP matches the allowlist (if configured)
-       5. **Authorization:** Grants access based on the API User's assigned role(s)
+
+       The middleware then authenticates the request as the API User. It does not check roles: controllers and policies authorize each action against the API User's permissions.
 
     5. **Logging**
 
-       After the response is sent, the system logs the request details for monitoring and analytics.
+       Once the response is built, and before it is returned, `LogsApiRequests` writes the request details to the database for monitoring and analytics.
 </Steps>
 
 <Aside type="caution" title="APP_KEY Rotation Invalidates Tokens">
@@ -126,7 +127,7 @@ Access tokens are stored as HMAC-SHA256 hashes derived from `APP_KEY`. If you ro
 
 The system sends email notifications when a token approaches its expiration date, provided the API User has an email address configured.
 
-By default, notifications are sent 30, 14, 7, and 3 days before expiration, as well as on the final day.
+By default, notifications are sent 30, 14, 7, 3 and 1 day before expiration. None is sent on the day the token expires.
 
 You can adjust these intervals in the configuration:
 
@@ -148,6 +149,18 @@ API_ACCESS_TOKEN_EXPIRATION_NOTIFICATIONS_ENABLED=false
 ## Request Logging
 
 Requests to protected API endpoints are logged to the `api_request_logs` table for monitoring API usage and debugging issues.
+
+<PropertyTable title="Settings">
+    <Property name="API_REQUEST_LOGGING_ENABLED" default="true">
+        Turns request logging on or off
+    </Property>
+    <Property name="API_REQUEST_LOGGING_SLOW_THRESHOLD_MS" default="500">
+        Requests slower than this many milliseconds are marked slow in the administration panel
+    </Property>
+    <Property name="API_REQUEST_LOG_RETENTION_DAYS" default="90">
+        Days before a log entry is deleted by the daily `model:prune`. See [Data Retention](/getting-started/initial-customization/#7-data-retention).
+    </Property>
+</PropertyTable>
 
 ### What Gets Logged
 
@@ -172,7 +185,7 @@ Every log entry includes:
 
 ### Sampling Configuration
 
-To manage the database load, you can configure probabilistic sampling through environment variables:
+Sampling is off by default (`API_REQUEST_LOGGING_SAMPLING_ENABLED=false`, `API_REQUEST_LOGGING_SAMPLE_RATE=1.0`), so every request is logged. To reduce database load, turn on probabilistic sampling:
 
 ```php
 // .env
@@ -197,11 +210,13 @@ For production applications expecting high volume:
 
 ## Rate Limiting
 
-API routes are globally rate-limited via the `throttleApi()` middleware in `bootstrap/app.php`, keyed by the authenticated user ID (or by IP for unauthenticated requests).
+API routes are rate-limited by the `throttleApi()` middleware in `bootstrap/app.php`, using the `api` limiter in `RateLimitingServiceProvider`. The limiter runs before `AuthenticatesAccessTokens`, so it looks up the bearer token itself and counts requests per API user. A request without a valid token is counted by IP address.
+
+A client over the limit gets a `429 Too Many Requests` Problem Details response with a `Retry-After` header.
 
 <PropertyTable title="Rate Limits">
     <Property name="RATE_LIMIT_API_PER_MINUTE" default="1800">
-        Maximum API requests per minute per user/IP
+        Maximum API requests per minute per API user (or per IP without a valid token)
     </Property>
 </PropertyTable>
 

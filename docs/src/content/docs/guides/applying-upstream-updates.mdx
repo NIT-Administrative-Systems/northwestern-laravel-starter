@@ -79,11 +79,13 @@ git fetch starter
    git cherry-pick --continue
    ```
 
-   If a commit doesn't apply cleanly and isn't worth the effort, you can skip it:
+   If a commit doesn't apply cleanly and isn't worth the effort, you can skip it and move on to the next one in the range:
 
    ```bash
-   git cherry-pick --abort
+   git cherry-pick --skip
    ```
+
+   To give up on the whole cherry-pick instead, run `git cherry-pick --abort`. It returns the branch to where it was before you started, dropping any commits from the range that were already applied.
 
 </Steps>
 
