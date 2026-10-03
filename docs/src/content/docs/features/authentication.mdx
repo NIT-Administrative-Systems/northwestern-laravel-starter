@@ -54,11 +54,32 @@ Sign-in belongs to the [App panel](/building/app-panel/). Guests who open a page
 
 - **Sign in with NetID** appears when single sign-on is configured. It uses Online Passport (WebSSO) when that is configured, otherwise Entra ID.
 - **Sign in with email** appears when `LOCAL_AUTH_ENABLED=true`.
-- If neither is configured, the page explains that no sign-in methods are available.
+- **Sign in as** appears in the `local` environment only. See [Signing In Locally](#signing-in-locally).
+- If none is available, the page explains that no sign-in methods are available.
 
-When NetID is the only method, `/app/login` skips the page and goes straight to single sign-on. The exception is the `ci` environment, where the page always renders so end-to-end tests can sign in with email codes.
+When NetID is the only method, `/app/login` skips the page and goes straight to single sign-on. The exceptions are the `ci` environment, where the page always renders so end-to-end tests can sign in with email codes, and `local`, where it offers **Sign in as**.
 
 Email sign-in is a single page, `/app/login/email`, with two steps: request a code, then enter it. Progress is kept in the session, so reloading the page returns to the current step.
+
+## Signing In Locally
+
+A local environment needs no SSO, email or credentials to sign in. In the `local` environment, the sign-in page has a **Development** section with a **Sign in as…** menu of the seeded demo users, each shown with its role:
+
+| User | Signs in as |
+|---|---|
+| `nuit.admin` | NUIT Administrator, a Super Administrator |
+| `generic.user` | A Northwestern user with no extra roles |
+| `partner.user` | A local (email) account, when `LOCAL_AUTH_ENABLED=true` |
+
+Each menu item is a link to `/app/login/as/{username}`, which signs in as that user, records the sign-in like any other, and redirects to `/` (or the page you asked for). Agents and scripts can use the URL directly, at any host or port the application is served on.
+
+The users come from `DemoUserSeeder`, which `db:rebuild` runs. Add the users you seed for specific roles to its `SIGN_IN_AS` list and they appear here too. API users can't be signed in as.
+
+<Aside type="caution">
+The route is registered only when `APP_ENV=local`: an explicit check for `local`, not "anything but production". It doesn't exist in `ci`, `develop`, `qa`, `production` or any other environment, and the controller refuses outside `local` as well.
+</Aside>
+
+To test real NetID sign-in locally, configure Entra ID or Online Passport (see [Installation](/getting-started/installation/#5-environment-configuration)). The Azure redirect URI must match the host you use.
 
 ## Where Users Land After Signing In
 

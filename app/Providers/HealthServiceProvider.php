@@ -60,7 +60,9 @@ class HealthServiceProvider extends ServiceProvider
                     //
                 ]),
 
-            DirectorySearchCheck::new(),
+            // Optional locally; a deployed environment without a key should still fail.
+            DirectorySearchCheck::new()
+                ->unless(App::isLocal() && blank(config('nusoa.directorySearch.apiKey'))),
         ]);
     }
 

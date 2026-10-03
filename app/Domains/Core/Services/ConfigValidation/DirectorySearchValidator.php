@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Core\Services\ConfigValidation;
 
+use Illuminate\Support\Facades\App;
 use Northwestern\SysDev\Chassis\Attributes\ValidatesConfig;
 use Northwestern\SysDev\Chassis\Contracts\ConfigValidator;
 
@@ -11,14 +12,16 @@ use Northwestern\SysDev\Chassis\Contracts\ConfigValidator;
  * Validates that the Directory Search API key is configured.
  *
  * The Directory Search API is required for user provisioning during
- * SSO login and for stakeholder seeding.
+ * SSO login and for stakeholder seeding. It is optional locally, where
+ * demo users are seeded without it, so a local environment with no key
+ * skips this check.
  */
 #[ValidatesConfig(description: 'Directory Search')]
 class DirectorySearchValidator implements ConfigValidator
 {
     public function shouldRun(): bool
     {
-        return true;
+        return ! (App::environment('local') && blank(config('nusoa.directorySearch.apiKey')));
     }
 
     public function validate(): bool

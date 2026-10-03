@@ -15,9 +15,11 @@ Customize these settings before launching your application.
 
 *Super Administrators* have full access to the application and bypass all authorization checks. These accounts are typically reserved for IT staff or core development team members.
 
+This is a step for deployed environments. Locally you don't need it: the seeded **NUIT Administrator** demo user is a Super Administrator, and the sign-in page offers it under **Sign in as**.
+
 ### Configuration
 
-Add NetIDs to your `.env` file, or the `.env.example` file if they will be the same across environments:
+Add NetIDs to each deployed environment's configuration, or to `.env.example` if they will be the same across environments:
 
 ```bash
 // .env
@@ -27,7 +29,7 @@ SUPER_ADMIN_NETIDS=abc123,xyz789,def456
 
 ### How It Works
 
-The `StakeholderSeeder` runs automatically during `php artisan db:rebuild` and:
+The `StakeholderSeeder` runs on deploy (the reference `vapor.yml` in [Deployment](/guides/deployment/) runs `php artisan db:seed --class=StakeholderSeeder`) and:
 
 1. **Looks up each NetID** in the Northwestern Directory
 2. **Creates or refreshes user accounts** with their directory information (name, email, department, etc.)
@@ -35,16 +37,16 @@ The `StakeholderSeeder` runs automatically during `php artisan db:rebuild` and:
 4. **Safe to run multiple times** - existing users are updated from the directory, not duplicated
 
 <Tabs>
-  <TabItem label="Initial Setup" icon="rocket">
-    After configuring `SUPER_ADMIN_NETIDS`, rebuild the database to provision administrators:
+  <TabItem label="Deployed Environments" icon="rocket">
+    Set `SUPER_ADMIN_NETIDS` and deploy; the seeder runs as part of the deploy. To add administrators between deploys, run it in that environment:
 
     ```bash
-    php artisan db:rebuild
+    php artisan db:seed --class=StakeholderSeeder
     ```
   </TabItem>
 
-  <TabItem label="Add Admins Later" icon="seti:config">
-    To add administrators to an existing database without losing data:
+  <TabItem label="Locally (Optional)" icon="seti:config">
+    `db:rebuild` doesn't run the seeder, so it needs no network. To sign in locally as yourself with NetID, configure SSO and Directory Search, set `SUPER_ADMIN_NETIDS`, and run the seeder after a rebuild:
 
     ```bash
     php artisan db:seed --class=StakeholderSeeder

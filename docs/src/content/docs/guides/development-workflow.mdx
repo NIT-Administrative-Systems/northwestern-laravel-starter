@@ -26,6 +26,8 @@ The queue worker is required. Jobs go to Redis (`QUEUE_CONNECTION=redis`), so ma
 
 With [Laravel Herd](https://herd.laravel.com), Herd serves the site at `https://your-project-name.test`, named by `herd.yml`, and Herd Pro runs the PostgreSQL, Redis and RustFS services that `herd.yml` lists. Use that address rather than the one `php artisan serve` prints; `composer dev` still provides the queue worker, the log stream and Vite. [Installation](/getting-started/installation/) covers the first-time setup.
 
+A local environment needs no credentials: copy `.env.example`, run `php artisan key:generate` and `php artisan db:rebuild`, and sign in as a seeded demo user. That makes worktrees and agents cheap to set up. An agent working in the browser signs in by opening `/app/login/as/{username}` (for example `/app/login/as/nuit.admin`) at whatever host and port the app is served on. See [Signing In Locally](/features/authentication/#signing-in-locally).
+
 ## Quality gates
 
 Every change must pass these checks. CI runs all of them except the type check.

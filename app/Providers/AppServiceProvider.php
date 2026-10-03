@@ -83,7 +83,11 @@ class AppServiceProvider extends ServiceProvider
     /** Force HTTPS in deployed environments. */
     public function configureRoutes(): void
     {
-        if (! App::environment(['ci', 'testing'])) {
+        // Deployed environments are always HTTPS behind their proxy. Locally, follow APP_URL, so a
+        // plain-HTTP server on any port (a worktree's, an agent's) keeps working.
+        $localOverHttp = App::isLocal() && ! str_starts_with((string) config('app.url'), 'https://');
+
+        if (! App::environment(['ci', 'testing']) && ! $localOverHttp) {
             URL::forceScheme('https');
         }
     }

@@ -203,6 +203,7 @@ class NorthwesternUserInfolist
                                             'This will pull the latest attributes from the Northwestern Directory and update the user in the platform.'
                                         )
                                         ->modalSubmitActionLabel('Start Sync')
+                                        ->visible(fn (): bool => filled(config('nusoa.directorySearch.apiKey')))
                                         ->action(function ($record, FindOrUpdateUserFromDirectory $findOrUpdateUserFromDirectory) {
                                             $user = ($findOrUpdateUserFromDirectory)($record->username, immediate: true);
 

@@ -72,7 +72,7 @@ Laravel's own configuration files read many more variables than this page lists:
 | `SESSION_DRIVER` | `database` | Session storage |
 | `SESSION_LIFETIME` | `120` | Minutes of inactivity before a session expires. `.env.example` sets `480` |
 | `SESSION_ENCRYPT` | `true` | Encrypt session data |
-| `SESSION_SECURE_COOKIE` | `true` | Send the session cookie over HTTPS only |
+| `SESSION_SECURE_COOKIE` | `true`, or `false` in `local` when `APP_URL` is `http://` | Send the session cookie over HTTPS only |
 | `SESSION_PATH` | `/` | Session cookie path |
 | `SESSION_DOMAIN` | `null` | Session cookie domain |
 | `CACHE_STORE` | `file` | Default cache store |
@@ -98,13 +98,13 @@ Laravel's own configuration files read many more variables than this page lists:
 
 ## Authentication
 
-See [Authentication](/features/authentication/) and [WebSSO](/northwestern-integrations/websso/).
+See [Authentication](/features/authentication/) and [WebSSO](/northwestern-integrations/websso/). None of these are needed in the `local` environment, which offers **Sign in as** for the seeded demo users; deployed environments need a NetID provider.
 
 ### NetID sign-in
 
 | Variable | Default | Description |
 |---|---|---|
-| `SUPER_ADMIN_NETIDS` | `''` | Comma-separated NetIDs given the Super Administrator role when the database is seeded. See [Super Administrator Accounts](/getting-started/initial-customization/#1-super-administrator-accounts) |
+| `SUPER_ADMIN_NETIDS` | `''` | Comma-separated NetIDs given the Super Administrator role by `StakeholderSeeder`, which deployments run (not `db:rebuild`). See [Super Administrator Accounts](/getting-started/initial-customization/#1-super-administrator-accounts) |
 | `AZURE_CLIENT_ID` | `null` | Entra ID application ID. Entra ID sign-in is available when this and `AZURE_CLIENT_SECRET` are set |
 | `AZURE_CLIENT_SECRET` | `null` | Entra ID client secret |
 | `WEBSSO_API_KEY` | `null` | Apigee key for Online Passport. Setting it switches sign-in from Entra ID to Online Passport |
@@ -150,7 +150,7 @@ See [API](/features/api/).
 
 | Variable | Default | Description |
 |---|---|---|
-| `DIRECTORY_SEARCH_API_KEY` | `null` | Apigee key for [Directory Search](/northwestern-integrations/directory-search/) |
+| `DIRECTORY_SEARCH_API_KEY` | `null` | Apigee key for [Directory Search](/northwestern-integrations/directory-search/). Optional in `local`; required in deployed environments |
 | `DIRECTORY_SEARCH_URL` | `https://northwestern-prod.apigee.net/directory-search` | Directory Search API base URL |
 | `DIRECTORY_SEARCH_HEALTH_CHECK_NETID` | `swd2981` | NetID the Directory Search health check looks up |
 | `EVENT_HUB_MOCK_ENABLED` | `true` when `APP_ENV` is `local`, otherwise `false` | Mock [EventHub](/northwestern-integrations/eventhub/) instead of calling it |

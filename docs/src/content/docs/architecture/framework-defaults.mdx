@@ -110,12 +110,14 @@ Configured in `AppServiceProvider` and `bootstrap/app.php`.
 ### Forced HTTPS
 
 ```php
-if (! App::environment(['ci', 'testing'])) {
+$localOverHttp = App::isLocal() && ! str_starts_with((string) config('app.url'), 'https://');
+
+if (! App::environment(['ci', 'testing']) && ! $localOverHttp) {
     URL::forceScheme('https');
 }
 ```
 
-All generated URLs use HTTPS. CI and testing environments are excluded so tests don't require SSL certificates.
+All generated URLs use HTTPS in deployed environments. CI and testing environments are excluded so tests don't require SSL certificates. Locally, URLs follow `APP_URL`: HTTPS under Herd, and plain HTTP when a worktree or agent serves the app on another port. The session cookie's `secure` flag follows the same rule unless `SESSION_SECURE_COOKIE` is set.
 
 ### Destructive Command Prohibition
 

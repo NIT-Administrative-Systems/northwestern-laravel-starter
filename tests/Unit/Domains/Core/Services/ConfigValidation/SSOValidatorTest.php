@@ -11,11 +11,36 @@ use Tests\TestCase;
 #[CoversClass(SSOValidator::class)]
 final class SSOValidatorTest extends TestCase
 {
-    public function test_should_always_run(): void
+    public function test_runs_outside_local_even_when_nothing_is_configured(): void
     {
-        $validator = new SSOValidator();
+        config([
+            'nusoa.sso.apigeeApiKey' => null,
+            'nusoa.sso.strategy' => 'apigee',
+            'services.northwestern-azure.client_id' => null,
+            'services.northwestern-azure.client_secret' => null,
+        ]);
 
-        $this->assertTrue($validator->shouldRun());
+        $this->assertTrue((new SSOValidator())->shouldRun());
+    }
+
+    // SSO is optional locally, but a half-configured provider still runs so the missing variable is reported.
+    public function test_is_skipped_locally_only_when_no_provider_is_configured(): void
+    {
+        $this->app->detectEnvironment(fn (): string => 'local');
+
+        config([
+            'nusoa.sso.apigeeApiKey' => null,
+            'nusoa.sso.strategy' => 'apigee',
+            'services.northwestern-azure.client_id' => null,
+            'services.northwestern-azure.client_secret' => null,
+        ]);
+        $this->assertFalse((new SSOValidator())->shouldRun());
+
+        config(['services.northwestern-azure.client_id' => 'test-client-id']);
+        $this->assertTrue((new SSOValidator())->shouldRun());
+
+        config(['services.northwestern-azure.client_id' => null, 'nusoa.sso.apigeeApiKey' => 'test-key']);
+        $this->assertTrue((new SSOValidator())->shouldRun());
     }
 
     public function test_passes_when_entra_id_credentials_are_configured(): void

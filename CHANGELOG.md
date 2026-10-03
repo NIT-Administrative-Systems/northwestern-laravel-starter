@@ -27,6 +27,7 @@ Version 3 removes the Bootstrap user interface. Every page now uses one stack, F
 - Retention periods for audit logs (`AUDIT_RETENTION_DAYS`, kept by default), sign-in records (`LOGIN_RECORD_RETENTION_DAYS`, 365 days) and impersonation logs (`IMPERSONATION_LOG_RETENTION_DAYS`, kept by default), through the new `PrunesAfterRetentionPeriod` trait.
 - Accessibility checks with axe for every page the starter ships, in `cypress/e2e/accessibility.cy.ts`. `cy.checkAxeViolations()` accepts selectors to exclude.
 - `AGENTS.md`, a guide for coding agents working in the repository.
+- "Sign in as" in the `local` environment: the sign-in page lists the seeded demo users, and `/app/login/as/{username}` signs in as one, so a local environment, worktree or agent needs no SSO, email or credentials. The route exists only when `APP_ENV=local`.
 - A "Your account" widget on the app panel's dashboard: a greeting with the user's previous sign-in, their roles, and links to Contact Support and the documentation when configured.
 - A component gallery at `/app/gallery`, in the app panel's sidebar outside production, showing Filament's components in the Northwestern theme. Delete it when you no longer need it.
 - An error layout (`<x-layouts.error>`) that renders without Filament, auth or the database, so the 500, 503 and database-paused pages work when the database is down. The client error pages (401, 403, 404, 419, 429) render on the public layout with the full header, and a fallback route lets the not-found page know who is signed in.
@@ -39,6 +40,9 @@ Version 3 removes the Bootstrap user interface. Every page now uses one stack, F
 - Sign-in is in the app panel, at `/app/login` and `/app/login/email`, and the environment lockdown page is at `/app/access-restricted`.
 - The changelog and Contact Support pages were rebuilt on the public layout and the app panel; Contact Support is at `/app/support/contact`. The changelog's URLs and RSS feed are unchanged.
 - Every retention setting lives under `platform.retention`, including those for login challenges and API request logs.
+- SSO and Directory Search are optional in the `local` environment: `config:validate` and the Directory Search health check skip them when they aren't configured, the administration panel's Add NU User says Directory Search isn't configured, and Force Sync is hidden without it.
+- Locally, generated URLs and the session cookie's `secure` flag follow `APP_URL`'s scheme, so a worktree or agent can serve the app over plain HTTP on any port. Deployed environments still force HTTPS. `.env.example` no longer sets `SESSION_SECURE_COOKIE`.
+- `db:rebuild` no longer runs `StakeholderSeeder`, so it makes no Directory Search calls. Deployments run the seeder for `SUPER_ADMIN_NETIDS`; locally, the seeded NUIT Administrator is a Super Administrator.
 - The environment lockdown page is a Filament page in the app panel, and lockdown now applies to app panel routes.
 - Panels, the public layout and the error layout use the Department Templates 4.0 wordmark and fonts. The app panel and public pages have the Northwestern footer; the administration panel does not.
 - The support request confirmation email shows the reference number, subject, submission time and the user's message; the support team's email leads with the request.

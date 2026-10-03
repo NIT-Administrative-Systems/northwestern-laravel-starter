@@ -12,6 +12,8 @@ The Directory Search integration looks up Northwestern users by NetID, email, or
 
 The underlying API client is provided by the [`northwestern-sysdev/laravel-soa`](https://github.com/NIT-Administrative-Systems/SysDev-laravel-soa) package.
 
+Directory Search is optional in the `local` environment. Local demo users are seeded without it and `db:rebuild` doesn't call it. Without `DIRECTORY_SEARCH_API_KEY`, `config:validate` and the health check skip it locally, the administration panel's **Add NU User** says it isn't configured, and **Force Sync** is hidden. Deployed environments always need the key.
+
 ## How It Works
 
 <Steps>
