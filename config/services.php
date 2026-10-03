@@ -19,6 +19,9 @@ return [
     'northwestern-azure' => [
         'client_id' => env('AZURE_CLIENT_ID'),
         'client_secret' => env('AZURE_CLIENT_SECRET'),
+        // Socialite requires the key to exist. laravel-soa leaves it unused and builds the callback URL
+        // from the login-oauth-callback route.
+        'redirect' => null,
     ],
 
     'ses' => [
