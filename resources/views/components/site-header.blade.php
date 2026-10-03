@@ -5,8 +5,22 @@
     the slot, such as the Help menu and Sign in or the user menu.
 
     Error pages use it, so it must render without Filament, auth or the database.
+
+    Outside production it shows the environment badge, as the panels' top bar does: top
+    right on larger screens, centered below the header on phones, with a gold rule under
+    the header on both. The theme's default settings decide when it shows and its label.
 --}}
-<header class="bg-nu-purple-120 w-full text-white">
+@php
+    use Northwestern\FilamentTheme\EnvironmentIndicator\EnvironmentIndicatorConfig;
+
+    $environment = new EnvironmentIndicatorConfig();
+    $showEnvironment = $environment->isVisible();
+@endphp
+
+<header @class([
+    'bg-nu-purple-120 w-full text-white',
+    'border-b-4 border-[var(--nu-gold)]' => $showEnvironment,
+])>
     <div class="flex h-16 items-center gap-4 px-4 md:px-6 lg:px-8">
         <a class="block shrink-0 [&_.nu-wordmark]:h-5 [&_.nu-wordmark]:w-auto [&_.nu-wordmark]:text-white"
            href="https://www.northwestern.edu/">
@@ -20,8 +34,16 @@
             {{ config('app.name') }}
         </a>
 
-        @if ($slot->hasActualContent())
+        @if ($showEnvironment || $slot->hasActualContent())
             <div class="ms-auto flex shrink-0 items-center gap-2 sm:gap-3">
+                @if ($showEnvironment)
+                    {{-- The badge hides itself below the sm breakpoint; the row under the header takes over. --}}
+                    @include('northwestern-filament-theme::environment-indicator', [
+                        'config' => $environment,
+                        'placement' => 'topbar',
+                    ])
+                @endif
+
                 {{ $slot }}
             </div>
         @endif
@@ -34,3 +56,18 @@
         </a>
     </div>
 </header>
+
+@if ($showEnvironment)
+    <div class="nu-site-header-environment flex justify-center px-4 pt-4 sm:hidden">
+        @include('northwestern-filament-theme::environment-indicator', [
+            'config' => $environment,
+            'placement' => 'topbar',
+        ])
+    </div>
+
+    <style>
+        .nu-site-header-environment .nu-env-indicator {
+            display: inline-flex;
+        }
+    </style>
+@endif

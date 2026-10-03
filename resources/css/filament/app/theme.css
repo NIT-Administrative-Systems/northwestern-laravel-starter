@@ -10,6 +10,11 @@
 @source '../../../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/tailwind.blade.php';
 @source '../../../../vendor/filament/**/*';
 
+/* The app panel's simple pages show the environment badge in <x-site-header>, not above the card. */
+.fi-simple-layout .nu-env-indicator-simple {
+    display: none;
+}
+
 /* The app panel's simple pages (sign-in, lockdown): a Northwestern Purple accent on the card. */
 .fi-simple-main {
     border-top: 4px solid var(--nu-purple-100);

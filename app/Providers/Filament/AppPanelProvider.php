@@ -67,8 +67,8 @@ class AppPanelProvider extends PanelProvider
             ->viteTheme('resources/css/filament/app/theme.css')
             ->renderHook(PanelsRenderHook::HEAD_END, fn (): string => Blade::render('<x-sentry-browser />'))
             ->renderHook(PanelsRenderHook::TOPBAR_LOGO_AFTER, fn (): string => Blade::render('<x-panel-brand />'))
-            // Before global search, which puts the Help menu just ahead of the user menu.
-            ->renderHook(PanelsRenderHook::GLOBAL_SEARCH_BEFORE, fn (): string => Blade::render('<x-help-menu />'))
+            // After global search: after the theme's environment badge and just ahead of the user menu.
+            ->renderHook(PanelsRenderHook::GLOBAL_SEARCH_AFTER, fn (): string => Blade::render('<x-help-menu />'))
             // Sign-in and the lockdown page; see HasSiteHeader.
             ->renderHook(PanelsRenderHook::SIMPLE_LAYOUT_START, fn (): string => Blade::render(<<<'BLADE'
                 <x-site-header>

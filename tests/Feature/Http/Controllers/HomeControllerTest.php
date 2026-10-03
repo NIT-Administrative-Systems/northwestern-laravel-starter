@@ -38,6 +38,11 @@ final class HomeControllerTest extends TestCase
             ->assertSee('Report a Concern');
     }
 
+    public function test_the_header_shows_the_environment_badge_outside_production(): void
+    {
+        $this->get(route('home'))->assertOk()->assertSee('Environment: Testing');
+    }
+
     public function test_the_help_menu_lists_the_changelog_and_the_documentation_link_when_set(): void
     {
         config(['support.enabled' => true, 'support.documentation_url' => null]);
