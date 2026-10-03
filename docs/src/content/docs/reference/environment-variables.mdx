@@ -116,8 +116,6 @@ See [Authentication](/features/authentication/) and [WebSSO](/northwestern-integ
 | `WEBSSO_COOKIE_NAME` | `nusso` | Name of the SSO session cookie |
 | `DUO_ENABLED` | `false` | Require Duo multi-factor authentication, by selecting the `ldap-and-duo` tree |
 
-`config/services.php` also reads `AZURE_REDIRECT_URI`, but nothing uses it: the redirect URI is always built from the callback route.
-
 ### Email verification codes
 
 These configure [passwordless verification codes](/features/authentication/#passwordless-verification-codes) for users without a NetID.
@@ -270,8 +268,6 @@ See [Health Checks](/features/health-checks/).
 | `HEALTH_NOTIFICATION_EMAIL` | `null` | Recipient of failure emails |
 | `HEALTH_DB_CONNECTION` | from `DB_CONNECTION` | Connection that stores check results |
 | `SCHEDULE_HEARTBEAT_URL` | `null` | URL pinged when the Schedule check passes |
-
-`config/health.php` also reads `HEALTH_SLACK_WEBHOOK_URL`, `OH_DEAR_HEALTH_CHECK_SECRET` and `HORIZON_HEARTBEAT_URL`. The starter sends only mail notifications, leaves the Oh Dear endpoint off and does not install Horizon, so none of them has an effect as shipped.
 
 ## Sentry
 
