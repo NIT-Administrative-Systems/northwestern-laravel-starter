@@ -55,6 +55,7 @@ Version 3 removes the Bootstrap user interface. Every page now uses one stack, F
 - `TDX_TICKET_APP_NAME` and `TDX_CLIENT_APP_NAME` take effect. The starter ships `config/team-dynamix.php`, because `tdx-php-sdk`'s own config read them with `config()` instead of `env()`.
 - Health check history is pruned after `keep_history_for_days`; nothing pruned it before.
 - `/api/health` refuses every request until `HEALTH_SECRET_TOKEN` is set. It was public while the token was empty, which is how `.env.example` ships it.
+- `/api/health` no longer returns 503 for checks skipped where they don't apply, such as the database and queue checks outside production. Spatie treats skipped checks as failures by default.
 - A Directory Search outage during sign-in shows the 503 page, or a Problem Details 503 on the API, instead of a 500.
 
 ## [v2.6.0] - 2026-10-01
