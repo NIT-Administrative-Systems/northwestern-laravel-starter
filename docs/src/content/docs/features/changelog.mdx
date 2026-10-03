@@ -46,13 +46,13 @@ Add the following to your `.env` file:
 CHANGELOG_ENABLED=true
 ```
 
-When enabled, the changelog routes are registered and a "Changelog" link appears in the navigation. When disabled, the routes are not registered and the nav item is hidden. Entries can still be seeded regardless of this setting.
+When enabled, the changelog routes are registered and a "Changelog" link appears in the Help menu (`<x-help-menu>`) in the app panel's top bar and the public site header. When disabled, the routes are not registered and the link is hidden. Entries can still be seeded regardless of this setting.
 
 ---
 
 ## Markdown File Format
 
-Each file in `resources/changelogs/` must contain YAML front matter with `slug`, `date`, and `title` fields, followed by Markdown content:
+Each file in `resources/changelogs/` must contain YAML front matter with `slug` and `date` fields, and usually a `title`, followed by Markdown content:
 
 ```markdown
 ---
@@ -77,8 +77,8 @@ title: "Changelog & Notification Preferences"
     <Property name="date" required>
         Authored date in `YYYY-MM-DD` format
     </Property>
-    <Property name="title" required>
-        Human-readable title displayed in the changelog header
+    <Property name="title">
+        Human-readable title displayed in the changelog header. Falls back to the slug when omitted.
     </Property>
 </PropertyTable>
 
@@ -124,7 +124,7 @@ The changelog tracks two dates for each entry:
 
 The UI displays `created_at` because it accurately reflects when users in each environment can first see the entry. A changelog authored on February 10 but not promoted to production until February 24 will display February 24 for production users.
 
-In local and testing environments, the seeder backdates `created_at` to match `authored_at` so that entries display realistic historical dates after a fresh `db:rebuild`.
+In the `local`, `ci` and `testing` environments, the seeder backdates `created_at` to match `authored_at` so that entries display realistic historical dates after a fresh `db:rebuild`.
 
 ---
 
@@ -144,7 +144,7 @@ All changelog routes are registered under the `/support/changelog` prefix when t
 | `GET /support/changelog/feed.rss` | RSS 2.0 feed |
 | `GET /support/changelog/{slug}` | Individual entry |
 
-The changelog is public and does not require authentication.
+The changelog is public and does not require authentication. Its pages render on the public layout from the views in `resources/views/public/changelog/`.
 
 ---
 

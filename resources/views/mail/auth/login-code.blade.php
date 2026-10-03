@@ -3,7 +3,7 @@ Hello,
 
 We received a request to sign in to your **{{ config('app.name') }}** account.
 
-To continue, please enter the verification code below in the original sign-in window:
+To continue, enter this verification code on the sign-in page:
 
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
     <tr>
@@ -14,6 +14,12 @@ To continue, please enter the verification code below in the original sign-in wi
         </td>
     </tr>
 </table>
+
+If you closed the sign-in page, or you are reading this on another device, this button opens it ready for the code:
+
+<x-mail::button :url="$signInUrl">
+Enter your code
+</x-mail::button>
 
 <x-slot:subcopy>
 If you did not initiate this request, you may disregard this email. For your security, do not share this verification code with anyone. This code expires in {{ $expiresInMinutes }} minutes.

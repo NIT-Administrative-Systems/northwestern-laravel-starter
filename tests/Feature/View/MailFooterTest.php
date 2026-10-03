@@ -40,7 +40,7 @@ final class MailFooterTest extends TestCase
 
     public function test_text_mail_footer_spells_out_the_links(): void
     {
-        $text = (string) resolve(Markdown::class)->renderText('mail.auth.login-code', ['code' => '123456', 'expiresInMinutes' => 10]);
+        $text = (string) resolve(Markdown::class)->renderText('mail.auth.login-code', ['code' => '123456', 'expiresInMinutes' => 10, 'signInUrl' => 'https://example.test/app/login/email']);
 
         $this->assertStringContainsString('Example Office | 633 Clark Street, Evanston, IL 60208 | 847-555-0100 | office@northwestern.edu', $text);
         $this->assertStringContainsString('Accessibility: https://www.northwestern.edu/accessibility/report/', $text);
@@ -51,7 +51,7 @@ final class MailFooterTest extends TestCase
     {
         config(['northwestern-filament-theme.unit.phone' => '']);
 
-        $text = (string) resolve(Markdown::class)->renderText('mail.auth.login-code', ['code' => '123456', 'expiresInMinutes' => 10]);
+        $text = (string) resolve(Markdown::class)->renderText('mail.auth.login-code', ['code' => '123456', 'expiresInMinutes' => 10, 'signInUrl' => 'https://example.test/app/login/email']);
 
         $this->assertStringContainsString('Example Office | 633 Clark Street, Evanston, IL 60208 | office@northwestern.edu', $text);
     }
@@ -60,7 +60,7 @@ final class MailFooterTest extends TestCase
     {
         config(['northwestern-filament-theme.unit.fax' => '847-555-0199']);
 
-        $text = (string) resolve(Markdown::class)->renderText('mail.auth.login-code', ['code' => '123456', 'expiresInMinutes' => 10]);
+        $text = (string) resolve(Markdown::class)->renderText('mail.auth.login-code', ['code' => '123456', 'expiresInMinutes' => 10, 'signInUrl' => 'https://example.test/app/login/email']);
 
         $this->assertStringContainsString('847-555-0100 | Fax 847-555-0199 | office@northwestern.edu', $text);
     }
@@ -69,13 +69,13 @@ final class MailFooterTest extends TestCase
     {
         config(['northwestern-filament-theme.unit' => array_fill_keys(['name', 'address', 'city', 'phone', 'fax', 'email'], null)]);
 
-        $text = (string) resolve(Markdown::class)->renderText('mail.auth.login-code', ['code' => '123456', 'expiresInMinutes' => 10]);
+        $text = (string) resolve(Markdown::class)->renderText('mail.auth.login-code', ['code' => '123456', 'expiresInMinutes' => 10, 'signInUrl' => 'https://example.test/app/login/email']);
 
         $this->assertStringContainsString('Information Technology | 1800 Sherman Ave, Evanston, IL 60201', $text);
     }
 
     private function loginCodeMail(): LoginCodeMail
     {
-        return new LoginCodeMail(Crypt::encryptString('123456'), CarbonImmutable::now()->addMinutes(10));
+        return new LoginCodeMail(Crypt::encryptString('123456'), CarbonImmutable::now()->addMinutes(10), 'https://example.test/app/login/email');
     }
 }

@@ -11,6 +11,7 @@ use Livewire\Features\SupportConsoleCommands\Commands\S3CleanupCommand as CleanT
 use Spatie\Health\Commands\DispatchQueueCheckJobsCommand;
 use Spatie\Health\Commands\RunHealthChecksCommand;
 use Spatie\Health\Commands\ScheduleCheckHeartbeatCommand;
+use Spatie\Health\Models\HealthCheckResultHistoryItem;
 
 /*
 |--------------------------------------------------------------------------|
@@ -55,6 +56,7 @@ use Spatie\Health\Commands\ScheduleCheckHeartbeatCommand;
 Schedule::command(TelescopePruneCommand::class)->daily();
 Schedule::command(CleanTemporaryS3FilesCommand::class)->daily();
 Schedule::command(PruneCommand::class, ['--path' => glob('app/Domains/*/Models')])->daily();
+Schedule::command(PruneCommand::class, ['--model' => [HealthCheckResultHistoryItem::class]])->daily();
 
 if (config('api.expiration_notifications.enabled')) {
     Schedule::command(SendAccessTokenExpirationNotificationsCommand::class)

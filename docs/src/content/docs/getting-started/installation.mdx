@@ -28,6 +28,13 @@ git commit -m "chore: initial commit from Northwestern Laravel Starter"
 
 The application expects specific services to exist before you can begin local development:
 
+<Aside type="note" title="Start the services first">
+    PostgreSQL, Redis and RustFS must be running before you create the databases
+    and bucket. In Laravel Herd Pro, add them under **Settings → Services**
+    using the versions in `herd.yml` (PostgreSQL 16, Redis 7.0.0, RustFS 1.0.0).
+    `herd init` in step 4 then links the site to them.
+</Aside>
+
 <Steps>
     1. **Create Databases**
 
@@ -82,8 +89,12 @@ The application expects specific services to exist before you can begin local de
         APP_URL=https://your-project-name.test
         DB_DATABASE=your_project_name_local
         DB_PHPUNIT_DATABASE=your_project_name_test
+        AWS_URL=https://rustfs.herd.test/your-project-name
+        AWS_ENDPOINT=https://rustfs.herd.test
         AWS_BUCKET=your-project-name
         ```
+
+        Replace `test` in `AWS_URL` and `AWS_ENDPOINT` with your Herd TLD (use `rustfs-9000.herd.<tld>` on Windows). `AWS_URL` ends with the bucket name.
 
         Commit these changes to your repository as the base configuration for other developers.
 
@@ -112,7 +123,7 @@ php artisan key:generate
 
 nvm install
 nvm use v26
-npm install -g pnpm@latest-11 # If pnpm is not already installed
+npm install -g pnpm@latest-12 # If pnpm is not already installed
 
 pnpm install
 pnpm build
@@ -177,11 +188,13 @@ php artisan db:rebuild
 
 This will:
 
+- Clear the cache, the queue and the schedule cache (Redis must be running)
 - Create all database tables
-- Seed system permissions
-- Seed default roles
-- Seed role types
+- Seed system permissions, role types and default roles
+- Sync changelog entries from `resources/changelogs/`
+- Give each NetID in `SUPER_ADMIN_NETIDS` the Super Administrator role (see [Super Administrator Accounts](/getting-started/initial-customization/#1-super-administrator-accounts))
 - Seed example users
+- Regenerate the model IDE helper files
 
 :::caution
 This command is only intended for local and testing environments. Use this as needed as the schema or seeders change during development.
@@ -191,14 +204,14 @@ This command is only intended for local and testing environments. Use this as ne
 
 ### Test the Application
 
-Start the development server:
+Start the development processes:
 
 ```bash
-# If using Laravel Herd, your site should already be available at:
-http://your-project-name.test
-
-# Otherwise, use the built-in PHP server:
-php artisan serve
+composer dev
 ```
 
-Visit the application in your browser. You should see the homepage.
+This runs the PHP server, a queue worker, the log viewer and Vite together. The queue worker is required: jobs go to Redis (`QUEUE_CONNECTION=redis`), and email sign-in codes are not sent until a worker runs them.
+
+With Laravel Herd, the site is served at `https://your-project-name.test`. Without Herd, use the address `php artisan serve` prints.
+
+As a guest you should see the landing page. After you sign in, you land in the app panel at `/app`.

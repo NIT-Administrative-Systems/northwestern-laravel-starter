@@ -27,6 +27,8 @@ import { FileTree } from '@astrojs/starlight/components';
         - Core
             - Casts/
             - Enums/
+            - Exceptions/
+            - Health/
             - Models/
             - Services/
             - ...
@@ -46,12 +48,17 @@ import { FileTree } from '@astrojs/starlight/components';
             - QueryBuilders/
             - ...
     - Filament
+        - App/ the app panel
+            - Pages/
+        - Clusters/
+        - Navigation/
+        - Pages/
         - Resources/
         - ...
     - Http/
         - Controllers/
+        - Livewire/
         - Middleware/
-        - Requests/
     - Providers/
     - View/
         - Components/
@@ -67,10 +74,12 @@ The **Core** domain contains foundational functionality that applies across the 
 
 **Responsibilities:**
 
-- Base models and concerns
-- Core enums (External Services, API Request Failures)
-- Core services (DateTime formatting, Configuration validation)
-- Shared utilities and helpers
+- `BaseModel` and model concerns, including `PrunesAfterRetentionPeriod` for records that expire
+- The `ExternalService` enum
+- Configuration validators (`Services/ConfigValidation/`)
+- Shared exceptions (`NoRollbackException`, `ServiceDownError`, `SentryExceptionHandler`)
+- Custom health checks (`Health/`)
+- Shared casts (`MarkdownWithJiraLinksCast`)
 
 **When to add code to Core:**
 
@@ -110,6 +119,18 @@ The **User** domain handles everything related to user data and management:
 - Audit logging of user actions
 - User login tracking
 - Wildcard photo management
+
+### Support Domain
+
+The **Support** domain handles the changelog and support tickets:
+
+**Location:** `app/Domains/Support/`
+
+**Responsibilities:**
+
+- [Changelog](/features/changelog/) entries, synced from `resources/changelogs/` by `ChangelogSeeder`
+- [Support tickets](/features/support-tickets/) submitted from the Contact Support page
+- Ticket gateways (TeamDynamix and mail), with a fallback to mail when the primary gateway fails
 
 ## Component Types
 

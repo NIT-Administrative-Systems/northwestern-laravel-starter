@@ -50,7 +50,7 @@ The Northwestern Laravel Starter provides a multi-method authentication system t
 
 ## Signing In
 
-Sign-in belongs to the [App panel](/architecture/ui-architecture). Guests who open a page in any panel are sent to `/app/login`, which lists the sign-in methods this application has configured:
+Sign-in belongs to the [App panel](/building/app-panel/). Guests who open a page in any panel are sent to `/app/login`, which lists the sign-in methods this application has configured:
 
 - **Sign in with NetID** appears when single sign-on is configured. It uses Online Passport (WebSSO) when that is configured, otherwise Entra ID.
 - **Sign in with email** appears when `LOCAL_AUTH_ENABLED=true`.
@@ -108,7 +108,7 @@ Northwestern users authenticate via single sign-on using their NetID credentials
 
 2. **Redirect to SSO**
 
-   Application redirects to Northwestern's authentication service
+   The application sends the guest to `/app/login`. When email sign-in is off, that page redirects straight to Northwestern's authentication service; otherwise the user picks **Sign in with NetID** there
 
 3. **User authenticates**
 
@@ -159,11 +159,11 @@ External users (non-Northwestern) can access the application via time-limited ve
 
 2. **Verification code sent**
 
-   Admin triggers a code email or user requests one themselves
+   The user requests a code on `/app/login/email`, or an administrator sends one with **Send Verification Code** on the user's page (or the **Send verification code** option when creating the user)
 
 3. **User receives email**
 
-   Email contains a time-limited verification code (valid for 10 minutes by default)
+   The email contains the code (valid for 10 minutes by default, `LOCAL_AUTH_CODE_EXPIRES_MINUTES`) and an **Enter your code** button. The button opens `/app/login/email` at the code step for that challenge, so a code sent by an administrator or read on another device can be entered. The link alone does not sign anyone in, and an expired, used, locked or altered link is ignored.
 
 4. **User enters code**
 
@@ -191,6 +191,19 @@ LOCAL_AUTH_RATE_LIMIT_PER_IP_PER_HOUR=20
 
 # Use a fixed, predictable verification code instead of random codes
 LOCAL_AUTH_USE_FIXED_CODE=false
+
+# Number of digits in a verification code
+LOCAL_AUTH_CODE_DIGITS=6
+
+# Minutes before a code expires
+LOCAL_AUTH_CODE_EXPIRES_MINUTES=10
+
+# Failed attempts before a challenge locks, and how many minutes it stays locked
+LOCAL_AUTH_CODE_MAX_ATTEMPTS=8
+LOCAL_AUTH_CODE_LOCK_MINUTES=15
+
+# Seconds before another code can be sent
+LOCAL_AUTH_CODE_RESEND_COOLDOWN=30
 ```
 
 <Aside type="tip">
@@ -202,29 +215,27 @@ LOCAL_AUTH_USE_FIXED_CODE=false
 <Tabs>
   <TabItem label="Via Administration Panel" icon="seti:config">
     1. Navigate to **Users**
-    2. Click **Actions** → **Create Local User**
-    3. Enter user details (name, email, etc.)
-    6. Create the user
+    2. Click **Add User** → **Add Local User**
+    3. Enter the email address, first and last name, job title and organization (all required), and an optional description
+    4. Check **Send verification code** if the user should get a code now. Otherwise they can request one themselves.
+    5. Create the user
   </TabItem>
 
   <TabItem label="Programmatically" icon="seti:php">
+    `CreateLocalUser` generates a unique username and creates the local user as an affiliate. With `sendLoginLink: true` (the default), it also emails a verification code.
+
     ```php
-    use App\Domains\User\Models\User;
-    use App\Domains\User\Enums\Affiliation;
-    use App\Domains\Auth\Enums\AuthType;
-    use App\Domains\Auth\Actions\Local\IssueLoginChallenge;
+    use App\Domains\User\Actions\Local\CreateLocalUser;
 
-    $user = User::create([
-        'username' => 'jdoe',
-        'auth_type' => AuthType::Local,
-        'primary_affiliation' => Affiliation::Affiliate,
-        'email' => 'jane.doe@example.com',
-        'first_name' => 'Jane',
-        'last_name' => 'Doe',
-    ]);
-
-    // Send verification code
-    resolve(IssueLoginChallenge::class)($user->email, request()->ip(), request()->userAgent());
+    $user = resolve(CreateLocalUser::class)(
+        email: 'jane.doe@example.com',
+        firstName: 'Jane',
+        lastName: 'Doe',
+        title: 'Research Partner',
+        department: 'Example University',
+        description: 'Collaborator on the 2026 study',
+        sendLoginLink: true,
+    );
     ```
   </TabItem>
 </Tabs>
@@ -233,7 +244,7 @@ LOCAL_AUTH_USE_FIXED_CODE=false
 
 <CardGrid>
   <Card title="Time-Limited Codes" icon="approve-check">
-    Codes automatically expire after configured duration (default: 10 minutes)
+    Codes expire after `LOCAL_AUTH_CODE_EXPIRES_MINUTES` (default: 10 minutes)
   </Card>
 
   <Card title="Single-Use Codes" icon="approve-check">
@@ -292,6 +303,8 @@ See the [API Documentation](/features/api/) for complete Access Token management
 ## User Segmentation
 
 Every login creates a `UserLoginRecord` with a **segment**, a classification of the user at that moment. Segments feed the login analytics dashboard (charts, stats, filters) and are captured at login time so historical metrics remain accurate even if user roles change later.
+
+Login records are deleted after `LOGIN_RECORD_RETENTION_DAYS` (default 365). See [Data Retention](/getting-started/initial-customization/#7-data-retention).
 
 ### Default Segments
 
@@ -367,5 +380,15 @@ Authentication uses layered rate limits to prevent brute force attacks and abuse
 </PropertyTable>
 
 All rate limiters are defined in `config/rate-limiting.php`.
+
+---
+
+## Impersonating Users
+
+Users with the `ManageImpersonation` permission can sign in as another user to see the application as they do. The **Impersonate** button on a user's page in the administration panel posts to `/impersonate/take/{id}`. API users can't be impersonated, and only a user with `ManageAll` can impersonate another user who has it.
+
+While impersonating, both panels show the theme's impersonation banner, whose leave button posts to `/impersonate/leave` and returns to the original account. Both routes are in `routes/auth.php` and share the [impersonation rate limit](#impersonation).
+
+Each start is recorded in the impersonation log, which is kept forever unless `IMPERSONATION_LOG_RETENTION_DAYS` is set. See [Audit Logging](/features/audit-logging/#what-gets-audited).
 
 For information on roles, permissions, and policies after a user is authenticated, see the [Authorization](/features/authorization/) documentation.

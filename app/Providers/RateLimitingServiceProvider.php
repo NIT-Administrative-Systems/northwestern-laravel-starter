@@ -4,20 +4,21 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Domains\Auth\Http\Middleware\AuthenticatesAccessTokens;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
-use Northwestern\SysDev\Chassis\Http\Responses\ProblemDetails;
 
 class RateLimitingServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
+        // The limiter runs before the token middleware authenticates the request, so it asks the
+        // middleware for the token's user; without a valid token the request is limited by IP.
         RateLimiter::for('api', static function (Request $request) {
             return Limit::perMinute((int) config('rate-limiting.api.per_minute'))
-                ->by($request->user()?->id ?: $request->ip())
-                ->response(fn () => ProblemDetails::tooManyRequests());
+                ->by(resolve(AuthenticatesAccessTokens::class)->userIdForRateLimiting($request) ?? $request->ip());
         });
 
         RateLimiter::for('auth:impersonate', static function (Request $request) {

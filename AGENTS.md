@@ -49,7 +49,7 @@ formatting fixes back to the pull request, so pull before pushing again.
   `--panel=administration`.
 - **Public pages** in `resources/views/public/`, on `<x-layouts.public>`, with routes in the
   `panel:app` middleware group in `routes/web.php`.
-- **Error pages** in `resources/views/errors/`. Client errors (401, 403, 404, 419, 429)
+- **Error pages** in `resources/views/errors/`. Client errors (401, 402, 403, 404, 419, 429)
   render on the public layout; 500, 503 and database-paused use `<x-layouts.error>`, which
   must not use Filament, auth or the database.
 - **Shared header**: `<x-site-header>` on public, sign-in, lockdown and error pages;
@@ -63,7 +63,8 @@ formatting fixes back to the pull request, so pull before pushing again.
 - **Tailwind only compiles classes from files it is told about.** A view outside
   `app/Filament/App/` and `resources/views/filament/app/` must be covered by an `@source`
   line in `resources/css/filament/app/theme.css` (or the administration theme), or its
-  classes silently do nothing.
+  classes silently do nothing. Error-layout pages (500, 503, database-paused) compile from
+  `resources/css/errors.css`, which has its own `@source` lines.
 - **Filament callout headings are always `<h4>`.** A callout directly under a page title or
   a top-level section skips heading levels and fails axe. Use `Callout::make()` with a
   description that opens with bold text instead of a heading.
@@ -74,7 +75,9 @@ formatting fixes back to the pull request, so pull before pushing again.
 - **Render hooks registered when a panel boots persist for the rest of a test.** Request
   `/app` and `/administration` in separate tests when asserting on panel chrome.
 - **Never add `$fillable` or `$guarded`** to models, never add foreign key constraints, and
-  never implement a migration's `down()` (throw `NoRollbackException`).
+  never implement a migration's `down()` (throw `NoRollbackException`). The only foreign keys
+  are in Filament's `imports`, `exports` and `failed_import_rows` migrations, shipped in
+  v1.10.0.
 - **Edit an unreleased migration instead of adding another one.** Check `git tag --contains`
   before deciding a migration has shipped.
 - **Retention:** records that should expire use the `PrunesAfterRetentionPeriod` trait and a
@@ -89,7 +92,8 @@ formatting fixes back to the pull request, so pull before pushing again.
 ## Tests
 
 - Mirror the namespace under `tests/Feature` or `tests/Unit`, and put a regression test in the
-  existing test file for that class. Mark test classes with `#[CoversClass]`.
+  existing test file for that class. Mark test classes with `#[CoversClass]`, or
+  `#[CoversTrait]` for traits.
 - Use factories. `UserFactory` gives SSO users the Northwestern User role; use `->affiliate()`
   for a user without roles.
 - Every page the starter ships is checked with axe in `cypress/e2e/accessibility.cy.ts`. Add

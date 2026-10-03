@@ -11,7 +11,8 @@ return [
     |
     | Controls the global rate limit applied to all API routes via the
     | throttleApi() middleware in bootstrap/app.php. This is keyed by
-    | the authenticated user ID, or by IP for unauthenticated requests.
+    | the API user behind the request's access token, or by IP when the
+    | request has no valid token.
     |
     */
 

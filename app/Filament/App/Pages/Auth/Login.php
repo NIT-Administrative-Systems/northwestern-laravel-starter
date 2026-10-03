@@ -14,7 +14,6 @@ use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Text;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
-use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\HtmlString;
@@ -47,15 +46,6 @@ class Login extends SimplePage
         if (! $this->localAuthEnabled() && ! App::environment('ci') && $ssoUrl !== null) {
             $this->redirect($ssoUrl);
         }
-    }
-
-    /** "Sign in to" above the application name, which gets a row of its own. */
-    public function getHeading(): string|Htmlable|null
-    {
-        return new HtmlString(
-            '<span class="nu-sign-in-heading-lead">Sign in to</span> '
-            . '<span class="nu-sign-in-heading-app">' . e(config('app.name')) . '</span>'
-        );
     }
 
     public function content(Schema $schema): Schema

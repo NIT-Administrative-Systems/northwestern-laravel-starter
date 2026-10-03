@@ -6,6 +6,7 @@ namespace App\Domains\Auth\Jobs;
 
 use App\Domains\Auth\Mail\LoginCodeMail;
 use App\Domains\Auth\Models\LoginChallenge;
+use App\Domains\Auth\ValueObjects\LoginCodeSession;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -55,6 +56,7 @@ class SendLoginCodeEmailJob implements ShouldQueue
             new LoginCodeMail(
                 encryptedCode: $this->encryptedCode,
                 expiresAt: $challenge->expires_at,
+                signInUrl: LoginCodeSession::link($challenge),
             )
         );
 

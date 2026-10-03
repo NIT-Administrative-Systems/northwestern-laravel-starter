@@ -2,7 +2,7 @@
 title: Deployment
 description: Guidelines for deploying the starter
 sidebar:
-    order: 1
+    order: 4
 ---
 
 import { Aside, Steps } from "@astrojs/starlight/components";
@@ -36,6 +36,15 @@ Your options typically include:
 
 Most Northwestern teams choose Vapor, so the remainder of this documentation focuses on building, provisioning, and deploying your application using Vapor.
 
+### Scheduler and Queue Worker
+
+Vapor runs the scheduler and queue workers for you. On any other target, you run them yourself:
+
+- `php artisan schedule:run` every minute, from cron or an equivalent
+- A long-running `php artisan queue:work` process, kept alive by a process supervisor
+
+The scheduler (`routes/console.php`) runs retention pruning (`model:prune`), Telescope and temporary S3 file cleanup, the health checks, and the health check heartbeat. Without it, expired records are never deleted and the health check reports that the schedule has not run.
+
 ## Laravel Vapor
 
 Laravel Vapor is a serverless deployment platform built specifically for Laravel applications. Vapor:
@@ -59,11 +68,22 @@ Because Vapor associates one project with one team, every application ends up wi
 ### Initial Setup
 
 <Steps>
-    1. **Create the Vapor project**
+    1. **Install the Vapor packages**
+
+        The starter does not include Vapor's packages. Add the runtime as a production dependency and the CLI as a development dependency:
+
+        ```bash
+        composer require laravel/vapor-core
+        composer require --dev laravel/vapor-cli
+        ```
+
+        The CLI provides `vendor/bin/vapor`, used in the steps below and in the deployment workflow.
+
+    2. **Create the Vapor project**
 
         Create one project inside the nonprod Vapor team and one inside the prod Vapor team.
 
-    2. **Request certificates**
+    3. **Request certificates**
 
         Create ACM certificates for each environment hostname:
 
@@ -74,19 +94,19 @@ Because Vapor associates one project with one team, every application ends up wi
         ```
 
 
-    3. **Validate certificates via DNS**
+    4. **Validate certificates via DNS**
 
         Use your organization’s DNS request process to add the CNAME records Vapor provides.
 
-    4. **Request VPC subnet allocations**
+    5. **Request VPC subnet allocations**
 
         Obtain subnet IDs from your cloud/networking team.
 
-    5. **Configure `vapor.yml`**
+    6. **Configure `vapor.yml`**
 
         Add memory values, timeouts, subnets, security groups, queue names, and build/deploy steps.
 
-    6. **Run your first deploy**
+    7. **Run your first deploy**
 
         ```bash
         vendor/bin/vapor deploy develop

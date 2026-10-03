@@ -11,6 +11,13 @@
 @source '../../../../resources/views/vendor/pagination/tailwind.blade.php';
 @source '../../../../vendor/filament/**/*';
 
+/* The wordmark's lowercase letters sit in the lower part of its box, so centering the box leaves it
+   looking low beside the application name. Lifting it by a tenth of its height lines up its visual
+   center with the name's. A candidate for northwestern-filament-theme. */
+.fi-topbar .fi-logo .nu-wordmark {
+    translate: 0 -10%;
+}
+
 /* The app panel's simple pages show the environment badge in <x-site-header>, not above the card. */
 .fi-simple-layout .nu-env-indicator-simple {
     display: none;
@@ -24,21 +31,6 @@
 /* Filament runs the card edge to edge on phones; keep a gutter so it reads as a card there too. */
 .fi-simple-main-ctn {
     padding-inline: 1rem;
-}
-
-/* Sign-in page: "Sign in to" above the application name, which gets a row of its own. */
-.nu-sign-in-heading-lead {
-    display: block;
-    color: var(--gray-500);
-    font-family: var(--nu-font-body);
-    font-size: 1rem;
-    font-weight: 500;
-    letter-spacing: normal;
-}
-
-.nu-sign-in-heading-app {
-    display: block;
-    margin-top: 0.25rem;
 }
 
 /* A muted line under each sign-in button saying who it is for. */
@@ -67,7 +59,6 @@
     content: "";
 }
 
-.dark .nu-sign-in-heading-lead,
 .dark .nu-sign-in-hint,
 .dark .nu-sign-in-divider {
     color: var(--gray-400);

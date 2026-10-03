@@ -2,7 +2,7 @@
 
 ## Coding standards & style
 
-- **Formatting**: Follow PSR-12 exactly; run `composer format:php` before committing. Keep imports alphabetized and grouped.
+- **Formatting**: Follow the Pint configuration in `pint.json` (the `laravel` preset plus custom rules); run `composer format:php` before committing. Keep imports alphabetized and grouped.
 - **Strict typing**: Start files with `declare(strict_types=1)`;. Use typed properties, scalar/union/DTO types, and return types everywhere. Favor constructor property promotion and `readonly` when stable immutability is intentional.
 - **PHP language features**: Use named arguments, match expressions, nullsafe operator (?->), and attributes over DocBlock annotations. Prefer enums for constrained sets and value objects for domain primitives.
 - **Naming**: Classes/interfaces/traits/enum cases in `PascalCase`, methods/variables in `camelCase`, configuration keys in `snake_case`, and class constants in `UPPER_SNAKE_CASE`.
@@ -25,26 +25,26 @@
 - **Model inheritance**: Models should extend `App\Domains\Core\Models\BaseModel` which provides automatic audit logging. Exception: `User` extends `Authenticatable` but uses the `Auditable` concern directly.
 - **Model properties**: Use `protected $hidden` array for sensitive fields (passwords, tokens). Use `protected $casts` property for type casting, NOT the `casts()` method. Define `protected array $auditExclude` to exclude fields from audit logs (e.g., timestamps that change frequently, tokens, passwords).
 - **Model attributes**: Use Laravel's `Attribute` casting for computed properties. Mark with `@comment` for code generator support. Pattern: `protected function attributeName(): Attribute { return Attribute::make(get: fn() => ...) }`.
-- **Model concerns**: Extract reusable model behavior into traits in `Models/Concerns/`. Examples: `Auditable`, `HandlesImpersonation`, `AuditsRoles`.
+- **Model concerns**: Extract reusable model behavior into traits in `Models/Concerns/`. Examples: `PrunesAfterRetentionPeriod`, `HandlesImpersonation`, `AuditsRoles`.
 - **Policies & authorization**: Register policies per model and check them explicitly. Align permissions with `spatie/laravel-permission` using enum-based permission constants (e.g., `SystemPermission`).
 - **Livewire & Filament**: Keep Livewire components lean, delegating heavy logic to actions. In Filament resources, extract form/table definitions into methods for reuse and keep validation centralized.
 
 ## Testing & quality gates
 
-- **Test organization:** Write feature/unit tests using PHPUnit; colocate tests under `tests/Feature` or `tests/Unit` mirroring namespaces. Use `#[CoversClass(ClassName::class)]` attributes on test classes for coverage tracking.
+- **Test organization:** Write feature/unit tests using PHPUnit; colocate tests under `tests/Feature` or `tests/Unit` mirroring namespaces. Use `#[CoversClass(ClassName::class)]` attributes on test classes for coverage tracking, or `#[CoversTrait(TraitName::class)]` when testing a trait.
 - **Factory usage:** Prefer factories over manual model creation. Note that `UserFactory` automatically assigns `SystemRole::NorthwesternUser` to SSO users via `afterCreating` hook; use `->affiliate()` state for users without auto-assigned roles.
-- **Mocking external services:** Mock external services (e.g., `ImpersonateManager`, `DirectorySearchService`) in tests rather than relying on real API calls or session state. Use `Event::fake()` and `Queue::fake()` to test event/job dispatching without side effects.
+- **Mocking external services:** Mock external services (e.g., `ImpersonateManager`, `Northwestern\SysDev\SOA\DirectorySearch`) in tests rather than relying on real API calls or session state. Use `Event::fake()` and `Queue::fake()` to test event/job dispatching without side effects.
 - **Static analysis:** Run `composer analyse:php` (PHPStan) before merging. Keep baseline errors at zero—add `@phpstan-ignore-next-line` only with justification.
-- **Code formatting:** Always run `composer format:php` (Laravel Pint) before committing to ensure PSR-12 compliance.
+- **Code formatting:** Always run `composer format:php` (Laravel Pint, configured in `pint.json`) before committing.
 
 # Database & Persistence Instructions
 
 ## Schema & naming conventions
 
-- **Tables**: plural, `snake_case` names (`access_tokens`, `login_records`). Pivot tables follow `singular_singular` alphabetical order (`role_user`, not `user_role`).
+- **Tables**: plural, `snake_case` names (`access_tokens`, `user_login_records`). Pivot tables follow `singular_singular` alphabetical order (`role_user`, not `user_role`).
 - **Primary Key**: Tables should always have an `id` column as the primary key (`$table->id()`).
-- **Columns**: `snake_case`; booleans start with `is_`/`has_`, timestamps use `_at` suffix, dates use `_on` suffix.
-- **Foreign keys**: Always use `singular_id` format (`user_id`, `role_id`) when defining foreign keys. ONLY use the `foreignId()` method. NEVER chain it with `->constrained()`, `->cascadeOnDelete()`, or `->restrictOnUpdate()` - this project intentionally avoids database-level constraints.
+- **Columns**: `snake_case`; booleans name a state without an `is_`/`has_` prefix (`netid_inactive`, `system_managed`), timestamps use `_at` suffix, dates use `_on` suffix.
+- **Foreign keys**: Always use `singular_id` format (`user_id`, `role_id`) when defining foreign keys. ONLY use the `foreignId()` method. NEVER chain it with `->constrained()`, `->cascadeOnDelete()`, or `->restrictOnUpdate()` - this project intentionally avoids database-level constraints. The only exceptions are Filament's `imports`, `exports` and `failed_import_rows` migrations, shipped in v1.10.0.
 - **Indexes**: Add `->index()` on columns hypothesized to be frequently queried in WHERE clauses or JOIN conditions. Use `->unique()` for unique constraints. Define composite indexes with `->index(['col1', 'col2'])` when querying multiple columns together.
 - **Soft-deletes**: Tables should have `$table->softDeletes()` unless there's a strong reason not to (e.g., log/audit tables, pivot tables). After adding a `Schema::create()` to a migration, review for correctness and remove any undesired `softDeletes()` calls.
 
@@ -64,7 +64,7 @@
 
 - **Foreign key relationships:** Columns ending with `_id` should call the related model's `factory()` method instead of using Faker.
 - **Faker methods:** Always use Faker methods (not properties): `fake()->text()` instead of `fake()->text`.
-- **Factory states:** Use states for variations of the same model:
+- **Factory states:** Use states for variations of the same model (`User::factory()->affiliate()`).
 
 ### Idempotent seeding
 
@@ -72,14 +72,14 @@ This starter uses a custom **idempotent seeding pattern** that allows seeders to
 
 **Key components:**
 
-- For seeders that _should_ be idempotent, extend `App\Domains\Core\Seeders\IdempotentSeeder` and not `Illuminate\Database\Seeder`. These seeds should include the `#[AutoSeed]` attribute and define dependencies, if any.
+- For seeders that _should_ be idempotent, extend `Northwestern\SysDev\Chassis\Seeding\IdempotentSeeder` and not `Illuminate\Database\Seeder`. These seeds should include the `Northwestern\SysDev\Chassis\Attributes\AutoSeed` attribute (`#[AutoSeed]`) and define dependencies, if any.
 
 ---
 
 ## Query optimization
 
-- **Eager loading:** Always eager load relationships to avoid N+1 queries using `with()`, `load()` or `loadMissing()`:
-- **Query scopes:** Define reusable query logic as scopes on models or custom query builders:
+- **Eager loading:** Always eager load relationships to avoid N+1 queries using `with()`, `load()` or `loadMissing()`.
+- **Query scopes:** Define reusable query logic as scopes on models or custom query builders.
 - **Select specific columns:** Only select columns you need if applicable to avoid hydrating full models unnecessarily.
 - **Chunk large datasets:** For processing large result sets, use `chunk()` or `lazy()`.
 
@@ -93,12 +93,12 @@ This application has **one frontend stack**: Filament (Livewire, Alpine and Tail
 
 Put each page where it belongs:
 
-| Surface                                  | Location                         | Use for                                                                                                                                                                                                     |
-| ---------------------------------------- | -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| App panel (`/app`, default panel)        | `app/Filament/App/`              | The application's features for its users. Default to this.                                                                                                                                                  |
-| Administration panel (`/administration`) | `app/Filament/` (outside `App/`) | Back-office tooling                                                                                                                                                                                         |
-| Public layout (`<x-layouts.public>`)     | `resources/views/public/`        | Pages that must work without signing in. Routes use the `panel:app` middleware so Filament's Blade components work. Light only.                                                                             |
-| Error layout (`<x-layouts.error>`)       | `resources/views/errors/`        | The 500, 503 and database-paused pages. No Filament, auth or database calls; wrap anything that could query the database in `rescue()`. Client error pages (401, 403, 404, 419, 429) use the public layout. |
+| Surface                                  | Location                         | Use for                                                                                                                                                                                                          |
+| ---------------------------------------- | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| App panel (`/app`, default panel)        | `app/Filament/App/`              | The application's features for its users. Default to this.                                                                                                                                                       |
+| Administration panel (`/administration`) | `app/Filament/` (outside `App/`) | Back-office tooling                                                                                                                                                                                              |
+| Public layout (`<x-layouts.public>`)     | `resources/views/public/`        | Pages that must work without signing in. Routes use the `panel:app` middleware so Filament's Blade components work. Light only.                                                                                  |
+| Error layout (`<x-layouts.error>`)       | `resources/views/errors/`        | The 500, 503 and database-paused pages. No Filament, auth or database calls; wrap anything that could query the database in `rescue()`. Client error pages (401, 402, 403, 404, 419, 429) use the public layout. |
 
 **Stack details:**
 
@@ -114,7 +114,7 @@ Put each page where it belongs:
 php artisan make:filament-resource User --generate --model-namespace=App\\Domains\\User\\Models
 
 // Relation managers must specify full model path
-php artisan make:filament-relation-manager --related-model=App\\Domains\\User\\Models\\User --attach Role users username
+php artisan make:filament-relation-manager --panel=administration --related-model=App\\Domains\\User\\Models\\User --attach Role users username
 ```
 
 **Authorization:** Panel access is controlled via `User::canAccessPanel()`, which matches on panel IDs defined as constants (`AppPanelProvider::ID`, `AdministrationPanelProvider::ID`). Add a case for every new panel.
@@ -127,7 +127,7 @@ php artisan make:filament-relation-manager --related-model=App\\Domains\\User\\M
 
 - **Keep Blade declarative:** Push business logic into view models, presenters, or Livewire components. Use `@php` blocks sparingly and never for business rules.
 - **Component reusability:** Prefer Blade components (`<x-component>`) or includes for repeated UI fragments. Register view composers for globally shared data (navigation, user context).
-- **Layout hierarchy:** Outside panels, use the layout components (`<x-layouts.public>`, `<x-layouts.error>`) and `@push('scripts')` for per-page scripts.
+- **Layout hierarchy:** Outside panels, use the layout components (`<x-layouts.public>`, `<x-layouts.error>`). `@push('scripts')` works only on `<x-layouts.error>`; `<x-layouts.public>` has no `@stack('scripts')`, so give public pages behavior with Alpine, which the layout already loads.
 - **Security helpers:** Always use built-in helpers (`@can`, `@csrf`, `@vite`, `@method`) instead of manual HTML to maintain consistency and security.
 - **Avoid inline PHP:** Never embed business logic in views. Views should only handle presentation logic (loops, conditionals for display).
 
@@ -137,7 +137,7 @@ php artisan make:filament-relation-manager --related-model=App\\Domains\\User\\M
 
 - **Formatting:** Run `pnpm format` to lint CSS via Prettier before committing.
 - **Tailwind:** Use Tailwind utilities and the Northwestern tokens everywhere. Favor utility classes over custom CSS.
-- **Tailwind sources:** Views outside `app/Filament/App/` and `resources/views/filament/app/` must be listed under `@source` in `resources/css/filament/app/theme.css`, or their classes won't be compiled.
+- **Tailwind sources:** Views outside `app/Filament/App/` and `resources/views/filament/app/` must be listed under `@source` in `resources/css/filament/app/theme.css`, or their classes won't be compiled. Error-layout pages (500, 503, database-paused) compile from `resources/css/errors.css`, which has its own `@source` lines.
 
 ---
 

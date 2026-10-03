@@ -34,7 +34,7 @@ The underlying API client is provided by the [`northwestern-sysdev/laravel-soa`]
 
 5. **Persistence**
 
-   `PersistUserWithUniqueUsername` saves the user record and assigns the default `Northwestern User` role.
+   `PersistUserWithUniqueUsername` saves the user in a transaction and assigns the `Northwestern User` role to SSO users. If the save collides with an existing username, it returns the existing user instead.
 
 </Steps>
 
@@ -47,13 +47,13 @@ The underlying API client is provided by the [`northwestern-sysdev/laravel-soa`]
 | `FindOrUpdateUserFromDirectory` | Orchestrates the full lookup-validate-sync-persist flow |
 | `SyncUserFromDirectory` | Maps LDAP attributes to User model fields |
 | `DirectorySearchType` | Auto-detects search input type (email, employee ID, NetID) |
-| `PersistUserWithUniqueUsername` | Saves/updates user with unique username generation |
+| `PersistUserWithUniqueUsername` | Saves the user, assigns the Northwestern User role, and returns the existing user on a username collision |
 
 ---
 
 ## Post-Retrieval Jobs
 
-After a user is synced and persisted, `FindOrUpdateUserFromDirectory` dispatches a configurable list of **post-retrieval jobs**. This is the extension point for running custom logic when a user is fetched from the directory, whether during SSO login, manual creation in Filament, or a scheduled directory sync.
+After a user is synced and persisted, `FindOrUpdateUserFromDirectory` dispatches a configurable list of **post-retrieval jobs**. This is the extension point for running custom logic when a user is fetched from the directory, whether during SSO login, user creation in the administration panel, or the administration panel's **Force Sync** action.
 
 Add your jobs to the `postRetrievalJobs()` method in `FindOrUpdateUserFromDirectory`:
 
@@ -108,7 +108,7 @@ The caller controls whether jobs run synchronously or are dispatched to the queu
 |--------|:------------:|----------|
 | SSO login | `false` | Jobs are **queued**, login completes immediately |
 | Filament user creation | `true` | Jobs run **synchronously**, the admin sees the result before the page redirects |
-| Scheduled directory sync | `false` | Jobs are **queued**, sync processes users in bulk |
+| Filament **Force Sync** action | `true` | Jobs run **synchronously**, the admin sees the refreshed record |
 
 <Aside type="tip">
 When jobs run synchronously (`$immediate = true`), failures are caught and reported via your exception handler. They will **not** break the login or creation flow.
@@ -176,7 +176,7 @@ To sync an additional directory attribute (e.g., building/office location):
 
 When a directory lookup returns invalid data (missing required fields), the behavior depends on whether the user already exists:
 
-- **Existing user** - The account is marked with `netid_inactive = true` and `directory_sync_last_failed_at` is recorded. The user is not deleted.
+- **Existing SSO user** - The account is marked with `netid_inactive = true` and `directory_sync_last_failed_at` is recorded. The user is not deleted. Other existing users are returned unchanged, and API users skip the lookup entirely.
 - **New user** - A `BadDirectoryEntry` exception is thrown, preventing account creation with incomplete data.
 
 This ensures that transient directory issues don't destroy existing accounts while still preventing invalid new accounts.

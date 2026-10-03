@@ -99,13 +99,19 @@ When a role's permissions are modified:
 
 **Impersonation Sessions**
 
-When administrators impersonate users:
+When an administrator starts impersonating a user, `LogImpersonationAccess` (listening for `TakeImpersonation`) writes an `ImpersonationLog` to the `user_impersonation_logs` table with:
 
-- When impersonation starts
-- Who is being impersonated
 - Who started the impersonation
-- When impersonation ends
-- Actions performed during impersonation
+- Who is being impersonated
+- When it started
+
+Nothing records when an impersonation ends. Audit entries for changes made while impersonating carry the administrator's ID in `impersonator_user_id`.
+
+---
+
+## Retention
+
+Audit entries are kept forever by default. Set `AUDIT_RETENTION_DAYS` to delete older entries; the scheduler's daily `model:prune` removes them. Impersonation logs work the same way with `IMPERSONATION_LOG_RETENTION_DAYS`. Check your record-keeping requirements before setting either. See [Data Retention](/getting-started/initial-customization/#7-data-retention).
 
 ---
 
@@ -179,7 +185,7 @@ For production seeders that manage security-relevant data (roles, permissions, s
 Add the trait to your seeder and wrap the seeding logic in `withAuditing()`:
 
 ```php title="app/Domains/Auth/Seeders/RoleSeeder.php"
-use App\Domains\Core\Seeders\Concerns\AuditsSeederChanges;
+use Northwestern\SysDev\Chassis\Seeding\Concerns\AuditsSeederChanges;
 
 class RoleSeeder extends Seeder implements IdempotentSeederInterface
 {

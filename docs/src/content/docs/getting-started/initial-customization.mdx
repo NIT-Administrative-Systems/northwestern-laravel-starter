@@ -30,9 +30,9 @@ SUPER_ADMIN_NETIDS=abc123,xyz789,def456
 The `StakeholderSeeder` runs automatically during `php artisan db:rebuild` and:
 
 1. **Looks up each NetID** in the Northwestern Directory
-2. **Creates user accounts** with their directory information (name, email, department, etc.)
-3. **Assigns the System-Managed role** (full application access)
-4. **Skips existing users** - safe to run multiple times (idempotent)
+2. **Creates or refreshes user accounts** with their directory information (name, email, department, etc.)
+3. **Assigns the Super Administrator role** (full application access) to users who don't already have it
+4. **Safe to run multiple times** - existing users are updated from the directory, not duplicated
 
 <Tabs>
   <TabItem label="Initial Setup" icon="rocket">
@@ -69,7 +69,7 @@ Local authentication allows external users (non-Northwestern) to access your app
 Edit `config/local-auth.php` or set environment variables:
 
 ```bash
-// config/local-auth.php
+// .env
 # Enable/disable local authentication
 LOCAL_AUTH_ENABLED=true
 
@@ -114,7 +114,7 @@ Edit `config/local-auth.php` to tune the OTP length, expiration, and lockout beh
 ### How Local Auth Works
 
 <Steps>
-1. Admin creates a local user account through the Filament panel
+1. Admin creates a local user account in the administration panel (`/administration`): **Users** → **Add User** → **Add Local User**
 2. Admin can trigger an immediate verification code, or the user can request one themselves
 3. User receives an email with a verification code valid for a limited time
 4. User enters the code and is authenticated (no password needed)
@@ -148,12 +148,11 @@ All rate limiters (API, authentication, support) are centralized in `config/rate
 # Enable API request logging
 API_REQUEST_LOGGING_ENABLED=true
 
-# Auto-delete logs older than this (days)
-API_REQUEST_LOG_RETENTION_DAYS=90
-
 # Slow request threshold for monitoring (milliseconds)
 API_REQUEST_LOGGING_SLOW_THRESHOLD_MS=500
 ```
+
+How long request logs are kept is set by `API_REQUEST_LOG_RETENTION_DAYS`; see [Data Retention](#7-data-retention).
 
 ### Sampling (High-Traffic Apps)
 
@@ -231,7 +230,7 @@ ENVIRONMENT_LOCKDOWN_ENABLED=false
 ```
 
 <Aside type="tip">
-Useful for testing or for enabling lockdown in production during a closed beta launch.
+To enable lockdown in production, for example during a closed beta launch, set `ENVIRONMENT_LOCKDOWN_ENABLED=true` in production's `.env`.
 </Aside>
 
 ### Important: Production URL Configuration
@@ -240,23 +239,14 @@ Useful for testing or for enabling lockdown in production during a closed beta l
 If you plan to use Environment Lockdown in your lower environments, you **must** configure the production URL. The lockdown page displays a link to the production environment so users know where to find the live application.
 </Aside>
 
-**Option 1: Update Config Default (Recommended)**
-
-Edit `config/platform.php` to replace the default value:
-
-```diff title="config/platform.php"
-- 'production_url' => env('PRODUCTION_URL', 'https://northwestern.edu'),
-+ 'production_url' => env('PRODUCTION_URL', 'https://your-app.northwestern.edu'),
-```
-
-**Option 2: Environment Variable**
-
-Add this to your `.env` file:
+Set `PRODUCTION_URL` in `.env.example` so every environment inherits it:
 
 ```bash
-// .env
+// .env.example
 PRODUCTION_URL=https://your-app.northwestern.edu
 ```
+
+Changing the default in `config/platform.php` has no effect while `.env.example` ships `PRODUCTION_URL=` empty, because an empty environment value overrides the config default.
 
 ### Exempted Routes
 
@@ -331,6 +321,12 @@ Perform these cleanup tasks to personalize the starter kit for your project and 
 
 </Steps>
 
+Leave these references to the upstream starter out of both replacements:
+
+- `.starter-version.yaml`, which records the starter version your project came from
+- `REPO` in `app/Console/Commands/StarterCheckCommand.php`, which `php artisan starter:check` uses to compare against starter releases
+- The Coveralls upload's `if: github.repository == ...` guard in `.github/workflows/check-pr.yml`; remove the step or the condition instead, as its comment explains
+
 ### Documentation Site
 
 By default, the `docs/` directory contains documentation for the starter kit itself. This can be removed entirely or modified to host your project's documentation.
@@ -343,3 +339,18 @@ rm -rf docs/
 ```
 
 If you keep it, update the `DOCS_CNAME` env var at the top of `.github/workflows/deploy-docs.yml` to point to your own domain.
+
+`.github/workflows/release.yml` and `.github/workflows/smoke-test.yml` release and test the starter itself. Delete them unless you adapt them for your project.
+
+### Starter Placeholders
+
+Replace the pages the starter ships as placeholders:
+
+- **Landing page**: `resources/views/public/landing.blade.php`, which guests see at `/`
+- **Dashboard**: `app/Filament/App/Pages/Dashboard.php`, whose content is a setup checklist for developers
+- **Component gallery**: delete `app/Filament/App/Pages/ComponentGallery.php` when you no longer need it
+- **Where signed-in users land**: `destinationFor()` in `app/Http/Controllers/HomeController.php` sends everyone to the app panel
+
+Keep `AGENTS.md` up to date as the application grows; coding agents read it.
+
+[Contact Support](/features/support-tickets/) (`SUPPORT_ENABLED`, `SUPPORT_MAIL_TO`) and the [public changelog](/features/changelog/) (`CHANGELOG_ENABLED`) are off by default. Turn them on in `.env.example` if your application uses them.

@@ -65,6 +65,12 @@ class EmailCodeLogin extends SimplePage
             return;
         }
 
+        $token = request()->query(LoginCodeSession::LINK_PARAMETER);
+
+        if (is_string($token) && $token !== '') {
+            LoginCodeSession::startFromLink($token);
+        }
+
         $this->email = LoginCodeSession::email();
 
         $this->form->fill();

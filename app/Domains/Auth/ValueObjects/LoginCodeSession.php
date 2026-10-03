@@ -19,6 +19,10 @@ use Illuminate\Support\Str;
  * issued. The challenge ID is encrypted before being stored, and emails without
  * a local account store an encrypted decoy, so real IDs and decoys look identical.
  *
+ * Every login code email links to the code step with the challenge ID encrypted in
+ * the URL, so a code issued outside this browser (sent by an administrator, or read
+ * on another device) can still be entered. The link alone signs no one in.
+ *
  * - @see EmailCodeLogin
  */
 final class LoginCodeSession
@@ -32,6 +36,9 @@ final class LoginCodeSession
      * challenge ID for locally known users.
      */
     public const string CHALLENGE_ID = self::PREFIX . 'challenge_id';
+
+    /** The query parameter that carries the encrypted challenge ID in the email's link. */
+    public const string LINK_PARAMETER = 'challenge';
 
     /** @var non-empty-list<non-empty-string> */
     public const array KEYS = [
@@ -59,6 +66,39 @@ final class LoginCodeSession
         if ($challenge instanceof LoginChallenge) {
             Session::put(self::CHALLENGE_ID, self::encrypt($challenge));
         }
+    }
+
+    /**
+     * The code step's URL for a challenge, for the login code email.
+     */
+    public static function link(LoginChallenge $challenge): string
+    {
+        return route('filament.app.auth.login-code', [
+            self::LINK_PARAMETER => self::encrypt($challenge),
+        ]);
+    }
+
+    /**
+     * Start the flow from an email's link. A token that cannot be decrypted, or a
+     * challenge that is expired, used or locked, is ignored.
+     */
+    public static function startFromLink(string $token): bool
+    {
+        try {
+            $challengeId = Crypt::decryptString($token);
+        } catch (DecryptException) {
+            return false;
+        }
+
+        $challenge = ctype_digit($challengeId) ? LoginChallenge::query()->find($challengeId) : null;
+
+        if (! $challenge?->isActive()) {
+            return false;
+        }
+
+        self::start($challenge->email, $challenge);
+
+        return true;
     }
 
     public static function email(): ?string

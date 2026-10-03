@@ -6,7 +6,10 @@ namespace App\Domains\Core\Exceptions;
 
 use App\Domains\Core\Enums\ExternalService;
 use Exception;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Northwestern\SysDev\Chassis\Http\Responses\ProblemDetails;
+use Symfony\Component\HttpFoundation\Response;
 
 class ServiceDownError extends Exception
 {
@@ -38,5 +41,21 @@ class ServiceDownError extends Exception
         }
 
         parent::__construct($message, $code, $previous);
+    }
+
+    /**
+     * The outage is in another service, so show the 503 page rather than a 500 with the stack trace.
+     * API and JSON requests get Problem Details. The error is still reported.
+     */
+    public function render(Request $request): Response
+    {
+        if ($request->is('api/*') || $request->expectsJson()) {
+            return ProblemDetails::serviceUnavailable(
+                detail: sprintf('%s is temporarily unavailable.', $this->service->label()),
+                retryAfter: 60,
+            );
+        }
+
+        return response()->view('errors.503', [], Response::HTTP_SERVICE_UNAVAILABLE);
     }
 }

@@ -33,15 +33,15 @@ Model::preventLazyLoading(! App::isProduction());
 
 **Laravel default:** Lazy loading is allowed everywhere, which silently introduces N+1 query problems.
 
-**Starter behavior:** A two-tier approach:
+**Starter behavior:** Prevention depends on the environment and debug mode:
 
 | Environment | Behavior |
 |-------------|----------|
-| Local with debug mode | **Throws an exception**, you see the N+1 immediately |
-| Non-production without debug | **Silently reports** to your exception handler, caught in logs during testing and CI |
-| Production | **Silently reports** to your exception handler, never breaks for users |
+| Non-production with debug mode | **Throws an exception**, you see the N+1 immediately |
+| Non-production without debug | **Reports** to your exception handler (Sentry and logs) without breaking the request |
+| Production | **Allowed silently**, nothing is thrown or reported |
 
-If a lazy loading violation reaches production, it's reported to Sentry/logs rather than showing an error page.
+Lazy loading is not checked in production at all, so catch violations locally and in non-production environments before they ship.
 
 ### Missing Attribute Access Prevention
 
@@ -123,7 +123,7 @@ All generated URLs use HTTPS. CI and testing environments are excluded so tests 
 DB::prohibitDestructiveCommands(App::isProduction());
 ```
 
-Commands like `migrate:fresh`, `migrate:refresh`, `db:wipe`, and `db:seed --force` are blocked in production. This prevents accidentally destroying a production database.
+`migrate:fresh`, `migrate:refresh`, `migrate:reset`, `migrate:rollback`, and `db:wipe` are blocked in production. `db:seed` is not blocked. This prevents accidentally destroying a production database.
 
 ### Stray HTTP Request Prevention
 
@@ -149,11 +149,11 @@ In local, CI, and testing environments, HTTP client exceptions include the full 
 
 ## Filament Defaults
 
-Configured in `FilamentServiceProvider`. These apply to every panel.
+Configured in `FilamentServiceProvider`, except the impersonation banner. These apply to every panel.
 
 ### User Timezone on All Datetimes
 
-All `DateTimePicker`, `TextColumn`, and `TextEntry` components that display datetime values automatically use the authenticated user's timezone. This means timestamps are displayed in each user's local time throughout the admin panel. No manual `->timezone()` calls are needed.
+All `DateTimePicker`, `TextColumn`, and `TextEntry` components that display datetime values automatically use the authenticated user's timezone. This means timestamps are displayed in each user's local time in every panel. No manual `->timezone()` calls are needed.
 
 ### Table Defaults
 
@@ -166,7 +166,7 @@ All `DateTimePicker`, `TextColumn`, and `TextEntry` components that display date
 
 ### Non-Native Selects
 
-All `Select` and `SelectFilter` components render as Filament's custom searchable select instead of the browser's native `<select>` element. This provides a consistent, searchable dropdown experience across the admin panel.
+All `Select` and `SelectFilter` components render as Filament's custom searchable select instead of the browser's native `<select>` element. This provides a consistent, searchable dropdown experience across every panel.
 
 ### Export Defaults
 
@@ -175,6 +175,15 @@ All Filament export actions default to CSV format and write to the `s3` disk.
 ### Impersonation Banner
 
 An impersonation warning banner is injected at the top of the page body when a user is being impersonated, ensuring administrators always know when they're acting as another user.
+
+Each panel turns the banner on through the Northwestern theme plugin, in `AppPanelProvider` and `AdministrationPanelProvider`:
+
+```php
+NorthwesternTheme::make()
+    ->impersonationBanner()
+```
+
+A panel you add needs the same call to show it.
 
 ---
 

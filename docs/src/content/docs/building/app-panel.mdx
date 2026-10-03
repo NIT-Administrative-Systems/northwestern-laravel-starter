@@ -1,0 +1,180 @@
+---
+title: The App Panel
+description: Where your application's features live, and what the starter puts in the panel for you
+sidebar:
+    order: 1
+---
+
+import { Aside, FileTree, Steps } from '@astrojs/starlight/components';
+
+The app panel at `/app` is where an application built on the starter does its work. It is the default Filament panel, configured in `App\Providers\Filament\AppPanelProvider`, and any signed-in user can open it. Back-office tools belong in the [administration panel](/architecture/ui-architecture/#the-administration-panel) instead.
+
+The panel also owns sign-in for the whole application. Guests of any panel are sent to `/app/login` (see [Authentication](/features/authentication/#signing-in)), and in a locked-down environment users without an application role are sent to `/app/access-restricted` (see [Environment Lockdown](/getting-started/initial-customization/#5-environment-lockdown)).
+
+## Where Its Code Lives
+
+The panel discovers Resources, Pages and Widgets in `app/Filament/App/`:
+
+<FileTree>
+- app/Filament/App/
+  - Pages/
+    - Auth/ sign-in pages
+    - Concerns/HasSiteHeader.php
+    - ComponentGallery.php
+    - ContactSupport.php
+    - Dashboard.php
+    - EnvironmentLockdown.php
+  - Resources/ discovered, empty until you add one
+  - Widgets/ discovered, empty until you add one
+</FileTree>
+
+It does not discover Clusters. To group pages into a cluster, add `->discoverClusters(in: app_path('Filament/App/Clusters'), for: 'App\Filament\App\Clusters')` to `AppPanelProvider`, as the administration panel does.
+
+The sidebar is for your application's features. The starter ships only the dashboard there; the component gallery and Contact Support are reached from the dashboard and the Help menu.
+
+Filament's generators target the default panel, so new resources and pages land here without a `--panel` option:
+
+```bash
+php artisan make:filament-resource Project --generate --model-namespace=App\\Domains\\Project\\Models
+php artisan make:filament-page Reports
+```
+
+Views for the panel's pages go in `resources/views/filament/app/`. The panel's Tailwind theme, `resources/css/filament/app/theme.css`, already compiles classes from that directory and from `app/Filament/App/`. A view anywhere else needs an `@source` line there, or its classes do nothing.
+
+## The Dashboard
+
+`App\Filament\App\Pages\Dashboard` is a placeholder. Its `content()` is a setup checklist for developers, not part of an application. Replace `content()` with your own schema, or delete the override and the dashboard renders the widgets in `app/Filament/App/Widgets/`.
+
+Each step shows a check when it is done, an empty circle when it isn't, and a question mark when the starter can't detect it. Each links to the documentation for that step.
+
+| Step | Done when |
+|---|---|
+| Set your unit's details | `northwestern-filament-theme.unit.name` is set (`NU_UNIT_NAME`) |
+| Configure Northwestern single sign-on | A `login-websso` or `login-oauth-redirect` route is registered |
+| Replace the landing page | Not detected; always shows a question mark |
+| Build your first feature | The app panel has at least one Resource |
+| Set up Contact Support | `SUPPORT_ENABLED=true` and `SUPPORT_MAIL_TO` is no longer `your-team@northwestern.edu` |
+| Connect Sentry | A Sentry DSN is set (`SENTRY_LARAVEL_DSN`) |
+
+## The Component Gallery
+
+`/app/gallery` shows Filament's common components in the Northwestern theme with sample content: buttons, badges, callouts, form fields, a table, notifications and modals. It is linked from the dashboard, never shown in the navigation, and `ComponentGallery::canAccess()` refuses it in production.
+
+Delete `app/Filament/App/Pages/ComponentGallery.php` when you no longer need it. If the placeholder dashboard is still in place, remove its `gallery` action too, which refers to the class.
+
+## The Top Bar
+
+The top bar holds what every page shares: the Northwestern wordmark, the application name (`<x-panel-brand>`), the environment badge outside production, the Help menu, the notification bell and the user menu.
+
+### The Help Menu
+
+`<x-help-menu>` (`resources/views/components/help-menu.blade.php`) is rendered in the app panel's top bar, just ahead of the user menu, and in the header of public pages. The administration panel doesn't show it. Each item shows only when it is available:
+
+- **Changelog**, when the [changelog](/features/changelog/) is enabled.
+- **Contact Support**, for signed-in users when [support tickets](/features/support-tickets/) are enabled.
+- **Documentation**, when `SUPPORT_DOCUMENTATION_URL` is set. It opens in a new tab.
+
+The menu disappears when none of them apply. To add an item, add an entry to the `$items` array, or `null` when it shouldn't show:
+
+```php
+// resources/views/components/help-menu.blade.php
+Route::has('policies.index')
+    ? [
+        'label' => 'Policies',
+        'url' => route('policies.index'),
+        'icon' => Heroicon::OutlinedDocumentText,
+        'external' => false,
+    ]
+    : null,
+```
+
+The component also renders on error pages, so keep anything that could query the database inside `rescue()`, as the Contact Support check does.
+
+### The User Menu
+
+The user menu has two items, set in `AppPanelProvider::userMenuItems()`:
+
+- **Administration** links to `/administration`. It shows only to users who can open that panel (`User::canAccessPanel()`).
+- **Sign out** goes to the `logout` route.
+
+## Notifications
+
+The bell in the top bar lists database notifications, refreshed every 30 seconds (`->databaseNotificationsPolling('30s')`). Notifications are stored in the `notifications` table, created by `2026_01_22_232242_create_notifications_table.php`. The administration panel has the same bell.
+
+Send one with Filament's notification builder:
+
+```php
+use Filament\Notifications\Notification;
+
+Notification::make()
+    ->title('Report ready')
+    ->body('Your quarterly report finished processing.')
+    ->success()
+    ->sendToDatabase($user);
+```
+
+A Laravel notification class can send the same notification alongside mail or other channels. Return Filament's database message from `toDatabase()`, so the bell can render it:
+
+```php
+use Filament\Notifications\Notification as FilamentNotification;
+use Illuminate\Notifications\Notification;
+
+class ReportReady extends Notification
+{
+    public function via(object $notifiable): array
+    {
+        return ['database', 'mail'];
+    }
+
+    public function toDatabase(object $notifiable): array
+    {
+        return FilamentNotification::make()
+            ->title('Report ready')
+            ->getDatabaseMessage();
+    }
+}
+```
+
+The bell picks up new notifications at its next poll. A Livewire component in the panel can refresh it at once with `$this->dispatch('databaseNotificationsSent')`, as the component gallery's "Send me a notification" button does.
+
+## Simple Pages
+
+Simple pages (Filament's `SimplePage`) render a single card without the sidebar. The sign-in pages and the lockdown page are simple pages. The app panel renders `<x-site-header>` above every simple page's card, so they share the header of public and error pages.
+
+<Steps>
+
+1. Extend `Filament\Pages\SimplePage` in `app/Filament/App/Pages/`, and use `App\Filament\App\Pages\Concerns\HasSiteHeader`. The trait turns off Filament's own logo and simple-page user menu, which would repeat what the header shows.
+
+   ```php
+   use App\Filament\App\Pages\Concerns\HasSiteHeader;
+   use Filament\Pages\SimplePage;
+   use Filament\Schemas\Schema;
+
+   class Welcome extends SimplePage
+   {
+       use HasSiteHeader;
+
+       public function content(Schema $schema): Schema
+       {
+           return $schema->components([
+               // ...
+           ]);
+       }
+   }
+   ```
+
+2. Register its route in `AppPanelProvider::panel()`. Filament's page discovery only picks up full pages, so simple pages are routed in `->routes()`, as the lockdown page is:
+
+   ```php
+   ->routes(function (): void {
+       Route::get('welcome', Welcome::class)
+           ->middleware(Authenticate::class)
+           ->name('welcome');
+   })
+   ```
+
+</Steps>
+
+<Aside type="tip">
+    For a page that guests must see without the panel's sign-in, use the [public layout](/building/public-pages/) instead.
+</Aside>

@@ -48,6 +48,8 @@ Ad blockers often block requests to `sentry.io`. The browser SDK sends its repor
 
 It imports only what the starter uses, and exposes `captureException` and `captureFeedback` on `window.Sentry` for inline scripts. The 500 error page uses `captureFeedback` to send the user's description of what happened.
 
+The `dataCollection` object passed to `init()` turns off the browser SDK's default collection of user info, cookies, HTTP headers and request and response bodies. Keep it when you edit `init()`.
+
 ### Adding SDK Features
 
 To add a Sentry feature, import it in `resources/js/sentry.js` and add it to the integrations passed to `init()`. For example, [Session Replay](https://docs.sentry.io/platforms/javascript/session-replay/):
@@ -83,7 +85,7 @@ The starter ships `config/sentry.php` with sensible defaults:
 
 | Setting | Default | Description |
 |---|---|---|
-| `dsn` | `env('SENTRY_LARAVEL_DSN')` | Project DSN from Sentry |
+| `dsn` | `env('SENTRY_LARAVEL_DSN', env('SENTRY_DSN'))` | Project DSN from Sentry |
 | `release` | `env('VAPOR_COMMIT_HASH')` | Git SHA, set automatically by Vapor's `--commit` flag |
 | `environment` | `env('SENTRY_ENVIRONMENT')` | Falls back to `APP_ENV` |
 | `sample_rate` | `1.0` | Error sampling rate |

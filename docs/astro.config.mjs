@@ -26,6 +26,10 @@ export default defineNorthwesternConfig({
 				items: [{ autogenerate: { directory: 'getting-started' } }],
 			},
 			{
+				label: 'Building Your Application',
+				items: [{ autogenerate: { directory: 'building' } }],
+			},
+			{
 				label: 'Architecture',
 				items: [{ autogenerate: { directory: 'architecture' } }],
 			},

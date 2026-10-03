@@ -7,6 +7,7 @@ namespace Tests\Feature\Domains\Auth\Jobs;
 use App\Domains\Auth\Jobs\SendLoginCodeEmailJob;
 use App\Domains\Auth\Mail\LoginCodeMail;
 use App\Domains\Auth\Models\LoginChallenge;
+use App\Domains\Auth\ValueObjects\LoginCodeSession;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
@@ -45,6 +46,25 @@ final class SendLoginCodeEmailJobTest extends TestCase
         });
 
         $this->assertTrue($challenge->fresh()->email_sent_at->eq(now()));
+    }
+
+    // The link lets a code issued outside the sign-in page (by an administrator, say) be entered.
+    public function test_email_links_to_the_code_step_for_its_challenge(): void
+    {
+        $challenge = LoginChallenge::create([
+            'email' => 'test@example.com',
+            'code_hash' => Hash::make('123456'),
+            'expires_at' => now()->addMinutes(10),
+        ]);
+
+        (new SendLoginCodeEmailJob($challenge->id, Crypt::encryptString('123456')))->handle();
+
+        Mail::assertSent(LoginCodeMail::class, function (LoginCodeMail $mail) use ($challenge) {
+            parse_str((string) parse_url($mail->signInUrl, PHP_URL_QUERY), $query);
+
+            return str_starts_with($mail->signInUrl, url('/app/login/email'))
+                && Crypt::decryptString($query[LoginCodeSession::LINK_PARAMETER]) === (string) $challenge->id;
+        });
     }
 
     public function test_job_skips_when_challenge_missing_or_already_sent(): void

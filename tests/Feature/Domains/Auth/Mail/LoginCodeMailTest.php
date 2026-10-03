@@ -18,7 +18,8 @@ final class LoginCodeMailTest extends TestCase
         config(['app.name' => 'Test App']);
         $mailable = new LoginCodeMail(
             Crypt::encryptString('123456'),
-            CarbonImmutable::now()->addMinutes(10)
+            CarbonImmutable::now()->addMinutes(10),
+            'https://example.test/app/login/email?challenge=token',
         );
 
         $this->assertEquals('Sign in to Test App', $mailable->envelope()->subject);
@@ -32,7 +33,8 @@ final class LoginCodeMailTest extends TestCase
 
         $mailable = new LoginCodeMail(
             Crypt::encryptString('654321'),
-            $expiresAt
+            $expiresAt,
+            'https://example.test/app/login/email?challenge=token',
         );
 
         $content = $mailable->content();
@@ -40,5 +42,6 @@ final class LoginCodeMailTest extends TestCase
         $this->assertEquals('mail.auth.login-code', $content->markdown);
         $this->assertEquals('654321', $content->with['code']);
         $this->assertEquals($expectedMinutes, $content->with['expiresInMinutes']);
+        $this->assertEquals('https://example.test/app/login/email?challenge=token', $content->with['signInUrl']);
     }
 }

@@ -11,8 +11,10 @@ import { Card, CardGrid, Aside } from '@astrojs/starlight/components';
 
 - **PHP**: `^8.5`
 - **Node.js**: `v26.x`
-- **pnpm**: `11.0+`
+- **pnpm**: `12.x` (CI's version; `package.json` accepts `11.0+`)
 - **PostgreSQL**: `16+`
+- **Redis**: `7+`, for the queue (`QUEUE_CONNECTION=redis`), which `php artisan db:rebuild` also clears
+- **S3-compatible object storage**: the default filesystem disk and Livewire's temporary uploads both use `s3` (RustFS locally)
 
 ### PHP Extensions
 
@@ -22,10 +24,13 @@ The following PHP extensions are required to satisfy application dependencies:
 ext-ctype       ext-curl        ext-dom         ext-fileinfo
 ext-filter      ext-hash        ext-iconv       ext-intl
 ext-json        ext-libxml      ext-mbstring    ext-openssl
-ext-pcre        ext-pdo         ext-phar        ext-reflection
-ext-session     ext-simplexml   ext-sodium      ext-tokenizer
-ext-xml         ext-xmlreader   ext-xmlwriter   ext-zip
+ext-pcre        ext-pdo         ext-pdo_pgsql   ext-phar
+ext-redis       ext-reflection  ext-session     ext-simplexml
+ext-sodium      ext-tokenizer   ext-xml         ext-xmlreader
+ext-xmlwriter   ext-zip
 ```
+
+`ext-redis` is needed because `REDIS_CLIENT` defaults to `phpredis`; the `predis` package is not installed.
 
 ### Database Requirements
 
@@ -49,14 +54,14 @@ If you choose to use a different database driver, expect to modify migrations, s
     [Laravel Herd](https://herd.laravel.com/) provides an all-in-one development environment for macOS and Windows:
     - PHP 8.5+ with extension management
     - Nginx web server
-    - PostgreSQL, Redis, and RustFS services
+    - PostgreSQL, Redis, and RustFS services (Herd Pro)
     - Automatic site provisioning
   </Card>
 
   <Card title="Laravel Valet" icon="seti:config">
     **Alternative**
 
-    [Laravel Valet](https://laravel.com/docs/valet) is a lightweight macOS environment requiring manual installation of PHP, PostgreSQL, and other dependencies.
+    [Laravel Valet](https://laravel.com/docs/valet) is a lightweight macOS environment requiring manual installation of PHP, PostgreSQL, Redis, S3-compatible storage, and other dependencies.
 
     Suitable as an alternative if you cannot use Laravel Herd.
   </Card>

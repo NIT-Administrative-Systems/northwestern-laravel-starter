@@ -119,9 +119,9 @@ return [
     | Mail Capture URL
     |--------------------------------------------------------------------------
     |
-    | This setting controls whether a link to the MailPit server (or similar)
-    | is shown in the navigation to all users. This should be available to
-    | every user when in use, since anyone testing may need to see mail.
+    | When set, the administration panel's Developer Tools group links to the
+    | MailPit server (or similar) that captures outgoing mail. The link is
+    | shown to users who can view Telescope.
     |
     | Supported: string|null
     */

@@ -2,7 +2,7 @@
 title: Artisan Commands
 description: Reference guide for custom Artisan commands in the starter
 sidebar:
-    order: 2
+    order: 1
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -26,7 +26,7 @@ php artisan db:rebuild
 2. Runs `migrate:fresh` (drops all tables and re-runs migrations)
 3. Executes all seeders via `db:seed`
 4. Seeds demo data via `DemoSeeder`
-5. Regenerates IDE model helper annotations
+5. Regenerates IDE model helper annotations with `ide-helper:models -N`
 
 <Aside type="caution" title="Destructive Operation">
 This command will **completely wipe your database**. Only use in local and testing environments. Never run this in production.
@@ -300,7 +300,7 @@ Validators that aren't relevant to the current configuration (e.g., EventHub whe
 
 ### Adding Custom Validators
 
-Validators are discovered automatically using the `#[StarterValidator]` attribute, following the same pattern as `#[AutoSeed]` for seeders.
+Validators are discovered automatically using chassis's `#[ValidatesConfig]` attribute, following the same pattern as `#[AutoSeed]` for seeders.
 
 **1. Create a validator class** implementing `ConfigValidator` in a `Services/ConfigValidation` directory within your domain:
 
@@ -309,10 +309,10 @@ Validators are discovered automatically using the `#[StarterValidator]` attribut
 
 namespace App\Domains\Billing\Services\ConfigValidation;
 
-use App\Domains\Core\Attributes\StarterValidator;
-use App\Domains\Core\Contracts\ConfigValidator;
+use Northwestern\SysDev\Chassis\Attributes\ValidatesConfig;
+use Northwestern\SysDev\Chassis\Contracts\ConfigValidator;
 
-#[StarterValidator(description: 'Stripe')]
+#[ValidatesConfig(description: 'Stripe')]
 class StripeValidator implements ConfigValidator
 {
     public function shouldRun(): bool
@@ -349,8 +349,41 @@ class StripeValidator implements ConfigValidator
 **2. That's it.** The validator is automatically discovered from any `app/Domains/*/Services/ConfigValidation` directory. No registration or configuration needed.
 
 <Aside type="tip">
-The `description` parameter on `#[StarterValidator]` controls the label shown in the command output. The `shouldRun()` method determines whether the validator is relevant. Return `false` for optional integrations that aren't configured to avoid false negatives.
+The `description` parameter on `#[ValidatesConfig]` controls the label shown in the command output. The `shouldRun()` method determines whether the validator is relevant. Return `false` for optional integrations that aren't configured to avoid false negatives.
 </Aside>
+
+---
+
+## User and Role Commands
+
+### `role:force-detach {user} {role}`
+
+Remove a role from a user in an emergency, bypassing the role's assignment lock.
+
+```bash
+php artisan role:force-detach jdoe "Super Administrator" --reason="Offboarding"
+```
+
+<PropertyTable title="Options">
+    <Property name="user" type="argument">
+        Username or ID of the user. If omitted, a search prompt is shown.
+    </Property>
+    <Property name="role" type="argument">
+        Name of the role to detach. If omitted, a search prompt is shown.
+    </Property>
+    <Property name="--reason" type="option">
+        Reason for the detachment, recorded in the audit log. Prompted for if omitted; required with `--force`.
+    </Property>
+    <Property name="--force" type="flag">
+        Skip the confirmation prompt
+    </Property>
+</PropertyTable>
+
+**What it does:**
+
+1. Finds the user and role, and fails if the user doesn't have the role
+2. Shows the user, role, assignment lock and reason, and asks for confirmation
+3. Detaches the role with an audit record (origin `System`) that includes the reason
 
 ---
 
@@ -389,7 +422,7 @@ php artisan health:check
 Validates connectivity and configuration for:
 
 - **Database** - Connection and query execution (production only)
-- **Queue** - Queue worker connectivity
+- **Queue** - Fails when the heartbeat job hasn't been processed within 15 minutes (production only)
 - **Cache** - Cache store read/write
 - **Schedule** - Scheduler heartbeat
 - **Debug Mode** - Ensures debug mode is off (non-local)
@@ -407,7 +440,7 @@ Validates connectivity and configuration for:
 
 **Integration:**
 
-The `/api/health` endpoint also runs these checks for automated monitoring:
+The `/api/health` endpoint also runs these checks on every request for automated monitoring. It refuses every request with `403` until `HEALTH_SECRET_TOKEN` is set:
 
 ```bash
 curl -H "X-Secret-Token: your-secret-token" https://your-app.northwestern.edu/api/health
@@ -475,9 +508,47 @@ If a file with the same slug already exists, a numeric suffix is appended automa
 
 ---
 
+## Development Commands
+
+### `netid:update:test {netId} {action}`
+
+Simulate a message from the EventHub **NetID Updates** topic to test the NetID update webhook without Northwestern's systems.
+
+```bash
+php artisan netid:update:test jdoe deactivate
+```
+
+<PropertyTable title="Options">
+    <Property name="netId" type="argument">
+        NetID to include in the message. Prompted for if omitted.
+    </Property>
+    <Property name="action" type="argument">
+        Update action: `deactivate`, `deprovision` or `sechold`. A selector is shown if omitted.
+    </Property>
+    <Property name="--via-queue" type="flag">
+        Send through the EventHub queue instead of directly to the HTTP webhook
+    </Property>
+</PropertyTable>
+
+---
+
+### `restore-env-files`
+
+Restore your local `.env` after a Cypress run that didn't swap the files back.
+
+```bash
+php artisan restore-env-files
+```
+
+**What it does:**
+
+Moves the current `.env` to `.env.cypress` and renames `.env.backup` to `.env`. Fails if `.env.backup` doesn't exist.
+
+---
+
 ## IDE Helper Commands
 
-The starter uses `laravel-ide-helper` to generate IDE autocomplete files. These commands are automatically run after `db:rebuild`:
+The starter uses `laravel-ide-helper` to generate IDE autocomplete files. All three run from Composer's `post-update-cmd` script and from `composer ide-helper:generate`. `db:rebuild` runs only `ide-helper:models -N`.
 
 ### `ide-helper:generate`
 
@@ -492,8 +563,10 @@ php artisan ide-helper:generate
 Generate PHPDoc annotations for Eloquent models.
 
 ```bash
-php artisan ide-helper:models --write --reset
+php artisan ide-helper:models -N
 ```
+
+`-N` (`--nowrite`) writes the annotations to `_ide_helper_models.php` instead of the model files.
 
 ### `ide-helper:meta`
 
@@ -504,5 +577,22 @@ php artisan ide-helper:meta
 ```
 
 <Aside type="tip">
-These commands are automatically executed as part of `db:rebuild`. You rarely need to run them manually unless you're specifically updating IDE helpers.
+`composer update` and `db:rebuild` keep these files current. You rarely need to run them manually.
 </Aside>
+
+---
+
+## Scheduled Tasks
+
+`routes/console.php` schedules these commands. The scheduler must be running (`php artisan schedule:work` locally) for any of them to run.
+
+| Command | Frequency | Purpose |
+|---|---|---|
+| `telescope:prune` | Daily | Deletes Telescope entries older than 24 hours |
+| `livewire:configure-s3-upload-cleanup` | Daily | Sets the S3 lifecycle rule that expires Livewire's temporary uploads after 24 hours (only when uploads use an S3 disk) |
+| `model:prune --path=app/Domains/*/Models` | Daily | Prunes models in `app/Domains/*/Models` that use `Prunable` or `MassPrunable`, including those with `PrunesAfterRetentionPeriod` |
+| `model:prune --model=HealthCheckResultHistoryItem` | Daily | Deletes health check results older than `keep_history_for_days` (5) |
+| `access-tokens:notify-expiration` | Daily at 09:00 | Sends access token expiration reminders, when `api.expiration_notifications.enabled` is true |
+| `health:schedule-check-heartbeat` | Every minute | Records the heartbeat the Schedule health check reads, in every environment |
+| `health:queue-check-heartbeat` | Every five minutes, production only | Dispatches the job the Queue health check waits for |
+| `health:check` | Every minute, production only | Runs and stores the health checks |

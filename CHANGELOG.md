@@ -6,21 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
-Version 3 removes the Bootstrap user interface. Every page now uses one stack, Filament (Livewire, Alpine and Tailwind CSS), with Northwestern branding from `northwestern-sysdev/northwestern-filament-theme` and Department Templates 4.0. Version 3 is aimed at new applications: an application started on version 2 can keep its Bootstrap pages by keeping `northwestern-sysdev/northwestern-laravel-ui` installed, and that package and `northwestern-filament-theme` 4.x still support it.
+Version 3 removes the Bootstrap user interface. Every page now uses one stack, Filament (Livewire, Alpine and Tailwind CSS), with Northwestern branding from `northwestern-sysdev/northwestern-filament-theme` and Department Templates 4.0. Version 3 is for new applications; applications built on version 2 stay on version 2.
 
-### Breaking
+### Removed
 
-- Removed `northwestern-sysdev/northwestern-laravel-ui`, its `northwestern::` layouts and `config/northwestern-theme.php`. Unit details, the lockup and footer links now live in `config/northwestern-filament-theme.php` (`NU_UNIT_*`, `NU_LOCKUP`).
-- Removed Bootstrap, Sass, Font Awesome, Tom Select, `clipboard` and `axios`, with `resources/sass`, `resources/js/app.js`, `resources/js/bootstrap.js` and `resources/js/utils.js`.
-- Removed the Blade component library (`<x-select>`, `<x-clipboard>`, `<x-breadcrumbs>`, `<x-tooltip>`, `<x-wildcard-photo>`, `<x-not-yet-implemented>`), `AsyncSelectOptionsRequest` and the Bootstrap navigation. Use Filament's components instead.
-- The administration panel is no longer the default panel. Livewire tests of administration pages must call `Filament::setCurrentPanel('administration')`, and Filament's generators need `--panel=administration` for administration resources.
-- Sign-in moved into the new app panel: `/auth/type` became `/app/login`, `/auth/login` became `/app/login/email`, and `/platform/access-restricted` became `/app/access-restricted`. The `login-selection`, `login-code.*` and `platform.environment-lockdown` route names were removed. Single sign-on callback URLs did not change.
-- Contact Support moved to `/app/support/contact`; the `support.contact.*` routes, `ContactController` and `ContactFormRequest` were removed.
-- Removed `local-auth.redirect_after_login` (`LOCAL_AUTH_REDIRECT_AFTER_LOGIN`). Override `HomeController::destinationFor()` instead.
-- Removed GlobalAlert and its impersonation alert; Filament's impersonation banner covers it.
-- Retention settings moved under `platform.retention`: `local-auth.code.retention_days` is now `platform.retention.login_challenges`, and `api.request_logging.retention_days` is now `platform.retention.api_request_logs`. The environment variables are unchanged.
-- Removed `InjectLivewireAssets`. Livewire's `inject_assets` is back on.
-- Requires `northwestern-sysdev/northwestern-filament-theme` `^4.1` and `northwestern-sysdev/chassis` `^1.2`.
+- `northwestern-sysdev/northwestern-laravel-ui`, its `northwestern::` layouts and `config/northwestern-theme.php`. Unit details, the lockup and footer links are configured in `config/northwestern-filament-theme.php` (`NU_UNIT_*`, `NU_LOCKUP`).
+- Bootstrap, Sass, Font Awesome, Tom Select, `clipboard` and `axios`, with `resources/sass`, `resources/js/app.js`, `resources/js/bootstrap.js` and `resources/js/utils.js`.
+- The Blade component library (`<x-select>`, `<x-clipboard>`, `<x-breadcrumbs>`, `<x-tooltip>`, `<x-wildcard-photo>`, `<x-not-yet-implemented>`), `AsyncSelectOptionsRequest` and the Bootstrap navigation.
+- `local-auth.redirect_after_login` (`LOCAL_AUTH_REDIRECT_AFTER_LOGIN`); `HomeController::destinationFor()` decides where signed-in users go.
+- GlobalAlert; Filament's impersonation banner shows who is being impersonated.
+- `InjectLivewireAssets`; Livewire injects its own assets.
 
 ### Added
 
@@ -39,17 +34,29 @@ Version 3 removes the Bootstrap user interface. Every page now uses one stack, F
 
 ### Changed
 
-- The changelog and Contact Support pages were rebuilt on the public layout and the app panel. The changelog's URLs and RSS feed are unchanged.
+- The app panel is the default panel; the administration panel is at `/administration`.
+- Sign-in is in the app panel, at `/app/login` and `/app/login/email`, and the environment lockdown page is at `/app/access-restricted`.
+- The changelog and Contact Support pages were rebuilt on the public layout and the app panel; Contact Support is at `/app/support/contact`. The changelog's URLs and RSS feed are unchanged.
+- Every retention setting lives under `platform.retention`, including those for login challenges and API request logs.
 - The environment lockdown page is a Filament page in the app panel, and lockdown now applies to app panel routes.
 - Panels, the public layout and the error layout use the Department Templates 4.0 wordmark and fonts. The app panel and public pages have the Northwestern footer; the administration panel does not.
 - The support request confirmation email shows the reference number, subject, submission time and the user's message; the support team's email leads with the request.
 - Browser and PHP Sentry reports share one user context, `SentryExceptionHandler::userContext()`.
 - Livewire's pagination theme is `tailwind`.
+- Requires `northwestern-sysdev/northwestern-filament-theme` `^4.1` and `northwestern-sysdev/chassis` `^1.2.1`.
 
 ### Fixed
 
 - Setting `LOGIN_CHALLENGE_RETENTION_DAYS` or `API_REQUEST_LOG_RETENTION_DAYS` to `null` now keeps records, as documented. The settings were cast to an integer, so `null` became `0` and pruning deleted every record.
 - Accessibility: callouts directly under a page title no longer skip heading levels, table cells that link to a record show a placeholder instead of an empty link, table placeholders and the platform overview's heatmap labels meet color contrast, the heatmap cells no longer carry labels axe rejects, and the sign-in page's "or" divider meets color contrast.
+- Login codes sent by an administrator, or read on another device, can be entered. Every login code email links to the code step for its code; before, only a code requested in the same browser session worked.
+- The API rate limit applies per API user, as documented. The limiter ran before the access token was authenticated, so it limited by IP address.
+- API clients over the rate limit get a 429 Problem Details response with `Retry-After` instead of a 500.
+- `TDX_TICKET_APP_NAME` and `TDX_CLIENT_APP_NAME` take effect. The starter ships `config/team-dynamix.php`, because `tdx-php-sdk`'s own config read them with `config()` instead of `env()`.
+- Health check history is pruned after `keep_history_for_days`; nothing pruned it before.
+- `/api/health` refuses every request until `HEALTH_SECRET_TOKEN` is set. It was public while the token was empty, which is how `.env.example` ships it.
+- `/api/health` no longer returns 503 for checks skipped where they don't apply, such as the database and queue checks outside production. Spatie treats skipped checks as failures by default.
+- A Directory Search outage during sign-in shows the 503 page, or a Problem Details 503 on the API, instead of a 500.
 
 ## [v2.6.0] - 2026-10-01
 
