@@ -8,7 +8,7 @@
             <div>
                 <time class="text-sm font-semibold text-gray-500"
                       datetime="{{ $entry->created_at->toDateString() }}">{{ $entry->created_at->format('F j, Y') }}</time>
-                <h1 class="font-nu-heading mt-2 text-3xl font-bold text-gray-950">
+                <h1 class="font-nu-heading text-nu-purple-100 mt-2 text-3xl font-bold">
                     {{ $entry->title ?? $entry->slug }}
                 </h1>
             </div>

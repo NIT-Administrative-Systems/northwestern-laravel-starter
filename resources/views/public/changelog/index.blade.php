@@ -1,7 +1,7 @@
 <x-layouts.public title="Changelog">
     <div class="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
         <div class="flex flex-wrap items-center justify-between gap-4">
-            <h1 class="font-nu-heading text-3xl font-bold text-gray-950">Changelog</h1>
+            <h1 class="font-nu-heading text-nu-purple-100 text-3xl font-bold">Changelog</h1>
 
             <x-filament::button color="gray"
                                 outlined
