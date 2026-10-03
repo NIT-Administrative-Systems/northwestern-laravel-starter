@@ -93,12 +93,12 @@ This application has **one frontend stack**: Filament (Livewire, Alpine and Tail
 
 Put each page where it belongs:
 
-| Surface                                  | Location                         | Use for                                                                                                                         |
-| ---------------------------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| App panel (`/app`, default panel)        | `app/Filament/App/`              | The application's features for its users. Default to this.                                                                      |
-| Administration panel (`/administration`) | `app/Filament/` (outside `App/`) | Back-office tooling                                                                                                             |
-| Public layout (`<x-layouts.public>`)     | `resources/views/public/`        | Pages that must work without signing in. Routes use the `panel:app` middleware so Filament's Blade components work. Light only. |
-| Error layout (`<x-layouts.error>`)       | `resources/views/errors/`        | Error pages only. No Filament, auth or database calls; wrap anything that could query the database in `rescue()`.               |
+| Surface                                  | Location                         | Use for                                                                                                                                                                                                     |
+| ---------------------------------------- | -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| App panel (`/app`, default panel)        | `app/Filament/App/`              | The application's features for its users. Default to this.                                                                                                                                                  |
+| Administration panel (`/administration`) | `app/Filament/` (outside `App/`) | Back-office tooling                                                                                                                                                                                         |
+| Public layout (`<x-layouts.public>`)     | `resources/views/public/`        | Pages that must work without signing in. Routes use the `panel:app` middleware so Filament's Blade components work. Light only.                                                                             |
+| Error layout (`<x-layouts.error>`)       | `resources/views/errors/`        | The 500, 503 and database-paused pages. No Filament, auth or database calls; wrap anything that could query the database in `rescue()`. Client error pages (401, 403, 404, 419, 429) use the public layout. |
 
 **Stack details:**
 

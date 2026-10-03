@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domains\User\Models;
 
 use App\Domains\Core\Models\BaseModel;
+use App\Domains\Core\Models\Concerns\PrunesAfterRetentionPeriod;
 use App\Domains\User\Models\Concerns\AuditsRoles;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -35,6 +36,8 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  */
 class Audit extends BaseModel
 {
+    use PrunesAfterRetentionPeriod;
+
     protected $casts = [
         'old_values' => 'json',
         'new_values' => 'json',
@@ -101,5 +104,10 @@ class Audit extends BaseModel
                 default => [],
             };
         });
+    }
+
+    protected function retentionConfigKey(): string
+    {
+        return 'platform.retention.audits';
     }
 }

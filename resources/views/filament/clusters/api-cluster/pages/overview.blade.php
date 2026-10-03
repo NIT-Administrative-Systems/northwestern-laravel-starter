@@ -173,8 +173,8 @@
                             <x-filament::icon class="h-4 w-4 text-gray-400" icon="heroicon-o-calendar-days" />
                             <span class="text-sm text-gray-600 dark:text-gray-400">Log Retention</span>
                         </div>
-                        <span class="text-sm font-medium text-gray-900 dark:text-white">{{ $stats['retention_days'] }}
-                            days</span>
+                        <span
+                              class="text-sm font-medium text-gray-900 dark:text-white">{{ $stats['retention_days'] === null ? 'Kept forever' : "{$stats['retention_days']} days" }}</span>
                     </div>
 
                     {{-- Sampling --}}

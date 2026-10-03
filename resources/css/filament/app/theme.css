@@ -54,7 +54,7 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    color: var(--gray-400);
+    color: var(--gray-500);
     font-size: 0.75rem;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -68,7 +68,8 @@
 }
 
 .dark .nu-sign-in-heading-lead,
-.dark .nu-sign-in-hint {
+.dark .nu-sign-in-hint,
+.dark .nu-sign-in-divider {
     color: var(--gray-400);
 }
 
@@ -87,4 +88,14 @@
     min-width: 0;
     height: 3rem;
     font-size: 1.25rem;
+}
+
+/* Filament draws table placeholder text in gray-400, which fails color contrast on white.
+   A candidate for northwestern-filament-theme, so every app gets it. */
+.fi-ta-placeholder {
+    color: var(--gray-500);
+}
+
+.dark .fi-ta-placeholder {
+    color: var(--gray-400);
 }

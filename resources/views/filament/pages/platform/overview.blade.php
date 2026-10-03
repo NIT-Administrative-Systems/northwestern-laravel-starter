@@ -238,7 +238,7 @@
                                 <div class="flex min-w-0 flex-col gap-2">
                                     {{-- Hour axis. Four labels (0 / 6 / 12 / 18) aligned with their columns in the grid below. --}}
                                     <div
-                                         class="grid grid-cols-[2rem_repeat(24,_minmax(0,1fr))] items-end gap-x-0.5 text-xs tabular-nums text-gray-400 dark:text-gray-500">
+                                         class="grid grid-cols-[2rem_repeat(24,_minmax(0,1fr))] items-end gap-x-0.5 text-xs tabular-nums text-gray-500 dark:text-gray-400">
                                         <span></span>
                                         @for ($h = 0; $h < 24; $h++)
                                             <span class="text-center">
@@ -254,13 +254,13 @@
                                         @foreach ($loginHeatmap['rows'] as $row)
                                             <div
                                                  class="grid grid-cols-[2rem_repeat(24,_minmax(0,1fr))] items-center gap-x-0.5">
-                                                <span class="pr-2 text-right text-xs tabular-nums text-gray-400 dark:text-gray-500"
+                                                <span class="pr-2 text-right text-xs tabular-nums text-gray-500 dark:text-gray-400"
                                                       title="{{ $row['date']->format('l, F j, Y') }}">
                                                     {{ $row['label'] }}
                                                 </span>
                                                 @foreach ($row['cells'] as $cell)
+                                                    {{-- No aria-label: the role="img" container above carries the label for the grid. --}}
                                                     <div title="{{ $cell['tooltip'] }}"
-                                                         aria-label="{{ $cell['tooltip'] }}"
                                                          @class([
                                                              'aspect-square rounded-xs',
                                                              'bg-gray-950/5 dark:bg-white/5' => $cell['bucket'] === 0,

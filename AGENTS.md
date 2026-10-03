@@ -1,0 +1,97 @@
+# Agent guide
+
+How to work in this repository. It starts as the Northwestern Laravel Starter, and an
+application built from it keeps this file: update it as the application grows.
+
+Detailed coding standards (PHP style, models, migrations, factories, Blade, Filament,
+accessibility) are in [`.github/copilot-instructions.md`](.github/copilot-instructions.md),
+shared with GitHub Copilot. Follow them. The documentation site is in `docs/`
+(Astro Starlight) and is published at <https://laravel-starter.entapp.northwestern.edu/>.
+
+## Stack
+
+- PHP 8.5, Laravel 13, PostgreSQL, Redis queues.
+- Filament 5 on Livewire 4, Alpine and Tailwind CSS 4, branded by
+  `northwestern-sysdev/northwestern-filament-theme`. This is the only frontend stack: no
+  Bootstrap, Font Awesome, jQuery or other component libraries.
+- Northwestern integrations from `northwestern-sysdev/laravel-soa` and
+  `northwestern-sysdev/chassis` (WebSSO, Entra ID, Directory Search, EventHub, API tokens).
+- Pest and PHPUnit for PHP tests, Cypress with axe for end-to-end and accessibility tests.
+
+## Commands
+
+| Task                            | Command                                                                 |
+| ------------------------------- | ----------------------------------------------------------------------- |
+| Run the app locally             | `composer dev` (server, queue, logs, Vite)                              |
+| PHP tests                       | `vendor/bin/pest --parallel`                                            |
+| One test file                   | `vendor/bin/pest tests/Feature/Path/To/SomeTest.php`                    |
+| Static analysis                 | `composer analyse:php` (PHPStan, must report no errors)                 |
+| Format PHP                      | `composer format:php` (Pint)                                            |
+| Format Blade, CSS, TS, Markdown | `pnpm format` (Prettier)                                                |
+| Type-check TypeScript           | `pnpm typecheck`                                                        |
+| Build assets                    | `pnpm build`                                                            |
+| End-to-end tests                | `pnpm test:e2e:headless` (needs a running app; see `cypress.config.js`) |
+
+Before calling work done, run the PHP tests, PHPStan and both formatters, and rebuild assets
+if you changed Blade, CSS or TypeScript. CI runs all of them, and its lint job commits
+formatting fixes back to the pull request, so pull before pushing again.
+
+## Where code goes
+
+- **Domain code** in `app/Domains/{Domain}/`: `Actions/`, `Models/`, `Enums/`, `Jobs/`,
+  `Policies/` and so on. `Core` holds shared building blocks (`BaseModel`, model concerns,
+  casts, health checks).
+- **The app panel** (`/app`, the default panel) in `app/Filament/App/`. Applications build
+  their features here. Its sidebar is for application features; site-wide links live in the
+  Help menu (`<x-help-menu>`).
+- **The administration panel** (`/administration`) in `app/Filament/` outside `App/`, for
+  back-office tools. Filament generators target the app panel unless you pass
+  `--panel=administration`.
+- **Public pages** in `resources/views/public/`, on `<x-layouts.public>`, with routes in the
+  `panel:app` middleware group in `routes/web.php`.
+- **Error pages** in `resources/views/errors/`. Client errors (401, 403, 404, 419, 429)
+  render on the public layout; 500, 503 and database-paused use `<x-layouts.error>`, which
+  must not use Filament, auth or the database.
+- **Shared header**: `<x-site-header>` on public, sign-in, lockdown and error pages;
+  `<x-panel-brand>` adds the application name to the panels' top bar.
+- **Configuration** in `config/`, read from env variables with sane defaults. Starter
+  settings live mostly in `config/platform.php` (retention, lockdown, stakeholders),
+  `config/support.php` and `config/northwestern-filament-theme.php` (unit details, footer).
+
+## Rules that are easy to miss
+
+- **Tailwind only compiles classes from files it is told about.** A view outside
+  `app/Filament/App/` and `resources/views/filament/app/` must be covered by an `@source`
+  line in `resources/css/filament/app/theme.css` (or the administration theme), or its
+  classes silently do nothing.
+- **Filament callout headings are always `<h4>`.** A callout directly under a page title or
+  a top-level section skips heading levels and fails axe. Use `Callout::make()` with a
+  description that opens with bold text instead of a heading.
+- **Clickable table rows wrap every cell in a link.** A cell that can be empty needs a
+  `->placeholder()`, or it becomes a link with no text.
+- **Panel tests:** `app` is the default panel. Livewire tests of administration pages must
+  call `Filament::setCurrentPanel(AdministrationPanelProvider::ID)` first.
+- **Render hooks registered when a panel boots persist for the rest of a test.** Request
+  `/app` and `/administration` in separate tests when asserting on panel chrome.
+- **Never add `$fillable` or `$guarded`** to models, never add foreign key constraints, and
+  never implement a migration's `down()` (throw `NoRollbackException`).
+- **Edit an unreleased migration instead of adding another one.** Check `git tag --contains`
+  before deciding a migration has shipped.
+- **Retention:** records that should expire use the `PrunesAfterRetentionPeriod` trait and a
+  key under `platform.retention`; the daily `model:prune` deletes them. Don't cast those env
+  values to `(int)`: `null` must stay null (keep forever), not become 0.
+- **Mail templates:** don't let Prettier reformat `resources/views/vendor/mail/` or
+  `resources/views/mail/` (both are in `.prettierignore`). Indentation inside Markdown mail
+  becomes code blocks.
+- **Secrets** belong in `.env`, never in committed files. Add new settings to `.env.example`
+  with a safe default.
+
+## Tests
+
+- Mirror the namespace under `tests/Feature` or `tests/Unit`, and put a regression test in the
+  existing test file for that class. Mark test classes with `#[CoversClass]`.
+- Use factories. `UserFactory` gives SSO users the Northwestern User role; use `->affiliate()`
+  for a user without roles.
+- Every page the starter ships is checked with axe in `cypress/e2e/accessibility.cy.ts`. Add
+  new pages to its lists. `cy.checkAxeViolations(['selector'])` excludes an element when a
+  third-party widget can't be fixed, with a comment saying why.

@@ -192,6 +192,10 @@ class ComponentGallery extends Page implements HasTable
                                 ->label('Danger notification')
                                 ->color('gray')
                                 ->action(fn () => Notification::make()->title('Something went wrong')->body('A sample danger notification.')->danger()->send()),
+                            Action::make('notifyDatabase')
+                                ->label('Send me a notification')
+                                ->color('gray')
+                                ->action(fn () => $this->sendSampleNotification()),
                             Action::make('confirm')
                                 ->label('Confirmation modal')
                                 ->color('gray')
@@ -208,6 +212,19 @@ class ComponentGallery extends Page implements HasTable
                         ]),
                     ]),
             ]);
+    }
+
+    public function sendSampleNotification(): void
+    {
+        Notification::make()
+            ->title('A sample notification')
+            ->body('Database notifications land in the bell in the top bar.')
+            ->sendToDatabase(auth()->user());
+
+        // Refresh the bell now rather than at its next 30-second poll.
+        $this->dispatch('databaseNotificationsSent');
+
+        Notification::make()->title('Sent. Check the bell in the top bar.')->success()->send();
     }
 
     public function submitExample(): void

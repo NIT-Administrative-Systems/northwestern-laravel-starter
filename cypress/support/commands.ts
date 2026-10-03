@@ -55,27 +55,31 @@ Cypress.Commands.add("loadDatabaseSnapshot", (filename: string = "cypress") => {
     );
 });
 
-Cypress.Commands.add("checkAxeViolations", () => {
+Cypress.Commands.add("checkAxeViolations", (exclude: string[] = []) => {
     cy.injectAxe();
     cy.configureAxe({
-        rules: [{ id: "duplicate-id", enabled: false }],
+        rules: [
+            { id: "duplicate-id", enabled: false },
+            // Filament leaves the actions column's header cell empty in every table.
+            { id: "empty-table-header", enabled: false },
+        ],
     });
 
     const axeSkipFailures = Cypress.expose("axe_skip_failures");
     const axeExcludedSelectors = Cypress.expose("axe_excluded_selectors");
+    const excluded = [
+        ...exclude,
+        ...(typeof axeExcludedSelectors === "string"
+            ? axeExcludedSelectors.split(",")
+            : []),
+    ]
+        .map((selector) => selector.trim())
+        .filter(Boolean);
 
     if (axeSkipFailures === "true") {
         cy.checkA11y(undefined, undefined, undefined, true);
-    } else if (
-        typeof axeExcludedSelectors === "string" &&
-        axeExcludedSelectors !== ""
-    ) {
-        cy.checkA11y({
-            exclude: axeExcludedSelectors
-                .split(",")
-                .map((selector) => selector.trim())
-                .filter(Boolean),
-        });
+    } else if (excluded.length > 0) {
+        cy.checkA11y({ exclude: excluded });
     } else {
         cy.checkA11y();
     }

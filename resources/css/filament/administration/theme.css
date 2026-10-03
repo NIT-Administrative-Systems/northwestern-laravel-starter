@@ -7,3 +7,13 @@
 @source '../../../../resources/views/filament/**/*';
 @source '../../../../resources/views/components/panel-brand.blade.php';
 @source '../../../../vendor/filament/**/*';
+
+/* Filament draws table placeholder text in gray-400, which fails color contrast on white.
+   A candidate for northwestern-filament-theme, so every app gets it. */
+.fi-ta-placeholder {
+    color: var(--gray-500);
+}
+
+.dark .fi-ta-placeholder {
+    color: var(--gray-400);
+}

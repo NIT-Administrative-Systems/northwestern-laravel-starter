@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domains\User\Models;
 
 use App\Domains\Core\Models\BaseModel;
+use App\Domains\Core\Models\Concerns\PrunesAfterRetentionPeriod;
 use Database\Factories\Domains\User\Models\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -28,7 +29,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class ImpersonationLog extends BaseModel
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory;
+    use HasFactory, PrunesAfterRetentionPeriod;
 
     protected $table = 'user_impersonation_logs';
 
@@ -42,5 +43,10 @@ class ImpersonationLog extends BaseModel
     public function impersonated(): BelongsTo
     {
         return $this->belongsTo(User::class, 'impersonated_user_id');
+    }
+
+    protected function retentionConfigKey(): string
+    {
+        return 'platform.retention.impersonation_logs';
     }
 }
