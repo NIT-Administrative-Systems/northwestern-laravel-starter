@@ -25,7 +25,7 @@ final class ChangelogControllerTest extends TestCase
 
         $response->assertOk();
         $response->assertViewIs('public.changelog.index');
-        $response->assertSee('Copy RSS feed URL');
+        $response->assertSee('RSS Feed');
         $response->assertSee('Showing');
         $response->assertViewHas('feedUrl', route('support.changelog.feed'));
 
@@ -71,5 +71,15 @@ final class ChangelogControllerTest extends TestCase
             ->assertOk()
             ->assertSee('fi-user-menu', escape: false)
             ->assertDontSee('data-cy="sign-in-link"', escape: false);
+    }
+
+    public function test_show_offers_a_share_button(): void
+    {
+        $entry = Changelog::factory()->create(['slug' => 'share-button-test', 'authored_at' => now()]);
+
+        $this->get(route('support.changelog.show', $entry))
+            ->assertOk()
+            ->assertSee('navigator.share', escape: false)
+            ->assertSee('Share');
     }
 }

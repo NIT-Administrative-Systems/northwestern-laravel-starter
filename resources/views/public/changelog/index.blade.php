@@ -9,7 +9,7 @@
                                 icon="heroicon-m-rss"
                                 x-data="{}"
                                 x-on:click="window.navigator.clipboard.writeText({{ Js::from($feedUrl) }}).then(() => $tooltip('Feed URL copied', { timeout: 2000 })).catch(() => $tooltip('Unable to copy', { timeout: 2000 }))">
-                Copy RSS feed URL
+                RSS Feed
             </x-filament::button>
         </div>
 

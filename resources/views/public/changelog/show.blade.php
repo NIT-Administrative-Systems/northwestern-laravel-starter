@@ -13,13 +13,28 @@
                 </h1>
             </div>
 
+            {{-- The device's share sheet where there is one (phones, Safari); elsewhere it copies the link. --}}
             <x-filament::button color="gray"
                                 outlined
                                 size="sm"
-                                icon="heroicon-m-link"
-                                x-data="{}"
-                                x-on:click="window.navigator.clipboard.writeText({{ Js::from(route('support.changelog.show', $entry)) }}).then(() => $tooltip('Link copied', { timeout: 2000 })).catch(() => $tooltip('Unable to copy', { timeout: 2000 }))">
-                Copy link
+                                icon="heroicon-m-share"
+                                x-data="{
+                                    url: {{ Js::from(route('support.changelog.show', $entry)) }},
+                                    title: {{ Js::from($entry->title ?? $entry->slug) }},
+                                    share() {
+                                        if (navigator.share) {
+                                            navigator.share({ title: this.title, url: this.url }).catch(() => {});
+                                
+                                            return;
+                                        }
+                                
+                                        navigator.clipboard.writeText(this.url)
+                                            .then(() => this.$tooltip('Link copied', { timeout: 2000 }))
+                                            .catch(() => this.$tooltip('Unable to copy', { timeout: 2000 }));
+                                    },
+                                }"
+                                x-on:click="share()">
+                Share
             </x-filament::button>
         </div>
 
