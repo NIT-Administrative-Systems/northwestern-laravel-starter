@@ -51,8 +51,9 @@
             --font-family: '{!! filament()->getFontFamily() !!}';
         }
 
-        /* These pages are light-only, so the user menu's theme switcher would do nothing here. */
-        .fi-theme-switcher {
+        /* These pages are light-only, so the user menu's theme switcher would do nothing here.
+           It has a dropdown list of its own; hide the list, or its border stays behind. */
+        .fi-dropdown-list:has(> .fi-theme-switcher) {
             display: none !important;
         }
     </style>
