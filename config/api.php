@@ -64,21 +64,7 @@ return [
         // for internal monitoring/display purposes.
         'slow_request_threshold_ms' => (int) env('API_REQUEST_LOGGING_SLOW_THRESHOLD_MS', 500),
 
-        /*
-        |--------------------------------------------------------------------------
-        | Data Retention
-        |--------------------------------------------------------------------------
-        |
-        | Automatically delete logs older than this many days to prevent unbounded
-        | database growth.
-        |
-        | Set to null to disable automatic pruning (not recommended for production).
-        | For high-traffic apps, consider using a dedicated observability tool
-        | instead (Sentry, New Relic, Datadog, etc.).
-        |
-        */
-
-        'retention_days' => (int) env('API_REQUEST_LOG_RETENTION_DAYS', 90),
+        // Retention: see platform.retention.api_request_logs.
 
         /*
         |--------------------------------------------------------------------------

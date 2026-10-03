@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Domains\Auth\Models;
 
+use App\Domains\Core\Models\Concerns\PrunesAfterRetentionPeriod;
 use App\Domains\User\Models\User;
 use Database\Factories\Domains\Auth\Models\ApiRequestLogFactory;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Northwestern\SysDev\Chassis\Enums\ApiRequestFailure;
@@ -16,7 +15,7 @@ use Northwestern\SysDev\Chassis\Enums\ApiRequestFailure;
 class ApiRequestLog extends Model
 {
     /** @use HasFactory<ApiRequestLogFactory> */
-    use HasFactory, MassPrunable;
+    use HasFactory, PrunesAfterRetentionPeriod;
 
     public const null UPDATED_AT = null;
 
@@ -25,26 +24,9 @@ class ApiRequestLog extends Model
         'created_at' => 'datetime',
     ];
 
-    /**
-     * Automatically deletes logs older than the configured retention period.
-     *
-     * @return Builder<static>
-     */
-    public function prunable(): Builder
+    protected function retentionConfigKey(): string
     {
-        $retentionDays = config('api.request_logging.retention_days');
-
-        if ($retentionDays === null) {
-            return static::query()->whereRaw('1 = 0');
-        }
-
-        if (! is_numeric($retentionDays) || $retentionDays < 0) {
-            throw new \InvalidArgumentException(
-                'API request log retention days must be a positive integer or null.'
-            );
-        }
-
-        return static::query()->where('created_at', '<', now()->subDays((int) $retentionDays));
+        return 'platform.retention.api_request_logs';
     }
 
     /**

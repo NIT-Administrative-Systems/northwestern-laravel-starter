@@ -49,9 +49,7 @@ return [
         // Cooldown before resending another code
         'resend_cooldown_seconds' => (int) env('LOCAL_AUTH_CODE_RESEND_COOLDOWN', 30),
 
-        // Days to retain login challenge records before pruning
-        // Set to null to disable automatic pruning
-        'retention_days' => (int) env('LOGIN_CHALLENGE_RETENTION_DAYS', 30),
+        // Retention: see platform.retention.login_challenges.
     ],
 
 ];
