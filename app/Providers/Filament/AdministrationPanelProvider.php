@@ -65,6 +65,8 @@ class AdministrationPanelProvider extends PanelProvider
             ->plugins([
                 NorthwesternTheme::make()
                     ->impersonationBanner()
+                    // A back-office panel; the footer is for the pages end users see.
+                    ->footer(false)
                     ->withoutAssetRegistration(),
             ])
             ->databaseNotifications()
