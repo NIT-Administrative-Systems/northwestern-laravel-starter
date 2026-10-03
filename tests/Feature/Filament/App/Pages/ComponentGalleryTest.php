@@ -32,6 +32,25 @@ final class ComponentGalleryTest extends TestCase
             ->assertSee('Sample record one');
     }
 
+    // The app panel's dashboard is Filament's own, so the sidebar is the gallery's only way in.
+    public function test_the_sidebar_links_to_the_gallery_outside_production(): void
+    {
+        $this->actingAs(User::factory()->create())
+            ->get('/app')
+            ->assertOk()
+            ->assertSee('href="' . url('/app/gallery') . '"', escape: false);
+    }
+
+    public function test_the_sidebar_hides_the_gallery_in_production(): void
+    {
+        $this->app->detectEnvironment(fn () => 'production');
+
+        $this->actingAs(User::factory()->create())
+            ->get('/app')
+            ->assertOk()
+            ->assertDontSee(url('/app/gallery'), escape: false);
+    }
+
     public function test_page_is_unavailable_in_production(): void
     {
         $this->app->detectEnvironment(fn () => 'production');

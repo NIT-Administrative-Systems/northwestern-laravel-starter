@@ -22,15 +22,15 @@ The panel discovers Resources, Pages and Widgets in `app/Filament/App/`:
     - Concerns/HasSiteHeader.php
     - ComponentGallery.php
     - ContactSupport.php
-    - Dashboard.php
     - EnvironmentLockdown.php
   - Resources/ discovered, empty until you add one
-  - Widgets/ discovered, empty until you add one
+  - Widgets/
+    - YourAccountWidget.php
 </FileTree>
 
 It does not discover Clusters. To group pages into a cluster, add `->discoverClusters(in: app_path('Filament/App/Clusters'), for: 'App\Filament\App\Clusters')` to `AppPanelProvider`, as the administration panel does.
 
-The sidebar is for your application's features. The starter ships only the dashboard there; the component gallery and Contact Support are reached from the dashboard and the Help menu.
+The sidebar is for your application's features. The starter ships only the dashboard and, outside production, the component gallery there; Contact Support is in the Help menu.
 
 Filament's generators target the default panel, so new resources and pages land here without a `--panel` option:
 
@@ -43,24 +43,23 @@ Views for the panel's pages go in `resources/views/filament/app/`. The panel's T
 
 ## The Dashboard
 
-`App\Filament\App\Pages\Dashboard` is a placeholder. Its `content()` is a setup checklist for developers, not part of an application. Replace `content()` with your own schema, or delete the override and the dashboard renders the widgets in `app/Filament/App/Widgets/`.
+The panel's home page at `/app` is Filament's own `Filament\Pages\Dashboard`, registered with `->pages()` in `AppPanelProvider`. It renders the widgets in `app/Filament/App/Widgets/`.
 
-Each step shows a check when it is done, an empty circle when it isn't, and a question mark when the starter can't detect it. Each links to the documentation for that step.
+The starter ships one, `YourAccountWidget`, which shows the signed-in user:
 
-| Step | Done when |
-|---|---|
-| Set your unit's details | `northwestern-filament-theme.unit.name` is set (`NU_UNIT_NAME`) |
-| Configure Northwestern single sign-on | A `login-websso` or `login-oauth-redirect` route is registered |
-| Replace the landing page | Not detected; always shows a question mark |
-| Build your first feature | The app panel has at least one Resource |
-| Set up Contact Support | `SUPPORT_ENABLED=true` and `SUPPORT_MAIL_TO` is no longer `your-team@northwestern.edu` |
-| Connect Sentry | A Sentry DSN is set (`SENTRY_LARAVEL_DSN`) |
+- a greeting, and when and how they last signed in (their NetID or an email verification code), from their login records
+- the roles they hold beyond the default Northwestern User role
+- links to Contact Support and the documentation, each shown only when it is configured, as in the Help menu
+
+Its view is `resources/views/filament/app/widgets/your-account.blade.php`. Keep it, change it, or delete it as the application grows its own dashboard.
+
+Add widgets with `php artisan make:filament-widget`. For anything a grid of widgets can't hold, write your own page that extends `Filament\Pages\Dashboard` in `app/Filament/App/Pages/` and register it in `->pages()` instead.
 
 ## The Component Gallery
 
-`/app/gallery` shows Filament's common components in the Northwestern theme with sample content: buttons, badges, callouts, form fields, a table, notifications and modals. It is linked from the dashboard, never shown in the navigation, and `ComponentGallery::canAccess()` refuses it in production.
+`/app/gallery` shows Filament's common components in the Northwestern theme with sample content: buttons, badges, callouts, form fields, a table, notifications and modals. It is in the sidebar outside production. `ComponentGallery::canAccess()` refuses it in production, which also hides its sidebar item.
 
-Delete `app/Filament/App/Pages/ComponentGallery.php` when you no longer need it. If the placeholder dashboard is still in place, remove its `gallery` action too, which refers to the class.
+Delete `app/Filament/App/Pages/ComponentGallery.php` when you no longer need it.
 
 ## The Top Bar
 

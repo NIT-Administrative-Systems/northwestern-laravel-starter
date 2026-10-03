@@ -19,7 +19,7 @@ Version 3 removes the Bootstrap user interface. Every page now uses one stack, F
 
 ### Added
 
-- An `app` panel at `/app`, the default panel, for each application's features. Any signed-in user can open it. Its sidebar is for the application's features (the starter ships the dashboard); its top bar has a Help menu (Changelog, Contact Support, and documentation when `SUPPORT_DOCUMENTATION_URL` is set) and an "Administration" user-menu item for users who can open that panel.
+- An `app` panel at `/app`, the default panel, for each application's features. Any signed-in user can open it. Its sidebar is for the application's features (the starter ships Filament's dashboard, and the component gallery outside production); its top bar has a Help menu (Changelog, Contact Support, and documentation when `SUPPORT_DOCUMENTATION_URL` is set) and an "Administration" user-menu item for users who can open that panel.
 - Filament sign-in pages: `/app/login` lists the configured methods and goes straight to single sign-on when it is the only one, and `/app/login/email` requests and verifies a login code on one page. The login code logic moved into the `RequestLoginCode` and `AuthenticateWithLoginCode` actions.
 - A public layout (`<x-layouts.public>`) for pages outside the panels. It runs in the app panel's context so Filament's Blade components work, and it is light only. Its header (`<x-site-header>`) matches the panels' top bar and is shared by the sign-in, lockdown and error pages.
 - A landing page at `/` for guests. `HomeController::destinationFor()` decides where signed-in users go, by default the app panel.
@@ -27,7 +27,8 @@ Version 3 removes the Bootstrap user interface. Every page now uses one stack, F
 - Retention periods for audit logs (`AUDIT_RETENTION_DAYS`, kept by default), sign-in records (`LOGIN_RECORD_RETENTION_DAYS`, 365 days) and impersonation logs (`IMPERSONATION_LOG_RETENTION_DAYS`, kept by default), through the new `PrunesAfterRetentionPeriod` trait.
 - Accessibility checks with axe for every page the starter ships, in `cypress/e2e/accessibility.cy.ts`. `cy.checkAxeViolations()` accepts selectors to exclude.
 - `AGENTS.md`, a guide for coding agents working in the repository.
-- A placeholder dashboard (`App\Filament\App\Pages\Dashboard`) with a setup checklist, and a component gallery at `/app/gallery` outside production. Both are meant to be replaced or deleted.
+- A "Your account" widget on the app panel's dashboard: a greeting with the user's previous sign-in, their roles, and links to Contact Support and the documentation when configured.
+- A component gallery at `/app/gallery`, in the app panel's sidebar outside production, showing Filament's components in the Northwestern theme. Delete it when you no longer need it.
 - An error layout (`<x-layouts.error>`) that renders without Filament, auth or the database, so the 500, 503 and database-paused pages work when the database is down. The client error pages (401, 403, 404, 419, 429) render on the public layout with the full header, and a fallback route lets the not-found page know who is signed in.
 - Browser Sentry on every page through `<x-sentry-browser />` and `resources/js/sentry.js`, relayed through chassis's DSN-validating `SentryTunnelController`. The new `sentry.tracing.browser` setting (`SENTRY_ENABLE_APM_FOR_JS`) enables browser tracing.
 - A branded mail theme. Every email's footer shows the unit's contact details and the Accessibility and Privacy Statement links the university requires.
