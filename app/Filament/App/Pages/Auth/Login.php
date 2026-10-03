@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\App\Pages\Auth;
 
+use App\Filament\App\Pages\Concerns\HasSiteHeader;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Pages\SimplePage;
@@ -25,6 +26,8 @@ use Illuminate\Support\Facades\Route;
  */
 class Login extends SimplePage
 {
+    use HasSiteHeader;
+
     private const string AUTH_DOCS_URL = 'https://laravel-starter.entapp.northwestern.edu/getting-started/installation/#5-environment-configuration';
 
     protected static ?string $title = 'Sign in';

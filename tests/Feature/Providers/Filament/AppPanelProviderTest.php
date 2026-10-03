@@ -45,4 +45,17 @@ final class AppPanelProviderTest extends TestCase
             ->assertOk()
             ->assertSee('data-cy="admin-panel-link"', escape: false);
     }
+
+    public function test_top_bar_shows_the_app_name_and_the_help_menu(): void
+    {
+        config(['support.enabled' => true]);
+
+        $this->actingAs(User::factory()->create())
+            ->get('/app')
+            ->assertOk()
+            ->assertSee(config('app.name'))
+            ->assertSee('data-cy="help-menu-trigger"', escape: false)
+            ->assertSee(route('support.changelog.index'), escape: false)
+            ->assertSee('Contact Support');
+    }
 }

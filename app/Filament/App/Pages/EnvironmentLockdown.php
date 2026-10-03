@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\App\Pages;
 
 use App\Domains\User\Models\User;
+use App\Filament\App\Pages\Concerns\HasSiteHeader;
 use App\Http\Middleware\EnvironmentLockdown as EnvironmentLockdownMiddleware;
 use Filament\Actions\Action;
 use Filament\Pages\SimplePage;
@@ -21,6 +22,8 @@ use Illuminate\Support\HtmlString;
  */
 class EnvironmentLockdown extends SimplePage
 {
+    use HasSiteHeader;
+
     private const string SERVICE_DESK_URL = 'https://www.it.northwestern.edu/support/service-desk/';
 
     protected static ?string $title = 'Access Restricted';

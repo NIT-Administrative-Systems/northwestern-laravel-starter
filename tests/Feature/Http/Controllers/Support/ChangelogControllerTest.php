@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Http\Controllers\Support;
 
 use App\Domains\Support\Models\Changelog;
+use App\Domains\User\Models\User;
 use App\Http\Controllers\Support\ChangelogController;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
@@ -61,5 +62,14 @@ final class ChangelogControllerTest extends TestCase
         $this->get(route('support.changelog.feed'))
             ->assertOk()
             ->assertHeader('Content-Type', 'application/rss+xml; charset=UTF-8');
+    }
+
+    public function test_signed_in_users_get_the_user_menu_instead_of_sign_in(): void
+    {
+        $this->actingAs(User::factory()->create())
+            ->get(route('support.changelog.index'))
+            ->assertOk()
+            ->assertSee('fi-user-menu', escape: false)
+            ->assertDontSee('data-cy="sign-in-link"', escape: false);
     }
 }

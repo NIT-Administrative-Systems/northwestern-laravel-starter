@@ -30,24 +30,7 @@
 </head>
 
 <body class="font-nu-body flex min-h-screen flex-col bg-white text-gray-900 antialiased">
-    <header>
-        <div class="bg-nu-purple-120">
-            <div class="mx-auto flex h-12 max-w-7xl items-center px-4 sm:px-6 lg:px-8">
-                <a class="block [&_.nu-wordmark]:h-5 [&_.nu-wordmark]:w-auto [&_.nu-wordmark]:text-white"
-                   href="https://www.northwestern.edu/">
-                    @include('northwestern-filament-theme::wordmark')
-                </a>
-            </div>
-        </div>
-
-        <div class="border-b border-gray-200 bg-white">
-            <div class="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-                <a class="font-nu-heading text-nu-purple-100 text-lg font-bold sm:text-xl" href="{{ url('/') }}">
-                    {{ $appName }}
-                </a>
-            </div>
-        </div>
-    </header>
+    <x-site-header />
 
     <main class="flex-1">
         {{ $slot }}

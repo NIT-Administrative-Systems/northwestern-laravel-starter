@@ -7,6 +7,7 @@ namespace App\Filament\App\Pages\Auth;
 use App\Domains\Auth\Actions\Local\AuthenticateWithLoginCode;
 use App\Domains\Auth\Actions\Local\RequestLoginCode;
 use App\Domains\Auth\ValueObjects\LoginCodeSession;
+use App\Filament\App\Pages\Concerns\HasSiteHeader;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\OneTimeCodeInput;
@@ -40,6 +41,8 @@ use Livewire\Features\SupportRedirects\Redirector;
  */
 class EmailCodeLogin extends SimplePage
 {
+    use HasSiteHeader;
+
     protected static ?string $title = 'Sign in with email';
 
     /** @var array<string, mixed>|null */
