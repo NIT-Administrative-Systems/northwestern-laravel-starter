@@ -31,18 +31,21 @@ It also provides:
 
 - **Sign-in.** `/app/login` lists the configured sign-in methods (Northwestern single sign-on and email login codes). Guests of either panel are sent here. See [Authentication](/features/authentication).
 - **Environment lockdown.** Users without a role that grants access to a locked-down environment see `/app/access-restricted`.
-- **Help.** The changelog and the Contact Support page (`/app/support/contact`) are in its Help navigation group.
+- **Navigation.** The sidebar is for your application's features; the starter ships only the dashboard there. The top bar holds what every page shares: the wordmark, the application name, the **Help** menu and the user menu.
+- **Help.** The Help menu (`<x-help-menu />`) lists the changelog, the Contact Support page (`/app/support/contact`) for signed-in users, and your user documentation when `SUPPORT_DOCUMENTATION_URL` is set.
 - **The user menu.** It has "Administration" (shown only to users who can open that panel) and "Sign out".
 
 Signed-in users who visit `/` are sent to the app panel by `HomeController`. To send some users elsewhere, override `HomeController::destinationFor()`.
 
 ## The administration panel
 
-The administration panel at `/administration` holds the starter's back-office tools. It requires the `AccessAdministrationPanel` permission. Its resources and pages live in `app/Filament/` outside `app/Filament/App/`.
+The administration panel at `/administration` holds the starter's back-office tools. It requires the `AccessAdministrationPanel` permission. Its resources and pages live in `app/Filament/` outside `app/Filament/App/`. It has no footer: the footer is for the pages end users see.
 
 ## The public layout
 
-`<x-layouts.public>` is the layout for pages outside the panels. It has the Department Templates 4.0 header (the Northwestern wordmark, then the application name with **Sign in** or **Back to app**) and the Northwestern footer.
+`<x-layouts.public>` is the layout for pages outside the panels. Its header (`<x-site-header>`) matches the panels' top bar: the Northwestern wordmark, the application name, the Help menu, then **Sign in** or the user menu. The Northwestern footer is at the bottom.
+
+The sign-in pages, the lockdown page and the error pages use the same header, so every page names the application.
 
 Routes that use it run in the app panel's context through the `panel:app` middleware, so the page loads the app panel's theme and colors, and you can use Filament's Blade components:
 

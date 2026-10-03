@@ -23,9 +23,9 @@ Version 3 removes the Bootstrap user interface. Every page now uses one stack, F
 
 ### Added
 
-- An `app` panel at `/app`, the default panel, for each application's features. Any signed-in user can open it; it has a Help group (Changelog, Contact Support) and an "Administration" user-menu item for users who can open that panel.
+- An `app` panel at `/app`, the default panel, for each application's features. Any signed-in user can open it. Its sidebar is for the application's features (the starter ships the dashboard); its top bar has a Help menu (Changelog, Contact Support, and documentation when `SUPPORT_DOCUMENTATION_URL` is set) and an "Administration" user-menu item for users who can open that panel.
 - Filament sign-in pages: `/app/login` lists the configured methods and goes straight to single sign-on when it is the only one, and `/app/login/email` requests and verifies a login code on one page. The login code logic moved into the `RequestLoginCode` and `AuthenticateWithLoginCode` actions.
-- A public layout (`<x-layouts.public>`) for pages outside the panels. It runs in the app panel's context so Filament's Blade components work, and it is light only.
+- A public layout (`<x-layouts.public>`) for pages outside the panels. It runs in the app panel's context so Filament's Blade components work, and it is light only. Its header (`<x-site-header>`) matches the panels' top bar and is shared by the sign-in, lockdown and error pages.
 - A landing page at `/` for guests. `HomeController::destinationFor()` decides where signed-in users go, by default the app panel.
 - An error layout (`<x-layouts.error>`) that renders without Filament, auth or the database, so the 500 and database-paused pages work when the database is down.
 - Browser Sentry on every page through `<x-sentry-browser />` and `resources/js/sentry.js`, relayed through chassis's DSN-validating `SentryTunnelController`. The new `sentry.tracing.browser` setting (`SENTRY_ENABLE_APM_FOR_JS`) enables browser tracing.
@@ -35,7 +35,8 @@ Version 3 removes the Bootstrap user interface. Every page now uses one stack, F
 
 - The changelog and Contact Support pages were rebuilt on the public layout and the app panel. The changelog's URLs and RSS feed are unchanged.
 - The environment lockdown page is a Filament page in the app panel, and lockdown now applies to app panel routes.
-- Panels, the public layout and the error layout use the Department Templates 4.0 wordmark, fonts and footer.
+- Panels, the public layout and the error layout use the Department Templates 4.0 wordmark and fonts. The app panel and public pages have the Northwestern footer; the administration panel does not.
+- The support request confirmation email shows the reference number, subject, submission time and the user's message; the support team's email leads with the request.
 - Browser and PHP Sentry reports share one user context, `SentryExceptionHandler::userContext()`.
 - Livewire's pagination theme is `tailwind`.
 
