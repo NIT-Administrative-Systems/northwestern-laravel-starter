@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a9138c2b434da8bc4af61311c8f605f3",
+    "content-hash": "45e712e2bb71e63ad9b89f26d38e2207",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -5457,16 +5457,16 @@
         },
         {
             "name": "northwestern-sysdev/northwestern-filament-theme",
-            "version": "v4.0.0",
+            "version": "v4.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/NIT-Administrative-Systems/northwestern-filament-theme",
-                "reference": "b4bc8ca5d4834c26ed26f348e25bd892055a8527"
+                "reference": "9de3003ef41c9ae59abb991eca9b0186dc4d8ffa"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/NIT-Administrative-Systems/northwestern-filament-theme/zipball/b4bc8ca5d4834c26ed26f348e25bd892055a8527",
-                "reference": "b4bc8ca5d4834c26ed26f348e25bd892055a8527",
+                "url": "https://api.github.com/repos/NIT-Administrative-Systems/northwestern-filament-theme/zipball/9de3003ef41c9ae59abb991eca9b0186dc4d8ffa",
+                "reference": "9de3003ef41c9ae59abb991eca9b0186dc4d8ffa",
                 "shasum": ""
             },
             "require": {
@@ -5484,7 +5484,7 @@
                 "rector/rector": "^2.6"
             },
             "suggest": {
-                "northwestern-sysdev/northwestern-laravel-ui": "Provides Northwestern brand lockup and office contact configuration automatically."
+                "northwestern-sysdev/northwestern-laravel-ui": "Optional. Its config/northwestern-theme.php is still supported as a fallback for the lockup and office details; the theme's own config/northwestern-filament-theme.php takes precedence."
             },
             "type": "library",
             "extra": {
@@ -5521,7 +5521,7 @@
                 "issues": "https://github.com/NIT-Administrative-Systems/northwestern-filament-theme/issues",
                 "source": "https://github.com/NIT-Administrative-Systems/northwestern-filament-theme"
             },
-            "time": "2026-10-02T19:12:38+00:00"
+            "time": "2026-10-03T00:06:30+00:00"
         },
         {
             "name": "northwestern-sysdev/northwestern-laravel-ui",

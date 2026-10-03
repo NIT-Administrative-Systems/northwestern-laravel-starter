@@ -3,19 +3,23 @@
     Accessibility and Privacy Statement links the university requires, and the copyright.
     Rendered as Markdown for HTML mail and as plain text for the text part.
 
-    Unit details come from config('northwestern-theme.office.*') until the starter
-    adopts the filament theme's own config.
+    Unit details resolve through the filament theme's FooterConfig, the same as the
+    page footer: config/northwestern-filament-theme.php, then the built-in defaults.
 --}}
 @props(['plain' => false])
 
 @php
+    use Northwestern\FilamentTheme\Footer\FooterConfig;
     use Northwestern\FilamentTheme\Footer\RequiredLink;
 
+    $office = (new FooterConfig())->office();
+
     $unit = array_filter([
-        config('northwestern-theme.office.name'),
-        collect([config('northwestern-theme.office.addr'), config('northwestern-theme.office.city')])->filter()->implode(', '),
-        config('northwestern-theme.office.phone'),
-        config('northwestern-theme.office.email'),
+        $office['name'],
+        collect([$office['addr'], $office['city']])->filter()->implode(', '),
+        $office['phone'],
+        filled($office['fax']) ? "Fax {$office['fax']}" : null,
+        $office['email'],
     ]);
 
     $links = [RequiredLink::Accessibility, RequiredLink::PrivacyStatement];
