@@ -22,7 +22,7 @@
     'border-b-4 border-[var(--nu-gold)]' => $showEnvironment,
 ])>
     <div class="flex h-16 items-center gap-4 px-4 md:px-6 lg:px-8">
-        <a class="block shrink-0 [&_.nu-wordmark]:h-5 [&_.nu-wordmark]:w-auto [&_.nu-wordmark]:text-white"
+        <a class="block shrink-0 [&_.nu-wordmark]:h-6 [&_.nu-wordmark]:w-auto [&_.nu-wordmark]:-translate-y-[10%] [&_.nu-wordmark]:text-white"
            href="https://www.northwestern.edu/">
             @include('northwestern-filament-theme::wordmark')
         </a>
