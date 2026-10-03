@@ -97,20 +97,6 @@ git fetch starter
 If a cherry-pick produces too many conflicts, it may be easier to read the commit diff (`git show <hash>`) and apply the changes manually. This is common when your project has significantly restructured a file the starter also changed.
 </Aside>
 
-## Version 3
-
-Version 3 of the starter removes the Bootstrap user interface. It is aimed at **new applications**. An application started on version 2 does not need to adopt it, and cherry-picking it piece by piece is not practical: most of its changes replace the pages they touch.
-
-What version 3 removed:
-
-- `northwestern-sysdev/northwestern-laravel-ui`, its `northwestern::` layouts and `config/northwestern-theme.php`
-- Bootstrap, Sass, Font Awesome and Tom Select, with `resources/js/app.js` and `resources/js/bootstrap.js`
-- The Blade component library: `<x-select>`, `<x-clipboard>`, `<x-breadcrumbs>`, `<x-tooltip>`, `<x-wildcard-photo>` and `<x-not-yet-implemented>`
-- The Bootstrap sign-in pages (`/auth/type`, `/auth/login`), home page, environment lockdown page, changelog views, Contact Support form and error pages, which were rebuilt on Filament and Tailwind
-- `local-auth.redirect_after_login` (`LOCAL_AUTH_REDIRECT_AFTER_LOGIN`)
-
-A version 2 application can keep its Bootstrap pages by keeping `northwestern-laravel-ui` installed. That package and `northwestern-filament-theme` 4.x still support version 2 applications, including the `config/northwestern-theme.php` file. Changes to the shared packages (`chassis`, `northwestern-filament-theme`) remain safe to take.
-
 ## Alternative: Patch Files
 
 If you prefer not to add the starter as a remote, you can apply changes from patch files:

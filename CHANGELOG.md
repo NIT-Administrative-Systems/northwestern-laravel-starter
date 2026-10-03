@@ -6,6 +6,39 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+Version 3 removes the Bootstrap user interface. Every page now uses one stack, Filament (Livewire, Alpine and Tailwind CSS), with Northwestern branding from `northwestern-sysdev/northwestern-filament-theme` and Department Templates 4.0. Version 3 is aimed at new applications: an application started on version 2 can keep its Bootstrap pages by keeping `northwestern-sysdev/northwestern-laravel-ui` installed, and that package and `northwestern-filament-theme` 4.x still support it.
+
+### Breaking
+
+- Removed `northwestern-sysdev/northwestern-laravel-ui`, its `northwestern::` layouts and `config/northwestern-theme.php`. Unit details, the lockup and footer links now live in `config/northwestern-filament-theme.php` (`NU_UNIT_*`, `NU_LOCKUP`).
+- Removed Bootstrap, Sass, Font Awesome, Tom Select, `clipboard` and `axios`, with `resources/sass`, `resources/js/app.js`, `resources/js/bootstrap.js` and `resources/js/utils.js`.
+- Removed the Blade component library (`<x-select>`, `<x-clipboard>`, `<x-breadcrumbs>`, `<x-tooltip>`, `<x-wildcard-photo>`, `<x-not-yet-implemented>`), `AsyncSelectOptionsRequest` and the Bootstrap navigation. Use Filament's components instead.
+- The administration panel is no longer the default panel. Livewire tests of administration pages must call `Filament::setCurrentPanel('administration')`, and Filament's generators need `--panel=administration` for administration resources.
+- Sign-in moved into the new app panel: `/auth/type` became `/app/login`, `/auth/login` became `/app/login/email`, and `/platform/access-restricted` became `/app/access-restricted`. The `login-selection`, `login-code.*` and `platform.environment-lockdown` route names were removed. Single sign-on callback URLs did not change.
+- Contact Support moved to `/app/support/contact`; the `support.contact.*` routes, `ContactController` and `ContactFormRequest` were removed.
+- Removed `local-auth.redirect_after_login` (`LOCAL_AUTH_REDIRECT_AFTER_LOGIN`). Override `HomeController::destinationFor()` instead.
+- Removed GlobalAlert and its impersonation alert; Filament's impersonation banner covers it.
+- Removed `InjectLivewireAssets`. Livewire's `inject_assets` is back on.
+- Requires `northwestern-sysdev/northwestern-filament-theme` `^4.1` and `northwestern-sysdev/chassis` `^1.2`.
+
+### Added
+
+- An `app` panel at `/app`, the default panel, for each application's features. Any signed-in user can open it; it has a Help group (Changelog, Contact Support) and an "Administration" user-menu item for users who can open that panel.
+- Filament sign-in pages: `/app/login` lists the configured methods and goes straight to single sign-on when it is the only one, and `/app/login/email` requests and verifies a login code on one page. The login code logic moved into the `RequestLoginCode` and `AuthenticateWithLoginCode` actions.
+- A public layout (`<x-layouts.public>`) for pages outside the panels. It runs in the app panel's context so Filament's Blade components work, and it is light only.
+- A landing page at `/` for guests. `HomeController::destinationFor()` decides where signed-in users go, by default the app panel.
+- An error layout (`<x-layouts.error>`) that renders without Filament, auth or the database, so the 500 and database-paused pages work when the database is down.
+- Browser Sentry on every page through `<x-sentry-browser />` and `resources/js/sentry.js`, relayed through chassis's DSN-validating `SentryTunnelController`. The new `sentry.tracing.browser` setting (`SENTRY_ENABLE_APM_FOR_JS`) enables browser tracing.
+- A branded mail theme. Every email's footer shows the unit's contact details and the Accessibility and Privacy Statement links the university requires.
+
+### Changed
+
+- The changelog and Contact Support pages were rebuilt on the public layout and the app panel. The changelog's URLs and RSS feed are unchanged.
+- The environment lockdown page is a Filament page in the app panel, and lockdown now applies to app panel routes.
+- Panels, the public layout and the error layout use the Department Templates 4.0 wordmark, fonts and footer.
+- Browser and PHP Sentry reports share one user context, `SentryExceptionHandler::userContext()`.
+- Livewire's pagination theme is `tailwind`.
+
 ## [v2.6.0] - 2026-10-01
 
 ### Breaking
