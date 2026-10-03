@@ -37,6 +37,23 @@ final class TeamDynamixGatewayTest extends TestCase
         ]);
     }
 
+    // The gateway creates tickets in the SDK's default ticketing application. The SDK's own config reads
+    // its name with config() instead of env(), so it only comes from the environment through ours.
+    public function test_the_ticketing_application_names_come_from_the_environment(): void
+    {
+        $_ENV['TDX_TICKET_APP_NAME'] = $_SERVER['TDX_TICKET_APP_NAME'] = 'NU Tickets';
+        $_ENV['TDX_CLIENT_APP_NAME'] = $_SERVER['TDX_CLIENT_APP_NAME'] = 'NU Client Portal';
+
+        try {
+            $config = require config_path('team-dynamix.php');
+
+            $this->assertSame('NU Tickets', $config['apps']['ticketing']);
+            $this->assertSame('NU Client Portal', $config['apps']['client']);
+        } finally {
+            unset($_ENV['TDX_TICKET_APP_NAME'], $_SERVER['TDX_TICKET_APP_NAME'], $_ENV['TDX_CLIENT_APP_NAME'], $_SERVER['TDX_CLIENT_APP_NAME']);
+        }
+    }
+
     public function test_create_returns_successful_result_when_ticket_is_created(): void
     {
         $cache = $this->mockCacheRepository();
