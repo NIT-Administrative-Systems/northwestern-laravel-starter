@@ -145,19 +145,11 @@ if (App::environment(['local', 'ci', 'testing'])) {
 
 In local, CI, and testing environments, HTTP client exceptions include the full response body instead of truncating it. This makes debugging failed API calls easier.
 
-### Bootstrap 5 Pagination
-
-```php
-Paginator::useBootstrapFive();
-```
-
-Laravel's paginator renders Bootstrap 5 markup instead of the default Tailwind CSS. This applies to non-Filament views that use `{{ $items->links() }}`.
-
 ---
 
 ## Filament Defaults
 
-Configured in `FilamentServiceProvider`. These affect the entire admin panel.
+Configured in `FilamentServiceProvider`. These apply to every panel.
 
 ### User Timezone on All Datetimes
 

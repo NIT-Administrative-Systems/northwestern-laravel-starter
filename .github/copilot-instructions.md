@@ -87,54 +87,39 @@ This starter uses a custom **idempotent seeding pattern** that allows seeders to
 
 # Frontend & UI Instructions
 
-## Dual UI Architecture
+## UI Architecture
 
-This application uses **two separate and distinct UI stacks** optimized for different audiences. Understanding which stack to use is critical.
+This application has **one frontend stack**: Filament (Livewire, Alpine and Tailwind CSS), with Northwestern branding from `northwestern-sysdev/northwestern-filament-theme`. There is no Bootstrap. Don't add Bootstrap classes, Font Awesome, jQuery or another component library.
 
-### Northwestern Laravel UI (User-Facing)
+Put each page where it belongs:
 
-**When to use:**
-
-- Public-facing pages and landing pages
-- Custom user dashboards and workflows
-- Any interface requiring Northwestern branding
-- Complex custom experiences needing full design control
-
-**Stack details:**
-
-- **Layout:** Extend `northwestern::purple-container` or other Northwestern layouts
-- **Styling:** Bootstrap 5 (utility classes like `btn`, `card`, `row`, `col-*`)
-- **Icons:** Font Awesome (`<i class="fas fa-icon">`)
-- **Components:** Custom Blade components in `resources/views/components/`
-
-### Filament (Administration Interface)
-
-**When to use:**
-
-- Staff/developer admin panels (`/administration`)
-- CRUD operations and data management
-- Analytics dashboards and reporting
-- User/system configuration
-- Internal tooling
+| Surface                                  | Location                         | Use for                                                                                                                         |
+| ---------------------------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| App panel (`/app`, default panel)        | `app/Filament/App/`              | The application's features for its users. Default to this.                                                                      |
+| Administration panel (`/administration`) | `app/Filament/` (outside `App/`) | Back-office tooling                                                                                                             |
+| Public layout (`<x-layouts.public>`)     | `resources/views/public/`        | Pages that must work without signing in. Routes use the `panel:app` middleware so Filament's Blade components work. Light only. |
+| Error layout (`<x-layouts.error>`)       | `resources/views/errors/`        | Error pages only. No Filament, auth or database calls; wrap anything that could query the database in `rescue()`.               |
 
 **Stack details:**
 
-- **Framework:** Filament resources, pages, and widgets
-- **Styling:** Tailwind CSS utility classes
+- **Framework:** Filament resources, pages, widgets and schema components; Filament Blade components (`<x-filament::button>` and so on) outside panels
+- **Styling:** Tailwind CSS utility classes and the Northwestern tokens (`text-nu-purple-100`, `font-nu-heading`)
 - **Icons:** Heroicons (`use Filament\Support\Icons\Heroicon;`)
-- **Location:** `app/Filament/` directory
+- **Branding config:** `config/northwestern-filament-theme.php` (unit details, lockup, footer links)
 
 **Key patterns:**
 
 ```php
-// Generating resources with correct model namespace
+// Generators target the default (app) panel; add --panel=administration for back-office resources
 php artisan make:filament-resource User --generate --model-namespace=App\\Domains\\User\\Models
 
 // Relation managers must specify full model path
 php artisan make:filament-relation-manager --related-model=App\\Domains\\User\\Models\\User --attach Role users username
 ```
 
-**Authorization:** Panel access is controlled via `User::canAccessPanel()` method checking permissions against panel IDs defined as constants (e.g., `AdministrationPanelProvider::ID`).
+**Authorization:** Panel access is controlled via `User::canAccessPanel()`, which matches on panel IDs defined as constants (`AppPanelProvider::ID`, `AdministrationPanelProvider::ID`). Add a case for every new panel.
+
+**Testing:** `app` is the default panel. Livewire tests of administration pages must call `Filament::setCurrentPanel(AdministrationPanelProvider::ID)` first.
 
 ---
 
@@ -142,7 +127,7 @@ php artisan make:filament-relation-manager --related-model=App\\Domains\\User\\M
 
 - **Keep Blade declarative:** Push business logic into view models, presenters, or Livewire components. Use `@php` blocks sparingly and never for business rules.
 - **Component reusability:** Prefer Blade components (`<x-component>`) or includes for repeated UI fragments. Register view composers for globally shared data (navigation, user context).
-- **Layout hierarchy:** Respect Laravel's layout stack by extending base layouts, defining `@section` blocks explicitly, and using `@push('scripts')`/`@stack` for per-page assets.
+- **Layout hierarchy:** Outside panels, use the layout components (`<x-layouts.public>`, `<x-layouts.error>`) and `@push('scripts')` for per-page scripts.
 - **Security helpers:** Always use built-in helpers (`@can`, `@csrf`, `@vite`, `@method`) instead of manual HTML to maintain consistency and security.
 - **Avoid inline PHP:** Never embed business logic in views. Views should only handle presentation logic (loops, conditionals for display).
 
@@ -150,9 +135,9 @@ php artisan make:filament-relation-manager --related-model=App\\Domains\\User\\M
 
 ## Styling & assets
 
-- **Formatting:** Run `pnpm format` to lint CSS/SCSS via Prettier before committing.
-- **Northwestern UI:** Use Bootstrap 5 utility classes for user-facing interfaces. Favor utility classes over custom CSS when possible.
-- **Filament:** Use Tailwind CSS utilities within Filament resources. Do not mix Bootstrap classes in Filament views.
+- **Formatting:** Run `pnpm format` to lint CSS via Prettier before committing.
+- **Tailwind:** Use Tailwind utilities and the Northwestern tokens everywhere. Favor utility classes over custom CSS.
+- **Tailwind sources:** Views outside `app/Filament/App/` and `resources/views/filament/app/` must be listed under `@source` in `resources/css/filament/app/theme.css`, or their classes won't be compiled.
 
 ---
 
@@ -188,4 +173,4 @@ php artisan make:filament-relation-manager --related-model=App\\Domains\\User\\M
     - Avoid inlining large unminified bundles
     - Use lazy loading for images below the fold
     - Leverage browser caching via versioned assets
-- **Progressive enhancement:** Render critical content server-side, then layer interactive behaviors (dropdowns, modals, tabs) through Livewire, Alpine, or Bootstrap data attributes.
+- **Progressive enhancement:** Render critical content server-side, then layer interactive behaviors (dropdowns, modals, tabs) through Livewire and Alpine.

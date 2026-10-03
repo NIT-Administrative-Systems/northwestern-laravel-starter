@@ -79,10 +79,9 @@ LOCAL_AUTH_RATE_LIMIT_PER_HOUR=10
 # Rate limit for login code requests per IP (per hour)
 # Prevents a single IP from exhausting multiple accounts' per-email rate limits
 LOCAL_AUTH_RATE_LIMIT_PER_IP_PER_HOUR=20
-
-# Redirect destination after successful login
-LOCAL_AUTH_REDIRECT_AFTER_LOGIN=/
 ```
+
+To change where users land after signing in, see [Where Users Land After Signing In](/features/authentication/#where-users-land-after-signing-in).
 
 <CardGrid>
   <Card title="Enabled" icon="approve-check">
@@ -271,7 +270,26 @@ These exemptions ensure users can log in and administrators can manage impersona
 
 ___
 
-## 6. Project Cleanup
+## 6. Your Unit's Details
+
+The university's Web Style Guide requires every page to show the responsible unit's address, phone, fax (if any) and email. The footer on every page and every email reads them from `config/northwestern-filament-theme.php`. Until you set them, they show Information Technology's details.
+
+```bash
+# .env
+NU_UNIT_NAME="Your Office"
+NU_UNIT_ADDRESS="633 Clark Street"
+NU_UNIT_CITY="Evanston, IL 60208"
+NU_UNIT_PHONE="847-555-0100"
+NU_UNIT_FAX=
+NU_UNIT_EMAIL="your-office@northwestern.edu"
+
+# Optional: a unit lockup (URL or public path) instead of the Northwestern wordmark
+NU_LOCKUP=
+```
+
+Quick links and the "Connect" social accounts are set in the same config file, under `footer.links` and `footer.social`.
+
+## 7. Project Cleanup
 
 <Aside type="caution" title="Important">
 Perform these cleanup tasks to personalize the starter kit for your project and remove references to the Northwestern Laravel Starter.
