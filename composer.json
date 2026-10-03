@@ -31,7 +31,6 @@
         "northwestern-sysdev/chassis": "^1.2",
         "northwestern-sysdev/laravel-soa": "^12.0",
         "northwestern-sysdev/northwestern-filament-theme": "^4.1",
-        "northwestern-sysdev/northwestern-laravel-ui": "^4.0",
         "northwestern-sysdev/tdx-php-sdk": "^0.6",
         "owen-it/laravel-auditing": "^14.0",
         "phiki/phiki": "^2.0",

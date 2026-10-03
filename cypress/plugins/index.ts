@@ -9,7 +9,7 @@
 // https://on.cypress.io/plugins-guide
 // ***********************************************************
 
-import axios from "axios";
+import * as http from "node:http";
 import * as https from "node:https";
 import seeders from "../support/seeders";
 import { activateCypressEnvFile, activateLocalEnvFile } from "./swap-env";
@@ -17,6 +17,48 @@ import { activateCypressEnvFile, activateLocalEnvFile } from "./swap-env";
 type ArtisanParameter = string | number | boolean | null;
 
 type ArtisanParameters = Record<string, ArtisanParameter>;
+
+/**
+ * POST a JSON body and resolve on a 2xx response. Local servers can use self-signed
+ * certificates, so HTTPS skips certificate verification.
+ */
+const postJson = (url: string, body: unknown): Promise<void> =>
+    new Promise((resolve, reject) => {
+        const target = new URL(url);
+        const payload = JSON.stringify(body);
+        const options = {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Content-Length": Buffer.byteLength(payload),
+            },
+        };
+        const onResponse = (response: http.IncomingMessage): void => {
+            response.resume();
+            response.on("end", () => {
+                const status = response.statusCode ?? 0;
+
+                if (status >= 200 && status < 300) {
+                    resolve();
+                } else {
+                    reject(
+                        new Error(`Request failed with status code ${status}`),
+                    );
+                }
+            });
+        };
+        const request =
+            target.protocol === "https:"
+                ? https.request(
+                      target,
+                      { ...options, rejectUnauthorized: false },
+                      onResponse,
+                  )
+                : http.request(target, options, onResponse);
+
+        request.on("error", reject);
+        request.end(payload);
+    });
 
 /**
  * @type {Cypress.PluginConfig}
@@ -32,21 +74,10 @@ export default (
         console.log(`⏳ ${command} ${JSON.stringify(parameters)}`);
 
         try {
-            await axios.post(
-                `${config.baseUrl}/__cypress__/artisan`,
-                {
-                    command: command,
-                    parameters: parameters,
-                },
-                {
-                    httpsAgent: new https.Agent({
-                        rejectUnauthorized: false,
-                    }),
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                },
-            );
+            await postJson(`${config.baseUrl}/__cypress__/artisan`, {
+                command: command,
+                parameters: parameters,
+            });
 
             console.log(`✅ ${command} ${JSON.stringify(parameters)}`);
         } catch (error: unknown) {

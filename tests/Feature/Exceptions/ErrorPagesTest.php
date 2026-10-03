@@ -28,6 +28,7 @@ final class ErrorPagesTest extends TestCase
         config(['app.debug' => false]);
 
         Route::get('/__test/server-error', fn () => throw new RuntimeException('Sensitive failure detail'));
+        Route::get('/__test/unavailable', fn () => abort(503));
     }
 
     public function test_not_found_page_uses_the_error_layout_with_the_footer(): void
@@ -36,8 +37,40 @@ final class ErrorPagesTest extends TestCase
             ->assertNotFound()
             ->assertSee('Not Found')
             ->assertSee('Back to homepage')
-            ->assertSee('Privacy Statement')
-            ->assertDontSee('northwestern::', escape: false);
+            ->assertSee('Privacy Statement');
+    }
+
+    public function test_not_found_page_has_the_help_menu_and_sign_in_for_guests(): void
+    {
+        $this->get('/no-such-page')
+            ->assertNotFound()
+            ->assertSee('data-cy="help-menu-trigger"', escape: false)
+            ->assertSee('data-cy="sign-in-link"', escape: false);
+    }
+
+    public function test_not_found_page_knows_who_is_signed_in(): void
+    {
+        $this->actingAs(User::factory()->create())
+            ->get('/no-such-page')
+            ->assertNotFound()
+            ->assertSee('fi-user-menu', escape: false)
+            ->assertDontSee('data-cy="sign-in-link"', escape: false);
+    }
+
+    public function test_unknown_api_paths_are_not_caught_by_the_web_fallback(): void
+    {
+        $this->get('/api/no-such-endpoint')
+            ->assertNotFound()
+            ->assertCookieMissing(config('session.cookie'));
+    }
+
+    public function test_service_unavailable_page_keeps_the_bare_header(): void
+    {
+        $this->get('/__test/unavailable')
+            ->assertServiceUnavailable()
+            ->assertSee('Service Unavailable')
+            ->assertDontSee('data-cy="help-menu-trigger"', escape: false)
+            ->assertDontSee('data-cy="sign-in-link"', escape: false);
     }
 
     public function test_server_error_page_renders_when_the_database_is_unavailable(): void

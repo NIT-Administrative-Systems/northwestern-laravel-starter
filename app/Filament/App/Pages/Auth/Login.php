@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\App\Pages\Auth;
 
+use App\Filament\App\Pages\Concerns\HasSiteHeader;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Pages\SimplePage;
@@ -13,8 +14,10 @@ use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Text;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\HtmlString;
 
 /**
  * Lists the sign-in methods this application has configured: Northwestern single
@@ -25,6 +28,8 @@ use Illuminate\Support\Facades\Route;
  */
 class Login extends SimplePage
 {
+    use HasSiteHeader;
+
     private const string AUTH_DOCS_URL = 'https://laravel-starter.entapp.northwestern.edu/getting-started/installation/#5-environment-configuration';
 
     protected static ?string $title = 'Sign in';
@@ -44,6 +49,15 @@ class Login extends SimplePage
         }
     }
 
+    /** "Sign in to" above the application name, which gets a row of its own. */
+    public function getHeading(): string|Htmlable|null
+    {
+        return new HtmlString(
+            '<span class="nu-sign-in-heading-lead">Sign in to</span> '
+            . '<span class="nu-sign-in-heading-app">' . e(config('app.name')) . '</span>'
+        );
+    }
+
     public function content(Schema $schema): Schema
     {
         $ssoUrl = $this->ssoUrl();
@@ -52,7 +66,6 @@ class Login extends SimplePage
         return $schema
             ->components([
                 Group::make([
-                    Text::make('For students, faculty, staff, and affiliates with a NetID.'),
                     Actions::make([
                         Action::make('netid')
                             ->label('Sign in with NetID')
@@ -60,10 +73,15 @@ class Login extends SimplePage
                             ->url($ssoUrl)
                             ->extraAttributes(['data-cy' => 'netid-login']),
                     ])->fullWidth(),
-                ])->visible($ssoUrl !== null),
+                    Text::make('For students, faculty, staff, and affiliates.')
+                        ->extraAttributes(['class' => 'nu-sign-in-hint']),
+                ])->dense()->visible($ssoUrl !== null),
+
+                Text::make('or')
+                    ->extraAttributes(['class' => 'nu-sign-in-divider'])
+                    ->visible($ssoUrl !== null && $localAuthEnabled),
 
                 Group::make([
-                    Text::make('For approved external users and partners who do not have a NetID.'),
                     Actions::make([
                         Action::make('email')
                             ->label('Sign in with email')
@@ -73,7 +91,9 @@ class Login extends SimplePage
                             ->url(fn (): ?string => Route::has('filament.app.auth.login-code') ? route('filament.app.auth.login-code') : null)
                             ->extraAttributes(['data-cy' => 'email-login']),
                     ])->fullWidth(),
-                ])->visible($localAuthEnabled),
+                    Text::make('For approved external partners without a NetID.')
+                        ->extraAttributes(['class' => 'nu-sign-in-hint']),
+                ])->dense()->visible($localAuthEnabled),
 
                 Callout::make('No sign-in methods available')
                     ->description('This application has not been configured with any authentication providers yet.')

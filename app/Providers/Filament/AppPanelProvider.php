@@ -7,16 +7,12 @@ namespace App\Providers\Filament;
 use App\Filament\App\Pages\Auth\EmailCodeLogin;
 use App\Filament\App\Pages\Auth\Login;
 use App\Filament\App\Pages\EnvironmentLockdown as EnvironmentLockdownPage;
-use App\Filament\Navigation\AppNavGroup;
 use App\Http\Middleware\EnvironmentLockdown;
-use App\Http\Middleware\InjectLivewireAssets;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Navigation\NavigationItem;
-use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Icons\Heroicon;
@@ -69,6 +65,17 @@ class AppPanelProvider extends PanelProvider
             })
             ->viteTheme('resources/css/filament/app/theme.css')
             ->renderHook(PanelsRenderHook::HEAD_END, fn (): string => Blade::render('<x-sentry-browser />'))
+            ->renderHook(PanelsRenderHook::TOPBAR_LOGO_AFTER, fn (): string => Blade::render('<x-panel-brand />'))
+            // After global search: after the theme's environment badge and just ahead of the user menu.
+            ->renderHook(PanelsRenderHook::GLOBAL_SEARCH_AFTER, fn (): string => Blade::render('<x-help-menu />'))
+            // Sign-in and the lockdown page; see HasSiteHeader.
+            ->renderHook(PanelsRenderHook::SIMPLE_LAYOUT_START, fn (): string => Blade::render(<<<'BLADE'
+                <x-site-header>
+                    @auth
+                        @livewire(\Filament\Livewire\SimpleUserMenu::class)
+                    @endauth
+                </x-site-header>
+                BLADE))
             ->userMenuItems([
                 'administration' => Action::make('administration')
                     ->label('Administration')
@@ -89,24 +96,12 @@ class AppPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/App/Resources'), for: 'App\Filament\App\Resources')
             ->discoverPages(in: app_path('Filament/App/Pages'), for: 'App\Filament\App\Pages')
             ->discoverWidgets(in: app_path('Filament/App/Widgets'), for: 'App\Filament\App\Widgets')
-            ->pages([
-                Dashboard::class,
-            ])
             ->plugins([
                 NorthwesternTheme::make()
                     ->impersonationBanner()
                     ->withoutAssetRegistration(),
             ])
-            ->navigationItems([
-                NavigationItem::make('Changelog')
-                    ->url(fn (): ?string => Route::has('support.changelog.index') ? route('support.changelog.index') : null)
-                    ->visible(fn (): bool => Route::has('support.changelog.index'))
-                    ->group(AppNavGroup::Help)
-                    ->icon(Heroicon::OutlinedNewspaper)
-                    ->sort(1),
-            ])
             ->middleware([
-                InjectLivewireAssets::class,
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
                 StartSession::class,

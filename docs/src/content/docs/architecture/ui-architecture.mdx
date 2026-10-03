@@ -1,91 +1,107 @@
 ---
 title: UI Architecture
-description: Understanding the dual UI stack approach
+description: How the starter's interface is built on one stack, and where each kind of page belongs
 sidebar:
     order: 1
 ---
 
-import { Card, CardGrid, Aside, Badge } from '@astrojs/starlight/components';
+import { Aside } from '@astrojs/starlight/components';
 
-The starter uses **two separate UI stacks**: a custom, branded stack for users, and a rapid administration panel for staff/developers.
+The starter has **one frontend stack**: [Filament](https://filamentphp.com), built on Livewire, Alpine and Tailwind CSS. Every page, from sign-in to error pages, uses it or the Northwestern design tokens it is built on. Northwestern branding comes from the [Northwestern Filament Theme](https://github.com/NIT-Administrative-Systems/northwestern-filament-theme), which follows the university's Department Templates 4.0.
 
-## User Facing Interface - Northwestern Laravel UI
+## Where pages live
 
-This stack is dedicated to creating a cohesive, branded experience for end-users and the public.
-
-**Repository:** [Northwestern Laravel UI](https://github.com/NIT-Administrative-Systems/northwestern-laravel-ui)
-
-### Stack Details
-
-* **View Layer:** Blade Templates
-* **Styling:** Customized Bootstrap 5
-* **Icons:** Font Awesome
-
-### Purpose & Use Cases
-
-* **Public Facing Pages:** Landing pages, informational content.
-* **Custom Experiences:** User dashboards, complex custom workflows.
-* **Branding:** Achieving the official **Northwestern branded look and feel**.
-* **Design Flexibility:** Provides full control over the design and frontend code.
-
-> **Example:** The application's default home page (`/`) is built entirely with this stack.
-
-## Filament
-
-Filament is a rapid application development framework built on Livewire and Tailwind. The starter ships with a single **Administration** panel for back-end staff tooling, but Filament works well for any authenticated, data-driven user experience: portals, dashboards, and self-service tools.
-
-**Framework:** [Filament](https://filamentphp.com)
-
-### Stack Details
-
-* **View Layer:** Filament
-* **Styling:** Tailwind CSS
-* **Icons:** Heroicons
-
-### Purpose & Use Cases
-
-* **Administration:** Internal staff tooling, system configuration, and user management.
-* **Data Management:** Full **CRUD** operations, interactive tables, filters, and bulk actions.
-* **Analytics:** Custom reporting dashboards and chart metrics.
-* **User-Facing Panels:** Portals, self-service tools, and data-driven workflows for authenticated users.
-* **Access:** The built-in Administration panel is available at `/administration` (requires authentication and specific permissions). Additional panels can be created on separate routes.
+| Surface | URL | Built with | Use it for |
+|---|---|---|---|
+| **App panel** | `/app` | Filament panel (`AppPanelProvider`) | Everything your application does for its users. It is the default panel, and it owns sign-in for the whole application. |
+| **Administration panel** | `/administration` | Filament panel (`AdministrationPanelProvider`) | Back-office tooling: users, roles, audits, API tokens, platform settings. |
+| **Public layout** | anywhere outside the panels, such as `/` and `/support/changelog` | `<x-layouts.public>` with Filament's Blade components | Pages people can see without signing in. |
+| **Error layout** | 500, 503 and database-paused pages | `<x-layouts.error>` | Errors where the application may not be working. It renders without Filament, auth or the database. |
+| **Mail** | — | Laravel markdown mail, with the starter's theme | Email. |
 
 <Aside type="tip">
-    See the [Adding a Filament Panel](/guides/adding-a-filament-panel) guide for step-by-step instructions on creating additional panels for user-facing functionality.
+    Build features in the **app panel**. Reach for the public layout only for pages that must work without signing in.
 </Aside>
 
----
+## The app panel
 
-## Choosing the Right Stack
+The app panel at `/app` is where an application built on the starter does its work. Any signed-in user can open it. Resources, pages and widgets placed in `app/Filament/App/` are discovered automatically.
 
-The choice depends on the audience and the required level of customization.
+It also provides:
 
-<CardGrid>
-    <Card title="Northwestern Laravel UI" icon="seti:html">
-        <Badge text="Best For" variant="success" />
-        * **Custom User Experiences**
-        * Public-facing Content & Landing Pages
-        * Official Branded Pages
-        * Complex Custom Workflows
-        <hr />
-        <Badge text="Trade-offs" variant="caution" />
-        * **More Development Time**
-        * Manual building of forms/tables
-    </Card>
+- **Sign-in.** `/app/login` lists the configured sign-in methods (Northwestern single sign-on and email login codes). Guests of either panel are sent here. See [Authentication](/features/authentication).
+- **Environment lockdown.** Users without a role that grants access to a locked-down environment see `/app/access-restricted`.
+- **A placeholder dashboard.** `App\Filament\App\Pages\Dashboard` shows a setup checklist that ticks what it can detect from your configuration. Replace its `content()` with your application's dashboard.
+- **A component gallery.** `/app/gallery` shows Filament's components in the Northwestern theme with sample content. It is linked from the placeholder dashboard, never in the navigation, and unavailable in production. Delete `ComponentGallery` when you no longer need it.
+- **Navigation.** The sidebar is for your application's features; the starter ships only the dashboard there. The top bar holds what every page shares: the wordmark, the application name, the **Help** menu and the user menu.
+- **Help.** The Help menu (`<x-help-menu />`) lists the changelog, the Contact Support page (`/app/support/contact`) for signed-in users, and your user documentation when `SUPPORT_DOCUMENTATION_URL` is set.
+- **The user menu.** It has "Administration" (shown only to users who can open that panel) and "Sign out".
 
-    <Card title="Filament" icon="rocket">
-        <Badge text="Best For" variant="success" />
-        * **Data-Driven Interfaces**
-        * Rapid CRUD Operations
-        * User/System Configuration
-        * Analytics Dashboards
-        * Portals & Self-Service Tools
-        <hr />
-        <Badge text="Trade-offs" variant="caution" />
-        * **Limited UI Customization**
-        * Not suited for public/unauthenticated pages
-    </Card>
-</CardGrid>
+Signed-in users who visit `/` are sent to the app panel by `HomeController`. To send some users elsewhere, override `HomeController::destinationFor()`.
+
+## The administration panel
+
+The administration panel at `/administration` holds the starter's back-office tools. It requires the `AccessAdministrationPanel` permission. Its resources and pages live in `app/Filament/` outside `app/Filament/App/`. It has no footer: the footer is for the pages end users see.
+
+## The public layout
+
+`<x-layouts.public>` is the layout for pages outside the panels. Its header (`<x-site-header>`) matches the panels' top bar: the Northwestern wordmark, the application name, the Help menu, then **Sign in** or the user menu. The Northwestern footer is at the bottom.
+
+The sign-in pages, the lockdown page and the error pages use the same header, so every page names the application. Outside production the header shows the environment badge: top right on larger screens, centered below the header on phones.
+
+The client error pages (401, 403, 404, 419 and 429) render on this layout, so their header keeps the Help menu and Sign in or the user menu. A fallback route sends unknown URLs through the web middleware, so the not-found page knows who is signed in; paths under `api/` are left out.
+
+Routes that use it run in the app panel's context through the `panel:app` middleware, so the page loads the app panel's theme and colors, and you can use Filament's Blade components:
+
+```php
+// routes/web.php
+Route::middleware('panel:' . AppPanelProvider::ID)->group(function () {
+    Route::get('/', Controllers\HomeController::class)->name('home');
+});
+```
+
+```blade
+<x-layouts.public title="About">
+    <div class="mx-auto max-w-3xl px-4 py-12">
+        <h1 class="font-nu-heading text-3xl font-bold">About</h1>
+
+        <x-filament::button tag="a" href="/app">Get started</x-filament::button>
+    </div>
+</x-layouts.public>
+```
+
+The public layout is **light only**, as the university's templates are. It loads Livewire and Filament's support scripts (for Alpine features such as tooltips) but not the panel core, which would apply each user's panel theme, including dark mode. Its views are compiled by the app panel's Tailwind theme, so keep them in `resources/views/public/` or add their path to the `@source` list in `resources/css/filament/app/theme.css`.
+
+## The error layout
+
+`<x-layouts.error>` renders the error pages that can't rely on the application working: 500, 503 (maintenance) and database-paused. It must work when nothing else does, so it loads no Filament, makes no auth calls and doesn't touch the database. Its styles come from `resources/css/errors.css`, built from the Northwestern design tokens.
+
+Anything on an error page that could query the database, such as checking the signed-in user's permissions, is wrapped in `rescue()` and fails closed.
+
+## Branding
+
+The Northwestern Filament Theme provides the look of every surface:
+
+- **Colors and fonts** come from [`@nu-appdev/northwestern-tokens`](https://github.com/NIT-Administrative-Systems/northwestern-tokens). Akkurat Pro, Poppins and Noto Serif load from the university's CDN.
+- **The footer** includes the links the university's Web Style Guide requires, plus your unit's contact details. Panels render it automatically; other layouts use `<x-northwestern-filament-theme::footer />`. Emails use the same unit details.
+- **Your unit's details** are set in `config/northwestern-filament-theme.php`:
+
+```php
+// config/northwestern-filament-theme.php
+'lockup' => env('NU_LOCKUP'),          // null shows the Northwestern wordmark
+'unit' => [
+    'name' => env('NU_UNIT_NAME'),
+    'address' => env('NU_UNIT_ADDRESS'),
+    'city' => env('NU_UNIT_CITY'),
+    'phone' => env('NU_UNIT_PHONE'),
+    'fax' => env('NU_UNIT_FAX'),
+    'email' => env('NU_UNIT_EMAIL'),
+],
+'footer' => [
+    'links' => [],                     // Quick Links, as label => URL
+    'social' => [/* network => URL */],
+],
+```
 
 ---
 
@@ -97,17 +113,17 @@ Filament is structured around **Panels** and **Resources**.
 
 A **Panel** is a discrete, isolated area of the site with its own navigation, set of resources, and pages.
 
-> **Example:** Everything under `/administration` is driven by the `AdministrationPanelProvider`.
+> **Example:** Everything under `/app` is driven by the `AppPanelProvider`, and everything under `/administration` by the `AdministrationPanelProvider`.
 
 #### Panel ID & Authorization
 
-When adding a new Panel, the **ID** is critical for authorization:
+Each panel has an **ID**, which is also the key for authorization:
 
 ```php {4, 10}
-// app/Providers/Filament/AdministrationPanelProvider.php
-class AdministrationPanelProvider extends PanelProvider
+// app/Providers/Filament/AppPanelProvider.php
+class AppPanelProvider extends PanelProvider
 {
-    public const string ID = 'administration';
+    public const string ID = 'app';
 
     public function panel(Panel $panel): Panel
     {
@@ -119,7 +135,18 @@ class AdministrationPanelProvider extends PanelProvider
 }
 ```
 
-The initial access check for the entire panel is determined by the `User::canAccessPanel()` method, which uses this ID constant to execute the appropriate permission check.
+The access check for an entire panel is `User::canAccessPanel()`, which matches on the panel ID. A panel that isn't listed there throws, so a new panel can't be opened by accident:
+
+```php
+return match ($panel->getId()) {
+    AppPanelProvider::ID => true,
+    AdministrationPanelProvider::ID => $this->can(SystemPermission::AccessAdministrationPanel),
+};
+```
+
+<Aside type="caution" title="Testing administration pages">
+    `app` is the default panel. Livewire tests for administration pages must set the panel first: `Filament::setCurrentPanel(AdministrationPanelProvider::ID)`.
+</Aside>
 
 ### Filament Resources
 
@@ -136,6 +163,11 @@ To ensure correct mapping to the application's domain structure, you must specif
 php artisan make:filament-resource User --generate --model-namespace=App\\Domains\\User\\Models
 ```
 The `--generate` flag is highly recommended as it uses model introspection to create reasonable defaults for forms and columns.
+
+Filament's generators target the default panel, which is the app panel. For an administration resource or page, add `--panel=administration`:
+```bash
+php artisan make:filament-resource User --generate --model-namespace=App\\Domains\\User\\Models --panel=administration
+```
 
 #### Relation Managers
 

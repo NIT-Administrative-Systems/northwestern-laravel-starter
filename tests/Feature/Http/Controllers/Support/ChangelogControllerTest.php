@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Http\Controllers\Support;
 
 use App\Domains\Support\Models\Changelog;
+use App\Domains\User\Models\User;
 use App\Http\Controllers\Support\ChangelogController;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
@@ -24,8 +25,12 @@ final class ChangelogControllerTest extends TestCase
 
         $response->assertOk();
         $response->assertViewIs('public.changelog.index');
-        $response->assertSee('Copy RSS feed URL');
+        $response->assertSee('RSS Feed');
         $response->assertSee('Showing');
+        // The published pagination view labels Previous and Next as plain text, with a role on the disabled one.
+        $response->assertSee('<span role="link" aria-disabled="true" aria-label="Previous">', escape: false);
+        $response->assertSee('aria-label="Next"', escape: false);
+        $response->assertDontSee('aria-label="&amp;laquo;', escape: false);
         $response->assertViewHas('feedUrl', route('support.changelog.feed'));
 
         $entries = $response->viewData('entries');
@@ -61,5 +66,24 @@ final class ChangelogControllerTest extends TestCase
         $this->get(route('support.changelog.feed'))
             ->assertOk()
             ->assertHeader('Content-Type', 'application/rss+xml; charset=UTF-8');
+    }
+
+    public function test_signed_in_users_get_the_user_menu_instead_of_sign_in(): void
+    {
+        $this->actingAs(User::factory()->create())
+            ->get(route('support.changelog.index'))
+            ->assertOk()
+            ->assertSee('fi-user-menu', escape: false)
+            ->assertDontSee('data-cy="sign-in-link"', escape: false);
+    }
+
+    public function test_show_offers_a_share_button(): void
+    {
+        $entry = Changelog::factory()->create(['slug' => 'share-button-test', 'authored_at' => now()]);
+
+        $this->get(route('support.changelog.show', $entry))
+            ->assertOk()
+            ->assertSee('navigator.share', escape: false)
+            ->assertSee('Share');
     }
 }

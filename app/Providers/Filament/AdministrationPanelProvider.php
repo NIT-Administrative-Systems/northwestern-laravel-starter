@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Providers\Filament;
 
 use App\Filament\Navigation\AdministrationNavGroup;
-use App\Http\Middleware\InjectLivewireAssets;
 use Filament\Actions\Action;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -43,6 +42,7 @@ class AdministrationPanelProvider extends PanelProvider
             ->maxContentWidth(Width::Full)
             ->viteTheme('resources/css/filament/administration/theme.css')
             ->renderHook(PanelsRenderHook::HEAD_END, fn (): string => Blade::render('<x-sentry-browser />'))
+            ->renderHook(PanelsRenderHook::TOPBAR_LOGO_AFTER, fn (): string => Blade::render('<x-panel-brand />'))
             ->userMenuItems([
                 'logout' => fn (Action $action) => $action
                     ->label('Sign out')
@@ -65,6 +65,8 @@ class AdministrationPanelProvider extends PanelProvider
             ->plugins([
                 NorthwesternTheme::make()
                     ->impersonationBanner()
+                    // A back-office panel; the footer is for the pages end users see.
+                    ->footer(false)
                     ->withoutAssetRegistration(),
             ])
             ->databaseNotifications()
@@ -90,7 +92,6 @@ class AdministrationPanelProvider extends PanelProvider
                     ->sort(1003),
             ])
             ->middleware([
-                InjectLivewireAssets::class,
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
                 StartSession::class,

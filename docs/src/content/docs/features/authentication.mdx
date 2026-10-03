@@ -48,6 +48,52 @@ The Northwestern Laravel Starter provides a multi-method authentication system t
 
 ---
 
+## Signing In
+
+Sign-in belongs to the [App panel](/architecture/ui-architecture). Guests who open a page in any panel are sent to `/app/login`, which lists the sign-in methods this application has configured:
+
+- **Sign in with NetID** appears when single sign-on is configured. It uses Online Passport (WebSSO) when that is configured, otherwise Entra ID.
+- **Sign in with email** appears when `LOCAL_AUTH_ENABLED=true`.
+- If neither is configured, the page explains that no sign-in methods are available.
+
+When NetID is the only method, `/app/login` skips the page and goes straight to single sign-on. The exception is the `ci` environment, where the page always renders so end-to-end tests can sign in with email codes.
+
+Email sign-in is a single page, `/app/login/email`, with two steps: request a code, then enter it. Progress is kept in the session, so reloading the page returns to the current step.
+
+## Where Users Land After Signing In
+
+Every sign-in path ends at `/`. `HomeController` shows guests the landing page and sends signed-in users to `destinationFor()`, which returns the App panel by default. A user who started from a specific page, for example a link in an email, is returned to that page instead.
+
+To change where signed-in users go, override `destinationFor()`:
+
+<Tabs>
+  <TabItem label="Per role">
+    ```php
+    // app/Http/Controllers/HomeController.php
+    protected function destinationFor(User $user): string
+    {
+        if ($user->can(SystemPermission::AccessAdministrationPanel)) {
+            return Filament::getPanel(AdministrationPanelProvider::ID)->getUrl();
+        }
+
+        return Filament::getPanel(AppPanelProvider::ID)->getUrl();
+    }
+    ```
+  </TabItem>
+  <TabItem label="No landing page">
+    To send guests straight to sign-in instead of showing the landing page, change the guest branch of `__invoke()`:
+
+    ```php
+    // app/Http/Controllers/HomeController.php
+    if (! $user instanceof User) {
+        return redirect()->to(Filament::getPanel(AppPanelProvider::ID)->getLoginUrl());
+    }
+    ```
+  </TabItem>
+</Tabs>
+
+---
+
 ## NetID Authentication
 
 Northwestern users authenticate via single sign-on using their NetID credentials. The starter supports two SSO providers, **Microsoft Entra ID** (OAuth2) and **Online Passport** (agentless WebSSO via ForgeRock), and auto-detects which one to use based on your configured credentials. See the [WebSSO / Entra ID](/northwestern-integrations/websso/) documentation for provider-specific details.
@@ -121,7 +167,7 @@ External users (non-Northwestern) can access the application via time-limited ve
 
 4. **User enters code**
 
-   Code authenticates the user and establishes a session
+   On `/app/login/email`, the code authenticates the user and establishes a session
 
 5. **Code expires**
 
@@ -142,9 +188,6 @@ LOCAL_AUTH_RATE_LIMIT_PER_HOUR=10
 
 # Rate limit for login code requests per IP (per hour)
 LOCAL_AUTH_RATE_LIMIT_PER_IP_PER_HOUR=20
-
-# Where to redirect after successful login
-LOCAL_AUTH_REDIRECT_AFTER_LOGIN=/
 
 # Use a fixed, predictable verification code instead of random codes
 LOCAL_AUTH_USE_FIXED_CODE=false
@@ -296,7 +339,7 @@ All charts, filters, exports, and stats pull from the `UserSegment`. Adding a ne
 
 ## Rate Limiting
 
-Authentication endpoints use layered rate limiters to prevent brute force attacks and abuse. Limits are applied per IP and per identifier (email or challenge ID) to balance security with usability.
+Authentication uses layered rate limits to prevent brute force attacks and abuse. Limits are applied per IP and per identifier (email or challenge ID) to balance security with usability. The email sign-in page enforces the passwordless limits itself, because Livewire actions don't pass through route middleware.
 
 ### Passwordless Login
 

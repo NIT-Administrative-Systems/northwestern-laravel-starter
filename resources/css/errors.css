@@ -8,3 +8,4 @@
 
 @source '../views/errors/**/*';
 @source '../views/components/layouts/error.blade.php';
+@source '../views/components/site-header.blade.php';

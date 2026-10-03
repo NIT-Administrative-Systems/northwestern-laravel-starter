@@ -8,8 +8,6 @@ use App\Domains\Support\Actions\CreateSupportTicket;
 use App\Domains\Support\Models\SupportTicket;
 use App\Domains\Support\Repositories\SupportTicketRepository;
 use App\Domains\User\Models\User;
-use App\Filament\Navigation\AppNavGroup;
-use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -26,7 +24,6 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\RateLimiter;
-use UnitEnum;
 
 /**
  * Sends a support request to the configured ticket system, falling back to email.
@@ -40,11 +37,8 @@ class ContactSupport extends Page
 
     protected static ?string $slug = 'support/contact';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedLifebuoy;
-
-    protected static string|UnitEnum|null $navigationGroup = AppNavGroup::Help;
-
-    protected static ?int $navigationSort = 2;
+    // Reached from the Help menu in the top bar, not the sidebar.
+    protected static bool $shouldRegisterNavigation = false;
 
     /** @var array<string, mixed>|null */
     public ?array $data = [];
@@ -149,7 +143,7 @@ class ContactSupport extends Page
 
     /**
      * Apply the `support:contact` rate limits, which were route middleware for the
-     * Bootstrap form. Livewire actions don't pass through route middleware.
+     * previous controller-based form. Livewire actions don't pass through route middleware.
      */
     private function tooManyRequests(): bool
     {

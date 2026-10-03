@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "45e712e2bb71e63ad9b89f26d38e2207",
+    "content-hash": "e32389299b072c99b2ee3403e3321f59",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -5524,65 +5524,6 @@
             "time": "2026-10-03T00:06:30+00:00"
         },
         {
-            "name": "northwestern-sysdev/northwestern-laravel-ui",
-            "version": "v4.2.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/NIT-Administrative-Systems/northwestern-laravel-ui",
-                "reference": "970b00fdb2d9d58939bcf5f7b5b18c48f1b7ecc8"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/NIT-Administrative-Systems/northwestern-laravel-ui/zipball/970b00fdb2d9d58939bcf5f7b5b18c48f1b7ecc8",
-                "reference": "970b00fdb2d9d58939bcf5f7b5b18c48f1b7ecc8",
-                "shasum": ""
-            },
-            "require": {
-                "laravel/ui": "^3.0|^2.0|^3.0|^4.0",
-                "php": ">=8.3",
-                "sentry/sdk": "^4"
-            },
-            "conflict": {
-                "laravel/framework": "<7.0"
-            },
-            "require-dev": {
-                "larastan/larastan": "^3.12",
-                "orchestra/testbench": "^10.0|^11.0",
-                "php-coveralls/php-coveralls": "^2.4",
-                "phpunit/phpunit": "^11.0"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "Northwestern\\SysDev\\UI\\Providers\\NorthwesternUiServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Northwestern\\SysDev\\UI\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Nicholas Evans",
-                    "email": "nick.evans@northwestern.edu"
-                }
-            ],
-            "description": "Northwestern University Bootstrap 4 theme for Laravel apps",
-            "keywords": [
-                "laravel",
-                "northwestern",
-                "northwestern university"
-            ],
-            "time": "2026-09-16T19:09:05+00:00"
-        },
-        {
             "name": "northwestern-sysdev/tdx-php-sdk",
             "version": "v0.6.0",
             "source": {
@@ -7399,61 +7340,6 @@
                 }
             ],
             "time": "2022-12-17T21:53:22+00:00"
-        },
-        {
-            "name": "sentry/sdk",
-            "version": "4.0.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/getsentry/sentry-php-sdk.git",
-                "reference": "fcbca864e8d1dc712f3ecfaa95ea89d024fb2e53"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/getsentry/sentry-php-sdk/zipball/fcbca864e8d1dc712f3ecfaa95ea89d024fb2e53",
-                "reference": "fcbca864e8d1dc712f3ecfaa95ea89d024fb2e53",
-                "shasum": ""
-            },
-            "require": {
-                "sentry/sentry": "^4.0"
-            },
-            "type": "metapackage",
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Sentry",
-                    "email": "accounts@sentry.io"
-                }
-            ],
-            "description": "This is a meta package of sentry/sentry. We recommend using sentry/sentry directly.",
-            "homepage": "http://sentry.io",
-            "keywords": [
-                "crash-reporting",
-                "crash-reports",
-                "error-handler",
-                "error-monitoring",
-                "log",
-                "logging",
-                "sentry"
-            ],
-            "support": {
-                "issues": "https://github.com/getsentry/sentry-php-sdk/issues",
-                "source": "https://github.com/getsentry/sentry-php-sdk/tree/4.0.0"
-            },
-            "funding": [
-                {
-                    "url": "https://sentry.io/",
-                    "type": "custom"
-                },
-                {
-                    "url": "https://sentry.io/pricing/",
-                    "type": "custom"
-                }
-            ],
-            "time": "2023-11-06T10:23:19+00:00"
         },
         {
             "name": "sentry/sentry",

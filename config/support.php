@@ -18,6 +18,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Documentation Link
+    |--------------------------------------------------------------------------
+    |
+    | The user documentation for your application, linked from the Help menu
+    | in the header. The link is hidden while this is empty. It does not
+    | depend on the feature toggle above.
+    |
+    */
+
+    'documentation_url' => env('SUPPORT_DOCUMENTATION_URL'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Limited Support Warning
     |--------------------------------------------------------------------------
     |

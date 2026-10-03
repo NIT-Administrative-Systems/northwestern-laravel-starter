@@ -8,12 +8,10 @@ use App\Domains\Auth\Actions\Local\FixedNumericOneTimeCodeGenerator;
 use App\Domains\Auth\Actions\Local\RandomNumericOneTimeCodeGenerator;
 use App\Domains\Auth\Contracts\OneTimeCodeGenerator;
 use App\Domains\Auth\Enums\SystemPermission;
-use App\Domains\Core\Exceptions\SentryExceptionHandler;
 use App\Domains\User\Models\User;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Client\RequestException;
-use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -24,7 +22,6 @@ use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Northwestern\SysDev\Chassis\Database\ConfigurableDbDumperFactory;
 use Northwestern\SysDev\Chassis\Exceptions\ProblemDetailsRenderer;
-use Northwestern\SysDev\UI\Providers\NorthwesternUiServiceProvider;
 use Spatie\DbSnapshots\DbDumperFactory;
 
 class AppServiceProvider extends ServiceProvider
@@ -42,8 +39,6 @@ class AppServiceProvider extends ServiceProvider
                 ? FixedNumericOneTimeCodeGenerator::class
                 : RandomNumericOneTimeCodeGenerator::class,
         );
-
-        Paginator::useBootstrapFive();
     }
 
     public function boot(): void
@@ -53,7 +48,6 @@ class AppServiceProvider extends ServiceProvider
         $this->configureCommands();
         $this->configureRoutes();
         $this->configureRequests();
-        $this->configureSentry();
     }
 
     /** Configure Vite asset handling and prefetching strategy. */
@@ -104,17 +98,5 @@ class AppServiceProvider extends ServiceProvider
         if (App::environment(['ci', 'testing'])) {
             Http::preventStrayRequests();
         }
-    }
-
-    /**
-     * Registers user context for the browser Sentry SDK on the remaining
-     * northwestern-laravel-ui pages, which call `Sentry.setUser()` with it on
-     * every page load. It is the same context PHP reports use.
-     */
-    public function configureSentry(): void
-    {
-        NorthwesternUiServiceProvider::setSentryUserContext(static fn (?User $user): ?array => $user instanceof User
-            ? resolve(SentryExceptionHandler::class)->userContext($user)
-            : null);
     }
 }

@@ -115,7 +115,7 @@ return [
     |
     */
 
-    'inject_assets' => false,
+    'inject_assets' => true,
 
     /*
     |---------------------------------------------------------------------------
@@ -153,9 +153,9 @@ return [
     |
     | When enabling Livewire's pagination feature by using the `WithPagination`
     | trait, Livewire will use Tailwind templates to render pagination views
-    | on the page. If you want Bootstrap CSS, you can specify: "bootstrap"
+    | on the page.
     |
     */
 
-    'pagination_theme' => 'bootstrap',
+    'pagination_theme' => 'tailwind',
 ];

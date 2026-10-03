@@ -43,7 +43,7 @@ When enabled, the contact form routes are registered and the submission log appe
 
 1. **User visits the contact form**
 
-   Authenticated users access `/support/contact` and fill in a subject and details.
+   Signed-in users open **Contact Support** in the App panel (`/app/support/contact`) and fill in a subject and details.
 
 2. **Ticket is persisted**
 
@@ -170,7 +170,7 @@ Tickets are globally searchable by subject, ticket number, requester email, and 
 
 ## Contact Form
 
-The contact form is available at `/support/contact` for authenticated users. It collects a subject and details.
+The contact form is the **Contact Support** page in the app panel (`/app/support/contact`), reached from the Help menu in the header,, available to signed-in users when `SUPPORT_ENABLED=true`. It collects a subject and details, and reports the result as a notification.
 
 ### Limited Support Warning
 

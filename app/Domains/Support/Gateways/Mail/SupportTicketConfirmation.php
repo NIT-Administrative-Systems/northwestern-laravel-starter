@@ -12,7 +12,8 @@ use Illuminate\Mail\Mailable;
 /**
  * User-facing confirmation email sent after a support ticket is submitted.
  *
- * Contains the reference number, subject, and next-step expectations.
+ * Contains the reference number, subject, submission time, the user's own details,
+ * and next-step expectations.
  * Excludes any internal details (fallback warnings, error messages, etc.).
  * Sent by the {@see MailGateway} for both primary and fallback submissions.
  */
@@ -37,7 +38,11 @@ class SupportTicketConfirmation extends Mailable implements ShouldQueue
             ->with([
                 'submitter' => $this->ticket->user->first_name ?? 'User',
                 'subject' => $this->ticket->subject,
+                'details' => $this->ticket->details,
                 'referenceNumber' => $this->referenceNumber,
+                'submittedAt' => ($this->ticket->created_at ?? now())
+                    ->setTimezone(config('app.schedule_timezone'))
+                    ->format('M j, Y g:i A T'),
             ]);
     }
 }

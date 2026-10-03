@@ -12,10 +12,17 @@
 @php
     use App\Providers\Filament\AppPanelProvider;
     use Filament\Facades\Filament;
+    use Filament\Livewire\SimpleUserMenu;
 
     $appName = config('app.name');
     $appPanel = Filament::getPanel(AppPanelProvider::ID);
-    $user = auth()->user();
+
+    // Error pages render on this layout too, from wherever the error happened (an administration
+    // page, or an unknown URL), so the app panel's theme is selected here, and a failing user
+    // lookup leaves the page signed out rather than failing it.
+    Filament::setCurrentPanel($appPanel);
+    Filament::bootCurrentPanel();
+    $user = rescue(fn() => auth()->user(), null, report: false);
 @endphp
 
 <!DOCTYPE html>
@@ -40,6 +47,7 @@
         }
     </style>
 
+    @livewireStyles
     @filamentStyles
     {{ filament()->getTheme()->getHtml() }}
     {{ filament()->getFontHtml() }}
@@ -47,6 +55,12 @@
     <style>
         :root {
             --font-family: '{!! filament()->getFontFamily() !!}';
+        }
+
+        /* These pages are light-only, so the user menu's theme switcher would do nothing here.
+           It has a dropdown list of its own; hide the list, or its border stays behind. */
+        .fi-dropdown-list:has(> .fi-theme-switcher) {
+            display: none !important;
         }
     </style>
 
@@ -59,43 +73,22 @@
         Skip to content
     </a>
 
-    <header>
-        <div class="bg-nu-purple-120">
-            <div class="mx-auto flex h-12 max-w-7xl items-center px-4 sm:px-6 lg:px-8">
-                <a class="block [&_.nu-wordmark]:h-5 [&_.nu-wordmark]:w-auto [&_.nu-wordmark]:text-white"
-                   href="https://www.northwestern.edu/">
-                    @include('northwestern-filament-theme::wordmark')
-                </a>
-            </div>
-        </div>
+    <x-site-header>
+        <x-help-menu />
 
-        <div class="border-b border-gray-200 bg-white">
-            <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
-                <a class="font-nu-heading text-nu-purple-100 text-lg font-bold sm:text-xl" href="{{ url('/') }}">
-                    {{ $appName }}
-                </a>
-
-                @if ($user)
-                    <div class="flex items-center gap-3">
-                        <span class="hidden text-sm text-gray-600 sm:inline">{{ $user->getFilamentName() }}</span>
-                        <x-filament::button data-cy="back-to-app-link"
-                                            tag="a"
-                                            :href="$appPanel->getUrl()"
-                                            color="gray"
-                                            outlined>
-                            Back to app
-                        </x-filament::button>
-                    </div>
-                @else
-                    <x-filament::button data-cy="sign-in-link"
-                                        tag="a"
-                                        :href="$appPanel->getLoginUrl()">
-                        Sign in
-                    </x-filament::button>
-                @endif
-            </div>
-        </div>
-    </header>
+        @if ($user)
+            @livewire(SimpleUserMenu::class)
+        @else
+            <x-filament::button class="whitespace-nowrap"
+                                data-cy="sign-in-link"
+                                tag="a"
+                                :href="$appPanel->getLoginUrl()"
+                                color="gray"
+                                size="sm">
+                Sign in
+            </x-filament::button>
+        @endif
+    </x-site-header>
 
     <main class="flex-1" id="main">
         {{ $slot }}
@@ -103,6 +96,9 @@
 
     <x-northwestern-filament-theme::footer />
 
+    {{-- Livewire's scripts bring Alpine, which Filament's components need. Livewire only injects them
+         automatically on pages that render a Livewire component, and these pages render none. --}}
+    @livewireScripts
     {{-- Without the panel core, which would apply the user's panel theme (including dark mode). --}}
     @filamentScripts
 </body>

@@ -20,8 +20,6 @@ export default defineConfig({
         tailwindcss(),
         laravel({
             input: [
-                "resources/sass/app.scss",
-                "resources/js/app.js",
                 "resources/js/audit-diff.ts",
                 "resources/js/sentry.js",
                 "resources/css/errors.css",
