@@ -21,7 +21,7 @@ class DirectorySearchValidator implements ConfigValidator
 {
     public function shouldRun(): bool
     {
-        return ! (App::environment('local') && blank(config('nusoa.directorySearch.apiKey')));
+        return ! App::environment('local') || filled(config('nusoa.directorySearch.apiKey'));
     }
 
     public function validate(): bool
