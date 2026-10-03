@@ -82,14 +82,14 @@ class Dashboard extends BaseDashboard
                             'Replace the landing page',
                             'Guests see resources/views/public/landing.blade.php at /.',
                             null,
-                            'architecture/ui-architecture/#the-public-layout',
+                            'building/public-pages/#the-landing-page',
                         ),
                         $this->step(
                             'feature',
                             'Build your first feature',
                             'Resources and pages in app/Filament/App/ appear in this panel\'s sidebar.',
                             Filament::getPanel(AppPanelProvider::ID)->getResources() !== [],
-                            'architecture/ui-architecture/#the-app-panel',
+                            'building/app-panel/',
                         ),
                         $this->step(
                             'support',

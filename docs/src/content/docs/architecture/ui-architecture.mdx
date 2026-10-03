@@ -13,11 +13,11 @@ The starter has **one frontend stack**: [Filament](https://filamentphp.com), bui
 
 | Surface | URL | Built with | Use it for |
 |---|---|---|---|
-| **App panel** | `/app` | Filament panel (`AppPanelProvider`) | Everything your application does for its users. It is the default panel, and it owns sign-in for the whole application. |
-| **Administration panel** | `/administration` | Filament panel (`AdministrationPanelProvider`) | Back-office tooling: users, roles, audits, API tokens, platform settings. |
-| **Public layout** | anywhere outside the panels, such as `/` and `/support/changelog` | `<x-layouts.public>` with Filament's Blade components | Pages people can see without signing in. |
-| **Error layout** | 500, 503 and database-paused pages | `<x-layouts.error>` | Errors where the application may not be working. It renders without Filament, auth or the database. |
-| **Mail** | — | Laravel markdown mail, with the starter's theme | Email. |
+| [**App panel**](/building/app-panel/) | `/app` | Filament panel (`AppPanelProvider`) | Everything your application does for its users. It is the default panel, and it owns sign-in for the whole application. |
+| [**Administration panel**](#the-administration-panel) | `/administration` | Filament panel (`AdministrationPanelProvider`) | Back-office tooling: users, roles, audits, API tokens, platform settings. |
+| [**Public layout**](/building/public-pages/) | anywhere outside the panels, such as `/` and `/support/changelog` | `<x-layouts.public>` with Filament's Blade components | Pages people can see without signing in. |
+| [**Error layout**](/building/error-pages/) | 500, 503 and database-paused pages | `<x-layouts.error>` | Errors where the application may not be working. It renders without Filament, auth or the database. |
+| [**Mail**](/building/branding-and-mail/#email) | — | Laravel Markdown mail, with the starter's theme | Email. |
 
 <Aside type="tip">
     Build features in the **app panel**. Reach for the public layout only for pages that must work without signing in.
@@ -25,84 +25,27 @@ The starter has **one frontend stack**: [Filament](https://filamentphp.com), bui
 
 ## The app panel
 
-The app panel at `/app` is where an application built on the starter does its work. Any signed-in user can open it. Resources, pages and widgets placed in `app/Filament/App/` are discovered automatically.
-
-It also provides:
-
-- **Sign-in.** `/app/login` lists the configured sign-in methods (Northwestern single sign-on and email login codes). Guests of either panel are sent here. See [Authentication](/features/authentication).
-- **Environment lockdown.** Users without a role that grants access to a locked-down environment see `/app/access-restricted`.
-- **A placeholder dashboard.** `App\Filament\App\Pages\Dashboard` shows a setup checklist that ticks what it can detect from your configuration. Replace its `content()` with your application's dashboard.
-- **A component gallery.** `/app/gallery` shows Filament's components in the Northwestern theme with sample content. It is linked from the placeholder dashboard, never in the navigation, and unavailable in production. Delete `ComponentGallery` when you no longer need it.
-- **Navigation.** The sidebar is for your application's features; the starter ships only the dashboard there. The top bar holds what every page shares: the wordmark, the application name, the **Help** menu and the user menu.
-- **Help.** The Help menu (`<x-help-menu />`) lists the changelog, the Contact Support page (`/app/support/contact`) for signed-in users, and your user documentation when `SUPPORT_DOCUMENTATION_URL` is set.
-- **The user menu.** It has "Administration" (shown only to users who can open that panel) and "Sign out".
-- **Notifications.** The bell in the top bar lists database notifications, refreshed every 30 seconds. Send one with `Notification::make()->title('...')->sendToDatabase($user)`. The component gallery's "Send me a notification" button shows one arriving.
-
-Signed-in users who visit `/` are sent to the app panel by `HomeController`. To send some users elsewhere, override `HomeController::destinationFor()`.
+The app panel at `/app` is where an application built on the starter does its work. Any signed-in user can open it, and Resources, Pages and Widgets in `app/Filament/App/` are discovered automatically. See [The App Panel](/building/app-panel/) for its dashboard, Help menu, notifications and simple pages.
 
 ## The administration panel
 
-The administration panel at `/administration` holds the starter's back-office tools. It requires the `AccessAdministrationPanel` permission. Its resources and pages live in `app/Filament/` outside `app/Filament/App/`. It has no footer: the footer is for the pages end users see.
+The administration panel at `/administration` holds the starter's back-office tools. It requires the `AccessAdministrationPanel` permission, and each tool checks its own permission as well. Its resources and pages live in `app/Filament/` outside `app/Filament/App/`, and it has no footer.
+
+- **Users and roles.** Manage SSO, local and API users and their roles. See [Authorization](/features/authorization/) and [Creating Local Users](/features/authentication/#creating-local-users).
+- **Access tokens and API request logs.** Issue, rotate and revoke an API user's tokens on the user's page. The **API** section shows an overview and the request log when the API is enabled. See [API](/features/api/).
+- **Audit logs.** Every audited change, with a diff of each one. See [Audit Logging](/features/audit-logging/).
+- **Sign-in records.** Every sign-in with its user segment, with stats and charts of sign-ins over time and by segment (`app/Filament/Resources/UserLoginRecords`). Requires `ViewLoginRecords`. See [User Segmentation](/features/authentication/#user-segmentation).
+- **Role activity.** Role assignments and removals across all users, opened from the **Role Activity** button on the Roles page. See [Audited Role Changes](/features/authorization/#audited-role-changes).
+- **Support tickets.** A read-only log of Contact Support submissions, when support is enabled. See [Support Tickets](/features/support-tickets/#filament-admin-panel).
+- **Platform overview.** `/administration/overview` shows the environment, services, feature flags, health check results, queues, scheduled tasks, sign-in activity and API traffic. Requires `ManageAll`. See [Health Checks](/features/health-checks/).
+- **Impersonation.** The **Impersonate** button on a user's page. See [Impersonating Users](/features/authentication/#impersonating-users).
+- **Developer Tools.** Navigation links to Telescope, the RustFS console when `S3_CONSOLE_URL` is set, and MailPit when `MAIL_CAPTURE_URL` is set. They show only to users who can view Telescope (`ManageAll`), and open in a new tab.
 
 ## The public layout
 
-`<x-layouts.public>` is the layout for pages outside the panels. Its header (`<x-site-header>`) matches the panels' top bar: the Northwestern wordmark, the application name, the Help menu, then **Sign in** or the user menu. The Northwestern footer is at the bottom.
+`<x-layouts.public>` is the layout for pages outside the panels, such as the landing page and the changelog. Its routes run in the app panel's context, so it can use Filament's Blade components, and it is light only. See [Public Pages](/building/public-pages/) for adding a page, and [Error Pages](/building/error-pages/) for the error pages that also use it.
 
-The sign-in pages, the lockdown page and the error pages use the same header, so every page names the application. Outside production the header shows the environment badge: top right on larger screens, centered below the header on phones.
-
-The client error pages (401, 403, 404, 419 and 429) render on this layout, so their header keeps the Help menu and Sign in or the user menu. A fallback route sends unknown URLs through the web middleware, so the not-found page knows who is signed in; paths under `api/` are left out.
-
-Routes that use it run in the app panel's context through the `panel:app` middleware, so the page loads the app panel's theme and colors, and you can use Filament's Blade components:
-
-```php
-// routes/web.php
-Route::middleware('panel:' . AppPanelProvider::ID)->group(function () {
-    Route::get('/', Controllers\HomeController::class)->name('home');
-});
-```
-
-```blade
-<x-layouts.public title="About">
-    <div class="mx-auto max-w-3xl px-4 py-12">
-        <h1 class="font-nu-heading text-3xl font-bold">About</h1>
-
-        <x-filament::button tag="a" href="/app">Get started</x-filament::button>
-    </div>
-</x-layouts.public>
-```
-
-The public layout is **light only**, as the university's templates are. It loads Livewire and Filament's support scripts (for Alpine features such as tooltips) but not the panel core, which would apply each user's panel theme, including dark mode. Its views are compiled by the app panel's Tailwind theme, so keep them in `resources/views/public/` or add their path to the `@source` list in `resources/css/filament/app/theme.css`.
-
-## The error layout
-
-`<x-layouts.error>` renders the error pages that can't rely on the application working: 500, 503 (maintenance) and database-paused. It must work when nothing else does, so it loads no Filament, makes no auth calls and doesn't touch the database. Its styles come from `resources/css/errors.css`, built from the Northwestern design tokens.
-
-Anything on an error page that could query the database, such as checking the signed-in user's permissions, is wrapped in `rescue()` and fails closed.
-
-## Branding
-
-The Northwestern Filament Theme provides the look of every surface:
-
-- **Colors and fonts** come from [`@nu-appdev/northwestern-tokens`](https://github.com/NIT-Administrative-Systems/northwestern-tokens). Akkurat Pro, Poppins and Noto Serif load from the university's CDN.
-- **The footer** includes the links the university's Web Style Guide requires, plus your unit's contact details. Panels render it automatically; other layouts use `<x-northwestern-filament-theme::footer />`. Emails use the same unit details.
-- **Your unit's details** are set in `config/northwestern-filament-theme.php`:
-
-```php
-// config/northwestern-filament-theme.php
-'lockup' => env('NU_LOCKUP'),          // null shows the Northwestern wordmark
-'unit' => [
-    'name' => env('NU_UNIT_NAME'),
-    'address' => env('NU_UNIT_ADDRESS'),
-    'city' => env('NU_UNIT_CITY'),
-    'phone' => env('NU_UNIT_PHONE'),
-    'fax' => env('NU_UNIT_FAX'),
-    'email' => env('NU_UNIT_EMAIL'),
-],
-'footer' => [
-    'links' => [],                     // Quick Links, as label => URL
-    'social' => [/* network => URL */],
-],
-```
+The theme, footer and email are covered in [Branding & Mail](/building/branding-and-mail/).
 
 ---
 
