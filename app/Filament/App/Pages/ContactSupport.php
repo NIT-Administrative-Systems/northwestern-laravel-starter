@@ -24,6 +24,7 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\HtmlString;
 
 /**
  * Sends a support request to the configured ticket system, falling back to email.
@@ -78,8 +79,12 @@ class ContactSupport extends Page
     {
         return $schema
             ->components([
-                Callout::make('Limited support')
-                    ->description('Limited support for this environment is available. The contact form may behave differently by sending emails instead of creating tickets in the IT ticketing system. If you are performing testing for a project, please reach out to the project team instead of using this form.')
+                // No callout heading: Filament renders it as an <h4>, which would skip levels after the page's <h1>.
+                Callout::make()
+                    ->description(new HtmlString(
+                        '<strong>Limited support.</strong> Limited support for this environment is available. The contact form may behave differently by sending emails instead of creating tickets in the IT ticketing system. '
+                        . 'If you are performing testing for a project, please reach out to the project team instead of using this form.'
+                    ))
                     ->warning()
                     ->visible((bool) config('support.limited_support_warning')),
                 Section::make('Need help or have a question?')

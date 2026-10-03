@@ -95,8 +95,11 @@ class Login extends SimplePage
                         ->extraAttributes(['class' => 'nu-sign-in-hint']),
                 ])->dense()->visible($localAuthEnabled),
 
-                Callout::make('No sign-in methods available')
-                    ->description('This application has not been configured with any authentication providers yet.')
+                // No callout heading: Filament renders it as an <h4>, which would skip levels after the page's <h1>.
+                Callout::make()
+                    ->description(new HtmlString(
+                        '<strong>No sign-in methods available.</strong> This application has not been configured with any authentication providers yet.'
+                    ))
                     ->warning()
                     ->actions([
                         Action::make('docs')

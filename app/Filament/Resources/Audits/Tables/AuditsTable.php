@@ -104,6 +104,8 @@ class AuditsTable
                             ->orWhereRelation('impersonator', 'username', 'ilike', "%{$search}%");
                     })
                     ->formatStateUsing(fn ($state, $record) => $record->user->username ?? '')
+                    // Rows link to the audit, so an empty cell would be a link with no text.
+                    ->placeholder('System')
                     ->description(
                         fn ($record) => $record->impersonator
                         ? "Impersonated by {$record->impersonator->username}"
@@ -120,6 +122,7 @@ class AuditsTable
                             ->orWhereHas('impersonator', fn (Builder $q) => $q->searchByName($search));
                     })
                     ->formatStateUsing(fn ($state, $record) => $record->user->full_name ?? '')
+                    ->placeholder('—')
                     ->description(
                         fn ($record) => $record->impersonator
                         ? "Impersonated by {$record->impersonator->full_name}"

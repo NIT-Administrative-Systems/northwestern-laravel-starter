@@ -75,7 +75,9 @@ class UsersTable
                     ->searchable()
                     ->toggleable(),
                 TextColumn::make('roles.name')
-                    ->badge(),
+                    ->badge()
+                    // Rows link to the user, so an empty cell would be a link with no text.
+                    ->placeholder('No roles'),
                 IconColumn::make('netid_inactive')
                     ->label('NetID Status')
                     ->getStateUsing(fn (User $record) => NetIdStatus::getState($record))
