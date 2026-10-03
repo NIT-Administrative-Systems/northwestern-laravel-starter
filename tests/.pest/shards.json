@@ -63,7 +63,6 @@
         "Tests\\Feature\\Filament\\App\\Pages\\Auth\\LoginTest": 0.9628,
         "Tests\\Feature\\Filament\\App\\Pages\\ComponentGalleryTest": 0.808,
         "Tests\\Feature\\Filament\\App\\Pages\\ContactSupportTest": 1.2322,
-        "Tests\\Feature\\Filament\\App\\Pages\\DashboardTest": 0.5001,
         "Tests\\Feature\\Filament\\App\\Pages\\EnvironmentLockdownTest": 0.8304,
         "Tests\\Feature\\Filament\\Resources\\Roles\\RoleDefinitionHistoryTest": 1.742,
         "Tests\\Feature\\Http\\Controllers\\HomeControllerTest": 0.5035,

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\App\Pages;
 
+use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
@@ -34,8 +35,8 @@ use Illuminate\Support\HtmlString;
 
 /**
  * Starter placeholder: Filament's common components in the Northwestern theme, with
- * sample content, so you can see what you are building with. Linked from the
- * dashboard, never in the navigation, and not available in production.
+ * sample content, so you can see what you are building with. In the sidebar outside
+ * production; canAccess() refuses it, and hides its navigation item, in production.
  *
  * Delete this page when you no longer need it.
  *
@@ -49,7 +50,9 @@ class ComponentGallery extends Page implements HasTable
 
     protected static ?string $slug = 'gallery';
 
-    protected static bool $shouldRegisterNavigation = false;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSwatch;
+
+    protected static ?int $navigationSort = 1000;
 
     /** @var array<string, mixed>|null */
     public ?array $data = [];
