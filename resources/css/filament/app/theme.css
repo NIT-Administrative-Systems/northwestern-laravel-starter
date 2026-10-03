@@ -21,16 +21,55 @@
     border-top: 4px solid var(--nu-purple-100);
 }
 
-/* Sign-in options: each section's heading is a small caps audience label. */
-.nu-sign-in-option .fi-section-header-heading {
-    color: var(--nu-purple-100);
+/* Sign-in page: "Sign in to" above the application name, which gets a row of its own. */
+.nu-sign-in-heading-lead {
+    display: block;
+    color: var(--gray-500);
+    font-family: var(--nu-font-body);
+    font-size: 1rem;
+    font-weight: 500;
+    letter-spacing: normal;
+}
+
+.nu-sign-in-heading-app {
+    display: block;
+    margin-top: 0.25rem;
+}
+
+/* A muted line under each sign-in button saying who it is for. */
+.nu-sign-in-hint {
+    display: block;
+    color: var(--gray-500);
+    font-size: 0.8125rem;
+    text-align: center;
+}
+
+/* "or" between the sign-in methods, with a rule on each side. */
+.nu-sign-in-divider {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--gray-400);
     font-size: 0.75rem;
     letter-spacing: 0.06em;
     text-transform: uppercase;
 }
 
-.dark .nu-sign-in-option .fi-section-header-heading {
-    color: var(--nu-purple-40);
+.nu-sign-in-divider::before,
+.nu-sign-in-divider::after {
+    flex: 1;
+    border-top: 1px solid var(--gray-200);
+    content: "";
+}
+
+.dark .nu-sign-in-heading-lead,
+.dark .nu-sign-in-hint {
+    color: var(--gray-400);
+}
+
+.dark .nu-sign-in-divider::before,
+.dark .nu-sign-in-divider::after {
+    border-top-color: var(--gray-700);
 }
 
 /* Login code boxes fill the card, however many digits local-auth.code.digits sets. */

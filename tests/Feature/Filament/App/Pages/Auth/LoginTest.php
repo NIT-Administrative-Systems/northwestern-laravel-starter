@@ -142,9 +142,22 @@ final class LoginTest extends TestCase
 
         $this->get('/app/login')
             ->assertOk()
-            ->assertSee('Sign in to ' . config('app.name'))
-            ->assertSee('Northwestern community')
-            ->assertSee('External partners')
+            ->assertSee('Sign in to')
+            ->assertSee('<span class="nu-sign-in-heading-app">' . e(config('app.name')) . '</span>', escape: false)
+            ->assertSee('For students, faculty, staff, and affiliates.')
+            ->assertSee('For approved external partners without a NetID.')
+            ->assertSee('nu-sign-in-divider', escape: false)
             ->assertSee('https://www.northwestern.edu/', escape: false);
+    }
+
+    // With single sign-on alone the page redirects to it, so email alone is the one-method case that renders.
+    public function test_the_or_divider_only_shows_with_both_methods(): void
+    {
+        config(['local-auth.enabled' => true]);
+
+        $this->get('/app/login')
+            ->assertOk()
+            ->assertSee('Sign in with email')
+            ->assertDontSee('nu-sign-in-divider', escape: false);
     }
 }
