@@ -210,7 +210,7 @@ For production applications expecting high volume:
 
 ## Rate Limiting
 
-API routes are rate-limited by the `throttleApi()` middleware in `bootstrap/app.php`, using the `api` limiter in `RateLimitingServiceProvider`. The limiter runs before `AuthenticatesAccessTokens`, so it looks up the bearer token itself and counts requests per API user. A request without a valid token is counted by IP address.
+API routes are rate-limited by the `throttleApi()` middleware in `bootstrap/app.php`, using the `api` limiter in `RateLimitingServiceProvider`. It counts requests per API user: the limiter runs before `AuthenticatesAccessTokens`, so it gets the bearer token's user from that middleware's `userIdForRateLimiting()` (from chassis). A request without a valid token is counted by IP address.
 
 A client over the limit gets a `429 Too Many Requests` Problem Details response with a `Retry-After` header.
 

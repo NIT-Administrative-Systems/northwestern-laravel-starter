@@ -43,7 +43,7 @@ Version 3 removes the Bootstrap user interface. Every page now uses one stack, F
 - The support request confirmation email shows the reference number, subject, submission time and the user's message; the support team's email leads with the request.
 - Browser and PHP Sentry reports share one user context, `SentryExceptionHandler::userContext()`.
 - Livewire's pagination theme is `tailwind`.
-- Requires `northwestern-sysdev/northwestern-filament-theme` `^4.1` and `northwestern-sysdev/chassis` `^1.2`.
+- Requires `northwestern-sysdev/northwestern-filament-theme` `^4.1` and `northwestern-sysdev/chassis` `^1.2.1`.
 
 ### Fixed
 
