@@ -167,9 +167,10 @@ declare namespace Cypress {
         assertRedirect(path: string): Chainable<void>;
 
         /**
-         * Check for accessibility violations.
+         * Check for accessibility violations, leaving out elements matching `exclude`
+         * (and any in the `axe_excluded_selectors` setting).
          */
-        checkAxeViolations(): Chainable<void>;
+        checkAxeViolations(exclude?: string[]): Chainable<void>;
 
         /**
          * Select an element by its `data-cy` attribute.
