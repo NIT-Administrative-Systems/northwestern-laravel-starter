@@ -36,8 +36,7 @@ final class ErrorPagesTest extends TestCase
             ->assertNotFound()
             ->assertSee('Not Found')
             ->assertSee('Back to homepage')
-            ->assertSee('Privacy Statement')
-            ->assertDontSee('northwestern::', escape: false);
+            ->assertSee('Privacy Statement');
     }
 
     public function test_server_error_page_renders_when_the_database_is_unavailable(): void

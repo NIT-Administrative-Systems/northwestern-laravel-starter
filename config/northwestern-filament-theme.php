@@ -11,7 +11,7 @@ return [
     |
     | This value is the unit lockup shown as the brand logo of every panel. It
     | may be a full URL or a path within the public directory. If null, the
-    | legacy lockup is used, then the Department Templates 4.0 wordmark.
+    | Department Templates 4.0 wordmark is used.
     |
     */
 
@@ -26,8 +26,8 @@ return [
     | The Web Style Guide requires its address, phone, fax (if any)
     | and email to appear in the footer of every page it serves.
     |
-    | A null value falls back to the legacy northwestern-theme office key,
-    | then to Information Technology. An empty string hides that field.
+    | A null value falls back to Information Technology's details. An
+    | empty string hides that field.
     |
     */
 
