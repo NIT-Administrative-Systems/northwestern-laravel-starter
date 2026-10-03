@@ -21,6 +21,7 @@ final class SupportTicketConfirmationTest extends TestCase
 
         $ticket = SupportTicket::factory()->for($user)->pending()->create([
             'subject' => 'Login issue',
+            'details' => 'I cannot sign in.',
         ]);
 
         $mailable = new SupportTicketConfirmation($ticket, 'SUP-101')->build();
@@ -30,6 +31,11 @@ final class SupportTicketConfirmationTest extends TestCase
         $this->assertSame('Pat', $mailable->viewData['submitter']);
         $this->assertSame('Login issue', $mailable->viewData['subject']);
         $this->assertSame('SUP-101', $mailable->viewData['referenceNumber']);
+        $this->assertStringContainsString('I cannot sign in.', $mailable->viewData['details']);
+        $this->assertSame(
+            $ticket->created_at->setTimezone(config('app.schedule_timezone'))->format('M j, Y g:i A T'),
+            $mailable->viewData['submittedAt'],
+        );
     }
 
     public function test_build_uses_default_submitter_label_when_first_name_is_missing(): void

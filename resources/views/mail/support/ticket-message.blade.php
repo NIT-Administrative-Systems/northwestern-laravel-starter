@@ -1,8 +1,16 @@
 <x-mail::message>
+# New support request
+
 @if ($fallbackMode)
 > **Fallback Alert:** The primary gateway failed to create this ticket.
 > This email was sent as a fallback — check Sentry for the corresponding error.
 @endif
+
+<x-mail::panel>
+**{{ $subject }}**
+
+{!! $details !!}
+</x-mail::panel>
 
 <x-mail::table>
 | | |
@@ -20,14 +28,6 @@
 | **{{ count($submitterDepartments) === 1 ? 'Department' : 'Departments' }}** | {{ implode(', ', $submitterDepartments) }} |
 @endif
 </x-mail::table>
-
-**Subject**
-
-{{ $subject }}
-
-**Details**
-
-{!! $details !!}
 
 ---
 

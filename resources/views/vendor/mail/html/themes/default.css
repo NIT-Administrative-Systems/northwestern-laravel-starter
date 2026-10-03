@@ -109,18 +109,6 @@ img {
     text-decoration: none;
 }
 
-/* Eyebrow above the app name (text, because many email clients don't render SVG) */
-
-.header-eyebrow {
-    color: #e4e0ee;
-    font-size: 12px;
-    font-weight: bold;
-    letter-spacing: 0.08em;
-    margin: 0 0 6px;
-    text-align: center;
-    text-transform: uppercase;
-}
-
 /* Body */
 
 .body {
@@ -271,18 +259,18 @@ img {
 /* Panels */
 
 .panel {
-    border-left: #2d3748 solid 4px;
+    border-left: #4e2a84 solid 4px;
     margin: 21px 0;
 }
 
 .panel-content {
-    background-color: #edf2f7;
-    color: #718096;
+    background-color: #f2f0f7;
+    color: #2f3133;
     padding: 16px;
 }
 
 .panel-content p {
-    color: #718096;
+    color: #2f3133;
 }
 
 .panel-item {

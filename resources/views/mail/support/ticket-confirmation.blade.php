@@ -1,13 +1,21 @@
 <x-mail::message>
+# We received your request
+
 Hi {{ $submitter }},
 
-We received your support request and it has been assigned to our team.
+Thanks for contacting us. Your request is with our team, and someone will follow up with you by email as soon as possible.
 
-**Reference:** {{ $referenceNumber }}
+<x-mail::panel>
+**Reference:** {{ $referenceNumber }}<br>
+**Subject:** {{ $subject }}<br>
+**Submitted:** {{ $submittedAt }}
+</x-mail::panel>
 
-**Subject:** {{ $subject }}
+**What you sent**
 
-A team member will review your request and follow up with you as soon as possible.
+{!! $details !!}
+
+Please mention your reference number if you contact us about this request.
 
 Thanks,<br>
 {{ config('app.name') }}
