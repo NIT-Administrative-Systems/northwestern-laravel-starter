@@ -52,6 +52,13 @@ class CreateNorthwesternUserAction extends Action
                                 return;
                             }
 
+                            // Optional locally: say so instead of reporting a failed API call.
+                            if (blank(config('nusoa.directorySearch.apiKey'))) {
+                                $fail('Directory Search isn\'t configured. Set DIRECTORY_SEARCH_API_KEY to look people up.');
+
+                                return;
+                            }
+
                             try {
                                 $searchType = DirectorySearchType::fromSearchValue($searchValue);
                                 $result = $directorySearch->lookup($searchValue, $searchType->value, 'basic');

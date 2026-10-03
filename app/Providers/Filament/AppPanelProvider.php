@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers\Filament;
 
+use App\Domains\Auth\Http\Controllers\SignInAsController;
 use App\Filament\App\Pages\Auth\EmailCodeLogin;
 use App\Filament\App\Pages\Auth\Login;
 use App\Filament\App\Pages\EnvironmentLockdown as EnvironmentLockdownPage;
@@ -58,6 +59,12 @@ class AppPanelProvider extends PanelProvider
             ->routes(function (): void {
                 if (config('local-auth.enabled')) {
                     Route::get('login/email', EmailCodeLogin::class)->name('auth.login-code');
+                }
+
+                // One-click sign-in as a seeded user, so local environments need no SSO or email.
+                // Only ever in `local`: an explicit allowlist, never "not production".
+                if ($this->app->environment('local')) {
+                    Route::get('login/as/{username}', SignInAsController::class)->name('auth.login-as');
                 }
 
                 Route::get('access-restricted', EnvironmentLockdownPage::class)

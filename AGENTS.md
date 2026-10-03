@@ -20,17 +20,18 @@ shared with GitHub Copilot. Follow them. The documentation site is in `docs/`
 
 ## Commands
 
-| Task                            | Command                                                                 |
-| ------------------------------- | ----------------------------------------------------------------------- |
-| Run the app locally             | `composer dev` (server, queue, logs, Vite)                              |
-| PHP tests                       | `vendor/bin/pest --parallel`                                            |
-| One test file                   | `vendor/bin/pest tests/Feature/Path/To/SomeTest.php`                    |
-| Static analysis                 | `composer analyse:php` (PHPStan, must report no errors)                 |
-| Format PHP                      | `composer format:php` (Pint)                                            |
-| Format Blade, CSS, TS, Markdown | `pnpm format` (Prettier)                                                |
-| Type-check TypeScript           | `pnpm typecheck`                                                        |
-| Build assets                    | `pnpm build`                                                            |
-| End-to-end tests                | `pnpm test:e2e:headless` (needs a running app; see `cypress.config.js`) |
+| Task                            | Command                                                                        |
+| ------------------------------- | ------------------------------------------------------------------------------ |
+| Run the app locally             | `composer dev` (server, queue, logs, Vite)                                     |
+| Sign in locally                 | Open `/app/login/as/nuit.admin` (or another `DemoUserSeeder::SIGN_IN_AS` user) |
+| PHP tests                       | `vendor/bin/pest --parallel`                                                   |
+| One test file                   | `vendor/bin/pest tests/Feature/Path/To/SomeTest.php`                           |
+| Static analysis                 | `composer analyse:php` (PHPStan, must report no errors)                        |
+| Format PHP                      | `composer format:php` (Pint)                                                   |
+| Format Blade, CSS, TS, Markdown | `pnpm format` (Prettier)                                                       |
+| Type-check TypeScript           | `pnpm typecheck`                                                               |
+| Build assets                    | `pnpm build`                                                                   |
+| End-to-end tests                | `pnpm test:e2e:headless` (needs a running app; see `cypress.config.js`)        |
 
 Before calling work done, run the PHP tests, PHPStan and both formatters, and rebuild assets
 if you changed Blade, CSS or TypeScript. CI runs all of them, and its lint job commits

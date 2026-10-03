@@ -17,6 +17,18 @@ use Illuminate\Support\Str;
  */
 class DemoUserSeeder extends Seeder
 {
+    /**
+     * The users the sign-in page offers under "Sign in as" in local environments, in this order.
+     * Add the users you seed for specific roles here so developers and agents can sign in as them.
+     *
+     * @var list<string>
+     */
+    public const array SIGN_IN_AS = [
+        'nuit.admin',
+        'generic.user',
+        'partner.user',
+    ];
+
     public function run(): void
     {
         $this->genericUser();

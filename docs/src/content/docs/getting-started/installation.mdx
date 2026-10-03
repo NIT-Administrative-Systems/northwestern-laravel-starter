@@ -131,7 +131,13 @@ pnpm build
 
 ### 5. Environment Configuration
 
-In your **LOCAL** `.env` file, configure credentials depending on your authentication strategy. See the [WebSSO / Entra ID](/northwestern-integrations/websso/) documentation for full details on each provider.
+A local environment needs no credentials. With the `.env.example` values, the sign-in page offers **Sign in as** for the seeded demo users, `db:rebuild` makes no network calls, and `config:validate` skips the SSO and Directory Search checks. See [Signing In Locally](/features/authentication/#signing-in-locally).
+
+Configure SSO and Directory Search locally only to test real NetID sign-in or to add Northwestern users from the directory. Deployed environments always need them. See the [WebSSO / Entra ID](/northwestern-integrations/websso/) documentation for full details on each provider.
+
+<Aside type="note">
+Entra ID only redirects back to the redirect URIs registered for the application in Azure, so local NetID sign-in works only at a host you have registered. Worktrees and agents on other hosts or ports use **Sign in as** instead.
+</Aside>
 
 <Tabs>
   <TabItem label="Entra ID" icon="seti:lock">
@@ -192,8 +198,7 @@ This will:
 - Create all database tables
 - Seed system permissions, role types and default roles
 - Sync changelog entries from `resources/changelogs/`
-- Give each NetID in `SUPER_ADMIN_NETIDS` the Super Administrator role (see [Super Administrator Accounts](/getting-started/initial-customization/#1-super-administrator-accounts))
-- Seed example users
+- Seed the demo users, which the sign-in page offers under **Sign in as**
 - Regenerate the model IDE helper files
 
 :::caution
@@ -214,4 +219,4 @@ This runs the PHP server, a queue worker, the log viewer and Vite together. The 
 
 With Laravel Herd, the site is served at `https://your-project-name.test`. Without Herd, use the address `php artisan serve` prints.
 
-As a guest you should see the landing page. After you sign in, you land in the app panel at `/app`.
+As a guest you should see the landing page. Choose **Sign in**, then **Sign in as…** and a demo user such as NUIT Administrator, and you land in the app panel at `/app`.

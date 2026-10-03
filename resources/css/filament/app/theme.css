@@ -33,6 +33,13 @@
     padding-inline: 1rem;
 }
 
+/* Local "Sign in as" menu: its trigger spans the card like the sign-in buttons above it. */
+.nu-sign-in-as .fi-dropdown,
+.nu-sign-in-as .fi-dropdown-trigger,
+.nu-sign-in-as .fi-btn {
+    width: 100%;
+}
+
 /* A muted line under each sign-in button saying who it is for. */
 .nu-sign-in-hint {
     display: block;

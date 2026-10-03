@@ -20,7 +20,8 @@ class DemoSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->call(StakeholderSeeder::class);
+        // StakeholderSeeder isn't called here: it looks people up in Directory Search, and local
+        // environments get their administrator from DemoUserSeeder. Deployments run it on their own.
         $this->call(DemoUserSeeder::class);
 
         // Add additional seeders here as needed

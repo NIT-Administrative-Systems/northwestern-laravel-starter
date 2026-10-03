@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domains\Core\Services\ConfigValidation;
 
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\App;
 use Northwestern\SysDev\Chassis\Attributes\ValidatesConfig;
 use Northwestern\SysDev\Chassis\Contracts\ConfigValidator;
 
@@ -14,6 +15,9 @@ use Northwestern\SysDev\Chassis\Contracts\ConfigValidator;
  * The starter supports two SSO providers: Microsoft Entra ID (OAuth2) and
  * Online Passport (agentless WebSSO via ForgeRock). This validator detects
  * which provider is active and checks the appropriate credentials.
+ *
+ * SSO is optional locally, where "Sign in as" and email codes cover sign-in, so a
+ * local environment with no SSO variables at all skips this check.
  */
 #[ValidatesConfig(description: 'SSO Authentication')]
 class SSOValidator implements ConfigValidator
@@ -25,7 +29,7 @@ class SSOValidator implements ConfigValidator
 
     public function shouldRun(): bool
     {
-        return true;
+        return ! (App::environment('local') && $this->entraIdVariables()->filter()->isEmpty() && ! $this->detectOnlinePassport());
     }
 
     public function validate(): bool
