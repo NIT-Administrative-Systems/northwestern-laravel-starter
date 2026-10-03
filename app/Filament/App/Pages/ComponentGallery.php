@@ -145,12 +145,26 @@ class ComponentGallery extends Page implements HasTable
                         ]),
                     ]),
 
+                // Filament renders callout headings as <h4>, so callouts with a heading sit under an <h3>:
+                // the uncontained sections below. Directly under a page or a top-level section, leave the
+                // heading out and lead the description with bold text instead.
                 Section::make('Callouts')
                     ->schema([
-                        Callout::make('Information')->description('Something people should know.')->info(),
-                        Callout::make('Success')->description('Something worked.')->success(),
-                        Callout::make('Warning')->description('Something needs attention.')->warning(),
-                        Callout::make('Danger')->description('Something went wrong.')->danger(),
+                        Section::make('With a heading')
+                            ->contained(false)
+                            ->schema([
+                                Callout::make('Information')->description('Something people should know.')->info(),
+                                Callout::make('Success')->description('Something worked.')->success(),
+                                Callout::make('Warning')->description('Something needs attention.')->warning(),
+                                Callout::make('Danger')->description('Something went wrong.')->danger(),
+                            ]),
+                        Section::make('Without a heading')
+                            ->contained(false)
+                            ->schema([
+                                Callout::make()
+                                    ->description(new HtmlString('<strong>Bold lead-in.</strong> Use this directly under a page title or a top-level section.'))
+                                    ->info(),
+                            ]),
                     ]),
 
                 Section::make('Form fields')

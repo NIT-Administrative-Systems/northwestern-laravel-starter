@@ -52,8 +52,12 @@ class EnvironmentLockdown extends SimplePage
                     "This is the <strong>{$environment}</strong> environment for <strong>{$appName}</strong>, "
                     . 'which is strictly reserved for <strong>Northwestern IT</strong> development and testing purposes.'
                 )),
-                Callout::make('Why are you seeing this?')
-                    ->description('You do not have an assigned role that grants you access to this environment. If you believe this is an error, please reach out to your project contact or the IT Service Desk for assistance.')
+                // No callout heading: Filament renders it as an <h4>, which would skip levels after the page's <h1>.
+                Callout::make()
+                    ->description(new HtmlString(
+                        '<strong>Why are you seeing this?</strong> You do not have an assigned role that grants you access to this environment. '
+                        . 'If you believe this is an error, please reach out to your project contact or the IT Service Desk for assistance.'
+                    ))
                     ->info()
                     ->actions([
                         Action::make('serviceDesk')
