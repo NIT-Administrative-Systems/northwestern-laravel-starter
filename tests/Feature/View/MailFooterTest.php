@@ -71,7 +71,7 @@ final class MailFooterTest extends TestCase
 
         $text = (string) resolve(Markdown::class)->renderText('mail.auth.login-code', ['code' => '123456', 'expiresInMinutes' => 10]);
 
-        $this->assertStringContainsString((string) config('northwestern-theme.office.name', 'Information Technology'), $text);
+        $this->assertStringContainsString('Information Technology | 1800 Sherman Ave, Evanston, IL 60201', $text);
     }
 
     private function loginCodeMail(): LoginCodeMail

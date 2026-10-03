@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Providers\Filament;
 
 use App\Filament\Navigation\AdministrationNavGroup;
-use App\Http\Middleware\InjectLivewireAssets;
 use Filament\Actions\Action;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -90,7 +89,6 @@ class AdministrationPanelProvider extends PanelProvider
                     ->sort(1003),
             ])
             ->middleware([
-                InjectLivewireAssets::class,
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
                 StartSession::class,

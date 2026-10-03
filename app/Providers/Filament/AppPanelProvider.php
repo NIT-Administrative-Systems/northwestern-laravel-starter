@@ -9,7 +9,6 @@ use App\Filament\App\Pages\Auth\Login;
 use App\Filament\App\Pages\EnvironmentLockdown as EnvironmentLockdownPage;
 use App\Filament\Navigation\AppNavGroup;
 use App\Http\Middleware\EnvironmentLockdown;
-use App\Http\Middleware\InjectLivewireAssets;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Http\Middleware\Authenticate;
@@ -106,7 +105,6 @@ class AppPanelProvider extends PanelProvider
                     ->sort(1),
             ])
             ->middleware([
-                InjectLivewireAssets::class,
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
                 StartSession::class,

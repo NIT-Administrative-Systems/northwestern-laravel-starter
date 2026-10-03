@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Http\Controllers;
-use App\Http\Middleware\InjectLivewireAssets;
 use App\Providers\Filament\AppPanelProvider;
 use Illuminate\Support\Facades\Route;
 
@@ -11,7 +10,7 @@ use Illuminate\Support\Facades\Route;
  * Public pages render on the public layout (`<x-layouts.public>`) in the app panel's
  * context, so they load its theme and can use Filament's Blade components.
  */
-Route::middleware(['panel:' . AppPanelProvider::ID, InjectLivewireAssets::class])->group(function () {
+Route::middleware('panel:' . AppPanelProvider::ID)->group(function () {
     Route::get('/', Controllers\HomeController::class)->name('home');
 
     if (config('changelog.enabled')) {

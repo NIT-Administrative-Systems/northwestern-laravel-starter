@@ -40,6 +40,7 @@
         }
     </style>
 
+    @livewireStyles
     @filamentStyles
     {{ filament()->getTheme()->getHtml() }}
     {{ filament()->getFontHtml() }}
@@ -103,6 +104,9 @@
 
     <x-northwestern-filament-theme::footer />
 
+    {{-- Livewire's scripts bring Alpine, which Filament's components need. Livewire only injects them
+         automatically on pages that render a Livewire component, and these pages render none. --}}
+    @livewireScripts
     {{-- Without the panel core, which would apply the user's panel theme (including dark mode). --}}
     @filamentScripts
 </body>

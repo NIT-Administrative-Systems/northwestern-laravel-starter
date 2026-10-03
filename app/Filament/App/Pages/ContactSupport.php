@@ -149,7 +149,7 @@ class ContactSupport extends Page
 
     /**
      * Apply the `support:contact` rate limits, which were route middleware for the
-     * Bootstrap form. Livewire actions don't pass through route middleware.
+     * previous controller-based form. Livewire actions don't pass through route middleware.
      */
     private function tooManyRequests(): bool
     {
