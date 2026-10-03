@@ -16,7 +16,13 @@
 
     $appName = config('app.name');
     $appPanel = Filament::getPanel(AppPanelProvider::ID);
-    $user = auth()->user();
+
+    // Error pages render on this layout too, from wherever the error happened (an administration
+    // page, or an unknown URL), so the app panel's theme is selected here, and a failing user
+    // lookup leaves the page signed out rather than failing it.
+    Filament::setCurrentPanel($appPanel);
+    Filament::bootCurrentPanel();
+    $user = rescue(fn() => auth()->user(), null, report: false);
 @endphp
 
 <!DOCTYPE html>

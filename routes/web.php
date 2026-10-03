@@ -21,6 +21,10 @@ Route::middleware('panel:' . AppPanelProvider::ID)->group(function () {
                 ->name('show');
         });
     }
+
+    // Unknown URLs 404 through the web middleware, so the not-found page knows who is signed in.
+    // API paths are left out: they 404 as JSON and shouldn't start a session.
+    Route::fallback(fn () => abort(404))->where('fallbackPlaceholder', '^(?!api(/|$)).*');
 });
 
 if (config('platform.wildcard_photo_sync')) {

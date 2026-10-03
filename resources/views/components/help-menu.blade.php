@@ -18,7 +18,7 @@
                 'external' => false,
             ]
             : null,
-        auth()->check() && ContactSupport::canAccess()
+        rescue(fn() => auth()->check(), false, report: false) && ContactSupport::canAccess()
             ? [
                 'label' => 'Contact Support',
                 'url' => ContactSupport::getUrl(panel: AppPanelProvider::ID),

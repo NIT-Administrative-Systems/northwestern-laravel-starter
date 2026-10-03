@@ -7,6 +7,7 @@
 @source '../../../../resources/views/filament/app/**/*';
 @source '../../../../resources/views/components/**/*';
 @source '../../../../resources/views/public/**/*';
+@source '../../../../resources/views/errors/**/*';
 @source '../../../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/tailwind.blade.php';
 @source '../../../../vendor/filament/**/*';
 
