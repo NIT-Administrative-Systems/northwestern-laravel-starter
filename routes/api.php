@@ -6,10 +6,10 @@ use App\Domains\Auth\Http\Controllers\Api\V1\AccessTokenApiController;
 use App\Domains\Auth\Http\Middleware\AuthenticatesAccessTokens;
 use App\Domains\Auth\Http\Middleware\LogsApiRequests;
 use App\Domains\User\Http\Controllers\Api\V1\UserApiController;
+use App\Http\Middleware\RequireHealthSecretToken;
 use Illuminate\Support\Facades\Route;
 use Northwestern\SysDev\Chassis\Http\Middleware\EnsureFeatureEnabled;
 use Spatie\Health\Http\Controllers\HealthCheckJsonResultsController;
-use Spatie\Health\Http\Middleware\RequiresSecretToken;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,10 +46,11 @@ Route::middleware([EnsureFeatureEnabled::class . ':api.enabled', LogsApiRequests
 | Health Check Routes
 |--------------------------------------------------------------------------
 | Protected by a secret token (X-Secret-Token header) rather than Bearer
-| token authentication. Set HEALTH_SECRET_TOKEN in your .env file.
+| token authentication. The endpoint refuses every request until
+| HEALTH_SECRET_TOKEN is set.
 */
 
-Route::middleware([RequiresSecretToken::class])->group(function () {
+Route::middleware([RequireHealthSecretToken::class])->group(function () {
     Route::get('health', HealthCheckJsonResultsController::class);
 });
 
