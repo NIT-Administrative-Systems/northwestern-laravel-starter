@@ -134,4 +134,17 @@ final class LoginTest extends TestCase
             'services.northwestern-azure.client_secret' => 'test-client-secret',
         ]);
     }
+
+    public function test_page_has_the_site_header_and_names_the_application(): void
+    {
+        $this->configureEntra();
+        config(['local-auth.enabled' => true]);
+
+        $this->get('/app/login')
+            ->assertOk()
+            ->assertSee('Sign in to ' . config('app.name'))
+            ->assertSee('Northwestern community')
+            ->assertSee('External partners')
+            ->assertSee('https://www.northwestern.edu/', escape: false);
+    }
 }

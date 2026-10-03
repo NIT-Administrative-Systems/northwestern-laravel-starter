@@ -9,3 +9,32 @@
 @source '../../../../resources/views/public/**/*';
 @source '../../../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/tailwind.blade.php';
 @source '../../../../vendor/filament/**/*';
+
+/* The app panel's simple pages (sign-in, lockdown): a Northwestern Purple accent on the card. */
+.fi-simple-main {
+    border-top: 4px solid var(--nu-purple-100);
+}
+
+/* Sign-in options: each section's heading is a small caps audience label. */
+.nu-sign-in-option .fi-section-header-heading {
+    color: var(--nu-purple-100);
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.dark .nu-sign-in-option .fi-section-header-heading {
+    color: var(--nu-purple-40);
+}
+
+/* Login code boxes fill the card, however many digits local-auth.code.digits sets. */
+.nu-login-code .fi-one-time-code-input-ctn {
+    width: 100%;
+}
+
+.nu-login-code .fi-one-time-code-input-digit {
+    flex: 1 1 0;
+    min-width: 0;
+    height: 3rem;
+    font-size: 1.25rem;
+}

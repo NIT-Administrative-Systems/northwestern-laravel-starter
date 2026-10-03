@@ -93,6 +93,7 @@ class EmailCodeLogin extends SimplePage
                 OneTimeCodeInput::make('code')
                     ->label('Verification code')
                     ->length((int) config('local-auth.code.digits', 6))
+                    ->extraFieldWrapperAttributes(['class' => 'nu-login-code'])
                     ->required()
                     ->autofocus()
                     ->extraInputAttributes(['data-cy' => 'code-input'])

@@ -10,10 +10,10 @@ use Filament\Facades\Filament;
 use Filament\Pages\SimplePage;
 use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Callout;
-use Filament\Schemas\Components\Group;
-use Filament\Schemas\Components\Text;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Route;
 
@@ -47,6 +47,11 @@ class Login extends SimplePage
         }
     }
 
+    public function getHeading(): string|Htmlable|null
+    {
+        return 'Sign in to ' . config('app.name');
+    }
+
     public function content(Schema $schema): Schema
     {
         $ssoUrl = $this->ssoUrl();
@@ -54,29 +59,41 @@ class Login extends SimplePage
 
         return $schema
             ->components([
-                Group::make([
-                    Text::make('For students, faculty, staff, and affiliates with a NetID.'),
-                    Actions::make([
-                        Action::make('netid')
-                            ->label('Sign in with NetID')
-                            ->icon(Heroicon::OutlinedArrowRightEndOnRectangle)
-                            ->url($ssoUrl)
-                            ->extraAttributes(['data-cy' => 'netid-login']),
-                    ])->fullWidth(),
-                ])->visible($ssoUrl !== null),
+                Section::make('Northwestern community')
+                    ->description('For students, faculty, staff, and affiliates with a NetID.')
+                    ->icon(Heroicon::OutlinedIdentification)
+                    ->iconColor('primary')
+                    ->compact()
+                    ->extraAttributes(['class' => 'nu-sign-in-option'])
+                    ->schema([
+                        Actions::make([
+                            Action::make('netid')
+                                ->label('Sign in with NetID')
+                                ->icon(Heroicon::OutlinedArrowRightEndOnRectangle)
+                                ->url($ssoUrl)
+                                ->extraAttributes(['data-cy' => 'netid-login']),
+                        ])->fullWidth(),
+                    ])
+                    ->visible($ssoUrl !== null),
 
-                Group::make([
-                    Text::make('For approved external users and partners who do not have a NetID.'),
-                    Actions::make([
-                        Action::make('email')
-                            ->label('Sign in with email')
-                            ->icon(Heroicon::OutlinedEnvelope)
-                            ->color('gray')
-                            ->outlined()
-                            ->url(fn (): ?string => Route::has('filament.app.auth.login-code') ? route('filament.app.auth.login-code') : null)
-                            ->extraAttributes(['data-cy' => 'email-login']),
-                    ])->fullWidth(),
-                ])->visible($localAuthEnabled),
+                Section::make('External partners')
+                    ->description('For approved external users and partners who do not have a NetID.')
+                    ->icon(Heroicon::OutlinedEnvelope)
+                    ->iconColor('primary')
+                    ->compact()
+                    ->extraAttributes(['class' => 'nu-sign-in-option'])
+                    ->schema([
+                        Actions::make([
+                            Action::make('email')
+                                ->label('Sign in with email')
+                                ->icon(Heroicon::OutlinedEnvelope)
+                                ->color('gray')
+                                ->outlined()
+                                ->url(fn (): ?string => Route::has('filament.app.auth.login-code') ? route('filament.app.auth.login-code') : null)
+                                ->extraAttributes(['data-cy' => 'email-login']),
+                        ])->fullWidth(),
+                    ])
+                    ->visible($localAuthEnabled),
 
                 Callout::make('No sign-in methods available')
                     ->description('This application has not been configured with any authentication providers yet.')
