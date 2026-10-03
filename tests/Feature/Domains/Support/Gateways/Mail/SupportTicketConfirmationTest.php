@@ -31,7 +31,7 @@ final class SupportTicketConfirmationTest extends TestCase
         $this->assertSame('Pat', $mailable->viewData['submitter']);
         $this->assertSame('Login issue', $mailable->viewData['subject']);
         $this->assertSame('SUP-101', $mailable->viewData['referenceNumber']);
-        $this->assertStringContainsString('I cannot sign in.', $mailable->viewData['details']);
+        $this->assertStringContainsString('I cannot sign in.', (string) $mailable->viewData['details']);
         $this->assertSame(
             $ticket->created_at->setTimezone(config('app.schedule_timezone'))->format('M j, Y g:i A T'),
             $mailable->viewData['submittedAt'],
