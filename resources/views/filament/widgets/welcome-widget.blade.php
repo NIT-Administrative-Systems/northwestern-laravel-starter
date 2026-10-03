@@ -3,7 +3,7 @@
         <div class="flex items-start gap-6">
             <div class="flex-1">
                 <h2 class="text-xl font-bold tracking-tight text-gray-950 dark:text-white">
-                    {{ config('app.name') }}
+                    Welcome
                 </h2>
 
                 <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">

@@ -33,21 +33,6 @@
     padding-inline: 1rem;
 }
 
-/* Sign-in page: "Sign in to" above the application name, which gets a row of its own. */
-.nu-sign-in-heading-lead {
-    display: block;
-    color: var(--gray-500);
-    font-family: var(--nu-font-body);
-    font-size: 1rem;
-    font-weight: 500;
-    letter-spacing: normal;
-}
-
-.nu-sign-in-heading-app {
-    display: block;
-    margin-top: 0.25rem;
-}
-
 /* A muted line under each sign-in button saying who it is for. */
 .nu-sign-in-hint {
     display: block;
@@ -74,7 +59,6 @@
     content: "";
 }
 
-.dark .nu-sign-in-heading-lead,
 .dark .nu-sign-in-hint,
 .dark .nu-sign-in-divider {
     color: var(--gray-400);

@@ -135,15 +135,17 @@ final class LoginTest extends TestCase
         ]);
     }
 
-    public function test_page_has_the_site_header_and_names_the_application(): void
+    // The site header names the application, so the card's heading is a plain "Sign in"; the browser tab keeps the name.
+    public function test_page_has_the_site_header_and_a_plain_heading(): void
     {
         $this->configureEntra();
         config(['local-auth.enabled' => true]);
 
         $this->get('/app/login')
             ->assertOk()
-            ->assertSee('Sign in to')
-            ->assertSee('<span class="nu-sign-in-heading-app">' . e(config('app.name')) . '</span>', escape: false)
+            ->assertSeeInOrder(['<h1 class="fi-simple-header-heading">', 'Sign in', '</h1>'], escape: false)
+            ->assertDontSee('Sign in to')
+            ->assertSeeInOrder(['<title>', 'Sign in', ' - ', e(config('app.name')), '</title>'], escape: false)
             ->assertSee('For students, faculty, staff, and affiliates.')
             ->assertSee('For approved external partners without a NetID.')
             ->assertSee('nu-sign-in-divider', escape: false)
