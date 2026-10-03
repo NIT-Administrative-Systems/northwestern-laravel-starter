@@ -73,11 +73,13 @@ jobs:
         with:
           version: ${{ env.PNPM_VERSION }}
 
+      # No `cache: pnpm` here: it caches the pnpm store keyed on the root lockfile. When the root
+      # lockfile changes but docs/node_modules is restored below, install never creates the store
+      # and setup-node's post step fails trying to save it.
       - name: 🟢 Setup Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
 
       - name: 📷 pnpm Dependencies Cache
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
