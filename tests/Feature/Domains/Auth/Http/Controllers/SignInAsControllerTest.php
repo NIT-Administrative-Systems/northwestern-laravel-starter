@@ -8,7 +8,7 @@ use App\Domains\Auth\Enums\RoleTypeEnum;
 use App\Domains\Auth\Http\Controllers\SignInAsController;
 use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\User;
-use App\Filament\App\Pages\Auth\Login;
+use App\Providers\Filament\AppPanelProvider;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -20,7 +20,7 @@ use Tests\TestCase;
  * needs: `local` by default, or the one its data provider names.
  */
 #[CoversClass(SignInAsController::class)]
-#[CoversClass(Login::class)]
+#[CoversClass(AppPanelProvider::class)]
 final class SignInAsControllerTest extends TestCase
 {
     public function createApplication(): Application
