@@ -22,6 +22,7 @@ class LoginCodeMail extends Mailable
     public function __construct(
         public readonly string $encryptedCode,
         public readonly CarbonImmutable $expiresAt,
+        public readonly string $signInUrl,
     ) {
         //
     }
@@ -44,6 +45,7 @@ class LoginCodeMail extends Mailable
             with: [
                 'code' => $code,
                 'expiresInMinutes' => $expiresInMinutes,
+                'signInUrl' => $this->signInUrl,
             ]
         );
     }

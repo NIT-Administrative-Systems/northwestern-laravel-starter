@@ -154,6 +154,37 @@ final class EmailCodeLoginTest extends TestCase
             ->assertRedirect(url('/app/some-page'));
     }
 
+    // Codes sent by an administrator, or read on another device, have no challenge in this session.
+    public function test_the_email_link_lets_a_code_issued_elsewhere_sign_the_user_in(): void
+    {
+        $user = User::factory()->affiliate()->create(['email' => 'test@example.com']);
+        $challenge = $this->challengeFor($user->email, '123456');
+
+        Livewire::withQueryParams([LoginCodeSession::LINK_PARAMETER => $this->linkToken($challenge)])
+            ->test(EmailCodeLogin::class)
+            ->assertSet('email', 'test@example.com')
+            ->assertSee('Check your email')
+            ->fillForm(['code' => '123456'], 'codeForm')
+            ->call('verifyCode')
+            ->assertHasNoFormErrors([], 'codeForm')
+            ->assertRedirect('/');
+
+        $this->assertAuthenticatedAs($user);
+    }
+
+    public function test_links_to_expired_or_unknown_challenges_are_ignored(): void
+    {
+        $expired = $this->challengeFor('test@example.com', '123456');
+        $expired->update(['expires_at' => now()->subMinute()]);
+
+        foreach ([$this->linkToken($expired), Crypt::encryptString('999999'), 'not-a-token'] as $token) {
+            Livewire::withQueryParams([LoginCodeSession::LINK_PARAMETER => $token])
+                ->test(EmailCodeLogin::class)
+                ->assertSet('email', null)
+                ->assertSee('Request a verification code');
+        }
+    }
+
     public function test_invalid_code_shows_an_error_on_the_code_field(): void
     {
         $user = User::factory()->affiliate()->create();
@@ -232,6 +263,13 @@ final class EmailCodeLoginTest extends TestCase
             'code_hash' => Hash::make($code),
             'expires_at' => now()->addMinutes(10),
         ]);
+    }
+
+    private function linkToken(LoginChallenge $challenge): string
+    {
+        parse_str((string) parse_url(LoginCodeSession::link($challenge), PHP_URL_QUERY), $query);
+
+        return $query[LoginCodeSession::LINK_PARAMETER];
     }
 
     private function startFlow(string $email, ?LoginChallenge $challenge = null): void
