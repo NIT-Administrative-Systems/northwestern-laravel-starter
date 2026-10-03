@@ -20,6 +20,7 @@ use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\IconPosition;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\HtmlString;
 
 /**
  * The app panel's dashboard.
@@ -37,8 +38,12 @@ class Dashboard extends BaseDashboard
     {
         return $schema
             ->components([
-                Callout::make('Starter placeholder')
-                    ->description('This dashboard comes from the Northwestern Laravel Starter. Replace it with your application\'s dashboard in app/Filament/App/Pages/Dashboard.php.')
+                // No callout heading: Filament renders it as an <h4>, which would skip levels after the page's <h1>.
+                Callout::make()
+                    ->description(new HtmlString(
+                        '<strong>Starter placeholder.</strong> This dashboard comes from the Northwestern Laravel Starter. '
+                        . 'Replace it with your application\'s dashboard in <code>app/Filament/App/Pages/Dashboard.php</code>.'
+                    ))
                     ->icon(Heroicon::OutlinedWrenchScrewdriver)
                     ->warning()
                     ->actions([

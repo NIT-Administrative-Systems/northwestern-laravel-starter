@@ -30,6 +30,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
+use Illuminate\Support\HtmlString;
 
 /**
  * Starter placeholder: Filament's common components in the Northwestern theme, with
@@ -110,8 +111,12 @@ class ComponentGallery extends Page implements HasTable
     {
         return $schema
             ->components([
-                Callout::make('Starter placeholder')
-                    ->description('Sample content showing Filament\'s components in the Northwestern theme. It is not available in production. Delete app/Filament/App/Pages/ComponentGallery.php when you no longer need it.')
+                // No callout heading: Filament renders it as an <h4>, which would skip levels after the page's <h1>.
+                Callout::make()
+                    ->description(new HtmlString(
+                        '<strong>Starter placeholder.</strong> Sample content showing Filament\'s components in the Northwestern theme. '
+                        . 'It is not available in production. Delete <code>app/Filament/App/Pages/ComponentGallery.php</code> when you no longer need it.'
+                    ))
                     ->icon(Heroicon::OutlinedSwatch)
                     ->warning(),
 
