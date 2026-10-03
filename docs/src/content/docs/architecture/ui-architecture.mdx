@@ -36,6 +36,7 @@ It also provides:
 - **Navigation.** The sidebar is for your application's features; the starter ships only the dashboard there. The top bar holds what every page shares: the wordmark, the application name, the **Help** menu and the user menu.
 - **Help.** The Help menu (`<x-help-menu />`) lists the changelog, the Contact Support page (`/app/support/contact`) for signed-in users, and your user documentation when `SUPPORT_DOCUMENTATION_URL` is set.
 - **The user menu.** It has "Administration" (shown only to users who can open that panel) and "Sign out".
+- **Notifications.** The bell in the top bar lists database notifications, refreshed every 30 seconds. Send one with `Notification::make()->title('...')->sendToDatabase($user)`. The component gallery's "Send me a notification" button shows one arriving.
 
 Signed-in users who visit `/` are sent to the app panel by `HomeController`. To send some users elsewhere, override `HomeController::destinationFor()`.
 

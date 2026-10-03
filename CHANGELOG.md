@@ -18,6 +18,7 @@ Version 3 removes the Bootstrap user interface. Every page now uses one stack, F
 - Contact Support moved to `/app/support/contact`; the `support.contact.*` routes, `ContactController` and `ContactFormRequest` were removed.
 - Removed `local-auth.redirect_after_login` (`LOCAL_AUTH_REDIRECT_AFTER_LOGIN`). Override `HomeController::destinationFor()` instead.
 - Removed GlobalAlert and its impersonation alert; Filament's impersonation banner covers it.
+- Retention settings moved under `platform.retention`: `local-auth.code.retention_days` is now `platform.retention.login_challenges`, and `api.request_logging.retention_days` is now `platform.retention.api_request_logs`. The environment variables are unchanged.
 - Removed `InjectLivewireAssets`. Livewire's `inject_assets` is back on.
 - Requires `northwestern-sysdev/northwestern-filament-theme` `^4.1` and `northwestern-sysdev/chassis` `^1.2`.
 
@@ -27,6 +28,10 @@ Version 3 removes the Bootstrap user interface. Every page now uses one stack, F
 - Filament sign-in pages: `/app/login` lists the configured methods and goes straight to single sign-on when it is the only one, and `/app/login/email` requests and verifies a login code on one page. The login code logic moved into the `RequestLoginCode` and `AuthenticateWithLoginCode` actions.
 - A public layout (`<x-layouts.public>`) for pages outside the panels. It runs in the app panel's context so Filament's Blade components work, and it is light only. Its header (`<x-site-header>`) matches the panels' top bar and is shared by the sign-in, lockdown and error pages.
 - A landing page at `/` for guests. `HomeController::destinationFor()` decides where signed-in users go, by default the app panel.
+- Database notifications in the app panel: a bell in the top bar, polled every 30 seconds.
+- Retention periods for audit logs (`AUDIT_RETENTION_DAYS`, kept by default), sign-in records (`LOGIN_RECORD_RETENTION_DAYS`, 365 days) and impersonation logs (`IMPERSONATION_LOG_RETENTION_DAYS`, kept by default), through the new `PrunesAfterRetentionPeriod` trait.
+- Accessibility checks with axe for every page the starter ships, in `cypress/e2e/accessibility.cy.ts`. `cy.checkAxeViolations()` accepts selectors to exclude.
+- `AGENTS.md`, a guide for coding agents working in the repository.
 - A placeholder dashboard (`App\Filament\App\Pages\Dashboard`) with a setup checklist, and a component gallery at `/app/gallery` outside production. Both are meant to be replaced or deleted.
 - An error layout (`<x-layouts.error>`) that renders without Filament, auth or the database, so the 500, 503 and database-paused pages work when the database is down. The client error pages (401, 403, 404, 419, 429) render on the public layout with the full header, and a fallback route lets the not-found page know who is signed in.
 - Browser Sentry on every page through `<x-sentry-browser />` and `resources/js/sentry.js`, relayed through chassis's DSN-validating `SentryTunnelController`. The new `sentry.tracing.browser` setting (`SENTRY_ENABLE_APM_FOR_JS`) enables browser tracing.
@@ -40,6 +45,11 @@ Version 3 removes the Bootstrap user interface. Every page now uses one stack, F
 - The support request confirmation email shows the reference number, subject, submission time and the user's message; the support team's email leads with the request.
 - Browser and PHP Sentry reports share one user context, `SentryExceptionHandler::userContext()`.
 - Livewire's pagination theme is `tailwind`.
+
+### Fixed
+
+- Setting `LOGIN_CHALLENGE_RETENTION_DAYS` or `API_REQUEST_LOG_RETENTION_DAYS` to `null` now keeps records, as documented. The settings were cast to an integer, so `null` became `0` and pruning deleted every record.
+- Accessibility: callouts directly under a page title no longer skip heading levels, table cells that link to a record show a placeholder instead of an empty link, table placeholders and the platform overview's heatmap labels meet color contrast, the heatmap cells no longer carry labels axe rejects, and the sign-in page's "or" divider meets color contrast.
 
 ## [v2.6.0] - 2026-10-01
 

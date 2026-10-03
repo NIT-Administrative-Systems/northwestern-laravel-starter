@@ -289,7 +289,25 @@ NU_LOCKUP=
 
 Quick links and the "Connect" social accounts are set in the same config file, under `footer.links` and `footer.social`.
 
-## 7. Project Cleanup
+## 7. Data Retention
+
+The scheduler runs `model:prune` daily, which deletes records older than their retention period. Every period is set in days under `retention` in `config/platform.php`, and `null` keeps records forever.
+
+| Records | Setting | Default |
+|---|---|---|
+| Audit logs | `AUDIT_RETENTION_DAYS` | `null` (kept) |
+| Sign-in records | `LOGIN_RECORD_RETENTION_DAYS` | `365` |
+| Impersonation logs | `IMPERSONATION_LOG_RETENTION_DAYS` | `null` (kept) |
+| Login code challenges | `LOGIN_CHALLENGE_RETENTION_DAYS` | `30` |
+| API request logs | `API_REQUEST_LOG_RETENTION_DAYS` | `90` |
+
+<Aside type="caution" title="Check your record-keeping requirements first">
+Audit logs often back FERPA, HIPAA or university record-keeping requirements, so the starter keeps them unless you set a period.
+</Aside>
+
+To give another model a retention period, use the `PrunesAfterRetentionPeriod` trait, return its setting from `retentionConfigKey()`, and add the setting under `platform.retention`. Override `retentionColumn()` when the record's date isn't `created_at`, and prefer an indexed column.
+
+## 8. Project Cleanup
 
 <Aside type="caution" title="Important">
 Perform these cleanup tasks to personalize the starter kit for your project and remove references to the Northwestern Laravel Starter.
