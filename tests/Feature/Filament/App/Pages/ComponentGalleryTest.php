@@ -55,4 +55,17 @@ final class ComponentGalleryTest extends TestCase
             ->assertHasNoErrors()
             ->assertNotified('Form submitted');
     }
+
+    public function test_the_notification_example_sends_a_database_notification(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        Livewire::test(ComponentGallery::class)
+            ->call('sendSampleNotification')
+            ->assertDispatched('databaseNotificationsSent');
+
+        $this->assertSame(1, $user->notifications()->count());
+        $this->assertSame('A sample notification', $user->notifications()->first()?->data['title']);
+    }
 }

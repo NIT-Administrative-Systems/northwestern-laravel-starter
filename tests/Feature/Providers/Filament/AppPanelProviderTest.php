@@ -73,4 +73,9 @@ final class AppPanelProviderTest extends TestCase
 
         $this->actingAs($admin)->get('/administration')->assertOk()->assertDontSee('Privacy Statement');
     }
+
+    public function test_the_app_panel_has_database_notifications(): void
+    {
+        $this->assertTrue(Filament::getPanel(AppPanelProvider::ID)->hasDatabaseNotifications());
+    }
 }

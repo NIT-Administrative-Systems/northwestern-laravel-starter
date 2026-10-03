@@ -96,6 +96,9 @@ class AppPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/App/Resources'), for: 'App\Filament\App\Resources')
             ->discoverPages(in: app_path('Filament/App/Pages'), for: 'App\Filament\App\Pages')
             ->discoverWidgets(in: app_path('Filament/App/Widgets'), for: 'App\Filament\App\Widgets')
+            // The bell in the top bar. Send one with Notification::make()->...->sendToDatabase($user).
+            ->databaseNotifications()
+            ->databaseNotificationsPolling('30s')
             ->plugins([
                 NorthwesternTheme::make()
                     ->impersonationBanner()
