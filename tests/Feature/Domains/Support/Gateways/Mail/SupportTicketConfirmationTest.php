@@ -38,6 +38,16 @@ final class SupportTicketConfirmationTest extends TestCase
         );
     }
 
+    public function test_the_email_does_not_promise_a_channel_for_the_follow_up(): void
+    {
+        $ticket = SupportTicket::factory()->for(User::factory()->affiliate()->create())->pending()->create();
+
+        $html = new SupportTicketConfirmation($ticket, 'SUP-303')->render();
+
+        $this->assertStringContainsString('someone will follow up with you as soon as possible', $html);
+        $this->assertStringNotContainsString('by email', $html);
+    }
+
     public function test_build_uses_default_submitter_label_when_first_name_is_missing(): void
     {
         $user = User::factory()->affiliate()->create([

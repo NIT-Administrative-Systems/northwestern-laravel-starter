@@ -3,7 +3,7 @@
 
 Hi {{ $submitter }},
 
-Thanks for contacting us. Your request is with our team, and someone will follow up with you by email as soon as possible.
+Thanks for contacting us. Your request is with our team, and someone will follow up with you as soon as possible.
 
 <x-mail::panel>
 **Reference:** {{ $referenceNumber }}<br>
@@ -14,6 +14,8 @@ Thanks for contacting us. Your request is with our team, and someone will follow
 **What you sent**
 
 {!! $details !!}
+
+---
 
 Please mention your reference number if you contact us about this request.
 
