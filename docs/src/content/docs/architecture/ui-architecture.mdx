@@ -16,7 +16,7 @@ The starter has **one frontend stack**: [Filament](https://filamentphp.com), bui
 | **App panel** | `/app` | Filament panel (`AppPanelProvider`) | Everything your application does for its users. It is the default panel, and it owns sign-in for the whole application. |
 | **Administration panel** | `/administration` | Filament panel (`AdministrationPanelProvider`) | Back-office tooling: users, roles, audits, API tokens, platform settings. |
 | **Public layout** | anywhere outside the panels, such as `/` and `/support/changelog` | `<x-layouts.public>` with Filament's Blade components | Pages people can see without signing in. |
-| **Error layout** | error pages | `<x-layouts.error>` | Error pages only. It renders without Filament, auth or the database. |
+| **Error layout** | 500, 503 and database-paused pages | `<x-layouts.error>` | Errors where the application may not be working. It renders without Filament, auth or the database. |
 | **Mail** | — | Laravel markdown mail, with the starter's theme | Email. |
 
 <Aside type="tip">
@@ -31,6 +31,8 @@ It also provides:
 
 - **Sign-in.** `/app/login` lists the configured sign-in methods (Northwestern single sign-on and email login codes). Guests of either panel are sent here. See [Authentication](/features/authentication).
 - **Environment lockdown.** Users without a role that grants access to a locked-down environment see `/app/access-restricted`.
+- **A placeholder dashboard.** `App\Filament\App\Pages\Dashboard` shows a setup checklist that ticks what it can detect from your configuration. Replace its `content()` with your application's dashboard.
+- **A component gallery.** `/app/gallery` shows Filament's components in the Northwestern theme with sample content. It is linked from the placeholder dashboard, never in the navigation, and unavailable in production. Delete `ComponentGallery` when you no longer need it.
 - **Navigation.** The sidebar is for your application's features; the starter ships only the dashboard there. The top bar holds what every page shares: the wordmark, the application name, the **Help** menu and the user menu.
 - **Help.** The Help menu (`<x-help-menu />`) lists the changelog, the Contact Support page (`/app/support/contact`) for signed-in users, and your user documentation when `SUPPORT_DOCUMENTATION_URL` is set.
 - **The user menu.** It has "Administration" (shown only to users who can open that panel) and "Sign out".
@@ -45,7 +47,9 @@ The administration panel at `/administration` holds the starter's back-office to
 
 `<x-layouts.public>` is the layout for pages outside the panels. Its header (`<x-site-header>`) matches the panels' top bar: the Northwestern wordmark, the application name, the Help menu, then **Sign in** or the user menu. The Northwestern footer is at the bottom.
 
-The sign-in pages, the lockdown page and the error pages use the same header, so every page names the application.
+The sign-in pages, the lockdown page and the error pages use the same header, so every page names the application. Outside production the header shows the environment badge: top right on larger screens, centered below the header on phones.
+
+The client error pages (401, 403, 404, 419 and 429) render on this layout, so their header keeps the Help menu and Sign in or the user menu. A fallback route sends unknown URLs through the web middleware, so the not-found page knows who is signed in; paths under `api/` are left out.
 
 Routes that use it run in the app panel's context through the `panel:app` middleware, so the page loads the app panel's theme and colors, and you can use Filament's Blade components:
 
@@ -70,7 +74,7 @@ The public layout is **light only**, as the university's templates are. It loads
 
 ## The error layout
 
-`<x-layouts.error>` renders error pages, including the 500 and database-paused pages. It must work when nothing else does, so it loads no Filament, makes no auth calls and doesn't touch the database. Its styles come from `resources/css/errors.css`, built from the Northwestern design tokens.
+`<x-layouts.error>` renders the error pages that can't rely on the application working: 500, 503 (maintenance) and database-paused. It must work when nothing else does, so it loads no Filament, makes no auth calls and doesn't touch the database. Its styles come from `resources/css/errors.css`, built from the Northwestern design tokens.
 
 Anything on an error page that could query the database, such as checking the signed-in user's permissions, is wrapped in `rescue()` and fails closed.
 

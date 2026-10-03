@@ -27,7 +27,8 @@ Version 3 removes the Bootstrap user interface. Every page now uses one stack, F
 - Filament sign-in pages: `/app/login` lists the configured methods and goes straight to single sign-on when it is the only one, and `/app/login/email` requests and verifies a login code on one page. The login code logic moved into the `RequestLoginCode` and `AuthenticateWithLoginCode` actions.
 - A public layout (`<x-layouts.public>`) for pages outside the panels. It runs in the app panel's context so Filament's Blade components work, and it is light only. Its header (`<x-site-header>`) matches the panels' top bar and is shared by the sign-in, lockdown and error pages.
 - A landing page at `/` for guests. `HomeController::destinationFor()` decides where signed-in users go, by default the app panel.
-- An error layout (`<x-layouts.error>`) that renders without Filament, auth or the database, so the 500 and database-paused pages work when the database is down.
+- A placeholder dashboard (`App\Filament\App\Pages\Dashboard`) with a setup checklist, and a component gallery at `/app/gallery` outside production. Both are meant to be replaced or deleted.
+- An error layout (`<x-layouts.error>`) that renders without Filament, auth or the database, so the 500, 503 and database-paused pages work when the database is down. The client error pages (401, 403, 404, 419, 429) render on the public layout with the full header, and a fallback route lets the not-found page know who is signed in.
 - Browser Sentry on every page through `<x-sentry-browser />` and `resources/js/sentry.js`, relayed through chassis's DSN-validating `SentryTunnelController`. The new `sentry.tracing.browser` setting (`SENTRY_ENABLE_APM_FOR_JS`) enables browser tracing.
 - A branded mail theme. Every email's footer shows the unit's contact details and the Accessibility and Privacy Statement links the university requires.
 
