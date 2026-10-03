@@ -17,11 +17,11 @@ final class MailFooterTest extends TestCase
         parent::setUp();
 
         config([
-            'northwestern-theme.office.name' => 'Example Office',
-            'northwestern-theme.office.addr' => '633 Clark Street',
-            'northwestern-theme.office.city' => 'Evanston, IL 60208',
-            'northwestern-theme.office.phone' => '847-555-0100',
-            'northwestern-theme.office.email' => 'office@northwestern.edu',
+            'northwestern-filament-theme.unit.name' => 'Example Office',
+            'northwestern-filament-theme.unit.address' => '633 Clark Street',
+            'northwestern-filament-theme.unit.city' => 'Evanston, IL 60208',
+            'northwestern-filament-theme.unit.phone' => '847-555-0100',
+            'northwestern-filament-theme.unit.email' => 'office@northwestern.edu',
         ]);
     }
 
@@ -49,11 +49,29 @@ final class MailFooterTest extends TestCase
 
     public function test_empty_unit_fields_are_left_out(): void
     {
-        config(['northwestern-theme.office.phone' => '']);
+        config(['northwestern-filament-theme.unit.phone' => '']);
 
         $text = (string) resolve(Markdown::class)->renderText('mail.auth.login-code', ['code' => '123456', 'expiresInMinutes' => 10]);
 
         $this->assertStringContainsString('Example Office | 633 Clark Street, Evanston, IL 60208 | office@northwestern.edu', $text);
+    }
+
+    public function test_mail_footer_includes_the_fax_when_set(): void
+    {
+        config(['northwestern-filament-theme.unit.fax' => '847-555-0199']);
+
+        $text = (string) resolve(Markdown::class)->renderText('mail.auth.login-code', ['code' => '123456', 'expiresInMinutes' => 10]);
+
+        $this->assertStringContainsString('847-555-0100 | Fax 847-555-0199 | office@northwestern.edu', $text);
+    }
+
+    public function test_mail_footer_matches_the_page_footer_when_unit_details_are_unset(): void
+    {
+        config(['northwestern-filament-theme.unit' => array_fill_keys(['name', 'address', 'city', 'phone', 'fax', 'email'], null)]);
+
+        $text = (string) resolve(Markdown::class)->renderText('mail.auth.login-code', ['code' => '123456', 'expiresInMinutes' => 10]);
+
+        $this->assertStringContainsString((string) config('northwestern-theme.office.name', 'Information Technology'), $text);
     }
 
     private function loginCodeMail(): LoginCodeMail

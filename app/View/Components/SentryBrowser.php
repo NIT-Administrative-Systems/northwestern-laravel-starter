@@ -43,8 +43,8 @@ class SentryBrowser extends Component
             'dsn' => config('sentry.dsn'),
             'environment' => config('app.env'),
             'tunnel' => Route::has('sentry.tunnel') ? route('sentry.tunnel', absolute: false) : null,
-            'tracing' => (bool) config('northwestern-theme.sentry-enable-apm-js'),
-            'tracesSampleRate' => (float) config('northwestern-theme.sentry-traces-sample-rate'),
+            'tracing' => (bool) config('sentry.tracing.browser'),
+            'tracesSampleRate' => (float) config('sentry.traces_sample_rate'),
             'user' => $user instanceof User ? resolve(SentryExceptionHandler::class)->userContext($user) : null,
         ];
     }

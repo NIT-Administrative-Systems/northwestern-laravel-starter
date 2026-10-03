@@ -27,8 +27,8 @@ final class SentryBrowserTest extends TestCase
     {
         config([
             'sentry.dsn' => self::DSN,
-            'northwestern-theme.sentry-enable-apm-js' => true,
-            'northwestern-theme.sentry-traces-sample-rate' => 0.25,
+            'sentry.tracing.browser' => true,
+            'sentry.traces_sample_rate' => 0.25,
         ]);
 
         $config = $this->renderedConfig();
