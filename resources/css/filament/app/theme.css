@@ -21,6 +21,11 @@
     border-top: 4px solid var(--nu-purple-100);
 }
 
+/* Filament runs the card edge to edge on phones; keep a gutter so it reads as a card there too. */
+.fi-simple-main-ctn {
+    padding-inline: 1rem;
+}
+
 /* Sign-in page: "Sign in to" above the application name, which gets a row of its own. */
 .nu-sign-in-heading-lead {
     display: block;
