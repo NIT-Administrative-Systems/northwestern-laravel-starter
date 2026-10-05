@@ -593,6 +593,8 @@ php artisan ide-helper:meta
 | `model:prune --path=app/Domains/*/Models` | Daily | Prunes models in `app/Domains/*/Models` that use `Prunable` or `MassPrunable`, including those with `PrunesAfterRetentionPeriod` |
 | `model:prune --model=HealthCheckResultHistoryItem` | Daily | Deletes health check results older than `keep_history_for_days` (5) |
 | `oauth-clients:notify-secret-expiration` | Daily at 09:00 | Sends client secret expiration reminders, when `api.expiration_notifications.enabled` is true |
+| `personal-access-tokens:notify-expiration` | Daily at 09:00 | Emails people before their personal access tokens expire, unless they turned it off in their preferences, when `api.expiration_notifications.enabled` is true |
+| `oauth:revoke-ineligible` | Hourly | Revokes the credentials of deleted and deactivated accounts, and personal access tokens whose owners lost `CreatePersonalAccessTokens` |
 | `passport:purge --hours=744` | Daily | Deletes revoked and expired OAuth tokens and codes once they are more than 31 days past, longer than the 30-day refresh token lifetime |
 | `health:schedule-check-heartbeat` | Every minute | Records the heartbeat the Schedule health check reads, in every environment |
 | `health:queue-check-heartbeat` | Every five minutes, production only | Dispatches the job the Queue health check waits for |
