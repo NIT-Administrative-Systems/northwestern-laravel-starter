@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\App\Clusters\AccountCluster\Pages;
 
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\User\Actions\UpdateUserPreferences;
 use App\Domains\User\Data\UserPreferences;
 use App\Domains\User\Models\User;
@@ -12,6 +13,7 @@ use BackedEnum;
 use DateTimeZone;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Actions;
@@ -59,13 +61,22 @@ class Preferences extends Page
     {
         return $schema
             ->components([
-                Select::make('timezone')
-                    ->label('Timezone')
-                    ->helperText('Dates and times in this application are shown in this timezone.')
-                    ->options($this->timezoneOptions())
-                    ->in(DateTimeZone::listIdentifiers())
-                    ->searchable()
-                    ->required(),
+                Section::make('Date and time')
+                    ->schema([
+                        Select::make('timezone')
+                            ->label('Timezone')
+                            ->helperText('Dates and times in this application are shown in this timezone.')
+                            ->options($this->timezoneOptions())
+                            ->in(DateTimeZone::listIdentifiers())
+                            ->searchable()
+                            ->required(),
+                    ]),
+                Section::make('Email')
+                    ->schema([
+                        Toggle::make('emailBeforeAccessTokensExpire')
+                            ->label('Email me before my personal access tokens expire'),
+                    ])
+                    ->visible(fn (): bool => $this->user()->can(SystemPermission::CreatePersonalAccessTokens)),
             ])
             ->disabled($this->isImpersonating())
             ->statePath('data');
@@ -80,19 +91,16 @@ class Preferences extends Page
                     ->description(new HtmlString('<strong>You are impersonating this user.</strong> You can see their preferences, but changes can\'t be saved.'))
                     ->warning()
                     ->visible($this->isImpersonating()),
-                Section::make('Date and time')
-                    ->schema([
-                        Form::make([EmbeddedSchema::make('form')])
-                            ->id('form')
-                            ->livewireSubmitHandler('save')
-                            ->footer([
-                                Actions::make([
-                                    Action::make('save')
-                                        ->label('Save')
-                                        ->submit('save')
-                                        ->hidden($this->isImpersonating()),
-                                ]),
-                            ]),
+                Form::make([EmbeddedSchema::make('form')])
+                    ->id('form')
+                    ->livewireSubmitHandler('save')
+                    ->footer([
+                        Actions::make([
+                            Action::make('save')
+                                ->label('Save')
+                                ->submit('save')
+                                ->hidden($this->isImpersonating()),
+                        ]),
                     ]),
             ]);
     }

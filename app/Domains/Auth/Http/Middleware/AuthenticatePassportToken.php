@@ -4,16 +4,21 @@ declare(strict_types=1);
 
 namespace App\Domains\Auth\Http\Middleware;
 
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\OAuthClient;
+use App\Domains\Auth\Models\OAuthToken;
 use App\Domains\User\Models\User;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Context;
 use Laravel\Passport\Client;
 use Laravel\Passport\Guards\TokenGuard;
+use Northwestern\SysDev\Chassis\Enums\OAuthGrantType;
 use Northwestern\SysDev\Chassis\Exceptions\MissingRequestIpForRestrictedTokenException;
 use Northwestern\SysDev\Chassis\Http\Middleware\AuthenticatesPassportTokens;
+use Northwestern\SysDev\Chassis\ValueObjects\ApiRequestContext;
 
 /**
  * Authenticates the API's Passport access tokens. A service client's token acts as the
@@ -21,7 +26,7 @@ use Northwestern\SysDev\Chassis\Http\Middleware\AuthenticatesPassportTokens;
  */
 class AuthenticatePassportToken extends AuthenticatesPassportTokens
 {
-    /** Record a client's last use at most this often, so busy integrations don't write on every request. */
+    /** Record a client's and a token's last use at most this often, so busy integrations don't write on every request. */
     private const int LAST_USED_RESOLUTION_SECONDS = 300;
 
     /**
@@ -52,15 +57,30 @@ class AuthenticatePassportToken extends AuthenticatesPassportTokens
         return $client instanceof OAuthClient ? $client->allowed_ips : null;
     }
 
+    /**
+     * A deleted or deactivated account is refused, and a personal access token stops working
+     * as soon as its owner loses the permission to hold one.
+     */
     protected function isEligible(Authenticatable $user): bool
     {
-        return $user instanceof User && ! $user->trashed() && $user->netid_inactive !== true;
+        if (! $user instanceof User || $user->trashed() || $user->netid_inactive === true) {
+            return false;
+        }
+
+        return Context::get(ApiRequestContext::OAUTH_GRANT_TYPE) !== OAuthGrantType::PersonalAccess->value
+            || $user->can(SystemPermission::CreatePersonalAccessTokens);
     }
 
     protected function authenticated(Request $request, Client $client, ?Authenticatable $user): void
     {
         if (Cache::add("oauth-client-used:{$client->getKey()}", true, self::LAST_USED_RESOLUTION_SECONDS)) {
             $client->newQuery()->whereKey($client->getKey())->update(['last_used_at' => now()]);
+        }
+
+        $tokenId = Context::get(ApiRequestContext::OAUTH_TOKEN_ID);
+
+        if (is_string($tokenId) && Cache::add("oauth-token-used:{$tokenId}", true, self::LAST_USED_RESOLUTION_SECONDS)) {
+            OAuthToken::query()->whereKey($tokenId)->update(['last_used_at' => now()]);
         }
     }
 

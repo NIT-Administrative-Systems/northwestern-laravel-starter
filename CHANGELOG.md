@@ -38,6 +38,10 @@ Version 3 removes the Bootstrap user interface. Every page now uses one stack, F
 - A per-IP API limit before authentication (`RATE_LIMIT_API_PER_IP_PER_MINUTE`), also covering Passport's OAuth endpoints, alongside the per-client limit after authentication (`RATE_LIMIT_API_PER_MINUTE`).
 - `config/cors.php`: no browser origin may call the API unless it is listed in `CORS_ALLOWED_ORIGINS`.
 - `ViewApiRequestLogs`, the permission to view API request logs and charts.
+- Personal access tokens. People with the new `CreatePersonalAccessTokens` permission, which no default role grants, create tokens on the Account area's Access tokens page to call the API as themselves: scopes limited to their API-relevant permissions, a lifetime of 30 to 365 days (`API_PERSONAL_ACCESS_TOKEN_MAX_LIFETIME_DAYS`), at most 10 working tokens (`API_PERSONAL_ACCESS_TOKEN_MAX_ACTIVE`), and the token shown once. Administrators revoke them from a user's Access Tokens tab, recorded in the user's audit history. While impersonating, tokens can be seen but not created or revoked.
+- `RequireApiScope`, route middleware that limits a person's token to a scope; service clients hold every scope.
+- `personal-access-tokens:notify-expiration`, which emails people before a personal access token expires, and the `emailBeforeAccessTokensExpire` preference to turn it off.
+- `oauth:revoke-ineligible`, run hourly, which revokes the credentials of deleted and deactivated accounts and the personal access tokens of people who lost the permission. Deleting a user revokes their credentials at once.
 - A component gallery at `/app/gallery`, in the app panel's sidebar outside production, showing Filament's components in the Northwestern theme. Delete it when you no longer need it.
 - An error layout (`<x-layouts.error>`) that renders without Filament, auth or the database, so the 500, 503 and database-paused pages work when the database is down. The client error pages (401, 403, 404, 419, 429) render on the public layout with the full header, and a fallback route lets the not-found page know who is signed in.
 - Browser Sentry on every page through `<x-sentry-browser />` and `resources/js/sentry.js`, relayed through chassis's DSN-validating `SentryTunnelController`. The new `sentry.tracing.browser` setting (`SENTRY_ENABLE_APM_FOR_JS`) enables browser tracing.
@@ -56,6 +60,7 @@ Version 3 removes the Bootstrap user interface. Every page now uses one stack, F
 - API users can no longer open the app panel. They authenticate with bearer tokens and never had a way to sign in.
 - API request logs record who made each request as `principal_type`, `oauth_client_id`, `token_id` and `grant_type` instead of `access_token_id`, so refused requests and service clients are logged too.
 - `ManageApiUsers` is now `ManageApiAccess` (`manage-api-access`). The API area of the administration panel requires it, or `ViewApiRequestLogs` for request logs, instead of `ManageAll`.
+- On API requests, the super-administrator shortcut in `Gate::before` doesn't apply: a token is limited to its scopes and its user's permissions.
 - Requires `laravel/passport` `^13.8` and `northwestern-sysdev/chassis` `^1.3`.
 - Panels, the public layout and the error layout use the Department Templates 4.0 wordmark and fonts. The app panel and public pages have the Northwestern footer; the administration panel does not.
 - The support request confirmation email shows the reference number, subject, submission time and the user's message; the support team's email leads with the request.

@@ -6,6 +6,7 @@ namespace App\Providers;
 
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\OAuthClient;
+use App\Domains\Auth\Models\OAuthToken;
 use Carbon\CarbonInterval;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Passport\Bridge\AccessTokenRepository;
@@ -31,6 +32,7 @@ class OAuthServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Passport::useClientModel(OAuthClient::class);
+        Passport::useTokenModel(OAuthToken::class);
 
         Passport::tokensCan(self::scopes());
 

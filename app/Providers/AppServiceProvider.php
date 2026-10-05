@@ -68,8 +68,15 @@ class AppServiceProvider extends ServiceProvider
          * Users with the {@see SystemPermission::ManageAll} permission bypass all authorization checks.
          * This is important to remember when adding new authorization checks to the application.
          * Be sure to accurately test new features with and without the permission.
+         *
+         * Not on API requests: a token is limited to its scopes, and its user's own permissions
+         * and policies decide the rest, so a super-administrator's token is no exception.
          */
         Gate::before(static function (User $user): ?true {
+            if ($user->currentAccessToken() !== null) {
+                return null;
+            }
+
             return $user->hasPermissionTo(SystemPermission::ManageAll) ? true : null;
         });
     }

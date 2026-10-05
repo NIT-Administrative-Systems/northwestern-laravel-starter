@@ -99,6 +99,23 @@ return [
     |
     */
 
+    /*
+    |--------------------------------------------------------------------------
+    | Personal Access Tokens
+    |--------------------------------------------------------------------------
+    |
+    | People who hold the Create Personal Access Tokens permission create these
+    | on the Account page to call the API as themselves. Each token chooses its
+    | lifetime, up to `max_lifetime_days`, and a person can hold at most
+    | `max_active` working tokens at once.
+    |
+    */
+
+    'personal_access_tokens' => [
+        'max_lifetime_days' => (int) env('API_PERSONAL_ACCESS_TOKEN_MAX_LIFETIME_DAYS', 365),
+        'max_active' => (int) env('API_PERSONAL_ACCESS_TOKEN_MAX_ACTIVE', 10),
+    ],
+
     'expiration_notifications' => [
         'enabled' => env('API_CLIENT_SECRET_EXPIRATION_NOTIFICATIONS_ENABLED', true),
         'intervals' => [30, 14, 7, 3, 1],

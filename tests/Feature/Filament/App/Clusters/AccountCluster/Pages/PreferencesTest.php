@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Filament\App\Clusters\AccountCluster\Pages;
 
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\User\Models\User;
 use App\Filament\App\Clusters\AccountCluster\Pages\Preferences;
 use App\Providers\Filament\AppPanelProvider;
@@ -45,6 +46,24 @@ final class PreferencesTest extends TestCase
             ->assertNotified('Your preferences have been saved.');
 
         $this->assertSame('Europe/London', $user->refresh()->timezone);
+    }
+
+    public function test_token_holders_choose_whether_to_be_emailed_before_tokens_expire(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        Livewire::test(Preferences::class)->assertDontSee('Email me before my personal access tokens expire');
+
+        $user->givePermissionTo(SystemPermission::CreatePersonalAccessTokens);
+
+        Livewire::test(Preferences::class)
+            ->assertSchemaStateSet(['emailBeforeAccessTokensExpire' => true], 'form')
+            ->fillForm(['emailBeforeAccessTokensExpire' => false])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $this->assertFalse($user->refresh()->preferences->emailBeforeAccessTokensExpire);
     }
 
     public function test_it_refuses_a_value_that_is_not_a_timezone(): void

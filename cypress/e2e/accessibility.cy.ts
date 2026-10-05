@@ -83,6 +83,8 @@ describe("Accessibility", () => {
             "/administration/support-tickets",
             "/administration/api",
             "/administration/api/requests",
+            // The super administrator holds CreatePersonalAccessTokens; generic users don't see the page.
+            "/app/account/access-tokens",
         ].forEach((path) => {
             it(`${path} has no violations`, () => {
                 visit(path);
