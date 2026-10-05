@@ -5,7 +5,9 @@
     Help menu and Sign in or the user menu. Pages passing :navigation="false" use the bare error
     layout, which renders without Filament, auth or the database.
 --}}
-<x-dynamic-component :component="$navigation ? 'layouts.public' : 'layouts.error'" :title="$title">
+<x-dynamic-component :component="$navigation ? 'layouts.public' : 'layouts.error'"
+                     :title="$title"
+                     :announcements="false">
     <section class="mx-auto max-w-2xl px-4 py-20 text-center sm:px-6 lg:py-28">
         <h1 class="font-nu-heading text-nu-purple-100 text-4xl font-bold tracking-tight">{{ $title }}</h1>
 

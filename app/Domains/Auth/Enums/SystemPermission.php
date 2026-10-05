@@ -60,6 +60,7 @@ enum SystemPermission: string implements HasLabel
 
     // Support
     case ViewSupportTickets = 'view-support-tickets';
+    case ManageAnnouncements = 'manage-announcements';
 
     /**
      * A human-readable label of the permission.
@@ -109,6 +110,7 @@ enum SystemPermission: string implements HasLabel
 
             // Support
             self::ViewSupportTickets => 'Allows viewing submitted support tickets in the admin panel.',
+            self::ManageAnnouncements => 'Allows writing, publishing and ending announcements shown to the application\'s users.',
         };
     }
 

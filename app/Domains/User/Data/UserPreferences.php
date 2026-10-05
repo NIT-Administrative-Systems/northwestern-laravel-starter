@@ -29,6 +29,8 @@ final readonly class UserPreferences extends Preferences
         public bool $emailBeforeAccessTokensExpire = true,
         /** Email me when an application connects to my account. The in-app notification is always sent. */
         public bool $emailWhenApplicationConnects = true,
+        /** Email me announcements an administrator chose to notify people about. The in-app notification is always sent. */
+        public bool $emailAnnouncements = true,
     ) {
     }
 }

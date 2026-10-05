@@ -56,6 +56,7 @@ describe("Accessibility", () => {
             "/app/account/profile",
             "/app/account/preferences",
             "/app/account/connected-applications",
+            "/app/announcements",
             "/app/support/contact",
             "/app/access-restricted",
             "/support/changelog",
@@ -66,6 +67,20 @@ describe("Accessibility", () => {
                 visit(path);
                 cy.checkAxeViolations();
             });
+        });
+
+        it("the announcement banner and page have no violations", () => {
+            cy.php(
+                "App\\Domains\\Support\\Models\\Announcement::factory()->severity(App\\Domains\\Support\\Enums\\AnnouncementSeverity::Warning)->create(['title' => 'Scheduled maintenance', 'body' => 'The application is **unavailable** Saturday from 6 to 8 AM.']); App\\Domains\\Support\\Models\\Announcement::factory()->create(); return true;",
+            );
+
+            visit("/app");
+            cy.get('[data-cy="announcement-banner"]').should("be.visible");
+            cy.checkAxeViolations();
+
+            visit("/app/announcements");
+            cy.contains("Scheduled maintenance");
+            cy.checkAxeViolations();
         });
 
         it("the OAuth consent screen has no violations", () => {
@@ -107,6 +122,8 @@ describe("Accessibility", () => {
             "/administration/api/requests",
             "/administration/api/applications",
             "/administration/api/mcp-clients",
+            "/administration/announcements",
+            "/administration/announcements/create",
             // The super administrator holds CreatePersonalAccessTokens; generic users don't see the page.
             "/app/account/access-tokens",
         ].forEach((path) => {

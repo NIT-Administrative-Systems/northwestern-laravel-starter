@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Console\Commands\NotifyAnnouncementAudiencesCommand;
 use App\Console\Commands\PruneMcpClientsCommand;
 use App\Console\Commands\RevokeIneligibleCredentialsCommand;
 use App\Console\Commands\SendClientSecretExpirationNotificationsCommand;
@@ -119,6 +120,14 @@ Schedule::command(RevokeIneligibleCredentialsCommand::class)->hourly();
 // traffic — so it runs in every environment. Without it, Spatie's ScheduleCheck
 // reports "the schedule did not run yet" indefinitely.
 Schedule::command(ScheduleCheckHeartbeatCommand::class)->everyMinute();
+
+// Notifies the audience of a scheduled announcement once it starts, when its author asked.
+// Hourly outside production, so idle databases can scale to zero.
+if (App::isProduction()) {
+    Schedule::command(NotifyAnnouncementAudiencesCommand::class)->everyFiveMinutes();
+} else {
+    Schedule::command(NotifyAnnouncementAudiencesCommand::class)->hourly();
+}
 
 if (App::isProduction()) {
     // The other two health commands touch infrastructure on every tick and have

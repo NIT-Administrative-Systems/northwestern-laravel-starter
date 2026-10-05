@@ -7,6 +7,8 @@
 --}}
 @props([
     'title' => null,
+    // Announcements for signed-out visitors, under the header. Error pages turn it off.
+    'announcements' => true,
 ])
 
 @php
@@ -89,6 +91,10 @@
             </x-filament::button>
         @endif
     </x-site-header>
+
+    @if ($announcements)
+        <x-public-announcement-banner />
+    @endif
 
     <main class="flex-1" id="main">
         {{ $slot }}

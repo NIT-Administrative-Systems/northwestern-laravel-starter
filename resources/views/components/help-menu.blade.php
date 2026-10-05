@@ -1,15 +1,27 @@
 {{--
     The Help menu in the app panel's top bar and the public header. Each item shows only
-    when it is available: the changelog, Contact Support (signed-in users, when support is
-    enabled), and the documentation link set in `support.documentation_url`.
+    when it is available: announcements (signed-in users), the changelog, Contact Support
+    (signed-in users, when support is enabled), and the documentation link set in
+    `support.documentation_url`.
 --}}
 @php
+    use App\Filament\App\Pages\Announcements;
     use App\Filament\App\Pages\ContactSupport;
     use App\Providers\Filament\AppPanelProvider;
     use Filament\Support\Icons\Heroicon;
     use Illuminate\Support\Facades\Route;
 
+    $signedIn = rescue(fn() => auth()->check(), false, report: false);
+
     $items = array_filter([
+        $signedIn
+            ? [
+                'label' => 'Announcements',
+                'url' => Announcements::getUrl(panel: AppPanelProvider::ID),
+                'icon' => Heroicon::OutlinedMegaphone,
+                'external' => false,
+            ]
+            : null,
         Route::has('support.changelog.index')
             ? [
                 'label' => 'Changelog',
@@ -18,7 +30,7 @@
                 'external' => false,
             ]
             : null,
-        rescue(fn() => auth()->check(), false, report: false) && ContactSupport::canAccess()
+        $signedIn && ContactSupport::canAccess()
             ? [
                 'label' => 'Contact Support',
                 'url' => ContactSupport::getUrl(panel: AppPanelProvider::ID),

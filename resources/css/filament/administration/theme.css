@@ -6,6 +6,7 @@
 @source '../../../../app/Filament/**/*';
 @source '../../../../resources/views/filament/**/*';
 @source '../../../../resources/views/components/panel-brand.blade.php';
+@source '../../../../resources/views/components/announcement-banner.blade.php';
 @source '../../../../vendor/filament/**/*';
 
 /* The wordmark's lowercase letters sit in the lower part of its box, so centering the box leaves it
