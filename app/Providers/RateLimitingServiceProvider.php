@@ -24,6 +24,20 @@ class RateLimitingServiceProvider extends ServiceProvider
         // Authenticated API requests are also limited per client or user, after authentication,
         // by {@see LimitAuthenticatedApiRequests}.
 
+        // MCP client registration needs no credentials, so it gets a tight per-IP limit.
+        RateLimiter::for('mcp-registration', static function (Request $request) {
+            return Limit::perHour((int) config('mcp.rate_limits.registrations_per_hour'))
+                ->by('mcp:registration:' . $request->ip());
+        });
+
+        // MCP tool calls, per person. Other MCP messages (listing tools, pings) only count
+        // towards the per-IP limit.
+        RateLimiter::for('mcp-tool-calls', static function (Request $request) {
+            return $request->json('method') === 'tools/call'
+                ? Limit::perMinute((int) config('mcp.rate_limits.tool_calls_per_minute'))->by('mcp:tool-calls:' . $request->user()?->getAuthIdentifier())
+                : Limit::none();
+        });
+
         RateLimiter::for('auth:impersonate', static function (Request $request) {
             return Limit::perMinute((int) config('rate-limiting.auth.impersonate.per_minute'))
                 ->by($request->user()?->id ?: $request->ip());

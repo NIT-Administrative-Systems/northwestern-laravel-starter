@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Domains\Auth\Actions\Applications\DisconnectApplication;
 use App\Domains\Auth\Actions\RevokeAllCredentials;
+use App\Domains\Auth\Enums\ClientOrigin;
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\OAuthClient;
+use App\Domains\Auth\Models\OAuthConnection;
 use App\Domains\Auth\Models\OAuthToken;
 use App\Domains\User\Models\User;
 use Illuminate\Console\Command;
@@ -14,8 +17,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 /**
  * Revokes credentials their holders may no longer have: everything belonging to deactivated
- * or deleted accounts, and the personal access tokens of people who lost the permission to
- * hold them.
+ * or deleted accounts, the personal access tokens of people who lost the permission to hold
+ * them, and the MCP clients connected by people who lost the permission to use MCP.
  *
  * The API already refuses these on every request; this makes the records say so, so the
  * Account and Administration pages show them as revoked.
@@ -24,9 +27,9 @@ class RevokeIneligibleCredentialsCommand extends Command
 {
     protected $signature = 'oauth:revoke-ineligible';
 
-    protected $description = 'Revoke the API credentials of deactivated accounts, and personal access tokens whose owners may no longer hold them';
+    protected $description = 'Revoke the API credentials of deactivated accounts, and personal access tokens and MCP clients their owners may no longer hold';
 
-    public function handle(RevokeAllCredentials $revokeAllCredentials): int
+    public function handle(RevokeAllCredentials $revokeAllCredentials, DisconnectApplication $disconnect): int
     {
         $deactivated = User::query()
             ->withTrashed()
@@ -52,7 +55,20 @@ class RevokeIneligibleCredentialsCommand extends Command
             }
         }
 
-        $this->components->info("Revoked the credentials of {$accounts} deactivated account(s) and {$tokens} personal access token(s) whose owners lost the permission.");
+        $mcpConnections = 0;
+
+        $connections = OAuthConnection::query()
+            ->with(['user', 'oauth_client'])
+            ->whereHas('oauth_client', fn (Builder $query) => $query->where('origin', ClientOrigin::Dynamic));
+
+        foreach ($connections->lazyById() as $connection) {
+            if ($connection->user instanceof User && ! $connection->user->can(SystemPermission::UseMcp)) {
+                $disconnect($connection, $connection->user);
+                $mcpConnections++;
+            }
+        }
+
+        $this->components->info("Revoked the credentials of {$accounts} deactivated account(s), {$tokens} personal access token(s) and {$mcpConnections} MCP client connection(s) whose owners lost the permission.");
 
         return self::SUCCESS;
     }

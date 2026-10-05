@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\Auth\Http\Middleware;
 
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Http\Middleware\LogsApiRequests;
 use App\Domains\Auth\Models\ApiRequestLog;
 use App\Domains\User\Models\User;
+use App\Mcp\Servers\AppServer;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
@@ -15,11 +17,15 @@ use Northwestern\SysDev\Chassis\Enums\ApiRequestFailure;
 use Northwestern\SysDev\Chassis\Enums\OAuthGrantType;
 use Northwestern\SysDev\Chassis\ValueObjects\ApiRequestContext;
 use PHPUnit\Framework\Attributes\CoversClass;
+use Tests\Concerns\RunsAuthorizationCodeFlow;
+use Tests\Fixtures\Mcp\EchoServer;
 use Tests\TestCase;
 
 #[CoversClass(LogsApiRequests::class)]
 final class LogsApiRequestsTest extends TestCase
 {
+    use RunsAuthorizationCodeFlow;
+
     private string $endpoint = '/api/test';
 
     protected function setUp(): void
@@ -324,6 +330,45 @@ final class LogsApiRequestsTest extends TestCase
         $log = ApiRequestLog::first();
         // In tests, this will be 127.0.0.1, but the middleware code handles null → 'unknown'
         $this->assertNotNull($log->ip_address);
+    }
+
+    // A failed tool call or a JSON-RPC error still answers 200; only the body tells.
+    public function test_mcp_requests_record_the_method_tool_and_outcome(): void
+    {
+        config(['mcp.enabled' => true]);
+        $this->app->bind(AppServer::class, EchoServer::class);
+        $user = User::factory()->create();
+        $user->givePermissionTo(SystemPermission::UseMcp);
+        $this->actingAs($user);
+        $token = $this->mcpToken();
+
+        $this->mcp($token, 'tools/call', ['name' => 'echo', 'arguments' => ['text' => 'hello']])->assertOk();
+        $this->mcp($token, 'tools/call', ['name' => 'echo', 'arguments' => ['text' => 'h']])->assertOk();
+        $this->mcp($token, 'resources/read', ['uri' => 'file:///missing'])->assertBadRequest();
+        $this->postJson('/mcp', ['jsonrpc' => '2.0', 'method' => 'notifications/initialized'], ['Accept' => 'application/json, text/event-stream', 'Authorization' => "Bearer {$token}"])->assertAccepted();
+
+        $this->assertSame([
+            ['tools/call', 'echo', 'ok'],
+            ['tools/call', 'echo', 'tool_error'],
+            ['resources/read', null, 'error'],
+            ['notifications/initialized', null, null],
+        ], ApiRequestLog::query()->orderBy('id')->get()->map(fn (ApiRequestLog $log): array => [$log->mcp_method, $log->mcp_tool, $log->mcp_outcome])->all());
+    }
+
+    public function test_an_mcp_response_without_a_json_rpc_body_records_no_outcome(): void
+    {
+        Context::add(ApiRequestContext::USER_ID, User::factory()->create()->id);
+        Context::add(ApiRequestContext::TRACE_ID, Str::uuid()->toString());
+        Route::middleware(LogsApiRequests::class)->post('/api/test-mcp-text', fn () => response()->json(['message' => 'Unauthenticated.'], 401))->name('mcp.server');
+        Route::middleware(LogsApiRequests::class)->post('/api/test-mcp-stream', fn () => response()->stream(function (): void {
+            echo 'data: {}';
+        }))->name('mcp.server');
+
+        $this->postJson('/api/test-mcp-text', ['method' => 'ping'])->assertUnauthorized();
+        $this->postJson('/api/test-mcp-stream', ['method' => 'ping'])->assertOk();
+
+        $this->assertSame([null, null], ApiRequestLog::query()->orderBy('id')->pluck('mcp_outcome')->all());
+        $this->assertSame(['ping', 'ping'], ApiRequestLog::query()->orderBy('id')->pluck('mcp_method')->all());
     }
 
     public function test_streamed_response_does_not_capture_response_bytes(): void

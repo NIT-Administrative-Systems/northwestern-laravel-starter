@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 use App\Domains\Core\Exceptions\SentryExceptionHandler;
 use App\Http\Middleware\EnvironmentLockdown;
+use App\Http\Middleware\HandleCors;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Middleware\HandleCors as FrameworkHandleCors;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Laravel\Passport\Exceptions\InvalidAuthTokenException;
@@ -36,6 +38,9 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->throttleApi();
+
+        // Adds cors.open_paths, for the MCP server and the OAuth endpoints its clients call.
+        $middleware->replace(FrameworkHandleCors::class, HandleCors::class);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         // Database pause errors (custom handling for web)

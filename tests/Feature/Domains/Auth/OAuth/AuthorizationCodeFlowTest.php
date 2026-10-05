@@ -12,6 +12,7 @@ use App\Domains\Auth\Models\OAuthConnection;
 use App\Domains\Auth\Notifications\ApplicationConnectedNotification;
 use App\Domains\User\Models\User;
 use App\Providers\OAuthServiceProvider;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Notification;
 use Laravel\Passport\Events\AccessTokenCreated;
 use Mockery;
@@ -200,6 +201,12 @@ final class AuthorizationCodeFlowTest extends TestCase
         $this->personalAccessToken(User::factory()->create());
 
         $this->assertSame(0, OAuthConnection::query()->count());
+    }
+
+    // Event discovery registers the listener; registering it again ran it twice for every token.
+    public function test_the_connection_listener_is_registered_once(): void
+    {
+        $this->assertCount(1, Event::getRawListeners()[AccessTokenCreated::class]);
     }
 
     public function test_a_token_for_someone_who_no_longer_exists_records_no_connection(): void

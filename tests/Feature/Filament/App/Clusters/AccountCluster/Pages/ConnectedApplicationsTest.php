@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Filament\App\Clusters\AccountCluster\Pages;
 
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\OAuthConnection;
 use App\Domains\User\Models\User;
 use App\Filament\App\Clusters\AccountCluster\Pages\ConnectedApplications;
@@ -38,6 +39,16 @@ final class ConnectedApplicationsTest extends TestCase
         $this->get('/app/account/connected-applications')->assertOk()->assertSee('No connected applications');
     }
 
+    // AI clients are connections too, so the page stays while only the MCP server is on.
+    public function test_it_shows_while_the_api_or_the_mcp_server_is_enabled(): void
+    {
+        config(['api.enabled' => false, 'mcp.enabled' => true]);
+        $this->assertTrue(ConnectedApplications::canAccess());
+
+        config(['mcp.enabled' => false]);
+        $this->assertFalse(ConnectedApplications::canAccess());
+    }
+
     public function test_it_lists_the_persons_live_connections(): void
     {
         $mine = $this->connect('Reporting Tool');
@@ -53,6 +64,18 @@ final class ConnectedApplicationsTest extends TestCase
         $this->travel(31)->days();
 
         Livewire::test(ConnectedApplications::class)->assertCanNotSeeTableRecords([$mine]);
+    }
+
+    // An MCP client named itself, so the list says so.
+    public function test_a_self_registered_mcp_client_is_labelled(): void
+    {
+        config(['mcp.enabled' => true]);
+        $this->user->givePermissionTo(SystemPermission::UseMcp);
+        $this->mcpToken();
+
+        Livewire::test(ConnectedApplications::class)
+            ->assertSee('Claude Code')
+            ->assertSee('AI client · self-reported name');
     }
 
     public function test_a_person_disconnects_an_application(): void

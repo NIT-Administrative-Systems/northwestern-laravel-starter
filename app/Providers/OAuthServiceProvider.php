@@ -5,14 +5,12 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Domains\Auth\Enums\SystemPermission;
-use App\Domains\Auth\Listeners\RecordOAuthConnection;
 use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\Auth\Models\OAuthToken;
 use Carbon\CarbonInterval;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Mcp\Server\Registrar;
 use Laravel\Passport\Bridge\AccessTokenRepository;
-use Laravel\Passport\Events\AccessTokenCreated;
 use Laravel\Passport\Passport;
 use Northwestern\SysDev\Chassis\Passport\ExpiringAccessTokenRepository;
 use Symfony\Component\HttpFoundation\Response;
@@ -38,11 +36,11 @@ class OAuthServiceProvider extends ServiceProvider
         Passport::useClientModel(OAuthClient::class);
         Passport::useTokenModel(OAuthToken::class);
 
-        Passport::tokensCan(self::scopes());
+        // MCP clients get only `mcp:use`, which no REST route accepts, so their tokens and REST tokens
+        // can't stand in for each other. It isn't offered for personal tokens or applications.
+        Passport::tokensCan([...self::scopes(), Registrar::OAUTH_SCOPE => "Use this application's tools from an AI client"]);
 
         Passport::authorizationView(fn (array $parameters): Response => response()->view('public.oauth.authorize', $parameters));
-
-        Event::listen(AccessTokenCreated::class, RecordOAuthConnection::class);
 
         Passport::tokensExpireIn(CarbonInterval::hour());
         Passport::refreshTokensExpireIn(CarbonInterval::days(30));

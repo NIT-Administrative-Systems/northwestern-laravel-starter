@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Console\Commands\PruneMcpClientsCommand;
 use App\Console\Commands\RevokeIneligibleCredentialsCommand;
 use App\Console\Commands\SendClientSecretExpirationNotificationsCommand;
 use App\Console\Commands\SendPersonalAccessTokenExpirationNotificationsCommand;
@@ -71,6 +72,9 @@ if (config('api.expiration_notifications.enabled')) {
 // Delete revoked and expired OAuth tokens and codes. Keep them past the 30-day refresh token
 // lifetime: refresh tokens are found through their access tokens when access is revoked.
 Schedule::command(PurgeCommand::class, ['--hours' => 24 * 31])->daily();
+
+// Self-registered MCP clients nobody connected, or nobody uses any more.
+Schedule::command(PruneMcpClientsCommand::class)->daily();
 
 /*
 |--------------------------------------------------------------------------
