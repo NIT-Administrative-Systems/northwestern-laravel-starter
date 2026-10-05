@@ -6,6 +6,7 @@ namespace App\Filament\App\Clusters\AccountCluster\Pages;
 
 use App\Domains\Auth\Actions\Applications\DisconnectApplication;
 use App\Domains\Auth\Enums\AuthType;
+use App\Domains\Auth\Enums\ClientOrigin;
 use App\Domains\Auth\Models\OAuthConnection;
 use App\Domains\User\Models\User;
 use App\Filament\App\Clusters\AccountCluster;
@@ -48,7 +49,7 @@ class ConnectedApplications extends Page implements HasTable
     {
         $user = auth()->user();
 
-        return $user instanceof User && $user->auth_type !== AuthType::API && (bool) config('api.enabled');
+        return $user instanceof User && $user->auth_type !== AuthType::API && ((bool) config('api.enabled') || (bool) config('mcp.enabled'));
     }
 
     public function content(Schema $schema): Schema
@@ -74,7 +75,9 @@ class ConnectedApplications extends Page implements HasTable
                 ->where('user_id', $this->user()->getKey())
                 ->latest('connected_at'))
             ->columns([
-                TextColumn::make('oauth_client.name')->label('Application'),
+                TextColumn::make('oauth_client.name')
+                    ->label('Application')
+                    ->description(fn (OAuthConnection $record): ?string => $record->oauth_client?->origin === ClientOrigin::Dynamic ? 'AI client · self-reported name' : null),
                 TextColumn::make('scopes')->label('Allowed to')->badge()->placeholder('See your account details'),
                 TextColumn::make('connected_at')->label('Connected')->date(),
                 TextColumn::make('last_used_at')->label('Last used')->since()->dateTimeTooltip()->placeholder('Never'),

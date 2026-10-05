@@ -52,6 +52,7 @@ enum SystemPermission: string implements HasLabel
     case ManageApiAccess = 'manage-api-access';
     case ViewApiRequestLogs = 'view-api-request-logs';
     case CreatePersonalAccessTokens = 'create-personal-access-tokens';
+    case UseMcp = 'use-mcp';
 
     // Audit & Monitoring
     case ViewAuditLogs = 'view-audit-logs';
@@ -69,6 +70,7 @@ enum SystemPermission: string implements HasLabel
             ->replace('-', ' ')
             ->title()
             ->replaceMatches('/\bapi\b/i', 'API')
+            ->replaceMatches('/\bmcp\b/i', 'MCP')
             ->toString();
     }
 
@@ -99,6 +101,7 @@ enum SystemPermission: string implements HasLabel
             self::ManageApiAccess => 'Allows creating API users and managing their clients, roles, and access.',
             self::ViewApiRequestLogs => 'Allows viewing API request logs and usage charts.',
             self::CreatePersonalAccessTokens => 'Allows creating personal access tokens on the Account page, to call the API as yourself from scripts.',
+            self::UseMcp => 'Allows connecting AI clients such as Claude and VS Code to the MCP server, to use its tools as yourself.',
 
             // Audit & Monitoring
             self::ViewAuditLogs => 'Allows viewing system audit logs and change history.',

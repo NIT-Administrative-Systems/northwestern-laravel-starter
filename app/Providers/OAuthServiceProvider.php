@@ -9,6 +9,7 @@ use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\Auth\Models\OAuthToken;
 use Carbon\CarbonInterval;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Mcp\Server\Registrar;
 use Laravel\Passport\Bridge\AccessTokenRepository;
 use Laravel\Passport\Passport;
 use Northwestern\SysDev\Chassis\Passport\ExpiringAccessTokenRepository;
@@ -35,7 +36,9 @@ class OAuthServiceProvider extends ServiceProvider
         Passport::useClientModel(OAuthClient::class);
         Passport::useTokenModel(OAuthToken::class);
 
-        Passport::tokensCan(self::scopes());
+        // MCP clients get only `mcp:use`, which no REST route accepts, so their tokens and REST tokens
+        // can't stand in for each other. It isn't offered for personal tokens or applications.
+        Passport::tokensCan([...self::scopes(), Registrar::OAUTH_SCOPE => "Use this application's tools from an AI client"]);
 
         Passport::authorizationView(fn (array $parameters): Response => response()->view('public.oauth.authorize', $parameters));
 

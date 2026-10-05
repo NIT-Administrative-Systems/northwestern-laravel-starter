@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Domains\Auth\Http\Middleware\AuthenticatePassportToken;
 use App\Domains\Auth\Http\Middleware\LimitAuthenticatedApiRequests;
 use App\Domains\Auth\Http\Middleware\LogsApiRequests;
+use App\Domains\Auth\Http\Middleware\RefuseMcpTokens;
 use App\Domains\User\Http\Controllers\Api\V1\UserApiController;
 use App\Http\Middleware\RequireHealthSecretToken;
 use Illuminate\Support\Facades\Route;
@@ -30,13 +31,15 @@ Route::middleware([EnsureFeatureEnabled::class . ':api.enabled'])->group(functio
 | Endpoints that require a Passport access token, fully logged through the API
 | request logging middleware and rate limited per client or user once the token is
 | known. Credentials are never created here: service clients are created in
-| Administration and personal access tokens on the Account page.
+| Administration and personal access tokens on the Account page. Tokens issued
+| to MCP clients are refused: they work only on the MCP server (routes/ai.php).
 */
 
 Route::middleware([
     EnsureFeatureEnabled::class . ':api.enabled',
     LogsApiRequests::class,
     AuthenticatePassportToken::class,
+    RefuseMcpTokens::class,
     LimitAuthenticatedApiRequests::class,
 ])->group(function () {
     Route::prefix('v1')->group(function () {

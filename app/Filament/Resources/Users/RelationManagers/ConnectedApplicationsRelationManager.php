@@ -6,6 +6,7 @@ namespace App\Filament\Resources\Users\RelationManagers;
 
 use App\Domains\Auth\Actions\Applications\DisconnectApplication;
 use App\Domains\Auth\Enums\AuthType;
+use App\Domains\Auth\Enums\ClientOrigin;
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\OAuthConnection;
 use App\Domains\User\Models\User;
@@ -32,7 +33,7 @@ class ConnectedApplicationsRelationManager extends RelationManager
     {
         /** @var User $ownerRecord */
         return $ownerRecord->auth_type !== AuthType::API
-            && config('api.enabled')
+            && (config('api.enabled') || config('mcp.enabled'))
             && auth()->user()?->can(SystemPermission::ManageApiAccess);
     }
 
@@ -47,7 +48,9 @@ class ConnectedApplicationsRelationManager extends RelationManager
             ->recordTitleAttribute('oauth_client.name')
             ->modifyQueryUsing(fn (Builder $query) => $query->whereIn('id', OAuthConnection::query()->live()->select('id'))->with('oauth_client')->latest('connected_at'))
             ->columns([
-                TextColumn::make('oauth_client.name')->label('Application'),
+                TextColumn::make('oauth_client.name')
+                    ->label('Application')
+                    ->description(fn (OAuthConnection $record): ?string => $record->oauth_client?->origin === ClientOrigin::Dynamic ? 'AI client · self-reported name' : null),
                 TextColumn::make('scopes')->label('Scopes')->badge()->placeholder('None'),
                 TextColumn::make('connected_at')->label('Connected')->dateTime(),
                 TextColumn::make('last_used_at')->label('Last Used')->dateTime()->placeholder('Never'),

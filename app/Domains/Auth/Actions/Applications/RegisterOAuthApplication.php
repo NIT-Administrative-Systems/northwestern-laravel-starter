@@ -12,7 +12,8 @@ use Laravel\Passport\ClientRepository;
 /**
  * Registers an external application that people can connect to their account through the
  * authorization code flow. A confidential application, such as a web server, gets a client
- * secret; a public one, such as a desktop or browser app, uses PKCE instead.
+ * secret; a public one, such as a desktop or browser app, uses PKCE instead. An MCP client
+ * registers itself through the same action, with a dynamic origin.
  */
 readonly class RegisterOAuthApplication
 {
@@ -35,8 +36,9 @@ readonly class RegisterOAuthApplication
         bool $firstParty = false,
         ?string $description = null,
         ?string $contactEmail = null,
+        ClientOrigin $origin = ClientOrigin::Administrator,
     ): array {
-        return DB::transaction(function () use ($name, $redirectUris, $confidential, $scopes, $firstParty, $description, $contactEmail): array {
+        return DB::transaction(function () use ($name, $redirectUris, $confidential, $scopes, $firstParty, $description, $contactEmail, $origin): array {
             /** @var OAuthClient $client */
             $client = $this->clients->createAuthorizationCodeGrantClient($name, array_values($redirectUris), $confidential);
 
@@ -44,7 +46,7 @@ readonly class RegisterOAuthApplication
             $secret = $client->plainSecret;
 
             $client->forceFill([
-                'origin' => ClientOrigin::Administrator,
+                'origin' => $origin,
                 'scopes' => array_values($scopes),
                 'first_party' => $firstParty,
                 'description' => $description,

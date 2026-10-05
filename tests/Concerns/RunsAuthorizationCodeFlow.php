@@ -77,6 +77,46 @@ trait RunsAuthorizationCodeFlow
     }
 
     /**
+     * Register an MCP client the way one registers itself, at the dynamic registration endpoint.
+     */
+    protected function registerMcpClient(string $name = 'Claude Code'): OAuthClient
+    {
+        $clientId = $this->postJson('/oauth/register', ['client_name' => $name, 'redirect_uris' => [self::REDIRECT_URI]])
+            ->assertCreated()
+            ->json('client_id');
+
+        return OAuthClient::query()->findOrFail($clientId);
+    }
+
+    /**
+     * Connect a new MCP client as the signed-in person and return its access token.
+     */
+    protected function mcpToken(): string
+    {
+        $client = $this->registerMcpClient();
+        [, $verifier] = $this->requestAuthorization($client, ['mcp:use']);
+
+        return (string) $this->exchange($client, $this->approve($client), $verifier)->assertOk()->json('access_token');
+    }
+
+    /**
+     * Send one JSON-RPC message to the MCP server.
+     *
+     * @param  array<string, mixed>  $params
+     * @return TestResponse<\Symfony\Component\HttpFoundation\Response>
+     */
+    protected function mcp(?string $token, string $method, array $params = []): TestResponse
+    {
+        $headers = ['Accept' => 'application/json, text/event-stream', 'MCP-Protocol-Version' => '2025-06-18'];
+
+        if ($token !== null) {
+            $headers['Authorization'] = "Bearer {$token}";
+        }
+
+        return $this->postJson('/mcp', ['jsonrpc' => '2.0', 'id' => 1, 'method' => $method, 'params' => (object) $params], $headers);
+    }
+
+    /**
      * @return TestResponse<\Symfony\Component\HttpFoundation\Response>
      */
     protected function exchange(OAuthClient $client, string $code, string $verifier): TestResponse

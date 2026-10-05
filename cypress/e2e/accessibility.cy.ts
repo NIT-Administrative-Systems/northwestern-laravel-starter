@@ -106,11 +106,35 @@ describe("Accessibility", () => {
             "/administration/api",
             "/administration/api/requests",
             "/administration/api/applications",
+            "/administration/api/mcp-clients",
             // The super administrator holds CreatePersonalAccessTokens; generic users don't see the page.
             "/app/account/access-tokens",
         ].forEach((path) => {
             it(`${path} has no violations`, () => {
                 visit(path);
+                cy.checkAxeViolations();
+            });
+        });
+
+        // Approving an MCP client needs UseMcp, which the super administrator holds.
+        it("the consent screen for a self-registered MCP client has no violations", () => {
+            cy.request("POST", "/oauth/register", {
+                client_name: "Claude Code",
+                redirect_uris: ["http://localhost:4100/callback"],
+            }).then(({ body }) => {
+                const query = new URLSearchParams({
+                    client_id: String(body.client_id),
+                    redirect_uri: "http://localhost:4100/callback",
+                    response_type: "code",
+                    scope: "mcp:use",
+                    state: "axe",
+                    code_challenge:
+                        "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+                    code_challenge_method: "S256",
+                });
+
+                visit(`/oauth/authorize?${query.toString()}`);
+                cy.contains("Unverified application");
                 cy.checkAxeViolations();
             });
         });

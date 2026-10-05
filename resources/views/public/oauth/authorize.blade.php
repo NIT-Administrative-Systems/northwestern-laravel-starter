@@ -43,7 +43,10 @@
 
             <h2 class="mt-6 text-base font-semibold text-gray-950">It will be able to act as you to:</h2>
             <ul class="mt-2 list-disc space-y-1 ps-5 text-gray-700">
-                <li>See your account details</li>
+                {{-- A self-registered MCP client's token works only on the MCP server, never the REST API's /v1/me. --}}
+                @unless ($unverified)
+                    <li>See your account details</li>
+                @endunless
                 @foreach ($scopes as $scope)
                     <li>{{ $scope->description }}</li>
                 @endforeach
