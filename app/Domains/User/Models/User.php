@@ -66,6 +66,12 @@ class User extends Authenticatable implements Auditable, FilamentUser, HasAvatar
         HasRoles::syncRoles as private;
     }
 
+    /**
+     * Roles and permissions belong to the `web` guard. Without this, Spatie checks them against
+     * the `api` guard on API requests, where Passport's guard is the default, and finds none.
+     */
+    protected string $guard_name = 'web';
+
     /** @var list<string> */
     protected array $auditExclude = [
         'last_directory_sync_at',
