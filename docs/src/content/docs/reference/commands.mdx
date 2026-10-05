@@ -5,8 +5,11 @@ sidebar:
     order: 1
 ---
 
-import { Aside } from '@astrojs/starlight/components';
-import { PropertyTable, Property } from '@nu-appdev/northwestern-starlight-theme/components';
+import { Aside } from "@astrojs/starlight/components";
+import {
+    PropertyTable,
+    Property,
+} from "@nu-appdev/northwestern-starlight-theme/components";
 
 The starter includes several custom Artisan commands for managing your application's database, configuration, and Northwestern integrations.
 
@@ -29,7 +32,8 @@ php artisan db:rebuild
 5. Regenerates IDE model helper annotations with `ide-helper:models -N`
 
 <Aside type="caution" title="Destructive Operation">
-This command will **completely wipe your database**. Only use in local and testing environments. Never run this in production.
+    This command will **completely wipe your database**. Only use in local and
+    testing environments. Never run this in production.
 </Aside>
 
 **When to use:**
@@ -95,7 +99,8 @@ php artisan db:snapshot:create my-snapshot-name
 
 <PropertyTable title="Options">
     <Property name="filename" type="argument">
-        Descriptive name for the snapshot. Defaults to `database-dump` if omitted.
+        Descriptive name for the snapshot. Defaults to `database-dump` if
+        omitted.
     </Property>
     <Property name="--skip-schema-validation" type="flag">
         Skip schema validation checks
@@ -109,7 +114,8 @@ php artisan db:snapshot:create my-snapshot-name
 3. Stores metadata about the snapshot (checksum, timestamp, migration/seeder counts)
 
 <Aside type="tip">
-Use descriptive snapshot names like `clean-test-data` or `before-feature-x` to make them easier to identify later.
+    Use descriptive snapshot names like `clean-test-data` or `before-feature-x`
+    to make them easier to identify later.
 </Aside>
 
 **When to use:**
@@ -155,7 +161,8 @@ php artisan db:snapshot:restore my-snapshot-name
 5. Restores data from snapshot SQL file
 
 <Aside type="caution" title="Destructive Operation">
-Restoring a snapshot will **completely replace** your current database. All current data will be lost.
+    Restoring a snapshot will **completely replace** your current database. All
+    current data will be lost.
 </Aside>
 
 **When to use:**
@@ -186,7 +193,8 @@ php artisan db:snapshot:info my-snapshot-name
 
 <PropertyTable title="Options">
     <Property name="filename" type="argument">
-        Name of the snapshot to inspect. If omitted, an interactive selector is shown.
+        Name of the snapshot to inspect. If omitted, an interactive selector is
+        shown.
     </Property>
 </PropertyTable>
 
@@ -214,7 +222,8 @@ php artisan db:snapshot:delete my-snapshot-name
 
 <PropertyTable title="Options">
     <Property name="filename" type="argument">
-        Name of the snapshot to delete. If omitted, an interactive selector is shown.
+        Name of the snapshot to delete. If omitted, an interactive selector is
+        shown.
     </Property>
     <Property name="--all" type="flag">
         Delete all snapshots
@@ -262,7 +271,9 @@ Attempts to connect to the database and execute a simple query, causing serverle
 - When you know the database has been idle
 
 <Aside type="note">
-This is primarily useful for AWS Aurora Serverless or similar serverless database configurations that automatically pause after periods of inactivity.
+    This is primarily useful for AWS Aurora Serverless or similar serverless
+    database configurations that automatically pause after periods of
+    inactivity.
 </Aside>
 
 ---
@@ -349,7 +360,10 @@ class StripeValidator implements ConfigValidator
 **2. That's it.** The validator is automatically discovered from any `app/Domains/*/Services/ConfigValidation` directory. No registration or configuration needed.
 
 <Aside type="tip">
-The `description` parameter on `#[ValidatesConfig]` controls the label shown in the command output. The `shouldRun()` method determines whether the validator is relevant. Return `false` for optional integrations that aren't configured to avoid false negatives.
+    The `description` parameter on `#[ValidatesConfig]` controls the label shown
+    in the command output. The `shouldRun()` method determines whether the
+    validator is relevant. Return `false` for optional integrations that aren't
+    configured to avoid false negatives.
 </Aside>
 
 ---
@@ -372,7 +386,8 @@ php artisan role:force-detach jdoe "Super Administrator" --reason="Offboarding"
         Name of the role to detach. If omitted, a search prompt is shown.
     </Property>
     <Property name="--reason" type="option">
-        Reason for the detachment, recorded in the audit log. Prompted for if omitted; required with `--force`.
+        Reason for the detachment, recorded in the audit log. Prompted for if
+        omitted; required with `--force`.
     </Property>
     <Property name="--force" type="flag">
         Skip the confirmation prompt
@@ -498,7 +513,8 @@ php artisan make:changelog 2026-03-01 --date=2026-03-01 --title="Search Improvem
         Authored date in `YYYY-MM-DD` format. Defaults to today.
     </Property>
     <Property name="--title" type="option">
-        Human-readable title. Defaults to "Month Year Release" when the slug is a date.
+        Human-readable title. Defaults to "Month Year Release" when the slug is
+        a date.
     </Property>
 </PropertyTable>
 
@@ -523,7 +539,8 @@ php artisan netid:update:test jdoe deactivate
         NetID to include in the message. Prompted for if omitted.
     </Property>
     <Property name="action" type="argument">
-        Update action: `deactivate`, `deprovision` or `sechold`. A selector is shown if omitted.
+        Update action: `deactivate`, `deprovision` or `sechold`. A selector is
+        shown if omitted.
     </Property>
     <Property name="--via-queue" type="flag">
         Send through the EventHub queue instead of directly to the HTTP webhook
@@ -577,7 +594,8 @@ php artisan ide-helper:meta
 ```
 
 <Aside type="tip">
-`composer update` and `db:rebuild` keep these files current. You rarely need to run them manually.
+    `composer update` and `db:rebuild` keep these files current. You rarely need
+    to run them manually.
 </Aside>
 
 ---
@@ -586,16 +604,17 @@ php artisan ide-helper:meta
 
 `routes/console.php` schedules these commands. The scheduler must be running (`php artisan schedule:work` locally) for any of them to run.
 
-| Command | Frequency | Purpose |
-|---|---|---|
-| `telescope:prune` | Daily | Deletes Telescope entries older than 24 hours |
-| `livewire:configure-s3-upload-cleanup` | Daily | Sets the S3 lifecycle rule that expires Livewire's temporary uploads after 24 hours (only when uploads use an S3 disk) |
-| `model:prune --path=app/Domains/*/Models` | Daily | Prunes models in `app/Domains/*/Models` that use `Prunable` or `MassPrunable`, including those with `PrunesAfterRetentionPeriod` |
-| `model:prune --model=HealthCheckResultHistoryItem` | Daily | Deletes health check results older than `keep_history_for_days` (5) |
-| `oauth-clients:notify-secret-expiration` | Daily at 09:00 | Sends client secret expiration reminders, when `api.expiration_notifications.enabled` is true |
-| `personal-access-tokens:notify-expiration` | Daily at 09:00 | Emails people before their personal access tokens expire, unless they turned it off in their preferences, when `api.expiration_notifications.enabled` is true |
-| `oauth:revoke-ineligible` | Hourly | Revokes the credentials of deleted and deactivated accounts, and personal access tokens whose owners lost `CreatePersonalAccessTokens` |
-| `passport:purge --hours=744` | Daily | Deletes revoked and expired OAuth tokens and codes once they are more than 31 days past, longer than the 30-day refresh token lifetime |
-| `health:schedule-check-heartbeat` | Every minute | Records the heartbeat the Schedule health check reads, in every environment |
-| `health:queue-check-heartbeat` | Every five minutes, production only | Dispatches the job the Queue health check waits for |
-| `health:check` | Every minute, production only | Runs and stores the health checks |
+| Command                                            | Frequency                           | Purpose                                                                                                                                                                                   |
+| -------------------------------------------------- | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `telescope:prune`                                  | Daily                               | Deletes Telescope entries older than 24 hours                                                                                                                                             |
+| `livewire:configure-s3-upload-cleanup`             | Daily                               | Sets the S3 lifecycle rule that expires Livewire's temporary uploads after 24 hours (only when uploads use an S3 disk)                                                                    |
+| `model:prune --path=app/Domains/*/Models`          | Daily                               | Prunes models in `app/Domains/*/Models` that use `Prunable` or `MassPrunable`, including those with `PrunesAfterRetentionPeriod`                                                          |
+| `model:prune --model=HealthCheckResultHistoryItem` | Daily                               | Deletes health check results older than `keep_history_for_days` (5)                                                                                                                       |
+| `oauth-clients:notify-secret-expiration`           | Daily at 09:00                      | Sends client secret expiration reminders, when `api.expiration_notifications.enabled` is true                                                                                             |
+| `personal-access-tokens:notify-expiration`         | Daily at 09:00                      | Emails people before their personal access tokens expire, unless they turned it off in their preferences, when `api.expiration_notifications.enabled` is true                             |
+| `oauth:revoke-ineligible`                          | Hourly                              | Revokes the credentials of deleted and deactivated accounts, personal access tokens whose owners lost `CreatePersonalAccessTokens`, and MCP clients connected by people who lost `UseMcp` |
+| `mcp:prune-clients`                                | Daily                               | Deletes self-registered [MCP clients](/features/mcp/) nobody connected within a day, and revokes those nobody has used for 90 days                                                        |
+| `passport:purge --hours=744`                       | Daily                               | Deletes revoked and expired OAuth tokens and codes once they are more than 31 days past, longer than the 30-day refresh token lifetime                                                    |
+| `health:schedule-check-heartbeat`                  | Every minute                        | Records the heartbeat the Schedule health check reads, in every environment                                                                                                               |
+| `health:queue-check-heartbeat`                     | Every five minutes, production only | Dispatches the job the Queue health check waits for                                                                                                                                       |
+| `health:check`                                     | Every minute, production only       | Runs and stores the health checks                                                                                                                                                         |

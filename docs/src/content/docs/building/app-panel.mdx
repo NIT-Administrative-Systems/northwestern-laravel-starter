@@ -5,7 +5,7 @@ sidebar:
     order: 1
 ---
 
-import { Aside, FileTree, Steps } from '@astrojs/starlight/components';
+import { Aside, FileTree, Steps } from "@astrojs/starlight/components";
 
 The app panel at `/app` is where an application built on the starter does its work. It is the default Filament panel, configured in `App\Providers\Filament\AppPanelProvider`, and any signed-in user can open it. API users can't: they authenticate through OAuth clients and never have a panel session. Back-office tools belong in the [administration panel](/architecture/ui-architecture/#the-administration-panel) instead.
 
@@ -16,21 +16,11 @@ The panel also owns sign-in for the whole application. Guests of any panel are s
 The panel discovers Resources, Pages, Clusters and Widgets in `app/Filament/App/`:
 
 <FileTree>
-- app/Filament/App/
-  - Clusters/
-    - AccountCluster.php
-    - AccountCluster/Pages/
-      - Profile.php
-      - Preferences.php
-  - Pages/
-    - Auth/ sign-in pages
-    - Concerns/HasSiteHeader.php
-    - ComponentGallery.php
-    - ContactSupport.php
-    - EnvironmentLockdown.php
-  - Resources/ discovered, empty until you add one
-  - Widgets/
-    - YourAccountWidget.php
+    - app/Filament/App/ - Clusters/ - AccountCluster.php - AccountCluster/Pages/
+    - Profile.php - Preferences.php - Pages/ - Auth/ sign-in pages -
+    Concerns/HasSiteHeader.php - ComponentGallery.php - ContactSupport.php -
+    EnvironmentLockdown.php - Resources/ discovered, empty until you add one -
+    Widgets/ - YourAccountWidget.php
 </FileTree>
 
 The sidebar is for your application's features. The starter ships only the dashboard and, outside production, the component gallery there; Contact Support is in the Help menu.
@@ -77,7 +67,7 @@ The Account area at `/app/account` is each user's own: who they are, how they si
 
 ### Connected Applications
 
-`/app/account/connected-applications` lists the [applications](/features/api/#connected-applications) the user has allowed to act for them, one row per application, with what each may do, when it connected and when it was last used. **Disconnect** removes one application's access and **Disconnect all** removes every application's. Every user can open it while the API is enabled.
+`/app/account/connected-applications` lists the [applications](/features/api/#connected-applications) the user has allowed to act for them, one row per application, with what each may do, when it connected and when it was last used. **Disconnect** removes one application's access and **Disconnect all** removes every application's. Every user can open it while the API or the [MCP server](/features/mcp/) is enabled; AI clients are labelled with their self-reported names.
 
 ### Preferences
 
@@ -93,34 +83,34 @@ Everything else a user chooses goes in the `users.preferences` JSON column, read
 
 1. Add the property:
 
-   ```php
-   // app/Domains/User/Data/UserPreferences.php
-   final readonly class UserPreferences extends Preferences
-   {
-       public function __construct(
-           public bool $emailBeforeAccessTokensExpire = true,
-           public bool $emailWhenApplicationConnects = true,
-           public bool $emailWeeklySummary = true,
-       ) {}
-   }
-   ```
+    ```php
+    // app/Domains/User/Data/UserPreferences.php
+    final readonly class UserPreferences extends Preferences
+    {
+        public function __construct(
+            public bool $emailBeforeAccessTokensExpire = true,
+            public bool $emailWhenApplicationConnects = true,
+            public bool $emailWeeklySummary = true,
+        ) {}
+    }
+    ```
 
 2. Add its field to the form in `App\Filament\App\Clusters\AccountCluster\Pages\Preferences`, named after the property:
 
-   ```php
-   Toggle::make('emailWeeklySummary')
-       ->label('Email me a weekly summary'),
-   ```
+    ```php
+    Toggle::make('emailWeeklySummary')
+        ->label('Email me a weekly summary'),
+    ```
 
-   The page fills the form from `$user->preferences` and saves every field except `timezone` back into it.
+    The page fills the form from `$user->preferences` and saves every field except `timezone` back into it.
 
 3. Read it wherever it matters:
 
-   ```php
-   if ($user->preferences->emailWeeklySummary) {
-       // ...
-   }
-   ```
+    ```php
+    if ($user->preferences->emailWeeklySummary) {
+        // ...
+    }
+    ```
 
 </Steps>
 
@@ -134,7 +124,8 @@ $user->save();
 The base class, `App\Domains\Core\Data\Preferences`, works for any model: extend it and cast a JSON column with your subclass (`'settings' => TeamSettings::class`).
 
 <Aside>
-    Keep a setting in its own column instead when queries filter or sort by it, as `timezone` is.
+    Keep a setting in its own column instead when queries filter or sort by it,
+    as `timezone` is.
 </Aside>
 
 ## The Component Gallery
@@ -227,36 +218,37 @@ Simple pages (Filament's `SimplePage`) render a single card without the sidebar.
 
 1. Extend `Filament\Pages\SimplePage` in `app/Filament/App/Pages/`, and use `App\Filament\App\Pages\Concerns\HasSiteHeader`. The trait turns off Filament's own logo and simple-page user menu, which would repeat what the header shows.
 
-   ```php
-   use App\Filament\App\Pages\Concerns\HasSiteHeader;
-   use Filament\Pages\SimplePage;
-   use Filament\Schemas\Schema;
+    ```php
+    use App\Filament\App\Pages\Concerns\HasSiteHeader;
+    use Filament\Pages\SimplePage;
+    use Filament\Schemas\Schema;
 
-   class Welcome extends SimplePage
-   {
-       use HasSiteHeader;
+    class Welcome extends SimplePage
+    {
+        use HasSiteHeader;
 
-       public function content(Schema $schema): Schema
-       {
-           return $schema->components([
-               // ...
-           ]);
-       }
-   }
-   ```
+        public function content(Schema $schema): Schema
+        {
+            return $schema->components([
+                // ...
+            ]);
+        }
+    }
+    ```
 
 2. Register its route in `AppPanelProvider::panel()`. Filament's page discovery only picks up full pages, so simple pages are routed in `->routes()`, as the lockdown page is:
 
-   ```php
-   ->routes(function (): void {
-       Route::get('welcome', Welcome::class)
-           ->middleware(Authenticate::class)
-           ->name('welcome');
-   })
-   ```
+    ```php
+    ->routes(function (): void {
+        Route::get('welcome', Welcome::class)
+            ->middleware(Authenticate::class)
+            ->name('welcome');
+    })
+    ```
 
 </Steps>
 
 <Aside type="tip">
-    For a page that guests must see without the panel's sign-in, use the [public layout](/building/public-pages/) instead.
+    For a page that guests must see without the panel's sign-in, use the [public
+    layout](/building/public-pages/) instead.
 </Aside>

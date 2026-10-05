@@ -5,7 +5,14 @@ sidebar:
     order: 2
 ---
 
-import { Aside, Steps, Tabs, TabItem, Card, CardGrid } from '@astrojs/starlight/components';
+import {
+    Aside,
+    Steps,
+    Tabs,
+    TabItem,
+    Card,
+    CardGrid,
+} from "@astrojs/starlight/components";
 
 The starter implements a role-based access control (RBAC) system built on [Spatie Laravel Permission](https://spatie.be/docs/laravel-permission) with added role types, permission metadata, auditable role changes, and API role segregation.
 
@@ -29,12 +36,12 @@ The starter implements a role-based access control (RBAC) system built on [Spati
 
 Every role belongs to a **role type** that determines how it can be managed and who it can be assigned to.
 
-| Type | Purpose | UI Editable | Assignable To |
-|------|---------|:-----------:|---------------|
-| **System Managed** | Critical roles managed by code (Super Administrator, Northwestern User) | No (read-only in Filament) | SSO and local users (assignable only by `ManageAll` users) |
-| **Application Admin** | Administrative roles with elevated privileges | Yes | SSO and local users |
-| **Application Role** | Standard user roles for day-to-day access | Yes | SSO and local users |
-| **API Integration** | Roles for programmatic API consumers | Yes | API users only |
+| Type                  | Purpose                                                                 |        UI Editable         | Assignable To                                              |
+| --------------------- | ----------------------------------------------------------------------- | :------------------------: | ---------------------------------------------------------- |
+| **System Managed**    | Critical roles managed by code (Super Administrator, Northwestern User) | No (read-only in Filament) | SSO and local users (assignable only by `ManageAll` users) |
+| **Application Admin** | Administrative roles with elevated privileges                           |            Yes             | SSO and local users                                        |
+| **Application Role**  | Standard user roles for day-to-day access                               |            Yes             | SSO and local users                                        |
+| **API Integration**   | Roles for programmatic API consumers                                    |            Yes             | API users only                                             |
 
 ### When to Use Each Type
 
@@ -49,10 +56,10 @@ Every role belongs to a **role type** that determines how it can be managed and 
 
 The starter ships with two system-managed roles, created by `RoleSeeder`:
 
-| Role | Permissions | Assignment Locked | Assigned When |
-|------|-------------|:-----------------:|---------------|
-| **Super Administrator** | All permissions | No | `StakeholderSeeder` runs for NetIDs in `SUPER_ADMIN_NETIDS` |
-| **Northwestern User** | None by default | Yes | Automatically on first SSO login |
+| Role                    | Permissions     | Assignment Locked | Assigned When                                               |
+| ----------------------- | --------------- | :---------------: | ----------------------------------------------------------- |
+| **Super Administrator** | All permissions |        No         | `StakeholderSeeder` runs for NetIDs in `SUPER_ADMIN_NETIDS` |
+| **Northwestern User**   | None by default |        Yes        | Automatically on first SSO login                            |
 
 The **Northwestern User** role serves as a baseline. It confirms the user has authenticated via SSO but grants no application-specific permissions. Add permissions to this role in `RoleSeeder` if your application needs default access for all Northwestern users:
 
@@ -81,15 +88,15 @@ When a role is assignment-locked, it cannot be attached to or detached from user
 
 These are two independent concepts:
 
-| Combination | Can Edit Definition | Can Assign via UI |
-|---|---|---|
-| Neither | Yes | Yes |
-| System Managed only | No | Yes |
-| Assignment Locked only | Yes | No |
-| Both | No | No |
+| Combination            | Can Edit Definition | Can Assign via UI |
+| ---------------------- | ------------------- | ----------------- |
+| Neither                | Yes                 | Yes               |
+| System Managed only    | No                  | Yes               |
+| Assignment Locked only | Yes                 | No                |
+| Both                   | No                  | No                |
 
-- **System Managed** controls a role's *definition*. Its name, permissions, and type are seeder-synced and cannot be edited in the UI.
-- **Assignment Locked** controls a role's *assignment*. It cannot be attached to or detached from users in the UI.
+- **System Managed** controls a role's _definition_. Its name, permissions, and type are seeder-synced and cannot be edited in the UI.
+- **Assignment Locked** controls a role's _assignment_. It cannot be attached to or detached from users in the UI.
 
 ### Use Cases
 
@@ -118,7 +125,7 @@ The audited methods (`assignRoleWithAudit`, `removeRoleWithAudit`) work for all 
 ### Default Locked Roles
 
 - **Northwestern User** - assignment-locked (managed by SSO provisioning)
-- **Super Administrator** - intentionally *not* assignment-locked for onboarding
+- **Super Administrator** - intentionally _not_ assignment-locked for onboarding
 
 ### Emergency Detachment
 
@@ -136,24 +143,25 @@ Permissions are defined as cases in `SystemPermission`, the **single source of t
 
 ### Default Permissions
 
-| Permission | Description | System Managed | API Relevant |
-|------------|-------------|:--------------:|:------------:|
-| `ManageAll` | Bypasses all authorization checks | Yes | — |
-| `AccessAdministrationPanel` | Access to the Filament admin panel | Yes | — |
-| `ManageImpersonation` | Impersonate other users | Yes | — |
-| `ViewUsers` | View user profiles and listings | — | Yes |
-| `CreateUsers` | Create new user accounts | — | — |
-| `EditUsers` | Edit existing user accounts | — | — |
-| `ViewRoles` | View role definitions and assignments | — | — |
-| `EditRoles` | Create and edit role definitions | — | — |
-| `DeleteRoles` | Permanently delete roles | Yes | — |
-| `AssignRoles` | Assign and remove roles from users | — | — |
-| `ManageApiAccess` | Create API users and manage their clients | — | — |
-| `ViewApiRequestLogs` | View API request logs and usage charts | — | — |
-| `CreatePersonalAccessTokens` | Create personal access tokens on the Account page | — | — |
-| `ViewAuditLogs` | View audit trail entries | Yes | — |
-| `ViewLoginRecords` | View login analytics | Yes | — |
-| `ViewSupportTickets` | View support ticket submissions | Yes | — |
+| Permission                   | Description                                            | System Managed | API Relevant |
+| ---------------------------- | ------------------------------------------------------ | :------------: | :----------: |
+| `ManageAll`                  | Bypasses all authorization checks                      |      Yes       |      —       |
+| `AccessAdministrationPanel`  | Access to the Filament admin panel                     |      Yes       |      —       |
+| `ManageImpersonation`        | Impersonate other users                                |      Yes       |      —       |
+| `ViewUsers`                  | View user profiles and listings                        |       —        |     Yes      |
+| `CreateUsers`                | Create new user accounts                               |       —        |      —       |
+| `EditUsers`                  | Edit existing user accounts                            |       —        |      —       |
+| `ViewRoles`                  | View role definitions and assignments                  |       —        |      —       |
+| `EditRoles`                  | Create and edit role definitions                       |       —        |      —       |
+| `DeleteRoles`                | Permanently delete roles                               |      Yes       |      —       |
+| `AssignRoles`                | Assign and remove roles from users                     |       —        |      —       |
+| `ManageApiAccess`            | Create API users and manage their clients              |       —        |      —       |
+| `ViewApiRequestLogs`         | View API request logs and usage charts                 |       —        |      —       |
+| `CreatePersonalAccessTokens` | Create personal access tokens on the Account page      |       —        |      —       |
+| `UseMcp`                     | Connect AI clients to the [MCP server](/features/mcp/) |       —        |      —       |
+| `ViewAuditLogs`              | View audit trail entries                               |      Yes       |      —       |
+| `ViewLoginRecords`           | View login analytics                                   |      Yes       |      —       |
+| `ViewSupportTickets`         | View support ticket submissions                        |      Yes       |      —       |
 
 **System Managed** permissions are security-sensitive and can only be included in system-managed roles or by users with `ManageAll`. They appear in a separate "Sensitive Permissions" section in the role form.
 
@@ -165,66 +173,66 @@ Permissions are defined as cases in `SystemPermission`, the **single source of t
 
 1. **Add a case to `SystemPermission`**
 
-   ```php ins={1} title="app/Domains/Auth/Enums/SystemPermission.php"
-   case ViewReports = 'view-reports';
-   ```
+    ```php ins={1} title="app/Domains/Auth/Enums/SystemPermission.php"
+    case ViewReports = 'view-reports';
+    ```
 
 2. **Update the metadata methods**
 
-   Three `match` blocks need the new case:
+    Three `match` blocks need the new case:
 
-   ```php ins={6,16}
-   // Is this permission too sensitive for non-super-admins to assign?
-   public function isSystemManaged(): bool
-   {
-       return match ($this) {
-           // ...existing cases...
-           self::ViewReports => false,
-           default => false,
-       };
-   }
+    ```php ins={6,16}
+    // Is this permission too sensitive for non-super-admins to assign?
+    public function isSystemManaged(): bool
+    {
+        return match ($this) {
+            // ...existing cases...
+            self::ViewReports => false,
+            default => false,
+        };
+    }
 
-   // Should this permission appear in API Integration role forms?
-   public function isApiRelevant(): bool
-   {
-       return match ($this) {
-           // ...existing cases...
-           self::ViewReports => true, // if API consumers need this
-           default => false,
-       };
-   }
+    // Should this permission appear in API Integration role forms?
+    public function isApiRelevant(): bool
+    {
+        return match ($this) {
+            // ...existing cases...
+            self::ViewReports => true, // if API consumers need this
+            default => false,
+        };
+    }
 
-   // System-wide or limited to owned resources?
-   public function scope(): PermissionScope
-   {
-       return match ($this) {
-           // ...existing cases...
-           default => PermissionScope::SystemWide,
-       };
-   }
-   ```
+    // System-wide or limited to owned resources?
+    public function scope(): PermissionScope
+    {
+        return match ($this) {
+            // ...existing cases...
+            default => PermissionScope::SystemWide,
+        };
+    }
+    ```
 
-   The `getLabel()` method builds a label from the value (e.g., `'view-reports'` → `"View Reports"`). If the generated label isn't right, wrap that pipeline in a `match` with a case for your permission and the pipeline as the `default`.
+    The `getLabel()` method builds a label from the value (e.g., `'view-reports'` → `"View Reports"`). If the generated label isn't right, wrap that pipeline in a `match` with a case for your permission and the pipeline as the `default`.
 
 3. **Add a description**
 
-   ```php ins={5}
-   public function description(): string
-   {
-       return match ($this) {
-           // ...existing cases...
-           self::ViewReports => 'View reporting dashboards and export report data.',
-       };
-   }
-   ```
+    ```php ins={5}
+    public function description(): string
+    {
+        return match ($this) {
+            // ...existing cases...
+            self::ViewReports => 'View reporting dashboards and export report data.',
+        };
+    }
+    ```
 
 4. **Run the seeder**
 
-   ```bash
-   php artisan db:seed --class=PermissionSeeder
-   ```
+    ```bash
+    php artisan db:seed --class=PermissionSeeder
+    ```
 
-   The seeder creates new permissions and updates metadata on existing ones (idempotent).
+    The seeder creates new permissions and updates metadata on existing ones (idempotent).
 
 </Steps>
 
@@ -242,7 +250,9 @@ SUPER_ADMIN_NETIDS=abc123,xyz789,def456
 The `ManageAll` permission triggers a `Gate::before()` hook that short-circuits **all** authorization. Every `$this->authorize()`, `@can`, and `Gate::allows()` call returns `true`.
 
 <Aside type="caution">
-When testing new authorization logic, always test with a non-super-admin user. Bugs in policies are invisible when testing with `ManageAll` because the gate bypass runs before your policy code.
+    When testing new authorization logic, always test with a non-super-admin
+    user. Bugs in policies are invisible when testing with `ManageAll` because
+    the gate bypass runs before your policy code.
 </Aside>
 
 ---
@@ -272,6 +282,7 @@ $user->removeRoleWithAudit(
 ```
 
 Both methods create an audit entry capturing:
+
 - **Before state** - all roles the user had before the change
 - **After state** - all roles the user has after the change
 - **Origin** - why the change happened
@@ -281,13 +292,13 @@ Both methods create an audit entry capturing:
 
 The `RoleModificationOrigin` tracks **why** a role change occurred:
 
-| Origin | Initiated By | Used When |
-|--------|--------------|-----------|
-| `UiAction` | An administrator | Admin assigns/removes a role in Filament |
-| `SsoProvisioning` | The application | Northwestern User role assigned on first SSO login |
-| `NetIdStatusChange` | The application | Roles stripped when a NetID is deactivated via EventHub |
-| `RemovedByDeletion` | The application | Roles removed from users when a role is deleted |
-| `System` | The application | Programmatic changes (seeders, Artisan commands) |
+| Origin              | Initiated By     | Used When                                               |
+| ------------------- | ---------------- | ------------------------------------------------------- |
+| `UiAction`          | An administrator | Admin assigns/removes a role in Filament                |
+| `SsoProvisioning`   | The application  | Northwestern User role assigned on first SSO login      |
+| `NetIdStatusChange` | The application  | Roles stripped when a NetID is deactivated via EventHub |
+| `RemovedByDeletion` | The application  | Roles removed from users when a role is deleted         |
+| `System`            | The application  | Programmatic changes (seeders, Artisan commands)        |
 
 The enum only provides a label, color and icon for each origin. The "Initiated By" column is descriptive; the code has no manual or programmatic flag.
 
@@ -301,26 +312,26 @@ When editing a role's permissions in Filament, `syncPermissionsWithAudit()` crea
 
 ## Role-Specific Permission Checks
 
-The `TracksPermissionSources` trait on the User model lets you check not just *if* a user has a permission, but *which role* grants it.
+The `TracksPermissionSources` trait on the User model lets you check not just _if_ a user has a permission, but _which role_ grants it.
 
-| Method | Returns | Description |
-|--------|---------|-------------|
-| `hasPermissionFromRole($permission, $role)` | `bool` | Check if a specific role grants a permission to the user |
-| `getRolesWithPermission($permission)` | `Collection<Role>` | Get all of the user's roles that grant a permission |
-| `getPermissionsFromRole($role)` | `Collection<SystemPermission>` | Get all permissions the user has from a specific role |
+| Method                                      | Returns                        | Description                                              |
+| ------------------------------------------- | ------------------------------ | -------------------------------------------------------- |
+| `hasPermissionFromRole($permission, $role)` | `bool`                         | Check if a specific role grants a permission to the user |
+| `getRolesWithPermission($permission)`       | `Collection<Role>`             | Get all of the user's roles that grant a permission      |
+| `getPermissionsFromRole($role)`             | `Collection<SystemPermission>` | Get all permissions the user has from a specific role    |
 
 ---
 
 ## Key Classes
 
-| Class | Purpose |
-|-------|---------|
-| `SystemPermission` | Single source of truth for all permissions (cases, metadata, seeder) |
-| `RoleTypeEnum` | Defines role type categories and their behavioral rules |
-| `SystemRole` | Names for the two system-managed roles |
-| `RoleModificationOrigin` | Records why a role change occurred, with a label, color and icon for each origin |
-| `AuditsRoles` | Trait providing `assignRoleWithAudit()` / `removeRoleWithAudit()` |
-| `AuditsPermissions` | Trait providing `syncPermissionsWithAudit()` |
-| `TracksPermissionSources` | Trait for querying which roles grant which permissions |
-| `RoleSeeder` | Creates system roles with their permissions |
-| `PermissionSeeder` | Syncs `SystemPermission` cases to the database |
+| Class                     | Purpose                                                                          |
+| ------------------------- | -------------------------------------------------------------------------------- |
+| `SystemPermission`        | Single source of truth for all permissions (cases, metadata, seeder)             |
+| `RoleTypeEnum`            | Defines role type categories and their behavioral rules                          |
+| `SystemRole`              | Names for the two system-managed roles                                           |
+| `RoleModificationOrigin`  | Records why a role change occurred, with a label, color and icon for each origin |
+| `AuditsRoles`             | Trait providing `assignRoleWithAudit()` / `removeRoleWithAudit()`                |
+| `AuditsPermissions`       | Trait providing `syncPermissionsWithAudit()`                                     |
+| `TracksPermissionSources` | Trait for querying which roles grant which permissions                           |
+| `RoleSeeder`              | Creates system roles with their permissions                                      |
+| `PermissionSeeder`        | Syncs `SystemPermission` cases to the database                                   |

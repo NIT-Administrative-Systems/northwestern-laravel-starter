@@ -5,8 +5,11 @@ sidebar:
     order: 4
 ---
 
-import { Aside, Steps, Badge } from '@astrojs/starlight/components';
-import { PropertyTable, Property } from '@nu-appdev/northwestern-starlight-theme/components';
+import { Aside, Steps, Badge } from "@astrojs/starlight/components";
+import {
+    PropertyTable,
+    Property,
+} from "@nu-appdev/northwestern-starlight-theme/components";
 
 The starter includes an API for programmatic access to your application. [Laravel Passport](https://laravel.com/docs/passport) issues its credentials as OAuth 2.0 access tokens, and the starter adds what an API in production needs around them: IP allowlisting, secret expiry and reminders, request logging, rate limits and analytics.
 
@@ -17,15 +20,21 @@ If your application does not require an API, you can disable the entire feature 
 // .env
 API_ENABLED=false
 ```
+
 </Aside>
 
 ## Default API Routes
 
 The starter ships with a minimal set of API endpoints. They live in `routes/api.php` and can be removed or extended as needed.
 
-- <Badge text="POST" variant="success" /> `/oauth/token` - Exchange a client ID and secret for an access token (Passport)
-- <Badge text="GET" variant="note" /> `/api/v1/me` - Returns the API user the access token acts as
-- <Badge text="GET" variant="note" /> `/api/health` - [Health check](/features/health-checks/) results. It takes no bearer token and isn't affected by `API_ENABLED`; it requires an `X-Secret-Token` header matching `HEALTH_SECRET_TOKEN` and returns 403 for every request until that is set
+- <Badge text="POST" variant="success" /> `/oauth/token` - Exchange a client ID
+  and secret for an access token (Passport)
+- <Badge text="GET" variant="note" /> `/api/v1/me` - Returns the API user the
+  access token acts as
+- <Badge text="GET" variant="note" /> `/api/health` - [Health
+  check](/features/health-checks/) results. It takes no bearer token and isn't
+  affected by `API_ENABLED`; it requires an `X-Secret-Token` header matching
+  `HEALTH_SECRET_TOKEN` and returns 403 for every request until that is set
 
 No endpoint creates credentials. Service clients and OAuth applications are registered in the administration panel, and personal access tokens are created on the Account page.
 
@@ -95,6 +104,7 @@ Issue a separate client for each system that calls your API, even when they act 
     6. **Logging**
 
        Once the response is built, `LogsApiRequests` writes the request details to the database for monitoring and analytics, including requests that were refused and why.
+
 </Steps>
 
 ### Through Apigee
@@ -134,7 +144,7 @@ On API requests the super-administrator shortcut in `Gate::before` doesn't apply
 
 ## Connected Applications
 
-An external application, such as a reporting tool or a portal, can act for a person who approves it, through the OAuth 2.0 authorization code flow.
+An external application, such as a reporting tool or a portal, can act for a person who approves it, through the OAuth 2.0 authorization code flow. AI clients connect the same way, to the [MCP server](/features/mcp/) instead of the REST API: they register themselves, and their tokens are refused here.
 
 ### Registering an Application
 
@@ -173,7 +183,10 @@ Passport signs access tokens with an RSA key pair.
 - **Locally**, `php artisan db:rebuild` generates key files in `storage/` when they don't exist.
 
 <Aside type="caution" title="Rotating the signing keys revokes every token">
-Every access token is signed with the private key. Replacing the key pair makes every outstanding access token invalid at once. Integrations recover by requesting new access tokens with their existing client credentials, so rotating the keys needs no new secrets.
+    Every access token is signed with the private key. Replacing the key pair
+    makes every outstanding access token invalid at once. Integrations recover
+    by requesting new access tokens with their existing client credentials, so
+    rotating the keys needs no new secrets.
 </Aside>
 
 ## Local Development
@@ -212,10 +225,12 @@ Requests to protected API endpoints are logged to the `api_request_logs` table f
         Turns request logging on or off
     </Property>
     <Property name="API_REQUEST_LOGGING_SLOW_THRESHOLD_MS" default="500">
-        Requests slower than this many milliseconds are marked slow in the administration panel
+        Requests slower than this many milliseconds are marked slow in the
+        administration panel
     </Property>
     <Property name="API_REQUEST_LOG_RETENTION_DAYS" default="90">
-        Days before a log entry is deleted by the daily `model:prune`. See [Data Retention](/getting-started/initial-customization/#7-data-retention).
+        Days before a log entry is deleted by the daily `model:prune`. See [Data
+        Retention](/getting-started/initial-customization/#7-data-retention).
     </Property>
 </PropertyTable>
 
@@ -224,26 +239,48 @@ Requests to protected API endpoints are logged to the `api_request_logs` table f
 Every log entry includes:
 
 <PropertyTable>
-    <Property name="trace_id">Unique request identifier, also returned in the `X-Trace-Id` response header</Property>
-    <Property name="user_id">ID of the user the request acted as: a person, or a service client's API user</Property>
-    <Property name="principal_type">`user` for a person's token, `client` for a service client's</Property>
-    <Property name="oauth_client_id">ID of the OAuth client the access token was issued to</Property>
+    <Property name="trace_id">
+        Unique request identifier, also returned in the `X-Trace-Id` response
+        header
+    </Property>
+    <Property name="user_id">
+        ID of the user the request acted as: a person, or a service client's API
+        user
+    </Property>
+    <Property name="principal_type">
+        `user` for a person's token, `client` for a service client's
+    </Property>
+    <Property name="oauth_client_id">
+        ID of the OAuth client the access token was issued to
+    </Property>
     <Property name="token_id">ID of the access token</Property>
-    <Property name="grant_type">How the access token was obtained, such as `client_credentials`</Property>
+    <Property name="grant_type">
+        How the access token was obtained, such as `client_credentials`
+    </Property>
     <Property name="method">HTTP method (GET, POST, etc.)</Property>
     <Property name="path">Request path (relative URL)</Property>
-    <Property name="route_name">Named route for the request (if applicable)</Property>
+    <Property name="route_name">
+        Named route for the request (if applicable)
+    </Property>
     <Property name="ip_address">Source IP address</Property>
     <Property name="status_code">HTTP status code</Property>
     <Property name="duration_ms">Request duration in milliseconds</Property>
-    <Property name="request_bytes">Size of the request body in bytes (if measurable)</Property>
-    <Property name="response_bytes">Size of the response body in bytes (if measurable)</Property>
-    <Property name="user_agent">User agent string from the request (if provided)</Property>
-    <Property name="failure_reason">Authentication or request failure reason, if any</Property>
+    <Property name="request_bytes">
+        Size of the request body in bytes (if measurable)
+    </Property>
+    <Property name="response_bytes">
+        Size of the response body in bytes (if measurable)
+    </Property>
+    <Property name="user_agent">
+        User agent string from the request (if provided)
+    </Property>
+    <Property name="failure_reason">
+        Authentication or request failure reason, if any
+    </Property>
     <Property name="created_at">Timestamp when the request was logged</Property>
 </PropertyTable>
 
-Secrets and tokens are never logged.
+MCP requests also record their JSON-RPC method, tool and outcome; see [MCP Server](/features/mcp/#logging-and-limits). Secrets and tokens are never logged.
 
 ### Sampling Configuration
 
@@ -267,6 +304,7 @@ Non-successful requests (`4xx`/`5xx`) are excluded from sampling and are **alway
 Database-based logging helps during local development to spot slow endpoints, and works well for low-traffic non-production environments.
 
 For production applications expecting high volume:
+
 - **Use a dedicated APM:** Tools like [New Relic](https://newrelic.com) or [Datadog](https://www.datadoghq.com) provide deeper insights and avoid database bloat.
 - **Adjust sampling:** If you keep this feature enabled in production, consider setting a very low sampling rate (or disabling it entirely) to avoid the database write overhead.
 
@@ -290,7 +328,7 @@ All rate limits are configured in `config/rate-limiting.php`.
 
 ## Browser Access (CORS)
 
-Integrations call the API from servers, where CORS doesn't apply, so no browser origin may call it by default. To let a browser application call the API with a bearer token, list its origins in `CORS_ALLOWED_ORIGINS` (comma-separated). Credentials such as cookies are never allowed. See `config/cors.php`.
+Integrations call the API from servers, where CORS doesn't apply, so no browser origin may call it by default. To let a browser application call the API with a bearer token, list its origins in `CORS_ALLOWED_ORIGINS` (comma-separated). Credentials such as cookies are never allowed. See `config/cors.php`. The [MCP server](/features/mcp/) and the OAuth endpoints its clients call accept any origin, through `cors.open_paths`.
 
 ---
 
