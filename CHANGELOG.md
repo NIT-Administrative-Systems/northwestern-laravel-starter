@@ -62,6 +62,7 @@ Version 3 removes the Bootstrap user interface. Every page now uses one stack, F
 - `/api/health` refuses every request until `HEALTH_SECRET_TOKEN` is set. It was public while the token was empty, which is how `.env.example` ships it.
 - `/api/health` no longer returns 503 for checks skipped where they don't apply, such as the database and queue checks outside production. Spatie treats skipped checks as failures by default.
 - A Directory Search outage during sign-in shows the 503 page, or a Problem Details 503 on the API, instead of a 500.
+- Directory sync no longer resets a user's timezone to `DEFAULT_USER_TIMEZONE` at every sign-in; it sets it only when the user is created.
 
 ## [v2.6.0] - 2026-10-01
 
