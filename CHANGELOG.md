@@ -44,6 +44,7 @@ Version 3 removes the Bootstrap user interface. Every page now uses one stack, F
 - Locally, generated URLs and the session cookie's `secure` flag follow `APP_URL`'s scheme, so a worktree or agent can serve the app over plain HTTP on any port. Deployed environments still force HTTPS. `.env.example` no longer sets `SESSION_SECURE_COOKIE`.
 - `db:rebuild` no longer runs `StakeholderSeeder`, so it makes no Directory Search calls. Deployments run the seeder for `SUPER_ADMIN_NETIDS`; locally, the seeded NUIT Administrator is a Super Administrator.
 - The environment lockdown page is a Filament page in the app panel, and lockdown now applies to app panel routes.
+- API users can no longer open the app panel. They authenticate with bearer tokens and never had a way to sign in.
 - Panels, the public layout and the error layout use the Department Templates 4.0 wordmark and fonts. The app panel and public pages have the Northwestern footer; the administration panel does not.
 - The support request confirmation email shows the reference number, subject, submission time and the user's message; the support team's email leads with the request.
 - Browser and PHP Sentry reports share one user context, `SentryExceptionHandler::userContext()`.

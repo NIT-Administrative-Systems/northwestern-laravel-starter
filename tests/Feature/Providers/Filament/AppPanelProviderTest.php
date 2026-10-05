@@ -30,6 +30,11 @@ final class AppPanelProviderTest extends TestCase
         $this->actingAs($user)->get('/app')->assertOk();
     }
 
+    public function test_api_users_cannot_access_the_app_panel(): void
+    {
+        $this->assertFalse(User::factory()->api()->create()->canAccessPanel(Filament::getPanel(AppPanelProvider::ID)));
+    }
+
     public function test_user_menu_links_to_administration_only_for_users_who_can_access_it(): void
     {
         $this->actingAs(User::factory()->create())

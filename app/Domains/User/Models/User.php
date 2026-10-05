@@ -240,7 +240,8 @@ class User extends Authenticatable implements Auditable, FilamentUser, HasAvatar
          * @phpstan-ignore match.unhandled
          */
         return match ($panel->getId()) {
-            AppPanelProvider::ID => true,
+            // API users authenticate with bearer tokens only and never have a panel session.
+            AppPanelProvider::ID => ! $this->is_api_user,
             AdministrationPanelProvider::ID => $this->can(SystemPermission::AccessAdministrationPanel),
         };
     }
