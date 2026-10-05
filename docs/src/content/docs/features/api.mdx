@@ -1,6 +1,6 @@
 ---
 title: API System
-description: Complete guide to the Access Token system and features
+description: OAuth credentials for the API through Laravel Passport, with request logging, limits and analytics
 sidebar:
     order: 4
 ---
@@ -8,7 +8,7 @@ sidebar:
 import { Aside, Steps, Badge } from '@astrojs/starlight/components';
 import { PropertyTable, Property } from '@nu-appdev/northwestern-starlight-theme/components';
 
-The starter includes an API system for secure, monitored programmatic access to your application. The system provides token-based authentication, IP allowlisting, request logging, and analytics.
+The starter includes an API for programmatic access to your application. [Laravel Passport](https://laravel.com/docs/passport) issues its credentials as OAuth 2.0 access tokens, and the starter adds what an API in production needs around them: IP allowlisting, secret expiry and reminders, request logging, rate limits and analytics.
 
 <Aside>
 If your application does not require an API, you can disable the entire feature set:
@@ -21,120 +21,115 @@ API_ENABLED=false
 
 ## Default API Routes
 
-The starter ships with a minimal set of API endpoints to support access token management and viewing user information. They live in `routes/api.php` and can be removed or extended as needed.
+The starter ships with a minimal set of API endpoints. They live in `routes/api.php` and can be removed or extended as needed.
 
+- <Badge text="POST" variant="success" /> `/oauth/token` - Exchange a client ID and secret for an access token (Passport)
+- <Badge text="GET" variant="note" /> `/api/v1/me` - Returns the API user the access token acts as
 - <Badge text="GET" variant="note" /> `/api/health` - [Health check](/features/health-checks/) results. It takes no bearer token and isn't affected by `API_ENABLED`; it requires an `X-Secret-Token` header matching `HEALTH_SECRET_TOKEN` and returns 403 for every request until that is set
-- <Badge text="GET" variant="note" /> `/api/v1/me` - Returns the authenticated API user profile
-- <Badge text="GET" variant="note" /> `/api/v1/me/tokens` - Paginated list of the user’s access tokens
-- <Badge text="POST" variant="success" /> `/api/v1/me/tokens` - Create a new access token
-- <Badge text="GET" variant="note" /> `/api/v1/me/tokens/{token}` - Fetch a single access token
-- <Badge text="DELETE" variant="danger" /> `/api/v1/me/tokens/{token}` - Revoke an access token
 
-View the [API Specification](/api) for a complete reference of these endpoints. If your project does not need these defaults, delete or adjust the corresponding routes in `routes/api.php`.
+No endpoint creates credentials. Service clients are created in the administration panel.
+
+View the [API Specification](/api) for a complete reference of these endpoints.
 
 ## Core Concepts
 
-The API architecture separates human identity from machine identity through a strict one-to-many relationship between API Users and their Access Tokens.
-
 ### API Users
 
-An **API User** represents a specific machine actor.
+An **API User** represents an integration: a machine actor, separate from the people who sign in.
 
-- **Distinct from Humans** - Separate from standard user accounts. They cannot log in through the UI.
-- **Scoped Authority** - They can only be assigned **API Integration** roles to ensure they are never granted elevated permissions.
+- **Never signs in** - API users have no way to sign in to either panel.
+- **Scoped authority** - They can only be assigned **API Integration** roles, so they are never granted permissions beyond what an integration needs.
 
-### Access Tokens
+### Service Clients
 
-Each API user can possess multiple **Access Tokens**. These are the actual credentials used in the `Authorization` header.
+Each API user owns one or more **service clients**: OAuth clients for the client credentials grant. An integration exchanges a client's ID and secret for an access token, then sends the access token with each request. **Every access token acts as the client's API user**, with its roles, so the integration's permissions are managed on the API user.
 
-- **Immediate Activation** - Tokens are valid upon creation.
-- **Optional Expiration** - Tokens can be set to expire after a certain date, or remain valid indefinitely.
-- **Granular Restrictions** - Each token can have its own specific IP allowlist, independent of other tokens belonging to the same user.
+- **Short-lived access tokens** - Access tokens last one hour. The integration requests a new one when it expires.
+- **Expiring secrets** - Every client secret expires, at most one year after it is created. Reminders go to the API user's contact email beforehand.
+- **IP allowlists** - Each client can have its own list of allowed IP addresses and CIDR ranges.
+- **Rotation without downtime** - Rotating creates a replacement client while the old one keeps working.
 
-## Strategy: Why Multiple Tokens?
-
-In production, issue a unique token for each service connecting to your API, even if they represent the same "API User" or organization.
-
-- **Isolation** - A single compromised integration does not jeopardize others
-- **Safe Rotation** - Rotate one token without interrupting other consumers
-- **Better Analytics** - Usage logs are tied to the specific token. This allows you to see granular usage patterns per integration.
-
-## Key Features
-
-### Access Token Management
-
-- **Multi-Token Architecture** - Create unique credentials for every consumer
-- **Flexible Lifecycles** - Choose between ephemeral tokens with hard expiration dates or permanent keys for long-term usage
-- **Revocation** - Invalidate compromised credentials through the administration panel
-
-### IP Allowlisting
-
-- **CIDR Notation Support** - Restrict access to specific subnets (e.g., `10.0.0.0/24`) or single IPs
-- **Multi-Origin Support** - Allow a single token to be used from multiple distinct locations
-
-### Request Logging & Monitoring
-
-- **Performance Metrics** - Requests are timed and logged so you can spot slow endpoints
-- **Traffic Analysis** - Built-in charts visualize API usage, error rates, and endpoint popularity over time
-- **Sampling** - Configurable logging rates to prevent database bloat in high-traffic environments
+Issue a separate client for each system that calls your API, even when they act as the same API user. A compromised secret then affects one integration, each can be rotated on its own, and the request logs show which client made each request.
 
 ## Authentication Flow
 
 <Steps>
-    1. **Token Creation**
+    1. **Client creation**
 
-       An administrator creates an API user and generates a token through the administration panel. You may set an **Expiration** during creation. If omitted, the token remains valid indefinitely.
+       An administrator creates an API user, or opens an existing one, and creates a client on its **Clients** tab: a name, a secret expiration and, optionally, allowed IP addresses.
 
-    2. **Token Delivery**
+    2. **Credential delivery**
 
-         The plain-text token is displayed **once** at creation. Be sure to copy and store it securely, as it cannot be retrieved later.
+       The client ID and secret are displayed **once**. Copy and store the secret securely: it is stored hashed and cannot be retrieved later.
 
+    3. **Getting an access token**
+
+       The integration exchanges the client ID and secret for an access token:
+
+        ```http
+        POST /oauth/token HTTP/1.1
+        Host: your-app.northwestern.edu
+        Content-Type: application/x-www-form-urlencoded
+
+        grant_type=client_credentials&client_id=019a...&client_secret=...
         ```
-        Bearer Token: abc123def456ghi789jkl012mno345pqr678stu901vwx234yz
-        ```
 
-    3. **Client Request**
+       The response contains the `access_token` and its lifetime in seconds, `expires_in`.
 
-       The external client includes the token in the request header:
+    4. **Calling the API**
 
         ```http
         GET /api/v1/me HTTP/1.1
         Host: your-app.northwestern.edu
-        Authorization: Bearer abc123def456ghi789jkl012mno345pqr678stu901vwx234yz
+        Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9...
         ```
 
-    4. **System Validation**
+    5. **Validation**
 
-       The middleware performs a sequence of checks:
+       `AuthenticatePassportToken`, which extends chassis's `AuthenticatesPassportTokens`, checks the token's signature, expiry and revocation through Passport. It then refuses a client that has been revoked, whose secret has expired, or that is calling from an IP address its allowlist doesn't include. It also refuses an API user that has been deleted.
 
-       1. **Format:** Extracts the Bearer token
-       2. **Identity:** Locates the API User by the token hash
-       3. **Validity:** Checks if the token has been revoked or expired
-       4. **Security:** Verifies the request IP matches the allowlist (if configured)
+       It then authenticates the request as the client's API user. It does not check roles: controllers and policies authorize each action against the API user's permissions.
 
-       The middleware then authenticates the request as the API User. It does not check roles: controllers and policies authorize each action against the API User's permissions.
+    6. **Logging**
 
-    5. **Logging**
-
-       Once the response is built, and before it is returned, `LogsApiRequests` writes the request details to the database for monitoring and analytics.
+       Once the response is built, `LogsApiRequests` writes the request details to the database for monitoring and analytics, including requests that were refused and why.
 </Steps>
 
-<Aside type="caution" title="APP_KEY Rotation Invalidates Tokens">
-Access tokens are stored as HMAC-SHA256 hashes derived from `APP_KEY`. If you rotate `APP_KEY`, **all existing API tokens will stop working** because their hashes will no longer match. Before rotating `APP_KEY`, coordinate with all API consumers to rotate their tokens afterward using the administration panel.
+### Through Apigee
+
+Most Northwestern integrations reach the application through an Apigee API proxy, which works with the University's API Service Registry to manage access approvals and consumer onboarding. Store the client ID and secret in Apigee's Key Value Maps, and have the proxy request an access token, cache it until it expires, and forward it to the application. To give each downstream consumer its own permissions and audit trail, create an API user and client per consumer and resolve the right credentials from the caller's Apigee App.
+
+### Rotating and Revoking
+
+**Rotate** a client to create a replacement with a new ID and secret. The old client keeps working, so the integration can switch without downtime; **revoke** the old client once it uses the replacement. Revoking a client also revokes every access token it holds, so the integration loses access immediately rather than when its current token expires.
+
+## Signing Keys
+
+Passport signs access tokens with an RSA key pair.
+
+- **Deployed environments** set the keys in `PASSPORT_PRIVATE_KEY` and `PASSPORT_PUBLIC_KEY`. Generate a pair with `php artisan passport:keys`, store the contents of `storage/oauth-private.key` and `storage/oauth-public.key` in the environment's secrets, and keep the files out of the repository.
+- **Locally**, `php artisan db:rebuild` generates key files in `storage/` when they don't exist.
+
+<Aside type="caution" title="Rotating the signing keys revokes every token">
+Every access token is signed with the private key. Replacing the key pair makes every outstanding access token invalid at once. Integrations recover by requesting new access tokens with their existing client credentials, so rotating the keys needs no new secrets.
 </Aside>
 
-## Expiration Notifications
+## Local Development
 
-The system sends email notifications when a token approaches its expiration date, provided the API User has an email address configured.
+In the `local` environment, `db:rebuild` seeds a demo API user, `api-nuit`, with a service client whose ID and secret are fixed and printed at the end of the rebuild, so scripts and agents can call the API across rebuilds. In every other environment the demo client's secret is random and never shown; rotate it in the administration panel to get one.
 
-By default, notifications are sent 30, 14, 7, 3 and 1 day before expiration. None is sent on the day the token expires.
+## Secret Expiration Notifications
+
+The system emails the API user's contact address when a client secret approaches its expiration date. A client stops working when its secret expires.
+
+By default, notifications are sent 30, 14, 7, 3 and 1 day before expiration. None is sent on the day the secret expires.
 
 You can adjust these intervals in the configuration:
 
 ```php
 // config/api.php
 'expiration_notifications' => [
-    'enabled' => env('API_ACCESS_TOKEN_EXPIRATION_NOTIFICATIONS_ENABLED', true),
+    'enabled' => env('API_CLIENT_SECRET_EXPIRATION_NOTIFICATIONS_ENABLED', true),
     'intervals' => [30, 14, 7, 3, 1],
 ],
 ```
@@ -143,7 +138,7 @@ To disable expiration notifications:
 
 ```php
 // .env
-API_ACCESS_TOKEN_EXPIRATION_NOTIFICATIONS_ENABLED=false
+API_CLIENT_SECRET_EXPIRATION_NOTIFICATIONS_ENABLED=false
 ```
 
 ## Request Logging
@@ -167,9 +162,12 @@ Requests to protected API endpoints are logged to the `api_request_logs` table f
 Every log entry includes:
 
 <PropertyTable>
-    <Property name="trace_id">Unique request identifier</Property>
-    <Property name="user_id">ID of the authenticated user</Property>
-    <Property name="access_token_id">ID of the Access Token used for authentication (nullable)</Property>
+    <Property name="trace_id">Unique request identifier, also returned in the `X-Trace-Id` response header</Property>
+    <Property name="user_id">ID of the user the request acted as: a person, or a service client's API user</Property>
+    <Property name="principal_type">`user` for a person's token, `client` for a service client's</Property>
+    <Property name="oauth_client_id">ID of the OAuth client the access token was issued to</Property>
+    <Property name="token_id">ID of the access token</Property>
+    <Property name="grant_type">How the access token was obtained, such as `client_credentials`</Property>
     <Property name="method">HTTP method (GET, POST, etc.)</Property>
     <Property name="path">Request path (relative URL)</Property>
     <Property name="route_name">Named route for the request (if applicable)</Property>
@@ -182,6 +180,8 @@ Every log entry includes:
     <Property name="failure_reason">Authentication or request failure reason, if any</Property>
     <Property name="created_at">Timestamp when the request was logged</Property>
 </PropertyTable>
+
+Secrets and tokens are never logged.
 
 ### Sampling Configuration
 
@@ -210,17 +210,25 @@ For production applications expecting high volume:
 
 ## Rate Limiting
 
-API routes are rate-limited by the `throttleApi()` middleware in `bootstrap/app.php`, using the `api` limiter in `RateLimitingServiceProvider`. It counts requests per API user: the limiter runs before `AuthenticatesAccessTokens`, so it gets the bearer token's user from that middleware's `userIdForRateLimiting()` (from chassis). A request without a valid token is counted by IP address.
+Two limits apply. A client over either gets a `429 Too Many Requests` Problem Details response with a `Retry-After` header.
 
-A client over the limit gets a `429 Too Many Requests` Problem Details response with a `Retry-After` header.
+- **Per IP address, before authentication.** The `api` limiter, applied to every API route by `throttleApi()` in `bootstrap/app.php` and to Passport's `/oauth/*` endpoints through `passport.middleware`, guards against floods and token guessing.
+- **Per client, after authentication.** `LimitAuthenticatedApiRequests` runs after `AuthenticatePassportToken`, so it counts requests per service client (and per user for a person's token). Integrations behind one gateway IP don't share a limit.
 
 <PropertyTable title="Rate Limits">
+    <Property name="RATE_LIMIT_API_PER_IP_PER_MINUTE" default="3600">
+        Maximum requests per minute per IP address, before authentication
+    </Property>
     <Property name="RATE_LIMIT_API_PER_MINUTE" default="1800">
-        Maximum API requests per minute per API user (or per IP without a valid token)
+        Maximum API requests per minute per client (or per user)
     </Property>
 </PropertyTable>
 
-All rate limiters are defined in `config/rate-limiting.php`.
+All rate limits are configured in `config/rate-limiting.php`.
+
+## Browser Access (CORS)
+
+Integrations call the API from servers, where CORS doesn't apply, so no browser origin may call it by default. To let a browser application call the API with a bearer token, list its origins in `CORS_ALLOWED_ORIGINS` (comma-separated). Credentials such as cookies are never allowed. See `config/cors.php`.
 
 ---
 
@@ -247,4 +255,11 @@ public function isApiRelevant(): bool
 }
 ```
 
-As you add new permissions to the system, ensure to update this method accordingly.
+Each API-relevant permission is also an OAuth scope of the same name (`view-users`), registered with Passport in `OAuthServiceProvider`. As you add new permissions to the system, ensure to update this method accordingly.
+
+### Managing API Access
+
+Two permissions govern the API area of the administration panel:
+
+- **Manage API Access** (`ManageApiAccess`) - create API users and manage their clients
+- **View API Request Logs** (`ViewApiRequestLogs`) - view request logs and usage charts

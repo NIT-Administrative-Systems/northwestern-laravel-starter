@@ -21,6 +21,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Number;
 use Northwestern\SysDev\Chassis\Enums\ApiRequestFailure;
+use Northwestern\SysDev\Chassis\Enums\OAuthGrantType;
 
 class ApiRequestLogsTable
 {
@@ -46,16 +47,25 @@ class ApiRequestLogsTable
                     ->searchable()
                     ->hidden($isRelationManager),
 
-                TextColumn::make('access_token.id')
-                    ->label('Token ID')
-                    ->numeric()
+                TextColumn::make('oauth_client.name')
+                    ->label('Client')
+                    ->placeholder('N/A')
+                    ->searchable(isIndividual: true, isGlobal: false)
+                    ->toggleable(),
+
+                TextColumn::make('grant_type')
+                    ->label('Grant')
+                    ->badge()
+                    ->color('gray')
+                    ->placeholder('N/A')
                     ->toggleable(isToggledHiddenByDefault: true),
 
-                TextColumn::make('access_token.name')
-                    ->label('Token Name')
+                TextColumn::make('token_id')
+                    ->label('Token ID')
+                    ->fontFamily(FontFamily::Mono)
+                    ->limit(12)
                     ->placeholder('N/A')
                     ->copyable()
-                    ->searchable(isIndividual: true, isGlobal: false)
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('method')
@@ -196,6 +206,13 @@ class ApiRequestLogsTable
                     ])
                     ->multiple(),
 
+                SelectFilter::make('oauth_client_id')
+                    ->label('Client')
+                    ->relationship('oauth_client', 'name')
+                    ->searchable(),
+                SelectFilter::make('grant_type')
+                    ->label('Grant')
+                    ->options(OAuthGrantType::class),
                 SelectFilter::make('failure_reason')
                     ->label('Failure Reason')
                     ->options(ApiRequestFailure::class)

@@ -7,7 +7,6 @@ namespace App\Domains\User\Models;
 use App\Domains\Auth\Enums\AuthType;
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Enums\SystemRole;
-use App\Domains\Auth\Models\AccessToken;
 use App\Domains\Auth\Models\ApiRequestLog;
 use App\Domains\Auth\Models\LoginChallenge;
 use App\Domains\Auth\Models\Role;
@@ -36,6 +35,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Passport\Contracts\OAuthenticatable;
+use Laravel\Passport\HasApiTokens;
 use Northwestern\SysDev\Chassis\Models\Concerns\Auditable as AuditableConcern;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\Permission\Traits\HasRoles;
@@ -54,10 +55,10 @@ use Spatie\Permission\Traits\HasRoles;
  *
  * @property Collection<int, Role> $roles
  */
-class User extends Authenticatable implements Auditable, FilamentUser, HasAvatar, HasName
+class User extends Authenticatable implements Auditable, FilamentUser, HasAvatar, HasName, OAuthenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use AuditableConcern, HandlesImpersonation, HasFactory, Notifiable, SoftDeletes, TracksPermissionSources;
+    use AuditableConcern, HandlesImpersonation, HasApiTokens, HasFactory, Notifiable, SoftDeletes, TracksPermissionSources;
 
     use AuditsRoles, HasRoles {
         HasRoles::assignRole as private;
@@ -122,20 +123,6 @@ class User extends Authenticatable implements Auditable, FilamentUser, HasAvatar
     public function login_challenges(): HasMany
     {
         return $this->hasMany(LoginChallenge::class, 'email', 'email');
-    }
-
-    /**
-     * @return HasMany<AccessToken, $this>
-     */
-    public function access_tokens(): HasMany
-    {
-        return $this->hasMany(AccessToken::class);
-    }
-
-    /** @return HasMany<AccessToken, $this> */
-    public function active_access_tokens(): HasMany
-    {
-        return $this->access_tokens()->active();
     }
 
     /**
@@ -232,6 +219,15 @@ class User extends Authenticatable implements Auditable, FilamentUser, HasAvatar
     public function getFilamentName(): string
     {
         return $this->full_name;
+    }
+
+    /**
+     * The user provider Passport issues this model's tokens for. Passport can only infer it for
+     * the `eloquent` driver, and the `users` provider uses `eager-load-eloquent`.
+     */
+    public function getProviderName(): string
+    {
+        return 'users';
     }
 
     public function canAccessPanel(Panel $panel): bool

@@ -8,7 +8,7 @@ sidebar:
 import { Card, CardGrid, Aside, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
 import { PropertyTable, Property } from '@nu-appdev/northwestern-starlight-theme/components';
 
-The Northwestern Laravel Starter provides a multi-method authentication system that handles Northwestern users (via NetID/SSO) and external collaborators (via passwordless verification codes or Access Tokens).
+The Northwestern Laravel Starter provides a multi-method authentication system that handles Northwestern users (via NetID/SSO) and external collaborators (via passwordless verification codes), and integrations through OAuth credentials issued by Laravel Passport.
 
 ## Authentication Methods
 
@@ -35,14 +35,14 @@ The Northwestern Laravel Starter provides a multi-method authentication system t
     - Invite-only access
   </Card>
 
-  <Card title="Access Tokens" icon="rocket">
-    **Bearer Token Authentication**
+  <Card title="OAuth Clients" icon="rocket">
+    **Laravel Passport**
 
-    Long-lived tokens for programmatic API access.
+    Client credentials for integrations, which get short-lived access tokens.
 
-    - Multiple tokens per user
+    - Multiple clients per API user
     - IP allowlisting
-    - Token expiration
+    - Expiring, rotatable secrets
   </Card>
 </CardGrid>
 
@@ -283,33 +283,33 @@ LOCAL_AUTH_CODE_RESEND_COOLDOWN=30
 
 ---
 
-## Access Token Authentication
+## API Authentication
 
-API users authenticate using long-lived Bearer tokens for programmatic access.
+Integrations authenticate as API users through OAuth service clients issued by Laravel Passport.
 
 ### How It Works
 
 <Steps>
 
-1. **Admin creates API user**
+1. **Admin creates an API user and a client**
 
-   Administrator creates an API user and generates first token
+   An administrator creates an API user with its first service client, or adds a client to an existing API user
 
-2. **Token delivered once**
+2. **Credentials delivered once**
 
-   Plain-text token shown only at creation (never retrievable again)
+   The client ID and secret are shown only at creation; the secret is stored hashed and can't be retrieved again
 
-3. **Client stores token**
+3. **Client gets an access token**
 
-   Client securely stores token for API requests
+   The integration exchanges the client ID and secret at `POST /oauth/token` for an access token that lasts one hour
 
 4. **Token in requests**
 
-   Client includes token in `Authorization: Bearer` header
+   The integration includes the access token in the `Authorization: Bearer` header
 
 5. **Middleware validates**
 
-   `AuthenticatesAccessTokens` middleware validates token and IP allowlist
+   `AuthenticatePassportToken` validates the token, the client's secret expiry and IP allowlist, and authenticates the request as the client's API user
 
 6. **Request logged**
 
@@ -317,7 +317,7 @@ API users authenticate using long-lived Bearer tokens for programmatic access.
 
 </Steps>
 
-See the [API Documentation](/features/api/) for complete Access Token management details.
+See the [API Documentation](/features/api/) for complete client management details.
 
 ---
 

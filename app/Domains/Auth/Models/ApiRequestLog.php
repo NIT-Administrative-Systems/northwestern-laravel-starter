@@ -10,7 +10,9 @@ use Database\Factories\Domains\Auth\Models\ApiRequestLogFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Northwestern\SysDev\Chassis\Enums\ApiPrincipalType;
 use Northwestern\SysDev\Chassis\Enums\ApiRequestFailure;
+use Northwestern\SysDev\Chassis\Enums\OAuthGrantType;
 
 class ApiRequestLog extends Model
 {
@@ -21,6 +23,8 @@ class ApiRequestLog extends Model
 
     protected $casts = [
         'failure_reason' => ApiRequestFailure::class,
+        'principal_type' => ApiPrincipalType::class,
+        'grant_type' => OAuthGrantType::class,
         'created_at' => 'datetime',
     ];
 
@@ -38,10 +42,10 @@ class ApiRequestLog extends Model
     }
 
     /**
-     * @return BelongsTo<AccessToken, $this>
+     * @return BelongsTo<OAuthClient, $this>
      */
-    public function access_token(): BelongsTo
+    public function oauth_client(): BelongsTo
     {
-        return $this->belongsTo(AccessToken::class);
+        return $this->belongsTo(OAuthClient::class, 'oauth_client_id');
     }
 }

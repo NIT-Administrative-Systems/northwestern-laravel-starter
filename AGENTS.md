@@ -79,6 +79,10 @@ formatting fixes back to the pull request, so pull before pushing again.
   never implement a migration's `down()` (throw `NoRollbackException`). The only foreign keys
   are in Filament's `imports`, `exports` and `failed_import_rows` migrations, shipped in
   v1.10.0.
+- **Passport's migrations stay as Passport publishes them** (`create_oauth_*`): UUID client
+  IDs, string token IDs, `foreignUuid()` and a `down()`. Columns elsewhere that refer to them
+  (`oauth_client_id`, `token_id`) use Passport's types. Add the starter's own OAuth columns in a
+  separate migration, as `add_starter_columns_to_oauth_clients_table` does.
 - **Edit an unreleased migration instead of adding another one.** Check `git tag --contains`
   before deciding a migration has shipped.
 - **Retention:** records that should expire use the `PrunesAfterRetentionPeriod` trait and a

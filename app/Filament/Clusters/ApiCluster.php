@@ -34,6 +34,9 @@ class ApiCluster extends Cluster
             return false;
         }
 
-        return auth()->user()?->hasPermissionTo(SystemPermission::ManageAll) ?? false;
+        $user = auth()->user();
+
+        return $user !== null
+            && ($user->can(SystemPermission::ManageApiAccess) || $user->can(SystemPermission::ViewApiRequestLogs));
     }
 }

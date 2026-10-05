@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Domains\Auth\Http\Controllers\Api\V1\AccessTokenApiController;
-use App\Domains\Auth\Http\Middleware\AuthenticatesAccessTokens;
+use App\Domains\Auth\Http\Middleware\AuthenticatePassportToken;
+use App\Domains\Auth\Http\Middleware\LimitAuthenticatedApiRequests;
 use App\Domains\Auth\Http\Middleware\LogsApiRequests;
 use App\Domains\User\Http\Controllers\Api\V1\UserApiController;
 use App\Http\Middleware\RequireHealthSecretToken;
@@ -27,17 +27,20 @@ Route::middleware([EnsureFeatureEnabled::class . ':api.enabled'])->group(functio
 |--------------------------------------------------------------------------
 | Protected API Routes
 |--------------------------------------------------------------------------
-| Endpoints that require access token authentication and are fully logged
-| through the API request logging middleware.
+| Endpoints that require a Passport access token, fully logged through the API
+| request logging middleware and rate limited per client or user once the token is
+| known. Credentials are never created here: service clients are created in
+| Administration and personal access tokens on the Account page.
 */
 
-Route::middleware([EnsureFeatureEnabled::class . ':api.enabled', LogsApiRequests::class, AuthenticatesAccessTokens::class])->group(function () {
+Route::middleware([
+    EnsureFeatureEnabled::class . ':api.enabled',
+    LogsApiRequests::class,
+    AuthenticatePassportToken::class,
+    LimitAuthenticatedApiRequests::class,
+])->group(function () {
     Route::prefix('v1')->group(function () {
         Route::get('me', [UserApiController::class, 'me']);
-        Route::get('me/tokens', [AccessTokenApiController::class, 'index']);
-        Route::post('me/tokens', [AccessTokenApiController::class, 'store']);
-        Route::get('me/tokens/{token}', [AccessTokenApiController::class, 'show']);
-        Route::delete('me/tokens/{token}', [AccessTokenApiController::class, 'destroy']);
     });
 });
 

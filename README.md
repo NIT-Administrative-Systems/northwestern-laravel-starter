@@ -76,15 +76,15 @@ usage guides.
 
 ### Authentication & Authorization
 
-- **Multi-Authentication Methods**: Support for single sign-on through Entra ID or Online Passport (WebSSO), Access Tokens,
-  and passwordless email-based verification codes.
+- **Multi-Authentication Methods**: Support for single sign-on through Entra ID or Online Passport (WebSSO),
+  passwordless email-based verification codes, and OAuth credentials for the API through Laravel Passport.
 - **Role-Based Access Control**: Fine-grained role and permissions system with a built-in management interface.
 - **User Impersonation**: Secure ability to troubleshoot user-specific issues and simulate user experiences.
 
 ### API Features
 
-- **Advanced Access Token Management**: Cryptographically secure tokens with CIDR-based IP restrictions, rotation,
-  time-bound validity, and automatic expiration notifications.
+- **OAuth Service Clients**: Client credentials for integrations through Laravel Passport, with short-lived access
+  tokens, CIDR-based IP restrictions, rotation without downtime, expiring secrets and expiration notifications.
 - **API Request Logging & Analytics**: Request tracking with performance metrics, failure analysis, and
   probabilistic sampling.
 - **Request Tracing**: Automatic trace ID propagation for correlation across logs, audits, and error reports.
@@ -106,7 +106,7 @@ usage guides.
 ### Frontend & UX
 
 - **Filament Panels**: An app panel at `/app` for your application's features, with database notifications, and an
-  administration panel at `/administration` for users, roles, access tokens, audits, and analytics.
+  administration panel at `/administration` for users, roles, API clients, audits, and analytics.
 - **Public Pages**: A landing page, sign-in, a public changelog, and branded error pages.
 - **Contact Support**: A support request form that opens TeamDynamix tickets or sends email.
 - **Brand Compliance**: Filament themed to the University's branding guidelines, with the unit footer the Web Style Guide

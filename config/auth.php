@@ -21,6 +21,23 @@ return [
     |
     */
 
+    /*
+    |--------------------------------------------------------------------------
+    | Authentication Guards
+    |--------------------------------------------------------------------------
+    |
+    | The framework's `web` session guard is merged in by default. The `api` guard
+    | authenticates Laravel Passport access tokens on the API.
+    |
+    */
+
+    'guards' => [
+        'api' => [
+            'driver' => 'passport',
+            'provider' => 'users',
+        ],
+    ],
+
     'providers' => [
         'users' => [
             'driver' => 'eager-load-eloquent',

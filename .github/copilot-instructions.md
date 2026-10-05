@@ -42,9 +42,9 @@
 ## Schema & naming conventions
 
 - **Tables**: plural, `snake_case` names (`access_tokens`, `user_login_records`). Pivot tables follow `singular_singular` alphabetical order (`role_user`, not `user_role`).
-- **Primary Key**: Tables should always have an `id` column as the primary key (`$table->id()`).
+- **Primary Key**: Tables should always have an `id` column as the primary key (`$table->id()`). Passport's `oauth_*` tables are the exception: their keys are UUIDs or token strings.
 - **Columns**: `snake_case`; booleans name a state without an `is_`/`has_` prefix (`netid_inactive`, `system_managed`), timestamps use `_at` suffix, dates use `_on` suffix.
-- **Foreign keys**: Always use `singular_id` format (`user_id`, `role_id`) when defining foreign keys. ONLY use the `foreignId()` method. NEVER chain it with `->constrained()`, `->cascadeOnDelete()`, or `->restrictOnUpdate()` - this project intentionally avoids database-level constraints. The only exceptions are Filament's `imports`, `exports` and `failed_import_rows` migrations, shipped in v1.10.0.
+- **Foreign keys**: Always use `singular_id` format (`user_id`, `role_id`) when defining foreign keys. ONLY use the `foreignId()` method. NEVER chain it with `->constrained()`, `->cascadeOnDelete()`, or `->restrictOnUpdate()` - this project intentionally avoids database-level constraints. The only exceptions are Filament's `imports`, `exports` and `failed_import_rows` migrations, shipped in v1.10.0. Laravel Passport's `create_oauth_*` migrations are also kept as Passport publishes them: UUID client IDs, string token IDs, `foreignUuid()` and a `down()` method. Columns that refer to them (`oauth_client_id`, `token_id`) follow Passport's types, and the starter's own OAuth columns go in a separate migration.
 - **Indexes**: Add `->index()` on columns hypothesized to be frequently queried in WHERE clauses or JOIN conditions. Use `->unique()` for unique constraints. Define composite indexes with `->index(['col1', 'col2'])` when querying multiple columns together.
 - **Soft-deletes**: Tables should have `$table->softDeletes()` unless there's a strong reason not to (e.g., log/audit tables, pivot tables). After adding a `Schema::create()` to a migration, review for correctness and remove any undesired `softDeletes()` calls.
 

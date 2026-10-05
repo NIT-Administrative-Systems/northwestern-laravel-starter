@@ -48,8 +48,9 @@ enum SystemPermission: string implements HasLabel
     case DeleteRoles = 'delete-roles';
     case AssignRoles = 'assign-roles';
 
-    // API User Management
-    case ManageApiUsers = 'manage-api-users';
+    // API Access
+    case ManageApiAccess = 'manage-api-access';
+    case ViewApiRequestLogs = 'view-api-request-logs';
 
     // Audit & Monitoring
     case ViewAuditLogs = 'view-audit-logs';
@@ -93,8 +94,9 @@ enum SystemPermission: string implements HasLabel
             self::DeleteRoles => 'Allows permanently deleting roles from the system.',
             self::AssignRoles => 'Allows assigning, updating, or removing roles from users.',
 
-            // API User Management
-            self::ManageApiUsers => 'Allows creating API users and managing their tokens, roles, and access.',
+            // API Access
+            self::ManageApiAccess => 'Allows creating API users and managing their clients, roles, and access.',
+            self::ViewApiRequestLogs => 'Allows viewing API request logs and usage charts.',
 
             // Audit & Monitoring
             self::ViewAuditLogs => 'Allows viewing system audit logs and change history.',

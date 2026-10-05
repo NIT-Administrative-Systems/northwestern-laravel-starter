@@ -32,7 +32,7 @@ The app panel at `/app` is where an application built on the starter does its wo
 The administration panel at `/administration` holds the starter's back-office tools. It requires the `AccessAdministrationPanel` permission, and each tool checks its own permission as well. Its resources and pages live in `app/Filament/` outside `app/Filament/App/`, and it has no footer.
 
 - **Users and roles.** Manage SSO, local and API users and their roles. See [Authorization](/features/authorization/) and [Creating Local Users](/features/authentication/#creating-local-users).
-- **Access tokens and API request logs.** Issue, rotate and revoke an API user's tokens on the user's page. The **API** section shows an overview and the request log when the API is enabled. See [API](/features/api/).
+- **Service clients and API request logs.** Create, rotate, restrict and revoke an API user's clients on the user's **Clients** tab. The **API** section shows an overview and the request log when the API is enabled. See [API](/features/api/).
 - **Audit logs.** Every audited change, with a diff of each one. See [Audit Logging](/features/audit-logging/).
 - **Sign-in records.** Every sign-in with its user segment, with stats and charts of sign-ins over time and by segment (`app/Filament/Resources/UserLoginRecords`). Requires `ViewLoginRecords`. See [User Segmentation](/features/authentication/#user-segmentation).
 - **Role activity.** Role assignments and removals across all users, opened from the **Role Activity** button on the Roles page. See [Audited Role Changes](/features/authorization/#audited-role-changes).

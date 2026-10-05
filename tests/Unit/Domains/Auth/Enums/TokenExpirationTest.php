@@ -29,19 +29,6 @@ final class TokenExpirationTest extends TestCase
         yield 'three months' => [TokenExpiration::ThreeMonths, '90 Days'];
         yield 'six months' => [TokenExpiration::SixMonths, '180 Days'];
         yield 'one year' => [TokenExpiration::OneYear, '1 Year'];
-        yield 'never' => [TokenExpiration::Never, 'No Expiration'];
-    }
-
-    public function test_never_expires_at_returns_null(): void
-    {
-        $this->assertNull(TokenExpiration::Never->expiresAt());
-    }
-
-    public function test_never_expires_at_returns_null_even_with_from_date(): void
-    {
-        $from = Carbon::parse('2026-01-01');
-
-        $this->assertNull(TokenExpiration::Never->expiresAt($from));
     }
 
     #[DataProvider('expiresAtProvider')]
@@ -76,7 +63,6 @@ final class TokenExpirationTest extends TestCase
 
         $result = TokenExpiration::OneWeek->expiresAt();
 
-        $this->assertNotNull($result);
         $this->assertTrue(Carbon::parse('2026-06-22 12:00:00')->equalTo($result));
 
         Carbon::setTestNow();

@@ -8,9 +8,21 @@ use App\Http\Controllers\Controller;
 use OpenApi\Attributes as OA;
 
 #[OA\SecurityScheme(
+    securityScheme: 'oauth2',
+    type: 'oauth2',
+    description: 'OAuth 2.0. Service integrations use the client credentials flow with a client created in Administration; the access token acts as the client\'s API user.',
+    flows: [
+        new OA\Flow(
+            tokenUrl: '/oauth/token',
+            flow: 'clientCredentials',
+            scopes: [],
+        ),
+    ],
+)]
+#[OA\SecurityScheme(
     securityScheme: 'bearerToken',
     type: 'http',
-    description: 'Bearer access token for authentication. Tokens are issued during API user provisioning or can be generated via the API.',
+    description: 'An OAuth access token, sent as a bearer token in the Authorization header.',
     scheme: 'bearer'
 )]
 #[OA\Schema(

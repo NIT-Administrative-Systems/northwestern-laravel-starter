@@ -27,8 +27,12 @@ class ApiRequestLogExporter extends Exporter
             ExportColumn::make('user.username')
                 ->label('Username'),
 
-            ExportColumn::make('access_token.name')
-                ->label('Token Name'),
+            ExportColumn::make('oauth_client.name')
+                ->label('Client'),
+
+            ExportColumn::make('grant_type')
+                ->label('Grant')
+                ->formatStateUsing(fn ($state) => $state?->getLabel()),
 
             ExportColumn::make('method')
                 ->label('Method'),

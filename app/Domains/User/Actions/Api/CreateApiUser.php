@@ -4,55 +4,46 @@ declare(strict_types=1);
 
 namespace App\Domains\User\Actions\Api;
 
+use App\Domains\Auth\Actions\Api\CreateServiceClient;
 use App\Domains\Auth\Enums\AuthType;
-use App\Domains\Auth\Models\AccessToken;
+use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\User\Enums\Affiliation;
 use App\Domains\User\Models\User;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 /**
- * Creates a new API user account with an initial Bearer token.
+ * Creates an API user, a service account for an integration, with its first service client.
  *
- * API users are service accounts used for programmatic access to the application.
- * They authenticate using Bearer tokens instead of SSO or verification codes.
+ * API users never sign in. Their clients exchange a client ID and secret at `/oauth/token`
+ * for access tokens that act as the API user, with its roles.
  */
 readonly class CreateApiUser
 {
+    public function __construct(
+        private CreateServiceClient $createServiceClient,
+    ) {
+    }
+
     /**
-     * Create a new API user with an initial token.
-     *
      * @param  non-empty-string  $username  The username for the API user (should be prefixed with 'api-')
      * @param  non-empty-string  $firstName  The display label for this API user (will be suffixed with 'API')
-     * @param  non-empty-string  $tokenName  Descriptive name for the initial access token
+     * @param  non-empty-string  $clientName  What the first service client is for
      * @param  string|null  $description  Optional description of the API user's purpose
-     * @param  string|null  $email  Optional contact email for expiration notifications
-     * @param  CarbonInterface|null  $expiresAt  When the token expires (null for no expiration)
-     * @param  list<non-empty-string>|null  $allowedIps  Optional list of allowed IP addresses or CIDR ranges
-     * @return array{0: User, 1: non-empty-string} The created user and the raw Bearer token
+     * @param  string|null  $email  Optional contact email for secret expiration notifications
+     * @param  list<non-empty-string>|null  $allowedIps  Optional IP addresses or CIDR ranges the client may call from
+     * @return array{0: User, 1: non-empty-string, 2: OAuthClient} The user, the client's plaintext secret, and the client
      */
     public function __invoke(
         string $username,
         string $firstName,
-        string $tokenName,
+        string $clientName,
+        CarbonInterface $secretExpiresAt,
         ?string $description = null,
         ?string $email = null,
-        ?CarbonInterface $expiresAt = null,
         ?array $allowedIps = null,
     ): array {
-        $rawToken = Str::random(length: 64);
-
-        $user = DB::transaction(static function () use (
-            $username,
-            $firstName,
-            $tokenName,
-            $description,
-            $email,
-            $expiresAt,
-            $allowedIps,
-            $rawToken
-        ) {
+        return DB::transaction(function () use ($username, $firstName, $clientName, $secretExpiresAt, $description, $email, $allowedIps): array {
             $user = User::create([
                 'username' => strtolower($username),
                 'primary_affiliation' => Affiliation::Other,
@@ -63,19 +54,9 @@ readonly class CreateApiUser
                 'description' => $description,
             ]);
 
-            $user->access_tokens()->create([
-                'name' => $tokenName,
-                'token_prefix' => mb_substr($rawToken, 0, 5),
-                'token_hash' => AccessToken::hashFromPlain($rawToken),
-                'expires_at' => $expiresAt,
-                'allowed_ips' => $allowedIps,
-            ]);
+            [$secret, $client] = ($this->createServiceClient)($user, $clientName, $secretExpiresAt, $allowedIps);
 
-            $user->refresh()->load('access_tokens');
-
-            return $user;
+            return [$user, $secret, $client];
         });
-
-        return [$user, $rawToken];
     }
 }

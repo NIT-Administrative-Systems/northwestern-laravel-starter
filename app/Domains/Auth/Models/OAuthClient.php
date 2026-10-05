@@ -1,0 +1,116 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Domains\Auth\Models;
+
+use App\Domains\Auth\Enums\ClientOrigin;
+use App\Domains\Auth\Enums\CredentialStatus;
+use App\Domains\User\Models\User;
+use Carbon\CarbonInterface;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
+use Laravel\Passport\Client;
+
+/**
+ * Passport's OAuth client, with the starter's columns: where the client came from, an IP
+ * allowlist, a secret expiry, and rotation history.
+ *
+ * A client whose secret has expired counts as revoked, so Passport refuses it at the token
+ * endpoint and {@see \App\Domains\Auth\Http\Middleware\AuthenticatePassportToken} refuses
+ * the tokens it already holds. `revoked` in the database still records an explicit revoke.
+ *
+ * Changes are audited on the owning API user by {@see \App\Domains\Auth\Actions\Api\AuditServiceClientChange}.
+ *
+ * @property string $id
+ * @property string $name
+ * @property string|null $secret
+ * @property list<string> $grant_types
+ * @property ClientOrigin $origin
+ * @property list<string>|null $allowed_ips
+ * @property Carbon|null $secret_expires_at
+ * @property Carbon|null $secret_expiration_notified_at
+ * @property Carbon|null $last_used_at
+ * @property bool $revoked
+ * @property-read CredentialStatus $status
+ */
+class OAuthClient extends Client
+{
+    protected $casts = [
+        'grant_types' => 'array',
+        'scopes' => 'array',
+        'redirect_uris' => 'array',
+        'revoked' => 'bool',
+        'origin' => ClientOrigin::class,
+        'allowed_ips' => 'array',
+        'secret_expires_at' => 'datetime',
+        'secret_expiration_notified_at' => 'datetime',
+        'last_used_at' => 'datetime',
+    ];
+
+    /**
+     * Clients that can still be used: not revoked, and with a secret that hasn't expired.
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
+    #[Scope]
+    protected function active(Builder $query, ?CarbonInterface $at = null): Builder
+    {
+        return $query
+            ->where('revoked', false)
+            ->where(fn (Builder $q) => $q->whereNull('secret_expires_at')->orWhere('secret_expires_at', '>', $at ?? Carbon::now()));
+    }
+
+    /** @return BelongsTo<self, $this> */
+    public function rotated_from_client(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'rotated_from_client_id');
+    }
+
+    /** @return BelongsTo<User, $this> */
+    public function rotated_by_user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'rotated_by_user_id');
+    }
+
+    /** @return HasMany<ApiRequestLog, $this> */
+    public function request_logs(): HasMany
+    {
+        return $this->hasMany(ApiRequestLog::class, 'oauth_client_id');
+    }
+
+    /**
+     * Whether the client is unusable, either revoked or past its secret expiry.
+     *
+     * @return Attribute<bool, bool>
+     */
+    protected function revoked(): Attribute
+    {
+        return Attribute::make(
+            get: fn (mixed $value): bool => (bool) $value || $this->secretExpired(),
+            set: fn (bool $value): bool => $value,
+        );
+    }
+
+    /** @return Attribute<CredentialStatus, never> */
+    protected function status(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): CredentialStatus => match (true) {
+                (bool) ($this->attributes['revoked'] ?? false) => CredentialStatus::Revoked,
+                $this->secretExpired() => CredentialStatus::Expired,
+                default => CredentialStatus::Active,
+            },
+        )->withoutObjectCaching(); // An expiry passes without the model changing.
+    }
+
+    private function secretExpired(): bool
+    {
+        return $this->secret_expires_at?->isPast() ?? false;
+    }
+}

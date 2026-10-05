@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use Database\Seeders\Sample\DemoUserSeeder;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Queue;
+use Laravel\Passport\Passport;
 use Northwestern\SysDev\Chassis\Console\Commands\RebuildDatabaseCommand as BaseRebuildDatabaseCommand;
 
 /**
@@ -26,6 +29,8 @@ class RebuildDatabaseCommand extends BaseRebuildDatabaseCommand
     protected function appendSteps(): array
     {
         return [
+            // Passport signs access tokens with these; deployed environments set PASSPORT_PRIVATE_KEY and PASSPORT_PUBLIC_KEY.
+            'Generating OAuth signing keys' => fn () => file_exists(Passport::keyPath('oauth-private.key')) || $this->callSilently('passport:keys') === self::SUCCESS,
             'Seeding demo data' => fn () => $this->callSilently('db:seed', ['--class' => 'DemoSeeder', '--force' => true]),
             'Generating IDE helpers' => fn () => $this->callSilently('ide-helper:models', ['-N' => true]),
         ];
@@ -45,12 +50,11 @@ class RebuildDatabaseCommand extends BaseRebuildDatabaseCommand
             $this->newLine();
         }
 
-        if (config('api.enabled') && blank(config('api.demo_user_token'))) {
-            $this->components->warn("The demo API user's access token is missing.");
-            $this->line('  <fg=gray>→</> A random value has been generated for <comment>api-nuit</comment>');
-            $this->line('  <fg=gray>→</> For predictable local testing, add to your <comment>.env</comment> file:');
-            $this->newLine();
-            $this->line('    <fg=magenta>API_DEMO_USER_ACCESS_TOKEN=<fg=white>your-value-here</>');
+        if (config('api.enabled') && App::isLocal()) {
+            $this->components->info('The demo API user <comment>api-nuit</comment> has a service client for local testing:');
+            $this->line('  <fg=gray>→</> Client ID: <comment>' . DemoUserSeeder::DEMO_CLIENT_ID . '</comment>');
+            $this->line('  <fg=gray>→</> Client secret: <comment>' . DemoUserSeeder::DEMO_CLIENT_SECRET . '</comment>');
+            $this->line('  <fg=gray>→</> Exchange them at <comment>POST /oauth/token</comment> with <comment>grant_type=client_credentials</comment>');
             $this->newLine();
         }
     }

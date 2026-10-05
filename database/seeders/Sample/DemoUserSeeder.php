@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Database\Seeders\Sample;
 
+use App\Domains\Auth\Actions\Api\CreateServiceClient;
 use App\Domains\Auth\Enums\RoleTypeEnum;
-use App\Domains\Auth\Models\AccessToken;
 use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\App;
 
 /**
  * These users are used for end-to-end testing and can also be used for demos and impersonation during development.
@@ -28,6 +28,15 @@ class DemoUserSeeder extends Seeder
         'generic.user',
         'partner.user',
     ];
+
+    /**
+     * The demo API user's service client in the `local` environment, fixed so local scripts and
+     * agents can use the API across database rebuilds. Elsewhere the secret is random and
+     * never shown; rotate the client in Administration to get one.
+     */
+    public const string DEMO_CLIENT_ID = '019a0000-0000-7000-8000-000000000001';
+
+    public const string DEMO_CLIENT_SECRET = 'local-demo-client-secret';
 
     public function run(): void
     {
@@ -91,17 +100,8 @@ class DemoUserSeeder extends Seeder
 
     private function apiUser(): void
     {
-        $demoToken = config('api.demo_user_token');
-        $rawToken = blank($demoToken) ? Str::random(64) : $demoToken;
-
-        User::factory()
+        $user = User::factory()
             ->api()
-            ->has(AccessToken::factory()->state([
-                'name' => 'Demo Access Token',
-                'token_prefix' => mb_substr($rawToken, 0, 5),
-                'token_hash' => AccessToken::hashFromPlain($rawToken),
-                'expires_at' => null,
-            ]), 'access_tokens')
             ->state([
                 'username' => 'api-nuit',
                 'description' => 'API user for demo and testing purposes.',
@@ -113,5 +113,11 @@ class DemoUserSeeder extends Seeder
                 'timezone' => config('platform.default_user_timezone'),
             ])
             ->createOne();
+
+        [, $client] = resolve(CreateServiceClient::class)($user, 'Demo client', now()->addYear());
+
+        if (App::isLocal()) {
+            $client->forceFill(['id' => self::DEMO_CLIENT_ID, 'secret' => self::DEMO_CLIENT_SECRET])->save();
+        }
     }
 }

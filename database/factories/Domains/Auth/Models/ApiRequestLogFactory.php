@@ -8,7 +8,9 @@ use App\Domains\Auth\Models\ApiRequestLog;
 use App\Domains\User\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Arr;
+use Northwestern\SysDev\Chassis\Enums\ApiPrincipalType;
 use Northwestern\SysDev\Chassis\Enums\ApiRequestFailure;
+use Northwestern\SysDev\Chassis\Enums\OAuthGrantType;
 
 /**
  * @extends Factory<ApiRequestLog>
@@ -29,7 +31,10 @@ class ApiRequestLogFactory extends Factory
         return [
             'trace_id' => fake()->uuid(),
             'user_id' => User::factory()->api(),
-            'access_token_id' => null,
+            'principal_type' => ApiPrincipalType::Client,
+            'oauth_client_id' => null,
+            'token_id' => null,
+            'grant_type' => OAuthGrantType::ClientCredentials,
             'method' => fake()->randomElement(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']),
             'path' => fake()->randomElement([
                 '/api/v1/data',
@@ -48,10 +53,10 @@ class ApiRequestLogFactory extends Factory
         ];
     }
 
-    public function successful(int $accessTokenId): self
+    public function successful(string $oauthClientId): self
     {
         return $this->state(fn (array $attributes) => [
-            'access_token_id' => $accessTokenId,
+            'oauth_client_id' => $oauthClientId,
             'status_code' => fake()->randomElement([200, 201, 204]),
             'failure_reason' => null,
         ]);
@@ -60,7 +65,8 @@ class ApiRequestLogFactory extends Factory
     public function failed(?ApiRequestFailure $reason = null): self
     {
         return $this->state(fn (array $attributes) => [
-            'access_token_id' => null,
+            'principal_type' => null,
+            'grant_type' => null,
             'status_code' => 401,
             'failure_reason' => $reason ?? Arr::random(ApiRequestFailure::cases()),
         ]);
