@@ -13,8 +13,8 @@ use OpenApi\Attributes as OA;
     description: 'OAuth 2.0. Service integrations use the client credentials flow with a client created in Administration; the access token acts as the client\'s API user.',
     flows: [
         new OA\Flow(
-            flow: 'clientCredentials',
             tokenUrl: '/oauth/token',
+            flow: 'clientCredentials',
             scopes: [],
         ),
     ],

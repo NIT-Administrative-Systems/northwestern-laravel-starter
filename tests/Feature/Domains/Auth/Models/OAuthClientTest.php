@@ -41,7 +41,7 @@ final class OAuthClientTest extends TestCase
         $client = $this->client();
         $clients = resolve(ClientRepository::class);
 
-        $this->assertNotNull($clients->findActive($client->getKey()));
+        $this->assertInstanceOf(\Laravel\Passport\Client::class, $clients->findActive($client->getKey()));
 
         $this->travel(31)->days();
 

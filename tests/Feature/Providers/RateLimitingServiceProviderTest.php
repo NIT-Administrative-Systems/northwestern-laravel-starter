@@ -52,7 +52,7 @@ final class RateLimitingServiceProviderTest extends TestCase
     {
         config(['rate-limiting.api.per_ip_per_minute' => 1]);
 
-        $this->postJson('/oauth/token', ['grant_type' => 'client_credentials'])->assertStatus(400);
+        $this->postJson('/oauth/token', ['grant_type' => 'client_credentials'])->assertBadRequest();
         $this->postJson('/oauth/token', ['grant_type' => 'client_credentials'])->assertTooManyRequests();
     }
 }
