@@ -4,51 +4,55 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Providers;
 
-use App\Domains\Auth\Models\AccessToken;
+use App\Domains\Auth\Http\Middleware\LimitAuthenticatedApiRequests;
 use App\Domains\User\Models\User;
 use App\Providers\RateLimitingServiceProvider;
 use PHPUnit\Framework\Attributes\CoversClass;
+use Tests\Concerns\IssuesServiceClientTokens;
 use Tests\TestCase;
 
 #[CoversClass(RateLimitingServiceProvider::class)]
+#[CoversClass(LimitAuthenticatedApiRequests::class)]
 final class RateLimitingServiceProviderTest extends TestCase
 {
+    use IssuesServiceClientTokens;
+
     protected function setUp(): void
     {
         parent::setUp();
 
-        config(['api.enabled' => true, 'rate-limiting.api.per_minute' => 1]);
+        config(['api.enabled' => true]);
     }
 
-    // The limiter runs before the token middleware, so it must find the user itself; otherwise
-    // every integration behind one IP address shares a single limit.
-    public function test_the_api_limit_is_per_api_user_not_per_ip_address(): void
+    // Every integration behind one IP address (an API gateway, say) must not share one limit.
+    public function test_authenticated_requests_are_limited_per_client_not_per_ip_address(): void
     {
-        $this->apiUserWithToken('token-a');
-        $this->apiUserWithToken('token-b');
+        config(['rate-limiting.api.per_minute' => 1, 'rate-limiting.api.per_ip_per_minute' => 100]);
 
-        $this->getJson('/api/v1/me', ['Authorization' => 'Bearer token-a'])->assertOk();
-        $this->getJson('/api/v1/me', ['Authorization' => 'Bearer token-a'])
+        [$tokenA] = $this->serviceClientToken(User::factory()->api()->create());
+        [$tokenB] = $this->serviceClientToken(User::factory()->api()->create());
+
+        $this->withToken($tokenA)->getJson('/api/v1/me')->assertOk();
+        $this->withToken($tokenA)->getJson('/api/v1/me')
             ->assertTooManyRequests()
             ->assertHeader('Content-Type', 'application/problem+json')
             ->assertHeader('Retry-After');
-        $this->getJson('/api/v1/me', ['Authorization' => 'Bearer token-b'])->assertOk();
+        $this->withToken($tokenB)->getJson('/api/v1/me')->assertOk();
     }
 
-    public function test_requests_without_a_valid_token_are_limited_by_ip_address(): void
+    public function test_requests_are_limited_per_ip_address_before_authentication(): void
     {
-        $this->getJson('/api/v1/me', ['Authorization' => 'Bearer unknown'])->assertUnauthorized();
-        $this->getJson('/api/v1/me', ['Authorization' => 'Bearer another-unknown'])->assertTooManyRequests();
+        config(['rate-limiting.api.per_ip_per_minute' => 1]);
+
+        $this->withToken('unknown')->getJson('/api/v1/me')->assertUnauthorized();
+        $this->withToken('another-unknown')->getJson('/api/v1/me')->assertTooManyRequests();
     }
 
-    private function apiUserWithToken(string $plainToken): User
+    public function test_the_oauth_token_endpoint_shares_the_per_ip_limit(): void
     {
-        return User::factory()
-            ->api()
-            ->has(AccessToken::factory()->state([
-                'token_hash' => AccessToken::hashFromPlain($plainToken),
-                'expires_at' => null,
-            ]), 'access_tokens')
-            ->createOne();
+        config(['rate-limiting.api.per_ip_per_minute' => 1]);
+
+        $this->postJson('/oauth/token', ['grant_type' => 'client_credentials'])->assertStatus(400);
+        $this->postJson('/oauth/token', ['grant_type' => 'client_credentials'])->assertTooManyRequests();
     }
 }

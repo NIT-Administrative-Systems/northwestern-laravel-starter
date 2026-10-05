@@ -4,149 +4,6 @@ info:
   description: 'Core API endpoints provided by the Northwestern Laravel Starter, including user profile information and access token management.'
   version: 1.0.0
 paths:
-  /api/v1/me/tokens:
-    get:
-      tags:
-        - 'Access Tokens'
-      summary: 'List all access tokens'
-      operationId: list-access-tokens
-      parameters:
-        -
-          name: page
-          in: query
-          description: 'Page number of the results to fetch.'
-          required: false
-          schema:
-            type: integer
-            format: int64
-            example: 1
-            minimum: 1
-      responses:
-        '200':
-          description: 'Paginated list of access tokens for the authenticated user.'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AccessTokenPage'
-        '401':
-          description: 'Missing or invalid bearer token.'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
-      security:
-        -
-          bearerToken: []
-    post:
-      tags:
-        - 'Access Tokens'
-      summary: 'Create an access token'
-      operationId: create-access-token
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AccessTokenCreateInput'
-      responses:
-        '201':
-          description: 'Access token created. The plain bearer token is only returned once.'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AccessTokenCreationResponse'
-        '401':
-          description: 'Missing or invalid bearer token.'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
-        '422':
-          description: 'Validation failed for the supplied token attributes.'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationProblemDetails'
-      security:
-        -
-          bearerToken: []
-  '/api/v1/me/tokens/{token}':
-    get:
-      tags:
-        - 'Access Tokens'
-      summary: 'Get an access token'
-      operationId: get-access-token
-      parameters:
-        -
-          name: token
-          in: path
-          description: 'The ID of the access token.'
-          required: true
-          schema:
-            type: integer
-            format: int64
-            example: 42
-      responses:
-        '200':
-          description: 'Access token details.'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AccessTokenResponse'
-        '401':
-          description: 'Missing or invalid bearer token.'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
-        '404':
-          description: 'Access token not found.'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
-      security:
-        -
-          bearerToken: []
-    delete:
-      tags:
-        - 'Access Tokens'
-      summary: 'Revoke an access token'
-      operationId: revoke-access-token
-      parameters:
-        -
-          name: token
-          in: path
-          description: 'The ID of the access token to revoke.'
-          required: true
-          schema:
-            type: integer
-            format: int64
-            example: 42
-      responses:
-        '204':
-          description: 'Access token revoked.'
-        '401':
-          description: 'Missing or invalid bearer token.'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
-        '422':
-          description: 'Cannot revoke the token currently being used.'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
-        '404':
-          description: 'Access token not found.'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
-      security:
-        -
-          bearerToken: []
   /api/v1/me:
     get:
       tags:
@@ -168,184 +25,63 @@ paths:
                 $ref: '#/components/schemas/ProblemDetails'
       security:
         -
+          oauth2: []
+        -
           bearerToken: []
 components:
   schemas:
-    AccessToken:
+    ProblemDetails:
+      description: 'Standard RFC 9457 problem details envelope.'
       required:
-        - id
-        - name
+        - type
+        - title
         - status
-        - usage_count
-        - created_at
+        - instance
       properties:
-        id:
-          type: integer
-          format: int64
-          example: 23145
-        name:
+        type:
+          description: 'RFC 9457 compliant problem details response builder.'
           type: string
-          example: 'CI Deployments'
+          format: uri
+          example: 'about:blank'
+        title:
+          type: string
+          example: Unauthorized
         status:
-          description: 'Operational status of the token, derived from revocation and expiration timestamps.'
-          type: string
-          example: active
-          enum:
-            - active
-            - expired
-            - revoked
-        last_used_at:
-          description: 'When this token was last used (null if never used).'
-          type: string
-          format: date-time
-          example: '2024-04-11T14:35:05Z'
-          nullable: true
-        usage_count:
           type: integer
-          example: 12
-        expires_at:
-          description: 'When this token expires. Null means the token does not expire.'
+          example: 401
+        detail:
           type: string
-          format: date-time
-          example: '2024-12-31T06:00:00Z'
+          example: 'Authentication failed'
           nullable: true
-        created_at:
+        instance:
           type: string
-          format: date-time
-          example: '2024-03-01T18:11:00Z'
-        allowed_ips:
-          description: 'Optional list of IPs or CIDR ranges allowed to use this token.'
-          type: array
-          items:
-            type: string
-            example: 203.0.113.0/24
-          example:
-            - 10.0.0.0/24
-            - 203.0.113.12
+          format: uri-reference
+          example: /api/v1/me
+        trace_id:
+          description: 'Unique identifier for the API request (if available).'
+          type: string
+          example: b4f5aa7a-1470-4d92-8d3c-98e7c7de9f5f
           nullable: true
       type: object
-    AccessTokenResponse:
-      required:
-        - data
-      properties:
-        data:
-          $ref: '#/components/schemas/AccessToken'
-      type: object
-    AccessTokenCreateInput:
-      required:
-        - name
-      properties:
-        name:
-          description: 'Friendly name for the token so you can identify it later.'
-          type: string
-          example: 'CI deploy token'
-        expires_at:
-          description: 'UTC timestamp (seconds) for when the token should expire. Must be at least 24 hours in the future.'
-          type: integer
-          format: int64
-          example: 1751328000
-          nullable: true
-        allowed_ips:
-          description: 'Optional allowlist of IPs or CIDR ranges that can use this token.'
-          type: array
-          items:
-            type: string
-            example: 198.51.100.0/25
-          nullable: true
-      type: object
-    AccessTokenCreationMeta:
-      required:
-        - bearer_token
-        - message
-      properties:
-        bearer_token:
-          description: 'The full bearer token. This is only returned once and cannot be retrieved again.'
-          type: string
-          example: YiRqNBToe7EIXAnmtCB3a9gAwHNh0xXZUX3A9zARG5CWKUcDhRn4U9qGcG3q7TwB
-        message:
-          type: string
-          example: 'Token generated successfully. Store the bearer token immediately; it will not be shown again.'
-      type: object
-    AccessTokenCreationResponse:
-      required:
-        - data
-        - meta
-      properties:
-        data:
-          $ref: '#/components/schemas/AccessToken'
-        meta:
-          $ref: '#/components/schemas/AccessTokenCreationMeta'
-      type: object
-      example:
-        data:
-          id: 23145
-          name: 'CI Deployments'
-          status: active
-          last_used_at: null
-          usage_count: 0
-          expires_at: null
-          created_at: '2025-03-01T18:11:00Z'
-          allowed_ips:
-            - 10.0.0.0/24
-            - 203.0.113.12
-        meta:
-          bearer_token: YiRqNBToe7EIXAnmtCB3a9gAwHNh0xXZUX3A9zARG5CWKUcDhRn4U9qGcG3q7TwB
-          message: 'Token generated successfully. Store the bearer token immediately; it will not be shown again.'
-    AccessTokenPage:
-      required:
-        - data
-        - links
-        - meta
-      properties:
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/AccessToken'
-        links:
-          $ref: '#/components/schemas/PaginationLinks'
-        meta:
-          $ref: '#/components/schemas/PaginationMeta'
-      type: object
-      example:
-        data:
-          -
-            id: 1
-            name: 'Production Deploy'
-            status: active
-            last_used_at: '2024-04-11T14:35:05Z'
-            usage_count: 42
-            expires_at: null
-            created_at: '2024-03-01T18:11:00Z'
-            allowed_ips: null
-        links:
-          first: 'https://example.edu/api/v1/me/tokens?page=1'
-          last: 'https://example.edu/api/v1/me/tokens?page=1'
-          prev: null
-          next: null
-        meta:
-          current_page: 1
-          from: 1
-          last_page: 1
-          links:
-            -
-              url: null
-              label: '&laquo; Previous'
-              page: null
-              active: false
-            -
-              url: 'https://example.edu/api/v1/me/tokens?page=1'
-              label: '1'
-              page: 1
-              active: true
-            -
-              url: null
-              label: 'Next &raquo;'
-              page: null
-              active: false
-          path: 'https://example.edu/api/v1/me/tokens'
-          per_page: 20
-          to: 15
-          total: 15
+    ValidationProblemDetails:
+      allOf:
+        -
+          $ref: '#/components/schemas/ProblemDetails'
+        -
+          properties:
+            errors:
+              description: 'Validation errors keyed by input field.'
+              type: object
+              example:
+                name:
+                  - 'The name field is required.'
+                expires_at:
+                  - 'The expires at must be at least 24 hours from now.'
+              additionalProperties:
+                type: array
+                items:
+                  type: string
+          type: object
     Permission:
       required:
         - id
@@ -679,67 +415,19 @@ components:
               page: null
               active: false
       type: object
-    ProblemDetails:
-      description: 'Standard RFC 9457 problem details envelope.'
-      required:
-        - type
-        - title
-        - status
-        - instance
-      properties:
-        type:
-          description: 'RFC 9457 compliant problem details response builder.'
-          type: string
-          format: uri
-          example: 'about:blank'
-        title:
-          type: string
-          example: Unauthorized
-        status:
-          type: integer
-          example: 401
-        detail:
-          type: string
-          example: 'Authentication failed'
-          nullable: true
-        instance:
-          type: string
-          format: uri-reference
-          example: /api/v1/me
-        trace_id:
-          description: 'Unique identifier for the API request (if available).'
-          type: string
-          example: b4f5aa7a-1470-4d92-8d3c-98e7c7de9f5f
-          nullable: true
-      type: object
-    ValidationProblemDetails:
-      allOf:
-        -
-          $ref: '#/components/schemas/ProblemDetails'
-        -
-          properties:
-            errors:
-              description: 'Validation errors keyed by input field.'
-              type: object
-              example:
-                name:
-                  - 'The name field is required.'
-                expires_at:
-                  - 'The expires at must be at least 24 hours from now.'
-              additionalProperties:
-                type: array
-                items:
-                  type: string
-          type: object
   securitySchemes:
+    oauth2:
+      type: oauth2
+      description: "OAuth 2.0. Service integrations use the client credentials flow with a client created in Administration; the access token acts as the client's API user."
+      flows:
+        clientCredentials:
+          tokenUrl: /oauth/token
+          scopes: {}
     bearerToken:
       type: http
-      description: 'Bearer access token for authentication. Tokens are issued during API user provisioning or can be generated via the API.'
+      description: 'An OAuth access token, sent as a bearer token in the Authorization header.'
       scheme: bearer
 tags:
-  -
-    name: 'Access Tokens'
-    description: 'Manage API access tokens for the authenticated user.'
   -
     name: Users
     description: 'Retrieve information about the authenticated API user.'

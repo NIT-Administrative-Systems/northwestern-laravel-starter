@@ -16,7 +16,6 @@ enum TokenExpiration: int implements HasLabel
     case ThreeMonths = 90;
     case SixMonths = 180;
     case OneYear = 365;
-    case Never = 0;
 
     public function getLabel(): string
     {
@@ -28,22 +27,14 @@ enum TokenExpiration: int implements HasLabel
             self::ThreeMonths => '90 Days',
             self::SixMonths => '180 Days',
             self::OneYear => '1 Year',
-            self::Never => 'No Expiration',
         };
     }
 
     /**
-     * Calculate the expiration date from now.
-     * Returns null for NEVER.
-     *
-     * @return ($this is self::Never ? null : Carbon)
+     * The expiration date, counted from now or from `$from`.
      */
-    public function expiresAt(?Carbon $from = null): ?Carbon
+    public function expiresAt(?Carbon $from = null): Carbon
     {
-        if ($this === self::Never) {
-            return null;
-        }
-
         return ($from ?? Carbon::now())->addDays($this->value);
     }
 }

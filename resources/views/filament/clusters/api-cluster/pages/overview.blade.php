@@ -81,44 +81,44 @@
     </div>
 
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {{-- Left Column: Token Stats --}}
+        {{-- Left Column: Client Stats --}}
         <div class="space-y-6">
-            {{-- Token Overview --}}
-            <x-filament::section heading="Access Tokens" icon="heroicon-o-key">
+            {{-- Client Overview --}}
+            <x-filament::section heading="Service Clients" icon="heroicon-o-key">
                 <div class="space-y-4">
                     <div class="grid grid-cols-3 gap-3 text-center">
                         <div class="bg-success-50 dark:bg-success-500/10 rounded-lg p-3">
                             <p class="text-success-600 dark:text-success-400 text-2xl font-bold">
-                                {{ $stats['active_tokens'] }}</p>
+                                {{ $stats['active_clients'] }}</p>
                             <p class="text-success-700 dark:text-success-300 text-xs">Active</p>
                         </div>
                         <div class="rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
                             <p class="text-2xl font-bold text-gray-600 dark:text-gray-400">
-                                {{ $stats['expired_tokens'] }}</p>
+                                {{ $stats['expired_clients'] }}</p>
                             <p class="text-xs text-gray-500 dark:text-gray-400">Expired</p>
                         </div>
                         <div class="bg-danger-50 dark:bg-danger-500/10 rounded-lg p-3">
                             <p class="text-danger-600 dark:text-danger-400 text-2xl font-bold">
-                                {{ $stats['revoked_tokens'] }}</p>
+                                {{ $stats['revoked_clients'] }}</p>
                             <p class="text-danger-700 dark:text-danger-300 text-xs">Revoked</p>
                         </div>
                     </div>
 
                     <div class="border-t border-gray-100 pt-4 dark:border-gray-800">
-                        <p class="mb-3 text-sm font-medium text-gray-700 dark:text-gray-300">Expiring Soon</p>
+                        <p class="mb-3 text-sm font-medium text-gray-700 dark:text-gray-300">Secrets Expiring Soon</p>
                         <div class="space-y-2">
                             <div class="flex items-center justify-between">
                                 <span class="text-sm text-gray-500 dark:text-gray-400">Within 7 days</span>
                                 <span
-                                      class="{{ $stats['tokens_expiring_7d'] > 0 ? 'bg-warning-100 text-warning-800 dark:bg-warning-500/20 dark:text-warning-300' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }} rounded-full px-2 py-0.5 text-xs font-medium">
-                                    {{ $stats['tokens_expiring_7d'] }}
+                                      class="{{ $stats['secrets_expiring_7d'] > 0 ? 'bg-warning-100 text-warning-800 dark:bg-warning-500/20 dark:text-warning-300' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }} rounded-full px-2 py-0.5 text-xs font-medium">
+                                    {{ $stats['secrets_expiring_7d'] }}
                                 </span>
                             </div>
                             <div class="flex items-center justify-between">
                                 <span class="text-sm text-gray-500 dark:text-gray-400">Within 30 days</span>
                                 <span
-                                      class="{{ $stats['tokens_expiring_30d'] > 0 ? 'bg-info-100 text-info-800 dark:bg-info-500/20 dark:text-info-300' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }} rounded-full px-2 py-0.5 text-xs font-medium">
-                                    {{ $stats['tokens_expiring_30d'] }}
+                                      class="{{ $stats['secrets_expiring_30d'] > 0 ? 'bg-info-100 text-info-800 dark:bg-info-500/20 dark:text-info-300' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }} rounded-full px-2 py-0.5 text-xs font-medium">
+                                    {{ $stats['secrets_expiring_30d'] }}
                                 </span>
                             </div>
                         </div>

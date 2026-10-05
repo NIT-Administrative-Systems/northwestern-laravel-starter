@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Domains\Auth\Services;
 
-use App\Domains\Auth\Http\Middleware\AuthenticatesAccessTokens;
+use App\Domains\Auth\Http\Middleware\AuthenticatePassportToken;
 use Illuminate\Routing\Router;
 
 /**
  * Inspects the application's registered routes to determine whether any API endpoints
- * are protected by the {@see AuthenticatesAccessTokens} middleware.
+ * are protected by the {@see AuthenticatePassportToken} middleware.
  *
  * This is used by the **API Request Logging** dashboard to decide whether a warning
  * should be shown indicating that no protected API routes exist.
@@ -31,7 +31,7 @@ readonly class ApiRouteInspector
                 continue;
             }
 
-            if (in_array(AuthenticatesAccessTokens::class, $route->gatherMiddleware(), true)) {
+            if (in_array(AuthenticatePassportToken::class, $route->gatherMiddleware(), true)) {
                 return true;
             }
         }

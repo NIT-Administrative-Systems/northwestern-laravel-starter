@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Filament\Clusters\ApiCluster\Pages;
 
-use App\Domains\Auth\Models\AccessToken;
+use App\Domains\Auth\Enums\ClientOrigin;
 use App\Domains\Auth\Models\ApiRequestLog;
+use App\Domains\Auth\Models\OAuthClient;
+use App\Domains\User\Models\User;
 use App\Filament\Clusters\ApiCluster;
 use BackedEnum;
 use Carbon\Carbon;
@@ -41,11 +43,11 @@ class Overview extends Page
      * @return array{
      *     api_enabled: bool,
      *     active_api_users: int,
-     *     active_tokens: int,
-     *     expired_tokens: int,
-     *     revoked_tokens: int,
-     *     tokens_expiring_7d: int,
-     *     tokens_expiring_30d: int,
+     *     active_clients: int,
+     *     expired_clients: int,
+     *     revoked_clients: int,
+     *     secrets_expiring_7d: int,
+     *     secrets_expiring_30d: int,
      *     total_requests_24h: int,
      *     failed_requests_24h: int,
      *     success_rate_24h: float,
@@ -64,33 +66,30 @@ class Overview extends Page
     {
         $now = Carbon::now();
 
-        $activeApiUsers = AccessToken::query()
-            ->distinct('user_id')
-            ->active()
-            ->count('user_id');
+        // Service clients only: OAuth applications and dynamically registered clients have no API user.
+        $serviceClients = fn () => OAuthClient::query()
+            ->where('origin', ClientOrigin::Administrator)
+            ->whereHasMorph('owner', [User::class]);
 
-        $activeTokens = AccessToken::query()->active()->count();
+        $activeApiUsers = $serviceClients()->active($now)->distinct('owner_id')->count('owner_id');
 
-        $expiredTokens = AccessToken::query()
-            ->whereNull('revoked_at')
-            ->whereNotNull('expires_at')
-            ->where('expires_at', '<', $now)
+        $activeClients = $serviceClients()->active($now)->count();
+
+        $expiredClients = $serviceClients()
+            ->where('revoked', false)
+            ->where('secret_expires_at', '<=', $now)
             ->count();
 
-        $revokedTokens = AccessToken::query()
-            ->whereNotNull('revoked_at')
+        $revokedClients = $serviceClients()->where('revoked', true)->count();
+
+        $secretsExpiring7d = $serviceClients()
+            ->active($now)
+            ->whereBetween('secret_expires_at', [$now, $now->copy()->addDays(7)])
             ->count();
 
-        $tokensExpiring7d = AccessToken::query()
-            ->active()
-            ->whereNotNull('expires_at')
-            ->whereBetween('expires_at', [$now, $now->copy()->addDays(7)])
-            ->count();
-
-        $tokensExpiring30d = AccessToken::query()
-            ->active()
-            ->whereNotNull('expires_at')
-            ->whereBetween('expires_at', [$now, $now->copy()->addDays(30)])
+        $secretsExpiring30d = $serviceClients()
+            ->active($now)
+            ->whereBetween('secret_expires_at', [$now, $now->copy()->addDays(30)])
             ->count();
 
         /**
@@ -118,11 +117,11 @@ class Overview extends Page
         return [
             'api_enabled' => (bool) config('api.enabled', true),
             'active_api_users' => $activeApiUsers,
-            'active_tokens' => $activeTokens,
-            'expired_tokens' => $expiredTokens,
-            'revoked_tokens' => $revokedTokens,
-            'tokens_expiring_7d' => $tokensExpiring7d,
-            'tokens_expiring_30d' => $tokensExpiring30d,
+            'active_clients' => $activeClients,
+            'expired_clients' => $expiredClients,
+            'revoked_clients' => $revokedClients,
+            'secrets_expiring_7d' => $secretsExpiring7d,
+            'secrets_expiring_30d' => $secretsExpiring30d,
             'total_requests_24h' => $totalRequests24h,
             'failed_requests_24h' => $failedRequests24h,
             'success_rate_24h' => $successRate24h,

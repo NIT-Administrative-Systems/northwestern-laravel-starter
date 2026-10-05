@@ -8,12 +8,12 @@ use App\Domains\User\Models\User;
 use App\Filament\Navigation\AdministrationNavGroup;
 use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Filament\Resources\Users\Pages\ViewUser;
-use App\Filament\Resources\Users\RelationManagers\AccessTokensRelationManager;
 use App\Filament\Resources\Users\RelationManagers\ApiRequestLogsRelationManager;
 use App\Filament\Resources\Users\RelationManagers\AuditsRelationManager;
 use App\Filament\Resources\Users\RelationManagers\LoginRecordsRelationManager;
 use App\Filament\Resources\Users\RelationManagers\RoleActivityRelationManager;
 use App\Filament\Resources\Users\RelationManagers\RolesRelationManager;
+use App\Filament\Resources\Users\RelationManagers\ServiceClientsRelationManager;
 use App\Filament\Resources\Users\Tables\UsersTable;
 use BackedEnum;
 use Filament\Resources\Pages\PageRegistration;
@@ -58,7 +58,7 @@ class UserResource extends Resource
             RoleActivityRelationManager::class,
             AuditsRelationManager::class,
             LoginRecordsRelationManager::class,
-            AccessTokensRelationManager::class,
+            ServiceClientsRelationManager::class,
             ApiRequestLogsRelationManager::class,
         ];
     }

@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
-use App\Console\Commands\SendAccessTokenExpirationNotificationsCommand;
+use App\Console\Commands\SendClientSecretExpirationNotificationsCommand;
 use Illuminate\Database\Console\PruneCommand;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Schedule;
+use Laravel\Passport\Console\PurgeCommand;
 use Laravel\Telescope\Console\PruneCommand as TelescopePruneCommand;
 use Livewire\Features\SupportConsoleCommands\Commands\S3CleanupCommand as CleanTemporaryS3FilesCommand;
 use Spatie\Health\Commands\DispatchQueueCheckJobsCommand;
@@ -59,9 +60,13 @@ Schedule::command(PruneCommand::class, ['--path' => glob('app/Domains/*/Models')
 Schedule::command(PruneCommand::class, ['--model' => [HealthCheckResultHistoryItem::class]])->daily();
 
 if (config('api.expiration_notifications.enabled')) {
-    Schedule::command(SendAccessTokenExpirationNotificationsCommand::class)
+    Schedule::command(SendClientSecretExpirationNotificationsCommand::class)
         ->dailyAt('09:00');
 }
+
+// Delete revoked and expired OAuth tokens and codes. Keep them past the 30-day refresh token
+// lifetime: refresh tokens are found through their access tokens when access is revoked.
+Schedule::command(PurgeCommand::class, ['--hours' => 24 * 31])->daily();
 
 /*
 |--------------------------------------------------------------------------

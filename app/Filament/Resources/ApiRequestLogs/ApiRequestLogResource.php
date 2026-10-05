@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\ApiRequestLogs;
 
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\ApiRequestLog;
 use App\Filament\Clusters\ApiCluster;
 use App\Filament\Resources\ApiRequestLogs\Pages\ListApiRequestLogs;
@@ -37,11 +38,11 @@ class ApiRequestLogResource extends Resource
 
     public static function canAccess(): bool
     {
-        if (! config('api.request_logging.enabled')) {
+        if (! config('api.enabled') || ! config('api.request_logging.enabled')) {
             return false;
         }
 
-        return parent::canAccess();
+        return (bool) auth()->user()?->can(SystemPermission::ViewApiRequestLogs);
     }
 
     public static function table(Table $table): Table

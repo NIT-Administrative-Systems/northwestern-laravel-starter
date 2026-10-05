@@ -20,7 +20,7 @@ class UserApiController extends ApiController
         path: '/api/v1/me',
         operationId: 'get-user-details',
         summary: 'Get authenticated user details',
-        security: [['bearerToken' => []]],
+        security: [['oauth2' => []], ['bearerToken' => []]],
         tags: ['Users'],
         responses: [
             new OA\Response(

@@ -16,6 +16,7 @@ Version 3 removes the Bootstrap user interface. Every page now uses one stack, F
 - `local-auth.redirect_after_login` (`LOCAL_AUTH_REDIRECT_AFTER_LOGIN`); `HomeController::destinationFor()` decides where signed-in users go.
 - GlobalAlert; Filament's impersonation banner shows who is being impersonated.
 - `InjectLivewireAssets`; Livewire injects its own assets.
+- The bespoke API access tokens: the `AccessToken` model and `access_tokens` table, the `/api/v1/me/tokens` endpoints, `AuthenticatesAccessTokens`, `IssueAccessToken` and `RotateAccessToken`, `access-tokens:notify-expiration`, and `API_DEMO_USER_ACCESS_TOKEN`. No API endpoint creates credentials any more.
 
 ### Added
 
@@ -31,6 +32,12 @@ Version 3 removes the Bootstrap user interface. Every page now uses one stack, F
 - A "Your account" widget on the app panel's dashboard: a greeting with the user's previous sign-in, their roles, and links to Contact Support and the documentation when configured.
 - An Account area at `/app/account`, reached from the user menu and the "Your account" widget. Profile shows the user's details (from the Northwestern Directory for NetID users), how they sign in, their recent sign-ins and their roles, read-only. Preferences lets them choose their timezone; an administrator impersonating them can see it but not save it.
 - A `users.preferences` JSON column read through `App\Domains\User\Data\UserPreferences`, for applications to add their own per-user settings as typed properties with defaults. The base class, `App\Domains\Core\Data\Preferences`, can cast a JSON column on any model.
+- API credentials through Laravel Passport. Each API user owns service clients: an integration exchanges a client's ID and secret at `POST /oauth/token` (client credentials) for an access token that lasts one hour and acts as the API user. Clients have an IP allowlist, a secret that expires within a year, and rotation that keeps the old client working until it is revoked; revoking a client revokes the tokens it holds. Administrators manage them on an API user's **Clients** tab. Authentication and request logging use chassis's `AuthenticatesPassportTokens` and `LogsPassportRequests`.
+- `oauth-clients:notify-secret-expiration`, which emails an API user's contact address before a client secret expires (`API_CLIENT_SECRET_EXPIRATION_NOTIFICATIONS_ENABLED`), and a daily `passport:purge`.
+- Passport signing keys from `PASSPORT_PRIVATE_KEY` and `PASSPORT_PUBLIC_KEY`; locally, `db:rebuild` generates key files and seeds the demo API user's client with a fixed ID and secret, which it prints.
+- A per-IP API limit before authentication (`RATE_LIMIT_API_PER_IP_PER_MINUTE`), also covering Passport's OAuth endpoints, alongside the per-client limit after authentication (`RATE_LIMIT_API_PER_MINUTE`).
+- `config/cors.php`: no browser origin may call the API unless it is listed in `CORS_ALLOWED_ORIGINS`.
+- `ViewApiRequestLogs`, the permission to view API request logs and charts.
 - A component gallery at `/app/gallery`, in the app panel's sidebar outside production, showing Filament's components in the Northwestern theme. Delete it when you no longer need it.
 - An error layout (`<x-layouts.error>`) that renders without Filament, auth or the database, so the 500, 503 and database-paused pages work when the database is down. The client error pages (401, 403, 404, 419, 429) render on the public layout with the full header, and a fallback route lets the not-found page know who is signed in.
 - Browser Sentry on every page through `<x-sentry-browser />` and `resources/js/sentry.js`, relayed through chassis's DSN-validating `SentryTunnelController`. The new `sentry.tracing.browser` setting (`SENTRY_ENABLE_APM_FOR_JS`) enables browser tracing.
@@ -47,11 +54,14 @@ Version 3 removes the Bootstrap user interface. Every page now uses one stack, F
 - `db:rebuild` no longer runs `StakeholderSeeder`, so it makes no Directory Search calls. Deployments run the seeder for `SUPER_ADMIN_NETIDS`; locally, the seeded NUIT Administrator is a Super Administrator.
 - The environment lockdown page is a Filament page in the app panel, and lockdown now applies to app panel routes.
 - API users can no longer open the app panel. They authenticate with bearer tokens and never had a way to sign in.
+- API request logs record who made each request as `principal_type`, `oauth_client_id`, `token_id` and `grant_type` instead of `access_token_id`, so refused requests and service clients are logged too.
+- `ManageApiUsers` is now `ManageApiAccess` (`manage-api-access`). The API area of the administration panel requires it, or `ViewApiRequestLogs` for request logs, instead of `ManageAll`.
+- Requires `laravel/passport` `^13.8` and `northwestern-sysdev/chassis` `^1.3`.
 - Panels, the public layout and the error layout use the Department Templates 4.0 wordmark and fonts. The app panel and public pages have the Northwestern footer; the administration panel does not.
 - The support request confirmation email shows the reference number, subject, submission time and the user's message; the support team's email leads with the request.
 - Browser and PHP Sentry reports share one user context, `SentryExceptionHandler::userContext()`.
 - Livewire's pagination theme is `tailwind`.
-- Requires `northwestern-sysdev/northwestern-filament-theme` `^4.1` and `northwestern-sysdev/chassis` `^1.2.1`.
+- Requires `northwestern-sysdev/northwestern-filament-theme` `^4.1`.
 
 ### Fixed
 

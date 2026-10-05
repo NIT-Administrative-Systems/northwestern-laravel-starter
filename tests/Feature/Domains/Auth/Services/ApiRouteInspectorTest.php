@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\Auth\Services;
 
-use App\Domains\Auth\Http\Middleware\AuthenticatesAccessTokens;
+use App\Domains\Auth\Http\Middleware\AuthenticatePassportToken;
 use App\Domains\Auth\Services\ApiRouteInspector;
 use Illuminate\Routing\RouteCollection;
 use Illuminate\Support\Facades\Route;
@@ -31,7 +31,7 @@ final class ApiRouteInspectorTest extends TestCase
         Route::get('web/dashboard', fn () => 'web');
         Route::get('api/unprotected/v1', fn () => 'public');
         Route::get('api/protected/v1', fn () => 'secret')
-            ->middleware([AuthenticatesAccessTokens::class]);
+            ->middleware([AuthenticatePassportToken::class]);
 
         $inspector = $this->inspector();
 
@@ -43,7 +43,7 @@ final class ApiRouteInspectorTest extends TestCase
         Route::get('web/public', fn () => 'web');
         Route::get('api/health', fn () => 'public');
         Route::get('api/secret', fn () => 'secret')
-            ->middleware(['auth', AuthenticatesAccessTokens::class, 'throttle']);
+            ->middleware(['auth', AuthenticatePassportToken::class, 'throttle']);
         Route::get('app/admin', fn () => 'app');
 
         $inspector = $this->inspector();

@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Domains\Auth\Http\Middleware;
 
 use App\Domains\Auth\Models\ApiRequestLog;
-use Northwestern\SysDev\Chassis\Http\Middleware\LogsApiRequests as BaseLogsApiRequests;
+use Northwestern\SysDev\Chassis\Http\Middleware\LogsPassportRequests;
 
-class LogsApiRequests extends BaseLogsApiRequests
+class LogsApiRequests extends LogsPassportRequests
 {
     protected function isEnabled(): bool
     {
@@ -29,7 +29,10 @@ class LogsApiRequests extends BaseLogsApiRequests
         ApiRequestLog::create([
             'trace_id' => $data['trace_id'],
             'user_id' => $data['user_id'],
-            'access_token_id' => $data['token_id'],
+            'principal_type' => $data['principal_type'],
+            'oauth_client_id' => $data['oauth_client_id'],
+            'token_id' => $data['oauth_token_id'],
+            'grant_type' => $data['oauth_grant_type'],
             'method' => $data['method'],
             'path' => $data['path'],
             'route_name' => $data['route_name'],

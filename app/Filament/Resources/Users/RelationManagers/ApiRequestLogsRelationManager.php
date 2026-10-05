@@ -38,7 +38,7 @@ class ApiRequestLogsRelationManager extends RelationManager
 
         /** @var User $ownerRecord */
         return $ownerRecord->auth_type === AuthType::API
-            && auth()->user()?->hasPermissionTo(SystemPermission::ManageAll);
+            && auth()->user()?->can(SystemPermission::ViewApiRequestLogs);
     }
 
     public static function getTabComponent(Model $ownerRecord, string $pageClass): Tab

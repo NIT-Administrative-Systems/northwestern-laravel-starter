@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Users\Schemas;
 
 use App\Domains\Auth\Enums\SystemPermission;
+use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\User\Models\User;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;
@@ -105,26 +106,20 @@ class ApiUserInfolist
                                 ->badge(),
 
                             Group::make([
-                                TextEntry::make('active_tokens_count')
-                                    ->label('Active Tokens')
+                                TextEntry::make('active_clients_count')
+                                    ->label('Active Clients')
                                     ->inlineLabel()
-                                    ->getStateUsing(fn (User $record) => number_format($record->active_access_tokens()->count())),
-
-                                TextEntry::make('total_api_requests')
-                                    ->label('Total API Requests')
-                                    ->tooltip('Total successful API requests made by this user across all tokens')
-                                    ->inlineLabel()
-                                    ->numeric()
-                                    ->getStateUsing(fn (User $record) => number_format((int) $record->access_tokens()->sum('usage_count'))),
+                                    ->getStateUsing(fn (User $record) => number_format(OAuthClient::query()->whereMorphedTo('owner', $record)->active()->count())),
 
                                 TextEntry::make('last_api_request_at')
                                     ->label('Last API Request')
+                                    ->tooltip('The most recent request from any of this user\'s clients')
                                     ->placeholder('Never')
                                     ->inlineLabel()
                                     ->dateTime()
                                     ->since()
                                     ->dateTimeTooltip()
-                                    ->getStateUsing(fn (User $record) => $record->access_tokens()->max('last_used_at')),
+                                    ->getStateUsing(fn (User $record) => OAuthClient::query()->whereMorphedTo('owner', $record)->max('last_used_at')),
                             ])
                                 ->columns(1),
 

@@ -1,0 +1,40 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Feature\Domains\Auth\Actions\Api;
+
+use App\Domains\Auth\Actions\Api\AuditServiceClientChange;
+use App\Domains\Auth\Actions\Api\CreateServiceClient;
+use App\Domains\Auth\Actions\Api\UpdateServiceClientIpRestrictions;
+use App\Domains\User\Models\Audit;
+use App\Domains\User\Models\User;
+use PHPUnit\Framework\Attributes\CoversClass;
+use Tests\TestCase;
+
+#[CoversClass(UpdateServiceClientIpRestrictions::class)]
+#[CoversClass(AuditServiceClientChange::class)]
+final class UpdateServiceClientIpRestrictionsTest extends TestCase
+{
+    public function test_it_replaces_the_allowlist_and_audits_the_previous_one(): void
+    {
+        [, $client] = resolve(CreateServiceClient::class)(User::factory()->api()->create(), 'Sync', now()->addDays(30), ['10.0.0.0/8']);
+
+        resolve(UpdateServiceClientIpRestrictions::class)($client, ['192.0.2.0/24']);
+
+        $this->assertSame(['192.0.2.0/24'], $client->fresh()?->allowed_ips);
+
+        $audit = Audit::query()->where('event', 'service_client_ip_restrictions_updated')->sole();
+        $this->assertSame(['allowed_ips' => ['10.0.0.0/8']], $audit->old_values);
+        $this->assertSame(['192.0.2.0/24'], $audit->new_values['allowed_ips']);
+    }
+
+    public function test_an_empty_list_allows_every_ip(): void
+    {
+        [, $client] = resolve(CreateServiceClient::class)(User::factory()->api()->create(), 'Sync', now()->addDays(30), ['10.0.0.0/8']);
+
+        resolve(UpdateServiceClientIpRestrictions::class)($client, []);
+
+        $this->assertNull($client->fresh()?->allowed_ips);
+    }
+}

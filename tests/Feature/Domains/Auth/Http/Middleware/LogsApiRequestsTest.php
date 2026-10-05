@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace Tests\Feature\Domains\Auth\Http\Middleware;
 
 use App\Domains\Auth\Http\Middleware\LogsApiRequests;
-use App\Domains\Auth\Models\AccessToken;
 use App\Domains\Auth\Models\ApiRequestLog;
 use App\Domains\User\Models\User;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
+use Northwestern\SysDev\Chassis\Enums\ApiPrincipalType;
 use Northwestern\SysDev\Chassis\Enums\ApiRequestFailure;
+use Northwestern\SysDev\Chassis\Enums\OAuthGrantType;
 use Northwestern\SysDev\Chassis\ValueObjects\ApiRequestContext;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
@@ -67,11 +68,15 @@ final class LogsApiRequestsTest extends TestCase
     public function test_authenticated_successful_request_is_logged(): void
     {
         $user = User::factory()->api()->create();
-        $token = AccessToken::factory()->for($user)->create();
+        $clientId = Str::uuid()->toString();
+        $tokenId = Str::random(80);
         $traceId = Str::uuid()->toString();
 
         Context::add(ApiRequestContext::USER_ID, $user->id);
-        Context::add(ApiRequestContext::TOKEN_ID, $token->id);
+        Context::add(ApiRequestContext::PRINCIPAL_TYPE, ApiPrincipalType::Client->value);
+        Context::add(ApiRequestContext::OAUTH_CLIENT_ID, $clientId);
+        Context::add(ApiRequestContext::OAUTH_TOKEN_ID, $tokenId);
+        Context::add(ApiRequestContext::OAUTH_GRANT_TYPE, OAuthGrantType::ClientCredentials->value);
         Context::add(ApiRequestContext::TRACE_ID, $traceId);
 
         $this->getJson($this->endpoint, ['User-Agent' => 'TestAgent/1.0'])
@@ -80,7 +85,10 @@ final class LogsApiRequestsTest extends TestCase
         $this->assertDatabaseHas(ApiRequestLog::class, [
             'trace_id' => $traceId,
             'user_id' => $user->id,
-            'access_token_id' => $token->id,
+            'principal_type' => 'client',
+            'oauth_client_id' => $clientId,
+            'token_id' => $tokenId,
+            'grant_type' => 'client_credentials',
             'method' => 'GET',
             'path' => 'api/test',
             'status_code' => 200,
@@ -408,11 +416,15 @@ final class LogsApiRequestsTest extends TestCase
     public function test_all_context_values_are_captured_in_log(): void
     {
         $user = User::factory()->api()->create();
-        $token = AccessToken::factory()->for($user)->create();
+        $clientId = Str::uuid()->toString();
+        $tokenId = Str::random(80);
         $traceId = Str::uuid()->toString();
 
         Context::add(ApiRequestContext::USER_ID, $user->id);
-        Context::add(ApiRequestContext::TOKEN_ID, $token->id);
+        Context::add(ApiRequestContext::PRINCIPAL_TYPE, ApiPrincipalType::Client->value);
+        Context::add(ApiRequestContext::OAUTH_CLIENT_ID, $clientId);
+        Context::add(ApiRequestContext::OAUTH_TOKEN_ID, $tokenId);
+        Context::add(ApiRequestContext::OAUTH_GRANT_TYPE, OAuthGrantType::ClientCredentials->value);
         Context::add(ApiRequestContext::TRACE_ID, $traceId);
         Context::add(ApiRequestContext::FAILURE_REASON, ApiRequestFailure::ValidationFailed->value);
 
@@ -422,7 +434,10 @@ final class LogsApiRequestsTest extends TestCase
         $this->assertDatabaseHas(ApiRequestLog::class, [
             'trace_id' => $traceId,
             'user_id' => $user->id,
-            'access_token_id' => $token->id,
+            'principal_type' => 'client',
+            'oauth_client_id' => $clientId,
+            'token_id' => $tokenId,
+            'grant_type' => 'client_credentials',
             'method' => 'GET',
             'path' => 'api/test',
             'status_code' => 200,
