@@ -62,7 +62,7 @@ class Preferences extends Page
                 Select::make('timezone')
                     ->label('Timezone')
                     ->helperText('Dates and times in this application are shown in this timezone.')
-                    ->options(self::timezoneOptions())
+                    ->options($this->timezoneOptions())
                     ->in(DateTimeZone::listIdentifiers())
                     ->searchable()
                     ->required(),
@@ -118,7 +118,7 @@ class Preferences extends Page
      *
      * @return array<string, array<string, string>>
      */
-    private static function timezoneOptions(): array
+    private function timezoneOptions(): array
     {
         $options = [];
 
