@@ -61,7 +61,7 @@ Add widgets with `php artisan make:filament-widget`. For anything a grid of widg
 
 ## The Account Area
 
-The Account area at `/app/account` is each user's own: who they are, how they sign in, their preferences and, for those allowed, their personal access tokens. It is a cluster, `App\Filament\App\Clusters\AccountCluster`, with its pages as tabs across the top. It isn't in the sidebar, which is for your application's features; users reach it from the user menu's **Account** item and the dashboard widget's "Manage your account" link. Every user who can open the app panel can open it.
+The Account area at `/app/account` is each user's own: who they are, how they sign in, their preferences, the applications connected to their account and, for those allowed, their personal access tokens. It is a cluster, `App\Filament\App\Clusters\AccountCluster`, with its pages as tabs across the top. It isn't in the sidebar, which is for your application's features; users reach it from the user menu's **Account** item and the dashboard widget's "Manage your account" link. Every user who can open the app panel can open it.
 
 ### Profile
 
@@ -75,15 +75,19 @@ The Account area at `/app/account` is each user's own: who they are, how they si
 
 `/app/account/access-tokens` lists the user's [personal access tokens](/features/api/#personal-access-tokens) and creates and revokes them. It shows only to users with the `CreatePersonalAccessTokens` permission, which no default role grants. A new token is shown once.
 
+### Connected Applications
+
+`/app/account/connected-applications` lists the [applications](/features/api/#connected-applications) the user has allowed to act for them, one row per application, with what each may do, when it connected and when it was last used. **Disconnect** removes one application's access and **Disconnect all** removes every application's. Every user can open it while the API is enabled.
+
 ### Preferences
 
-`/app/account/preferences` is where users change their own settings. The starter ships one, their timezone, which every date in both panels is shown in (see [Framework Defaults](/architecture/framework-defaults/#user-timezone-on-all-datetimes)). Directory sync sets a new user's timezone to `DEFAULT_USER_TIMEZONE` and leaves it alone after that. Users who can hold personal access tokens also choose whether to be emailed before one expires.
+`/app/account/preferences` is where users change their own settings. The starter ships one, their timezone, which every date in both panels is shown in (see [Framework Defaults](/architecture/framework-defaults/#user-timezone-on-all-datetimes)). Directory sync sets a new user's timezone to `DEFAULT_USER_TIMEZONE` and leaves it alone after that. Users also choose whether to be emailed when an application connects to their account (they're always told in the notification bell), and those who can hold personal access tokens whether to be emailed before one expires.
 
 An administrator [impersonating](/features/authentication/#impersonating-users) a user sees that user's preferences but can't save them: the page hides **Save**, and `save()` refuses with a 403.
 
 ### Adding a Preference
 
-Everything else a user chooses goes in the `users.preferences` JSON column, read through a typed class, `App\Domains\User\Data\UserPreferences`. It ships with one, `emailBeforeAccessTokensExpire`. Each preference is a promoted constructor property with a default, so adding one needs no migration:
+Everything else a user chooses goes in the `users.preferences` JSON column, read through a typed class, `App\Domains\User\Data\UserPreferences`. It ships with two, `emailBeforeAccessTokensExpire` and `emailWhenApplicationConnects`. Each preference is a promoted constructor property with a default, so adding one needs no migration:
 
 <Steps>
 
@@ -95,6 +99,7 @@ Everything else a user chooses goes in the `users.preferences` JSON column, read
    {
        public function __construct(
            public bool $emailBeforeAccessTokensExpire = true,
+           public bool $emailWhenApplicationConnects = true,
            public bool $emailWeeklySummary = true,
        ) {}
    }
