@@ -81,7 +81,7 @@ Version 3 removes the Bootstrap user interface. Every page now uses one stack, F
 - `/api/health` no longer returns 503 for checks skipped where they don't apply, such as the database and queue checks outside production. Spatie treats skipped checks as failures by default.
 - A Directory Search outage during sign-in shows the 503 page, or a Problem Details 503 on the API, instead of a 500.
 - Directory sync no longer resets a user's timezone to `DEFAULT_USER_TIMEZONE` at every sign-in; it sets it only when the user is created.
-- Permission checks during API requests use the `web` guard the roles and permissions belong to. With Passport's `api` guard as the default, Spatie looked them up under `api` and found none.
+- Permission checks during API requests use the `web` guard the roles and permissions belong to. With Passport's `api` guard as the default, Spatie looked them up under `api` and found none. A regression test now covers it.
 
 ## [v2.6.0] - 2026-10-01
 

@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\Auth\Http\Middleware;
 
+use App\Domains\Auth\Enums\RoleTypeEnum;
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Http\Middleware\AuthenticatePassportToken;
+use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Context;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Once;
 use Laravel\Passport\ClientRepository;
 use Northwestern\SysDev\Chassis\ValueObjects\ApiRequestContext;
@@ -32,6 +36,21 @@ final class AuthenticatePassportTokenTest extends TestCase
 
         $this->assertSame('client', Context::get(ApiRequestContext::PRINCIPAL_TYPE));
         $this->assertSame($client->getKey(), Context::get(ApiRequestContext::OAUTH_CLIENT_ID));
+    }
+
+    // Passport's guard is the default during API requests, but roles and permissions belong to `web`.
+    public function test_permission_checks_work_during_api_requests(): void
+    {
+        Route::middleware(['api', AuthenticatePassportToken::class])
+            ->get('/api/test/permission', fn (Request $request) => response()->json(['can_view_users' => $request->user()?->can(SystemPermission::ViewUsers)]));
+
+        $apiUser = User::factory()->api()->create();
+        $role = Role::factory()->forRoleType(RoleTypeEnum::ApiIntegration)->create();
+        $role->givePermissionTo(SystemPermission::ViewUsers);
+        $apiUser->roles()->attach($role);
+        [$token] = $this->serviceClientToken($apiUser);
+
+        $this->withToken($token)->getJson('/api/test/permission')->assertOk()->assertJsonPath('can_view_users', true);
     }
 
     public function test_the_clients_ip_allowlist_applies(): void
