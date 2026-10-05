@@ -73,10 +73,14 @@ class Preferences extends Page
                     ]),
                 Section::make('Email')
                     ->schema([
+                        Toggle::make('emailWhenApplicationConnects')
+                            ->label('Email me when an application connects to my account')
+                            ->helperText('You\'re always told in the notifications bell.'),
                         Toggle::make('emailBeforeAccessTokensExpire')
-                            ->label('Email me before my personal access tokens expire'),
+                            ->label('Email me before my personal access tokens expire')
+                            ->visible(fn (): bool => $this->user()->can(SystemPermission::CreatePersonalAccessTokens)),
                     ])
-                    ->visible(fn (): bool => $this->user()->can(SystemPermission::CreatePersonalAccessTokens)),
+                    ->visible(fn (): bool => (bool) config('api.enabled')),
             ])
             ->disabled($this->isImpersonating())
             ->statePath('data');

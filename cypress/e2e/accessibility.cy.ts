@@ -55,6 +55,7 @@ describe("Accessibility", () => {
             "/app/gallery",
             "/app/account/profile",
             "/app/account/preferences",
+            "/app/account/connected-applications",
             "/app/support/contact",
             "/app/access-restricted",
             "/support/changelog",
@@ -63,6 +64,27 @@ describe("Accessibility", () => {
         ].forEach((path) => {
             it(`${path} has no violations`, () => {
                 visit(path);
+                cy.checkAxeViolations();
+            });
+        });
+
+        it("the OAuth consent screen has no violations", () => {
+            cy.php(
+                "[, $client] = resolve(App\\Domains\\Auth\\Actions\\Applications\\RegisterOAuthApplication::class)('Reporting Tool', ['http://localhost:4100/callback'], false, ['view-users'], description: 'Weekly enrollment reports.'); return $client->getKey();",
+            ).then((clientId) => {
+                const query = new URLSearchParams({
+                    client_id: String(clientId),
+                    redirect_uri: "http://localhost:4100/callback",
+                    response_type: "code",
+                    scope: "view-users",
+                    state: "axe",
+                    code_challenge:
+                        "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+                    code_challenge_method: "S256",
+                });
+
+                visit(`/oauth/authorize?${query.toString()}`);
+                cy.contains("Reporting Tool wants to access your");
                 cy.checkAxeViolations();
             });
         });
@@ -83,6 +105,7 @@ describe("Accessibility", () => {
             "/administration/support-tickets",
             "/administration/api",
             "/administration/api/requests",
+            "/administration/api/applications",
             // The super administrator holds CreatePersonalAccessTokens; generic users don't see the page.
             "/app/account/access-tokens",
         ].forEach((path) => {

@@ -7,6 +7,7 @@ namespace Tests\Feature\Domains\Auth\Http\Middleware;
 use App\Domains\Auth\Enums\RoleTypeEnum;
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Http\Middleware\AuthenticatePassportToken;
+use App\Domains\Auth\Models\OAuthConnection;
 use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\User;
 use Illuminate\Http\Request;
@@ -18,12 +19,13 @@ use Northwestern\SysDev\Chassis\ValueObjects\ApiRequestContext;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\Concerns\IssuesPersonalAccessTokens;
 use Tests\Concerns\IssuesServiceClientTokens;
+use Tests\Concerns\RunsAuthorizationCodeFlow;
 use Tests\TestCase;
 
 #[CoversClass(AuthenticatePassportToken::class)]
 final class AuthenticatePassportTokenTest extends TestCase
 {
-    use IssuesPersonalAccessTokens, IssuesServiceClientTokens;
+    use IssuesPersonalAccessTokens, IssuesServiceClientTokens, RunsAuthorizationCodeFlow;
 
     public function test_a_service_client_acts_as_its_api_user(): void
     {
@@ -126,6 +128,18 @@ final class AuthenticatePassportTokenTest extends TestCase
         $this->withToken($token)->getJson('/api/v1/me')->assertOk();
 
         $this->assertNotNull($record->fresh()?->last_used_at);
+    }
+
+    public function test_it_records_when_a_connected_application_was_last_used(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $client = $this->registerApplication();
+        [, $verifier] = $this->requestAuthorization($client);
+        $token = $this->exchange($client, $this->approve($client), $verifier)->json('access_token');
+
+        $this->withToken($token)->getJson('/api/v1/me')->assertOk();
+
+        $this->assertNotNull(OAuthConnection::query()->sole()->last_used_at);
     }
 
     public function test_it_records_when_a_client_was_last_used_at_most_every_five_minutes(): void

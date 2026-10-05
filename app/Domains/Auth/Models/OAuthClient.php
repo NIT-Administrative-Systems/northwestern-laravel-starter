@@ -28,6 +28,11 @@ use Laravel\Passport\Client;
  *
  * @property string $id
  * @property string $name
+ * @property string|null $description
+ * @property string|null $contact_email
+ * @property bool $first_party
+ * @property list<string>|null $scopes
+ * @property list<string> $redirect_uris
  * @property string|null $secret
  * @property list<string> $grant_types
  * @property ClientOrigin $origin
@@ -46,6 +51,7 @@ class OAuthClient extends Client
         'redirect_uris' => 'array',
         'revoked' => 'bool',
         'origin' => ClientOrigin::class,
+        'first_party' => 'bool',
         'allowed_ips' => 'array',
         'secret_expires_at' => 'datetime',
         'secret_expiration_notified_at' => 'datetime',
@@ -76,6 +82,23 @@ class OAuthClient extends Client
     public function rotated_by_user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'rotated_by_user_id');
+    }
+
+    /** @return HasMany<OAuthConnection, $this> */
+    public function connections(): HasMany
+    {
+        return $this->hasMany(OAuthConnection::class, 'oauth_client_id');
+    }
+
+    /**
+     * An administrator can mark an application first-party, such as the organization's own
+     * tool, so people aren't asked to approve it.
+     *
+     * @param  list<\Laravel\Passport\Scope>  $scopes
+     */
+    public function skipsAuthorization(\Illuminate\Contracts\Auth\Authenticatable $user, array $scopes): bool
+    {
+        return $this->first_party;
     }
 
     /** @return HasMany<ApiRequestLog, $this> */

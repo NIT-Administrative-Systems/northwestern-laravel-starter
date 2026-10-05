@@ -10,6 +10,7 @@ use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Filament\Resources\Users\Pages\ViewUser;
 use App\Filament\Resources\Users\RelationManagers\ApiRequestLogsRelationManager;
 use App\Filament\Resources\Users\RelationManagers\AuditsRelationManager;
+use App\Filament\Resources\Users\RelationManagers\ConnectedApplicationsRelationManager;
 use App\Filament\Resources\Users\RelationManagers\LoginRecordsRelationManager;
 use App\Filament\Resources\Users\RelationManagers\PersonalAccessTokensRelationManager;
 use App\Filament\Resources\Users\RelationManagers\RoleActivityRelationManager;
@@ -60,6 +61,7 @@ class UserResource extends Resource
             AuditsRelationManager::class,
             LoginRecordsRelationManager::class,
             PersonalAccessTokensRelationManager::class,
+            ConnectedApplicationsRelationManager::class,
             ServiceClientsRelationManager::class,
             ApiRequestLogsRelationManager::class,
         ];

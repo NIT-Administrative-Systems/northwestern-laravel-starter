@@ -10,6 +10,7 @@ use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Enums\SystemRole;
 use App\Domains\Auth\Models\ApiRequestLog;
 use App\Domains\Auth\Models\LoginChallenge;
+use App\Domains\Auth\Models\OAuthConnection;
 use App\Domains\Auth\Models\Role;
 use App\Domains\Support\Models\SupportTicket;
 use App\Domains\User\Data\UserPreferences;
@@ -144,6 +145,12 @@ class User extends Authenticatable implements Auditable, FilamentUser, HasAvatar
     public function api_request_logs(): HasMany
     {
         return $this->hasMany(ApiRequestLog::class);
+    }
+
+    /** @return HasMany<OAuthConnection, $this> */
+    public function oauth_connections(): HasMany
+    {
+        return $this->hasMany(OAuthConnection::class);
     }
 
     /** @return HasMany<SupportTicket, $this> */

@@ -66,6 +66,20 @@ final class PreferencesTest extends TestCase
         $this->assertFalse($user->refresh()->preferences->emailBeforeAccessTokensExpire);
     }
 
+    public function test_people_choose_whether_to_be_emailed_when_an_application_connects(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        Livewire::test(Preferences::class)
+            ->assertSchemaStateSet(['emailWhenApplicationConnects' => true], 'form')
+            ->fillForm(['emailWhenApplicationConnects' => false])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $this->assertFalse($user->refresh()->preferences->emailWhenApplicationConnects);
+    }
+
     public function test_it_refuses_a_value_that_is_not_a_timezone(): void
     {
         $user = User::factory()->create(['timezone' => 'America/Chicago']);
