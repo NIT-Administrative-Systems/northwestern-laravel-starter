@@ -7,7 +7,7 @@ sidebar:
 
 import { Aside, FileTree, Steps } from '@astrojs/starlight/components';
 
-The app panel at `/app` is where an application built on the starter does its work. It is the default Filament panel, configured in `App\Providers\Filament\AppPanelProvider`, and any signed-in user can open it. API users can't: they authenticate with bearer tokens and never have a panel session. Back-office tools belong in the [administration panel](/architecture/ui-architecture/#the-administration-panel) instead.
+The app panel at `/app` is where an application built on the starter does its work. It is the default Filament panel, configured in `App\Providers\Filament\AppPanelProvider`, and any signed-in user can open it. API users can't: they authenticate through OAuth clients and never have a panel session. Back-office tools belong in the [administration panel](/architecture/ui-architecture/#the-administration-panel) instead.
 
 The panel also owns sign-in for the whole application. Guests of any panel are sent to `/app/login` (see [Authentication](/features/authentication/#signing-in)), and in a locked-down environment users without an application role are sent to `/app/access-restricted` (see [Environment Lockdown](/getting-started/initial-customization/#5-environment-lockdown)).
 

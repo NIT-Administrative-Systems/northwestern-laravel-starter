@@ -389,21 +389,21 @@ php artisan role:force-detach jdoe "Super Administrator" --reason="Offboarding"
 
 ## Maintenance Commands
 
-### `access-tokens:notify-expiration`
+### `oauth-clients:notify-secret-expiration`
 
-Send expiration reminder emails for access tokens approaching their expiration date.
+Send reminder emails for service client secrets approaching their expiration date.
 
 ```bash
-php artisan access-tokens:notify-expiration
+php artisan oauth-clients:notify-secret-expiration
 ```
 
 **What it does:**
 
-1. Queries for active access tokens with upcoming expiration dates
-2. Checks which tokens are due for notifications (30, 14, 7, 3, 1 days before)
-3. Sends reminder emails to token owners
+1. Queries for active service clients whose secrets expire soon
+2. Checks which are due for notifications (30, 14, 7, 3, 1 days before)
+3. Sends reminder emails to the API user's contact address
 
-**See also:** [API Documentation](/features/api/#expiration-notifications)
+**See also:** [API Documentation](/features/api/#secret-expiration-notifications)
 
 ---
 
@@ -592,7 +592,8 @@ php artisan ide-helper:meta
 | `livewire:configure-s3-upload-cleanup` | Daily | Sets the S3 lifecycle rule that expires Livewire's temporary uploads after 24 hours (only when uploads use an S3 disk) |
 | `model:prune --path=app/Domains/*/Models` | Daily | Prunes models in `app/Domains/*/Models` that use `Prunable` or `MassPrunable`, including those with `PrunesAfterRetentionPeriod` |
 | `model:prune --model=HealthCheckResultHistoryItem` | Daily | Deletes health check results older than `keep_history_for_days` (5) |
-| `access-tokens:notify-expiration` | Daily at 09:00 | Sends access token expiration reminders, when `api.expiration_notifications.enabled` is true |
+| `oauth-clients:notify-secret-expiration` | Daily at 09:00 | Sends client secret expiration reminders, when `api.expiration_notifications.enabled` is true |
+| `passport:purge --hours=744` | Daily | Deletes revoked and expired OAuth tokens and codes once they are more than 31 days past, longer than the 30-day refresh token lifetime |
 | `health:schedule-check-heartbeat` | Every minute | Records the heartbeat the Schedule health check reads, in every environment |
 | `health:queue-check-heartbeat` | Every five minutes, production only | Dispatches the job the Queue health check waits for |
 | `health:check` | Every minute, production only | Runs and stores the health checks |
