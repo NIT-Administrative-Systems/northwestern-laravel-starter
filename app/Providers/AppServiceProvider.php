@@ -73,7 +73,7 @@ class AppServiceProvider extends ServiceProvider
          * and policies decide the rest, so a super-administrator's token is no exception.
          */
         Gate::before(static function (User $user): ?true {
-            if ($user->currentAccessToken() !== null) {
+            if ($user->currentAccessToken() instanceof \Laravel\Passport\Contracts\ScopeAuthorizable) {
                 return null;
             }
 

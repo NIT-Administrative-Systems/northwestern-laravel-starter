@@ -72,23 +72,11 @@ readonly class CreatePersonalAccessToken
 
         $this->ensurePersonalAccessClient();
 
-        return DB::transaction(function () use ($user, $name, $scopes, $lifetime): array {
+        return DB::transaction(function () use ($user, $name, $scopes): array {
             $result = $user->createToken($name, array_values($scopes));
 
             $token = $result->getToken();
-
-            if (! $token instanceof OAuthToken) {
-                throw new RuntimeException('Passport did not return the token it created.');
-            }
-
-            // The token is signed with Passport's single maximum lifetime; this shorter expiry is
-            // enforced by ExpiringAccessTokenRepository on every request.
-            $token->forceFill(['expires_at' => $lifetime->expiresAt()])->save();
-
-            /** @var non-empty-string $accessToken */
-            $accessToken = $result->accessToken;
-
-            return [$accessToken, $token];
+            throw new RuntimeException('Passport did not return the token it created.');
         });
     }
 

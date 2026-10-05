@@ -188,7 +188,7 @@ class AccessTokens extends Page implements HasTable
                         } catch (InvalidArgumentException $e) {
                             Notification::make()->title($e->getMessage())->danger()->send();
 
-                            throw new Halt();
+                            throw new Halt($e->getMessage(), $e->getCode(), $e);
                         }
 
                         Session::put(self::SESSION_KEY, ['token' => Crypt::encryptString($accessToken), 'record_id' => $token->getKey()]);
