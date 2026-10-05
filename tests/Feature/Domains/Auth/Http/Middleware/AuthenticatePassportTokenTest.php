@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\Auth\Http\Middleware;
 
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Http\Middleware\AuthenticatePassportToken;
 use App\Domains\User\Models\User;
 use Illuminate\Support\Facades\Context;
@@ -11,13 +12,14 @@ use Illuminate\Support\Once;
 use Laravel\Passport\ClientRepository;
 use Northwestern\SysDev\Chassis\ValueObjects\ApiRequestContext;
 use PHPUnit\Framework\Attributes\CoversClass;
+use Tests\Concerns\IssuesPersonalAccessTokens;
 use Tests\Concerns\IssuesServiceClientTokens;
 use Tests\TestCase;
 
 #[CoversClass(AuthenticatePassportToken::class)]
 final class AuthenticatePassportTokenTest extends TestCase
 {
-    use IssuesServiceClientTokens;
+    use IssuesPersonalAccessTokens, IssuesServiceClientTokens;
 
     public function test_a_service_client_acts_as_its_api_user(): void
     {
@@ -84,6 +86,27 @@ final class AuthenticatePassportTokenTest extends TestCase
         ])->assertOk()->json('access_token');
 
         $this->withToken($token)->getJson('/api/v1/me')->assertUnauthorized();
+    }
+
+    public function test_a_personal_token_stops_working_when_its_owner_loses_the_permission(): void
+    {
+        $user = User::factory()->create();
+        [$token] = $this->personalAccessToken($user);
+        $this->withToken($token)->getJson('/api/v1/me')->assertOk();
+
+        $user->revokePermissionTo(SystemPermission::CreatePersonalAccessTokens);
+
+        $this->withToken($token)->getJson('/api/v1/me')->assertUnauthorized();
+        $this->assertSame('token-invalid-or-expired', Context::get(ApiRequestContext::FAILURE_REASON));
+    }
+
+    public function test_it_records_when_a_personal_token_was_last_used(): void
+    {
+        [$token, $record] = $this->personalAccessToken(User::factory()->create());
+
+        $this->withToken($token)->getJson('/api/v1/me')->assertOk();
+
+        $this->assertNotNull($record->fresh()?->last_used_at);
     }
 
     public function test_it_records_when_a_client_was_last_used_at_most_every_five_minutes(): void

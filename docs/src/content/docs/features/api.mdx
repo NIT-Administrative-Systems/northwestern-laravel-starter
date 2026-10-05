@@ -1,6 +1,6 @@
 ---
 title: API System
-description: OAuth credentials for the API through Laravel Passport, with request logging, limits and analytics
+description: OAuth credentials for the API through Laravel Passport, for integrations and people, with request logging, limits and analytics
 sidebar:
     order: 4
 ---
@@ -27,7 +27,7 @@ The starter ships with a minimal set of API endpoints. They live in `routes/api.
 - <Badge text="GET" variant="note" /> `/api/v1/me` - Returns the API user the access token acts as
 - <Badge text="GET" variant="note" /> `/api/health` - [Health check](/features/health-checks/) results. It takes no bearer token and isn't affected by `API_ENABLED`; it requires an `X-Secret-Token` header matching `HEALTH_SECRET_TOKEN` and returns 403 for every request until that is set
 
-No endpoint creates credentials. Service clients are created in the administration panel.
+No endpoint creates credentials. Service clients are created in the administration panel, and personal access tokens on the Account page.
 
 View the [API Specification](/api) for a complete reference of these endpoints.
 
@@ -102,6 +102,33 @@ Most Northwestern integrations reach the application through an Apigee API proxy
 ### Rotating and Revoking
 
 **Rotate** a client to create a replacement with a new ID and secret. The old client keeps working, so the integration can switch without downtime; **revoke** the old client once it uses the replacement. Revoking a client also revokes every access token it holds, so the integration loses access immediately rather than when its current token expires.
+
+## Personal Access Tokens
+
+People who hold the **Create Personal Access Tokens** permission can call the API as themselves from a script. No default role grants it. They create tokens on the Account area's [Access Tokens](/building/app-panel/#access-tokens) page:
+
+- **Scopes** - A token can do only what its scopes name, chosen from the API-relevant permissions the person holds, and never more than the person's permissions allow.
+- **Lifetime** - Each token chooses 30, 90 (the default), 180 or 365 days, up to `API_PERSONAL_ACCESS_TOKEN_MAX_LIFETIME_DAYS`. Tokens can't be renewed; create a new one.
+- **Limit** - A person holds at most `API_PERSONAL_ACCESS_TOKEN_MAX_ACTIVE` working tokens (10 by default).
+- **Shown once** - The token is shown once, after it is created, and never stored in plain text.
+- **Reminders** - People are emailed before a token expires, unless they turn it off on their Preferences page.
+
+A token stops working as soon as its owner loses the permission, is deactivated or is deleted; the hourly `oauth:revoke-ineligible` marks such tokens revoked. An administrator impersonating someone can see their tokens but can't create or revoke them. Administrators revoke a person's token, for example one that leaked, on the person's **Access Tokens** tab in the administration panel, which records it in the person's audit history.
+
+Passport issues personal access tokens through a personal access client, which the starter creates the first time someone creates a token.
+
+### Protecting an Endpoint with a Scope
+
+Require a scope on each route a person's token may reach, after the authentication middleware:
+
+```php
+// routes/api.php
+Route::get('users', UserIndexController::class)->middleware(RequireApiScope::class . ':view-users');
+```
+
+`RequireApiScope` refuses a person's token without the scope with a 403. A service client acts as its API user, whose roles are its ceiling, so it holds every scope. Controllers and policies still authorize each action against the user's permissions.
+
+On API requests the super-administrator shortcut in `Gate::before` doesn't apply: a super administrator's token is limited to its scopes and their permissions like anyone else's.
 
 ## Signing Keys
 

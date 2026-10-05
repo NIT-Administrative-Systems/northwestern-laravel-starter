@@ -61,7 +61,7 @@ Add widgets with `php artisan make:filament-widget`. For anything a grid of widg
 
 ## The Account Area
 
-The Account area at `/app/account` is each user's own: who they are, how they sign in, and their preferences. It is a cluster, `App\Filament\App\Clusters\AccountCluster`, with its pages as tabs across the top. It isn't in the sidebar, which is for your application's features; users reach it from the user menu's **Account** item and the dashboard widget's "Manage your account" link. Every user who can open the app panel can open it.
+The Account area at `/app/account` is each user's own: who they are, how they sign in, their preferences and, for those allowed, their personal access tokens. It is a cluster, `App\Filament\App\Clusters\AccountCluster`, with its pages as tabs across the top. It isn't in the sidebar, which is for your application's features; users reach it from the user menu's **Account** item and the dashboard widget's "Manage your account" link. Every user who can open the app panel can open it.
 
 ### Profile
 
@@ -71,15 +71,19 @@ The Account area at `/app/account` is each user's own: who they are, how they si
 - **Sign-in.** How the user signs in, and their 10 most recent sign-ins with IP addresses, from their login records. The page says how long sign-ins are kept when `LOGIN_RECORD_RETENTION_DAYS` is set.
 - **Roles.** The roles they hold beyond the default Northwestern User role.
 
+### Access Tokens
+
+`/app/account/access-tokens` lists the user's [personal access tokens](/features/api/#personal-access-tokens) and creates and revokes them. It shows only to users with the `CreatePersonalAccessTokens` permission, which no default role grants. A new token is shown once.
+
 ### Preferences
 
-`/app/account/preferences` is where users change their own settings. The starter ships one, their timezone, which every date in both panels is shown in (see [Framework Defaults](/architecture/framework-defaults/#user-timezone-on-all-datetimes)). Directory sync sets a new user's timezone to `DEFAULT_USER_TIMEZONE` and leaves it alone after that.
+`/app/account/preferences` is where users change their own settings. The starter ships one, their timezone, which every date in both panels is shown in (see [Framework Defaults](/architecture/framework-defaults/#user-timezone-on-all-datetimes)). Directory sync sets a new user's timezone to `DEFAULT_USER_TIMEZONE` and leaves it alone after that. Users who can hold personal access tokens also choose whether to be emailed before one expires.
 
 An administrator [impersonating](/features/authentication/#impersonating-users) a user sees that user's preferences but can't save them: the page hides **Save**, and `save()` refuses with a 403.
 
 ### Adding a Preference
 
-Everything else a user chooses goes in the `users.preferences` JSON column, read through a typed class, `App\Domains\User\Data\UserPreferences`. It ships empty. Each preference is a promoted constructor property with a default, so adding one needs no migration:
+Everything else a user chooses goes in the `users.preferences` JSON column, read through a typed class, `App\Domains\User\Data\UserPreferences`. It ships with one, `emailBeforeAccessTokensExpire`. Each preference is a promoted constructor property with a default, so adding one needs no migration:
 
 <Steps>
 
@@ -90,6 +94,7 @@ Everything else a user chooses goes in the `users.preferences` JSON column, read
    final readonly class UserPreferences extends Preferences
    {
        public function __construct(
+           public bool $emailBeforeAccessTokensExpire = true,
            public bool $emailWeeklySummary = true,
        ) {}
    }

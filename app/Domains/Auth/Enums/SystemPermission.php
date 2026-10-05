@@ -51,6 +51,7 @@ enum SystemPermission: string implements HasLabel
     // API Access
     case ManageApiAccess = 'manage-api-access';
     case ViewApiRequestLogs = 'view-api-request-logs';
+    case CreatePersonalAccessTokens = 'create-personal-access-tokens';
 
     // Audit & Monitoring
     case ViewAuditLogs = 'view-audit-logs';
@@ -97,6 +98,7 @@ enum SystemPermission: string implements HasLabel
             // API Access
             self::ManageApiAccess => 'Allows creating API users and managing their clients, roles, and access.',
             self::ViewApiRequestLogs => 'Allows viewing API request logs and usage charts.',
+            self::CreatePersonalAccessTokens => 'Allows creating personal access tokens on the Account page, to call the API as yourself from scripts.',
 
             // Audit & Monitoring
             self::ViewAuditLogs => 'Allows viewing system audit logs and change history.',

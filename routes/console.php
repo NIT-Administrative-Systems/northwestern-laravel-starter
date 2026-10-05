@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Console\Commands\RevokeIneligibleCredentialsCommand;
 use App\Console\Commands\SendClientSecretExpirationNotificationsCommand;
+use App\Console\Commands\SendPersonalAccessTokenExpirationNotificationsCommand;
 use Illuminate\Database\Console\PruneCommand;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Schedule;
@@ -62,6 +64,8 @@ Schedule::command(PruneCommand::class, ['--model' => [HealthCheckResultHistoryIt
 if (config('api.expiration_notifications.enabled')) {
     Schedule::command(SendClientSecretExpirationNotificationsCommand::class)
         ->dailyAt('09:00');
+    Schedule::command(SendPersonalAccessTokenExpirationNotificationsCommand::class)
+        ->dailyAt('09:00');
 }
 
 // Delete revoked and expired OAuth tokens and codes. Keep them past the 30-day refresh token
@@ -76,7 +80,8 @@ Schedule::command(PurgeCommand::class, ['--hours' => 24 * 31])->daily();
 | operations requiring regular intervals.
 */
 
-//
+// The API refuses these credentials on every request already; this marks them revoked.
+Schedule::command(RevokeIneligibleCredentialsCommand::class)->hourly();
 
 /*
 |--------------------------------------------------------------------------

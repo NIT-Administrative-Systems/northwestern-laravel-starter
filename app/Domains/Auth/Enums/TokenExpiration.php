@@ -31,6 +31,19 @@ enum TokenExpiration: int implements HasLabel
     }
 
     /**
+     * The lifetimes a personal access token may choose, up to `$maxDays`.
+     *
+     * @return list<self>
+     */
+    public static function forPersonalAccessTokens(int $maxDays): array
+    {
+        return array_values(array_filter(
+            [self::OneMonth, self::ThreeMonths, self::SixMonths, self::OneYear],
+            fn (self $lifetime): bool => $lifetime->value <= $maxDays,
+        ));
+    }
+
+    /**
      * The expiration date, counted from now or from `$from`.
      */
     public function expiresAt(?Carbon $from = null): Carbon

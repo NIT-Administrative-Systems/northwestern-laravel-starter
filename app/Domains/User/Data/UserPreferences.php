@@ -24,4 +24,9 @@ use App\Domains\User\Models\User;
  */
 final readonly class UserPreferences extends Preferences
 {
+    public function __construct(
+        /** Email me before my personal access tokens expire. */
+        public bool $emailBeforeAccessTokensExpire = true,
+    ) {
+    }
 }

@@ -18,12 +18,12 @@ final class UpdateUserPreferencesTest extends TestCase
     {
         $user = User::factory()->create(['timezone' => 'America/Chicago']);
 
-        resolve(UpdateUserPreferences::class)($user, 'Europe/London', new UserPreferences());
+        resolve(UpdateUserPreferences::class)($user, 'Europe/London', new UserPreferences(emailBeforeAccessTokensExpire: false));
 
         $user->refresh();
         $this->assertSame('Europe/London', $user->timezone);
-        $this->assertInstanceOf(UserPreferences::class, $user->preferences);
-        $this->assertSame('{}', $user->getRawOriginal('preferences'));
+        $this->assertFalse($user->preferences->emailBeforeAccessTokensExpire);
+        $this->assertSame('{"emailBeforeAccessTokensExpire":false}', $user->getRawOriginal('preferences'));
     }
 
     public function test_it_refuses_a_value_that_is_not_a_timezone(): void

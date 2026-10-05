@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\User\Models;
 
+use App\Domains\Auth\Actions\RevokeAllCredentials;
 use App\Domains\Auth\Enums\AuthType;
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Enums\SystemRole;
@@ -66,6 +67,12 @@ class User extends Authenticatable implements Auditable, FilamentUser, HasAvatar
         HasRoles::syncRoles as private;
     }
 
+    /**
+     * Roles and permissions belong to the `web` guard. Without this, Spatie checks them against
+     * the `api` guard on API requests, where Passport's guard is the default, and finds none.
+     */
+    protected string $guard_name = 'web';
+
     /** @var list<string> */
     protected array $auditExclude = [
         'last_directory_sync_at',
@@ -88,6 +95,12 @@ class User extends Authenticatable implements Auditable, FilamentUser, HasAvatar
         'directory_sync_last_failed_at' => 'datetime',
         'preferences' => UserPreferences::class,
     ];
+
+    protected static function booted(): void
+    {
+        // A deleted account can't call the API; its tokens and clients are revoked with it.
+        static::deleted(static fn (User $user) => resolve(RevokeAllCredentials::class)($user));
+    }
 
     /**
      * @param  Builder  $query
