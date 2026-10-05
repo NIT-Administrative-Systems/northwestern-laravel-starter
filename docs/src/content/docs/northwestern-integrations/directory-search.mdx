@@ -136,7 +136,7 @@ The `SyncUserFromDirectory::syncDemographics()` method defines how LDAP director
 | `departments` | `nuAllDepartmentName` | Multi-value (stored as JSON array) |
 | `job_titles` | `nuAllTitle` | Suppressed for students |
 | `hr_employee_id` | `employeeNumber` | Set when both `employeeNumber` and `nuStudentNumber` exist and differ |
-| `timezone` | — | Set from `config('platform.default_user_timezone')` (default: `America/Chicago`) |
+| `timezone` | — | Set from `config('platform.default_user_timezone')` (default: `America/Chicago`) when the user is created. Later syncs keep the timezone the user chose in their [Account preferences](/building/app-panel/#preferences) |
 
 For students, student-specific LDAP fields are prepended to the key arrays so they take priority. The `findValue()` helper returns the first non-empty match, so earlier keys win.
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Providers\Filament;
 
 use App\Domains\Auth\Http\Controllers\SignInAsController;
+use App\Filament\App\Clusters\AccountCluster\Pages\Profile;
 use App\Filament\App\Pages\Auth\EmailCodeLogin;
 use App\Filament\App\Pages\Auth\Login;
 use App\Filament\App\Pages\EnvironmentLockdown as EnvironmentLockdownPage;
@@ -85,6 +86,13 @@ class AppPanelProvider extends PanelProvider
                 </x-site-header>
                 BLADE))
             ->userMenuItems([
+                'account' => Action::make('account')
+                    ->label('Account')
+                    ->icon(Heroicon::OutlinedUserCircle)
+                    ->url(fn (): string => Profile::getUrl(panel: self::ID))
+                    ->extraAttributes([
+                        'data-cy' => 'account-menu-link',
+                    ]),
                 'administration' => Action::make('administration')
                     ->label('Administration')
                     ->icon(Heroicon::OutlinedCog6Tooth)
@@ -103,6 +111,7 @@ class AppPanelProvider extends PanelProvider
             ])
             ->discoverResources(in: app_path('Filament/App/Resources'), for: 'App\Filament\App\Resources')
             ->discoverPages(in: app_path('Filament/App/Pages'), for: 'App\Filament\App\Pages')
+            ->discoverClusters(in: app_path('Filament/App/Clusters'), for: 'App\Filament\App\Clusters')
             // Filament's dashboard renders the widgets in Filament/App/Widgets; replace it with your own page if you need more.
             ->pages([
                 Dashboard::class,

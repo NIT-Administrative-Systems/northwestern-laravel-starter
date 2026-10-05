@@ -53,6 +53,8 @@ describe("Accessibility", () => {
         [
             "/app",
             "/app/gallery",
+            "/app/account/profile",
+            "/app/account/preferences",
             "/app/support/contact",
             "/app/access-restricted",
             "/support/changelog",

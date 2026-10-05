@@ -6,14 +6,15 @@ namespace App\Filament\App\Widgets;
 
 use App\Domains\Auth\Enums\AuthType;
 use App\Domains\User\Models\User;
+use App\Filament\App\Clusters\AccountCluster\Pages\Profile;
 use App\Filament\App\Pages\ContactSupport;
 use App\Providers\Filament\AppPanelProvider;
 use Filament\Widgets\Widget;
 
 /**
  * The signed-in user's account on the app panel's dashboard: a greeting, their previous
- * sign-in, the roles they hold beyond the default Northwestern User role, and where to get
- * help. Replace or delete it as the application grows its own dashboard.
+ * sign-in, the roles they hold beyond the default Northwestern User role, a link to their
+ * Account area, and where to get help. Replace or delete it as the application grows its own dashboard.
  */
 class YourAccountWidget extends Widget
 {
@@ -48,6 +49,7 @@ class YourAccountWidget extends Widget
                 AuthType::Local => 'an email verification code',
                 default => $user->auth_type->getLabel(),
             },
+            'accountUrl' => Profile::getUrl(panel: AppPanelProvider::ID),
             'roles' => $user->non_default_roles->pluck('name')->sort()->values()->all(),
             'contactSupportUrl' => ContactSupport::canAccess() ? ContactSupport::getUrl(panel: AppPanelProvider::ID) : null,
             'documentationUrl' => config('support.documentation_url') ?: null,

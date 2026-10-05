@@ -81,6 +81,15 @@ final class YourAccountWidgetTest extends TestCase
             ->assertDontSee('Northwestern User');
     }
 
+    public function test_it_links_to_the_account_area(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        Livewire::test(YourAccountWidget::class)
+            ->assertSee('Manage your account')
+            ->assertSee('/app/account/profile');
+    }
+
     public function test_a_user_with_only_standard_access_is_told_so(): void
     {
         $this->actingAs(User::factory()->create());
