@@ -27,6 +27,8 @@ final readonly class UserPreferences extends Preferences
     public function __construct(
         /** Email me before my personal access tokens expire. */
         public bool $emailBeforeAccessTokensExpire = true,
+        /** Email me when an application connects to my account. The in-app notification is always sent. */
+        public bool $emailWhenApplicationConnects = true,
     ) {
     }
 }

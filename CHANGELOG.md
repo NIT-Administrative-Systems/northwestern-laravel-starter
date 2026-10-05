@@ -40,6 +40,8 @@ Version 3 removes the Bootstrap user interface. Every page now uses one stack, F
 - `ViewApiRequestLogs`, the permission to view API request logs and charts.
 - Personal access tokens. People with the new `CreatePersonalAccessTokens` permission, which no default role grants, create tokens on the Account area's Access tokens page to call the API as themselves: scopes limited to their API-relevant permissions, a lifetime of 30 to 365 days (`API_PERSONAL_ACCESS_TOKEN_MAX_LIFETIME_DAYS`), at most 10 working tokens (`API_PERSONAL_ACCESS_TOKEN_MAX_ACTIVE`), and the token shown once. Administrators revoke them from a user's Access Tokens tab, recorded in the user's audit history. While impersonating, tokens can be seen but not created or revoked.
 - `RequireApiScope`, route middleware that limits a person's token to a scope; service clients hold every scope.
+- Connected applications, through the OAuth 2.0 authorization code flow with PKCE. Administrators register applications under API → Applications (redirect URIs, allowed scopes, confidential or public, first party); people approve them on a branded consent screen at `/oauth/authorize` and review or disconnect them on the Account area's Connected applications page. Disconnecting revokes the application's access and refresh tokens and codes for that person only. Administrators disconnect applications from a user's Connected Applications tab, recorded in the user's audit history; consent and disconnecting are refused while impersonating.
+- A notification when an application first connects to a person's account, in the notification bell and by email, with the `emailWhenApplicationConnects` preference to turn the email off.
 - `personal-access-tokens:notify-expiration`, which emails people before a personal access token expires, and the `emailBeforeAccessTokensExpire` preference to turn it off.
 - `oauth:revoke-ineligible`, run hourly, which revokes the credentials of deleted and deactivated accounts and the personal access tokens of people who lost the permission. Deleting a user revokes their credentials at once.
 - A component gallery at `/app/gallery`, in the app panel's sidebar outside production, showing Filament's components in the Northwestern theme. Delete it when you no longer need it.
@@ -81,7 +83,7 @@ Version 3 removes the Bootstrap user interface. Every page now uses one stack, F
 - `/api/health` no longer returns 503 for checks skipped where they don't apply, such as the database and queue checks outside production. Spatie treats skipped checks as failures by default.
 - A Directory Search outage during sign-in shows the 503 page, or a Problem Details 503 on the API, instead of a 500.
 - Directory sync no longer resets a user's timezone to `DEFAULT_USER_TIMEZONE` at every sign-in; it sets it only when the user is created.
-- Permission checks during API requests use the `web` guard the roles and permissions belong to. With Passport's `api` guard as the default, Spatie looked them up under `api` and found none.
+- Permission checks during API requests use the `web` guard the roles and permissions belong to. With Passport's `api` guard as the default, Spatie looked them up under `api` and found none. A regression test now covers it.
 
 ## [v2.6.0] - 2026-10-01
 

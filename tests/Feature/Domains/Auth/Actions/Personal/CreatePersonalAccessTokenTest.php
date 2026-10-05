@@ -11,8 +11,11 @@ use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\User\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use InvalidArgumentException;
+use Laravel\Passport\PersonalAccessTokenFactory;
+use Laravel\Passport\PersonalAccessTokenResult;
 use Mockery;
 use PHPUnit\Framework\Attributes\CoversClass;
+use RuntimeException;
 use Tests\TestCase;
 
 #[CoversClass(CreatePersonalAccessToken::class)]
@@ -123,6 +126,18 @@ final class CreatePersonalAccessTokenTest extends TestCase
             $this->create($user, [], TokenExpiration::OneMonth);
             $this->assertSame(3, $user->tokens()->count());
         }
+    }
+
+    public function test_it_fails_loudly_when_passport_returns_no_token(): void
+    {
+        $user = $this->holder();
+        $this->mock(PersonalAccessTokenFactory::class)
+            ->shouldReceive('make')
+            ->andReturn(new PersonalAccessTokenResult(['access_token' => 'unused', 'access_token_id' => 'missing']));
+
+        $this->expectExceptionObject(new RuntimeException('Passport did not return the token it created.'));
+
+        $this->create($user, [], TokenExpiration::OneMonth);
     }
 
     /**

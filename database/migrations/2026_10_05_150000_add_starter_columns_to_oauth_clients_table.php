@@ -17,6 +17,12 @@ return new class extends Migration
     {
         Schema::table('oauth_clients', function (Blueprint $table) {
             $table->string('origin')->default('administrator')->after('provider');
+            // OAuth applications: what they're for, who to contact, whether consent is skipped,
+            // and which scopes they may request (null allows every scope, as for service clients).
+            $table->text('description')->nullable()->after('name');
+            $table->string('contact_email')->nullable()->after('description');
+            $table->boolean('first_party')->default(false)->after('origin');
+            $table->json('scopes')->nullable()->after('first_party');
             $table->json('allowed_ips')->nullable()->after('origin');
             $table->datetime('secret_expires_at')->nullable()->after('secret');
             $table->datetime('secret_expiration_notified_at')->nullable()->after('secret_expires_at');

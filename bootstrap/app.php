@@ -9,8 +9,10 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Laravel\Passport\Exceptions\InvalidAuthTokenException;
 use Northwestern\SysDev\Chassis\Database\DatabasePausedDetector;
 use Northwestern\SysDev\Chassis\Exceptions\ProblemDetailsRenderer;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -44,6 +46,11 @@ return Application::configure(basePath: dirname(__DIR__))
 
             return null;
         });
+
+        // An OAuth consent screen approved or denied after its session expired, or in another tab:
+        // the request is gone, so there is no application to return to.
+        // Mapped before Laravel turns authorization exceptions into a 403.
+        $exceptions->map(InvalidAuthTokenException::class, fn (InvalidAuthTokenException $e): HttpException => new HttpException(419, 'This authorization request has expired.', $e));
 
         // Skip reporting database timeout noise in non-production environments - these are common when RDS is waking up
         $exceptions->report(function (Throwable $e): bool {

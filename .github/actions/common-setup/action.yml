@@ -114,6 +114,7 @@ runs:
       run: |
         cp .env.ci .env
         php artisan key:generate
+        php artisan passport:keys
         php artisan migrate --force
 
     - name: 🔧 Generate IDE Helper Files

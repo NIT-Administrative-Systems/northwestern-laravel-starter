@@ -27,7 +27,9 @@ The starter ships with a minimal set of API endpoints. They live in `routes/api.
 - <Badge text="GET" variant="note" /> `/api/v1/me` - Returns the API user the access token acts as
 - <Badge text="GET" variant="note" /> `/api/health` - [Health check](/features/health-checks/) results. It takes no bearer token and isn't affected by `API_ENABLED`; it requires an `X-Secret-Token` header matching `HEALTH_SECRET_TOKEN` and returns 403 for every request until that is set
 
-No endpoint creates credentials. Service clients are created in the administration panel, and personal access tokens on the Account page.
+No endpoint creates credentials. Service clients and OAuth applications are registered in the administration panel, and personal access tokens are created on the Account page.
+
+Passport also serves `GET /oauth/authorize`, where a person approves an application on the consent screen.
 
 View the [API Specification](/api) for a complete reference of these endpoints.
 
@@ -129,6 +131,39 @@ Route::get('users', UserIndexController::class)->middleware(RequireApiScope::cla
 `RequireApiScope` refuses a person's token without the scope with a 403. A service client acts as its API user, whose roles are its ceiling, so it holds every scope. Controllers and policies still authorize each action against the user's permissions.
 
 On API requests the super-administrator shortcut in `Gate::before` doesn't apply: a super administrator's token is limited to its scopes and their permissions like anyone else's.
+
+## Connected Applications
+
+An external application, such as a reporting tool or a portal, can act for a person who approves it, through the OAuth 2.0 authorization code flow.
+
+### Registering an Application
+
+Administrators register applications under **API** → **Applications** in the administration panel:
+
+- **Redirect URIs** - Where people return after approving: HTTPS, or HTTP to localhost for applications on the user's own computer.
+- **Allowed scopes** - The most the application may request. The consent screen lists only these, and tokens only get these.
+- **Confidential or public** - A confidential application, which has a server, gets a client secret, shown once. A public one, such as a desktop or browser application, has no secret and must use PKCE. Regenerate a confidential application's secret from its actions.
+- **First party** - Skips the consent screen, for applications your organization runs and trusts.
+
+Revoking an application removes everyone's access to it and every connection.
+
+### The Flow
+
+1. The application sends the person to `GET /oauth/authorize` with `client_id`, `redirect_uri`, `response_type=code`, the `scope` it wants, a `state`, and a PKCE `code_challenge` (`S256`).
+2. A signed-out person signs in first, then returns to the consent screen.
+3. The consent screen shows the application, what it will be able to do, where the person returns, and who is signed in, with **Not you? Switch account**. The person approves or denies; denying returns to the application with `error=access_denied`.
+4. The application exchanges the code at `POST /oauth/token` (`grant_type=authorization_code`, with its `code_verifier`) for an access token that lasts one hour and a refresh token.
+5. It refreshes at `POST /oauth/token` (`grant_type=refresh_token`). Each refresh token can be used once and lasts 30 days, so a connection unused for 30 days expires.
+
+The consent screen asks again when an application requests scopes the person hasn't granted, or after its access tokens have expired. An administrator impersonating someone can't approve applications for them.
+
+**Switching account** signs out of this application and returns to sign-in. With single sign-on, the identity provider may still be signed in and sign the same person straight back in; they may need to sign out of Northwestern first.
+
+### Connections
+
+Approving creates a connection between the person and the application, which the person sees on their Account area's [Connected Applications](/building/app-panel/#connected-applications) page and can disconnect. Disconnecting revokes the access tokens, refresh tokens and authorization codes the application holds for that person; other people connected to the same application are unaffected. Administrators disconnect an application for a person on the person's **Connected Applications** tab, recorded in the person's audit history.
+
+The first time an application connects, the person is told in the notification bell, and by email unless they turned that off in their preferences.
 
 ## Signing Keys
 

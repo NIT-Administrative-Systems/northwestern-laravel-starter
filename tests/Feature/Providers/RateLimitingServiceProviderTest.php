@@ -6,12 +6,10 @@ namespace Tests\Feature\Providers;
 
 use App\Domains\Auth\Http\Middleware\LimitAuthenticatedApiRequests;
 use App\Domains\User\Models\User;
-use App\Providers\RateLimitingServiceProvider;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\Concerns\IssuesServiceClientTokens;
 use Tests\TestCase;
 
-#[CoversClass(RateLimitingServiceProvider::class)]
 #[CoversClass(LimitAuthenticatedApiRequests::class)]
 final class RateLimitingServiceProviderTest extends TestCase
 {

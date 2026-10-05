@@ -1,0 +1,128 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Feature\Filament\Resources\OAuthApplications;
+
+use App\Domains\Auth\Enums\CredentialStatus;
+use App\Domains\Auth\Enums\SystemPermission;
+use App\Domains\Auth\Models\OAuthClient;
+use App\Domains\User\Models\User;
+use App\Filament\Resources\OAuthApplications\OAuthApplicationResource;
+use App\Filament\Resources\OAuthApplications\Pages\ListOAuthApplications;
+use App\Filament\Resources\OAuthApplications\Schemas\OAuthApplicationSchemas;
+use App\Providers\Filament\AdministrationPanelProvider;
+use Filament\Actions\Testing\TestAction;
+use Filament\Facades\Filament;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Hash;
+use Livewire\Livewire;
+use PHPUnit\Framework\Attributes\CoversClass;
+use Tests\Concerns\IssuesServiceClientTokens;
+use Tests\Concerns\RunsAuthorizationCodeFlow;
+use Tests\TestCase;
+
+#[CoversClass(OAuthApplicationResource::class)]
+#[CoversClass(ListOAuthApplications::class)]
+#[CoversClass(OAuthApplicationSchemas::class)]
+final class OAuthApplicationResourceTest extends TestCase
+{
+    use IssuesServiceClientTokens, RunsAuthorizationCodeFlow;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Filament::setCurrentPanel(AdministrationPanelProvider::ID);
+
+        $admin = User::factory()->create();
+        $admin->givePermissionTo(SystemPermission::AccessAdministrationPanel, SystemPermission::ManageApiAccess);
+        $this->actingAs($admin);
+    }
+
+    public function test_it_needs_manage_api_access(): void
+    {
+        $this->assertTrue(OAuthApplicationResource::canAccess());
+
+        $this->actingAs(User::factory()->create());
+        $this->assertFalse(OAuthApplicationResource::canAccess());
+    }
+
+    public function test_it_lists_applications_and_not_service_clients(): void
+    {
+        $application = $this->registerApplication();
+        [, $serviceClient] = $this->serviceClientToken(User::factory()->api()->create());
+
+        Livewire::test(ListOAuthApplications::class)
+            ->assertCanSeeTableRecords([$application])
+            ->assertCanNotSeeTableRecords([$serviceClient]);
+    }
+
+    public function test_registering_a_confidential_application_shows_its_secret_once(): void
+    {
+        $component = Livewire::test(ListOAuthApplications::class)
+            ->mountAction(TestAction::make('register'))
+            ->fillForm([
+                'name' => 'Student Portal',
+                'redirect_uris' => ['https://portal.example.edu/callback'],
+                'scopes' => ['view-users'],
+                'confidential' => true,
+                'first_party' => false,
+            ])
+            ->goToNextWizardStep()
+            ->assertHasNoFormErrors();
+
+        $client = OAuthClient::query()->where('name', 'Student Portal')->sole();
+        $stored = session(OAuthApplicationSchemas::SESSION_KEY);
+        $this->assertSame($client->getKey(), $stored['client_id']);
+        $this->assertTrue(Hash::check(Crypt::decryptString($stored['secret']), (string) $client->secret));
+
+        $component->callMountedAction();
+        $this->assertNull(session(OAuthApplicationSchemas::SESSION_KEY));
+    }
+
+    public function test_redirect_uris_must_be_https_or_loopback(): void
+    {
+        Livewire::test(ListOAuthApplications::class)
+            ->mountAction(TestAction::make('register'))
+            ->fillForm(['name' => 'Bad', 'redirect_uris' => ['http://portal.example.edu/callback'], 'confidential' => false, 'first_party' => false])
+            ->goToNextWizardStep()
+            ->assertHasFormErrors(['redirect_uris.0']);
+
+        $this->assertSame(0, OAuthClient::query()->where('name', 'Bad')->count());
+    }
+
+    public function test_an_application_can_be_edited_and_revoked(): void
+    {
+        $application = $this->registerApplication();
+
+        Livewire::test(ListOAuthApplications::class)
+            ->callAction(TestAction::make('edit')->table($application), [
+                'name' => 'Renamed',
+                'redirect_uris' => ['https://renamed.example.edu/cb'],
+                'scopes' => [],
+                'first_party' => true,
+            ])
+            ->assertHasNoFormErrors()
+            ->callAction(TestAction::make('revoke')->table($application));
+
+        $application->refresh();
+        $this->assertSame('Renamed', $application->name);
+        $this->assertTrue($application->first_party);
+        $this->assertSame(CredentialStatus::Revoked, $application->status);
+    }
+
+    public function test_a_confidential_applications_secret_can_be_regenerated(): void
+    {
+        [, $application] = resolve(\App\Domains\Auth\Actions\Applications\RegisterOAuthApplication::class)('Portal', ['https://portal.example.edu/cb'], true, []);
+        $before = $application->secret;
+
+        Livewire::test(ListOAuthApplications::class)
+            ->mountAction(TestAction::make('regenerateSecret')->table($application))
+            ->goToNextWizardStep()
+            ->callMountedAction();
+
+        $this->assertNotSame($before, $application->fresh()?->secret);
+        $this->assertNull(session(OAuthApplicationSchemas::SESSION_KEY));
+    }
+}

@@ -6,6 +6,7 @@ namespace App\Domains\Auth\Http\Middleware;
 
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\OAuthClient;
+use App\Domains\Auth\Models\OAuthConnection;
 use App\Domains\Auth\Models\OAuthToken;
 use App\Domains\User\Models\User;
 use Illuminate\Contracts\Auth\Authenticatable;
@@ -26,7 +27,7 @@ use Northwestern\SysDev\Chassis\ValueObjects\ApiRequestContext;
  */
 class AuthenticatePassportToken extends AuthenticatesPassportTokens
 {
-    /** Record a client's and a token's last use at most this often, so busy integrations don't write on every request. */
+    /** Record a client's, a token's and a connection's last use at most this often, so busy integrations don't write on every request. */
     private const int LAST_USED_RESOLUTION_SECONDS = 300;
 
     /**
@@ -81,6 +82,11 @@ class AuthenticatePassportToken extends AuthenticatesPassportTokens
 
         if (is_string($tokenId) && Cache::add("oauth-token-used:{$tokenId}", true, self::LAST_USED_RESOLUTION_SECONDS)) {
             OAuthToken::query()->whereKey($tokenId)->update(['last_used_at' => now()]);
+        }
+
+        if ($user instanceof User && Context::get(ApiRequestContext::OAUTH_GRANT_TYPE) === OAuthGrantType::AuthorizationCode->value
+            && Cache::add("oauth-connection-used:{$user->getKey()}:{$client->getKey()}", true, self::LAST_USED_RESOLUTION_SECONDS)) {
+            OAuthConnection::query()->where('user_id', $user->getKey())->where('oauth_client_id', $client->getKey())->update(['last_used_at' => now()]);
         }
     }
 
