@@ -5,14 +5,11 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Domains\Auth\Enums\SystemPermission;
-use App\Domains\Auth\Listeners\RecordOAuthConnection;
 use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\Auth\Models\OAuthToken;
 use Carbon\CarbonInterval;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Passport\Bridge\AccessTokenRepository;
-use Laravel\Passport\Events\AccessTokenCreated;
 use Laravel\Passport\Passport;
 use Northwestern\SysDev\Chassis\Passport\ExpiringAccessTokenRepository;
 use Symfony\Component\HttpFoundation\Response;
@@ -41,8 +38,6 @@ class OAuthServiceProvider extends ServiceProvider
         Passport::tokensCan(self::scopes());
 
         Passport::authorizationView(fn (array $parameters): Response => response()->view('public.oauth.authorize', $parameters));
-
-        Event::listen(AccessTokenCreated::class, RecordOAuthConnection::class);
 
         Passport::tokensExpireIn(CarbonInterval::hour());
         Passport::refreshTokensExpireIn(CarbonInterval::days(30));
