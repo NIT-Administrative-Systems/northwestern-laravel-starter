@@ -12,9 +12,11 @@ use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Context;
+use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Once;
 use Laravel\Passport\ClientRepository;
+use Northwestern\SysDev\Chassis\Exceptions\MissingRequestIpForRestrictedTokenException;
 use Northwestern\SysDev\Chassis\ValueObjects\ApiRequestContext;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\Concerns\IssuesPersonalAccessTokens;
@@ -65,6 +67,19 @@ final class AuthenticatePassportTokenTest extends TestCase
         $this->assertSame('ip-denied', Context::get(ApiRequestContext::FAILURE_REASON));
 
         $this->withToken($token)->withServerVariables(['REMOTE_ADDR' => '10.1.2.3'])->getJson('/api/v1/me')->assertOk();
+    }
+
+    // Behind a misconfigured proxy every request looks IP-less; an allowlisted client must fail closed, loudly.
+    public function test_a_restricted_client_is_refused_and_reported_when_the_request_has_no_ip(): void
+    {
+        Exceptions::fake();
+        [$token, $client] = $this->serviceClientToken(User::factory()->api()->create());
+        $client->forceFill(['allowed_ips' => ['10.0.0.0/8']])->save();
+        Once::flush();
+
+        $this->withToken($token)->withServerVariables(['REMOTE_ADDR' => ''])->getJson('/api/v1/me')->assertUnauthorized();
+
+        Exceptions::assertReported(MissingRequestIpForRestrictedTokenException::class);
     }
 
     public function test_a_client_whose_secret_has_expired_is_refused(): void

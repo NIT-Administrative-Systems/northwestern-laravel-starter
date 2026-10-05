@@ -56,6 +56,15 @@ final class PreferencesTest extends TestCase
         ], $preferences->toArray());
     }
 
+    public function test_a_float_accepts_a_whole_number_and_an_array_is_kept(): void
+    {
+        $preferences = ExampleListPreferences::fromArray(['zoom' => 2, 'pinned' => ['users', 'roles']]);
+
+        $this->assertEqualsWithDelta(2.0, $preferences->zoom, PHP_FLOAT_EPSILON);
+        $this->assertSame(['users', 'roles'], $preferences->pinned);
+        $this->assertSame(['zoom' => 1.0, 'pinned' => []], ExampleListPreferences::fromArray(['zoom' => 'big', 'pinned' => 'users'])->toArray());
+    }
+
     public function test_a_nullable_preference_can_be_cleared(): void
     {
         $preferences = ExamplePreferences::fromArray(['nickname' => 'Willie'])->with(['nickname' => null]);
@@ -129,6 +138,16 @@ final readonly class ExamplePreferences extends Preferences
         public ExampleFrequency $frequency = ExampleFrequency::Weekly,
         public int $pageSize = 10,
         public ?string $nickname = null,
+    ) {
+    }
+}
+
+final readonly class ExampleListPreferences extends Preferences
+{
+    /** @param  list<string>  $pinned */
+    public function __construct(
+        public float $zoom = 1.0,
+        public array $pinned = [],
     ) {
     }
 }

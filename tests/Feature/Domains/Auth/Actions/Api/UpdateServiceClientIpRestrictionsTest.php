@@ -7,6 +7,7 @@ namespace Tests\Feature\Domains\Auth\Actions\Api;
 use App\Domains\Auth\Actions\Api\AuditServiceClientChange;
 use App\Domains\Auth\Actions\Api\CreateServiceClient;
 use App\Domains\Auth\Actions\Api\UpdateServiceClientIpRestrictions;
+use App\Domains\Auth\Actions\Applications\RegisterOAuthApplication;
 use App\Domains\User\Models\Audit;
 use App\Domains\User\Models\User;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -36,5 +37,15 @@ final class UpdateServiceClientIpRestrictionsTest extends TestCase
         resolve(UpdateServiceClientIpRestrictions::class)($client, []);
 
         $this->assertNull($client->fresh()?->allowed_ips);
+    }
+
+    // An application has no API user to record the change on.
+    public function test_a_client_without_an_api_user_is_not_audited(): void
+    {
+        [, $client] = resolve(RegisterOAuthApplication::class)('Reporting Tool', ['https://reports.example.edu/callback'], true, []);
+
+        resolve(AuditServiceClientChange::class)($client, 'service_client_revoked');
+
+        $this->assertFalse(Audit::query()->where('event', 'service_client_revoked')->exists());
     }
 }

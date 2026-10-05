@@ -65,6 +65,21 @@ final class SendPersonalAccessTokenExpirationNotificationsCommandTest extends Te
         Mail::assertNothingQueued();
     }
 
+    public function test_a_failed_email_is_reported_and_retried_on_the_next_run(): void
+    {
+        $token = $this->expiringToken(User::factory()->create());
+        $token->forceFill(['name' => 'Nightly export'])->save();
+
+        Mail::shouldReceive('to')->once()->andThrow(new \Exception('SMTP connection failure'));
+
+        $this->artisan(SendPersonalAccessTokenExpirationNotificationsCommand::class)
+            ->expectsOutputToContain('Failed to send notification for token Nightly export: SMTP connection failure')
+            ->expectsOutputToContain('Sent 0 notification(s), 1 failed')
+            ->assertFailed();
+
+        $this->assertNull($token->fresh()?->expiration_notified_at);
+    }
+
     public function test_it_does_nothing_when_disabled(): void
     {
         config(['api.expiration_notifications.enabled' => false]);

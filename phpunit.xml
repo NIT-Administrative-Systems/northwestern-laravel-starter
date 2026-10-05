@@ -39,8 +39,9 @@
             -->
 
             <!-- Enums (declarative values, labels, colors) -->
-            <file>app/Domains/Auth/Enums/AccessTokenStatus.php</file>
             <file>app/Domains/Auth/Enums/AuthType.php</file>
+            <file>app/Domains/Auth/Enums/ClientOrigin.php</file>
+            <file>app/Domains/Auth/Enums/CredentialStatus.php</file>
             <file>app/Domains/Auth/Enums/SystemPermission.php</file>
             <file>app/Domains/Auth/Enums/PermissionScope.php</file>
             <file>app/Domains/Auth/Enums/RoleModificationOrigin.php</file>
@@ -82,6 +83,7 @@
 
             <!-- Value Objects (constants, readonly data containers) -->
             <directory>app/Domains/Auth/ValueObjects</directory>
+            <file>app/Domains/User/Data/UserPreferences.php</file>
             <file>app/Domains/Support/Gateways/CreationResult.php</file>
 
             <!-- API Resources -->

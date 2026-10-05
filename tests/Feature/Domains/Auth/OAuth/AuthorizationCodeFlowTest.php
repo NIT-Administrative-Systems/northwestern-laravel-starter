@@ -5,14 +5,19 @@ declare(strict_types=1);
 namespace Tests\Feature\Domains\Auth\OAuth;
 
 use App\Domains\Auth\Actions\Applications\DisconnectApplication;
+use App\Domains\Auth\Http\Controllers\SwitchOAuthAccountController;
+use App\Domains\Auth\Http\Middleware\RefuseOAuthConsentWhileImpersonating;
 use App\Domains\Auth\Listeners\RecordOAuthConnection;
 use App\Domains\Auth\Models\OAuthConnection;
 use App\Domains\Auth\Notifications\ApplicationConnectedNotification;
 use App\Domains\User\Models\User;
 use App\Providers\OAuthServiceProvider;
 use Illuminate\Support\Facades\Notification;
+use Laravel\Passport\Events\AccessTokenCreated;
 use Mockery;
 use PHPUnit\Framework\Attributes\CoversClass;
+use Tests\Concerns\IssuesPersonalAccessTokens;
+use Tests\Concerns\IssuesServiceClientTokens;
 use Tests\Concerns\RunsAuthorizationCodeFlow;
 use Tests\TestCase;
 
@@ -21,9 +26,11 @@ use Tests\TestCase;
  */
 #[CoversClass(OAuthServiceProvider::class)]
 #[CoversClass(RecordOAuthConnection::class)]
+#[CoversClass(RefuseOAuthConsentWhileImpersonating::class)]
+#[CoversClass(SwitchOAuthAccountController::class)]
 final class AuthorizationCodeFlowTest extends TestCase
 {
-    use RunsAuthorizationCodeFlow;
+    use IssuesPersonalAccessTokens, IssuesServiceClientTokens, RunsAuthorizationCodeFlow;
 
     public function test_a_person_connects_an_application_which_then_calls_the_api_as_them(): void
     {
@@ -184,5 +191,23 @@ final class AuthorizationCodeFlowTest extends TestCase
         $this->post(route('oauth.switch-account'), ['return_to' => 'https://evil.example.test/']);
 
         $this->assertNull(session('url.intended'));
+    }
+
+    // Only an application acting for a person is a connection: not a service client, not a person's own token.
+    public function test_service_client_and_personal_tokens_record_no_connection(): void
+    {
+        $this->serviceClientToken(User::factory()->api()->create());
+        $this->personalAccessToken(User::factory()->create());
+
+        $this->assertSame(0, OAuthConnection::query()->count());
+    }
+
+    public function test_a_token_for_someone_who_no_longer_exists_records_no_connection(): void
+    {
+        $client = $this->registerApplication();
+
+        resolve(RecordOAuthConnection::class)->handle(new AccessTokenCreated('missing-token', '999999', $client->getKey()));
+
+        $this->assertSame(0, OAuthConnection::query()->count());
     }
 }

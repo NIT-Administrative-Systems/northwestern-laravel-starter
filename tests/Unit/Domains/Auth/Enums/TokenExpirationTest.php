@@ -57,6 +57,16 @@ final class TokenExpirationTest extends TestCase
         yield 'one year' => [TokenExpiration::OneYear, 365];
     }
 
+    public function test_personal_access_tokens_offer_the_lifetimes_up_to_the_maximum(): void
+    {
+        $this->assertSame(
+            [TokenExpiration::OneMonth, TokenExpiration::ThreeMonths, TokenExpiration::SixMonths, TokenExpiration::OneYear],
+            TokenExpiration::forPersonalAccessTokens(365),
+        );
+        $this->assertSame([TokenExpiration::OneMonth, TokenExpiration::ThreeMonths], TokenExpiration::forPersonalAccessTokens(90));
+        $this->assertSame([], TokenExpiration::forPersonalAccessTokens(7));
+    }
+
     public function test_expires_at_defaults_to_now_when_no_from_date(): void
     {
         Carbon::setTestNow(Carbon::parse('2026-06-15 12:00:00'));

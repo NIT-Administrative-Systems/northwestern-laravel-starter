@@ -10,7 +10,6 @@ use App\Domains\Auth\Http\Middleware\AuthenticatePassportToken;
 use App\Domains\Auth\Http\Middleware\RequireApiScope;
 use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\User;
-use App\Providers\AppServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
@@ -20,7 +19,6 @@ use Tests\Concerns\IssuesServiceClientTokens;
 use Tests\TestCase;
 
 #[CoversClass(RequireApiScope::class)]
-#[CoversClass(AppServiceProvider::class)]
 final class RequireApiScopeTest extends TestCase
 {
     use IssuesPersonalAccessTokens, IssuesServiceClientTokens;
