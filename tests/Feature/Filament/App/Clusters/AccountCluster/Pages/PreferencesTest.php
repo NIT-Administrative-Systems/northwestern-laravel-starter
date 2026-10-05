@@ -80,6 +80,20 @@ final class PreferencesTest extends TestCase
         $this->assertFalse($user->refresh()->preferences->emailWhenApplicationConnects);
     }
 
+    public function test_people_choose_whether_to_be_emailed_announcements(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        Livewire::test(Preferences::class)
+            ->assertSchemaStateSet(['emailAnnouncements' => true], 'form')
+            ->fillForm(['emailAnnouncements' => false])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $this->assertFalse($user->refresh()->preferences->emailAnnouncements);
+    }
+
     public function test_it_refuses_a_value_that_is_not_a_timezone(): void
     {
         $user = User::factory()->create(['timezone' => 'America/Chicago']);

@@ -23,7 +23,7 @@ final class UpdateUserPreferencesTest extends TestCase
         $user->refresh();
         $this->assertSame('Europe/London', $user->timezone);
         $this->assertFalse($user->preferences->emailBeforeAccessTokensExpire);
-        $this->assertSame('{"emailBeforeAccessTokensExpire":false,"emailWhenApplicationConnects":true}', $user->getRawOriginal('preferences'));
+        $this->assertSame('{"emailBeforeAccessTokensExpire":false,"emailWhenApplicationConnects":true,"emailAnnouncements":true}', $user->getRawOriginal('preferences'));
     }
 
     public function test_it_refuses_a_value_that_is_not_a_timezone(): void

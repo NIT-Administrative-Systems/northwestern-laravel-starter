@@ -84,7 +84,10 @@ class AppPanelProvider extends PanelProvider
                         @livewire(\Filament\Livewire\SimpleUserMenu::class)
                     @endauth
                 </x-site-header>
+                <x-public-announcement-banner />
                 BLADE))
+            // The announcement banner, above every page's heading, inside the page's spacing.
+            ->renderHook(PanelsRenderHook::PAGE_START, fn (): string => Blade::render('@livewire(\App\Filament\App\Livewire\AnnouncementBanner::class)'))
             ->userMenuItems([
                 'account' => Action::make('account')
                     ->label('Account')
