@@ -15,6 +15,12 @@
             @endif
         </x-slot>
 
+        <x-slot name="afterHeader">
+            <x-filament::link :href="$accountUrl" icon="heroicon-o-user-circle">
+                Manage your account
+            </x-filament::link>
+        </x-slot>
+
         <dl class="grid gap-6 sm:grid-cols-2">
             <div>
                 <dt class="text-sm font-medium text-gray-950 dark:text-white">Your roles</dt>

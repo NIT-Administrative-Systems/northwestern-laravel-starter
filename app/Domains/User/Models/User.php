@@ -12,6 +12,7 @@ use App\Domains\Auth\Models\ApiRequestLog;
 use App\Domains\Auth\Models\LoginChallenge;
 use App\Domains\Auth\Models\Role;
 use App\Domains\Support\Models\SupportTicket;
+use App\Domains\User\Data\UserPreferences;
 use App\Domains\User\Enums\Affiliation;
 use App\Domains\User\Models\Concerns\AuditsRoles;
 use App\Domains\User\Models\Concerns\HandlesImpersonation;
@@ -47,6 +48,7 @@ use Spatie\Permission\Traits\HasRoles;
  *                                    their student ID and employee ID, the student ID will be stored here.
  * @property list<string> $departments
  * @property list<string> $job_titles
+ * @property UserPreferences $preferences
  *
  * @method BelongsToMany<Role, $this> roles()
  *
@@ -83,6 +85,7 @@ class User extends Authenticatable implements Auditable, FilamentUser, HasAvatar
         'wildcard_photo_last_synced_at' => 'datetime',
         'last_directory_sync_at' => 'datetime',
         'directory_sync_last_failed_at' => 'datetime',
+        'preferences' => UserPreferences::class,
     ];
 
     /**
@@ -240,7 +243,8 @@ class User extends Authenticatable implements Auditable, FilamentUser, HasAvatar
          * @phpstan-ignore match.unhandled
          */
         return match ($panel->getId()) {
-            AppPanelProvider::ID => true,
+            // API users authenticate with bearer tokens only and never have a panel session.
+            AppPanelProvider::ID => ! $this->is_api_user,
             AdministrationPanelProvider::ID => $this->can(SystemPermission::AccessAdministrationPanel),
         };
     }

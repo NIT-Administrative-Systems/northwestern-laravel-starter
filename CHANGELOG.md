@@ -29,6 +29,8 @@ Version 3 removes the Bootstrap user interface. Every page now uses one stack, F
 - `AGENTS.md`, a guide for coding agents working in the repository.
 - "Sign in as" in the `local` environment: the sign-in page lists the seeded demo users, and `/app/login/as/{username}` signs in as one, so a local environment, worktree or agent needs no SSO, email or credentials. The route exists only when `APP_ENV=local`.
 - A "Your account" widget on the app panel's dashboard: a greeting with the user's previous sign-in, their roles, and links to Contact Support and the documentation when configured.
+- An Account area at `/app/account`, reached from the user menu and the "Your account" widget. Profile shows the user's details (from the Northwestern Directory for NetID users), how they sign in, their recent sign-ins and their roles, read-only. Preferences lets them choose their timezone; an administrator impersonating them can see it but not save it.
+- A `users.preferences` JSON column read through `App\Domains\User\Data\UserPreferences`, for applications to add their own per-user settings as typed properties with defaults. The base class, `App\Domains\Core\Data\Preferences`, can cast a JSON column on any model.
 - A component gallery at `/app/gallery`, in the app panel's sidebar outside production, showing Filament's components in the Northwestern theme. Delete it when you no longer need it.
 - An error layout (`<x-layouts.error>`) that renders without Filament, auth or the database, so the 500, 503 and database-paused pages work when the database is down. The client error pages (401, 403, 404, 419, 429) render on the public layout with the full header, and a fallback route lets the not-found page know who is signed in.
 - Browser Sentry on every page through `<x-sentry-browser />` and `resources/js/sentry.js`, relayed through chassis's DSN-validating `SentryTunnelController`. The new `sentry.tracing.browser` setting (`SENTRY_ENABLE_APM_FOR_JS`) enables browser tracing.
@@ -44,6 +46,7 @@ Version 3 removes the Bootstrap user interface. Every page now uses one stack, F
 - Locally, generated URLs and the session cookie's `secure` flag follow `APP_URL`'s scheme, so a worktree or agent can serve the app over plain HTTP on any port. Deployed environments still force HTTPS. `.env.example` no longer sets `SESSION_SECURE_COOKIE`.
 - `db:rebuild` no longer runs `StakeholderSeeder`, so it makes no Directory Search calls. Deployments run the seeder for `SUPER_ADMIN_NETIDS`; locally, the seeded NUIT Administrator is a Super Administrator.
 - The environment lockdown page is a Filament page in the app panel, and lockdown now applies to app panel routes.
+- API users can no longer open the app panel. They authenticate with bearer tokens and never had a way to sign in.
 - Panels, the public layout and the error layout use the Department Templates 4.0 wordmark and fonts. The app panel and public pages have the Northwestern footer; the administration panel does not.
 - The support request confirmation email shows the reference number, subject, submission time and the user's message; the support team's email leads with the request.
 - Browser and PHP Sentry reports share one user context, `SentryExceptionHandler::userContext()`.
@@ -62,6 +65,7 @@ Version 3 removes the Bootstrap user interface. Every page now uses one stack, F
 - `/api/health` refuses every request until `HEALTH_SECRET_TOKEN` is set. It was public while the token was empty, which is how `.env.example` ships it.
 - `/api/health` no longer returns 503 for checks skipped where they don't apply, such as the database and queue checks outside production. Spatie treats skipped checks as failures by default.
 - A Directory Search outage during sign-in shows the 503 page, or a Problem Details 503 on the API, instead of a 500.
+- Directory sync no longer resets a user's timezone to `DEFAULT_USER_TIMEZONE` at every sign-in; it sets it only when the user is created.
 
 ## [v2.6.0] - 2026-10-01
 
