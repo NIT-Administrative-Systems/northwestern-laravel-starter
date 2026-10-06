@@ -99,7 +99,7 @@ enum SystemPermission: string implements HasLabel
             self::AssignRoles => 'Assign roles to people and remove them.',
 
             // API Access
-            self::ManageApiAccess => 'Create API users and manage their service clients, roles, and access.',
+            self::ManageApiAccess => 'Manage API users and their service clients; register, edit, and revoke applications, including first-party ones that skip consent; revoke MCP clients; and revoke anyone\'s personal access tokens and connected applications.',
             self::ViewApiRequestLogs => 'View API request logs and usage charts.',
             self::CreatePersonalAccessTokens => 'Create personal access tokens in Account, to use the API as yourself from your own code and tools.',
             self::UseMcp => 'Connect AI clients such as Claude and VS Code to the MCP server, to use its tools as yourself.',
