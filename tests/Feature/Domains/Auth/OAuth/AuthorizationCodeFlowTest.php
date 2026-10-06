@@ -125,6 +125,19 @@ final class AuthorizationCodeFlowTest extends TestCase
         $this->exchange($client, $this->codeFrom($response), $verifier)->assertOk();
     }
 
+    // D70: environment lockdown covers the consent screen, so a locked-out person can't connect an application.
+    public function test_the_consent_screen_follows_environment_lockdown(): void
+    {
+        config(['platform.lockdown.enabled' => true]);
+        $this->actingAs(User::factory()->create());
+        $client = $this->registerApplication();
+
+        [$response] = $this->requestAuthorization($client);
+
+        $response->assertRedirect(route('filament.app.environment-lockdown'));
+        $this->assertSame(0, OAuthConnection::query()->count());
+    }
+
     public function test_an_application_only_gets_the_scopes_it_is_allowed(): void
     {
         $this->actingAs(User::factory()->create());
