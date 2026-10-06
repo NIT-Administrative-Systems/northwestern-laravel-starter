@@ -104,6 +104,12 @@ formatting fixes back to the pull request, so pull before pushing again.
 - Mirror the namespace under `tests/Feature` or `tests/Unit`, and put a regression test in the
   existing test file for that class. Mark test classes with `#[CoversClass]`, or
   `#[CoversTrait]` for traits.
+- **Coverage must stay at 100%, and only declared targets count.** A test's lines count only
+  for the classes and traits its attributes name, so a new trait needs a `#[CoversTrait]`
+  somewhere. Never name a class that the `<source>` exclusions in `phpunit.xml` leave out
+  (models, enums, `app/Filament` and others): PHPUnit warns and drops everything that test
+  covers, so the included classes it exercises show as untested. Check with
+  `herd coverage -dmemory_limit=2G vendor/bin/pest --coverage --min=100`.
 - Use factories. `UserFactory` gives SSO users the Northwestern User role; use `->affiliate()`
   for a user without roles.
 - Every page the starter ships is checked with axe in `cypress/e2e/accessibility.cy.ts`. Add
