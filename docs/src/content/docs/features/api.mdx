@@ -39,7 +39,7 @@ The starter ships with a minimal set of API endpoints. They live in `routes/api.
 
 No endpoint creates credentials. Service clients and OAuth applications are registered in the administration panel, and personal access tokens are created on the Account page.
 
-Passport also serves `GET /oauth/authorize`, where a person approves an application on the consent screen.
+Passport also serves `GET /oauth/authorize`, where a person approves an application on the consent screen, and `POST /oauth/token/refresh`, which refreshes the transient tokens Passport's own JavaScript uses and which the starter doesn't use. A refused request's `WWW-Authenticate` header names the realm `{APP_NAME} API` (`api.auth_realm`).
 
 The [API Specification](/api) documents the endpoints under `/api` and how to authenticate with each kind of credential.
 
@@ -124,7 +124,7 @@ People who hold the **Create Personal Access Tokens** permission can call the AP
 - **Lifetime** - Each token chooses 30, 90 (the default), 180 or 365 days, up to `API_PERSONAL_ACCESS_TOKEN_MAX_LIFETIME_DAYS`. Tokens can't be renewed; create a new one.
 - **Limit** - A person holds at most `API_PERSONAL_ACCESS_TOKEN_MAX_ACTIVE` working tokens (10 by default).
 - **Shown once** - The token is shown once, after it is created, and never stored in plain text.
-- **Reminders** - People are emailed before a token expires, unless they turn it off on their Preferences page.
+- **Reminders** - People are emailed 30, 14, 7, 3 and 1 days before a token expires (`api.personal_access_tokens.expiration_notifications.intervals`), unless they turn it off on their Preferences page.
 
 A token stops working as soon as its owner loses the permission, is deactivated or is deleted; `oauth:revoke-ineligible`, hourly in production, marks such tokens revoked. An administrator impersonating someone can see their tokens but can't create or revoke them. Administrators revoke a person's token, for example one that leaked, on the person's **Personal Access Tokens** tab in the administration panel, which records it in the person's audit history.
 
@@ -229,6 +229,8 @@ Requests to protected API endpoints are logged to the `api_request_logs` table f
 
 ### What Gets Logged
 
+The authenticated API routes and the MCP server are logged. Passport's `/oauth/*` endpoints, the public routes such as `/api/health`, and the MCP discovery and registration routes aren't.
+
 Every log entry includes:
 
 <PropertyTable>
@@ -268,7 +270,10 @@ Every log entry includes:
         User agent string from the request (if provided)
     </Property>
     <Property name="failure_reason">
-        Authentication or request failure reason, if any
+        Why the request was refused or failed, if it was: `missing-credentials`,
+        `invalid-header-format`, `token-invalid-or-expired`, `ip-denied`,
+        `unauthorized`, `validation-failed`, `conflict`, `client-error`,
+        `database-error` or `server-error`
     </Property>
     <Property name="created_at">Timestamp when the request was logged</Property>
 </PropertyTable>
@@ -321,7 +326,7 @@ All rate limits are configured in `config/rate-limiting.php`.
 
 ## Browser Access (CORS)
 
-Integrations call the API from servers, where CORS doesn't apply, so no browser origin may call it by default. To let a browser application call the API with a bearer token, list its origins in `CORS_ALLOWED_ORIGINS` (comma-separated). Credentials such as cookies are never allowed. See `config/cors.php`. The [MCP server](/features/mcp/) and the OAuth endpoints its clients call accept any origin, through `cors.open_paths`.
+Integrations call the API from servers, where CORS doesn't apply, so no browser origin may call it by default. To let a browser application call the API with a bearer token, list its origins in `CORS_ALLOWED_ORIGINS` (comma-separated). Credentials such as cookies are never allowed. Browser code can read these response headers: `X-Trace-Id`, `Retry-After`, `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `WWW-Authenticate` and `Mcp-Session-Id`. See `config/cors.php`. The [MCP server](/features/mcp/) and the OAuth endpoints its clients call accept any origin, through `cors.open_paths`.
 
 ---
 
