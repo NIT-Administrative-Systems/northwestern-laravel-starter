@@ -54,7 +54,7 @@ final class AnnouncementBannerTest extends TestCase
             ->assertDontSee('More Announcement')
             ->call('dismiss', $info->id)
             ->assertDontSee('New feature')
-            ->assertDontSeeHtml('data-cy="announcement-banner"');
+            ->assertDontSeeHtml('data-testid="announcement-banner"');
 
         $this->assertSame(2, AnnouncementDismissal::query()->where('user_id', $this->user->id)->count());
     }
@@ -65,7 +65,7 @@ final class AnnouncementBannerTest extends TestCase
 
         Livewire::test(AnnouncementBanner::class)
             ->assertSee('Outage')
-            ->assertDontSeeHtml('data-cy="dismiss-announcement"');
+            ->assertDontSeeHtml('data-testid="dismiss-announcement"');
     }
 
     public function test_an_impersonating_administrator_cant_dismiss(): void
@@ -78,7 +78,7 @@ final class AnnouncementBannerTest extends TestCase
 
         Livewire::test(AnnouncementBanner::class)
             ->assertSee('New feature')
-            ->assertDontSeeHtml('data-cy="dismiss-announcement"');
+            ->assertDontSeeHtml('data-testid="dismiss-announcement"');
     }
 
     public function test_it_is_on_every_app_page(): void

@@ -18,6 +18,8 @@ Version 3 removes the Bootstrap user interface. Every page now uses one stack, F
 - `InjectLivewireAssets`; Livewire injects its own assets.
 - `mews/purifier`. Support ticket details are stored as plain text and escaped where they're shown.
 - The bespoke API access tokens: the `AccessToken` model and `access_tokens` table, the `/api/v1/me/tokens` endpoints, `AuthenticatesAccessTokens`, `IssueAccessToken` and `RotateAccessToken`, `access-tokens:notify-expiration`, and `API_DEMO_USER_ACCESS_TOKEN`. No API endpoint creates credentials any more.
+- Cypress: the `cypress/` specs and support code, `cypress.config.js`, the `test:e2e` scripts, the `cypress`, `cypress-axe`, `cypress-ctrf-json-reporter` and `cypress-wait-until` packages, and `laracasts/cypress` with its `/__cypress__` routes. The browser tests cover everything the specs did.
+- `App\Filament\Support\Filters\DateRangeFilter` and `App\Filament\Support\Formatting\BadgePillRenderer`. Date range filters use the theme's `Northwestern\FilamentTheme\Filters\DateRangeFilter`, and the role tables render their pills with Filament's `<x-filament::badge>` component.
 
 ### Added
 
@@ -26,8 +28,9 @@ Version 3 removes the Bootstrap user interface. Every page now uses one stack, F
 - A public layout (`<x-layouts.public>`) for pages outside the panels. It runs in the app panel's context so Filament's Blade components work, and it is light only. Its header (`<x-site-header>`) matches the panels' top bar and is shared by the sign-in, lockdown and error pages.
 - A landing page at `/` for guests. `HomeController::destinationFor()` decides where signed-in users go, by default the app panel.
 - Database notifications in the app panel: a bell in the top bar, polled every 30 seconds.
-- Retention periods for audit logs (`AUDIT_RETENTION_DAYS`, kept by default), sign-in records (`LOGIN_RECORD_RETENTION_DAYS`, 365 days) and impersonation logs (`IMPERSONATION_LOG_RETENTION_DAYS`, kept by default), through the new `PrunesAfterRetentionPeriod` trait.
-- Accessibility checks with axe for every page the starter ships, in `cypress/e2e/accessibility.cy.ts`. `cy.checkAxeViolations()` accepts selectors to exclude.
+- Retention periods for audit logs (`AUDIT_RETENTION_DAYS`, kept by default), sign-in records (`LOGIN_RECORD_RETENTION_DAYS`, 365 days) and impersonation logs (`IMPERSONATION_LOG_RETENTION_DAYS`, kept by default), through Chassis's `PrunesAfterRetentionPeriod` trait.
+- Browser tests in `tests/Browser`, run with Pest's browser plugin and Playwright (`composer test:browser`, after `pnpm build`). The application runs inside the test process, so factories, `actingAs()` and fakes apply to what the browser does, and there's no app server or database snapshot. They cover the landing page, email sign-in and signing out, and check every page the starter ships with Chassis's browser expectations: axe violations of every impact, browser errors, server errors and broken images, in light and dark mode. Panel pages are found from each panel, so a new Filament page is checked without being listed. Public pages and both panel dashboards are also checked at a phone's width, and the error pages through test routes. `toBeHealthy(exclude: [...])` accepts selectors to exclude.
+- A **🌐 Browser Tests** CI job that runs the browser tests in parallel against PostgreSQL and the RustFS S3 service, publishes the **🌐 Browser Test Results** check and uploads screenshots of failed tests. CI runs Pest with `--ci`, so a test marked `->only()` doesn't narrow a CI run, and the lint job fails when a browser test calls `->debug()` or `->tinker()`.
 - `AGENTS.md`, a guide for coding agents working in the repository.
 - "Sign in as" in the `local` environment: the sign-in page lists the seeded demo users, and `/app/login/as/{username}` signs in as one, so a local environment, worktree or agent needs no SSO, email or credentials. The route exists only when `APP_ENV=local`.
 - A "Your account" widget on the app panel's dashboard: a greeting with the user's previous sign-in, their roles, and links to Contact Support and the documentation when configured.
@@ -66,14 +69,17 @@ Version 3 removes the Bootstrap user interface. Every page now uses one stack, F
 - API request logs record who made each request as `principal_type`, `oauth_client_id`, `token_id` and `grant_type` instead of `access_token_id`, so refused requests and service clients are logged too.
 - `ManageApiUsers` is now `ManageApiAccess` (`manage-api-access`). The API area of the administration panel requires it, or `ViewApiRequestLogs` for request logs, instead of `ManageAll`.
 - On API requests, the super-administrator shortcut in `Gate::before` doesn't apply: a token is limited to its scopes and its user's permissions.
-- Requires `laravel/passport` `^13.8` and `northwestern-sysdev/chassis` `^1.3`.
+- Requires `laravel/passport` `^13.8` and `northwestern-sysdev/chassis` `^1.4.1`.
 - Panels, the public layout and the error layout use the Department Templates 4.0 wordmark and fonts. The app panel and public pages have the Northwestern footer; the administration panel does not.
 - The support request confirmation email shows the reference number, subject, submission time and the user's message; the support team's email leads with the request.
 - Browser and PHP Sentry reports share one user context, `SentryExceptionHandler::userContext()`.
 - Livewire's pagination theme is `tailwind`.
-- Requires `northwestern-sysdev/northwestern-filament-theme` `^4.1.2`.
-- Interface copy follows one rule throughout: names in title case and sentences in sentence case, "sign in" rather than "log in", one name for each kind of credential, and Northwestern style for times and counts. Filament's own labels are overridden to match. See Interface Conventions in the docs.
+- Requires `northwestern-sysdev/northwestern-filament-theme` `^4.2.1`.
+- Interface copy follows one rule throughout: names in title case and sentences in sentence case, "sign in" rather than "log in", one name for each kind of credential, and Northwestern style for times and counts. Filament's built-in labels keep Filament's own wording. See Interface Conventions in the docs.
 - Date range filters use the browser's date input instead of Filament's custom picker, which screen readers couldn't operate.
+- Building blocks shared with other Northwestern applications come from Chassis 1.4: the `PrunesAfterRetentionPeriod` and `RecordsCustomAudits` model concerns, `OAuthClientRepository`, the `OAuthRedirectUri` rule, the `RequireSecretToken` middleware, and `TitleCase`, `NorthwesternDateTime`, `CountInWords` and `ShiftHeadings` for interface copy and Markdown. See the Chassis reference in the docs.
+- Views mark the elements tests use with `data-testid` instead of `data-cy`. Pest's `@name` selectors and Playwright's `getByTestId()` read it.
+- `pnpm typecheck` checks the application's TypeScript in `resources/js` in strict mode.
 
 ### Fixed
 
@@ -84,7 +90,7 @@ Version 3 removes the Bootstrap user interface. Every page now uses one stack, F
 - API clients over the rate limit get a 429 Problem Details response with `Retry-After` instead of a 500.
 - `TDX_TICKET_APP_NAME` and `TDX_CLIENT_APP_NAME` take effect. The starter ships `config/team-dynamix.php`, because `tdx-php-sdk`'s own config read them with `config()` instead of `env()`.
 - Health check history is pruned after `keep_history_for_days`; nothing pruned it before.
-- `/api/health` refuses every request until `HEALTH_SECRET_TOKEN` is set. It was public while the token was empty, which is how `.env.example` ships it.
+- `/api/health` refuses every request until `HEALTH_SECRET_TOKEN` is set, through Chassis's `RequireSecretToken` middleware. It was public while the token was empty, which is how `.env.example` ships it.
 - `/api/health` no longer returns 503 for checks skipped where they don't apply, such as the database and queue checks outside production. Spatie treats skipped checks as failures by default.
 - A Directory Search outage during sign-in shows the 503 page, or a Problem Details 503 on the API, instead of a 500.
 - Directory sync no longer resets a user's timezone to `DEFAULT_USER_TIMEZONE` at every sign-in; it sets it only when the user is created.

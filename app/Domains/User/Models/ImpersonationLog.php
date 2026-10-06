@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Domains\User\Models;
 
 use App\Domains\Core\Models\BaseModel;
-use App\Domains\Core\Models\Concerns\PrunesAfterRetentionPeriod;
 use Database\Factories\Domains\User\Models\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Northwestern\SysDev\Chassis\Models\Concerns\PrunesAfterRetentionPeriod;
 
 /**
  * Impersonation audit log model.

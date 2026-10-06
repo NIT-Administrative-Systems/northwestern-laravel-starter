@@ -32,7 +32,7 @@ A health check endpoint is available for external monitoring systems, protected 
 
 **Endpoint:** `GET /api/health`
 
-**Authentication:** Requires an `X-Secret-Token` header matching the `HEALTH_SECRET_TOKEN` environment variable, compared in constant time by `RequireHealthSecretToken`. Until `HEALTH_SECRET_TOKEN` is set, the endpoint refuses every request with `403`.
+**Authentication:** Requires an `X-Secret-Token` header matching the `HEALTH_SECRET_TOKEN` environment variable, compared in constant time by Chassis's `RequireSecretToken` middleware (`RequireSecretToken::class . ':health.secret_token'` in `routes/api.php`). Until `HEALTH_SECRET_TOKEN` is set, the endpoint refuses every request with `403`.
 
 **Freshness:** Every request runs the checks and stores the results before responding, because `oh_dear_endpoint.always_send_fresh_results` is `true` in `config/health.php`.
 

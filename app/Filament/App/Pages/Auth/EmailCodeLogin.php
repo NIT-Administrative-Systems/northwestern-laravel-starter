@@ -7,7 +7,6 @@ namespace App\Filament\App\Pages\Auth;
 use App\Domains\Auth\Actions\Local\AuthenticateWithLoginCode;
 use App\Domains\Auth\Actions\Local\RequestLoginCode;
 use App\Domains\Auth\ValueObjects\LoginCodeSession;
-use App\Domains\Core\Formatting\CountInWords;
 use App\Filament\App\Pages\Concerns\HasSiteHeader;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
@@ -29,6 +28,7 @@ use Illuminate\Support\HtmlString;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Locked;
 use Livewire\Features\SupportRedirects\Redirector;
+use Northwestern\SysDev\Chassis\Formatting\CountInWords;
 
 /**
  * Passwordless sign-in for local (non-NetID) users, in two steps on one page:
@@ -88,7 +88,7 @@ class EmailCodeLogin extends SimplePage
                     ->required()
                     ->autocomplete('email')
                     ->autofocus()
-                    ->extraInputAttributes(['data-cy' => 'email-input']),
+                    ->extraInputAttributes(['data-testid' => 'email-input']),
             ])
             ->statePath('data');
     }
@@ -103,7 +103,7 @@ class EmailCodeLogin extends SimplePage
                     ->extraFieldWrapperAttributes(['class' => 'nu-login-code'])
                     ->required()
                     ->autofocus()
-                    ->extraInputAttributes(['data-cy' => 'code-input'])
+                    ->extraInputAttributes(['data-testid' => 'code-input'])
                     ->belowContent(
                         Action::make('resendCode')
                             ->label('Resend Code')
@@ -126,7 +126,7 @@ class EmailCodeLogin extends SimplePage
                             Action::make('requestCode')
                                 ->label('Continue')
                                 ->submit('requestCode')
-                                ->extraAttributes(['data-cy' => 'continue-button']),
+                                ->extraAttributes(['data-testid' => 'continue-button']),
                         ])->fullWidth(),
                     ])
                     ->visible(fn (): bool => blank($this->email)),
@@ -139,7 +139,7 @@ class EmailCodeLogin extends SimplePage
                             Action::make('verifyCode')
                                 ->label('Verify')
                                 ->submit('verifyCode')
-                                ->extraAttributes(['data-cy' => 'verify-button']),
+                                ->extraAttributes(['data-testid' => 'verify-button']),
                         ])->fullWidth(),
                     ])
                     ->visible(fn (): bool => filled($this->email)),

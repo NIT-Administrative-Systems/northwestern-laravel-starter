@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Domains\Support\Gateways\Mail;
 
-use App\Domains\Core\Formatting\NorthwesternDateTime;
 use App\Domains\Support\Models\SupportTicket;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Mail\Mailable;
+use Northwestern\SysDev\Chassis\Formatting\NorthwesternDateTime;
 
 /**
  * Email sent to the support team with the ticket details.

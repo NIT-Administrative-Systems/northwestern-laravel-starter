@@ -33,7 +33,7 @@ final class HomeControllerTest extends TestCase
         $this->get(route('home'))
             ->assertOk()
             ->assertSee('<html class="fi min-h-screen"', escape: false)
-            ->assertSee('data-cy="sign-in-link"', escape: false)
+            ->assertSee('data-testid="sign-in-link"', escape: false)
             ->assertSee('Privacy Statement')
             ->assertSee('Report a Concern');
     }
@@ -49,7 +49,7 @@ final class HomeControllerTest extends TestCase
 
         $this->get(route('home'))
             ->assertOk()
-            ->assertSee('data-cy="help-menu-trigger"', escape: false)
+            ->assertSee('data-testid="help-menu-trigger"', escape: false)
             ->assertSee(route('support.changelog.index'), escape: false)
             ->assertDontSee('Contact Support')
             ->assertDontSee('https://docs.example.edu/', escape: false);

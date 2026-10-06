@@ -180,7 +180,7 @@ protected array $auditExclude = [
 
 ## Creating Custom Audit Events
 
-For actions that don't fit standard CRUD operations, log custom audit events. A model with the `RecordsCustomAudits` trait, as `User` has, records one in a line:
+For actions that don't fit standard CRUD operations, log custom audit events. A model with Chassis's `RecordsCustomAudits` trait (`Northwestern\SysDev\Chassis\Models\Concerns\RecordsCustomAudits`), as `User` has, records one in a line:
 
 ```php
 $user->recordCustomAudit('report_exported', new: ['report' => $report->name], old: []);

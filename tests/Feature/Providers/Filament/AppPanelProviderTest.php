@@ -40,7 +40,7 @@ final class AppPanelProviderTest extends TestCase
         $this->actingAs(User::factory()->create())
             ->get('/app')
             ->assertOk()
-            ->assertSee('data-cy="account-menu-link"', escape: false)
+            ->assertSee('data-testid="account-menu-link"', escape: false)
             ->assertSee('/app/account/profile');
     }
 
@@ -49,7 +49,7 @@ final class AppPanelProviderTest extends TestCase
         $this->actingAs(User::factory()->create())
             ->get('/app')
             ->assertOk()
-            ->assertDontSee('data-cy="admin-panel-link"', escape: false);
+            ->assertDontSee('data-testid="admin-panel-link"', escape: false);
 
         $admin = User::factory()->create();
         $admin->givePermissionTo(SystemPermission::AccessAdministrationPanel);
@@ -57,7 +57,7 @@ final class AppPanelProviderTest extends TestCase
         $this->actingAs($admin)
             ->get('/app')
             ->assertOk()
-            ->assertSee('data-cy="admin-panel-link"', escape: false);
+            ->assertSee('data-testid="admin-panel-link"', escape: false);
     }
 
     public function test_top_bar_shows_the_app_name_and_the_help_menu(): void
@@ -68,7 +68,7 @@ final class AppPanelProviderTest extends TestCase
             ->get('/app')
             ->assertOk()
             ->assertSee(config('app.name'))
-            ->assertSee('data-cy="help-menu-trigger"', escape: false)
+            ->assertSee('data-testid="help-menu-trigger"', escape: false)
             ->assertSee(route('support.changelog.index'), escape: false)
             ->assertSee('Contact Support');
     }

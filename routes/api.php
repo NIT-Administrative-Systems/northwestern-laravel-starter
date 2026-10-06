@@ -7,9 +7,9 @@ use App\Domains\Auth\Http\Middleware\LimitAuthenticatedApiRequests;
 use App\Domains\Auth\Http\Middleware\LogsApiRequests;
 use App\Domains\Auth\Http\Middleware\RefuseMcpTokens;
 use App\Domains\User\Http\Controllers\Api\V1\UserApiController;
-use App\Http\Middleware\RequireHealthSecretToken;
 use Illuminate\Support\Facades\Route;
 use Northwestern\SysDev\Chassis\Http\Middleware\EnsureFeatureEnabled;
+use Northwestern\SysDev\Chassis\Http\Middleware\RequireSecretToken;
 use Spatie\Health\Http\Controllers\HealthCheckJsonResultsController;
 
 /*
@@ -56,7 +56,7 @@ Route::middleware([
 | HEALTH_SECRET_TOKEN is set.
 */
 
-Route::middleware([RequireHealthSecretToken::class])->group(function () {
+Route::middleware([RequireSecretToken::class . ':health.secret_token'])->group(function () {
     Route::get('health', HealthCheckJsonResultsController::class);
 });
 

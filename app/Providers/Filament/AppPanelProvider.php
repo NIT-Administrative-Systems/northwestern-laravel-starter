@@ -94,7 +94,7 @@ class AppPanelProvider extends PanelProvider
                     ->icon(Heroicon::OutlinedUserCircle)
                     ->url(fn (): string => Profile::getUrl(panel: self::ID))
                     ->extraAttributes([
-                        'data-cy' => 'account-menu-link',
+                        'data-testid' => 'account-menu-link',
                     ]),
                 'administration' => Action::make('administration')
                     ->label('Administration')
@@ -102,13 +102,13 @@ class AppPanelProvider extends PanelProvider
                     ->url(fn (): string => Filament::getPanel(AdministrationPanelProvider::ID)->getUrl())
                     ->visible(fn (): bool => auth()->user()->canAccessPanel(Filament::getPanel(AdministrationPanelProvider::ID)))
                     ->extraAttributes([
-                        'data-cy' => 'admin-panel-link',
+                        'data-testid' => 'admin-panel-link',
                     ]),
                 'logout' => fn (Action $action) => $action
                     ->label('Sign Out')
                     ->icon(Heroicon::OutlinedArrowRightOnRectangle)
                     ->extraAttributes([
-                        'data-cy' => 'sign-out-menu-link',
+                        'data-testid' => 'sign-out-menu-link',
                     ])
                     ->url(route('logout')),
             ])

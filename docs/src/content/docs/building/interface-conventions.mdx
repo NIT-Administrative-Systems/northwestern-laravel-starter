@@ -22,6 +22,7 @@ Write copy the way Northwestern does: plainly, in the second person, in the acti
 - A field label names a value ("Timezone", "Allowed Scopes"). A toggle or checkbox states a choice the person turns on, so it's a sentence ("Also notify the audience"), and so is a label that asks a question ("What happened?").
 - Title case follows Chicago headline style: articles, coordinating conjunctions and prepositions stay lowercase unless first or last ("Applications with Access to Your Account"). A verb's particle and the second part of a hyphenated word are capitalized ("Sign In with Email", "Sign-In Records").
 - Keep model labels lowercase (`protected static ?string $modelLabel = 'service client';`) unless they start with a proper noun or acronym ("MCP client"). Filament puts them into sentences as they are and title-cases them for titles and navigation.
+- Filament's built-in labels keep Filament's own wording, which is in sentence case ("Save changes", "New service client", "No service clients"). The rule applies to the copy you write: your pages, resources, actions, fields and messages.
 
 ### One Name for One Thing
 
@@ -40,18 +41,16 @@ Write copy the way Northwestern does: plainly, in the second person, in the acti
 
 ## Title Case
 
-`App\Filament\Support\Formatting\TitleCase::of()` applies the title case rule. It keeps words that already carry capitals ("NetID", "MCP") and placeholders (`:label`) as they are.
+`Northwestern\SysDev\Chassis\Formatting\TitleCase::of()`, from [Chassis](/reference/chassis/), applies the title case rule. It keeps words that already carry capitals ("NetID", "MCP") and placeholders (`:label`) as they are.
 
 ```php
 TitleCase::of('applications with access to your account'); // "Applications with Access to Your Account"
 TitleCase::of('sign-in records');                          // "Sign-In Records"
 ```
 
-`FilamentServiceProvider` uses it so Filament's built-in labels follow the rule for any resource: the create, attach, delete and export actions, and every table's empty-state heading ("No Service Clients"). Filament's own fixed labels are overridden in `lang/vendor/filament-*/en/`, which changes only the keys that differ ("Save Changes", "Mark All as Read"). A test fails if Filament renames or drops one of those keys, so check them when upgrading Filament.
-
 ## Dates and Counts in Sentences
 
-`App\Domains\Core\Formatting\NorthwesternDateTime` writes dates and times in Northwestern style, for emails, notifications and other sentences. Tables and compact displays keep Filament's formats.
+`Northwestern\SysDev\Chassis\Formatting\NorthwesternDateTime` writes dates and times in Northwestern style, for emails, notifications and other sentences. Tables and compact displays keep Filament's formats.
 
 ```php
 NorthwesternDateTime::format($moment);          // "10:12 a.m. CDT Saturday, October 10"
@@ -61,11 +60,11 @@ NorthwesternDateTime::date($moment);            // "Saturday, October 10", with 
 
 Each takes an optional timezone; pass the person's, `$user->timezone`, when you write to them.
 
-`App\Domains\Core\Formatting\CountInWords::of()` writes a count and its noun: "one minute", "five seconds", "30 seconds".
+`Northwestern\SysDev\Chassis\Formatting\CountInWords::of()` writes a count and its noun: "one minute", "five seconds", "30 seconds".
 
 ## Date Range Filters
 
-`App\Filament\Support\Filters\DateRangeFilter` builds a table filter with **From** and **To** dates, its query and its indicators. It uses the browser's date input, which works with screen readers.
+`Northwestern\FilamentTheme\Filters\DateRangeFilter`, from the Northwestern Filament theme, builds a table filter with **From** and **To** dates, its query and its indicators. It uses the browser's date input, which works with screen readers.
 
 ```php
 resolve(DateRangeFilter::class)->make(
@@ -75,13 +74,18 @@ resolve(DateRangeFilter::class)->make(
 ),
 ```
 
-## Badge Pills in Custom HTML
+## Badges in Custom HTML
 
-Filament's badges render from columns and entries. When a column builds its own HTML, such as a list of roles in one cell, `App\Filament\Support\Formatting\BadgePillRenderer` renders matching pills in `success`, `danger`, `warning`, `primary` or `gray`, with text that meets contrast:
+Filament's badges render from columns and entries. When a column builds its own HTML, such as a list of roles in one cell, render Filament's badge component with `Blade::render()`. It uses Filament's own classes and colors, so it matches the badges Filament renders everywhere else, in light and dark mode:
 
 ```php
-resolve(BadgePillRenderer::class)->render('Coordinators', 'primary');
+Blade::render(
+    '<x-filament::badge :color="$color" size="sm">{{ $label }}</x-filament::badge>',
+    ['label' => 'Coordinators', 'color' => 'primary'],
+);
 ```
+
+`RoleActivityTable` and `RoleDefinitionHistoryTable` render their role lists this way.
 
 <Aside type="caution" title="No links inside clickable rows">
     When a table's rows link to a record, every cell is already inside a link.
@@ -91,4 +95,4 @@ resolve(BadgePillRenderer::class)->render('Coordinators', 'primary');
 
 ## Headings in Rendered Markdown
 
-Markdown written to stand on its own usually starts its headings at `###`, which skips a level under a page's `<h1>`. `App\Domains\Core\Markdown\ShiftHeadings` is a CommonMark extension that moves a document's headings so the shallowest lands at the level you choose. The changelog uses it to start an entry's headings at `<h2>` on its own page and `<h3>` on the index; see `Changelog::bodyHtml()`.
+Markdown written to stand on its own usually starts its headings at `###`, which skips a level under a page's `<h1>`. `Northwestern\SysDev\Chassis\Markdown\ShiftHeadings` is a CommonMark extension that moves a document's headings so the shallowest lands at the level you choose. The changelog uses it to start an entry's headings at `<h2>` on its own page and `<h3>` on the index; see `Changelog::bodyHtml()`.

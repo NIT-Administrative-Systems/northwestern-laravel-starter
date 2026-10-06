@@ -26,7 +26,7 @@ class AnnouncementBanner extends Component
         // The focused dismiss button goes with the banner. Move focus to the next banner's button,
         // or, when none is left to dismiss, to the page heading, rather than back to the top of the page.
         $this->js(<<<'JS'
-            const next = $wire.$el.querySelector('[data-cy="dismiss-announcement"]');
+            const next = $wire.$el.querySelector('[data-testid="dismiss-announcement"]');
             const heading = document.querySelector('.fi-header-heading');
 
             if (next) {

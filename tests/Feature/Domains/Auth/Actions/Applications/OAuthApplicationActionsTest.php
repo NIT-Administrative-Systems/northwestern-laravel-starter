@@ -13,7 +13,6 @@ use App\Domains\Auth\Enums\ClientOrigin;
 use App\Domains\Auth\Enums\CredentialStatus;
 use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\Auth\Models\OAuthConnection;
-use App\Domains\Core\Models\Concerns\RecordsCustomAudits;
 use App\Domains\User\Models\Audit;
 use App\Domains\User\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -21,7 +20,6 @@ use Illuminate\Support\Facades\Hash;
 use InvalidArgumentException;
 use Mockery;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\CoversTrait;
 use Tests\Concerns\RunsAuthorizationCodeFlow;
 use Tests\TestCase;
 
@@ -30,7 +28,6 @@ use Tests\TestCase;
 #[CoversClass(RegenerateOAuthApplicationSecret::class)]
 #[CoversClass(RevokeOAuthApplication::class)]
 #[CoversClass(DisconnectApplication::class)]
-#[CoversTrait(RecordsCustomAudits::class)]
 final class OAuthApplicationActionsTest extends TestCase
 {
     use RunsAuthorizationCodeFlow;

@@ -38,8 +38,8 @@ inputs:
     description: "If true, skip all Node/pnpm steps (true|false)"
     required: false
     default: "false"
-  install-cypress:
-    description: "Whether to install the Cypress binary (true|false)"
+  install-playwright:
+    description: "Whether to install Playwright's Chromium and its system libraries, for browser tests (true|false)"
     required: false
     default: "false"
   run-ide-helper:
@@ -79,9 +79,7 @@ runs:
       if: ${{ inputs.docs-only != 'true' && inputs['php-only'] != 'true' }}
       uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
-        path: |
-          node_modules
-          ~/.cache/Cypress
+        path: node_modules
         key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
         restore-keys: |
           ${{ runner.os }}-pnpm-
@@ -91,10 +89,12 @@ runs:
       shell: bash
       run: pnpm install --frozen-lockfile --prefer-offline
 
-    - name: 🌲 Install Cypress Binary
-      if: ${{ inputs['install-cypress'] == 'true' }}
+    # Playwright recommends downloading browsers on each run: restoring a cache takes as long, and
+    # the system libraries --with-deps installs can't be cached.
+    - name: 🎭 Install Playwright Chromium
+      if: ${{ inputs['install-playwright'] == 'true' }}
       shell: bash
-      run: pnpm exec cypress install
+      run: pnpm exec playwright install --with-deps chromium
 
     - name: 📷 Composer Dependencies Cache
       if: ${{ inputs.docs-only != 'true' }}

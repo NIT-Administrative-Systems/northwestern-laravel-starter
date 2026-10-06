@@ -71,7 +71,7 @@ class Login extends SimplePage
                             ->label('Sign In with NetID')
                             ->icon(Heroicon::OutlinedArrowRightEndOnRectangle)
                             ->url($ssoUrl)
-                            ->extraAttributes(['data-cy' => 'netid-login']),
+                            ->extraAttributes(['data-testid' => 'netid-login']),
                     ])->fullWidth(),
                     Text::make('For students, faculty, staff, and affiliates.')
                         ->extraAttributes(['class' => 'nu-sign-in-hint']),
@@ -89,7 +89,7 @@ class Login extends SimplePage
                             ->color('gray')
                             ->outlined()
                             ->url(fn (): ?string => Route::has('filament.app.auth.login-code') ? route('filament.app.auth.login-code') : null)
-                            ->extraAttributes(['data-cy' => 'email-login']),
+                            ->extraAttributes(['data-testid' => 'email-login']),
                     ])->fullWidth(),
                     Text::make('For approved external partners without a NetID.')
                         ->extraAttributes(['class' => 'nu-sign-in-hint']),
@@ -110,7 +110,7 @@ class Login extends SimplePage
                             ->button()
                             ->dropdownPlacement('bottom')
                             ->dropdownWidth(Width::Small)
-                            ->extraAttributes(['data-cy' => 'sign-in-as']),
+                            ->extraAttributes(['data-testid' => 'sign-in-as']),
                     ])->extraAttributes(['class' => 'nu-sign-in-as']),
                     Text::make('Sign in as a seeded user. Only in local environments.')
                         ->extraAttributes(['class' => 'nu-sign-in-hint']),
@@ -162,7 +162,7 @@ class Login extends SimplePage
                 ->badgeColor('gray')
                 ->icon(Heroicon::OutlinedUser)
                 ->url(route('filament.app.auth.login-as', ['username' => $user->username]))
-                ->extraAttributes(['data-cy' => 'sign-in-as-' . $user->username]))
+                ->extraAttributes(['data-testid' => 'sign-in-as-' . $user->username]))
             ->values()
             ->all();
     }

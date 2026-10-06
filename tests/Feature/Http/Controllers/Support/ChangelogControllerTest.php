@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Http\Controllers\Support;
 
-use App\Domains\Core\Markdown\ShiftHeadings;
 use App\Domains\Support\Models\Changelog;
 use App\Domains\User\Models\User;
 use App\Http\Controllers\Support\ChangelogController;
@@ -12,7 +11,6 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(ChangelogController::class)]
-#[CoversClass(ShiftHeadings::class)]
 final class ChangelogControllerTest extends TestCase
 {
     public function test_index_returns_view_with_paginated_entries_and_feed_url(): void
@@ -82,7 +80,7 @@ final class ChangelogControllerTest extends TestCase
     {
         $this->get(route('support.changelog.index'))
             ->assertOk()
-            ->assertSee('data-cy="sign-in-link"', escape: false)
+            ->assertSee('data-testid="sign-in-link"', escape: false)
             ->assertSee('Privacy Statement');
     }
 
@@ -99,7 +97,7 @@ final class ChangelogControllerTest extends TestCase
             ->get(route('support.changelog.index'))
             ->assertOk()
             ->assertSee('fi-user-menu', escape: false)
-            ->assertDontSee('data-cy="sign-in-link"', escape: false);
+            ->assertDontSee('data-testid="sign-in-link"', escape: false);
     }
 
     public function test_show_offers_a_share_button(): void

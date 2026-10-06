@@ -82,7 +82,7 @@
             @livewire(SimpleUserMenu::class)
         @else
             <x-filament::button class="whitespace-nowrap"
-                                data-cy="sign-in-link"
+                                data-testid="sign-in-link"
                                 tag="a"
                                 :href="$appPanel->getLoginUrl()"
                                 color="gray"

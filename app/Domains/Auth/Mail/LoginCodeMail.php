@@ -6,12 +6,12 @@ namespace App\Domains\Auth\Mail;
 
 use App\Domains\Auth\Enums\AuthType;
 use App\Domains\Auth\Jobs\SendLoginCodeEmailJob;
-use App\Domains\Core\Formatting\CountInWords;
 use Carbon\CarbonImmutable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Support\Facades\Crypt;
+use Northwestern\SysDev\Chassis\Formatting\CountInWords;
 
 /**
  * Mailable containing a login verification code for {@see AuthType::Local} users.

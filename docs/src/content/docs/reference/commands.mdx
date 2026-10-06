@@ -647,20 +647,6 @@ php artisan netid:update:test jdoe deactivate
 
 ---
 
-### `restore-env-files`
-
-Restore your local `.env` after a Cypress run that didn't swap the files back.
-
-```bash
-php artisan restore-env-files
-```
-
-**What it does:**
-
-Moves the current `.env` to `.env.cypress` and renames `.env.backup` to `.env`. Fails if `.env.backup` doesn't exist.
-
----
-
 ## IDE Helper Commands
 
 The starter uses `laravel-ide-helper` to generate IDE autocomplete files. All three run from Composer's `post-update-cmd` script and from `composer ide-helper:generate`. `db:rebuild` runs only `ide-helper:models -N`.

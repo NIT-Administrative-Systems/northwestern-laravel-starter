@@ -12,7 +12,6 @@ use App\Domains\Auth\Models\ApiRequestLog;
 use App\Domains\Auth\Models\LoginChallenge;
 use App\Domains\Auth\Models\OAuthConnection;
 use App\Domains\Auth\Models\Role;
-use App\Domains\Core\Models\Concerns\RecordsCustomAudits;
 use App\Domains\Support\Models\SupportTicket;
 use App\Domains\User\Data\UserPreferences;
 use App\Domains\User\Enums\Affiliation;
@@ -41,6 +40,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\Contracts\OAuthenticatable;
 use Laravel\Passport\HasApiTokens;
 use Northwestern\SysDev\Chassis\Models\Concerns\Auditable as AuditableConcern;
+use Northwestern\SysDev\Chassis\Models\Concerns\RecordsCustomAudits;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\Permission\Traits\HasRoles;
 

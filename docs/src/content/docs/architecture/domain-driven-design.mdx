@@ -22,7 +22,6 @@ import { FileTree } from '@astrojs/starlight/components';
             - Http/
             - Models/
             - Policies/
-            - Repositories/
             - Seeders/
             - ...
         - Core
@@ -30,9 +29,7 @@ import { FileTree } from '@astrojs/starlight/components';
             - Data/
             - Enums/
             - Exceptions/
-            - Formatting/
             - Health/
-            - Markdown/
             - Models/
             - Services/
             - ...
@@ -58,7 +55,6 @@ import { FileTree } from '@astrojs/starlight/components';
         - Navigation/
         - Pages/
         - Resources/
-        - Support/ shared filters and formatting
         - ...
     - Http/
         - Controllers/
@@ -80,9 +76,8 @@ The **Core** domain contains foundational functionality that applies across the 
 
 **Responsibilities:**
 
-- `BaseModel` and model concerns, including `PrunesAfterRetentionPeriod` for records that expire and `RecordsCustomAudits` for audit events a model's own changes don't capture
+- `BaseModel`, which models extend. Model concerns shared with other applications, such as `PrunesAfterRetentionPeriod` for records that expire and `RecordsCustomAudits` for audit events a model's own changes don't capture, come from [Chassis](/reference/chassis/)
 - The typed preferences base class (`Data/Preferences`), which `UserPreferences` extends
-- Formatting for sentences (`NorthwesternDateTime`, `CountInWords`) and Markdown helpers (`ShiftHeadings`)
 - The `ExternalService` enum
 - Configuration validators (`Services/ConfigValidation/`)
 - Shared exceptions (`NoRollbackException`, `ServiceDownError`, `SentryExceptionHandler`)

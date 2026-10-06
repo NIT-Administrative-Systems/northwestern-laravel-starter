@@ -247,7 +247,7 @@ The Administration panel establishes several patterns worth replicating:
 | **Heroicon constants** | Use the `Heroicon` enum instead of raw strings | `Heroicon::OutlinedUsers` |
 | **Resource separation** | Dedicated directories per panel under `app/Filament/` | `app/Filament/App/` |
 | **Policies** | Standard Laravel policies (Filament respects them automatically) | `UserPolicy`, `RolePolicy` |
-| **Accessibility tests** | Add the new panel's pages to the axe checks | `cypress/e2e/accessibility.cy.ts` |
+| **Browser tests** | Check every page of the new panel, as the existing panels' tests do with `FilamentPages::in()` | `tests/Browser/Pages/AdministrationPagesTest.php` |
 
 <Aside type="tip">
     You do not need to check for `ManageAll` inside policies. The `Gate::before()` callback in `AppServiceProvider` automatically grants super-administrators full access to every panel and resource.

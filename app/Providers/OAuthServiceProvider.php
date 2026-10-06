@@ -7,7 +7,6 @@ namespace App\Providers;
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\Auth\Models\OAuthToken;
-use App\Domains\Auth\Repositories\OAuthClientRepository;
 use Carbon\CarbonInterval;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Mcp\Server\Registrar;
@@ -15,6 +14,7 @@ use Laravel\Passport\Bridge\AccessTokenRepository;
 use Laravel\Passport\ClientRepository;
 use Laravel\Passport\Passport;
 use Northwestern\SysDev\Chassis\Passport\ExpiringAccessTokenRepository;
+use Northwestern\SysDev\Chassis\Passport\OAuthClientRepository;
 use Symfony\Component\HttpFoundation\Response;
 
 /**

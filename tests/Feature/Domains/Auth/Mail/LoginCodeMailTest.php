@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Tests\Feature\Domains\Auth\Mail;
 
 use App\Domains\Auth\Mail\LoginCodeMail;
-use App\Domains\Core\Formatting\CountInWords;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Crypt;
+use Northwestern\SysDev\Chassis\Formatting\CountInWords;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 

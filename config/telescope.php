@@ -118,7 +118,6 @@ return [
         'livewire*',
         'nova-api*',
         'pulse*',
-        '__cypress__/*',
         'auth/login/verify/*',
     ],
 

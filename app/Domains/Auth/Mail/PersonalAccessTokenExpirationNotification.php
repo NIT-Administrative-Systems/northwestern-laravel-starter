@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace App\Domains\Auth\Mail;
 
 use App\Domains\Auth\Models\OAuthToken;
-use App\Domains\Core\Formatting\CountInWords;
-use App\Domains\Core\Formatting\NorthwesternDateTime;
 use App\Domains\User\Models\User;
 use App\Filament\App\Clusters\AccountCluster\Pages\AccessTokens;
 use App\Filament\App\Clusters\AccountCluster\Pages\Preferences;
@@ -17,6 +15,8 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\Attributes\WithoutRelations;
+use Northwestern\SysDev\Chassis\Formatting\CountInWords;
+use Northwestern\SysDev\Chassis\Formatting\NorthwesternDateTime;
 
 class PersonalAccessTokenExpirationNotification extends Mailable implements ShouldQueue
 {

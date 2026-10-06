@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Domains\Auth\Models;
 
-use App\Domains\Core\Models\Concerns\PrunesAfterRetentionPeriod;
 use App\Domains\User\Models\User;
 use Database\Factories\Domains\Auth\Models\ApiRequestLogFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Northwestern\SysDev\Chassis\Enums\ApiPrincipalType;
 use Northwestern\SysDev\Chassis\Enums\ApiRequestFailure;
 use Northwestern\SysDev\Chassis\Enums\OAuthGrantType;
+use Northwestern\SysDev\Chassis\Models\Concerns\PrunesAfterRetentionPeriod;
 
 class ApiRequestLog extends Model
 {
