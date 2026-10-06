@@ -13,6 +13,7 @@ use Carbon\CarbonInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Support\Timebox;
 use Illuminate\Validation\ValidationException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
@@ -20,9 +21,20 @@ use Tests\TestCase;
 #[CoversClass(AuthenticateWithLoginCode::class)]
 final class AuthenticateWithLoginCodeTest extends TestCase
 {
+    /** @var list<int> The minimum durations, in microseconds, the action asked the timebox for. */
+    private array $timeboxMinimums = [];
+
     protected function setUp(): void
     {
         parent::setUp();
+
+        $this->mock(Timebox::class, function ($mock) {
+            $mock->shouldReceive('call')->andReturnUsing(function (callable $callback, int $microseconds) {
+                $this->timeboxMinimums[] = $microseconds;
+
+                return $callback(new Timebox());
+            });
+        });
 
         config(['local-auth.code.max_attempts' => 5]);
         config(['rate-limiting.auth.login_code.verify.per_minute' => 50]);
@@ -88,6 +100,35 @@ final class AuthenticateWithLoginCodeTest extends TestCase
         $challenge = $this->challengeFor('missing-user@example.com', '123456');
 
         $this->assertRejectedWith("That code didn't work", fn () => $this->authenticate((string) $challenge->id, '123456'));
+    }
+
+    public function test_wrong_codes_lock_the_challenge_at_the_attempt_limit(): void
+    {
+        $user = User::factory()->affiliate()->create();
+        $challenge = $this->challengeFor($user->email, '123456');
+
+        foreach (range(1, 5) as $attempt) {
+            $this->assertRejectedWith("That code didn't work", fn () => $this->authenticate((string) $challenge->id, '000000'));
+        }
+
+        $challenge->refresh();
+        $this->assertSame(5, $challenge->attempts);
+        $this->assertNotNull($challenge->locked_until);
+        $this->assertRejectedWith('Too many attempts', fn () => $this->authenticate((string) $challenge->id, '123456'));
+    }
+
+    public function test_real_and_decoy_challenges_take_the_same_minimum_time(): void
+    {
+        $user = User::factory()->affiliate()->create();
+        $challenge = $this->challengeFor($user->email, '123456');
+
+        $this->assertRejectedWith("That code didn't work", fn () => $this->authenticate((string) $challenge->id, '000000'));
+        $this->assertRejectedWith("That code didn't work", fn () => $this->authenticate(Str::uuid()->toString(), '000000'));
+
+        $this->assertCount(2, $this->timeboxMinimums);
+        foreach ($this->timeboxMinimums as $microseconds) {
+            $this->assertGreaterThanOrEqual(500_000, $microseconds);
+        }
     }
 
     public function test_enforces_the_per_ip_per_minute_limit(): void
