@@ -75,7 +75,7 @@ Most clients return from sign-in to `https://` or `http://localhost`. A desktop 
 1. The client calls `POST /mcp` without a token. The server answers `401` with a `WWW-Authenticate` header pointing at its [protected resource metadata](https://datatracker.ietf.org/doc/html/rfc9728), `/.well-known/oauth-protected-resource/mcp`. The same document is also served at `/.well-known/oauth-protected-resource` for clients that look there.
 2. That document names the application as the authorization server; `/.well-known/oauth-authorization-server` lists its endpoints.
 3. The client registers itself at `POST /oauth/register` ([dynamic client registration](https://datatracker.ietf.org/doc/html/rfc7591)). Its redirect URIs must use HTTPS, HTTP to the person's own computer (`localhost`, `127.0.0.1` or `[::1]`), or one of `MCP_CUSTOM_SCHEMES`. It gets a public client, with no secret, that may ask only for the `mcp:use` scope.
-4. The person signs in and sees the consent screen, which marks the client **Unverified AI Client**: a client names itself, so its name is only a claim. Only people with `UseMcp` can approve it.
+4. The person signs in and sees the consent screen, which marks the client as an **unverified AI client**: a client names itself, so its name is only a claim. Only people with `UseMcp` can approve it.
 5. The client exchanges the code, with PKCE, for an access token that lasts one hour and a refresh token that lasts 30 days, and calls the server with it.
 
 </Steps>

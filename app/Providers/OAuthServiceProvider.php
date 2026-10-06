@@ -7,7 +7,9 @@ namespace App\Providers;
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\Auth\Models\OAuthToken;
+use App\Providers\Filament\AppPanelProvider;
 use Carbon\CarbonInterval;
+use Filament\Facades\Filament;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Mcp\Server\Registrar;
 use Laravel\Passport\Bridge\AccessTokenRepository;
@@ -45,7 +47,14 @@ class OAuthServiceProvider extends ServiceProvider
         // can't stand in for each other. It isn't offered for personal tokens or applications.
         Passport::tokensCan([...self::scopes(), Registrar::OAUTH_SCOPE => "Use this application's tools from an AI client"]);
 
-        Passport::authorizationView(fn (array $parameters): Response => response()->view('public.oauth.authorize', $parameters));
+        // The consent screen is a public page, which renders in the app panel's context for its theme
+        // and colors. Passport's routes don't carry the panel middleware, so the view sets it up.
+        Passport::authorizationView(function (array $parameters): Response {
+            Filament::setCurrentPanel(Filament::getPanel(AppPanelProvider::ID));
+            Filament::bootCurrentPanel();
+
+            return response()->view('public.oauth.authorize', $parameters);
+        });
 
         Passport::tokensExpireIn(CarbonInterval::hour());
         Passport::refreshTokensExpireIn(CarbonInterval::days(30));

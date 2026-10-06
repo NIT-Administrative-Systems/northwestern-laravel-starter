@@ -75,5 +75,5 @@ it('is healthy on the consent screen for a self-registered MCP client', function
         'code_challenge_method' => 'S256',
     ]));
 
-    expect($page->assertSee('Unverified AI Client'))->toBeHealthyInEachTheme();
+    expect($page->assertSee('Unverified AI client.'))->toBeHealthyInEachTheme();
 });
