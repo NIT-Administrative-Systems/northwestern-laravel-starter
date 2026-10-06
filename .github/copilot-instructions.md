@@ -158,6 +158,41 @@ php artisan make:filament-relation-manager --panel=administration --related-mode
 
 ---
 
+## Interface copy
+
+Write copy the way Northwestern does: plainly, in the second person, active voice, no jargon on pages everyone uses. The [Northwestern A to Z Style Guide](https://www.northwestern.edu/brand/editorial-guidelines/style-guide/) and the [Northwestern IT Style Guide](https://www.it.northwestern.edu/departments/it-services-support/it-communications/branding/style-guide.html) settle anything not covered here.
+
+**Names are title case; sentences are sentence case.**
+
+| Title case (names)                                                                                                                                                                                                          | Sentence case (sentences)                                                                                                                                                         |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Page titles, navigation, tabs, section headings, wizard steps, buttons, menu items, modal headings, field labels, column headers, filters and their options, enum labels, badges, notification titles, empty-state headings | Descriptions, subheadings, helper text, placeholders, modal descriptions, notification bodies, empty-state descriptions, validation and error messages, email subjects and bodies |
+
+- Title case follows Chicago headline style: articles, coordinating conjunctions and prepositions of any length stay lowercase unless first or last ("Applications with Access to Your Account"); a verb's particle and the second part of a hyphenated word are capitalized ("Sign In with Email", "Sign-In Records"). `App\Filament\Support\Formatting\TitleCase::of()` applies it.
+- Keep model labels lowercase (`protected static ?string $modelLabel = 'service client';`) unless they start with a proper noun or acronym ("API request", "MCP client"). Filament puts them into sentences as they are, and title-cases them for page titles, navigation and the built-in actions configured in `FilamentServiceProvider`.
+- Filament's own labels follow the same rule through `lang/vendor/filament-*/en/`, which overrides only the keys that differ. Check those keys when upgrading Filament.
+
+**One name for one thing:**
+
+- **Sign in**, **sign-in**, **sign out**: never "log in", "login" or "logout" in copy (identifiers in code are fine).
+- **Personal access token** for the tokens people create in Account; "access token" alone only for OAuth tokens in general.
+- **Service client** for an API user's client-credentials client; never a bare "client" in a label.
+- **Application** for an OAuth application an administrator registers.
+- **AI client** in copy everyone reads; **MCP client** only in Administration. A self-registered client's name is "not verified".
+- **Connections** for the people connected to an application.
+- **NetID**, **Northwestern Directory**, **Northwestern IT**, **IT Service Desk** (847-491-4357 (1-HELP)). Never "NU", "NUIT" or other informal abbreviations.
+- **email** is lowercase mid-sentence; the field label is "Email".
+
+**Northwestern style:**
+
+- Times: "4 p.m.", "10:12 a.m.", "noon", "midnight", the time before the date, months spelled out, the year only when it isn't this year.
+- Spell out one through nine in sentences; numerals are fine in tables, badges and pickers. Use real plurals, never "minute(s)".
+- Use the serial comma; no ampersands in place of "and"; no exclamation points.
+
+**Tone:** say what happened and what to do next. Leave out "Sorry", "Please" and "Unable to": "We couldn't resend the code. Try again in a minute." Keep every sentence true for any application built from the starter (say "the team that supports {app name}", not "Northwestern IT").
+
+---
+
 ## Accessibility & performance
 
 - **WCAG 2.1 AA compliance:** All views must meet accessibility standards:
