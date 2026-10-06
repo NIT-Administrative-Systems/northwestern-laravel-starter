@@ -20,6 +20,7 @@ use App\Filament\Resources\Announcements\Pages\ListAnnouncements;
 use App\Filament\Resources\Announcements\Schemas\AnnouncementForm;
 use App\Filament\Resources\Announcements\Tables\AnnouncementsTable;
 use App\Providers\Filament\AdministrationPanelProvider;
+use Carbon\CarbonImmutable;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Queue;
 use Livewire\Livewire;
@@ -111,6 +112,22 @@ final class AnnouncementResourceTest extends TestCase
         $this->assertSame('New title', $announcement->title);
         $this->assertSame(AnnouncementStatus::Live, $announcement->status);
         Queue::assertPushed(NotifyAnnouncementAudience::class);
+    }
+
+    // D93: times are entered in the author's timezone and stored as instants. The other tests use a UTC author.
+    public function test_a_start_time_is_read_in_the_authors_timezone(): void
+    {
+        $this->travelTo(CarbonImmutable::parse('2026-10-06 12:00:00', 'UTC'));
+        $this->manager->forceFill(['timezone' => 'America/Chicago'])->save();
+        $announcement = Announcement::factory()->draft()->create();
+
+        Livewire::test(EditAnnouncement::class, ['record' => $announcement->getRouteKey()])
+            ->callAction('publish', data: ['starts_at' => '2026-10-20 09:00:00', 'ends_at' => null, 'notify' => false])
+            ->assertHasNoActionErrors();
+
+        $announcement->refresh();
+        $this->assertSame('2026-10-20 14:00:00', $announcement->starts_at->utc()->toDateTimeString());
+        $this->assertSame(AnnouncementStatus::Scheduled, $announcement->status);
     }
 
     public function test_a_live_announcement_can_be_edited_shown_again_ended_and_duplicated(): void
