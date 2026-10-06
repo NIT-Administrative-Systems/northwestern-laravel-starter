@@ -58,15 +58,15 @@ final class ProfileTest extends TestCase
         ]));
 
         Livewire::test(Profile::class)
-            ->assertSee('come from the Northwestern Directory')
+            ->assertSee('From the Northwestern Directory')
             ->assertSee('Willie Wildcat')
             ->assertSee('wwc123')
             ->assertSee('willie@northwestern.edu')
             ->assertSee(Affiliation::Staff->getLabel())
             ->assertSee('Mascot')
             ->assertSee('Athletics')
-            ->assertSee('Your NetID')
-            ->assertDontSee('Contact Support to change them');
+            ->assertSee('NetID')
+            ->assertDontSee('Request a change');
     }
 
     public function test_email_users_see_the_details_an_administrator_entered(): void
@@ -79,15 +79,15 @@ final class ProfileTest extends TestCase
         ]));
 
         Livewire::test(Profile::class)
-            ->assertSee('An administrator entered these details')
+            ->assertSee('Entered by an administrator')
             ->assertSee('Visiting Scholar')
-            ->assertSee('Contact Support to change them')
-            ->assertSee('A verification code sent to your email')
+            ->assertSee('Request a change')
+            ->assertSee('Email verification code')
             ->assertDontSee('willie-x1y2');
 
         config(['support.enabled' => false]);
 
-        Livewire::test(Profile::class)->assertDontSee('Contact Support to change them');
+        Livewire::test(Profile::class)->assertDontSee('Request a change');
     }
 
     public function test_it_lists_the_most_recent_sign_ins(): void
@@ -108,10 +108,10 @@ final class ProfileTest extends TestCase
         $this->actingAs(User::factory()->create());
 
         config(['platform.retention.login_records' => 90]);
-        Livewire::test(Profile::class)->assertSee('Sign-ins are kept for 90 days.');
+        Livewire::test(Profile::class)->assertSee('Records are kept for 90 days.');
 
         config(['platform.retention.login_records' => null]);
-        Livewire::test(Profile::class)->assertDontSee('Sign-ins are kept for');
+        Livewire::test(Profile::class)->assertDontSee('Records are kept for');
     }
 
     public function test_it_lists_roles_beyond_standard_access(): void

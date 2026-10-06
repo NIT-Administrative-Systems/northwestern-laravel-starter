@@ -42,7 +42,7 @@ readonly class CreatePersonalAccessToken
     }
 
     /**
-     * @param  non-empty-string  $name  What the token is for, e.g. "Nightly export script"
+     * @param  non-empty-string  $name  What the token is for, e.g. "Nightly enrollment export"
      * @param  list<string>  $scopes
      * @return array{0: non-empty-string, 1: OAuthToken} The bearer token, shown once, and its record
      *

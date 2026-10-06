@@ -42,7 +42,7 @@ use InvalidArgumentException;
 use Phiki\Grammar\Grammar;
 
 /**
- * A person's personal access tokens, for calling the API as themselves from scripts. Shown
+ * A person's personal access tokens, for calling the API as themselves from their own code. Shown
  * to holders of {@see SystemPermission::CreatePersonalAccessTokens}.
  *
  * A new token is shown once. Between the wizard's steps it is kept encrypted in the session,
@@ -91,7 +91,7 @@ class AccessTokens extends Page implements HasTable
                 ->warning()
                 ->visible($this->isImpersonating()),
             Section::make('Personal access tokens')
-                ->description('Call the API as yourself from a script. A token can do what its scopes name, and only what your permissions allow. Keep tokens secret: anyone with one can act as you.')
+                ->description('Use the API as yourself from your own code and tools. A token can do what its scopes name, and only what your permissions allow. Keep tokens secret: anyone with one can act as you.')
                 ->schema([EmbeddedTable::make()]),
         ]);
     }
@@ -140,7 +140,7 @@ class AccessTokens extends Page implements HasTable
                     }),
             ])
             ->emptyStateHeading('No personal access tokens')
-            ->emptyStateDescription('Create a token to call the API from a script.')
+            ->emptyStateDescription('Create a token to use the API as yourself.')
             ->paginated(false);
     }
 
@@ -159,13 +159,13 @@ class AccessTokens extends Page implements HasTable
                     ->schema([
                         TextInput::make('name')
                             ->label('Name')
-                            ->placeholder('e.g., Nightly export script')
+                            ->placeholder('e.g., Nightly enrollment export')
                             ->required()
                             ->maxLength(255),
                         CheckboxList::make('scopes')
                             ->label('Scopes')
                             ->options(fn (): array => CreatePersonalAccessToken::scopesFor($this->user()))
-                            ->helperText('What the token may do. Choose only what the script needs.'),
+                            ->helperText('What the token may do. Choose only what it needs.'),
                         Select::make('lifetime')
                             ->label('Expires after')
                             ->options(collect(TokenExpiration::forPersonalAccessTokens($maxDays))->mapWithKeys(fn (TokenExpiration $lifetime): array => [$lifetime->value => $lifetime->getLabel()]))
