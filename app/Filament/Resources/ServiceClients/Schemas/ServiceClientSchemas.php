@@ -75,7 +75,6 @@ class ServiceClientSchemas
                 Select::make('expiration')
                     ->label('Secret Expires')
                     ->options(TokenExpiration::class)
-                    ->placeholder('Select Date')
                     ->required()
                     ->live()
                     ->helperText(function ($state) {
