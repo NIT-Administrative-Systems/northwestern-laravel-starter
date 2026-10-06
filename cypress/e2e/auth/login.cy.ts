@@ -40,7 +40,7 @@ describe("Authentication - Login", () => {
                 force: true,
             });
             cy.getBySel("continue-button").click();
-            cy.contains("Check your email").should("be.visible");
+            cy.contains("Check Your Email").should("be.visible");
             cy.getBySel("code-input").should("be.visible");
         });
 
@@ -70,7 +70,7 @@ describe("Authentication - Login", () => {
             cy.getBySel("verify-button").click();
 
             cy.url().should("include", "/app/login/email");
-            cy.contains("Invalid code");
+            cy.contains("That code didn't work");
         });
     });
 });

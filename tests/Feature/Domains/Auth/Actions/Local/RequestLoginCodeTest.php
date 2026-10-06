@@ -66,7 +66,7 @@ final class RequestLoginCodeTest extends TestCase
         User::factory()->affiliate()->create(['email' => 'test@example.com']);
         RateLimiter::hit('login-code:test@example.com', 3600);
 
-        $this->assertRejectedWith('Too many login attempts', fn () => $this->request('test@example.com'));
+        $this->assertRejectedWith('Too many sign-in attempts', fn () => $this->request('test@example.com'));
     }
 
     public function test_per_email_hourly_limit_applies_identically_to_unknown_emails(): void
@@ -74,7 +74,7 @@ final class RequestLoginCodeTest extends TestCase
         config(['local-auth.rate_limit_per_hour' => 1]);
         RateLimiter::hit('login-code:nonexistent@example.com', 3600);
 
-        $this->assertRejectedWith('Too many login attempts', fn () => $this->request('nonexistent@example.com'));
+        $this->assertRejectedWith('Too many sign-in attempts', fn () => $this->request('nonexistent@example.com'));
     }
 
     public function test_enforces_the_per_ip_hourly_limit(): void
@@ -84,7 +84,7 @@ final class RequestLoginCodeTest extends TestCase
         $this->request('user1@example.com');
         $this->request('user2@example.com');
 
-        $this->assertRejectedWith('Too many login attempts', fn () => $this->request('user3@example.com'));
+        $this->assertRejectedWith('Too many sign-in attempts', fn () => $this->request('user3@example.com'));
     }
 
     public function test_per_ip_hourly_limit_does_not_block_other_ips(): void
@@ -122,10 +122,10 @@ final class RequestLoginCodeTest extends TestCase
         $this->mock(IssueLoginChallenge::class, function ($mock) {
             $mock->shouldReceive('__invoke')
                 ->once()
-                ->andThrow(new RuntimeException('Too many login attempts. Please try again in 1 minute(s).'));
+                ->andThrow(new RuntimeException('Too many sign-in attempts. Try again in one minute.'));
         });
 
-        $this->assertRejectedWith('Too many login attempts', fn () => $this->request('test@example.com'));
+        $this->assertRejectedWith('Too many sign-in attempts', fn () => $this->request('test@example.com'));
     }
 
     private function request(string $email, string $ip = '127.0.0.1'): ?LoginChallenge

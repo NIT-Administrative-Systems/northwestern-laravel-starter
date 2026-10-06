@@ -24,24 +24,24 @@
     <section class="mx-auto max-w-xl px-4 py-12 sm:px-6 lg:py-16">
         <div class="rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-950/5 sm:p-8">
             <h1 class="font-nu-heading text-nu-purple-100 text-2xl font-bold tracking-tight">
-                {{ $client->name }} wants to access your {{ config('app.name') }} account
+                {{ $client->name }} Wants to Access Your {{ config('app.name') }} Account
             </h1>
 
             @if ($unverified)
                 <p class="mt-3">
                     <x-filament::badge color="warning" icon="heroicon-m-exclamation-triangle">
-                        Unverified application
+                        Unverified AI Client
                     </x-filament::badge>
                 </p>
                 <p class="mt-2 text-sm text-gray-600">
-                    This application registered itself. Its name is its own description and hasn't been checked. Only
-                    approve it if you started this connection.
+                    This AI client registered itself, so its name hasn't been verified. Only approve it if you started
+                    this connection.
                 </p>
             @elseif (filled($client->description))
                 <p class="mt-3 text-gray-600">{{ $client->description }}</p>
             @endif
 
-            <h2 class="mt-6 text-base font-semibold text-gray-950">It will be able to act as you to:</h2>
+            <h2 class="mt-6 text-base font-semibold text-gray-950">What It Can Do as You</h2>
             <ul class="mt-2 list-disc space-y-1 ps-5 text-gray-700">
                 {{-- A self-registered MCP client's token works only on the MCP server, never the REST API's /v1/me. --}}
                 @unless ($unverified)
@@ -105,7 +105,7 @@
                     <input name="return_to"
                            type="hidden"
                            value="{{ $request->fullUrl() }}">
-                    <button class="text-nu-purple-100 ms-1 underline" type="submit">Not you? Switch account</button>
+                    Not you? <button class="text-nu-purple-100 underline" type="submit">Switch Account</button>
                 </form>
             </div>
         </div>

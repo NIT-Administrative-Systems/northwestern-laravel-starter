@@ -52,18 +52,18 @@ The Northwestern Laravel Starter provides a multi-method authentication system t
 
 Sign-in belongs to the [App panel](/building/app-panel/). Guests who open a page in any panel are sent to `/app/login`, which lists the sign-in methods this application has configured:
 
-- **Sign in with NetID** appears when single sign-on is configured. It uses Online Passport (WebSSO) when that is configured, otherwise Entra ID.
-- **Sign in with email** appears when `LOCAL_AUTH_ENABLED=true`.
-- **Sign in as** appears in the `local` environment only. See [Signing In Locally](#signing-in-locally).
+- **Sign In with NetID** appears when single sign-on is configured. It uses Online Passport (WebSSO) when that is configured, otherwise Entra ID.
+- **Sign In with Email** appears when `LOCAL_AUTH_ENABLED=true`.
+- **Sign In As** appears in the `local` environment only. See [Signing In Locally](#signing-in-locally).
 - If none is available, the page explains that no sign-in methods are available.
 
-When NetID is the only method, `/app/login` skips the page and goes straight to single sign-on. The exceptions are the `ci` environment, where the page always renders so end-to-end tests can sign in with email codes, and `local`, where it offers **Sign in as**.
+When NetID is the only method, `/app/login` skips the page and goes straight to single sign-on. The exceptions are the `ci` environment, where the page always renders so end-to-end tests can sign in with email codes, and `local`, where it offers **Sign In As**.
 
 Email sign-in is a single page, `/app/login/email`, with two steps: request a code, then enter it. Progress is kept in the session, so reloading the page returns to the current step.
 
 ## Signing In Locally
 
-A local environment needs no SSO, email or credentials to sign in. In the `local` environment, the sign-in page has a **Development** section with a **Sign in as…** menu of the seeded demo users, each shown with its role:
+A local environment needs no SSO, email or credentials to sign in. In the `local` environment, the sign-in page has a **Development** section with a **Sign In As…** menu of the seeded demo users, each shown with its role:
 
 | User | Signs in as |
 |---|---|
@@ -129,7 +129,7 @@ Northwestern users authenticate via single sign-on using their NetID credentials
 
 2. **Redirect to SSO**
 
-   The application sends the guest to `/app/login`. When email sign-in is off, that page redirects straight to Northwestern's authentication service; otherwise the user picks **Sign in with NetID** there
+   The application sends the guest to `/app/login`. When email sign-in is off, that page redirects straight to Northwestern's authentication service; otherwise the user picks **Sign In with NetID** there
 
 3. **User authenticates**
 

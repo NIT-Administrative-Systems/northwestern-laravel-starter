@@ -17,7 +17,7 @@ Providers:
 
 The starter **auto-detects** which provider to use based on your credentials. Entra ID routes are registered only when both `AZURE_CLIENT_ID` and `AZURE_CLIENT_SECRET` are set. Online Passport routes are registered only when `WEBSSO_API_KEY` is set or `WEBSSO_STRATEGY` is `forgerock-direct`. When both are configured, the sign-in button and logout use Online Passport. When neither is, the sign-in page has no NetID button.
 
-SSO is optional in the `local` environment, where the sign-in page offers **Sign in as** for the seeded demo users and `config:validate` skips the SSO check when no provider is configured. See [Signing In Locally](/features/authentication/#signing-in-locally). Deployed environments always need a provider.
+SSO is optional in the `local` environment, where the sign-in page offers **Sign In As** for the seeded demo users and `config:validate` skips the SSO check when no provider is configured. See [Signing In Locally](/features/authentication/#signing-in-locally). Deployed environments always need a provider.
 
 For a higher-level overview of all authentication methods, see the [Authentication](/features/authentication/) documentation.
 
@@ -25,7 +25,7 @@ For a higher-level overview of all authentication methods, see the [Authenticati
 
 <Steps>
 
-1. **User clicks "Sign in with NetID"**
+1. **User clicks "Sign In with NetID"**
 
    The application redirects to Microsoft's login endpoint via `WebSSOController@oauthRedirect`. The OAuth2 authorization code flow goes directly to `login.microsoftonline.com`, not through Apigee or ForgeRock.
 
@@ -51,7 +51,7 @@ For a higher-level overview of all authentication methods, see the [Authenticati
 
 <Steps>
 
-1. **User clicks "Sign in with NetID"**
+1. **User clicks "Sign In with NetID"**
 
    The application redirects to ForgeRock's login page via `WebSSOController@login`. The user is sent to Northwestern's Online Passport login portal.
 

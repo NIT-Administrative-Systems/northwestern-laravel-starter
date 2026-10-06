@@ -51,7 +51,7 @@ final class LoginTest extends TestCase
     {
         config(['local-auth.enabled' => true]);
 
-        $this->get('/app/login')->assertOk()->assertSee('Sign in with email');
+        $this->get('/app/login')->assertOk()->assertSee('Sign In with Email');
     }
 
     public function test_shows_entra_and_email_options_when_both_are_configured(): void
@@ -60,10 +60,10 @@ final class LoginTest extends TestCase
         config(['local-auth.enabled' => true]);
 
         Livewire::test(Login::class)
-            ->assertSee('Sign in with NetID')
+            ->assertSee('Sign In with NetID')
             ->assertSeeHtml(route('login-oauth-redirect'))
-            ->assertSee('Sign in with email')
-            ->assertDontSee('No sign-in methods available');
+            ->assertSee('Sign In with Email')
+            ->assertDontSee('No sign-in methods are set up');
     }
 
     public function test_prefers_websso_over_entra_when_both_are_configured(): void
@@ -106,8 +106,8 @@ final class LoginTest extends TestCase
 
         Livewire::test(Login::class)
             ->assertNoRedirect()
-            ->assertSee('Sign in with NetID')
-            ->assertDontSee('Sign in with email');
+            ->assertSee('Sign In with NetID')
+            ->assertDontSee('Sign In with Email');
     }
 
     public function test_explains_when_no_sign_in_methods_are_configured(): void
@@ -116,8 +116,8 @@ final class LoginTest extends TestCase
 
         Livewire::test(Login::class)
             ->assertNoRedirect()
-            ->assertSee('No sign-in methods available')
-            ->assertDontSee('Sign in with NetID');
+            ->assertSee('No sign-in methods are set up')
+            ->assertDontSee('Sign In with NetID');
     }
 
     public function test_signed_in_users_are_redirected_home(): void
@@ -143,9 +143,9 @@ final class LoginTest extends TestCase
 
         $this->get('/app/login')
             ->assertOk()
-            ->assertSeeInOrder(['<h1 class="fi-simple-header-heading">', 'Sign in', '</h1>'], escape: false)
+            ->assertSeeInOrder(['<h1 class="fi-simple-header-heading">', 'Sign In', '</h1>'], escape: false)
             ->assertDontSee('Sign in to')
-            ->assertSeeInOrder(['<title>', 'Sign in', ' - ', e(config('app.name')), '</title>'], escape: false)
+            ->assertSeeInOrder(['<title>', 'Sign In', ' - ', e(config('app.name')), '</title>'], escape: false)
             ->assertSee('For students, faculty, staff, and affiliates.')
             ->assertSee('For approved external partners without a NetID.')
             ->assertSee('nu-sign-in-divider', escape: false)
@@ -159,7 +159,7 @@ final class LoginTest extends TestCase
 
         $this->get('/app/login')
             ->assertOk()
-            ->assertSee('Sign in with email')
+            ->assertSee('Sign In with Email')
             ->assertDontSee('nu-sign-in-divider', escape: false);
     }
 }

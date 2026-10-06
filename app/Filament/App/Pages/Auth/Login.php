@@ -40,7 +40,7 @@ class Login extends SimplePage
 
     private const string AUTH_DOCS_URL = 'https://laravel-starter.entapp.northwestern.edu/getting-started/installation/#5-environment-configuration';
 
-    protected static ?string $title = 'Sign in';
+    protected static ?string $title = 'Sign In';
 
     public function mount(): void
     {
@@ -68,7 +68,7 @@ class Login extends SimplePage
                 Group::make([
                     Actions::make([
                         Action::make('netid')
-                            ->label('Sign in with NetID')
+                            ->label('Sign In with NetID')
                             ->icon(Heroicon::OutlinedArrowRightEndOnRectangle)
                             ->url($ssoUrl)
                             ->extraAttributes(['data-cy' => 'netid-login']),
@@ -84,7 +84,7 @@ class Login extends SimplePage
                 Group::make([
                     Actions::make([
                         Action::make('email')
-                            ->label('Sign in with email')
+                            ->label('Sign In with Email')
                             ->icon(Heroicon::OutlinedEnvelope)
                             ->color('gray')
                             ->outlined()
@@ -103,7 +103,7 @@ class Login extends SimplePage
                     // One button however many users an application seeds, so it stays secondary to the real methods.
                     Actions::make([
                         ActionGroup::make($signInAs)
-                            ->label('Sign in as…')
+                            ->label('Sign In As…')
                             ->icon(Heroicon::OutlinedUserCircle)
                             ->color('gray')
                             ->outlined()
@@ -119,12 +119,12 @@ class Login extends SimplePage
                 // No callout heading: Filament renders it as an <h4>, which would skip levels after the page's <h1>.
                 Callout::make()
                     ->description(new HtmlString(
-                        '<strong>No sign-in methods available.</strong> This application has not been configured with any authentication providers yet.'
+                        '<strong>No sign-in methods are set up.</strong> Configure NetID sign-in or email codes so people can sign in.'
                     ))
                     ->warning()
                     ->actions([
                         Action::make('docs')
-                            ->label('Authentication documentation')
+                            ->label('Authentication Documentation')
                             ->url(self::AUTH_DOCS_URL, shouldOpenInNewTab: true)
                             ->link(),
                     ])
@@ -171,7 +171,7 @@ class Login extends SimplePage
     {
         $role = $user->non_default_roles->first()?->name;
 
-        return $role ?? ($user->is_local_user ? 'Local account' : 'Northwestern User');
+        return $role ?? ($user->is_local_user ? 'Local Account' : 'Northwestern User');
     }
 
     private function localAuthEnabled(): bool

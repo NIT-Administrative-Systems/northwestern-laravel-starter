@@ -99,7 +99,7 @@ describe("Accessibility", () => {
                 });
 
                 visit(`/oauth/authorize?${query.toString()}`);
-                cy.contains("Reporting Tool wants to access your");
+                cy.contains("Reporting Tool Wants to Access Your");
                 cy.checkAxeViolations();
             });
         });
@@ -151,7 +151,7 @@ describe("Accessibility", () => {
                 });
 
                 visit(`/oauth/authorize?${query.toString()}`);
-                cy.contains("Unverified application");
+                cy.contains("Unverified AI Client");
                 cy.checkAxeViolations();
             });
         });

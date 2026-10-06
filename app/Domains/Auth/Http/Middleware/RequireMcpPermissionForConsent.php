@@ -41,7 +41,7 @@ class RequireMcpPermissionForConsent
 
         $user = $request->user('web');
 
-        abort_if($user instanceof User && ! $user->can(SystemPermission::UseMcp), 403, 'You are not allowed to connect AI clients. Ask an administrator for the Use MCP permission.');
+        abort_if($user instanceof User && ! $user->can(SystemPermission::UseMcp), 403, 'You don\'t have permission to connect AI clients. Ask an administrator for the Use MCP permission.');
 
         return $next($request);
     }

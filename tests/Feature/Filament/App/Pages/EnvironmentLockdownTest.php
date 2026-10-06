@@ -41,7 +41,7 @@ final class EnvironmentLockdownTest extends TestCase
         $this->actingAs($user)
             ->get(route('filament.app.environment-lockdown'))
             ->assertOk()
-            ->assertSee('You do not have permission to access this environment.')
+            ->assertSee('You don\'t have access to this environment.')
             ->assertSee('Sign Out');
     }
 

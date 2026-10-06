@@ -60,14 +60,14 @@ class ContactSupport extends Page
             ->components([
                 TextInput::make('subject')
                     ->label('Subject')
-                    ->placeholder('I need help with...')
+                    ->placeholder('I need help with…')
                     ->required()
                     ->maxLength(200)
                     ->autocomplete(false),
                 Textarea::make('details')
                     ->label('Details')
-                    ->placeholder('Describe the issue or your idea...')
-                    ->helperText('Please include relevant details such as what you were trying to do, what happened, and any steps to reproduce the issue.')
+                    ->placeholder('Describe the problem or your idea…')
+                    ->helperText('Include what you were trying to do, what happened, and any steps to reproduce the problem.')
                     ->required()
                     ->maxLength(10000)
                     ->rows(6),
@@ -82,15 +82,15 @@ class ContactSupport extends Page
                 // No callout heading: Filament renders it as an <h4>, which would skip levels after the page's <h1>.
                 Callout::make()
                     ->description(new HtmlString(
-                        '<strong>Limited support.</strong> Limited support for this environment is available. The contact form may behave differently by sending emails instead of creating tickets in the IT ticketing system. '
-                        . 'If you are performing testing for a project, please reach out to the project team instead of using this form.'
+                        '<strong>Limited support.</strong> Support for this environment is limited, and this form may send an email instead of creating a ticket. '
+                        . 'If you\'re testing for a project, contact the project team instead.'
                     ))
                     ->warning()
                     ->visible((bool) config('support.limited_support_warning')),
-                Section::make('Need help or have a question?')
-                    ->description('Submitting this form sends your request directly to the Northwestern IT support team. You will receive a confirmation email, and a team member will follow up with you as soon as possible.')
+                Section::make('Need Help or Have a Question?')
+                    ->description('Your request goes to the team that supports ' . config('app.name') . '. You\'ll get a confirmation email, and someone will follow up as soon as they can.')
                     ->schema([
-                        Text::make('We also welcome enhancement requests and feedback. New functionality is at the discretion of the platform advisory group, and approved enhancements are prioritized against other requests.'),
+                        Text::make('Feature requests and feedback are welcome too.'),
                         Form::make([EmbeddedSchema::make('form')])
                             ->id('form')
                             ->livewireSubmitHandler('send')
@@ -114,7 +114,8 @@ class ContactSupport extends Page
 
         if ($this->tooManyRequests()) {
             Notification::make()
-                ->title('You have sent too many support requests. Please try again later.')
+                ->title('Too Many Requests')
+                ->body('You\'ve sent several support requests recently. Try again later.')
                 ->danger()
                 ->send();
 
@@ -128,10 +129,10 @@ class ContactSupport extends Page
 
         if ($ticket->wasPostedSuccessfully() || $ticket->fallback_sent_at !== null) {
             Notification::make()
-                ->title($ticket->wasPostedSuccessfully()
-                    ? "Your support request has been submitted ({$ticket->ticket_number})."
-                    : 'Your request has been submitted.')
-                ->body('You will receive a confirmation email shortly.')
+                ->title('Request Sent')
+                ->body($ticket->wasPostedSuccessfully()
+                    ? "Your reference number is {$ticket->ticket_number}. You'll get a confirmation email shortly."
+                    : 'You\'ll get a confirmation email shortly.')
                 ->success()
                 ->send();
 
@@ -141,7 +142,8 @@ class ContactSupport extends Page
         }
 
         Notification::make()
-            ->title('We were unable to submit your request. Please try again later.')
+            ->title('Request Not Sent')
+            ->body('We couldn\'t send your request. Try again later.')
             ->danger()
             ->send();
     }

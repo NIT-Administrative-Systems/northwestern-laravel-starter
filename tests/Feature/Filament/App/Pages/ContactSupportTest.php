@@ -35,7 +35,7 @@ final class ContactSupportTest extends TestCase
         $this->actingAs(User::factory()->create())
             ->get('/app/support/contact')
             ->assertOk()
-            ->assertSee('Need help or have a question?');
+            ->assertSee('Need Help or Have a Question?');
     }
 
     public function test_guests_are_sent_to_login(): void
@@ -73,7 +73,7 @@ final class ContactSupportTest extends TestCase
             ->fillForm(['subject' => 'Help with login', 'details' => 'I cannot sign in to the application.'])
             ->call('send')
             ->assertHasNoFormErrors()
-            ->assertNotified('Your support request has been submitted (SUP-1).')
+            ->assertNotified('Request Sent')
             ->assertSchemaStateSet(['subject' => null, 'details' => null]);
 
         $this->assertDatabaseHas('support_tickets', [
@@ -91,7 +91,7 @@ final class ContactSupportTest extends TestCase
         Livewire::test(ContactSupport::class)
             ->fillForm(['subject' => 'Test', 'details' => 'Details'])
             ->call('send')
-            ->assertNotified('Your request has been submitted.');
+            ->assertNotified('Request Sent');
     }
 
     public function test_reports_failure_when_nothing_was_sent(): void
@@ -102,7 +102,7 @@ final class ContactSupportTest extends TestCase
         Livewire::test(ContactSupport::class)
             ->fillForm(['subject' => 'Test', 'details' => 'Details'])
             ->call('send')
-            ->assertNotified('We were unable to submit your request. Please try again later.');
+            ->assertNotified('Request Not Sent');
     }
 
     public function test_subject_and_details_are_required_and_limited(): void
@@ -133,7 +133,7 @@ final class ContactSupportTest extends TestCase
         $page->fillForm(['subject' => 'First', 'details' => 'Details'])->call('send');
         $page->fillForm(['subject' => 'Second', 'details' => 'Details'])
             ->call('send')
-            ->assertNotified('You have sent too many support requests. Please try again later.');
+            ->assertNotified('Too Many Requests');
 
         $this->assertSame(1, SupportTicket::count());
     }
