@@ -1,7 +1,7 @@
 <p align="center">
     <picture>
         <source media="(prefers-color-scheme: dark)" srcset="art/lockup-dark.svg">
-        <img width="650" src="art/lockup-light.svg" alt="Northwestern Laravel Starter">
+        <img width="520" src="art/lockup-light.svg" alt="Northwestern Laravel Starter">
     </picture>
 </p>
 
@@ -37,7 +37,7 @@
       </td>
       <td align="center">
         <a href="art/ui-preview-4.png" target="_blank">
-          <img src="art/ui-preview-4.png" width="500" alt="Login records, and API request analytics" />
+          <img src="art/ui-preview-4.png" width="500" alt="Sign-in records, and API request analytics" />
         </a>
       </td>
     </tr>
