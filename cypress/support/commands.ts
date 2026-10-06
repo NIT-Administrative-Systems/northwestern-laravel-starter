@@ -35,7 +35,7 @@ Cypress.Commands.add("loginAsSuperAdmin", () => {
 Cypress.Commands.add(
     "getBySel",
     (selector: string, ...args: [options?: Cypress.GetCommandOptions]) => {
-        return cy.get(`[data-cy=${selector}]`, ...args);
+        return cy.get(`[data-testid=${selector}]`, ...args);
     },
 );
 

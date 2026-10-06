@@ -44,8 +44,8 @@ final class ErrorPagesTest extends TestCase
     {
         $this->get('/no-such-page')
             ->assertNotFound()
-            ->assertSee('data-cy="help-menu-trigger"', escape: false)
-            ->assertSee('data-cy="sign-in-link"', escape: false);
+            ->assertSee('data-testid="help-menu-trigger"', escape: false)
+            ->assertSee('data-testid="sign-in-link"', escape: false);
     }
 
     public function test_not_found_page_knows_who_is_signed_in(): void
@@ -54,7 +54,7 @@ final class ErrorPagesTest extends TestCase
             ->get('/no-such-page')
             ->assertNotFound()
             ->assertSee('fi-user-menu', escape: false)
-            ->assertDontSee('data-cy="sign-in-link"', escape: false);
+            ->assertDontSee('data-testid="sign-in-link"', escape: false);
     }
 
     public function test_unknown_api_paths_are_not_caught_by_the_web_fallback(): void
@@ -69,8 +69,8 @@ final class ErrorPagesTest extends TestCase
         $this->get('/__test/unavailable')
             ->assertServiceUnavailable()
             ->assertSee('Service Unavailable')
-            ->assertDontSee('data-cy="help-menu-trigger"', escape: false)
-            ->assertDontSee('data-cy="sign-in-link"', escape: false);
+            ->assertDontSee('data-testid="help-menu-trigger"', escape: false)
+            ->assertDontSee('data-testid="sign-in-link"', escape: false);
     }
 
     public function test_server_error_page_renders_when_the_database_is_unavailable(): void

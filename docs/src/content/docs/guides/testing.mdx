@@ -157,7 +157,7 @@ On a local run, if `.env.cypress` exists, Cypress moves `.env` to `.env.backup` 
 | `cypress/e2e/auth/logout.cy.ts`      | Signing out and losing access to protected pages                                                |
 | `cypress/e2e/accessibility.cy.ts`    | axe checks on every page the starter ships                                                      |
 
-Custom commands are declared in `cypress/support/index.d.ts`. The ones specs use most: `cy.loginAsGenericUser()`, `cy.loginAsSuperAdmin()`, `cy.loginAs(username)`, `cy.php(code)` to run PHP in the app, `cy.artisan(command)`, `cy.getBySel(name)` for `data-cy` attributes, and `cy.checkAxeViolations()`.
+Custom commands are declared in `cypress/support/index.d.ts`. The ones specs use most: `cy.loginAsGenericUser()`, `cy.loginAsSuperAdmin()`, `cy.loginAs(username)`, `cy.php(code)` to run PHP in the app, `cy.artisan(command)`, `cy.getBySel(name)` for `data-testid` attributes, and `cy.checkAxeViolations()`.
 
 ## Accessibility checks
 

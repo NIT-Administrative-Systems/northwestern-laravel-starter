@@ -77,7 +77,7 @@ describe("Accessibility", () => {
             );
 
             visit("/app");
-            cy.get('[data-cy="announcement-banner"]').should("be.visible");
+            cy.get('[data-testid="announcement-banner"]').should("be.visible");
             cy.checkAxeViolations();
 
             visit("/app/announcements");

@@ -80,7 +80,7 @@ final class ChangelogControllerTest extends TestCase
     {
         $this->get(route('support.changelog.index'))
             ->assertOk()
-            ->assertSee('data-cy="sign-in-link"', escape: false)
+            ->assertSee('data-testid="sign-in-link"', escape: false)
             ->assertSee('Privacy Statement');
     }
 
@@ -97,7 +97,7 @@ final class ChangelogControllerTest extends TestCase
             ->get(route('support.changelog.index'))
             ->assertOk()
             ->assertSee('fi-user-menu', escape: false)
-            ->assertDontSee('data-cy="sign-in-link"', escape: false);
+            ->assertDontSee('data-testid="sign-in-link"', escape: false);
     }
 
     public function test_show_offers_a_share_button(): void

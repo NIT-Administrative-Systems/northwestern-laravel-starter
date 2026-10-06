@@ -173,7 +173,7 @@ declare namespace Cypress {
         checkAxeViolations(exclude?: string[]): Chainable<void>;
 
         /**
-         * Select an element by its `data-cy` attribute.
+         * Select an element by its `data-testid` attribute.
          */
         getBySel(
             selector: string,
@@ -193,7 +193,7 @@ declare namespace Cypress {
          *
          * This command is especially useful for fetching elements rendered by Filament forms and
          * tables, where DOM elements have Livewire properties bound to them, and it's not possible
-         * to set the `data-cy` attribute.
+         * to set the `data-testid` attribute.
          *
          * @example
          * // If you have a Livewire component with a bound property like this:

@@ -48,7 +48,7 @@ class AdministrationPanelProvider extends PanelProvider
                     ->label('Sign Out')
                     ->icon(Heroicon::OutlinedArrowRightOnRectangle)
                     ->extraAttributes([
-                        'data-cy' => 'sign-out-menu-link',
+                        'data-testid' => 'sign-out-menu-link',
                     ])
                     ->url(route('logout')),
             ])

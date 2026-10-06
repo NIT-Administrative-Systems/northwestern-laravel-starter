@@ -50,12 +50,12 @@
 @endphp
 
 @if ($items !== [])
-    <x-filament::dropdown data-cy="help-menu"
+    <x-filament::dropdown data-testid="help-menu"
                           placement="bottom-end"
                           teleport>
         <x-slot name="trigger">
             <button class="flex h-9 items-center gap-1.5 rounded-lg px-2 text-sm font-medium text-white outline-none transition hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white sm:px-3"
-                    data-cy="help-menu-trigger"
+                    data-testid="help-menu-trigger"
                     type="button"
                     aria-label="Help">
                 <x-filament::icon class="size-5" :icon="Heroicon::OutlinedQuestionMarkCircle" />

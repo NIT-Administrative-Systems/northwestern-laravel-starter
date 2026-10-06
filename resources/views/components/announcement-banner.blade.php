@@ -22,7 +22,7 @@
     $readMoreUrl = $pageUrl !== null ? "{$pageUrl}#announcement-{$announcement->getKey()}" : null;
 @endphp
 
-<x-filament::callout data-cy="announcement-banner"
+<x-filament::callout data-testid="announcement-banner"
                      role="region"
                      aria-label="Announcement"
                      :color="$severity->getColor()"
@@ -55,7 +55,7 @@
 
     @if ($dismissible)
         <x-slot name="controls">
-            <x-filament::icon-button data-cy="dismiss-announcement"
+            <x-filament::icon-button data-testid="dismiss-announcement"
                                      :icon="Heroicon::XMark"
                                      color="gray"
                                      label="Dismiss announcement"
