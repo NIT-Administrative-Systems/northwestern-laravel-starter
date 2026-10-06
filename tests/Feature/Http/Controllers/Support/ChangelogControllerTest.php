@@ -13,7 +13,6 @@ use Tests\TestCase;
 
 #[CoversClass(ChangelogController::class)]
 #[CoversClass(ShiftHeadings::class)]
-#[CoversClass(Changelog::class)]
 final class ChangelogControllerTest extends TestCase
 {
     public function test_index_returns_view_with_paginated_entries_and_feed_url(): void
@@ -68,6 +67,15 @@ final class ChangelogControllerTest extends TestCase
         $this->get(route('support.changelog.index'))
             ->assertSee('<h3>Changes</h3>', escape: false)
             ->assertSee('<h4>Detail</h4>', escape: false);
+    }
+
+    public function test_an_entry_without_headings_renders_as_written(): void
+    {
+        $entry = Changelog::factory()->create(['body' => "- A change\n- Another change"]);
+
+        $this->get(route('support.changelog.show', $entry))
+            ->assertOk()
+            ->assertSee('<li>Another change</li>', escape: false);
     }
 
     public function test_changelog_is_public_and_renders_on_the_public_layout(): void

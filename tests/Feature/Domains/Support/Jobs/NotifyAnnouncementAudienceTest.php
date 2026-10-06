@@ -16,7 +16,6 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(NotifyAnnouncementAudience::class)]
-#[CoversClass(Announcement::class)]
 final class NotifyAnnouncementAudienceTest extends TestCase
 {
     public function test_it_notifies_everyone_who_can_use_the_app_once(): void
