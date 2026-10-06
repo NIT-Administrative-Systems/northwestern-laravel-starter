@@ -74,7 +74,7 @@ final class CreateServiceClientTest extends TestCase
         }
     }
 
-    // A secret outlives the session, so an impersonator can't take one away (D102).
+    // A secret outlives the session, so an impersonator can't take one away.
     public function test_it_is_refused_while_impersonating(): void
     {
         $apiUser = User::factory()->api()->create();

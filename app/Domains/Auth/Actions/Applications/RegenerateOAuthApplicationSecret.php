@@ -30,7 +30,7 @@ readonly class RegenerateOAuthApplicationSecret
             throw new InvalidArgumentException('A public application has no client secret.');
         }
 
-        // A secret outlives the session, so it is never issued while impersonating (D102).
+        // A secret outlives the session, so it is never issued while impersonating, as with personal access tokens.
         if (resolve('impersonate')->isImpersonating()) {
             throw new AuthorizationException('Application secrets cannot be regenerated while impersonating.');
         }

@@ -44,7 +44,7 @@ readonly class CreateServiceClient
             throw new InvalidArgumentException('Service clients can only belong to API users.');
         }
 
-        // A secret outlives the session, so it is never issued while impersonating (D102). This covers rotation and new API users too.
+        // A secret outlives the session, so it is never issued while impersonating, as with personal access tokens. This covers rotation and new API users too.
         if (resolve('impersonate')->isImpersonating()) {
             throw new AuthorizationException('Service clients cannot be created or rotated while impersonating.');
         }

@@ -44,7 +44,7 @@ readonly class RegisterOAuthApplication
         ClientOrigin $origin = ClientOrigin::Administrator,
         ?User $registeredBy = null,
     ): array {
-        // A secret outlives the session, so it is never issued while impersonating (D102). Dynamic registration has no session.
+        // A secret outlives the session, so it is never issued while impersonating, as with personal access tokens. Dynamic registration has no session.
         if ($origin === ClientOrigin::Administrator && resolve('impersonate')->isImpersonating()) {
             throw new AuthorizationException('Applications cannot be registered while impersonating.');
         }

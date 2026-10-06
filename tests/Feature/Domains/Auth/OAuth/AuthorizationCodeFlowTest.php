@@ -125,7 +125,7 @@ final class AuthorizationCodeFlowTest extends TestCase
         $this->exchange($client, $this->codeFrom($response), $verifier)->assertOk();
     }
 
-    // D70: environment lockdown covers the consent screen, so a locked-out person can't connect an application.
+    // Environment lockdown covers the consent screen, so a locked-out person can't connect an application.
     public function test_the_consent_screen_follows_environment_lockdown(): void
     {
         config(['platform.lockdown.enabled' => true]);

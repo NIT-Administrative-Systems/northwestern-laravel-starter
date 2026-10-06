@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Refuses the client-credentials grant at Passport's token endpoint while `api.enabled` is
- * off (D70), so service clients can't get tokens for an API that isn't there. The other grants
+ * off, so service clients can't get tokens for an API that isn't there. The other grants
  * stay: MCP clients use the authorization-code and refresh grants at the same endpoint.
  *
  * The refusal is an OAuth error response, as Passport would give for a grant it doesn't support.

@@ -87,7 +87,7 @@ final class OAuthApplicationActionsTest extends TestCase
         $this->assertTrue(Hash::check($new, (string) $client->fresh()?->secret));
     }
 
-    // A secret outlives the session, so an impersonator can't take one away (D102).
+    // A secret outlives the session, so an impersonator can't take one away.
     public function test_registering_and_regenerating_are_refused_while_impersonating(): void
     {
         [, $client] = resolve(RegisterOAuthApplication::class)('Portal', ['https://portal.example.edu/cb'], true, []);

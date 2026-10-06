@@ -103,7 +103,7 @@ class OAuthClient extends Client
     }
 
     /**
-     * MCP clients, which are the only clients that register themselves (D66).
+     * MCP clients, which are the only clients that register themselves, through the MCP server's dynamic registration.
      *
      * @param  Builder<static>  $query
      * @return Builder<static>
