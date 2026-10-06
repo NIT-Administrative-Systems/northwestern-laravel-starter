@@ -17,10 +17,11 @@ return [
 
     'guard' => 'web',
 
-    // Passport's OAuth endpoints share the API's per-IP limit. Consent is refused while impersonating,
-    // and for an MCP client without the UseMcp permission.
+    // Passport's OAuth endpoints share the API's per-IP limit. Service clients can't get tokens while the
+    // API is off. Consent is refused while impersonating, and for an MCP client without the UseMcp permission.
     'middleware' => [
         'throttle:api',
+        App\Domains\Auth\Http\Middleware\RefuseClientCredentialsWhileApiDisabled::class,
         App\Domains\Auth\Http\Middleware\RefuseOAuthConsentWhileImpersonating::class,
         App\Domains\Auth\Http\Middleware\RequireMcpPermissionForConsent::class,
     ],
