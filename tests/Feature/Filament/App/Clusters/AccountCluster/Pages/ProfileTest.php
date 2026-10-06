@@ -8,7 +8,6 @@ use App\Domains\Auth\Enums\RoleTypeEnum;
 use App\Domains\Auth\Models\Role;
 use App\Domains\User\Enums\Affiliation;
 use App\Domains\User\Models\User;
-use App\Domains\User\Models\UserLoginRecord;
 use App\Filament\App\Clusters\AccountCluster;
 use App\Filament\App\Clusters\AccountCluster\Pages\Profile;
 use App\Providers\Filament\AppPanelProvider;
@@ -82,36 +81,11 @@ final class ProfileTest extends TestCase
             ->assertSee('Entered by an administrator')
             ->assertSee('Visiting Scholar')
             ->assertSee('Request a change')
-            ->assertSee('Email verification code')
             ->assertDontSee('willie-x1y2');
 
         config(['support.enabled' => false]);
 
         Livewire::test(Profile::class)->assertDontSee('Request a change');
-    }
-
-    public function test_it_lists_the_most_recent_sign_ins(): void
-    {
-        $user = User::factory()->create();
-        UserLoginRecord::factory()->for($user)->create(['logged_in_at' => now()->subYear(), 'ip_address' => '192.0.2.99']);
-        UserLoginRecord::factory()->for($user)->count(Profile::RECENT_SIGN_INS)->create(['logged_in_at' => now()->subDay(), 'ip_address' => '192.0.2.10']);
-
-        $this->actingAs($user);
-
-        Livewire::test(Profile::class)
-            ->assertSee('192.0.2.10')
-            ->assertDontSee('192.0.2.99');
-    }
-
-    public function test_it_says_how_long_sign_ins_are_kept(): void
-    {
-        $this->actingAs(User::factory()->create());
-
-        config(['platform.retention.login_records' => 90]);
-        Livewire::test(Profile::class)->assertSee('Records are kept for 90 days.');
-
-        config(['platform.retention.login_records' => null]);
-        Livewire::test(Profile::class)->assertDontSee('Records are kept for');
     }
 
     public function test_it_lists_roles_beyond_standard_access(): void

@@ -11,8 +11,6 @@ use App\Filament\App\Pages\ContactSupport;
 use App\Providers\Filament\AppPanelProvider;
 use BackedEnum;
 use Filament\Actions\Action;
-use Filament\Infolists\Components\RepeatableEntry;
-use Filament\Infolists\Components\RepeatableEntry\TableColumn;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Grid;
@@ -26,9 +24,6 @@ use Filament\Support\Icons\Heroicon;
  */
 class Profile extends Page
 {
-    /** How many sign-ins the page lists. */
-    public const int RECENT_SIGN_INS = 10;
-
     protected static ?string $cluster = AccountCluster::class;
 
     protected static ?string $title = 'Profile';
@@ -79,35 +74,6 @@ class Profile extends Page
                         ]),
                     ]),
 
-                Section::make('Sign-in')
-                    ->description($this->signInDescription())
-                    ->schema([
-                        TextEntry::make('sign_in_method')
-                            ->label('Method')
-                            ->state(match ($user->auth_type) {
-                                AuthType::SSO => 'NetID',
-                                AuthType::Local => 'Email verification code',
-                                default => $user->auth_type->getLabel(),
-                            }),
-                        RepeatableEntry::make('recent_sign_ins')
-                            ->label('Recent sign-ins')
-                            ->state(fn (): array => $user->login_records()
-                                ->latest('logged_in_at')
-                                ->limit(self::RECENT_SIGN_INS)
-                                ->get(['logged_in_at', 'ip_address'])
-                                ->all())
-                            ->table([
-                                TableColumn::make('Signed in'),
-                                TableColumn::make('IP address'),
-                            ])
-                            ->schema([
-                                // Labels match the column headers: narrow screens stack each row with them.
-                                TextEntry::make('logged_in_at')->label('Signed in')->dateTime(),
-                                TextEntry::make('ip_address')->label('IP address')->placeholder('Unknown'),
-                            ])
-                            ->placeholder('No sign-ins recorded yet.'),
-                    ]),
-
                 Section::make('Roles')
                     ->description('Roles decide what you can do in this application. An administrator assigns them.')
                     ->schema([
@@ -118,17 +84,6 @@ class Profile extends Page
                             ->placeholder('None beyond standard access.'),
                     ]),
             ]);
-    }
-
-    private function signInDescription(): string
-    {
-        $description = 'The last ' . self::RECENT_SIGN_INS . ' sign-ins. Contact support if you don\'t recognize one.';
-
-        $retentionDays = config('platform.retention.login_records');
-
-        return filled($retentionDays)
-            ? "{$description} Records are kept for {$retentionDays} days."
-            : $description;
     }
 
     private function user(): User

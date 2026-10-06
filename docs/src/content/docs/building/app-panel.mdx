@@ -55,14 +55,13 @@ Every page shows the most important live [announcement](/features/announcements/
 
 ## The Account Area
 
-The Account area at `/app/account` is each user's own: who they are, how they sign in, their preferences, the applications connected to their account and, for those allowed, their personal access tokens. It is a cluster, `App\Filament\App\Clusters\AccountCluster`, with its pages as tabs across the top. It isn't in the sidebar, which is for your application's features; users reach it from the user menu's **Account** item and the dashboard widget's **Account** link. Every user who can open the app panel can open it.
+The Account area at `/app/account` is each user's own: who they are, their preferences, the applications connected to their account and, for those allowed, their personal access tokens. It is a cluster, `App\Filament\App\Clusters\AccountCluster`, with its pages as tabs across the top. It isn't in the sidebar, which is for your application's features; users reach it from the user menu's **Account** item and the dashboard widget's **Account** link. Every user who can open the app panel can open it.
 
 ### Profile
 
 `/app/account/profile` is read-only:
 
 - **Details.** For a NetID user: name, NetID, email, primary affiliation, job titles and departments, which come from the [Northwestern Directory](/northwestern-integrations/directory-search/) and refresh at each sign-in. For an email user: the name, email, title and department an administrator entered, with a **Request a change** link to Contact Support when [support tickets](/features/support-tickets/) are enabled.
-- **Sign-in.** How the user signs in, and their 10 most recent sign-ins with IP addresses, from their login records. The page says how long sign-ins are kept when `LOGIN_RECORD_RETENTION_DAYS` is set.
 - **Roles.** The roles they hold beyond the default Northwestern User role.
 
 ### Access Tokens
