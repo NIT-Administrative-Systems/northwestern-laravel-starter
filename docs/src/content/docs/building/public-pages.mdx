@@ -60,7 +60,7 @@ Guests see `resources/views/public/landing.blade.php` at `/`. It is a starter pl
 
 2. **Add the view** in `resources/views/public/`, wrapped in `<x-layouts.public>`.
 
-3. **Keep the view where Tailwind looks.** The app panel's theme, `resources/css/filament/app/theme.css`, compiles classes from `resources/views/public/` and `resources/views/components/`. A view anywhere else needs its own `@source` line in that file, or its classes silently do nothing.
+3. **Use Tailwind classes freely.** The app panel's theme, `resources/css/filament/app/theme.css`, compiles classes from every file the repository tracks. Only classes that appear solely in a package's views under `vendor/`, which git ignores, need an `@source` line there.
 
 4. **Check it with axe.** Add the path to the lists in `cypress/e2e/accessibility.cy.ts`.
 

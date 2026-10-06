@@ -186,4 +186,4 @@ cy.checkAxeViolations(["diffs-container"]);
     ```
 
 - **Clickable table rows wrap every cell in a link.** A table with a record URL renders each cell as an `<a>`, so a cell that can be empty becomes a link with no text. Give that column a `->placeholder()`, such as `->placeholder('—')`.
-- **Tailwind only compiles classes from files it is told about.** A view outside `app/Filament/App/` and `resources/views/filament/app/` must be covered by an `@source` line in `resources/css/filament/app/theme.css` (or the administration theme), or its classes do nothing. See [The public layout](/building/public-pages/#adding-a-public-page).
+- **Tailwind skips what git ignores.** The themes compile classes from every tracked file, but a class that appears only in a package's views under `vendor/` needs an `@source` line in the theme, as `vendor/filament/**` has, or it does nothing.

@@ -22,7 +22,7 @@
 - **Routing**: Use attribute or route-group organization with explicit middleware stacks. Keep route definitions thin; point to invokable controllers or action classes.
 - **Enums**: Use backed string enums for database values (e.g., `AuthType`, `SystemRole`, `SystemPermission`). Document each case with PHPDoc.
 - **Eloquent**: Favor query scopes, custom casts, and value objects over raw queries. **Never add `$fillable` or `$guarded` to Eloquent models** - omit them entirely for mass assignment protection. Always eager load relationships needed to avoid N+1 queries. Use custom query builders extending `Illuminate\Database\Eloquent\Builder` with proper type hints.
-- **Model inheritance**: Models should extend `App\Domains\Core\Models\BaseModel` which provides automatic audit logging. Exception: `User` extends `Authenticatable` but uses the `Auditable` concern directly.
+- **Model inheritance**: Models should extend `App\Domains\Core\Models\BaseModel` which provides automatic audit logging. A model that a package needs to own its parent keeps that parent: `User` extends `Authenticatable`, and `Role` and `Permission` extend Spatie's, each using the `Auditable` concern directly; `OAuthClient` and `OAuthToken` extend Passport's so `Passport::useClientModel()` and `useTokenModel()` work. Their UUID and string keys don't fit the audits table, so their changes are recorded as custom audits on a user (`User::recordCustomAudit()`).
 - **Model properties**: Use `protected $hidden` array for sensitive fields (passwords, tokens). Use `protected $casts` property for type casting, NOT the `casts()` method. Define `protected array $auditExclude` to exclude fields from audit logs (e.g., timestamps that change frequently, tokens, passwords).
 - **Model attributes**: Use Laravel's `Attribute` casting for computed properties. Mark with `@comment` for code generator support. Pattern: `protected function attributeName(): Attribute { return Attribute::make(get: fn() => ...) }`.
 - **Model concerns**: Extract reusable model behavior into traits in `Models/Concerns/`. Examples: `PrunesAfterRetentionPeriod`, `HandlesImpersonation`, `AuditsRoles`.
@@ -41,10 +41,10 @@
 
 ## Schema & naming conventions
 
-- **Tables**: plural, `snake_case` names (`access_tokens`, `user_login_records`). Pivot tables follow `singular_singular` alphabetical order (`role_user`, not `user_role`).
+- **Tables**: plural, `snake_case` names (`announcements`, `user_login_records`). Pivot tables follow `singular_singular` alphabetical order (`role_user`, not `user_role`).
 - **Primary Key**: Tables should always have an `id` column as the primary key (`$table->id()`). Passport's `oauth_*` tables are the exception: their keys are UUIDs or token strings.
 - **Columns**: `snake_case`; booleans name a state without an `is_`/`has_` prefix (`netid_inactive`, `system_managed`), timestamps use `_at` suffix, dates use `_on` suffix.
-- **Foreign keys**: Always use `singular_id` format (`user_id`, `role_id`) when defining foreign keys. ONLY use the `foreignId()` method. NEVER chain it with `->constrained()`, `->cascadeOnDelete()`, or `->restrictOnUpdate()` - this project intentionally avoids database-level constraints. The only exceptions are Filament's `imports`, `exports` and `failed_import_rows` migrations, shipped in v1.10.0. Laravel Passport's `create_oauth_*` migrations are also kept as Passport publishes them: UUID client IDs, string token IDs, `foreignUuid()` and a `down()` method. Columns that refer to them (`oauth_client_id`, `token_id`) follow Passport's types, and the starter's own OAuth columns go in a separate migration.
+- **Foreign keys**: Always use `singular_id` format (`user_id`, `role_id`) when defining foreign keys. ONLY use the `foreignId()` method. NEVER chain it with `->constrained()`, `->cascadeOnDelete()`, or `->restrictOnUpdate()` - this project intentionally avoids database-level constraints. The only exceptions are migrations published by packages and kept as published: Spatie's permission tables, Telescope's, and Filament's `imports`, `exports` and `failed_import_rows`. Laravel Passport's `create_oauth_*` migrations are also kept as Passport publishes them: UUID client IDs, string token IDs, `foreignUuid()` and a `down()` method. Columns that refer to them (`oauth_client_id`, `token_id`) follow Passport's types, and the starter's own OAuth columns go in a separate migration.
 - **Indexes**: Add `->index()` on columns hypothesized to be frequently queried in WHERE clauses or JOIN conditions. Use `->unique()` for unique constraints. Define composite indexes with `->index(['col1', 'col2'])` when querying multiple columns together.
 - **Soft-deletes**: Tables should have `$table->softDeletes()` unless there's a strong reason not to (e.g., log/audit tables, pivot tables). After adding a `Schema::create()` to a migration, review for correctness and remove any undesired `softDeletes()` calls.
 
@@ -137,7 +137,7 @@ php artisan make:filament-relation-manager --panel=administration --related-mode
 
 - **Formatting:** Run `pnpm format` to lint CSS via Prettier before committing.
 - **Tailwind:** Use Tailwind utilities and the Northwestern tokens everywhere. Favor utility classes over custom CSS.
-- **Tailwind sources:** Views outside `app/Filament/App/` and `resources/views/filament/app/` must be listed under `@source` in `resources/css/filament/app/theme.css`, or their classes won't be compiled. Error-layout pages (500, 503, database-paused) compile from `resources/css/errors.css`, which has its own `@source` lines.
+- **Tailwind sources:** The themes and `resources/css/errors.css` detect sources automatically and skip what git ignores, so a class in any tracked file compiles. A class that appears only in a package's views under `vendor/` needs an `@source` line, as `vendor/filament/**` has. Error-layout pages (500, 503, database-paused) use `resources/css/errors.css`, not a panel theme.
 
 ---
 
