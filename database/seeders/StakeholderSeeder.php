@@ -17,8 +17,8 @@ use Throwable;
  * Seed the environment with users who have specific roles in the application. These are users that
  * at a minimum are affiliated with Northwestern University and have a NetID.
  *
- * This is called from the {@see DemoSeeder}, but it can additionally be run
- * once in production to initialize users with their roles.
+ * The {@see DemoSeeder} doesn't call it: it looks people up in Directory Search. Run it on its
+ * own in a deployed environment to give the stakeholders their roles.
  */
 class StakeholderSeeder extends Seeder
 {

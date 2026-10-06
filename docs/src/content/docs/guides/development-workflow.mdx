@@ -20,7 +20,7 @@ composer dev
 | `server` | `php artisan serve`                 | PHP's built-in server, at the address it prints                             |
 | `queue`  | `php artisan queue:listen --tries=1` | Runs queued jobs from Redis, reloading the code for each job                |
 | `logs`   | `php artisan pail --timeout=0`      | Streams the application log                                                 |
-| `vite`   | `npm run dev`                       | The Vite dev server, which rebuilds CSS and TypeScript and reloads the page |
+| `vite`   | `pnpm run dev`                      | The Vite dev server, which rebuilds CSS and TypeScript and reloads the page |
 
 The queue worker is required. Jobs go to Redis (`QUEUE_CONNECTION=redis`), so mail such as email sign-in codes is not sent until a worker runs it.
 

@@ -10,7 +10,7 @@ return [
     ],
 
     'sso' => [
-        // Valid options are: classic, apigee, forgerock-direct
+        // Valid options are: apigee, forgerock-direct
         // The forgerock-direct is for advance use-cases and contingencies.
         'strategy' => env('WEBSSO_STRATEGY', 'apigee'),
         'openAmBaseUrl' => env('WEBSSO_URL_BASE', 'https://uat-nusso.it.northwestern.edu'),
