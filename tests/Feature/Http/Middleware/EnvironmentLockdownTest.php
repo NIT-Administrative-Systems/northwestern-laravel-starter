@@ -69,6 +69,21 @@ final class EnvironmentLockdownTest extends TestCase
             ->assertRedirect(route('filament.app.environment-lockdown'));
     }
 
+    // `logout` sends a WebSSO user on to WebSSO's sign-out, still signed in; lockdown must let them leave.
+    public function test_a_locked_out_websso_user_can_sign_out(): void
+    {
+        config(['platform.lockdown.enabled' => true]);
+        Route::middleware(['web', EnvironmentLockdown::class])->get('/auth/websso/logout', fn () => response('Signed out'))->name('login-websso-logout');
+
+        $user = User::factory()->create();
+        $user->assignRoleWithAudit($this->nuRole, RoleModificationOrigin::System);
+
+        $this->actingAs($user)
+            ->get('/auth/websso/logout')
+            ->assertOk()
+            ->assertSee('Signed out');
+    }
+
     public function test_redirects_users_with_no_roles(): void
     {
         config(['platform.lockdown.enabled' => true]);

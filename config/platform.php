@@ -101,6 +101,7 @@ return [
             'login-oauth-redirect',
             'login-oauth-callback',
             'login-oauth-logout',
+            'login-websso-logout',
             'filament.app.auth.login',
             'filament.app.auth.login-code',
             'logout',
