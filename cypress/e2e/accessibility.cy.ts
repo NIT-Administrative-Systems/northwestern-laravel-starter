@@ -27,6 +27,16 @@ describe("Accessibility", () => {
             });
         });
 
+        it("the email sign-in code step has no violations", () => {
+            visit("/app/login/email");
+            cy.getBySel("email-input").type("partner-user@uchicago.edu", {
+                force: true,
+            });
+            cy.getBySel("continue-button").click();
+            cy.getBySel("code-input").should("be.visible");
+            cy.checkAxeViolations();
+        });
+
         it("a changelog entry has no violations", () => {
             cy.php(
                 "return App\\Domains\\Support\\Models\\Changelog::factory()->create(['body' => \"### Changes\\n\\n- A change\"])->slug;",
