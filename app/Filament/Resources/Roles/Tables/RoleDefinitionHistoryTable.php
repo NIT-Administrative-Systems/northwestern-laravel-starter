@@ -65,7 +65,7 @@ class RoleDefinitionHistoryTable
                         ->label('Modified By')
                         ->state(function (Audit $record): HtmlString {
                             if (! $record->user) {
-                                return new HtmlString('<span class="italic text-gray-400 dark:text-gray-500">System</span>');
+                                return new HtmlString('<span class="italic text-gray-500 dark:text-gray-400">System</span>');
                             }
 
                             return new HtmlString(e("{$record->user->full_name} ({$record->user->username})"));
@@ -195,7 +195,7 @@ class RoleDefinitionHistoryTable
 
         return filled($changes)
             ? '<div class="flex flex-col gap-1">' . implode('', $changes) . '</div>'
-            : self::pill('Role Updated', 'gray');
+            : resolve(BadgePillRenderer::class)->render('Role Updated', 'gray');
     }
 
     /**
@@ -239,22 +239,7 @@ class RoleDefinitionHistoryTable
 
         return filled($parts)
             ? '<div class="flex flex-col gap-1">' . implode('', $parts) . '</div>'
-            : self::pill('Permissions Modified', 'gray');
-    }
-
-    /**
-     * Render a small pill/badge matching Filament's fi-badge styling.
-     */
-    private static function pill(string $text, string $color): string
-    {
-        $colors = match ($color) {
-            'success' => 'fi-color-success bg-success-50 text-success-600 ring-success-600/10 dark:bg-success-400/10 dark:text-success-400 dark:ring-success-400/20',
-            'danger' => 'fi-color-danger bg-danger-50 text-danger-600 ring-danger-600/10 dark:bg-danger-400/10 dark:text-danger-400 dark:ring-danger-400/20',
-            default => 'fi-color-gray bg-gray-50 text-gray-600 ring-gray-600/10 dark:bg-gray-400/10 dark:text-gray-400 dark:ring-gray-400/20',
-        };
-
-        return '<span class="fi-badge fi-size-sm inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ' . $colors . '">'
-            . e($text) . '</span>';
+            : resolve(BadgePillRenderer::class)->render('Permissions Modified', 'gray');
     }
 
     /**
@@ -270,13 +255,13 @@ class RoleDefinitionHistoryTable
         $visible = array_slice($labels, 0, $maxVisible);
         $remaining = $count - $maxVisible;
 
-        $parts = array_map(fn (string $label) => self::pill($prefix . ' ' . $label, $color), $visible);
+        $parts = array_map(fn (string $label) => resolve(BadgePillRenderer::class)->render($prefix . ' ' . $label, $color), $visible);
 
         if ($remaining > 0) {
             $overflowLabels = array_slice($labels, $maxVisible);
             $tooltip = e(implode(', ', $overflowLabels));
             $parts[] = '<span title="' . $tooltip . '">'
-                . self::pill('+' . $remaining . ' more', 'gray')
+                . resolve(BadgePillRenderer::class)->render('+' . $remaining . ' more', 'gray')
                 . '</span>';
         }
 
