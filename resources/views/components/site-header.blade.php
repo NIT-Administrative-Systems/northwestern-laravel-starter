@@ -7,8 +7,10 @@
     Error pages use it, so it must render without Filament, auth or the database.
 
     Outside production it shows the environment badge, as the panels' top bar does: top
-    right on larger screens, centered below the header on phones, with a gold rule under
-    the header on both. The theme's default settings decide when it shows and its label.
+    right on larger screens, centered below the header on phones. The gold rule runs along
+    the top of the header, where the theme draws it on the panels' top bar, so it stays in
+    place between signing in and the app. The theme's default settings decide when it shows
+    and its label.
 --}}
 @php
     use Northwestern\FilamentTheme\EnvironmentIndicator\EnvironmentIndicatorConfig;
@@ -19,9 +21,15 @@
 
 <header @class([
     'bg-nu-purple-120 w-full text-white',
-    'border-b-4 border-[var(--nu-gold)]' => $showEnvironment,
+    // The theme's top bar uses #A76616 for the rule in dark mode; the sign-in pages follow dark mode.
+    'border-t-4 border-[var(--nu-gold)] dark:border-[#A76616]' => $showEnvironment,
 ])>
-    <div class="flex h-16 items-center gap-4 px-4 md:px-6 lg:px-8">
+    {{-- 4rem tall in all, like the panels' top bar, which fits the rule inside that height. --}}
+    <div @class([
+        'flex items-center gap-4 px-4 md:px-6 lg:px-8',
+        'h-16' => !$showEnvironment,
+        'h-15' => $showEnvironment,
+    ])>
         <a class="block shrink-0 [&_.nu-wordmark]:h-6 [&_.nu-wordmark]:w-auto [&_.nu-wordmark]:-translate-y-[10%] [&_.nu-wordmark]:text-white"
            href="https://www.northwestern.edu/">
             @include('northwestern-filament-theme::wordmark')
