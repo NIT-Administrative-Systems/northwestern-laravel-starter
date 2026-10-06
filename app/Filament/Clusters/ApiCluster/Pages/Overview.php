@@ -33,6 +33,14 @@ class Overview extends Page
 
     protected ?string $subheading = 'API configuration and usage statistics';
 
+    /**
+     * Filament checks a cluster's rule only for its navigation; each clustered page needs its own.
+     */
+    public static function canAccess(): bool
+    {
+        return ApiCluster::canAccess();
+    }
+
     /** @return array<string, string> */
     public function getBreadcrumbs(): array
     {
