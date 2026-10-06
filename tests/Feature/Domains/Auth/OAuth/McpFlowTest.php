@@ -51,7 +51,9 @@ final class McpFlowTest extends TestCase
 
         $this->mcp(null, 'initialize')
             ->assertUnauthorized()
-            ->assertHeader('WWW-Authenticate', 'Bearer realm="mcp", resource_metadata="' . url('/.well-known/oauth-protected-resource/mcp') . '"');
+            ->assertHeader('WWW-Authenticate', 'Bearer realm="mcp", resource_metadata="' . url('/.well-known/oauth-protected-resource/mcp') . '"')
+            // MCP clients expect the protocol's errors, not the REST API's Problem Details.
+            ->assertHeader('Content-Type', 'application/json');
 
         $this->getJson('/.well-known/oauth-protected-resource/mcp')
             ->assertOk()
