@@ -34,7 +34,7 @@ final class YourAccountWidgetTest extends TestCase
     }
 
     // The newest login record is the current sign-in, so the greeting reports the one before it.
-    public function test_it_reports_the_previous_sign_in_and_how_it_was_made(): void
+    public function test_a_returning_user_is_welcomed_back_without_sign_in_details(): void
     {
         $user = User::factory()->create(['first_name' => 'Willie']);
         UserLoginRecord::factory()->for($user)->create(['logged_in_at' => now()->subDays(2)]);
@@ -44,28 +44,19 @@ final class YourAccountWidgetTest extends TestCase
 
         Livewire::test(YourAccountWidget::class)
             ->assertSee('Welcome back, Willie')
-            ->assertSee('2 days ago')
-            ->assertSee('with your NetID');
+            ->assertDontSee('2 days ago');
     }
 
-    public function test_email_users_see_their_sign_in_method(): void
+    public function test_a_first_sign_in_is_welcomed_rather_than_welcomed_back(): void
     {
-        $user = User::factory()->affiliate()->create();
-        UserLoginRecord::factory()->for($user)->count(2)->create();
-
-        $this->actingAs($user);
-
-        Livewire::test(YourAccountWidget::class)->assertSee('with an email verification code');
-    }
-
-    public function test_a_first_sign_in_says_so(): void
-    {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['first_name' => 'Willie']);
         UserLoginRecord::factory()->for($user)->create();
 
         $this->actingAs($user);
 
-        Livewire::test(YourAccountWidget::class)->assertSee('This is your first time signing in.');
+        Livewire::test(YourAccountWidget::class)
+            ->assertSee('Welcome, Willie')
+            ->assertDontSee('Welcome back');
     }
 
     public function test_it_lists_roles_beyond_the_default_northwestern_user_role(): void
@@ -86,7 +77,7 @@ final class YourAccountWidgetTest extends TestCase
         $this->actingAs(User::factory()->create());
 
         Livewire::test(YourAccountWidget::class)
-            ->assertSee('Manage your account')
+            ->assertSee('Account')
             ->assertSee('/app/account/profile');
     }
 

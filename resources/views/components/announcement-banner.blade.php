@@ -29,7 +29,8 @@
                      :icon="$severity->getIcon()">
     <x-slot name="footer">
         <div class="flex flex-col gap-1">
-            <p class="fi-callout-heading">
+            {{-- Not .fi-callout-heading: the theme sets that as a small uppercase label, and this is a title. --}}
+            <p class="font-nu-heading text-base font-semibold text-gray-950 dark:text-white">
                 <span class="sr-only">{{ $severity->getLabel() }}:</span>
                 {{ $announcement->title }}
             </p>

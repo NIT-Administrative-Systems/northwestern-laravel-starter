@@ -47,13 +47,13 @@ class Profile extends Page
         return $schema
             ->record($user)
             ->components([
-                Section::make('Your details')
+                Section::make('Details')
                     ->description($isNetIdUser
-                        ? 'These details come from the Northwestern Directory and are refreshed each time you sign in. They can\'t be changed here.'
-                        : 'An administrator entered these details when they created your account. They can\'t be changed here.')
+                        ? 'From the Northwestern Directory, refreshed each time you sign in.'
+                        : 'Entered by an administrator when your account was created.')
                     ->afterHeader([
                         Action::make('contactSupport')
-                            ->label('Contact Support to change them')
+                            ->label('Request a change')
                             ->link()
                             ->url(fn (): string => ContactSupport::getUrl(panel: AppPanelProvider::ID))
                             ->visible(fn (): bool => ! $isNetIdUser && ContactSupport::canAccess()),
@@ -83,10 +83,10 @@ class Profile extends Page
                     ->description($this->signInDescription())
                     ->schema([
                         TextEntry::make('sign_in_method')
-                            ->label('You sign in with')
+                            ->label('Method')
                             ->state(match ($user->auth_type) {
-                                AuthType::SSO => 'Your NetID',
-                                AuthType::Local => 'A verification code sent to your email',
+                                AuthType::SSO => 'NetID',
+                                AuthType::Local => 'Email verification code',
                                 default => $user->auth_type->getLabel(),
                             }),
                         RepeatableEntry::make('recent_sign_ins')
@@ -122,12 +122,12 @@ class Profile extends Page
 
     private function signInDescription(): string
     {
-        $description = 'Your ' . self::RECENT_SIGN_INS . ' most recent sign-ins. If you don\'t recognize one, contact support.';
+        $description = 'The last ' . self::RECENT_SIGN_INS . ' sign-ins. Contact support if you don\'t recognize one.';
 
         $retentionDays = config('platform.retention.login_records');
 
         return filled($retentionDays)
-            ? "{$description} Sign-ins are kept for {$retentionDays} days."
+            ? "{$description} Records are kept for {$retentionDays} days."
             : $description;
     }
 

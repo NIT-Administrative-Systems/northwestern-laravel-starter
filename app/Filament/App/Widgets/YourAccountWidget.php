@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Filament\App\Widgets;
 
-use App\Domains\Auth\Enums\AuthType;
 use App\Domains\User\Models\User;
 use App\Filament\App\Clusters\AccountCluster\Pages\Profile;
 use App\Filament\App\Pages\ContactSupport;
@@ -12,9 +11,9 @@ use App\Providers\Filament\AppPanelProvider;
 use Filament\Widgets\Widget;
 
 /**
- * The signed-in user's account on the app panel's dashboard: a greeting, their previous
- * sign-in, the roles they hold beyond the default Northwestern User role, a link to their
- * Account area, and where to get help. Replace or delete it as the application grows its own dashboard.
+ * The signed-in user's account on the app panel's dashboard: a greeting (welcome back, after
+ * the first sign-in), the roles they hold beyond the default Northwestern User role, a link to
+ * their Account area, and where to get help. Replace or delete it as the application grows its own dashboard.
  */
 class YourAccountWidget extends Widget
 {
@@ -35,20 +34,10 @@ class YourAccountWidget extends Widget
         /** @var User $user */
         $user = auth()->user();
 
-        // The newest record is the current sign-in, so the previous one is second.
-        $previousSignIn = $user->login_records()
-            ->latest('logged_in_at')
-            ->skip(1)
-            ->first();
-
         return [
             'firstName' => filled($user->first_name) ? $user->first_name : $user->full_name,
-            'previousSignInAt' => $previousSignIn?->logged_in_at,
-            'signInMethod' => match ($user->auth_type) {
-                AuthType::SSO => 'your NetID',
-                AuthType::Local => 'an email verification code',
-                default => $user->auth_type->getLabel(),
-            },
+            // The current sign-in is recorded too, so a returning user has more than one.
+            'returning' => $user->login_records()->skip(1)->exists(),
             'accountUrl' => Profile::getUrl(panel: AppPanelProvider::ID),
             'roles' => $user->non_default_roles->pluck('name')->sort()->values()->all(),
             'contactSupportUrl' => ContactSupport::canAccess() ? ContactSupport::getUrl(panel: AppPanelProvider::ID) : null,

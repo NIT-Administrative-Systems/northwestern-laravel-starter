@@ -1,29 +1,18 @@
 <x-filament-widgets::widget>
     <x-filament::section>
         <x-slot name="heading">
-            {{ $previousSignInAt ? 'Welcome back' : 'Welcome' }}, {{ $firstName }}
-        </x-slot>
-
-        <x-slot name="description">
-            @if ($previousSignInAt)
-                You last signed in
-                <time title="{{ $previousSignInAt->format('l, F j, Y \a\t g:i A') }}"
-                      datetime="{{ $previousSignInAt->toIso8601String() }}">
-                    {{ $previousSignInAt->diffForHumans() }}</time>, with {{ $signInMethod }}.
-            @else
-                This is your first time signing in.
-            @endif
+            {{ $returning ? 'Welcome back' : 'Welcome' }}, {{ $firstName }}
         </x-slot>
 
         <x-slot name="afterHeader">
             <x-filament::link :href="$accountUrl" icon="heroicon-o-user-circle">
-                Manage your account
+                Account
             </x-filament::link>
         </x-slot>
 
         <dl class="grid gap-6 sm:grid-cols-2">
             <div>
-                <dt class="text-sm font-medium text-gray-950 dark:text-white">Your roles</dt>
+                <dt class="text-sm font-medium text-gray-950 dark:text-white">Roles</dt>
                 <dd class="mt-2">
                     @if ($roles === [])
                         <span class="text-sm text-gray-600 dark:text-gray-400">

@@ -11,13 +11,6 @@
 @source '../../../../resources/views/vendor/pagination/tailwind.blade.php';
 @source '../../../../vendor/filament/**/*';
 
-/* The wordmark's lowercase letters sit in the lower part of its box, so centering the box leaves it
-   looking low beside the application name. Lifting it by a tenth of its height lines up its visual
-   center with the name's. A candidate for northwestern-filament-theme. */
-.fi-topbar .fi-logo .nu-wordmark {
-    translate: 0 -10%;
-}
-
 /* The app panel's simple pages show the environment badge in <x-site-header>, not above the card. */
 .fi-simple-layout .nu-env-indicator-simple {
     display: none;
@@ -86,14 +79,4 @@
     min-width: 0;
     height: 3rem;
     font-size: 1.25rem;
-}
-
-/* Filament draws table placeholder text in gray-400, which fails color contrast on white.
-   A candidate for northwestern-filament-theme, so every app gets it. */
-.fi-ta-placeholder {
-    color: var(--gray-500);
-}
-
-.dark .fi-ta-placeholder {
-    color: var(--gray-400);
 }
