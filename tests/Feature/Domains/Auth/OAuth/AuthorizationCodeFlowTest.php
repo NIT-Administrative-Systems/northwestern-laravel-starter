@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Tests\Feature\Domains\Auth\OAuth;
 
 use App\Domains\Auth\Actions\Applications\DisconnectApplication;
-use App\Domains\Auth\Http\Controllers\SwitchOAuthAccountController;
 use App\Domains\Auth\Enums\SystemPermission;
+use App\Domains\Auth\Http\Controllers\SwitchOAuthAccountController;
 use App\Domains\Auth\Http\Middleware\RefuseOAuthConsentWhileImpersonating;
 use App\Domains\Auth\Listeners\RecordOAuthConnection;
 use App\Domains\Auth\Models\OAuthConnection;
