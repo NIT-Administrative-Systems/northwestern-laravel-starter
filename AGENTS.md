@@ -16,7 +16,8 @@ shared with GitHub Copilot. Follow them. The documentation site is in `docs/`
   Bootstrap, Font Awesome, jQuery or other component libraries.
 - Northwestern integrations from `northwestern-sysdev/laravel-soa` and
   `northwestern-sysdev/chassis` (WebSSO, Entra ID, Directory Search, EventHub, API tokens).
-- Pest and PHPUnit for PHP tests, Cypress with axe for end-to-end and accessibility tests.
+- Pest and PHPUnit for PHP tests; Pest's browser plugin and Playwright for browser tests, which
+  check every page with axe through Chassis's browser expectations.
 
 ## Commands
 
@@ -31,11 +32,12 @@ shared with GitHub Copilot. Follow them. The documentation site is in `docs/`
 | Format Blade, CSS, TS, Markdown | `pnpm format` (Prettier)                                                       |
 | Type-check TypeScript           | `pnpm typecheck`                                                               |
 | Build assets                    | `pnpm build`                                                                   |
-| End-to-end tests                | `pnpm test:e2e:headless` (needs a running app; see `cypress.config.js`)        |
+| Browser tests                   | `composer test:browser` (after `pnpm build`; not part of `pest --parallel`)    |
 
-Before calling work done, run the PHP tests, PHPStan and both formatters, and rebuild assets
-if you changed Blade, CSS or TypeScript. CI runs all of them, and its lint job commits
-formatting fixes back to the pull request, so pull before pushing again.
+Before calling work done, run the PHP tests, PHPStan and both formatters, rebuild assets if
+you changed Blade, CSS or TypeScript, and run the browser tests if you added or changed a page.
+CI runs all of them, and its lint job commits formatting fixes back to the pull request, so pull
+before pushing again.
 
 ## Where code goes
 
@@ -90,9 +92,10 @@ formatting fixes back to the pull request, so pull before pushing again.
   separate migration, as `add_starter_columns_to_oauth_clients_table` does.
 - **Edit an unreleased migration instead of adding another one.** Check `git tag --contains`
   before deciding a migration has shipped.
-- **Retention:** records that should expire use the `PrunesAfterRetentionPeriod` trait and a
-  key under `platform.retention`; the daily `model:prune` deletes them. Don't cast those env
-  values to `(int)`: `null` must stay null (keep forever), not become 0.
+- **Retention:** records that should expire use Chassis's `PrunesAfterRetentionPeriod` trait
+  (`Northwestern\SysDev\Chassis\Models\Concerns`) and a key under `platform.retention`; the
+  daily `model:prune` deletes them. Don't cast those env values to `(int)`: `null` must stay
+  null (keep forever), not become 0.
 - **Mail templates:** don't let Prettier reformat `resources/views/vendor/mail/` or
   `resources/views/mail/` (both are in `.prettierignore`). Indentation inside Markdown mail
   becomes code blocks.
@@ -113,6 +116,11 @@ formatting fixes back to the pull request, so pull before pushing again.
   `herd coverage -dmemory_limit=2G vendor/bin/pest --coverage --min=100`.
 - Use factories. `UserFactory` gives SSO users the Northwestern User role; use `->affiliate()`
   for a user without roles.
-- Every page the starter ships is checked with axe in `cypress/e2e/accessibility.cy.ts`. Add
-  new pages to its lists. `cy.checkAxeViolations(['selector'])` excludes an element when a
-  third-party widget can't be fixed, with a comment saying why.
+- **Browser tests** in `tests/Browser` (Pest functions on `Tests\BrowserTestCase`) check every
+  page the starter ships with `toBeHealthy()`: axe, browser errors, server errors and broken
+  images, in light and dark mode. `FilamentPages::in()` finds each panel's pages, so a new
+  Filament page is checked automatically; add record pages, public pages and pages that need
+  data to the files in `tests/Browser/Pages`. `toBeHealthy(exclude: ['selector'])` excludes an
+  element when a third-party widget can't be fixed, with a comment saying why.
+- In browser tests, `@name` selects by `data-testid`, and a selector with no CSS punctuation is
+  matched as text. Never commit `->debug()` or `->tinker()`: CI's lint job fails on them.

@@ -62,7 +62,7 @@ Guests see `resources/views/public/landing.blade.php` at `/`. It is a starter pl
 
 3. **Use Tailwind classes freely.** The app panel's theme, `resources/css/filament/app/theme.css`, compiles classes from every file the repository tracks. Only classes that appear solely in a package's views under `vendor/`, which git ignores, need an `@source` line there.
 
-4. **Check it with axe.** Add the path to the lists in `cypress/e2e/accessibility.cy.ts`.
+4. **Check it in the browser tests.** Add the path to the `public pages` dataset in `tests/Browser/Pages/PublicPagesTest.php`, which checks each page with axe and for errors, in light and dark mode and at a phone's width. See [Browser Tests](/guides/testing/#browser-tests).
 
 </Steps>
 

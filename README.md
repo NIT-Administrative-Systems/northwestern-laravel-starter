@@ -112,14 +112,15 @@ usage guides.
 - **Brand Compliance**: Filament themed to the University's branding guidelines, with the unit footer the Web Style Guide
   requires.
 - **Responsive Design**: Consistent user experience across devices with various screen sizes.
-- **WCAG 2.1 Accessibility**: Every page the starter ships is checked with axe in Cypress.
+- **WCAG 2.1 Accessibility**: Every page the starter ships is checked with axe, in light and dark mode, by the browser
+  tests.
 
 ### Developer Experience
 
 - **Local Development**: Schema-validated database snapshots, configuration validation, and database rebuild
   utilities.
-- **Testing**: Parallel [Pest](https://pestphp.com) tests and end-to-end testing
-  with [Cypress](https://www.cypress.io).
+- **Testing**: Parallel [Pest](https://pestphp.com) tests, and browser tests through Pest's browser plugin and
+  [Playwright](https://playwright.dev).
 - **CI/CD Ready**: Pre-configured GitHub Actions workflows for static analysis, formatting, and automated testing.
 
 ### Monitoring & Operations

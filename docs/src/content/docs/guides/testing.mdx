@@ -1,34 +1,34 @@
 ---
 title: Testing
-description: Writing and running the PHP tests, the Cypress end-to-end tests and the axe accessibility checks
+description: Writing and running the PHP tests, and the browser tests that check every page with axe
 sidebar:
     order: 2
 ---
 
 import { Aside } from '@astrojs/starlight/components';
 
-The starter has two test suites. PHP tests in `tests/` run with Pest and cover actions, models, controllers, commands and Filament pages. Cypress specs in `cypress/e2e/` drive a running application in a browser, and one of them checks every page with axe.
+The starter has two kinds of test, and Pest runs both. PHP tests in `tests/Unit` and `tests/Feature` cover actions, models, controllers, commands and Filament pages. Browser tests in `tests/Browser` drive the application in Chromium, sign in, fill in forms, and check every page the starter ships with axe.
 
-## PHP tests
+## PHP Tests
 
-### Running them
+### Running Them
 
 | Task                         | Command                                               |
 | ---------------------------- | ----------------------------------------------------- |
-| Every test, in parallel      | `vendor/bin/pest --parallel`                          |
+| Every PHP test, in parallel  | `vendor/bin/pest --parallel`                          |
 | One file                     | `vendor/bin/pest tests/Feature/Path/To/SomeTest.php`  |
 | Tests whose name matches     | `vendor/bin/pest --filter=test_administration_panel` |
 | Tests in uncommitted files   | `vendor/bin/pest --dirty`                             |
 | Stop at the first failure    | `vendor/bin/pest --bail`                              |
 | Every test, with coverage    | `vendor/bin/pest --parallel --coverage`               |
 
-`--filter` takes a test class or method name, or a regular expression. `--coverage` needs the PCOV or Xdebug extension.
+`--filter` takes a test class or method name, or a regular expression. `--coverage` needs the PCOV or Xdebug extension. `phpunit.xml` runs the Unit and Feature suites by default, so these commands leave out the [browser tests](#browser-tests).
 
 Tests run against the database in `DB_PHPUNIT_DATABASE`, through the `phpunit` connection in `config/database.php`. `Tests\TestCase` refreshes and seeds it, and turns off Vite. With `--parallel`, Laravel creates a copy for each process (`your_project_name_test_test_1` and so on), so the database user needs permission to create databases.
 
 `phpunit.xml` sets the rest of the test environment: the `sync` queue, the `array` mailer, cache and session, and the optional features (the API, local sign-in, Contact Support, the changelog and the Wildcard photo sync) turned on so their tests run.
 
-### Where tests go
+### Where Tests Go
 
 Tests mirror the namespace of the class they test, under `tests/Feature` or `tests/Unit`. A regression test goes in the existing test file for that class.
 
@@ -70,7 +70,7 @@ Create models with factories rather than by hand. The `User` factory's states:
 
 Mock external services such as `Northwestern\SysDev\SOA\DirectorySearch` rather than calling them, and use `Event::fake()` and `Queue::fake()` to assert on dispatched events and jobs.
 
-### API endpoint tests
+### API Endpoint Tests
 
 Tests of an API endpoint extend `Tests\ApiTestCase`. Its `setUp()` creates an API user (`$this->apiUser`) with a service client, exchanges the client at `/oauth/token` for an access token (`$this->accessToken`), and skips the test when the API is disabled. Other tests can get a token the same way with the `Tests\Concerns\IssuesServiceClientTokens` trait. `Tests\Concerns\IssuesPersonalAccessTokens` gives a person the permission and a personal access token with the scopes you name, for testing routes that require a scope, and `Tests\Concerns\RunsAuthorizationCodeFlow` registers an application or MCP client and runs the consent and token exchange as a person would. A subclass names its endpoint and HTTP methods:
 
@@ -99,12 +99,12 @@ final class WidgetApiControllerTest extends ApiTestCase
 
 `authenticatedGet()`, `authenticatedPost()`, `authenticatedPut()`, `authenticatedPatch()`, `authenticatedDelete()` and `authenticatedJson()` send the request with the token's bearer header. The inherited `test_requires_authentication()` checks that each method in `methods()` answers 401 without a token. See [API](/features/api/).
 
-### Panel tests
+### Panel Tests
 
 - **`app` is the default panel.** Livewire tests of administration pages must call `Filament::setCurrentPanel(AdministrationPanelProvider::ID)` first, usually in `setUp()`.
 - **Render hooks persist for the rest of a test.** A panel registers its render hooks when it boots, and they stay registered for the rest of the test. When you assert on panel chrome, such as the footer, request `/app` and `/administration` in separate tests. `tests/Feature/Providers/Filament/AppPanelProviderTest.php` shows the pattern.
 
-### Test shards
+### Test Shards
 
 CI splits the PHP tests into three shards that run in parallel jobs (`--shard 1/3`, `2/3` and `3/3`). `tests/.pest/shards.json` records how long each test class took, and Pest uses those timings to give every shard about the same amount of work. A test class missing from the file is assigned round-robin, and Pest prints a warning that the file is out of date.
 
@@ -116,64 +116,124 @@ vendor/bin/pest --parallel --update-shards
 
 Pest writes `tests/.pest/shards.json` only when the run passes. Commit the file. To change the number of shards, edit both the `matrix.shard` list and the `--shard ${{ matrix.shard }}/3` argument in `.github/workflows/check-pr.yml`.
 
-## End-to-end tests with Cypress
+## Browser Tests
 
-### Running them
+Browser tests run through [Pest's browser plugin](https://pestphp.com/docs/browser-testing) (`pestphp/pest-plugin-browser`) and Playwright. The application runs inside the test process, as it does in a feature test, so there's no server to start and no database snapshot to restore. `Tests\TestCase` refreshes and seeds the database as it does for a feature test, and factories, `actingAs()` and fakes such as `Mail::fake()` apply to every request the browser makes.
 
-| Command                      | What it does                                                         |
-| ---------------------------- | -------------------------------------------------------------------- |
-| `pnpm test:e2e`              | Opens the Cypress app and rebuilds the test database before the run |
-| `pnpm test:e2e:skip-rebuild` | Opens the Cypress app and reuses the existing `cypress` snapshot    |
-| `pnpm test:e2e:headless`     | Runs every spec headless and reuses the existing `cypress` snapshot |
+### Setting Up
 
-A run needs:
+Install the JavaScript dependencies and Playwright's Chromium, and build the assets:
 
-- **The application running** at the `APP_URL` in `.env`, served by Herd or `composer dev`. Cypress reads `APP_URL` from `.env` and falls back to `http://localhost:8000`.
-- **A non-production environment.** Cypress drives the app through the `/__cypress__/*` routes from `laracasts/cypress`, which are not registered in production.
-- **Assets built** with `pnpm build`, or Vite running.
+```bash
+pnpm install
+pnpm exec playwright install chromium
+pnpm build
+```
 
-### The test database
+Pages load the application's real assets, so run `pnpm build` again after you change CSS or TypeScript, or add Tailwind classes to a view.
 
-Unless `SKIP_DATABASE_REBUILD` is set, Cypress prepares the database before the run (`cypress/plugins/index.ts`):
+### Running Them
 
-1. `migrate:fresh --seed`
-2. The seeders listed in `cypress/support/seeders.ts` (`Sample\DemoUserSeeder`, which creates the `generic.user` and `nuit.admin` accounts the specs sign in as)
-3. `db:snapshot:create cypress`
+| Task                             | Command                                                  |
+| -------------------------------- | -------------------------------------------------------- |
+| Every browser test, in parallel  | `composer test:browser`                                  |
+| One file                         | `vendor/bin/pest tests/Browser/Auth/SignInTest.php`      |
+| Tests whose name matches         | `vendor/bin/pest --testsuite=Browser --filter="sign-in"` |
+| Watch the browser                | `vendor/bin/pest --testsuite=Browser --headed`           |
 
-Each spec then calls `cy.loadDatabaseSnapshot()` in `beforeEach` to restore the `cypress` snapshot, so every test starts from the same data. The headless and skip-rebuild scripts set `SKIP_DATABASE_REBUILD`, so they need a `cypress` snapshot from an earlier rebuild. See [Database Snapshots](/features/database-snapshots/).
+`composer test:browser` runs `vendor/bin/pest --testsuite=Browser --parallel`. The browser tests are their own suite in `phpunit.xml`, so `vendor/bin/pest --parallel` doesn't run them. They use the same test database and `phpunit.xml` environment as the PHP tests.
 
-<Aside type="caution" title="The rebuild wipes the database">
-    `migrate:fresh` runs against the database the application is configured for. Point a separate `.env.cypress` at a database you can lose (see below), or expect to run `php artisan db:rebuild` afterwards.
-</Aside>
+### What They Check
 
-On a local run, if `.env.cypress` exists, Cypress moves `.env` to `.env.backup` and `.env.cypress` into its place before the run, and swaps them back afterwards. `.env.cypress` is ignored by Git. If a run stops before swapping back, `php artisan restore-env-files` restores your `.env` ([reference](/reference/commands/#restore-env-files)). CI never swaps the files; it uses the environment from `.env.ci`.
+`tests/Browser` holds Pest test functions. `tests/Pest.php` binds them to `Tests\BrowserTestCase`, which extends `Tests\TestCase`.
 
-### Specs
+| File                                | Checks                                                                                                                                                                                                       |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `HomeTest.php`                      | The landing page, where guests and signed-in people are sent, and who sees the user menu's administration link                                                                                               |
+| `Auth/SignInTest.php`               | The sign-in page and the email code flow, with the code read from the faked email                                                                                                                            |
+| `Auth/SignOutTest.php`              | Signing out from either panel                                                                                                                                                                                |
+| `Pages/PublicPagesTest.php`         | Every public page, also at a phone's width; the email code step; a changelog entry; the error pages from 401 to 503 and the database-paused page                                                            |
+| `Pages/AppPanelPagesTest.php`       | Every app panel page a signed-in person can open, plus the lockdown page, the changelog, the not-found page and `/administration`, which they can't open; the dashboard on a phone; the announcement banner; the OAuth consent screen |
+| `Pages/AdministrationPagesTest.php` | Every administration page, and the app panel pages only administrators see; record pages for users, an API user, roles, an announcement, a support ticket and an audit; the MCP client consent screen; the dashboard on a phone |
 
-| Spec                                 | Covers                                                                                         |
-| ------------------------------------ | ---------------------------------------------------------------------------------------------- |
-| `cypress/e2e/home.cy.ts`             | The landing page, and where guests and signed-in users are sent                                 |
-| `cypress/e2e/auth/login.cy.ts`       | The sign-in page and the email code flow                                                        |
-| `cypress/e2e/auth/logout.cy.ts`      | Signing out and losing access to protected pages                                                |
-| `cypress/e2e/accessibility.cy.ts`    | axe checks on every page the starter ships                                                      |
+The page checks run in light and dark mode, and use [Chassis's](/reference/chassis/#browser-testing) expectations. `toBeHealthy()` fails a page for any of these:
 
-Custom commands are declared in `cypress/support/index.d.ts`. The ones specs use most: `cy.loginAsGenericUser()`, `cy.loginAsSuperAdmin()`, `cy.loginAs(username)`, `cy.php(code)` to run PHP in the app, `cy.artisan(command)`, `cy.getBySel(name)` for `data-testid` attributes, and `cy.checkAxeViolations()`.
+- An axe violation of any impact. Transitions and animations are settled while axe runs, so colors are checked as they end up.
+- A browser error: a `console.error()`, an uncaught exception, an unhandled promise rejection or a failed Livewire request.
+- An exception the application reported while serving the page, Livewire updates included.
+- An image that failed to load.
 
-## Accessibility checks
+A failure lists every problem on the page at once. `toBeAccessible()`, `toHaveNoClientErrors()` and `toHaveNoServerErrors()` check one kind of problem; `toBeHealthyInEachTheme()` and `toBeHealthyOnMobile()` check a page in both themes or at a phone's width; and `toAllBeHealthy()` checks a list of paths and names every page that fails.
 
-`cypress/e2e/accessibility.cy.ts` visits every page the starter ships and fails on any axe violation. Pages are listed in three groups: guests, signed-in users (`generic.user`) and administrators (`nuit.admin`). Add each page your application adds to the lists for the people who can see it.
+`tests/Pest.php` turns off two axe rules for every page: `duplicate-id`, and `empty-table-header`, because Filament leaves the actions column's header cell empty in every table.
+
+### Writing a Test
+
+A test signs in with a helper from `Tests\BrowserTestCase`, makes its data with factories, and visits a page:
+
+```php
+// tests/Browser/WidgetsTest.php
+use App\Domains\Widget\Models\Widget;
+
+it('lists widgets for a signed-in person', function () {
+    $this->signInAsNorthwesternUser();
+    Widget::factory()->create(['name' => 'Blue Widget']);
+
+    $page = visit('/app/widgets')->assertSee('Blue Widget');
+
+    expect($page)->toBeHealthy();
+});
+```
+
+| Helper                                 | What it does                                                                                    |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `$this->signInAsSuperAdministrator()`  | Signs in as a new user with the Super Administrator role, which holds every permission           |
+| `$this->signInAsNorthwesternUser()`    | Signs in as a new user with only the Northwestern User role                                      |
+| `$this->signIn($user)`                 | Signs in as a user you made, with every column loaded as a real sign-in would                    |
+| `$this->useDarkMode()`                 | Visits every later page in the test in dark mode, including the pages an expectation visits      |
+
+A few things about the browser plugin that are easy to miss:
+
+- **`@name` finds a test hook.** `click('@sign-in-link')` finds the element whose `data-testid` (or `data-test`) attribute is `sign-in-link`. The starter's views mark the elements tests use with `data-testid`.
+- **A selector without CSS punctuation is matched as text.** `assertSeeIn('h1', ...)` looks for an element containing the text "h1". Write `main h1:first-of-type` instead.
+- **`visit()` loads nothing until you use the page.** The first assertion or action loads it.
+- **`inDarkMode()` returns a new page** rather than changing the one you have.
+- **Use Chassis's `FilamentPage::press($page, 'Create')` for Filament buttons.** Pest's own `press()` clicks the first element with that text, which on a Filament page is often a breadcrumb. `FilamentPage` also opens the user menu, confirms and cancels modals, and asserts on notifications and field errors.
+
+### Adding a Page
+
+`FilamentPages::in('app')` and `FilamentPages::in('administration')` find each panel's pages from the panel itself: each resource's index and create pages, and each page and dashboard the signed-in person can open. A new Filament page or resource is checked without any change to the tests.
+
+Add the pages they can't find to the file for the people who can see them:
+
+- **A record page**, such as a view or edit page, needs a record. Add it to the dataset of the record pages test in `Pages/AdministrationPagesTest.php`, with a closure that makes the record and returns the path.
+- **A public page** goes in the `public pages` dataset in `Pages/PublicPagesTest.php`, which also checks it at a phone's width.
+- **A page that needs data to show its interesting state**, such as a banner or a consent screen, gets a test of its own that makes the data and asserts that the state is visible before it checks the page.
+- **A new error page** goes in the list of statuses in the error page test in `Pages/PublicPagesTest.php`. `ErrorPages::path($status)` registers a test route that answers with that status.
+
+### Excluding an Element
 
 When a third-party widget has a violation you can't fix, exclude its element by selector and say why in a comment:
 
-```ts
+```php
 // The @pierre/diffs viewer renders syntax colors on its change backgrounds inside a shadow
 // DOM, and none of its themes meet color contrast there.
-cy.checkAxeViolations(["diffs-container"]);
+expect(visit("/administration/audits/{$audit->getKey()}"))->toBeHealthyInEachTheme(exclude: ['diffs-container']);
 ```
 
-`cy.checkAxeViolations()` turns off two axe rules for every page: `duplicate-id`, and `empty-table-header`, because Filament leaves the actions column's header cell empty in every table.
+### Debugging
 
-### Rules that keep pages passing
+- **`--headed`** shows the browser while the tests run.
+- **`--debug`** shows the browser and pauses at the first failure, so you can inspect the page. It doesn't work with `--parallel`.
+- **`->debug()`** on a page runs only that test, in a visible browser, and pauses there. Never commit it: CI fails when a browser test calls `->debug()` or `->tinker()`.
+- **Screenshots.** A failed assertion saves a screenshot of the page to `tests/Browser/Screenshots/`, which git ignores.
+- **`--trace`** keeps a Playwright trace of each failed test in `tests/Browser/Traces/`. Open one with `pnpm exec playwright show-trace` or at [trace.playwright.dev](https://trace.playwright.dev).
+
+### In CI
+
+The **🌐 Browser Tests** job in `.github/workflows/check-pr.yml` starts PostgreSQL, installs Playwright's Chromium, builds the assets and runs the suite with `--parallel --ci`. `--ci` runs every test even when one is marked `->only()`. The job publishes the results as the **🌐 Browser Test Results** check, uploads the screenshots of failed tests as an artifact, and prints `storage/logs/laravel.log`. See [Continuous Integration](/guides/development-workflow/#continuous-integration).
+
+### Rules That Keep Pages Passing
 
 - **Filament callout headings are always `<h4>`.** A callout directly under a page title or a top-level section skips heading levels and fails axe. Leave the heading off and open the description with bold text:
 
