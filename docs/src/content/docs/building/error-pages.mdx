@@ -18,7 +18,7 @@ Error pages live in `resources/views/errors/`. Laravel renders `{status}.blade.p
 
 ## Client Errors on the Public Layout
 
-`<x-error-layout>` (`App\View\Components\ErrorLayout`) renders `resources/views/errors/layout.blade.php`: a heading from `title`, the slot as the message, and a **Back to homepage** button. By default it renders on the public layout, so the header keeps the Help menu and **Sign in** or the user menu, and the page uses the app panel's theme.
+`<x-error-layout>` (`App\View\Components\ErrorLayout`) renders `resources/views/errors/layout.blade.php`: a heading from `title`, the slot as the message, and a **Back to Homepage** button. By default it renders on the public layout, so the header keeps the Help menu and **Sign In** or the user menu, and the page uses the app panel's theme.
 
 The public layout looks up the signed-in user inside `rescue()`, so a failing lookup leaves the page signed out instead of failing it. A fallback route sends unknown URLs through the `web` middleware, so the not-found page knows who is signed in.
 
@@ -43,8 +43,8 @@ The public layout looks up the signed-in user inside `rescue()`, so a failing lo
 1. **Edit the message** of an existing client error in its view, for example `resources/views/errors/404.blade.php`:
 
    ```blade
-   <x-error-layout title="Not Found">
-       Sorry, but we can't find the page you're looking for.
+   <x-error-layout title="Page Not Found">
+       We can't find that page. Check the address and try again.
    </x-error-layout>
    ```
 
@@ -65,8 +65,8 @@ Both `resources/css/filament/app/theme.css` and `resources/css/errors.css` compi
 It asks the user to try again and links to the IT Service Desk. The rest depends on the environment and on Sentry:
 
 - **Error ID.** When Sentry captured the exception, the page shows Sentry's event ID, so a user can quote it in a report.
-- **Help us fix this.** With an event ID, the page also shows a form for the user's name, email and a description. It sends the report to Sentry with `captureFeedback`, linked to the event. Name and email are filled in for signed-in users. See [Sentry](/features/sentry/).
-- **Technical details.** The exception message and stack trace show to everyone outside production, so testers without Sentry access can describe failures. In production they show only to users with the `ManageAll` permission.
+- **Help Us Fix This.** With an event ID, the page also shows a form for the user's name, email and a description. It sends the report to Sentry with `captureFeedback`, linked to the event. Name and email are filled in for signed-in users. See [Sentry](/features/sentry/).
+- **Technical Details.** The exception message and stack trace show to everyone outside production, so testers without Sentry access can describe failures. In production they show only to users with the `ManageAll` permission.
 
 The user and permission lookups are wrapped in `rescue()`: if the database is down, the page renders without them and hides the technical details in production.
 

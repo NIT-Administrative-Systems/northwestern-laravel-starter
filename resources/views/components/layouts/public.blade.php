@@ -72,7 +72,7 @@
 <body class="fi-body flex min-h-screen flex-col bg-white text-gray-950 antialiased">
     <a class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:bg-white focus:px-4 focus:py-2"
        href="#main">
-        Skip to content
+        Skip to Content
     </a>
 
     <x-site-header>
@@ -87,7 +87,7 @@
                                 :href="$appPanel->getLoginUrl()"
                                 color="gray"
                                 size="sm">
-                Sign in
+                Sign In
             </x-filament::button>
         @endif
     </x-site-header>

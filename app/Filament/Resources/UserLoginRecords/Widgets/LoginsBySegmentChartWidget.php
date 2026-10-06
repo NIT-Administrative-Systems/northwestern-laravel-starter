@@ -14,7 +14,7 @@ class LoginsBySegmentChartWidget extends ChartWidget
 {
     use TracksBroadcastDateRange;
 
-    protected ?string $heading = 'Logins by Segment';
+    protected ?string $heading = 'Sign-Ins by Segment';
 
     protected ?string $maxHeight = '235px';
 
@@ -68,7 +68,7 @@ class LoginsBySegmentChartWidget extends ChartWidget
         return [
             'datasets' => [
                 [
-                    'label' => 'Logins',
+                    'label' => 'Sign-Ins',
                     'data' => $chartValues,
                     'backgroundColor' => $colors,
                     'borderColor' => 'rgba(255, 255, 255, 0.7)',

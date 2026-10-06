@@ -61,4 +61,13 @@ class OAuthServiceProvider extends ServiceProvider
             ->mapWithKeys(fn (SystemPermission $permission): array => [$permission->value => $permission->description()])
             ->all();
     }
+
+    /**
+     * A scope's name in the interface: the permission it's named after ("View Users"), or "Use
+     * Tools" for the MCP scope.
+     */
+    public static function scopeLabel(string $scope): string
+    {
+        return $scope === Registrar::OAUTH_SCOPE ? 'Use Tools' : (SystemPermission::tryFrom($scope)?->getLabel() ?? $scope);
+    }
 }

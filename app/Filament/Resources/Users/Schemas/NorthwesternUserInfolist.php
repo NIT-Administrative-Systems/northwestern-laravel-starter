@@ -97,7 +97,7 @@ class NorthwesternUserInfolist
                                                         ->copyable(),
 
                                                     TextEntry::make('email')
-                                                        ->label('Email Address')
+                                                        ->label('Email')
                                                         ->url(fn ($state) => filled($state) ? 'mailto:' . $state : null)
                                                         ->openUrlInNewTab()
                                                         ->placeholder('N/A')
@@ -176,7 +176,7 @@ class NorthwesternUserInfolist
                                 ->dateTime(),
 
                             TextEntry::make('latest_login_record.logged_in_at')
-                                ->label('Last Login')
+                                ->label('Last Sign-In')
                                 ->placeholder('Never')
                                 ->dateTime()
                                 ->inlineLabel()
@@ -184,7 +184,7 @@ class NorthwesternUserInfolist
                                 ->dateTimeTooltip(),
 
                             TextEntry::make('last_directory_sync_at')
-                                ->label('Last Directory Sync At')
+                                ->label('Last Directory Sync')
                                 ->placeholder('Never')
                                 ->dateTime()
                                 ->since()
@@ -192,31 +192,31 @@ class NorthwesternUserInfolist
                                 ->belowContent([
                                     Action::make('sync')
                                         ->authorize(SystemPermission::EditUsers)
-                                        ->label('Force Sync')
+                                        ->label('Refresh from Directory')
                                         ->icon(Heroicon::OutlinedArrowPath)
-                                        ->tooltip('User data syncs automatically with the Northwestern Directory during login. If this appears out of date, you may force a refresh.')
+                                        ->tooltip('Details refresh from the Northwestern Directory each time this person signs in. Refresh them now if they look out of date.')
                                         ->color('warning')
                                         ->size(Size::ExtraSmall)
                                         ->requiresConfirmation()
-                                        ->modalHeading('Force Northwestern Directory Refresh?')
+                                        ->modalHeading('Refresh from the Northwestern Directory?')
                                         ->modalDescription(
                                             'This will pull the latest attributes from the Northwestern Directory and update the user in the platform.'
                                         )
-                                        ->modalSubmitActionLabel('Start Sync')
+                                        ->modalSubmitActionLabel('Refresh')
                                         ->visible(fn (): bool => filled(config('nusoa.directorySearch.apiKey')))
                                         ->action(function ($record, FindOrUpdateUserFromDirectory $findOrUpdateUserFromDirectory) {
                                             $user = ($findOrUpdateUserFromDirectory)($record->username, immediate: true);
 
                                             if ($record->directory_sync_last_failed_at?->getTimestamp() !== $user?->directory_sync_last_failed_at?->getTimestamp()) {
                                                 Notification::make()
-                                                    ->title('Directory sync failed')
-                                                    ->body('The Northwestern Directory may be unavailable or the user has an incomplete record. Please try again later.')
+                                                    ->title('Directory Refresh Failed')
+                                                    ->body('The Northwestern Directory may be unavailable, or this person\'s record is incomplete. Try again later.')
                                                     ->danger()
                                                     ->send();
                                             } else {
                                                 Notification::make()
-                                                    ->title('Directory sync complete')
-                                                    ->body("Northwestern Directory data has been synced for {$user?->username}.")
+                                                    ->title('Directory Refresh Complete')
+                                                    ->body("{$user?->username}'s details are up to date.")
                                                     ->success()
                                                     ->send();
                                             }
@@ -226,7 +226,7 @@ class NorthwesternUserInfolist
                                 ]),
 
                             TextEntry::make('directory_sync_last_failed_at')
-                                ->label('Last Directory Sync Failed At')
+                                ->label('Last Directory Sync Failed')
                                 ->hidden(fn (User $record) => blank($record->directory_sync_last_failed_at))
                                 ->placeholder('Never')
                                 ->dateTime()

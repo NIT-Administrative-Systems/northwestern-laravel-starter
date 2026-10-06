@@ -35,8 +35,8 @@ final class ErrorPagesTest extends TestCase
     {
         $this->get('/no-such-page')
             ->assertNotFound()
-            ->assertSee('Not Found')
-            ->assertSee('Back to homepage')
+            ->assertSee('Page Not Found')
+            ->assertSee('Back to Homepage')
             ->assertSee('Privacy Statement');
     }
 
@@ -80,7 +80,7 @@ final class ErrorPagesTest extends TestCase
 
         $this->get('/__test/server-error')
             ->assertInternalServerError()
-            ->assertSee('Something went wrong')
+            ->assertSee('Something Went Wrong')
             ->assertSee('Privacy Statement');
     }
 
@@ -100,7 +100,7 @@ final class ErrorPagesTest extends TestCase
         $this->get('/__test/server-error')
             ->assertInternalServerError()
             ->assertSee('Sensitive failure detail')
-            ->assertSee('Non-production only');
+            ->assertSee('Non-Production Only');
     }
 
     /**

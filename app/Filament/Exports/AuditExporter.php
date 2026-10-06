@@ -44,7 +44,7 @@ class AuditExporter extends Exporter
                 ->label('Username'),
 
             ExportColumn::make('user.full_name')
-                ->label('User Name'),
+                ->label('Name'),
 
             ExportColumn::make('impersonator.username')
                 ->label('Impersonator'),
@@ -76,7 +76,7 @@ class AuditExporter extends Exporter
                 ->enabledByDefault(false),
 
             ExportColumn::make('created_at')
-                ->label('Created At'),
+                ->label('Created'),
         ];
     }
 

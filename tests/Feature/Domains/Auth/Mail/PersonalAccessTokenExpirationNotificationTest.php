@@ -20,7 +20,7 @@ final class PersonalAccessTokenExpirationNotificationTest extends TestCase
 
         $mail = new PersonalAccessTokenExpirationNotification($user, $token, 3);
 
-        $this->assertSame('Your Personal Access Token Is Expiring', $mail->envelope()->subject);
+        $this->assertSame('Your personal access token expires in three days', $mail->envelope()->subject);
         $mail->assertSeeInHtml('Nightly export')
             ->assertSeeInHtml('/app/account/access-tokens')
             ->assertSeeInHtml('/app/account/preferences');

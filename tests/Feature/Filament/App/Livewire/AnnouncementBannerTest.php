@@ -38,8 +38,8 @@ final class AnnouncementBannerTest extends TestCase
         Livewire::test(AnnouncementBanner::class)
             ->assertSee('Maintenance Saturday')
             ->assertDontSee('New feature')
-            ->assertSee('1 more announcement')
-            ->assertSee('Read more')
+            ->assertSee('1 More Announcement')
+            ->assertSee('Read More')
             ->assertSeeHtml('wire:click="dismiss(');
     }
 
@@ -51,7 +51,7 @@ final class AnnouncementBannerTest extends TestCase
         Livewire::test(AnnouncementBanner::class)
             ->call('dismiss', $warning->id)
             ->assertSee('New feature')
-            ->assertDontSee('more announcement')
+            ->assertDontSee('More Announcement')
             ->call('dismiss', $info->id)
             ->assertDontSee('New feature')
             ->assertDontSeeHtml('data-cy="announcement-banner"');

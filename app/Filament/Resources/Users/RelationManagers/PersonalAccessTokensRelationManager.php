@@ -10,6 +10,7 @@ use App\Domains\Auth\Enums\CredentialStatus;
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\OAuthToken;
 use App\Domains\User\Models\User;
+use App\Providers\OAuthServiceProvider;
 use Filament\Actions\Action;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -27,7 +28,7 @@ class PersonalAccessTokensRelationManager extends RelationManager
 {
     protected static string $relationship = 'tokens';
 
-    protected static ?string $title = 'Access Tokens';
+    protected static ?string $title = 'Personal Access Tokens';
 
     public static function canViewForRecord(Model $ownerRecord, string $pageClass): bool
     {
@@ -39,7 +40,7 @@ class PersonalAccessTokensRelationManager extends RelationManager
 
     public static function getTabComponent(Model $ownerRecord, string $pageClass): Tab
     {
-        return Tab::make('Access Tokens')->icon(Heroicon::OutlinedKey);
+        return Tab::make('Personal Access Tokens')->icon(Heroicon::OutlinedKey);
     }
 
     public function table(Table $table): Table
@@ -53,8 +54,12 @@ class PersonalAccessTokensRelationManager extends RelationManager
                 ->latest())
             ->columns([
                 TextColumn::make('name')->label('Name'),
-                TextColumn::make('scopes')->label('Scopes')->badge()->placeholder('None'),
-                TextColumn::make('status')->badge(),
+                TextColumn::make('scopes')
+                    ->label('Access')
+                    ->badge()
+                    ->formatStateUsing(fn (string $state): string => OAuthServiceProvider::scopeLabel($state))
+                    ->placeholder('None'),
+                TextColumn::make('status')->label('Status')->badge(),
                 TextColumn::make('created_at')->label('Created')->dateTime(),
                 TextColumn::make('expires_at')->label('Expires')->dateTime('F j, Y'),
                 TextColumn::make('last_used_at')->label('Last Used')->dateTime()->placeholder('Never'),
@@ -66,8 +71,8 @@ class PersonalAccessTokensRelationManager extends RelationManager
                     ->color('danger')
                     ->outlined()
                     ->requiresConfirmation()
-                    ->modalHeading('Revoke Access Token')
-                    ->modalDescription('Anything using this token stops working immediately. This can\'t be undone, and it is recorded in the user\'s audit history.')
+                    ->modalHeading('Revoke Token')
+                    ->modalDescription('Anything using this token stops working immediately. This can\'t be undone, and it\'s recorded in the person\'s audit history.')
                     ->modalSubmitActionLabel('Revoke Token')
                     ->authorize(SystemPermission::ManageApiAccess)
                     ->visible(fn (OAuthToken $record): bool => $record->status === CredentialStatus::Active)
@@ -77,9 +82,9 @@ class PersonalAccessTokensRelationManager extends RelationManager
 
                         $revoke($record, $administrator);
                     })
-                    ->successNotificationTitle('Token revoked'),
+                    ->successNotificationTitle('Token Revoked'),
             ])
-            ->emptyStateHeading('No personal access tokens')
+            ->emptyStateHeading('No Personal Access Tokens')
             ->paginated(false);
     }
 }

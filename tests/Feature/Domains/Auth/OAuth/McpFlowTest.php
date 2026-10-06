@@ -73,8 +73,8 @@ final class McpFlowTest extends TestCase
 
         [$consent, $verifier] = $this->requestAuthorization($client, ['mcp:use']);
         $consent->assertOk()
-            ->assertSee('Claude Code wants to access your')
-            ->assertSee('Unverified application')
+            ->assertSee('Claude Code Wants to Access Your')
+            ->assertSee('Unverified AI Client')
             ->assertSee("Use this application's tools from an AI client")
             ->assertDontSee('See your account details');
 

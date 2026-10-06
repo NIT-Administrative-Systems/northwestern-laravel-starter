@@ -22,7 +22,7 @@ enum ClientOrigin: string implements HasLabel
     {
         return match ($this) {
             self::Administrator => 'Administrator',
-            self::Dynamic => 'Self-registered',
+            self::Dynamic => 'Self-Registered',
         };
     }
 }

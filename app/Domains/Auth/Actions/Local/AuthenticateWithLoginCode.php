@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Domains\Auth\Actions\Local;
 
 use App\Domains\Auth\Models\LoginChallenge;
+use App\Domains\Core\Formatting\CountInWords;
 use App\Domains\User\Actions\RecordLogin;
 use App\Domains\User\Models\User;
-use Carbon\CarbonInterval;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
@@ -37,7 +37,7 @@ class AuthenticateWithLoginCode
         $this->enforceRateLimits($challengeId, $request);
 
         if ($challengeId === null) {
-            throw ValidationException::withMessages(['code' => 'Invalid code.']);
+            throw ValidationException::withMessages(['code' => 'That code didn\'t work. Check it and try again.']);
         }
 
         $challenge = DB::transaction(fn () => $this->resolveChallenge($challengeId, $code, $request));
@@ -62,7 +62,7 @@ class AuthenticateWithLoginCode
         foreach ($limits as $key => $maxAttempts) {
             if (RateLimiter::tooManyAttempts($key, $maxAttempts)) {
                 throw ValidationException::withMessages([
-                    'code' => 'Too many attempts. Please try again in ' . RateLimiter::availableIn($key) . ' seconds.',
+                    'code' => 'Too many attempts. Try again in ' . CountInWords::of(RateLimiter::availableIn($key), 'second') . '.',
                 ]);
             }
         }
@@ -87,15 +87,13 @@ class AuthenticateWithLoginCode
             : null;
 
         if (! $challenge) {
-            throw ValidationException::withMessages(['code' => 'Invalid code.']);
+            throw ValidationException::withMessages(['code' => 'That code didn\'t work. Check it and try again.']);
         }
 
         if ($challenge->isLocked()) {
             $lockoutMinutes = (int) config('local-auth.code.lock_minutes', 15);
-            $lockoutDuration = CarbonInterval::minutes($lockoutMinutes)->forHumans();
-
             throw ValidationException::withMessages([
-                'code' => "Too many attempts. Please wait {$lockoutDuration} before trying again.",
+                'code' => 'Too many attempts. Try again in ' . CountInWords::of($lockoutMinutes, 'minute') . '.',
             ]);
         }
 
@@ -107,7 +105,7 @@ class AuthenticateWithLoginCode
         );
 
         if (! $codeVerified) {
-            throw ValidationException::withMessages(['code' => 'Invalid code.']);
+            throw ValidationException::withMessages(['code' => 'That code didn\'t work. Check it and try again.']);
         }
 
         return $challenge;
@@ -123,7 +121,7 @@ class AuthenticateWithLoginCode
         $user = User::firstLocalByEmail($challenge->email);
 
         if (! $user) {
-            throw ValidationException::withMessages(['code' => 'Invalid code.']);
+            throw ValidationException::withMessages(['code' => 'That code didn\'t work. Check it and try again.']);
         }
 
         if (! $user->email_verified_at) {

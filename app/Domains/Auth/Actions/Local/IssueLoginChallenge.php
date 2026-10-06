@@ -7,6 +7,7 @@ namespace App\Domains\Auth\Actions\Local;
 use App\Domains\Auth\Contracts\OneTimeCodeGenerator;
 use App\Domains\Auth\Jobs\SendLoginCodeEmailJob;
 use App\Domains\Auth\Models\LoginChallenge;
+use App\Domains\Core\Formatting\CountInWords;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterval;
 use Illuminate\Support\Facades\Crypt;
@@ -48,7 +49,7 @@ class IssueLoginChallenge
             $minutes = (int) ceil($seconds / 60);
 
             throw new RuntimeException(
-                "Too many login attempts. Please try again in {$minutes} minute(s)."
+                'Too many sign-in attempts. Try again in ' . CountInWords::of($minutes, 'minute') . '.'
             );
         }
 

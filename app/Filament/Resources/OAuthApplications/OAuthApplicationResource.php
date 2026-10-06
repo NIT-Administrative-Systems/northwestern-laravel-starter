@@ -41,9 +41,9 @@ class OAuthApplicationResource extends Resource
 
     protected static ?string $navigationLabel = 'Applications';
 
-    protected static ?string $modelLabel = 'OAuth Application';
+    protected static ?string $modelLabel = 'application';
 
-    protected static ?string $pluralModelLabel = 'OAuth Applications';
+    protected static ?string $pluralModelLabel = 'applications';
 
     protected static ?string $slug = 'applications';
 
@@ -80,8 +80,8 @@ class OAuthApplicationResource extends Resource
                     ->badge()
                     ->color('gray'),
                 TextColumn::make('scopes')->label('Allowed Scopes')->badge()->placeholder('None'),
-                IconColumn::make('first_party')->label('First Party')->boolean(),
-                TextColumn::make('connections_count')->label('Connected People')->numeric(),
+                IconColumn::make('first_party')->label('First-Party')->boolean(),
+                TextColumn::make('connections_count')->label('Connections')->numeric(),
                 TextColumn::make('status')->badge(),
                 TextColumn::make('created_at')->label('Registered')->date()->toggleable(isToggledHiddenByDefault: true),
             ])
@@ -102,7 +102,7 @@ class OAuthApplicationResource extends Resource
                             $data['description'] ?? null,
                             $data['contact_email'] ?? null,
                         ))
-                        ->successNotificationTitle('Application updated')
+                        ->successNotificationTitle('Application Updated')
                         ->visible(fn (OAuthClient $record): bool => $record->status === CredentialStatus::Active),
                     Action::make('regenerateSecret')
                         ->label('Regenerate Secret')
@@ -121,7 +121,7 @@ class OAuthApplicationResource extends Resource
                                 }),
                             Wizard\Step::make('Copy Secret')->schema(OAuthApplicationSchemas::credentialsStep()),
                         ])
-                        ->modalSubmitActionLabel('I have copied the secret')
+                        ->modalSubmitActionLabel('I\'ve copied the secret')
                         ->action(fn () => OAuthApplicationSchemas::clearCredentials())
                         ->visible(fn (OAuthClient $record): bool => $record->confidential() && $record->status === CredentialStatus::Active),
                     Action::make('revoke')
@@ -133,11 +133,11 @@ class OAuthApplicationResource extends Resource
                         ->modalDescription('The application loses access to everyone\'s account immediately, and every connection to it is removed. This can\'t be undone.')
                         ->modalSubmitActionLabel('Revoke Application')
                         ->action(fn (OAuthClient $record, RevokeOAuthApplication $revoke) => $revoke($record))
-                        ->successNotificationTitle('Application revoked')
+                        ->successNotificationTitle('Application Revoked')
                         ->visible(fn (OAuthClient $record): bool => $record->status === CredentialStatus::Active),
                 ])->label('Actions')->button(),
             ])
-            ->emptyStateHeading('No applications registered')
+            ->emptyStateHeading('No Applications Registered')
             ->emptyStateDescription('Register an application so people can connect it to their account.');
     }
 

@@ -1,7 +1,7 @@
 <x-filament-widgets::widget>
     <x-filament::section>
         <x-slot name="heading">
-            {{ $returning ? 'Welcome back' : 'Welcome' }}, {{ $firstName }}
+            {{ $returning ? 'Welcome Back' : 'Welcome' }}, {{ $firstName }}
         </x-slot>
 
         <x-slot name="afterHeader">
@@ -30,7 +30,7 @@
 
             @if ($contactSupportUrl || $documentationUrl)
                 <div>
-                    <dt class="text-sm font-medium text-gray-950 dark:text-white">Need help?</dt>
+                    <dt class="text-sm font-medium text-gray-950 dark:text-white">Need Help?</dt>
                     <dd class="mt-2 flex flex-wrap gap-x-6 gap-y-2">
                         @if ($contactSupportUrl)
                             <x-filament::link :href="$contactSupportUrl" icon="heroicon-o-lifebuoy">

@@ -17,7 +17,7 @@ This feature is disabled by default and can be enabled with a single environment
 
 1. **Photo sync triggered**
 
-   When a user is fetched from the directory, `FindOrUpdateUserFromDirectory` dispatches a `DownloadWildcardPhotoJob` if `WILDCARD_PHOTO_SYNC_ENABLED` is true. During SSO login the job is queued. It runs synchronously only when an administrator creates a user or uses **Force Sync** in the administration panel.
+   When a user is fetched from the directory, `FindOrUpdateUserFromDirectory` dispatches a `DownloadWildcardPhotoJob` if `WILDCARD_PHOTO_SYNC_ENABLED` is true. During SSO sign-in the job is queued. It runs synchronously only when an administrator creates a user or uses **Refresh from Directory** in the administration panel.
 
 2. **LDAP photo retrieval**
 

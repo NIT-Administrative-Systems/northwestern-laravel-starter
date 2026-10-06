@@ -19,9 +19,9 @@ enum AnnouncementAudience: string implements HasDescription, HasLabel
     public function getLabel(): string
     {
         return match ($this) {
-            self::Everyone => 'Everyone signed in',
-            self::Targeted => 'Specific roles and affiliations',
-            self::Public => 'Everyone, including signed-out visitors',
+            self::Everyone => 'Everyone Signed In',
+            self::Targeted => 'Specific Roles and Affiliations',
+            self::Public => 'Everyone, Including Signed-Out Visitors',
         };
     }
 

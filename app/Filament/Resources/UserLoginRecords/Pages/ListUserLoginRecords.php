@@ -18,7 +18,7 @@ class ListUserLoginRecords extends ListRecords
 {
     protected static string $resource = UserLoginRecordResource::class;
 
-    protected ?string $subheading = 'Authentication activity and login insights';
+    protected ?string $subheading = 'Who signed in, how, and when.';
 
     public ?string $tableStartDate = null;
 

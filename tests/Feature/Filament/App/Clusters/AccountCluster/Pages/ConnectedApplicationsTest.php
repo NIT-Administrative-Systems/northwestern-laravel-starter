@@ -36,7 +36,7 @@ final class ConnectedApplicationsTest extends TestCase
 
     public function test_every_person_can_open_it(): void
     {
-        $this->get('/app/account/connected-applications')->assertOk()->assertSee('No connected applications');
+        $this->get('/app/account/connected-applications')->assertOk()->assertSee('No Connected Applications');
     }
 
     // AI clients are connections too, so the page stays while only the MCP server is on.
@@ -75,7 +75,7 @@ final class ConnectedApplicationsTest extends TestCase
 
         Livewire::test(ConnectedApplications::class)
             ->assertSee('Claude Code')
-            ->assertSee('AI client · self-reported name');
+            ->assertSee('AI client · name not verified');
     }
 
     public function test_a_person_disconnects_an_application(): void
@@ -107,7 +107,7 @@ final class ConnectedApplicationsTest extends TestCase
         $this->app->instance('impersonate', $impersonate);
 
         Livewire::test(ConnectedApplications::class)
-            ->assertSee('You are impersonating this user.')
+            ->assertSee('You\'re impersonating this person.', escape: false)
             ->assertCanSeeTableRecords([$connection])
             ->assertActionHidden(TestAction::make('disconnect')->table($connection))
             ->assertActionHidden(TestAction::make('disconnectAll')->table());

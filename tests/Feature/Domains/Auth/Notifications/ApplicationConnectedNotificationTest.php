@@ -31,7 +31,7 @@ final class ApplicationConnectedNotificationTest extends TestCase
         $notification = new ApplicationConnectedNotification($this->connection());
         $user = User::factory()->create();
 
-        $this->assertSame('Reporting Tool connected to your account', $notification->toDatabase($user)['title']);
+        $this->assertSame('Reporting Tool Connected to Your Account', $notification->toDatabase($user)['title']);
         $this->assertStringContainsString('/app/account/connected-applications', (string) $notification->toMail($user)->actionUrl);
     }
 
@@ -43,7 +43,7 @@ final class ApplicationConnectedNotificationTest extends TestCase
         [, $verifier] = $this->requestAuthorization($client);
         $this->exchange($client, $this->approve($client), $verifier);
 
-        $this->assertSame('Reporting Tool connected to your account', $user->notifications()->sole()->data['title']);
+        $this->assertSame('Reporting Tool Connected to Your Account', $user->notifications()->sole()->data['title']);
     }
 
     private function connection(): OAuthConnection

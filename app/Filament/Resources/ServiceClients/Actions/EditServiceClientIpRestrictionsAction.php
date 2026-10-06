@@ -35,7 +35,7 @@ class EditServiceClientIpRestrictionsAction extends Action
             ->outlined()
             ->size(Size::ExtraSmall)
             ->modalHeading('Edit IP Restrictions')
-            ->modalDescription('Update the source IP addresses or CIDR ranges this client may call the API from. This adds a layer of security for direct integrations. Leaving the list empty allows all IPs.')
+            ->modalDescription('The IP addresses or CIDR ranges this service client may call the API from. Leave the list empty to allow any address.')
             ->modalIcon(Heroicon::OutlinedShieldCheck)
             ->modalIconColor('gray')
             ->modalWidth('xl')
@@ -45,7 +45,7 @@ class EditServiceClientIpRestrictionsAction extends Action
                         TagsInput::make('allowed_ips')
                             ->label('Allowed IP Addresses')
                             ->placeholder('e.g., 192.168.1.1 or 10.0.0.0/8')
-                            ->helperText('Enter one or more IP addresses or CIDR ranges. Delete all entries to allow any IP address.')
+                            ->helperText('One IP address or CIDR range per entry. Remove them all to allow any address.')
                             ->hintIcon(Heroicon::OutlinedInformationCircle)
                             ->hintIconTooltip(
                                 'For integrations routed through an API gateway (e.g., Apigee), network filtering can typically be managed by the proxy and this field is unnecessary. Only define IPs here for direct, external integrations requiring an extra layer of application-level security.'
@@ -58,7 +58,7 @@ class EditServiceClientIpRestrictionsAction extends Action
             ->action(fn (OAuthClient $record, array $data, UpdateServiceClientIpRestrictions $updateIpRestrictions) => $updateIpRestrictions($record, $data['allowed_ips'] ?? null))
             ->successNotification(
                 fn (OAuthClient $record) => Notification::make()
-                    ->title('IP restrictions updated')
+                    ->title('IP Restrictions Updated')
                     ->body(filled($record->allowed_ips)
                         ? 'The client is now restricted to ' . count($record->allowed_ips) . ' IP ' . Str::plural('address', count($record->allowed_ips))
                         : 'The client now accepts requests from any IP address')

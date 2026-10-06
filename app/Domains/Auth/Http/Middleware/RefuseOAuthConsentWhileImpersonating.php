@@ -23,7 +23,7 @@ class RefuseOAuthConsentWhileImpersonating
     {
         $user = $request->user('web');
 
-        abort_if($request->routeIs('passport.authorizations.*') && $user instanceof User && $user->isImpersonated(), 403, 'Applications cannot be connected while impersonating.');
+        abort_if($request->routeIs('passport.authorizations.*') && $user instanceof User && $user->isImpersonated(), 403, 'You can\'t connect applications while impersonating someone.');
 
         return $next($request);
     }

@@ -64,7 +64,7 @@ class ListOAuthApplications extends ListRecords
                 ])
                 ->modalSubmitActionLabel('Done')
                 ->action(fn () => OAuthApplicationSchemas::clearCredentials())
-                ->successNotificationTitle('Application registered'),
+                ->successNotificationTitle('Application Registered'),
         ];
     }
 }

@@ -39,7 +39,7 @@ class RolesTable
                     ->falseIcon(Heroicon::LockOpen)
                     ->trueColor('warning')
                     ->falseColor('gray')
-                    ->tooltip(fn (Role $record) => $record->isAssignmentLocked() ? 'Assigned programmatically - cannot be changed in the UI' : 'Assignment is open'),
+                    ->tooltip(fn (Role $record) => $record->isAssignmentLocked() ? 'Assigned automatically, so it can\'t be changed here' : 'Assignment is open'),
                 TextColumn::make('permissions_count')
                     ->label('Permissions')
                     ->badge()
@@ -108,8 +108,8 @@ class RolesTable
                     ->color('gray')
                     ->exporter(RoleExporter::class),
             ])
-            ->emptyStateHeading('No roles defined')
-            ->emptyStateDescription('Create roles to organize user permissions and access levels.')
+            ->emptyStateHeading('No Roles')
+            ->emptyStateDescription('Create a role to give people permissions.')
             ->emptyStateIcon('heroicon-o-shield-check');
     }
 }

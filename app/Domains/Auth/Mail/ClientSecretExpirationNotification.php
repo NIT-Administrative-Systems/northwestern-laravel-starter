@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Domains\Auth\Mail;
 
 use App\Domains\Auth\Models\OAuthClient;
+use App\Domains\Core\Formatting\CountInWords;
+use App\Domains\Core\Formatting\NorthwesternDateTime;
 use App\Domains\User\Models\User;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -30,7 +32,7 @@ class ClientSecretExpirationNotification extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'API Client Secret Expiring Soon - Action Required',
+            subject: 'A service client secret expires in ' . CountInWords::of($this->daysUntilExpiration, 'day'),
         );
     }
 
@@ -42,7 +44,10 @@ class ClientSecretExpirationNotification extends Mailable implements ShouldQueue
                 'user' => $this->user,
                 'client' => $this->client,
                 'daysUntilExpiration' => $this->daysUntilExpiration,
-                'expirationDate' => $this->client->secret_expires_at?->format('F j, Y \a\t g:i A T'),
+                'expiresIn' => CountInWords::of($this->daysUntilExpiration, 'day'),
+                'expiresAt' => $this->client->secret_expires_at ? NorthwesternDateTime::format($this->client->secret_expires_at, config('app.schedule_timezone')) : null,
+                'expiresOn' => $this->client->secret_expires_at ? NorthwesternDateTime::date($this->client->secret_expires_at, config('app.schedule_timezone')) : null,
+                'lastUsedAt' => $this->client->last_used_at ? NorthwesternDateTime::format($this->client->last_used_at, config('app.schedule_timezone')) : null,
             ],
         );
     }

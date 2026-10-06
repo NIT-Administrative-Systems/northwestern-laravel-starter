@@ -56,7 +56,7 @@ class LocalUserInfolist
                                                     ->label('Name'),
 
                                                 TextEntry::make('email')
-                                                    ->label('Email Address')
+                                                    ->label('Email')
                                                     ->url(fn ($state) => filled($state) ? 'mailto:' . $state : null)
                                                     ->openUrlInNewTab()
                                                     ->placeholder('N/A'),
@@ -111,8 +111,8 @@ class LocalUserInfolist
                                                     ]);
 
                                                     Notification::make()
-                                                        ->title('Notes updated')
-                                                        ->body('The local user notes have been updated.')
+                                                        ->title('Notes Updated')
+                                                        ->body('The notes were saved.')
                                                         ->success()
                                                         ->send();
                                                 }),
@@ -140,7 +140,7 @@ class LocalUserInfolist
                                 ->dateTime(),
 
                             TextEntry::make('latest_login_record.logged_in_at')
-                                ->label('Last Login')
+                                ->label('Last Sign-In')
                                 ->inlineLabel()
                                 ->placeholder('Never')
                                 ->dateTime()

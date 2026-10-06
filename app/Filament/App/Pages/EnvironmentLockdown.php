@@ -40,23 +40,22 @@ class EnvironmentLockdown extends SimplePage
 
     public function content(Schema $schema): Schema
     {
-        $environment = e(strtoupper((string) config('app.env')));
+        $environment = e((string) config('app.env'));
         $appName = e((string) config('app.name'));
         $productionUrl = config('platform.production_url');
 
         return $schema
             ->components([
-                Text::make('You do not have permission to access this environment.')
+                Text::make('You don\'t have access to this environment.')
                     ->weight('semibold'),
                 Text::make(new HtmlString(
-                    "This is the <strong>{$environment}</strong> environment for <strong>{$appName}</strong>, "
-                    . 'which is strictly reserved for <strong>Northwestern IT</strong> development and testing purposes.'
+                    "This is the <strong>{$environment}</strong> environment of <strong>{$appName}</strong>, for development and testing."
                 )),
                 // No callout heading: Filament renders it as an <h4>, which would skip levels after the page's <h1>.
                 Callout::make()
                     ->description(new HtmlString(
-                        '<strong>Why are you seeing this?</strong> You do not have an assigned role that grants you access to this environment. '
-                        . 'If you believe this is an error, please reach out to your project contact or the IT Service Desk for assistance.'
+                        '<strong>Why am I seeing this?</strong> Your account doesn\'t have a role that gives access here. '
+                        . 'If you need access, ask your project contact or the IT Service Desk.'
                     ))
                     ->info()
                     ->actions([
@@ -67,7 +66,7 @@ class EnvironmentLockdown extends SimplePage
                     ]),
                 Actions::make([
                     Action::make('production')
-                        ->label('Go to production environment')
+                        ->label('Go to ' . config('app.name'))
                         ->icon(Heroicon::OutlinedArrowRight)
                         ->url($productionUrl)
                         ->visible(filled($productionUrl)),

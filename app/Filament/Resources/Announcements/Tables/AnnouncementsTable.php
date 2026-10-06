@@ -66,7 +66,7 @@ class AnnouncementsTable
                     DeleteBulkAction::make(),
                 ]),
             ])
-            ->emptyStateHeading('No announcements')
+            ->emptyStateHeading('No Announcements')
             ->emptyStateDescription('Write an announcement to show people a message in a banner across the application.');
     }
 

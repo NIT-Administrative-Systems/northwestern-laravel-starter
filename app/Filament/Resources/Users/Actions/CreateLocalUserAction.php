@@ -39,7 +39,7 @@ class CreateLocalUserAction extends Action
                     ])
                     ->schema([
                         TextInput::make('email')
-                            ->label('Email Address')
+                            ->label('Email')
                             ->email()
                             ->required()
                             ->autocomplete(false)
@@ -82,10 +82,10 @@ class CreateLocalUserAction extends Action
                     ->icon(Heroicon::OutlinedLockOpen)
                     ->schema([
                         Checkbox::make('send_login_link')
-                            ->label('Send verification code')
+                            ->label('Send a verification code now')
                             ->default(false)
                             ->helperText(
-                                'Select this when the user is ready to access the application immediately. If left unchecked, they can request a verification code on their own at any time.'
+                                'Leave this off if they aren\'t ready to sign in yet. They can request a code themselves at any time.'
                             ),
                     ]),
             ])
@@ -104,8 +104,8 @@ class CreateLocalUserAction extends Action
 
                 Notification::make()
                     ->success()
-                    ->title('Local user created')
-                    ->body("User {$user->full_name} ({$user->email}) has been created.")
+                    ->title('Local User Created')
+                    ->body("{$user->full_name} ({$user->email}) was added.")
                     ->send();
 
                 return redirect()->route('filament.administration.resources.users.view', ['record' => $user]);

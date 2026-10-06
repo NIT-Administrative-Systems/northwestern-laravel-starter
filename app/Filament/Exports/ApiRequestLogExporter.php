@@ -71,7 +71,7 @@ class ApiRequestLogExporter extends Exporter
                 ->enabledByDefault(false),
 
             ExportColumn::make('created_at')
-                ->label('Recorded At'),
+                ->label('Recorded'),
         ];
     }
 

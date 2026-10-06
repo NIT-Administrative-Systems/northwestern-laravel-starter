@@ -1,3 +1,3 @@
 <x-error-layout title="Too Many Requests">
-    We've received quite a few requests recently. Please wait a moment before trying again.
+    You've made too many requests. Wait a minute, then try again.
 </x-error-layout>

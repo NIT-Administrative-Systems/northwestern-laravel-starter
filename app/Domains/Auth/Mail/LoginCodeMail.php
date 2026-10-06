@@ -6,6 +6,7 @@ namespace App\Domains\Auth\Mail;
 
 use App\Domains\Auth\Enums\AuthType;
 use App\Domains\Auth\Jobs\SendLoginCodeEmailJob;
+use App\Domains\Core\Formatting\CountInWords;
 use Carbon\CarbonImmutable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
@@ -44,7 +45,7 @@ class LoginCodeMail extends Mailable
             markdown: 'mail.auth.login-code',
             with: [
                 'code' => $code,
-                'expiresInMinutes' => $expiresInMinutes,
+                'expiresIn' => CountInWords::of($expiresInMinutes, 'minute'),
                 'signInUrl' => $this->signInUrl,
             ]
         );

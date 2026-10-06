@@ -79,7 +79,7 @@ final class SignInAsControllerTest extends TestCase
 
         $this->get('/app/login')
             ->assertOk()
-            ->assertSeeInOrder(['Development', 'Sign in as…', 'NUIT Administrator', 'Super Administrator', 'Generic User', 'Northwestern User'])
+            ->assertSeeInOrder(['Development', 'Sign In As…', 'NUIT Administrator', 'Super Administrator', 'Generic User', 'Northwestern User'])
             ->assertSee(url('/app/login/as/nuit.admin'), escape: false)
             ->assertSee('Only in local environments.');
     }
@@ -93,7 +93,7 @@ final class SignInAsControllerTest extends TestCase
         $this->get('/app/login')
             ->assertOk()
             ->assertSee('NUIT Administrator')
-            ->assertDontSee('No sign-in methods available.');
+            ->assertDontSee('No sign-in methods are set up.');
     }
 
     /** @return iterable<string, array{string, string}> */

@@ -40,7 +40,7 @@ class RequireMcpAccess
         $user = $request->user();
 
         if (! $user instanceof User || ! $user->can(SystemPermission::UseMcp)) {
-            throw new AuthorizationException('You are not allowed to use the MCP server.');
+            throw new AuthorizationException('You don\'t have permission to use the MCP server.');
         }
 
         return $next($request);

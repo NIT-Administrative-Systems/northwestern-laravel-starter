@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Support\Gateways\Mail;
 
+use App\Domains\Core\Formatting\NorthwesternDateTime;
 use App\Domains\Support\Models\SupportTicket;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -31,18 +32,16 @@ class SupportTicketConfirmation extends Mailable implements ShouldQueue
     public function build(): static
     {
         return $this->subject(sprintf(
-            'We received your support request - %s',
+            'We received your support request: %s',
             $this->ticket->subject,
         ))
             ->markdown('mail.support.ticket-confirmation')
             ->with([
-                'submitter' => $this->ticket->user->first_name ?? 'User',
+                'submitter' => $this->ticket->user->first_name ?: $this->ticket->user->full_name,
                 'subject' => $this->ticket->subject,
                 'details' => $this->ticket->details,
                 'referenceNumber' => $this->referenceNumber,
-                'submittedAt' => ($this->ticket->created_at ?? now())
-                    ->setTimezone(config('app.schedule_timezone'))
-                    ->format('M j, Y g:i A T'),
+                'submittedAt' => NorthwesternDateTime::format($this->ticket->created_at ?? now(), $this->ticket->user->timezone),
             ]);
     }
 }

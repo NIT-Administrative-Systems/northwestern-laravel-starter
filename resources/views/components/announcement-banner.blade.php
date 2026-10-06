@@ -41,11 +41,11 @@
 
             @if ($readMoreUrl !== null)
                 <div class="mt-1 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
-                    <x-filament::link :href="$readMoreUrl">Read more</x-filament::link>
+                    <x-filament::link :href="$readMoreUrl">Read More</x-filament::link>
 
                     @if ($others > 0)
                         <x-filament::link :href="$pageUrl" color="gray">
-                            {{ $others }} more {{ str('announcement')->plural($others) }}
+                            {{ $others }} More {{ str('Announcement')->plural($others) }}
                         </x-filament::link>
                     @endif
                 </div>

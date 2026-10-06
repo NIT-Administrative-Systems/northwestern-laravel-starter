@@ -143,7 +143,7 @@ class AuditsTable
                     ->searchable(isIndividual: true, isGlobal: false)
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
-                    ->label('Created At')
+                    ->label('Created')
                     ->since()
                     ->dateTimeTooltip()
                     ->sortable(),
@@ -271,8 +271,8 @@ class AuditsTable
                     ->color('gray')
                     ->exporter(AuditExporter::class),
             ])
-            ->emptyStateHeading('No audit logs yet')
-            ->emptyStateDescription('Audit logs will appear here as users make changes to records.')
+            ->emptyStateHeading('No Audit Logs Yet')
+            ->emptyStateDescription('Changes to records appear here.')
             ->emptyStateIcon('heroicon-o-clipboard-document-list');
     }
 

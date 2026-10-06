@@ -114,7 +114,7 @@ final class AnnouncementTest extends TestCase
     {
         $role = Role::factory()->create(['name' => 'Coordinators']);
 
-        $this->assertSame('Everyone signed in', Announcement::factory()->make()->audienceSummary());
+        $this->assertSame('Everyone Signed In', Announcement::factory()->make()->audienceSummary());
         $this->assertSame('Coordinators, Staff', Announcement::factory()->targeted([$role], [Affiliation::Staff])->make()->audienceSummary());
         $this->assertSame('Nobody', Announcement::factory()->targeted()->make()->audienceSummary());
     }

@@ -22,7 +22,7 @@
                                 :href="Filament::getPanel(AppPanelProvider::ID)->getLoginUrl()"
                                 size="lg"
                                 icon="heroicon-m-arrow-right-end-on-rectangle">
-                Sign in
+                Sign In
             </x-filament::button>
 
             <x-filament::button href="https://laravel-starter.entapp.northwestern.edu/"

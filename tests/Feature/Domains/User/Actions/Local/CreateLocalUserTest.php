@@ -173,7 +173,7 @@ final class CreateLocalUserTest extends TestCase
         $this->mock(\App\Domains\Auth\Actions\Local\IssueLoginChallenge::class, function ($mock) {
             $mock->shouldReceive('__invoke')
                 ->once()
-                ->andThrow(new \RuntimeException('Too many login attempts.'));
+                ->andThrow(new \RuntimeException('Too many sign-in attempts.'));
         });
 
         $user = $this->action()(

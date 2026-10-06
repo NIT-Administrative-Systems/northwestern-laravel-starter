@@ -8,7 +8,7 @@
             <div class="space-y-3">
                 <div class="flex flex-wrap items-center gap-2">
                     <p class="font-semibold tracking-tight">
-                        No protected API routes detected
+                        No Protected API Routes Detected
                     </p>
                 </div>
 
@@ -23,7 +23,7 @@
 
                 <div class="space-y-1">
                     <p class="text-warning-700 dark:text-warning-300 text-xs font-semibold uppercase tracking-wide">
-                        Next steps
+                        Next Steps
                     </p>
 
                     <ul class="text-warning-900/90 dark:text-warning-100/90 list-disc space-y-1 pl-5">

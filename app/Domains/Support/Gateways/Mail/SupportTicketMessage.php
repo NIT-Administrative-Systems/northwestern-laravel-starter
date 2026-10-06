@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Support\Gateways\Mail;
 
+use App\Domains\Core\Formatting\NorthwesternDateTime;
 use App\Domains\Support\Models\SupportTicket;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -49,6 +50,7 @@ class SupportTicketMessage extends Mailable implements ShouldQueue
                 'submitterDepartments' => $user->departments ?? [],
                 'submitterAffiliation' => $user?->primary_affiliation?->getLabel(),
                 'environment' => ucfirst((string) config('app.env')),
+                'submittedAt' => NorthwesternDateTime::format($this->ticket->created_at ?? now(), config('app.schedule_timezone')),
                 'fallbackMode' => $this->isFallbackEmail,
             ]);
     }

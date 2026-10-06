@@ -10,6 +10,7 @@ use App\Domains\Auth\Enums\ClientOrigin;
 use App\Domains\Auth\Models\OAuthConnection;
 use App\Domains\User\Models\User;
 use App\Filament\App\Clusters\AccountCluster;
+use App\Providers\OAuthServiceProvider;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
@@ -37,7 +38,7 @@ class ConnectedApplications extends Page implements HasTable
 
     protected static ?string $cluster = AccountCluster::class;
 
-    protected static ?string $title = 'Connected applications';
+    protected static ?string $title = 'Connected Applications';
 
     protected static ?string $slug = 'connected-applications';
 
@@ -57,11 +58,11 @@ class ConnectedApplications extends Page implements HasTable
         return $schema->components([
             // No callout heading: Filament renders it as an <h4>, which would skip levels after the page's <h1>.
             Callout::make()
-                ->description(new HtmlString('<strong>You are impersonating this user.</strong> You can see their connected applications, but you can\'t disconnect them. Disconnect an application from the user\'s page in Administration.'))
+                ->description(new HtmlString('<strong>You\'re impersonating this person.</strong> You can see their connected applications, but you can\'t disconnect them. To disconnect one, use their page in Administration.'))
                 ->warning()
                 ->visible($this->isImpersonating()),
-            Section::make('Applications with access to your account')
-                ->description('These applications can act as you, within what each was allowed and your own permissions. Disconnect any you no longer use or don\'t recognize.')
+            Section::make('Applications with Access to Your Account')
+                ->description('These applications can act as you, within what you allowed and your own permissions. Disconnect any you no longer use or don\'t recognize.')
                 ->schema([EmbeddedTable::make()]),
         ]);
     }
@@ -77,25 +78,25 @@ class ConnectedApplications extends Page implements HasTable
             ->columns([
                 TextColumn::make('oauth_client.name')
                     ->label('Application')
-                    ->description(fn (OAuthConnection $record): ?string => $record->oauth_client?->origin === ClientOrigin::Dynamic ? 'AI client · self-reported name' : null),
-                TextColumn::make('scopes')->label('Allowed to')->badge()->placeholder('See your account details'),
+                    ->description(fn (OAuthConnection $record): ?string => $record->oauth_client?->origin === ClientOrigin::Dynamic ? 'AI client · name not verified' : null),
+                TextColumn::make('scopes')->label('Allowed To')->badge()->formatStateUsing(fn (string $state): string => OAuthServiceProvider::scopeLabel($state))->placeholder('See Your Account Details'),
                 TextColumn::make('connected_at')->label('Connected')->date(),
-                TextColumn::make('last_used_at')->label('Last used')->since()->dateTimeTooltip()->placeholder('Never'),
+                TextColumn::make('last_used_at')->label('Last Used')->since()->dateTimeTooltip()->placeholder('Never'),
             ])
             ->headerActions([
                 Action::make('disconnectAll')
-                    ->label('Disconnect all')
+                    ->label('Disconnect All')
                     ->color('danger')
                     ->outlined()
                     ->requiresConfirmation()
-                    ->modalHeading('Disconnect all applications')
+                    ->modalHeading('Disconnect All Applications')
                     ->modalDescription('Every application loses access to your account immediately. To use one again, you\'ll need to connect it again.')
-                    ->modalSubmitActionLabel('Disconnect all')
+                    ->modalSubmitActionLabel('Disconnect All')
                     ->visible(fn (): bool => ! $this->isImpersonating() && OAuthConnection::query()->live()->where('user_id', $this->user()->getKey())->exists())
                     ->action(function (DisconnectApplication $disconnect): void {
                         OAuthConnection::query()->where('user_id', $this->user()->getKey())->each(fn (OAuthConnection $connection) => $disconnect($connection, $this->user()));
 
-                        Notification::make()->title('All applications disconnected')->success()->send();
+                        Notification::make()->title('All Applications Disconnected')->success()->send();
                     }),
             ])
             ->recordActions([
@@ -113,10 +114,10 @@ class ConnectedApplications extends Page implements HasTable
 
                         $disconnect($record, $this->user());
 
-                        Notification::make()->title('Application disconnected')->success()->send();
+                        Notification::make()->title('Application Disconnected')->success()->send();
                     }),
             ])
-            ->emptyStateHeading('No connected applications')
+            ->emptyStateHeading('No Connected Applications')
             ->emptyStateDescription('When you allow an application to act for you, it appears here.')
             ->paginated(false);
     }

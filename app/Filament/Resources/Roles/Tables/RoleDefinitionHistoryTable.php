@@ -128,7 +128,7 @@ class RoleDefinitionHistoryTable
                     ->columnSpan(2),
             ], layout: FiltersLayout::AboveContent)
             ->filtersFormColumns(3)
-            ->emptyStateHeading('No definition history yet')
+            ->emptyStateHeading('No Changes Yet')
             ->emptyStateDescription('Changes to this role\'s name, type, and permissions will appear here.')
             ->emptyStateIcon('heroicon-o-clock');
     }
@@ -139,9 +139,9 @@ class RoleDefinitionHistoryTable
     public static function summarizeChanges(Audit $audit): HtmlString
     {
         $html = match ($audit->event) {
-            'created' => resolve(BadgePillRenderer::class)->render('Role created', 'success'),
-            'deleted' => resolve(BadgePillRenderer::class)->render('Role deleted', 'danger'),
-            'restored' => resolve(BadgePillRenderer::class)->render('Role restored', 'success'),
+            'created' => resolve(BadgePillRenderer::class)->render('Role Created', 'success'),
+            'deleted' => resolve(BadgePillRenderer::class)->render('Role Deleted', 'danger'),
+            'restored' => resolve(BadgePillRenderer::class)->render('Role Restored', 'success'),
             'updated' => self::summarizeAttributeChanges($audit),
             'permissions_modified' => self::summarizePermissionChanges($audit),
             default => '<span class="text-sm text-gray-500">No details</span>',
@@ -195,7 +195,7 @@ class RoleDefinitionHistoryTable
 
         return filled($changes)
             ? '<div class="flex flex-col gap-1">' . implode('', $changes) . '</div>'
-            : self::pill('Role updated', 'gray');
+            : self::pill('Role Updated', 'gray');
     }
 
     /**
@@ -239,7 +239,7 @@ class RoleDefinitionHistoryTable
 
         return filled($parts)
             ? '<div class="flex flex-col gap-1">' . implode('', $parts) . '</div>'
-            : self::pill('Permissions modified', 'gray');
+            : self::pill('Permissions Modified', 'gray');
     }
 
     /**
@@ -304,8 +304,8 @@ class RoleDefinitionHistoryTable
     {
         return match ($key) {
             'name' => 'Name',
-            'role_type_id' => 'Role type',
-            'assignment_locked' => 'Assignment locked',
+            'role_type_id' => 'Role Type',
+            'assignment_locked' => 'Assignment Locked',
             'guard_name' => 'Guard',
             default => Str::of($key)->replace('_', ' ')->title()->toString(),
         };

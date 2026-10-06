@@ -43,7 +43,7 @@ final class PreferencesTest extends TestCase
             ->fillForm(['timezone' => 'Europe/London'])
             ->call('save')
             ->assertHasNoFormErrors()
-            ->assertNotified('Your preferences have been saved.');
+            ->assertNotified('Preferences Saved');
 
         $this->assertSame('Europe/London', $user->refresh()->timezone);
     }
@@ -53,7 +53,7 @@ final class PreferencesTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        Livewire::test(Preferences::class)->assertDontSee('Email me before my personal access tokens expire');
+        Livewire::test(Preferences::class)->assertDontSee('Expiring personal access tokens');
 
         $user->givePermissionTo(SystemPermission::CreatePersonalAccessTokens);
 
@@ -114,7 +114,7 @@ final class PreferencesTest extends TestCase
         $this->impersonating();
 
         Livewire::test(Preferences::class)
-            ->assertSee('You are impersonating this user.')
+            ->assertSee('You\'re impersonating this person.', escape: false)
             ->assertSchemaStateSet(['timezone' => 'America/Chicago'], 'form')
             ->assertDontSeeHtml('type="submit"')
             ->call('save')

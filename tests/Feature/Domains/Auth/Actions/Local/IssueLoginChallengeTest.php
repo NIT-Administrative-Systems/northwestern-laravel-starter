@@ -67,7 +67,7 @@ final class IssueLoginChallengeTest extends TestCase
         $this->action()('ratelimit@example.com', null, null);
 
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessageIsOrContains('Too many login attempts.');
+        $this->expectExceptionMessageIsOrContains('Too many sign-in attempts.');
 
         $this->action()('ratelimit@example.com', null, null);
     }
@@ -84,8 +84,8 @@ final class IssueLoginChallengeTest extends TestCase
             $this->action()('ratelimit@example.com', null, null);
             $this->fail('Expected RuntimeException was not thrown');
         } catch (RuntimeException $e) {
-            $this->assertStringContainsString('minute(s)', $e->getMessage());
-            $this->assertMatchesRegularExpression('/\d+\s+minute\(s\)/', $e->getMessage());
+            // A real plural, with one through nine spelled out: "in 60 minutes", "in one minute".
+            $this->assertMatchesRegularExpression('/Try again in (\d{2,}|one|two|three|four|five|six|seven|eight|nine) minutes?\.$/', $e->getMessage());
         }
     }
 

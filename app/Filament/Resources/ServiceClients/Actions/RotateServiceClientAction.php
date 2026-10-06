@@ -38,15 +38,15 @@ class RotateServiceClientAction extends Action
             ->closeModalByClickingAway(false)
             ->closeModalByEscaping(false)
             ->steps([
-                Wizard\Step::make('Rotate Client')
+                Wizard\Step::make('Rotate Service Client')
                     ->schema([
-                        Section::make('Notice')
+                        Section::make('Before You Rotate')
                             ->icon(Heroicon::OutlinedInformationCircle)
                             ->schema([
                                 TextEntry::make('rotate_notice')
                                     ->hiddenLabel()
                                     ->default(new HtmlString(<<<'HTML'
-Rotating creates a replacement client with a new ID and secret. <strong>This client keeps working</strong>, so the integration can switch to the replacement without downtime. Revoke this client once the integration uses the replacement.
+Rotating creates a replacement service client with a new ID and secret. <strong>This one keeps working</strong>, so the integration can switch without downtime. Revoke this one once the integration uses the replacement.
 HTML))
                                     ->columnSpanFull(),
                             ]),
@@ -79,7 +79,7 @@ HTML))
             ])
             ->modalSubmitAction(fn (Action $action) => ServiceClientSchemas::copyCredentialsSubmitButton($action))
             ->action(fn () => ServiceClientSchemas::clearCredentials(ServiceClientSchemas::SESSION_KEY_ROTATE))
-            ->successNotificationTitle('Replacement client created')
+            ->successNotificationTitle('Replacement Service Client Created')
             ->visible(fn (OAuthClient $record): bool => ServiceClientSchemas::canShowRotate($record));
     }
 }

@@ -32,7 +32,7 @@ class ViewRole extends ViewRecord
         $components = $schema->getComponents();
 
         if ($this->record->isSystemManagedType()) {
-            array_unshift($components, Section::make('System Managed')
+            array_unshift($components, Section::make('System-Managed')
                 ->icon(Heroicon::OutlinedShieldExclamation)
                 ->iconColor('danger')
                 ->schema([

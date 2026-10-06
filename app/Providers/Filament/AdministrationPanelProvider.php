@@ -45,7 +45,7 @@ class AdministrationPanelProvider extends PanelProvider
             ->renderHook(PanelsRenderHook::TOPBAR_LOGO_AFTER, fn (): string => Blade::render('<x-panel-brand />'))
             ->userMenuItems([
                 'logout' => fn (Action $action) => $action
-                    ->label('Sign out')
+                    ->label('Sign Out')
                     ->icon(Heroicon::OutlinedArrowRightOnRectangle)
                     ->extraAttributes([
                         'data-cy' => 'sign-out-menu-link',

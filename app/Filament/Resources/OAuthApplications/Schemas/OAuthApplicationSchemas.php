@@ -88,7 +88,7 @@ class OAuthApplicationSchemas
             Section::make()
                 ->icon(Heroicon::OutlinedExclamationTriangle)
                 ->iconColor('warning')
-                ->description(new HtmlString('Give these to the application\'s developers. <strong class="text-black dark:text-white">The secret will not be shown again.</strong>'))
+                ->description(new HtmlString('Give these to the application\'s developers. <strong class="text-black dark:text-white">The secret won\'t be shown again.</strong>'))
                 ->schema([
                     CodeEntry::make('client_id')
                         ->label('Client ID')

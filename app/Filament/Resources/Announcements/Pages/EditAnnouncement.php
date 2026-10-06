@@ -42,7 +42,7 @@ class EditAnnouncement extends EditRecord
                 ->label('Publish')
                 ->icon(Heroicon::OutlinedMegaphone)
                 ->visible(fn (): bool => $this->record->status === AnnouncementStatus::Draft)
-                ->modalHeading('Publish announcement')
+                ->modalHeading('Publish Announcement')
                 ->modalDescription('Your changes are saved first. People in its audience see it from when it starts.')
                 ->modalSubmitActionLabel('Publish')
                 ->schema([
@@ -70,37 +70,37 @@ class EditAnnouncement extends EditRecord
                         (bool) ($data['notify'] ?? false),
                     );
 
-                    Notification::make()->title('Announcement published')->success()->send();
+                    Notification::make()->title('Announcement Published')->success()->send();
                     $this->redirect(AnnouncementResource::getUrl('edit', ['record' => $this->record]));
                 }),
             Action::make('end')
-                ->label('End now')
+                ->label('End Now')
                 ->icon(Heroicon::OutlinedStopCircle)
                 ->color('danger')
                 ->visible(fn (): bool => $this->record->status === AnnouncementStatus::Live)
                 ->requiresConfirmation()
-                ->modalHeading('End announcement')
+                ->modalHeading('End Announcement')
                 ->modalDescription('It leaves the banner now and stays on the Announcements page as a past announcement. It can\'t be published again, but you can duplicate it.')
-                ->modalSubmitActionLabel('End now')
+                ->modalSubmitActionLabel('End Now')
                 ->action(function (EndAnnouncement $end): void {
                     $end($this->record);
 
-                    Notification::make()->title('Announcement ended')->success()->send();
+                    Notification::make()->title('Announcement Ended')->success()->send();
                     $this->redirect(AnnouncementResource::getUrl('edit', ['record' => $this->record]));
                 }),
             Action::make('showAgain')
-                ->label('Show again')
+                ->label('Show Again')
                 ->icon(Heroicon::OutlinedArrowPath)
                 ->color('gray')
                 ->visible(fn (): bool => $this->record->status === AnnouncementStatus::Live && $this->record->dismissals()->exists())
                 ->requiresConfirmation()
-                ->modalHeading('Show again to people who dismissed it')
+                ->modalHeading('Show Again to People Who Dismissed It')
                 ->modalDescription(fn (): string => 'It returns to the banner for the ' . $this->record->dismissals()->count() . ' people who dismissed it, for example after an important change.')
-                ->modalSubmitActionLabel('Show again')
+                ->modalSubmitActionLabel('Show Again')
                 ->action(function (): void {
                     $this->record->dismissals()->delete();
 
-                    Notification::make()->title('It will show again to everyone in its audience')->success()->send();
+                    Notification::make()->title('Showing Again')->body('Everyone in its audience sees it again, including people who dismissed it.')->success()->send();
                 }),
             Action::make('duplicate')
                 ->label('Duplicate')
@@ -111,7 +111,7 @@ class EditAnnouncement extends EditRecord
                     $user = auth()->user();
                     $copy = $duplicate($this->record, $user);
 
-                    Notification::make()->title('Copied to a new draft')->success()->send();
+                    Notification::make()->title('Copied to a New Draft')->success()->send();
                     $this->redirect(AnnouncementResource::getUrl('edit', ['record' => $copy]));
                 }),
             DeleteAction::make(),

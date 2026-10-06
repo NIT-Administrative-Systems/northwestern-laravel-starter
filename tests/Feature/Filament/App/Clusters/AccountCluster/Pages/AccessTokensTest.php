@@ -40,12 +40,12 @@ final class AccessTokensTest extends TestCase
 
     public function test_only_holders_of_the_permission_see_the_page(): void
     {
-        $this->get('/app/account/access-tokens')->assertOk()->assertSee('Personal access tokens');
-        $this->get('/app/account/profile')->assertSee('Access tokens');
+        $this->get('/app/account/access-tokens')->assertOk()->assertSee('Personal Access Tokens');
+        $this->get('/app/account/profile')->assertSee('Access Tokens');
 
         $this->actingAs(User::factory()->create());
         $this->get('/app/account/access-tokens')->assertForbidden();
-        $this->get('/app/account/profile')->assertDontSee('Access tokens');
+        $this->get('/app/account/profile')->assertDontSee('Access Tokens');
     }
 
     public function test_it_lists_the_persons_tokens_only(): void
@@ -125,7 +125,7 @@ final class AccessTokensTest extends TestCase
         $this->app->instance('impersonate', $impersonate);
 
         Livewire::test(AccessTokens::class)
-            ->assertSee('You are impersonating this user.')
+            ->assertSee('You\'re impersonating this person.', escape: false)
             ->assertCanSeeTableRecords([$token])
             ->assertActionHidden(TestAction::make('createToken')->table())
             ->assertActionHidden(TestAction::make('revoke')->table($token));

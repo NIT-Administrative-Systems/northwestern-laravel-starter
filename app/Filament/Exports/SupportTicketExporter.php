@@ -48,14 +48,14 @@ class SupportTicketExporter extends Exporter
                 ->enabledByDefault(false),
 
             ExportColumn::make('posted_to_ticketing_system_at')
-                ->label('Delivered At'),
+                ->label('Delivered'),
 
             ExportColumn::make('fallback_sent_at')
-                ->label('Fallback Sent At')
+                ->label('Fallback Sent')
                 ->enabledByDefault(false),
 
             ExportColumn::make('created_at')
-                ->label('Submitted At'),
+                ->label('Submitted'),
         ];
     }
 

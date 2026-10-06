@@ -13,10 +13,10 @@
             default => 'success',
         };
         $bannerLabel = match ($bannerTone) {
-            'success' => 'All systems operational',
-            'warning' => 'Attention required',
-            'danger' => 'Action required',
-            default => 'Health checks pending',
+            'success' => 'All Systems Operational',
+            'warning' => 'Attention Required',
+            'danger' => 'Action Required',
+            default => 'Health Checks Pending',
         };
 
         $queueStatus = $this->getQueueStatus();
@@ -75,7 +75,7 @@
                               icon="heroicon-o-exclamation-triangle" />
             <div class="min-w-0 flex-1">
                 <p class="text-danger-900 dark:text-danger-100 text-sm font-semibold">
-                    Queue attention needed
+                    Queue Needs Attention
                 </p>
                 <p class="text-danger-800 dark:text-danger-200 mt-0.5 text-sm tabular-nums">
                     @if ($queueStatus['failed'] > 0)
@@ -222,7 +222,7 @@
                 </x-filament::section>
 
                 @if ($loginHeatmap !== null)
-                    <x-filament::section heading="Login Activity"
+                    <x-filament::section heading="Sign-In Activity"
                                          icon="heroicon-o-calendar"
                                          compact>
                         <x-slot name="afterHeader">
@@ -250,7 +250,7 @@
                                     {{-- Heatmap rows. Label column is 2rem so the 24 data columns get the rest of the width. --}}
                                     <div class="flex flex-col gap-0.5"
                                          role="img"
-                                         aria-label="Login activity heatmap over the last {{ $loginHeatmap['days'] }} days">
+                                         aria-label="Sign-in activity heatmap over the last {{ $loginHeatmap['days'] }} days">
                                         @foreach ($loginHeatmap['rows'] as $row)
                                             <div
                                                  class="grid grid-cols-[2rem_repeat(24,_minmax(0,1fr))] items-center gap-x-0.5">
@@ -281,7 +281,7 @@
                                     <div>
                                         <p class="text-2xl font-semibold tabular-nums text-gray-950 dark:text-white">
                                             {{ number_format($loginHeatmap['total']) }}<span
-                                                  class="ml-1 text-sm font-normal text-gray-500 dark:text-gray-400">{{ Str::plural('login', $loginHeatmap['total']) }}</span>
+                                                  class="ml-1 text-sm font-normal text-gray-500 dark:text-gray-400">{{ Str::plural('sign-in', $loginHeatmap['total']) }}</span>
                                         </p>
                                         @if ($loginHeatmap['peak'])
                                             <p class="mt-1 text-sm tabular-nums text-gray-500 dark:text-gray-400">
@@ -412,7 +412,7 @@
                                 ['label' => 'Environment', 'rows' => $this->getEnvironmentInfo()],
                                 ['label' => 'Services', 'rows' => $this->getServicesInfo()],
                                 ['label' => 'Storage', 'rows' => $this->getStorageInfo()],
-                                ['label' => 'Error tracking', 'rows' => $this->getObservabilityInfo()],
+                                ['label' => 'Error Tracking', 'rows' => $this->getObservabilityInfo()],
                             ];
                         @endphp
 
@@ -491,7 +491,7 @@
                                     Schedule
                                 </th>
                                 <th class="px-4 py-2 text-left font-medium text-gray-500 dark:text-gray-400">
-                                    Next run
+                                    Next Run
                                 </th>
                                 <th class="py-2 pl-4 text-left font-medium text-gray-500 dark:text-gray-400">
                                     Description

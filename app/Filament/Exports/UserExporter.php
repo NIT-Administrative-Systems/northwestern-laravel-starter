@@ -48,7 +48,7 @@ class UserExporter extends Exporter
                 ->formatStateUsing(fn ($state) => $state?->getLabel()),
 
             ExportColumn::make('auth_type')
-                ->label('Auth Type')
+                ->label('Authentication')
                 ->formatStateUsing(fn ($state) => $state?->getLabel()),
 
             ExportColumn::make('roles.name')
@@ -76,14 +76,14 @@ class UserExporter extends Exporter
                 ->enabledByDefault(false),
 
             ExportColumn::make('created_at')
-                ->label('Created At'),
+                ->label('Created'),
 
             ExportColumn::make('updated_at')
-                ->label('Updated At')
+                ->label('Updated')
                 ->enabledByDefault(false),
 
             ExportColumn::make('deleted_at')
-                ->label('Deleted At')
+                ->label('Deleted')
                 ->enabledByDefault(false),
         ];
     }

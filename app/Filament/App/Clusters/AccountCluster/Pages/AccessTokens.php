@@ -13,6 +13,7 @@ use App\Domains\Auth\Enums\TokenExpiration;
 use App\Domains\Auth\Models\OAuthToken;
 use App\Domains\User\Models\User;
 use App\Filament\App\Clusters\AccountCluster;
+use App\Providers\OAuthServiceProvider;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\CheckboxList;
@@ -58,7 +59,7 @@ class AccessTokens extends Page implements HasTable
 
     protected static ?string $cluster = AccountCluster::class;
 
-    protected static ?string $title = 'Access tokens';
+    protected static ?string $title = 'Access Tokens';
 
     protected static ?string $slug = 'access-tokens';
 
@@ -87,11 +88,11 @@ class AccessTokens extends Page implements HasTable
         return $schema->components([
             // No callout heading: Filament renders it as an <h4>, which would skip levels after the page's <h1>.
             Callout::make()
-                ->description(new HtmlString('<strong>You are impersonating this user.</strong> You can see their tokens, but you can\'t create or revoke them. Revoke a token from the user\'s page in Administration.'))
+                ->description(new HtmlString('<strong>You\'re impersonating this person.</strong> You can see their tokens, but you can\'t create or revoke them. To revoke one, use their page in Administration.'))
                 ->warning()
                 ->visible($this->isImpersonating()),
-            Section::make('Personal access tokens')
-                ->description('Use the API as yourself from your own code and tools. A token can do what its scopes name, and only what your permissions allow. Keep tokens secret: anyone with one can act as you.')
+            Section::make('Personal Access Tokens')
+                ->description('Use the API as yourself from your own code and tools. A token can do only what you choose for it, and never more than you can. Keep tokens secret: anyone with one can act as you.')
                 ->schema([EmbeddedTable::make()]),
         ]);
     }
@@ -108,14 +109,15 @@ class AccessTokens extends Page implements HasTable
             ->columns([
                 TextColumn::make('name')->label('Name'),
                 TextColumn::make('scopes')
-                    ->label('Scopes')
+                    ->label('Access')
                     ->badge()
+                    ->formatStateUsing(fn (string $state): string => OAuthServiceProvider::scopeLabel($state))
                     ->placeholder('None'),
-                TextColumn::make('status')->badge(),
+                TextColumn::make('status')->label('Status')->badge(),
                 TextColumn::make('created_at')->label('Created')->date(),
                 TextColumn::make('expires_at')->label('Expires')->date(),
                 TextColumn::make('last_used_at')
-                    ->label('Last used')
+                    ->label('Last Used')
                     ->since()
                     ->dateTimeTooltip()
                     ->placeholder('Never'),
@@ -127,19 +129,19 @@ class AccessTokens extends Page implements HasTable
                     ->icon(Heroicon::OutlinedXCircle)
                     ->color('danger')
                     ->requiresConfirmation()
-                    ->modalHeading('Revoke token')
+                    ->modalHeading('Revoke Token')
                     ->modalDescription('Anything using this token stops working immediately. This can\'t be undone.')
-                    ->modalSubmitActionLabel('Revoke token')
+                    ->modalSubmitActionLabel('Revoke Token')
                     ->visible(fn (OAuthToken $record): bool => ! $this->isImpersonating() && $record->status === CredentialStatus::Active)
                     ->action(function (OAuthToken $record, RevokePersonalAccessToken $revoke): void {
                         abort_unless($record->user_id === $this->user()->getKey(), 404);
 
                         $revoke($record, $this->user());
 
-                        Notification::make()->title('Token revoked')->success()->send();
+                        Notification::make()->title('Token Revoked')->success()->send();
                     }),
             ])
-            ->emptyStateHeading('No personal access tokens')
+            ->emptyStateHeading('No Personal Access Tokens')
             ->emptyStateDescription('Create a token to use the API as yourself.')
             ->paginated(false);
     }
@@ -149,7 +151,7 @@ class AccessTokens extends Page implements HasTable
         $maxDays = (int) config('api.personal_access_tokens.max_lifetime_days');
 
         return Action::make('createToken')
-            ->label('Create token')
+            ->label('Create Token')
             ->icon(Heroicon::OutlinedPlusCircle)
             ->hidden(fn (): bool => $this->isImpersonating())
             ->closeModalByClickingAway(false)
@@ -163,11 +165,11 @@ class AccessTokens extends Page implements HasTable
                             ->required()
                             ->maxLength(255),
                         CheckboxList::make('scopes')
-                            ->label('Scopes')
+                            ->label('Access')
                             ->options(fn (): array => CreatePersonalAccessToken::scopesFor($this->user()))
-                            ->helperText('What the token may do. Choose only what it needs.'),
+                            ->helperText('What the token can do. Choose only what it needs.'),
                         Select::make('lifetime')
-                            ->label('Expires after')
+                            ->label('Expires After')
                             ->options(collect(TokenExpiration::forPersonalAccessTokens($maxDays))->mapWithKeys(fn (TokenExpiration $lifetime): array => [$lifetime->value => $lifetime->getLabel()]))
                             ->default(TokenExpiration::ThreeMonths->value <= $maxDays ? TokenExpiration::ThreeMonths->value : null)
                             ->required()
@@ -193,7 +195,7 @@ class AccessTokens extends Page implements HasTable
 
                         Session::put(self::SESSION_KEY, ['token' => Crypt::encryptString($accessToken), 'record_id' => $token->getKey()]);
                     }),
-                Wizard\Step::make('Copy token')
+                Wizard\Step::make('Copy Token')
                     ->schema([
                         Text::make(new HtmlString('Copy the token and store it somewhere safe. <strong>It won\'t be shown again.</strong> Send it in the <code>Authorization: Bearer</code> header.')),
                         CodeEntry::make('token')
@@ -213,7 +215,7 @@ class AccessTokens extends Page implements HasTable
                 ->icon(Heroicon::OutlinedCheckCircle)
                 ->iconPosition(IconPosition::After))
             ->action(fn () => Session::forget(self::SESSION_KEY))
-            ->successNotificationTitle('Token created');
+            ->successNotificationTitle('Token Created');
     }
 
     private function isImpersonating(): bool

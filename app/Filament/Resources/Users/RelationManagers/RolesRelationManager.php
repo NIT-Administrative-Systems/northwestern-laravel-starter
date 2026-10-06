@@ -105,8 +105,8 @@ class RolesRelationManager extends RelationManager
                     ->disabled(fn () => $this->getAvailableRolesForAssignment()->isEmpty())
                     ->tooltip(
                         fn () => $this->getAvailableRolesForAssignment()->isEmpty()
-                        ? 'This user already has all available roles assigned.'
-                        : 'Assign a role to this user'
+                        ? 'This person already has every role that can be assigned.'
+                        : 'Choose a role for this person.'
                     )
                     ->schema(function () {
                         /** @var User $user */
@@ -144,7 +144,7 @@ class RolesRelationManager extends RelationManager
                         // Validate that API roles can only be assigned to API users and vice versa
                         if ($role->role_type->slug === RoleTypeEnum::ApiIntegration && ! $user->is_api_user) {
                             Notification::make()
-                                ->title('Invalid role assignment')
+                                ->title('Role Not Assigned')
                                 ->body('API Integration roles can only be assigned to API users.')
                                 ->danger()
                                 ->send();
@@ -156,7 +156,7 @@ class RolesRelationManager extends RelationManager
 
                         $user->assignRoleWithAudit($role, RoleModificationOrigin::UiAction);
                     })
-                    ->successNotificationTitle('Role assigned'),
+                    ->successNotificationTitle('Role Assigned'),
             ])
             ->recordUrl(fn (Role $record) => route('filament.administration.resources.roles.view', ['record' => $record]))
             ->recordActions([
@@ -164,7 +164,7 @@ class RolesRelationManager extends RelationManager
                     ->label('Remove')
                     ->modalHeading('Remove Role')
                     ->authorize(fn (Role $record) => ! $record->isAssignmentLocked() && Gate::allows('detachUser', $record))
-                    ->modalDescription(fn (Role $record) => 'Are you sure you want to remove the ' . $record->name . ' role from this user?')
+                    ->modalDescription(fn (Role $record) => 'Remove the ' . $record->name . ' role from this person?')
                     ->modalSubmitActionLabel('Remove Role')
                     ->action(function (Role $record, RelationManager $livewire): void {
                         abort_if($record->isAssignmentLocked(), 403, 'This role is assignment-locked and cannot be removed through the UI.');
@@ -174,7 +174,7 @@ class RolesRelationManager extends RelationManager
                         $user = $livewire->getOwnerRecord();
                         $user->removeRoleWithAudit($record, RoleModificationOrigin::UiAction);
                     })
-                    ->successNotificationTitle('Role removed'),
+                    ->successNotificationTitle('Role Removed'),
             ])
             ->modifyQueryUsing(fn (Builder $query) => $query
                 ->withoutGlobalScopes([

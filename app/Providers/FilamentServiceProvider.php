@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Domains\User\Models\Export;
+use App\Filament\Support\Formatting\TitleCase;
+use Filament\Actions\AttachAction;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\ExportAction;
 use Filament\Actions\Exports\Enums\ExportFormat;
 use Filament\Actions\Exports\Models\Export as BaseExport;
@@ -34,7 +38,12 @@ class FilamentServiceProvider extends ServiceProvider
                 ->deferFilters(false)
                 ->paginationPageOptions([10, 25, 50, 100])
                 ->defaultPaginationPageOption(25)
+                ->emptyStateHeading(fn (Table $table): string => __('filament-tables::table.empty.heading', [
+                    'model' => TitleCase::of($table->getPluralModelLabel()),
+                ]))
         );
+
+        $this->titleCaseBuiltInActions();
 
         Schema::configureUsing(fn (Schema $infolist) => $infolist
             ->defaultDateTimeDisplayFormat(
@@ -73,5 +82,28 @@ class FilamentServiceProvider extends ServiceProvider
                 ->fileDisk('s3')
                 ->formats([ExportFormat::Csv])
         );
+    }
+
+    /**
+     * Filament's built-in actions put the lowercase model label into some of their names ("New
+     * :label"), and title-case it with Str::ucwords elsewhere ("Sign-in Record"). Names are title
+     * case in Chicago style here (see "Interface copy" in .github/copilot-instructions.md); an
+     * action's own ->label() or ->modalHeading() still wins.
+     */
+    private function titleCaseBuiltInActions(): void
+    {
+        CreateAction::configureUsing(fn (CreateAction $action) => $action
+            ->label(fn (CreateAction $action): string => __('filament-actions::create.single.label', ['label' => TitleCase::of($action->getModelLabel())]))
+            ->modalHeading(fn (CreateAction $action): string => __('filament-actions::create.single.modal.heading', ['label' => TitleCase::of($action->getModelLabel())])));
+
+        AttachAction::configureUsing(fn (AttachAction $action) => $action
+            ->modalHeading(fn (AttachAction $action): string => __('filament-actions::attach.single.modal.heading', ['label' => TitleCase::of($action->getModelLabel())])));
+
+        DeleteBulkAction::configureUsing(fn (DeleteBulkAction $action) => $action
+            ->modalHeading(fn (DeleteBulkAction $action): string => __('filament-actions::delete.multiple.modal.heading', ['label' => TitleCase::of($action->getPluralModelLabel())])));
+
+        ExportAction::configureUsing(fn (ExportAction $action) => $action
+            ->label(fn (ExportAction $action): string => __('filament-actions::export.label', ['label' => TitleCase::of($action->getPluralModelLabel())]))
+            ->modalHeading(fn (ExportAction $action): string => __('filament-actions::export.modal.heading', ['label' => TitleCase::of($action->getPluralModelLabel())])));
     }
 }

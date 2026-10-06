@@ -15,13 +15,13 @@ To continue, enter this verification code on the sign-in page:
     </tr>
 </table>
 
-If you closed the sign-in page, or you are reading this on another device, this button opens it ready for the code:
+If you closed the sign-in page or you're on another device, this button opens it ready for the code:
 
 <x-mail::button :url="$signInUrl">
-Enter your code
+Enter Your Code
 </x-mail::button>
 
 <x-slot:subcopy>
-If you did not initiate this request, you may disregard this email. For your security, do not share this verification code with anyone. This code expires in {{ $expiresInMinutes }} minutes.
+If you didn't ask to sign in, you can ignore this email. Don't share this code with anyone. It expires in {{ $expiresIn }}.
 </x-slot:subcopy>
 </x-mail::message>

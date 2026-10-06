@@ -105,7 +105,7 @@ final class AnnouncementResourceTest extends TestCase
             ->fillForm(['title' => 'New title'])
             ->callAction('publish', data: ['starts_at' => now()->subMinute()->toDateTimeString(), 'ends_at' => null, 'notify' => true])
             ->assertHasNoActionErrors()
-            ->assertNotified('Announcement published');
+            ->assertNotified('Announcement Published');
 
         $announcement->refresh();
         $this->assertSame('New title', $announcement->title);
@@ -128,10 +128,10 @@ final class AnnouncementResourceTest extends TestCase
         $page()->callAction('showAgain')->assertNotified();
         $this->assertSame(0, $announcement->dismissals()->count());
 
-        $page()->callAction('end')->assertNotified('Announcement ended');
+        $page()->callAction('end')->assertNotified('Announcement Ended');
         $this->assertSame(AnnouncementStatus::Ended, $announcement->refresh()->status);
 
-        $page()->callAction('duplicate')->assertNotified('Copied to a new draft');
+        $page()->callAction('duplicate')->assertNotified('Copied to a New Draft');
         $this->assertSame(1, Announcement::query()->whereNull('published_at')->where('title', 'Corrected title')->count());
     }
 

@@ -18,7 +18,7 @@ final class PublicAnnouncementBannerTest extends TestCase
         Announcement::factory()->public()->create(['title' => 'Sign-in changes on October 12']);
         Announcement::factory()->create(['title' => 'Only for people signed in']);
 
-        $this->get('/')->assertOk()->assertSee('Sign-in changes on October 12')->assertDontSee('Only for people signed in')->assertDontSee('Read more');
+        $this->get('/')->assertOk()->assertSee('Sign-in changes on October 12')->assertDontSee('Only for people signed in')->assertDontSee('Read More');
         $this->get('/app/login')->assertOk()->assertSee('Sign-in changes on October 12');
     }
 

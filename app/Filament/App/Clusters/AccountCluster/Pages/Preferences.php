@@ -61,7 +61,7 @@ class Preferences extends Page
     {
         return $schema
             ->components([
-                Section::make('Date and time')
+                Section::make('Date and Time')
                     ->schema([
                         Select::make('timezone')
                             ->label('Timezone')
@@ -71,17 +71,19 @@ class Preferences extends Page
                             ->searchable()
                             ->required(),
                     ]),
-                Section::make('Email')
+                Section::make('Email Notifications')
+                    ->description('Choose what we email you about.')
                     ->schema([
                         Toggle::make('emailAnnouncements')
-                            ->label('Email me announcements')
-                            ->helperText('When an administrator chooses to notify people about an announcement. You\'re always told in the notifications bell.'),
+                            ->label('Announcements')
+                            ->helperText('When an administrator sends you an announcement. It also appears in your notifications.'),
                         Toggle::make('emailWhenApplicationConnects')
-                            ->label('Email me when an application connects to my account')
-                            ->helperText('You\'re always told in the notifications bell.')
+                            ->label('Application connections')
+                            ->helperText('When an application connects to your account. It also appears in your notifications.')
                             ->visible(fn (): bool => (bool) config('api.enabled') || (bool) config('mcp.enabled')),
                         Toggle::make('emailBeforeAccessTokensExpire')
-                            ->label('Email me before my personal access tokens expire')
+                            ->label('Expiring personal access tokens')
+                            ->helperText('Reminders before one of your tokens expires.')
                             ->visible(fn (): bool => (bool) config('api.enabled') && $this->user()->can(SystemPermission::CreatePersonalAccessTokens)),
                     ]),
             ])
@@ -95,7 +97,7 @@ class Preferences extends Page
             ->components([
                 // No callout heading: Filament renders it as an <h4>, which would skip levels after the page's <h1>.
                 Callout::make()
-                    ->description(new HtmlString('<strong>You are impersonating this user.</strong> You can see their preferences, but changes can\'t be saved.'))
+                    ->description(new HtmlString('<strong>You\'re impersonating this person.</strong> You can see their preferences, but you can\'t change them.'))
                     ->warning()
                     ->visible($this->isImpersonating()),
                 Form::make([EmbeddedSchema::make('form')])
@@ -122,7 +124,7 @@ class Preferences extends Page
         $updatePreferences($user, $data['timezone'], $user->preferences->with(Arr::except($data, ['timezone'])));
 
         Notification::make()
-            ->title('Your preferences have been saved.')
+            ->title('Preferences Saved')
             ->success()
             ->send();
     }

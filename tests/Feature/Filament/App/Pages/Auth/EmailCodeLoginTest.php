@@ -43,7 +43,7 @@ final class EmailCodeLoginTest extends TestCase
 
     public function test_page_renders_over_http(): void
     {
-        $this->get('/app/login/email')->assertOk()->assertSee('Request a verification code');
+        $this->get('/app/login/email')->assertOk()->assertSee('Request a Verification Code');
     }
 
     public function test_returns_404_when_local_auth_is_disabled(): void
@@ -69,7 +69,7 @@ final class EmailCodeLoginTest extends TestCase
             ->call('requestCode')
             ->assertHasNoFormErrors()
             ->assertSet('email', 'test@example.com')
-            ->assertSee('Check your email');
+            ->assertSee('Check Your Email');
 
         $challenge = LoginChallenge::query()->where('email', 'test@example.com')->sole();
 
@@ -84,7 +84,7 @@ final class EmailCodeLoginTest extends TestCase
             ->call('requestCode')
             ->assertHasNoFormErrors()
             ->assertSet('email', 'missing@example.com')
-            ->assertSee('Check your email');
+            ->assertSee('Check Your Email');
 
         $this->assertSame(0, LoginChallenge::count());
         $this->assertFalse(ctype_digit((string) LoginCodeSession::challengeId()));
@@ -121,7 +121,7 @@ final class EmailCodeLoginTest extends TestCase
 
         Livewire::test(EmailCodeLogin::class)
             ->assertSet('email', 'test@example.com')
-            ->assertSee('Check your email');
+            ->assertSee('Check Your Email');
     }
 
     public function test_valid_code_signs_the_user_in_and_clears_the_flow(): void
@@ -163,7 +163,7 @@ final class EmailCodeLoginTest extends TestCase
         Livewire::withQueryParams([LoginCodeSession::LINK_PARAMETER => $this->linkToken($challenge)])
             ->test(EmailCodeLogin::class)
             ->assertSet('email', 'test@example.com')
-            ->assertSee('Check your email')
+            ->assertSee('Check Your Email')
             ->fillForm(['code' => '123456'], 'codeForm')
             ->call('verifyCode')
             ->assertHasNoFormErrors([], 'codeForm')
@@ -181,7 +181,7 @@ final class EmailCodeLoginTest extends TestCase
             Livewire::withQueryParams([LoginCodeSession::LINK_PARAMETER => $token])
                 ->test(EmailCodeLogin::class)
                 ->assertSet('email', null)
-                ->assertSee('Request a verification code');
+                ->assertSee('Request a Verification Code');
         }
     }
 
@@ -216,7 +216,7 @@ final class EmailCodeLoginTest extends TestCase
 
         Livewire::test(EmailCodeLogin::class)
             ->call('resendCode')
-            ->assertNotified('Verification code resent.');
+            ->assertNotified('Code Sent');
 
         $this->assertNotSame((string) $original->id, LoginCodeSession::challengeId());
         $this->assertTrue(RateLimiter::tooManyAttempts('login-code-resend:test@example.com', 1));
@@ -239,7 +239,7 @@ final class EmailCodeLoginTest extends TestCase
 
         Livewire::test(EmailCodeLogin::class)
             ->call('resendCode')
-            ->assertNotified('Verification code resent.');
+            ->assertNotified('Code Sent');
 
         $this->assertSame($decoy, LoginCodeSession::challengeId());
     }
@@ -251,7 +251,7 @@ final class EmailCodeLoginTest extends TestCase
         Livewire::test(EmailCodeLogin::class)
             ->call('useDifferentEmail')
             ->assertSet('email', null)
-            ->assertSee('Request a verification code');
+            ->assertSee('Request a Verification Code');
 
         $this->assertNull(LoginCodeSession::email());
     }

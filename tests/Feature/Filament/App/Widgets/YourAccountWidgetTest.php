@@ -43,7 +43,7 @@ final class YourAccountWidgetTest extends TestCase
         $this->actingAs($user);
 
         Livewire::test(YourAccountWidget::class)
-            ->assertSee('Welcome back, Willie')
+            ->assertSee('Welcome Back, Willie')
             ->assertDontSee('2 days ago');
     }
 
@@ -56,7 +56,7 @@ final class YourAccountWidgetTest extends TestCase
 
         Livewire::test(YourAccountWidget::class)
             ->assertSee('Welcome, Willie')
-            ->assertDontSee('Welcome back');
+            ->assertDontSee('Welcome Back');
     }
 
     public function test_it_lists_roles_beyond_the_default_northwestern_user_role(): void
@@ -96,14 +96,14 @@ final class YourAccountWidgetTest extends TestCase
         config(['support.enabled' => true, 'support.documentation_url' => 'https://docs.example.test/']);
 
         Livewire::test(YourAccountWidget::class)
-            ->assertSee('Need help?')
+            ->assertSee('Need Help?')
             ->assertSee('Contact Support')
             ->assertSee('https://docs.example.test/');
 
         config(['support.enabled' => false, 'support.documentation_url' => null]);
 
         Livewire::test(YourAccountWidget::class)
-            ->assertDontSee('Need help?')
+            ->assertDontSee('Need Help?')
             ->assertDontSee('Contact Support');
     }
 }

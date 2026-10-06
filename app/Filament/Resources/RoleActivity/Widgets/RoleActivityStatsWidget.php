@@ -43,13 +43,13 @@ class RoleActivityStatsWidget extends BaseWidget
             Stat::make('Assignments', number_format($assignmentCount))
                 ->icon(Heroicon::OutlinedUserPlus)
                 ->color('success')
-                ->description($recentAssignments . ' in last 7 days')
+                ->description($recentAssignments . ' in the last 7 days')
                 ->descriptionIcon(Heroicon::ArrowTrendingUp),
 
             Stat::make('Removals', number_format($removalCount))
                 ->icon(Heroicon::OutlinedUserMinus)
                 ->color('danger')
-                ->description($recentRemovals . ' in last 7 days')
+                ->description($recentRemovals . ' in the last 7 days')
                 ->descriptionIcon(Heroicon::ArrowTrendingDown),
 
             Stat::make('Last Activity', $lastActivity

@@ -105,7 +105,7 @@ class AppPanelProvider extends PanelProvider
                         'data-cy' => 'admin-panel-link',
                     ]),
                 'logout' => fn (Action $action) => $action
-                    ->label('Sign out')
+                    ->label('Sign Out')
                     ->icon(Heroicon::OutlinedArrowRightOnRectangle)
                     ->extraAttributes([
                         'data-cy' => 'sign-out-menu-link',

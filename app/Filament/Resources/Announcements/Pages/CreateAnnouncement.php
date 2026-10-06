@@ -23,7 +23,7 @@ class CreateAnnouncement extends CreateRecord
 
     protected function getCreatedNotificationTitle(): string
     {
-        return 'Draft saved';
+        return 'Draft Saved';
     }
 
     protected function getRedirectUrl(): string

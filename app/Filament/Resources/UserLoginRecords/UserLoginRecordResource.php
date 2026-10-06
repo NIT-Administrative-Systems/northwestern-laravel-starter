@@ -9,6 +9,7 @@ use App\Domains\User\Models\UserLoginRecord;
 use App\Filament\Navigation\AdministrationNavGroup;
 use App\Filament\Resources\UserLoginRecords\Pages\ListUserLoginRecords;
 use App\Filament\Resources\UserLoginRecords\Tables\UserLoginRecordsTable;
+use App\Filament\Support\Formatting\TitleCase;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
@@ -23,9 +24,9 @@ class UserLoginRecordResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'id';
 
-    protected static ?string $modelLabel = 'Login Record';
+    protected static ?string $modelLabel = 'sign-in record';
 
-    protected static ?string $pluralModelLabel = 'Login Records';
+    protected static ?string $pluralModelLabel = 'sign-in records';
 
     protected static ?string $slug = 'login-records';
 
@@ -33,7 +34,18 @@ class UserLoginRecordResource extends Resource
 
     protected static ?int $navigationSort = 4;
 
-    protected static ?string $description = 'Monitor user login activity and authentication patterns.';
+    protected static ?string $description = 'Who signed in, how, and when.';
+
+    // Filament's Str::ucwords would give "Sign-in Records".
+    public static function getTitleCaseModelLabel(): string
+    {
+        return TitleCase::of(static::getModelLabel());
+    }
+
+    public static function getTitleCasePluralModelLabel(): string
+    {
+        return TitleCase::of(static::getPluralModelLabel());
+    }
 
     public static function canAccess(): bool
     {

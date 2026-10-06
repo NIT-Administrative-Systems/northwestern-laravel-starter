@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domains\Auth\Actions\Local;
 
 use App\Domains\Auth\Models\LoginChallenge;
+use App\Domains\Core\Formatting\CountInWords;
 use App\Domains\User\Models\User;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Timebox;
@@ -103,7 +104,7 @@ class RequestLoginCode
 
         foreach ($perMinuteLimits as $key => $maxAttempts) {
             if (RateLimiter::tooManyAttempts($key, $maxAttempts)) {
-                return 'Too many requests. Please try again in ' . RateLimiter::availableIn($key) . ' seconds.';
+                return 'Too many requests. Try again in ' . CountInWords::of(RateLimiter::availableIn($key), 'second') . '.';
             }
         }
 
@@ -118,7 +119,7 @@ class RequestLoginCode
             if (RateLimiter::tooManyAttempts($key, $maxAttempts)) {
                 $minutes = (int) ceil(RateLimiter::availableIn($key) / 60);
 
-                return "Too many login attempts. Please try again in {$minutes} minute(s).";
+                return 'Too many sign-in attempts. Try again in ' . CountInWords::of($minutes, 'minute') . '.';
             }
         }
 

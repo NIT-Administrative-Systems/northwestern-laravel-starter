@@ -2,8 +2,7 @@
 # New support request
 
 @if ($fallbackMode)
-> **Fallback Alert:** The primary gateway failed to create this ticket.
-> This email was sent as a fallback — check Sentry for the corresponding error.
+> **The ticketing system didn't create this ticket.** This email is the fallback, and Sentry has the error.
 @endif
 
 <x-mail::panel>
@@ -17,8 +16,8 @@
 |:--|:--|
 | **Reference** | {{ $referenceNumber }} |
 | **Environment** | {{ $environment }} |
-| **Submitted** | {{ now()->setTimezone(config('app.schedule_timezone'))->format('M j, Y g:i A T') }} |
-| **Requestor** | {{ $submitterName }} |
+| **Submitted** | {{ $submittedAt }} |
+| **Requester** | {{ $submitterName }} |
 | **Email** | [{{ $submitterEmail }}](mailto:{{ $submitterEmail }}) |
 | **NetID** | {{ $submitterUsername }} |
 @if ($submitterAffiliation)
@@ -33,10 +32,9 @@
 
 <small>
 @if ($fallbackMode)
-This email was generated because the primary ticket system gateway was unavailable.
-The request has been captured, but the ticket was not created in the external system.
+The ticketing system was unavailable, so this email is the only record of the request.
 @else
-This email serves as the support ticket record. No external ticketing system is configured for this environment.
+No ticketing system is configured for this environment, so this email is the record of the request.
 @endif
 </small>
 </x-mail::message>

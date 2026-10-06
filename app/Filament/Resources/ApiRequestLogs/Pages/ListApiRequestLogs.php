@@ -21,7 +21,7 @@ class ListApiRequestLogs extends ListRecords
 {
     protected static string $resource = ApiRequestLogResource::class;
 
-    protected ?string $subheading = 'Inbound API activity and request metrics';
+    protected ?string $subheading = 'Every API request, with response times and failures.';
 
     /** @return array<string, string> */
     public function getBreadcrumbs(): array

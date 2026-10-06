@@ -13,7 +13,7 @@ class ListSupportTickets extends ListRecords
 {
     protected static string $resource = SupportTicketResource::class;
 
-    protected ?string $subheading = 'Submission log for user-submitted support tickets';
+    protected ?string $subheading = 'Requests sent through Contact Support.';
 
     /** @return array<class-string<Widget>> */
     protected function getHeaderWidgets(): array

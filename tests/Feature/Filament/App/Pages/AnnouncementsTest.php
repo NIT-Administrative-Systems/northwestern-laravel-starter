@@ -55,7 +55,7 @@ final class AnnouncementsTest extends TestCase
 
     public function test_it_says_when_there_are_none(): void
     {
-        $this->get('/app/announcements')->assertOk()->assertSee('No announcements');
+        $this->get('/app/announcements')->assertOk()->assertSee('No Announcements');
     }
 
     public function test_the_help_menu_links_to_it_for_people_signed_in(): void

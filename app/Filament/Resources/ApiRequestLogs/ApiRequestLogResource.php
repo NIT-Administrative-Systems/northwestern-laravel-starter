@@ -26,9 +26,9 @@ class ApiRequestLogResource extends Resource
 
     protected static ?string $navigationLabel = 'API Requests';
 
-    protected static ?string $modelLabel = 'API Request';
+    protected static ?string $modelLabel = 'API request';
 
-    protected static ?string $pluralModelLabel = 'API Requests';
+    protected static ?string $pluralModelLabel = 'API requests';
 
     protected static ?string $slug = 'requests';
 

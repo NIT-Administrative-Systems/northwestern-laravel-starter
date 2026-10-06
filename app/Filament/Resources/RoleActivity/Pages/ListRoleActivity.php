@@ -14,7 +14,7 @@ class ListRoleActivity extends ListRecords
 
     protected ?string $heading = 'Role Activity';
 
-    protected ?string $subheading = 'Assignment and removal history for all roles';
+    protected ?string $subheading = 'Every role assignment and removal.';
 
     protected static ?int $defaultPaginationPageOption = 25;
 

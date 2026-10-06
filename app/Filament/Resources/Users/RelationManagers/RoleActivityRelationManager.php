@@ -45,8 +45,8 @@ class RoleActivityRelationManager extends RelationManager
                     ->with(['user', 'impersonator', 'auditable']);
             })
             ->defaultPaginationPageOption(10)
-            ->emptyStateHeading('No role change history')
-            ->emptyStateDescription('This user has no role assignment or removal events recorded.')
+            ->emptyStateHeading('No Role Changes')
+            ->emptyStateDescription('No roles have been assigned to or removed from this person.')
             ->emptyStateIcon('heroicon-o-clock');
     }
 }

@@ -41,7 +41,8 @@ return [
     |
     */
 
-    'auth_realm' => config('app.name') . ' API',
+    // APP_NAME directly: config/api.php loads before the framework's app config, so config('app.name') is still empty here.
+    'auth_realm' => env('APP_NAME', 'Laravel') . ' API',
 
     /*
     |--------------------------------------------------------------------------

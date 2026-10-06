@@ -48,7 +48,7 @@ class AnnouncementForm
                                     ->live(debounce: 500),
                             ]),
                         Section::make('Severity')
-                            ->description('Sets the colour and icon, and which announcement the banner shows first. People can dismiss anything but a critical announcement.')
+                            ->description('Sets the color and icon, and which announcement the banner shows first. People can dismiss anything but a critical announcement.')
                             ->schema([
                                 ToggleButtons::make('severity')
                                     ->hiddenLabel()

@@ -7,6 +7,7 @@ namespace App\Filament\App\Pages\Auth;
 use App\Domains\Auth\Actions\Local\AuthenticateWithLoginCode;
 use App\Domains\Auth\Actions\Local\RequestLoginCode;
 use App\Domains\Auth\ValueObjects\LoginCodeSession;
+use App\Domains\Core\Formatting\CountInWords;
 use App\Filament\App\Pages\Concerns\HasSiteHeader;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
@@ -43,7 +44,7 @@ class EmailCodeLogin extends SimplePage
 {
     use HasSiteHeader;
 
-    protected static ?string $title = 'Sign in with email';
+    protected static ?string $title = 'Sign In with Email';
 
     /** @var array<string, mixed>|null */
     public ?array $data = [];
@@ -97,7 +98,7 @@ class EmailCodeLogin extends SimplePage
         return $schema
             ->components([
                 OneTimeCodeInput::make('code')
-                    ->label('Verification code')
+                    ->label('Verification Code')
                     ->length((int) config('local-auth.code.digits', 6))
                     ->extraFieldWrapperAttributes(['class' => 'nu-login-code'])
                     ->required()
@@ -105,7 +106,7 @@ class EmailCodeLogin extends SimplePage
                     ->extraInputAttributes(['data-cy' => 'code-input'])
                     ->belowContent(
                         Action::make('resendCode')
-                            ->label('Resend code')
+                            ->label('Resend Code')
                             ->link()
                             ->action(fn () => $this->resendCode())
                     ),
@@ -145,13 +146,13 @@ class EmailCodeLogin extends SimplePage
 
                 Actions::make([
                     Action::make('backToSignIn')
-                        ->label('Back to sign-in options')
+                        ->label('Back to Sign-In Options')
                         ->icon(Heroicon::OutlinedArrowLeft)
                         ->link()
                         ->url(fn (): ?string => Filament::getLoginUrl())
                         ->visible(fn (): bool => blank($this->email)),
                     Action::make('useDifferentEmail')
-                        ->label('Use a different email')
+                        ->label('Use a Different Email')
                         ->icon(Heroicon::OutlinedArrowLeft)
                         ->link()
                         ->action(fn () => $this->useDifferentEmail())
@@ -162,13 +163,13 @@ class EmailCodeLogin extends SimplePage
 
     public function getHeading(): string|Htmlable|null
     {
-        return blank($this->email) ? 'Request a verification code' : 'Check your email';
+        return blank($this->email) ? 'Request a Verification Code' : 'Check Your Email';
     }
 
     public function getSubheading(): string|Htmlable|null
     {
         if (blank($this->email)) {
-            return 'Enter the email address associated with your account to receive a verification code.';
+            return 'Enter the email address on your account, and we\'ll send you a verification code.';
         }
 
         return new HtmlString('We sent an email to <strong>' . e($this->email) . '</strong>. Enter the verification code below to sign in.');
@@ -226,8 +227,11 @@ class EmailCodeLogin extends SimplePage
         $cooldownKey = "login-code-resend:{$email}";
 
         if (RateLimiter::tooManyAttempts($cooldownKey, 1)) {
+            $seconds = RateLimiter::availableIn($cooldownKey);
+
             Notification::make()
-                ->title('Please wait ' . RateLimiter::availableIn($cooldownKey) . ' seconds before requesting another code.')
+                ->title('Wait a Moment')
+                ->body('You can request another code in ' . CountInWords::of($seconds, 'second') . '.')
                 ->warning()
                 ->send();
 
@@ -238,7 +242,8 @@ class EmailCodeLogin extends SimplePage
             $challenge = resolve(RequestLoginCode::class)($email, request()->ip(), request()->userAgent());
         } catch (ValidationException $e) {
             Notification::make()
-                ->title($e->errors()['email'][0] ?? 'Unable to resend the code.')
+                ->title('Code Not Sent')
+                ->body($e->errors()['email'][0] ?? 'We couldn\'t resend the code. Try again in a minute.')
                 ->danger()
                 ->send();
 
@@ -250,7 +255,8 @@ class EmailCodeLogin extends SimplePage
         RateLimiter::hit($cooldownKey, (int) config('local-auth.code.resend_cooldown_seconds', 30));
 
         Notification::make()
-            ->title('Verification code resent.')
+            ->title('Code Sent')
+            ->body('Check your email for the new code.')
             ->success()
             ->send();
     }

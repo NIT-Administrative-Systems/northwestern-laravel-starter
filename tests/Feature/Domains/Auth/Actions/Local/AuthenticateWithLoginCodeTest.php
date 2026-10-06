@@ -56,22 +56,22 @@ final class AuthenticateWithLoginCodeTest extends TestCase
         $user = User::factory()->affiliate()->create();
         $challenge = $this->challengeFor($user->email, '123456');
 
-        $this->assertRejectedWith('Invalid code', fn () => $this->authenticate((string) $challenge->id, '000000'));
+        $this->assertRejectedWith("That code didn't work", fn () => $this->authenticate((string) $challenge->id, '000000'));
     }
 
     public function test_missing_challenge_id_is_rejected(): void
     {
-        $this->assertRejectedWith('Invalid code', fn () => $this->authenticate(null, '123456'));
+        $this->assertRejectedWith("That code didn't work", fn () => $this->authenticate(null, '123456'));
     }
 
     public function test_uuid_decoy_challenge_id_is_rejected(): void
     {
-        $this->assertRejectedWith('Invalid code', fn () => $this->authenticate(Str::uuid()->toString(), '123456'));
+        $this->assertRejectedWith("That code didn't work", fn () => $this->authenticate(Str::uuid()->toString(), '123456'));
     }
 
     public function test_non_numeric_challenge_id_is_rejected_without_a_database_error(): void
     {
-        $this->assertRejectedWith('Invalid code', fn () => $this->authenticate('not-a-valid-id', '123456'));
+        $this->assertRejectedWith("That code didn't work", fn () => $this->authenticate('not-a-valid-id', '123456'));
     }
 
     public function test_locked_challenge_is_rejected_with_the_lockout_message(): void
@@ -87,14 +87,14 @@ final class AuthenticateWithLoginCodeTest extends TestCase
     {
         $challenge = $this->challengeFor('missing-user@example.com', '123456');
 
-        $this->assertRejectedWith('Invalid code', fn () => $this->authenticate((string) $challenge->id, '123456'));
+        $this->assertRejectedWith("That code didn't work", fn () => $this->authenticate((string) $challenge->id, '123456'));
     }
 
     public function test_enforces_the_per_ip_per_minute_limit(): void
     {
         config(['rate-limiting.auth.login_code.verify.per_minute' => 1]);
 
-        $this->assertRejectedWith('Invalid code', fn () => $this->authenticate(null, '123456'));
+        $this->assertRejectedWith("That code didn't work", fn () => $this->authenticate(null, '123456'));
         $this->assertRejectedWith('Too many attempts', fn () => $this->authenticate(null, '123456'));
     }
 
@@ -104,7 +104,7 @@ final class AuthenticateWithLoginCodeTest extends TestCase
         $user = User::factory()->affiliate()->create();
         $challenge = $this->challengeFor($user->email, '123456');
 
-        $this->assertRejectedWith('Invalid code', fn () => $this->authenticate((string) $challenge->id, '000000'));
+        $this->assertRejectedWith("That code didn't work", fn () => $this->authenticate((string) $challenge->id, '000000'));
         $this->assertRejectedWith('Too many attempts', fn () => $this->authenticate((string) $challenge->id, '123456', ip: '192.168.1.100'));
     }
 

@@ -11,8 +11,6 @@ use App\Filament\App\Pages\ContactSupport;
 use App\Providers\Filament\AppPanelProvider;
 use BackedEnum;
 use Filament\Actions\Action;
-use Filament\Infolists\Components\RepeatableEntry;
-use Filament\Infolists\Components\RepeatableEntry\TableColumn;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Grid;
@@ -26,9 +24,6 @@ use Filament\Support\Icons\Heroicon;
  */
 class Profile extends Page
 {
-    /** How many sign-ins the page lists. */
-    public const int RECENT_SIGN_INS = 10;
-
     protected static ?string $cluster = AccountCluster::class;
 
     protected static ?string $title = 'Profile';
@@ -53,7 +48,7 @@ class Profile extends Page
                         : 'Entered by an administrator when your account was created.')
                     ->afterHeader([
                         Action::make('contactSupport')
-                            ->label('Request a change')
+                            ->label('Request a Change')
                             ->link()
                             ->url(fn (): string => ContactSupport::getUrl(panel: AppPanelProvider::ID))
                             ->visible(fn (): bool => ! $isNetIdUser && ContactSupport::canAccess()),
@@ -62,14 +57,14 @@ class Profile extends Page
                         Grid::make(['default' => 1, 'md' => 2])->schema([
                             TextEntry::make('full_name')->label('Name'),
                             TextEntry::make('username')->label('NetID')->visible($isNetIdUser),
-                            TextEntry::make('email')->label('Email address')->placeholder('None'),
+                            TextEntry::make('email')->label('Email')->placeholder('None'),
                             TextEntry::make('primary_affiliation')
-                                ->label('Primary affiliation')
+                                ->label('Primary Affiliation')
                                 ->formatStateUsing(fn ($state) => $state?->getLabel())
                                 ->placeholder('None')
                                 ->visible($isNetIdUser),
                             TextEntry::make('job_titles')
-                                ->label($isNetIdUser ? 'Job titles' : 'Title')
+                                ->label($isNetIdUser ? 'Job Titles' : 'Title')
                                 ->badge()
                                 ->placeholder('None'),
                             TextEntry::make('departments')
@@ -77,35 +72,6 @@ class Profile extends Page
                                 ->badge()
                                 ->placeholder('None'),
                         ]),
-                    ]),
-
-                Section::make('Sign-in')
-                    ->description($this->signInDescription())
-                    ->schema([
-                        TextEntry::make('sign_in_method')
-                            ->label('Method')
-                            ->state(match ($user->auth_type) {
-                                AuthType::SSO => 'NetID',
-                                AuthType::Local => 'Email verification code',
-                                default => $user->auth_type->getLabel(),
-                            }),
-                        RepeatableEntry::make('recent_sign_ins')
-                            ->label('Recent sign-ins')
-                            ->state(fn (): array => $user->login_records()
-                                ->latest('logged_in_at')
-                                ->limit(self::RECENT_SIGN_INS)
-                                ->get(['logged_in_at', 'ip_address'])
-                                ->all())
-                            ->table([
-                                TableColumn::make('Signed in'),
-                                TableColumn::make('IP address'),
-                            ])
-                            ->schema([
-                                // Labels match the column headers: narrow screens stack each row with them.
-                                TextEntry::make('logged_in_at')->label('Signed in')->dateTime(),
-                                TextEntry::make('ip_address')->label('IP address')->placeholder('Unknown'),
-                            ])
-                            ->placeholder('No sign-ins recorded yet.'),
                     ]),
 
                 Section::make('Roles')
@@ -118,17 +84,6 @@ class Profile extends Page
                             ->placeholder('None beyond standard access.'),
                     ]),
             ]);
-    }
-
-    private function signInDescription(): string
-    {
-        $description = 'The last ' . self::RECENT_SIGN_INS . ' sign-ins. Contact support if you don\'t recognize one.';
-
-        $retentionDays = config('platform.retention.login_records');
-
-        return filled($retentionDays)
-            ? "{$description} Records are kept for {$retentionDays} days."
-            : $description;
     }
 
     private function user(): User
