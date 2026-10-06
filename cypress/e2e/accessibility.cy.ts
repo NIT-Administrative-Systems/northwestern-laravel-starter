@@ -124,6 +124,8 @@ describe("Accessibility", () => {
             "/administration/api/requests",
             "/administration/api/applications",
             "/administration/api/mcp-clients",
+            "/administration/roles/create",
+            "/administration/roles/activity",
             "/administration/announcements",
             "/administration/announcements/create",
             // The super administrator holds CreatePersonalAccessTokens; generic users don't see the page.
@@ -155,6 +157,54 @@ describe("Accessibility", () => {
                 visit(`/oauth/authorize?${query.toString()}`);
                 cy.contains("Unverified AI Client");
                 cy.checkAxeViolations();
+            });
+        });
+
+        // Record pages, each on a record made for it.
+        (
+            [
+                [
+                    "a NetID user",
+                    "App\\Domains\\User\\Models\\User::factory()->create()",
+                    (id) => `/administration/users/${id}`,
+                ],
+                [
+                    "an API user",
+                    "App\\Domains\\User\\Models\\User::factory()->api()->create()",
+                    (id) => `/administration/users/${id}`,
+                ],
+                [
+                    "a role",
+                    "App\\Domains\\Auth\\Models\\Role::factory()->create()",
+                    (id) => `/administration/roles/${id}`,
+                ],
+                [
+                    "a role's edit page",
+                    "App\\Domains\\Auth\\Models\\Role::factory()->create()",
+                    (id) => `/administration/roles/${id}/edit`,
+                ],
+                [
+                    "a role's history",
+                    "App\\Domains\\Auth\\Models\\Role::factory()->create()",
+                    (id) => `/administration/roles/${id}/history`,
+                ],
+                [
+                    "an announcement's edit page",
+                    "App\\Domains\\Support\\Models\\Announcement::factory()->create()",
+                    (id) => `/administration/announcements/${id}/edit`,
+                ],
+                [
+                    "a support ticket",
+                    "App\\Domains\\Support\\Models\\SupportTicket::factory()->create()",
+                    (id) => `/administration/support-tickets/${id}`,
+                ],
+            ] as [string, string, (id: string) => string][]
+        ).forEach(([name, factory, path]) => {
+            it(`${name} has no violations`, () => {
+                cy.php(`return ${factory}->getKey();`).then((id) => {
+                    visit(path(id));
+                    cy.checkAxeViolations();
+                });
             });
         });
 
