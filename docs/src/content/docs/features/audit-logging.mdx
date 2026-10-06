@@ -107,6 +107,20 @@ When an administrator starts impersonating a user, `LogImpersonationAccess` (lis
 
 Nothing records when an impersonation ends. Audit entries for changes made while impersonating carry the administrator's ID in `impersonator_user_id`.
 
+**API Credentials**
+
+OAuth clients and tokens have UUID or string keys, which the audits table can't store, so their changes are recorded as custom events on a person instead:
+
+| Event                                                                                     | Recorded on                                  | When                                                              |
+| ----------------------------------------------------------------------------------------- | -------------------------------------------- | ----------------------------------------------------------------- |
+| `service_client_created`, `service_client_revoked`, `service_client_ip_restrictions_updated` | The API user that owns the client            | A service client is created, rotated, restricted or revoked       |
+| `application_registered`, `application_updated`, `application_secret_regenerated`, `application_revoked` | The administrator who acted        | An administrator manages an application                           |
+| `mcp_client_revoked`                                                                      | The administrator who acted                  | An administrator revokes an MCP client                            |
+| `personal_access_token_revoked`                                                           | The token's owner                            | An administrator revokes someone else's token                     |
+| `application_disconnected`                                                                | The person                                   | An administrator disconnects an application for someone          |
+
+None of them records a secret. Updates record the values before and after; revoking an application records how many connections it removed.
+
 ---
 
 ## Retention
@@ -166,7 +180,13 @@ protected array $auditExclude = [
 
 ## Creating Custom Audit Events
 
-For actions that don't fit standard CRUD operations, log custom audit events. The `AuditsPermissions` and `AuditsRoles` traits demonstrate this pattern.
+For actions that don't fit standard CRUD operations, log custom audit events. A model with the `RecordsCustomAudits` trait, as `User` has, records one in a line:
+
+```php
+$user->recordCustomAudit('report_exported', new: ['report' => $report->name], old: []);
+```
+
+The audit's user is whoever is signed in. The `AuditsRoles` and `AuditsPermissions` traits show the longer form, with tags and context.
 
 <Aside type="tip" title="Additional Resources">
 For more advanced audit logging patterns, refer to the [Laravel Auditing documentation](https://laravel-auditing.com/guide/audit-custom.html#example-custom-log-event).

@@ -7,6 +7,7 @@ namespace Tests\Feature\Filament\Resources\McpClients;
 use App\Domains\Auth\Enums\CredentialStatus;
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\User\Models\User;
+use App\Filament\Clusters\ApiCluster;
 use App\Filament\Resources\McpClients\McpClientResource;
 use App\Filament\Resources\McpClients\Pages\ListMcpClients;
 use App\Providers\Filament\AdministrationPanelProvider;
@@ -18,6 +19,7 @@ use Tests\Concerns\RunsAuthorizationCodeFlow;
 use Tests\TestCase;
 
 #[CoversClass(McpClientResource::class)]
+#[CoversClass(ApiCluster::class)]
 #[CoversClass(ListMcpClients::class)]
 final class McpClientResourceTest extends TestCase
 {
@@ -45,6 +47,20 @@ final class McpClientResourceTest extends TestCase
         config(['mcp.enabled' => true]);
         $this->actingAs(User::factory()->create());
         $this->assertFalse(McpClientResource::canAccess());
+    }
+
+    // MCP Clients sits in the API cluster, which must still show in the sidebar when only MCP is on.
+    public function test_it_is_in_the_sidebar_when_only_mcp_is_on(): void
+    {
+        config(['api.enabled' => false]);
+
+        $this->get('/administration')
+            ->assertOk()
+            ->assertSee('href="' . ApiCluster::getUrl(panel: AdministrationPanelProvider::ID) . '"', escape: false);
+
+        $this->get(ApiCluster::getUrl(panel: AdministrationPanelProvider::ID))
+            ->assertRedirect(McpClientResource::getUrl(panel: AdministrationPanelProvider::ID));
+        $this->get('/administration/api/overview')->assertForbidden();
     }
 
     public function test_it_lists_only_self_registered_clients(): void

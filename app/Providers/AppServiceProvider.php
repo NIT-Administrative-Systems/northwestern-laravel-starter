@@ -29,7 +29,10 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(Authenticatable::class, User::class);
-        $this->app->singleton(ProblemDetailsRenderer::class);
+        // OAuth and MCP clients expect their own protocols' error bodies, not Problem Details.
+        $this->app->singleton(ProblemDetailsRenderer::class, fn (): ProblemDetailsRenderer => new ProblemDetailsRenderer(
+            exceptPaths: ['oauth/*', 'mcp', 'mcp/*', '.well-known/*'],
+        ));
         $this->app->bind(DbDumperFactory::class, function (): ConfigurableDbDumperFactory {
             return new ConfigurableDbDumperFactory();
         });

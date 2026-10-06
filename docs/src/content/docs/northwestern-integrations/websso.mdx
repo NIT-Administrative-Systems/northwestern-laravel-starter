@@ -137,7 +137,7 @@ If the Directory Search lookup fails after 3 retries during the SSO callback, th
 </PropertyTable>
 
 <Aside type="tip">
-Entra ID requires registering the application in Azure's control panel. You'll need to generate a client ID and secret, and register the callback URI. The callback must use HTTPS. The starter builds the callback URL from the `login-oauth-callback` route (`https://your-app.northwestern.edu/auth/azure-ad/callback`), so there is no redirect URI setting.
+Entra ID requires registering the application in Azure's control panel. You'll need to generate a client ID and secret, and register the callback URI. The callback must use HTTPS. The starter builds the callback URL from the `login-oauth-callback` route (`https://your-app.northwestern.edu/auth/azure-ad/callback`), so there is no redirect URI setting. `php artisan websso:callback` prints the URL to register.
 </Aside>
 
 ---

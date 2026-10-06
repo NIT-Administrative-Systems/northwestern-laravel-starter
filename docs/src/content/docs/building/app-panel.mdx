@@ -16,11 +16,28 @@ The panel also owns sign-in for the whole application. Guests of any panel are s
 The panel discovers Resources, Pages, Clusters and Widgets in `app/Filament/App/`:
 
 <FileTree>
-    - app/Filament/App/ - Clusters/ - AccountCluster.php - AccountCluster/Pages/
-    - Profile.php - Preferences.php - Pages/ - Auth/ sign-in pages -
-    Concerns/HasSiteHeader.php - ComponentGallery.php - ContactSupport.php -
-    EnvironmentLockdown.php - Resources/ discovered, empty until you add one -
-    Widgets/ - YourAccountWidget.php
+
+- app/Filament/App/
+    - Clusters/
+        - AccountCluster.php
+        - AccountCluster/Pages/
+            - AccessTokens.php
+            - ConnectedApplications.php
+            - Preferences.php
+            - Profile.php
+    - Livewire/
+        - AnnouncementBanner.php
+    - Pages/
+        - Announcements.php
+        - Auth/ sign-in pages
+        - Concerns/HasSiteHeader.php
+        - ComponentGallery.php
+        - ContactSupport.php
+        - EnvironmentLockdown.php
+    - Resources/ discovered, empty until you add one
+    - Widgets/
+        - YourAccountWidget.php
+
 </FileTree>
 
 The sidebar is for your application's features. The starter ships only the dashboard and, outside production, the component gallery there; Contact Support is in the Help menu.
@@ -66,7 +83,7 @@ The Account area at `/app/account` is each user's own: who they are, their prefe
 
 ### Access Tokens
 
-`/app/account/access-tokens` lists the user's [personal access tokens](/features/api/#personal-access-tokens) and creates and revokes them. It shows only to users with the `CreatePersonalAccessTokens` permission, which no default role grants. A new token is shown once.
+`/app/account/access-tokens` lists the user's [personal access tokens](/features/api/#personal-access-tokens) and creates and revokes them. It shows while the API is on (`API_ENABLED`) to people other than API users who hold the `CreatePersonalAccessTokens` permission; of the default roles, only Super Administrator has it. A new token is shown once.
 
 ### Connected Applications
 
@@ -93,6 +110,7 @@ Everything else a user chooses goes in the `users.preferences` JSON column, read
         public function __construct(
             public bool $emailBeforeAccessTokensExpire = true,
             public bool $emailWhenApplicationConnects = true,
+            public bool $emailAnnouncements = true,
             public bool $emailWeeklySummary = true,
         ) {}
     }
@@ -165,7 +183,7 @@ Route::has('policies.index')
     : null,
 ```
 
-The component also renders on error pages, so keep anything that could query the database inside `rescue()`, as the Contact Support check does.
+The component also renders on error pages, so keep anything that could query the database inside `rescue()`, as the Help menu's signed-in check does.
 
 ### The User Menu
 

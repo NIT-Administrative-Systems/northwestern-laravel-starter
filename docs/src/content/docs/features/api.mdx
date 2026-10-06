@@ -29,8 +29,9 @@ The starter ships with a minimal set of API endpoints. They live in `routes/api.
 
 - <Badge text="POST" variant="success" /> `/oauth/token` - Exchange a client ID
   and secret for an access token (Passport)
-- <Badge text="GET" variant="note" /> `/api/v1/me` - Returns the API user the
-  access token acts as
+- <Badge text="GET" variant="note" /> `/api/v1/me` - Returns whoever the access
+  token acts as: the API user for a service client, or the person for a
+  personal access token or an application
 - <Badge text="GET" variant="note" /> `/api/health` - [Health
   check](/features/health-checks/) results. It takes no bearer token and isn't
   affected by `API_ENABLED`; it requires an `X-Secret-Token` header matching
@@ -38,9 +39,9 @@ The starter ships with a minimal set of API endpoints. They live in `routes/api.
 
 No endpoint creates credentials. Service clients and OAuth applications are registered in the administration panel, and personal access tokens are created on the Account page.
 
-Passport also serves `GET /oauth/authorize`, where a person approves an application on the consent screen.
+Passport also serves `GET /oauth/authorize`, where a person approves an application on the consent screen, and `POST /oauth/token/refresh`, which refreshes the transient tokens Passport's own JavaScript uses and which the starter doesn't use. A refused request's `WWW-Authenticate` header names the realm `{APP_NAME} API` (`api.auth_realm`).
 
-View the [API Specification](/api) for a complete reference of these endpoints.
+The [API Specification](/api) documents the endpoints under `/api` and how to authenticate with each kind of credential.
 
 ## Core Concepts
 
@@ -117,15 +118,15 @@ Most Northwestern integrations reach the application through an Apigee API proxy
 
 ## Personal Access Tokens
 
-People who hold the **Create Personal Access Tokens** permission can call the API as themselves from their own code and tools. No default role grants it. They create tokens on the Account area's [Access Tokens](/building/app-panel/#access-tokens) page:
+People who hold the **Create Personal Access Tokens** permission can call the API as themselves from their own code and tools. Of the default roles, only Super Administrator has it. They create tokens on the Account area's [Access Tokens](/building/app-panel/#access-tokens) page:
 
 - **Scopes** - A token can do only what its scopes name, chosen from the API-relevant permissions the person holds, and never more than the person's permissions allow.
 - **Lifetime** - Each token chooses 30, 90 (the default), 180 or 365 days, up to `API_PERSONAL_ACCESS_TOKEN_MAX_LIFETIME_DAYS`. Tokens can't be renewed; create a new one.
 - **Limit** - A person holds at most `API_PERSONAL_ACCESS_TOKEN_MAX_ACTIVE` working tokens (10 by default).
 - **Shown once** - The token is shown once, after it is created, and never stored in plain text.
-- **Reminders** - People are emailed before a token expires, unless they turn it off on their Preferences page.
+- **Reminders** - People are emailed 30, 14, 7, 3 and 1 days before a token expires (`api.personal_access_tokens.expiration_notifications.intervals`), unless they turn it off on their Preferences page.
 
-A token stops working as soon as its owner loses the permission, is deactivated or is deleted; `oauth:revoke-ineligible`, hourly in production, marks such tokens revoked. An administrator impersonating someone can see their tokens but can't create or revoke them. Administrators revoke a person's token, for example one that leaked, on the person's **Access Tokens** tab in the administration panel, which records it in the person's audit history.
+A token stops working as soon as its owner loses the permission, is deactivated or is deleted; `oauth:revoke-ineligible`, hourly in production, marks such tokens revoked. An administrator impersonating someone can see their tokens but can't create or revoke them. Administrators revoke a person's token, for example one that leaked, on the person's **Personal Access Tokens** tab in the administration panel, which records it in the person's audit history.
 
 Passport issues personal access tokens through a personal access client, which the starter creates the first time someone creates a token.
 
@@ -177,17 +178,7 @@ The first time an application connects, the person is told in the notification b
 
 ## Signing Keys
 
-Passport signs access tokens with an RSA key pair.
-
-- **Deployed environments** set the keys in `PASSPORT_PRIVATE_KEY` and `PASSPORT_PUBLIC_KEY`. Generate a pair with `php artisan passport:keys`, store the contents of `storage/oauth-private.key` and `storage/oauth-public.key` in the environment's secrets, and keep the files out of the repository.
-- **Locally**, `php artisan db:rebuild` generates key files in `storage/` when they don't exist.
-
-<Aside type="caution" title="Rotating the signing keys revokes every token">
-    Every access token is signed with the private key. Replacing the key pair
-    makes every outstanding access token invalid at once. Integrations recover
-    by requesting new access tokens with their existing client credentials, so
-    rotating the keys needs no new secrets.
-</Aside>
+Passport signs access tokens with an RSA key pair: `PASSPORT_PRIVATE_KEY` and `PASSPORT_PUBLIC_KEY` in deployed environments, key files in `storage/` locally. Setting them up, what rotating them or `APP_KEY` invalidates, the cleanup tasks and the refusals that protect credentials are in [API Operations](/features/api-operations/).
 
 ## Local Development
 
@@ -238,6 +229,8 @@ Requests to protected API endpoints are logged to the `api_request_logs` table f
 
 ### What Gets Logged
 
+The authenticated API routes and the MCP server are logged. Passport's `/oauth/*` endpoints, the public routes such as `/api/health`, and the MCP discovery and registration routes aren't.
+
 Every log entry includes:
 
 <PropertyTable>
@@ -277,7 +270,10 @@ Every log entry includes:
         User agent string from the request (if provided)
     </Property>
     <Property name="failure_reason">
-        Authentication or request failure reason, if any
+        Why the request was refused or failed, if it was: `missing-credentials`,
+        `invalid-header-format`, `token-invalid-or-expired`, `ip-denied`,
+        `unauthorized`, `validation-failed`, `conflict`, `client-error`,
+        `database-error` or `server-error`
     </Property>
     <Property name="created_at">Timestamp when the request was logged</Property>
 </PropertyTable>
@@ -330,7 +326,7 @@ All rate limits are configured in `config/rate-limiting.php`.
 
 ## Browser Access (CORS)
 
-Integrations call the API from servers, where CORS doesn't apply, so no browser origin may call it by default. To let a browser application call the API with a bearer token, list its origins in `CORS_ALLOWED_ORIGINS` (comma-separated). Credentials such as cookies are never allowed. See `config/cors.php`. The [MCP server](/features/mcp/) and the OAuth endpoints its clients call accept any origin, through `cors.open_paths`.
+Integrations call the API from servers, where CORS doesn't apply, so no browser origin may call it by default. To let a browser application call the API with a bearer token, list its origins in `CORS_ALLOWED_ORIGINS` (comma-separated). Credentials such as cookies are never allowed. Browser code can read these response headers: `X-Trace-Id`, `Retry-After`, `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `WWW-Authenticate` and `Mcp-Session-Id`. See `config/cors.php`. The [MCP server](/features/mcp/) and the OAuth endpoints its clients call accept any origin, through `cors.open_paths`.
 
 ---
 

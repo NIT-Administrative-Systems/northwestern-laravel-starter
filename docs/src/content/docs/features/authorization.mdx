@@ -20,7 +20,7 @@ The starter implements a role-based access control (RBAC) system built on [Spati
 
 <Steps>
 
-1. **Permissions** define granular actions a user can perform (view users, edit roles, manage API tokens, etc.)
+1. **Permissions** define granular actions a user can perform (view users, edit roles, manage API access, and so on)
 
 2. **Roles** are named collections of permissions that are assigned to users
 
@@ -145,7 +145,7 @@ Permissions are defined as cases in `SystemPermission`, the **single source of t
 
 | Permission                   | Description                                                                                                 | System Managed | API Relevant |
 | ---------------------------- | ----------------------------------------------------------------------------------------------------------- | :------------: | :----------: |
-| `ManageAll`                  | Bypasses all authorization checks                                                                           |      Yes       |      —       |
+| `ManageAll`                  | Bypasses authorization checks in the panels; API and MCP requests get no bypass                             |      Yes       |      —       |
 | `AccessAdministrationPanel`  | Access to the Filament admin panel                                                                          |      Yes       |      —       |
 | `ManageImpersonation`        | Impersonate other users                                                                                     |      Yes       |      —       |
 | `ViewUsers`                  | View user profiles and listings                                                                             |       —        |     Yes      |
@@ -248,7 +248,7 @@ Users listed in `SUPER_ADMIN_NETIDS` receive the Super Administrator role (which
 SUPER_ADMIN_NETIDS=abc123,xyz789,def456
 ```
 
-The `ManageAll` permission triggers a `Gate::before()` hook that short-circuits **all** authorization. Every `$this->authorize()`, `@can`, and `Gate::allows()` call returns `true`.
+The `ManageAll` permission triggers a `Gate::before()` hook that short-circuits authorization: every `$this->authorize()`, `@can`, and `Gate::allows()` call returns `true`. The exception is a request made with a token. A token is limited to its scopes, and the person's own permissions and policies decide the rest, so a super administrator's personal access token gets no bypass.
 
 <Aside type="caution">
     When testing new authorization logic, always test with a non-super-admin

@@ -34,7 +34,7 @@ Laravel's own configuration files read many more variables than this page lists:
 | `APP_MAINTENANCE_DRIVER`   | `file`                     | Where maintenance mode is stored (`file` or `cache`)                                                                                                     |
 | `APP_MAINTENANCE_STORE`    | `database`                 | Cache store for maintenance mode when the driver is `cache`                                                                                              |
 | `BCRYPT_ROUNDS`            | `12`                       | Password hashing cost                                                                                                                                    |
-| `DEFAULT_USER_TIMEZONE`    | `America/Chicago`          | Timezone assigned to users synced from Directory Search                                                                                                  |
+| `DEFAULT_USER_TIMEZONE`    | `America/Chicago`          | Timezone given to users that Directory Search creates, and the `users.timezone` column's default, set when the migration runs. Changing it later doesn't change existing users or the column |
 | `AUDITING_ENABLED`         | `true`                     | Record model changes. See [Audit Logging](/features/audit-logging/)                                                                                      |
 | `LOG_CHANNEL`              | `stack`                    | Default log channel                                                                                                                                      |
 | `LOG_STACK`                | `single`                   | Comma-separated channels the `stack` channel writes to                                                                                                   |
@@ -111,7 +111,7 @@ See [Authentication](/features/authentication/) and [WebSSO](/northwestern-integ
 | `AZURE_CLIENT_ID`     | `null`                                                               | Entra ID application ID. Entra ID sign-in is available when this and `AZURE_CLIENT_SECRET` are set                                                                                                                                     |
 | `AZURE_CLIENT_SECRET` | `null`                                                               | Entra ID client secret                                                                                                                                                                                                                 |
 | `WEBSSO_API_KEY`      | `null`                                                               | Apigee key for Online Passport. Setting it switches sign-in from Entra ID to Online Passport                                                                                                                                           |
-| `WEBSSO_STRATEGY`     | `apigee`                                                             | Online Passport strategy: `apigee`, `classic` or `forgerock-direct`. `forgerock-direct` also enables Online Passport                                                                                                                   |
+| `WEBSSO_STRATEGY`     | `apigee`                                                             | Online Passport strategy: `apigee` or `forgerock-direct`. `forgerock-direct` also enables Online Passport |
 | `WEBSSO_URL_BASE`     | `https://uat-nusso.it.northwestern.edu`                              | ForgeRock base URL. Production uses `https://prd-nusso.it.northwestern.edu`                                                                                                                                                            |
 | `WEBSSO_API_URL_BASE` | `https://northwestern-prod.apigee.net/agentless-websso`              | Agentless WebSSO API base URL                                                                                                                                                                                                          |
 | `WEBSSO_REALM`        | `northwestern`                                                       | ForgeRock realm                                                                                                                                                                                                                        |
@@ -152,6 +152,7 @@ See [API](/features/api/).
 | `API_PERSONAL_ACCESS_TOKEN_MAX_ACTIVE`                       | `10`    | How many working personal access tokens a person may hold at once                                                                                                      |
 | `PASSPORT_PRIVATE_KEY`                                       | `null`  | The RSA private key that signs access tokens. Set in deployed environments; locally, `db:rebuild` generates key files. See [Signing Keys](/features/api/#signing-keys) |
 | `PASSPORT_PUBLIC_KEY`                                        | `null`  | The matching public key                                                                                                                                                |
+| `PASSPORT_CONNECTION` | `null`  | Database connection for Passport's tables; the default connection when unset |
 | `CORS_ALLOWED_ORIGINS`                                       | empty   | Browser origins allowed to call the API, comma-separated. See [Browser Access](/features/api/#browser-access-cors)                                                     |
 
 ## MCP
@@ -267,7 +268,8 @@ All limits count requests. See the rate limiting sections of [Authentication](/f
 
 | Variable                                                     | Default | Description                                                             |
 | ------------------------------------------------------------ | ------- | ----------------------------------------------------------------------- |
-| `RATE_LIMIT_API_PER_MINUTE`                                  | `1800`  | API requests per minute, per API user (or per IP without a valid token) |
+| `RATE_LIMIT_API_PER_MINUTE`                                  | `1800`  | Authenticated requests per minute, per service client for client credentials tokens and per person for every other token |
+| `RATE_LIMIT_API_PER_IP_PER_MINUTE` | `3600`  | Requests per minute from one IP address to the API and Passport's `/oauth/*` routes, counted before authentication |
 | `RATE_LIMIT_AUTH_LOGIN_CODE_REQUEST_PER_MINUTE`              | `5`     | Verification code requests per IP per minute                            |
 | `RATE_LIMIT_AUTH_LOGIN_CODE_REQUEST_PER_EMAIL_PER_MINUTE`    | `3`     | Verification code requests per email address per minute                 |
 | `RATE_LIMIT_AUTH_LOGIN_CODE_VERIFY_PER_MINUTE`               | `10`    | Code verification attempts per IP per minute                            |
@@ -297,7 +299,7 @@ See [Sentry](/features/sentry/).
 | ----------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `SENTRY_LARAVEL_DSN`          | from `SENTRY_DSN`       | Project DSN. PHP and browser reporting are off while it is empty                                                                                                          |
 | `SENTRY_DSN`                  | `null`                  | Fallback for `SENTRY_LARAVEL_DSN`                                                                                                                                         |
-| `SENTRY_ENVIRONMENT`          | `null` (uses `APP_ENV`) | Environment name reported to Sentry                                                                                                                                       |
+| `SENTRY_ENVIRONMENT`          | `null` (uses `APP_ENV`) | Environment name PHP reports to Sentry. The browser SDK always reports `APP_ENV`, so setting this splits PHP and JavaScript events |
 | `SENTRY_SAMPLE_RATE`          | `1.0`                   | Share of errors sent                                                                                                                                                      |
 | `SENTRY_TRACES_SAMPLE_RATE`   | `null` (tracing off)    | Share of requests traced, in PHP and the browser                                                                                                                          |
 | `SENTRY_PROFILES_SAMPLE_RATE` | `null` (profiling off)  | Share of traced requests profiled                                                                                                                                         |
@@ -328,7 +330,7 @@ See [Sentry](/features/sentry/).
 | Variable                | Default                | Description                                                                                                                                                                      |
 | ----------------------- | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `PG_BIN_DIRECTORY`      | `null` (auto-detected) | Directory containing `pg_dump` and `psql`, for [database snapshots](/features/database-snapshots/). Cypress uses a snapshot to reset the database between tests                  |
-| `SKIP_DATABASE_REBUILD` | unset                  | Cypress setting, not a `.env` variable. When set, Cypress skips rebuilding the database and its `cypress` snapshot before a run. `pnpm test:e2e:headless` passes it with `--env` |
+| `SKIP_DATABASE_REBUILD` | unset                  | Cypress setting, not a `.env` variable. When set, Cypress skips rebuilding the database and its `cypress` snapshot before a run. `pnpm test:e2e:headless` and `pnpm test:e2e:skip-rebuild` pass it with `--env` |
 | `CI`                    | unset                  | Set by CI providers. When set, Cypress does not swap in `.env.cypress` and writes a CTRF report to `.build/`, and `starter:check` skips the upstream version check               |
 
 `phpunit.xml` sets its own values for PHP tests, including `APP_ENV=testing` and `DB_CONNECTION=phpunit`. When `.env.cypress` exists and `CI` is unset, Cypress swaps it in for `.env` during a run and restores `.env` afterwards. The CTRF report also reads the `GITHUB_*` and `RUNNER_*` variables that GitHub Actions sets.

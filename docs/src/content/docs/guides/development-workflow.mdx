@@ -20,9 +20,19 @@ composer dev
 | `server` | `php artisan serve`                 | PHP's built-in server, at the address it prints                             |
 | `queue`  | `php artisan queue:listen --tries=1` | Runs queued jobs from Redis, reloading the code for each job                |
 | `logs`   | `php artisan pail --timeout=0`      | Streams the application log                                                 |
-| `vite`   | `npm run dev`                       | The Vite dev server, which rebuilds CSS and TypeScript and reloads the page |
+| `vite`   | `pnpm run dev`                      | The Vite dev server, which rebuilds CSS and TypeScript and reloads the page |
 
 The queue worker is required. Jobs go to Redis (`QUEUE_CONNECTION=redis`), so mail such as email sign-in codes is not sent until a worker runs it.
+
+`composer dev` doesn't run the scheduler. Run `php artisan schedule:work` in another terminal when you need [scheduled tasks](/reference/commands/#scheduled-tasks), or run one by hand, such as `php artisan announcements:notify`.
+
+### The API Specification
+
+`composer openapi:generate:v1` writes the OpenAPI schema from the `#[OA\...]` attributes in `app/` to `docs/schemas/api-schema.yaml`, which the docs site renders as its [API Specification](/api). CI regenerates it on every pull request; run it yourself to check your attributes. `composer openapi:generate` prints the schema without writing it.
+
+### The Documentation Site
+
+The docs site is an [Astro Starlight](https://starlight.astro.build) project in `docs/`, with its own dependencies. Run `pnpm install` and then `pnpm dev` in `docs/` to preview it with live reload, or `pnpm build` to check that it builds and that every internal link resolves, as CI does.
 
 With [Laravel Herd](https://herd.laravel.com), Herd serves the site at `https://your-project-name.test`, named by `herd.yml`, and Herd Pro runs the PostgreSQL, Redis and RustFS services that `herd.yml` lists. Use that address rather than the one `php artisan serve` prints; `composer dev` still provides the queue worker, the log stream and Vite. [Installation](/getting-started/installation/) covers the first-time setup.
 
@@ -37,7 +47,7 @@ Every change must pass these checks. CI runs all of them except the type check.
 | PHP tests                | `vendor/bin/pest --parallel`                  | See [Testing](/guides/testing/)                                                                                                                               |
 | Static analysis          | `composer analyse:php`                        | PHPStan at level 6 (`phpstan.neon`). It must report no errors.                                                                                                |
 | PHP formatting           | `composer format:php`                         | Laravel Pint with the rules in `pint.json`                                                                                                                    |
-| Frontend formatting      | `pnpm format`                                 | Prettier on `.blade.php`, `.ts`, `.js`, `.css`, `.md`, `.json`, `.yml`, `.xml` and `.astro` files. It skips `.mdx`, the mail views and `.github/workflows`. |
+| Frontend formatting      | `pnpm format` or `composer format:frontend` | Prettier on `.blade.php`, `.ts`, `.js`, `.css`, `.md`, `.json`, `.yml`, `.xml` and `.astro` files. It skips `.mdx`, the mail views and `.github/workflows`. |
 | Refactoring rules        | `composer rector`                             | Rector with the rules in `rector.php`. `composer rector:dry` shows the changes without making them.                                                          |
 | TypeScript               | `pnpm typecheck`                              | `tsc --noEmit`. Not run in CI.                                                                                                                                |
 | Asset build              | `pnpm build`                                  | Vite production build                                                                                                                                         |

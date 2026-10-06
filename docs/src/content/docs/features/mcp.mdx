@@ -20,7 +20,7 @@ It is built on [Laravel MCP](https://github.com/laravel/mcp) and the starter's [
 <Steps>
 
 1. Set `MCP_ENABLED=true`.
-2. Give the people who should connect AI clients the **Use MCP** permission (`UseMcp`). No default role has it.
+2. Give the people who should connect AI clients the **Use MCP** permission (`UseMcp`). Of the default roles, only Super Administrator has it.
 3. [Add the tools](#adding-tools) your application should offer. The server ships with none.
 
 </Steps>
@@ -72,7 +72,7 @@ Most clients return from sign-in to `https://` or `http://localhost`. A desktop 
 
 <Steps>
 
-1. The client calls `POST /mcp` without a token. The server answers `401` with a `WWW-Authenticate` header pointing at its [protected resource metadata](https://datatracker.ietf.org/doc/html/rfc9728), `/.well-known/oauth-protected-resource/mcp`.
+1. The client calls `POST /mcp` without a token. The server answers `401` with a `WWW-Authenticate` header pointing at its [protected resource metadata](https://datatracker.ietf.org/doc/html/rfc9728), `/.well-known/oauth-protected-resource/mcp`. The same document is also served at `/.well-known/oauth-protected-resource` for clients that look there.
 2. That document names the application as the authorization server; `/.well-known/oauth-authorization-server` lists its endpoints.
 3. The client registers itself at `POST /oauth/register` ([dynamic client registration](https://datatracker.ietf.org/doc/html/rfc7591)). Its redirect URIs must use HTTPS, HTTP to the person's own computer (`localhost`, `127.0.0.1` or `[::1]`), or one of `MCP_CUSTOM_SCHEMES`. It gets a public client, with no secret, that may ask only for the `mcp:use` scope.
 4. The person signs in and sees the consent screen, which marks the client **Unverified AI Client**: a client names itself, so its name is only a claim. Only people with `UseMcp` can approve it.
@@ -181,7 +181,7 @@ See the [Laravel MCP documentation](https://laravel.com/docs/mcp) for resources,
 
 ## Managing Clients
 
-**API** → **MCP Clients** in the administration panel lists the clients that registered themselves, with how many people have them connected and when they were last used. Revoking one ends everyone's access to it. It's shown to people with `ManageApiAccess` while MCP is on.
+**API** → **MCP Clients** in the administration panel lists the clients that registered themselves, with how many people have them connected and when they were last used. Revoking one ends everyone's access to it. It's shown to people with `ManageApiAccess` while MCP is on, even with the REST API off; then it's the only page under **API**.
 
 People see their MCP clients on their Account area's [Connected Applications](/building/app-panel/#connected-applications) page, labelled as AI clients whose names aren't verified, and can disconnect them there.
 

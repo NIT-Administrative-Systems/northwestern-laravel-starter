@@ -72,7 +72,7 @@ Mock external services such as `Northwestern\SysDev\SOA\DirectorySearch` rather 
 
 ### API endpoint tests
 
-Tests of an API endpoint extend `Tests\ApiTestCase`. Its `setUp()` creates an API user (`$this->apiUser`) with a service client, exchanges the client at `/oauth/token` for an access token (`$this->accessToken`), and skips the test when the API is disabled. Other tests can get a token the same way with the `Tests\Concerns\IssuesServiceClientTokens` trait. A subclass names its endpoint and HTTP methods:
+Tests of an API endpoint extend `Tests\ApiTestCase`. Its `setUp()` creates an API user (`$this->apiUser`) with a service client, exchanges the client at `/oauth/token` for an access token (`$this->accessToken`), and skips the test when the API is disabled. Other tests can get a token the same way with the `Tests\Concerns\IssuesServiceClientTokens` trait. `Tests\Concerns\IssuesPersonalAccessTokens` gives a person the permission and a personal access token with the scopes you name, for testing routes that require a scope, and `Tests\Concerns\RunsAuthorizationCodeFlow` registers an application or MCP client and runs the consent and token exchange as a person would. A subclass names its endpoint and HTTP methods:
 
 ```php
 use Tests\ApiTestCase;

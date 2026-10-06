@@ -1,0 +1,111 @@
+---
+title: The Administration Panel
+description: The starter's back-office tools, who can use each one, and how to add your own
+sidebar:
+    order: 2
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+The administration panel at `/administration` holds the starter's back-office tools. Opening it needs the `AccessAdministrationPanel` permission, and each tool checks its own permission as well, so a role can give someone just the tools they need. Its resources, pages, clusters and widgets live in `app/Filament/` outside `app/Filament/App/` and are discovered automatically.
+
+<Aside type="tip">
+    Build your application's features in the [app panel](/building/app-panel/).
+    The administration panel is for the people who run the application.
+</Aside>
+
+## Navigation
+
+The sidebar groups the tools with the `App\Filament\Navigation\AdministrationNavGroup` enum: **User Management**, **Platform** and **Developer Tools**. Give a resource or page its group with `protected static string|UnitEnum|null $navigationGroup = AdministrationNavGroup::Platform;`.
+
+| Tool                                      | Group                  | Needs                                                                                  |
+| ----------------------------------------- | ---------------------- | -------------------------------------------------------------------------------------- |
+| [Users](#users)                           | User Management        | `ViewUsers`                                                                            |
+| [Roles](#roles)                           | User Management        | `ViewRoles`                                                                            |
+| [Announcements](#announcements)           | Platform               | `ManageAnnouncements`                                                                  |
+| [API](#the-api-cluster)                   | Platform               | `ManageApiAccess` or `ViewApiRequestLogs`, with the API or MCP on                      |
+| [Audit Logs](#audit-logs)                 | Platform               | `ViewAuditLogs`                                                                        |
+| [Sign-In Records](#sign-in-records)       | Platform               | `ViewLoginRecords`                                                                     |
+| [Support Tickets](#support-tickets)       | Platform               | `ViewSupportTickets`, with Contact Support on                                          |
+| [Overview](#platform-overview)            | Platform               | `ManageAll`                                                                            |
+| [Developer tools](#developer-tools)       | Developer Tools        | `ManageAll`                                                                            |
+
+## The Dashboard
+
+`/administration` opens on Filament's dashboard with a placeholder `WelcomeWidget` (`app/Filament/Widgets/WelcomeWidget.php`). Replace it with the widgets, stats and charts your administrators need.
+
+## Users
+
+**Users** lists everyone, with filters for sign-in method, affiliation and role. Three actions create people:
+
+- **Add Northwestern User** looks a person up in Directory Search by NetID or email and creates them. Needs `CreateUsers`.
+- **Add Local User** creates a person who signs in with an email verification code. Needs `CreateUsers`. See [Creating Local Users](/features/authentication/#creating-local-users).
+- **Create API User** creates an API user with its first service client. Needs `ManageApiAccess`. See [API System](/features/api/).
+
+A person's page shows their details and these tabs, each only when it applies to them and the viewer holds its permission:
+
+| Tab                              | Shows                                                                       | Needs                                                   |
+| -------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------- |
+| Roles                            | Their roles, which can be assigned and removed here                         | Viewing the person; changing roles needs `AssignRoles`  |
+| Role History                     | Every role assignment and removal                                           | `ViewAuditLogs`                                         |
+| Audit Logs                       | Every audited change to them                                                | `ViewAuditLogs`                                         |
+| Login Records                    | Their sign-ins                                                              | `ViewLoginRecords`                                      |
+| Personal Access Tokens           | Their tokens, which can be revoked                                          | `ManageApiAccess`, with the API on                      |
+| Connected Applications           | Their applications and AI clients, which can be disconnected               | `ManageApiAccess`, with the API or MCP on               |
+| Service Clients                  | An API user's clients: create, rotate, restrict and revoke                  | `ManageApiAccess`, for API users                        |
+| API Requests                     | An API user's request log                                                   | `ViewApiRequestLogs`, for API users with logging on     |
+
+The **Impersonate** button signs you in as the person. See [Impersonating Users](/features/authentication/#impersonating-users).
+
+## Roles
+
+**Roles** lists every role with its type and how many people hold it. A role's page shows its permissions and an **Assigned Users** tab for assigning and removing people. Its **Definition History** page shows every change to its definition, with what changed. Creating, editing and deleting roles need `EditRoles` and `DeleteRoles`. See [Authorization](/features/authorization/).
+
+The **Role Activity** button on the Roles page lists role assignments and removals across everyone, with where each came from. It needs `ViewAuditLogs`.
+
+## The API Cluster
+
+**API** groups the API's tools under one sidebar entry, each page with its own rule:
+
+- **Overview** shows API users, clients, expiring secrets and the last day's traffic. It needs the API on and `ManageApiAccess` or `ViewApiRequestLogs`.
+- **API Requests** is the request log, with its charts. It needs `ViewApiRequestLogs`, with the API and request logging on. See [Request Logging](/features/api/#request-logging).
+- **Applications** registers and manages OAuth applications. It needs `ManageApiAccess`, with the API on. See [Connected Applications](/features/api/#connected-applications).
+- **MCP Clients** lists the clients that registered themselves and revokes them. It needs `ManageApiAccess`, with MCP on, even when the REST API is off. See [MCP](/features/mcp/#managing-clients).
+
+## Announcements
+
+**Announcements** writes, publishes, ends, shows again and duplicates the announcements people see in the banner and on the Announcements page. See [Announcements](/features/announcements/).
+
+## Audit Logs
+
+**Audit Logs** lists every audited change across the application, filterable by event, record type and date, with a diff of each change on its page. See [Audit Logging](/features/audit-logging/).
+
+## Sign-In Records
+
+**Sign-In Records** lists every sign-in with the person's user segment, with charts of sign-ins over time and by segment. See [User Segmentation](/features/authentication/#user-segmentation).
+
+## Support Tickets
+
+**Support Tickets** is a read-only log of Contact Support submissions and where each was delivered. It shows only while Contact Support is on. See [Support Tickets](/features/support-tickets/).
+
+## Platform Overview
+
+**Overview** (`/administration/overview`) shows the environment, services, feature flags, health check results, queues, scheduled tasks, sign-in activity and API traffic in one place. It's read-only. See [Health Checks](/features/health-checks/).
+
+## Developer Tools
+
+Links to Telescope, to the RustFS console when `S3_CONSOLE_URL` is set, and to MailPit when `MAIL_CAPTURE_URL` is set. They show only to people who can view Telescope (`ManageAll`) and open in a new tab.
+
+## Adding a Tool
+
+1. **Generate it for this panel.** Filament's generators target the app panel unless you pass `--panel=administration`, for example `php artisan make:filament-resource Course --panel=administration`.
+2. **Gate it.** Give the model a policy whose `viewAny` checks a permission, or give a page a `canAccess()`. Add a `SystemPermission` case for a new kind of access and grant it through a role.
+3. **Place it.** Set its `$navigationGroup` to an `AdministrationNavGroup` case, or add a case for a new group.
+
+<Aside type="caution" title="A cluster's rule only hides its navigation">
+    Filament checks a cluster's `canAccess()` when it builds the sidebar, not
+    when someone opens a page inside it. Give every clustered page its own
+    `canAccess()`, as the API cluster's pages do.
+</Aside>
+
+The panel's Tailwind theme is `resources/css/filament/administration/theme.css`. In tests, call `Filament::setCurrentPanel(AdministrationPanelProvider::ID)` before testing one of its Livewire pages, because the app panel is the default.

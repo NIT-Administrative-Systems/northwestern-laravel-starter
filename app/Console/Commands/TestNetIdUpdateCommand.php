@@ -6,8 +6,8 @@ namespace App\Console\Commands;
 
 use App\Domains\Core\Concerns\MocksEventHub;
 use App\Domains\User\Enums\NetIdUpdateAction;
+use App\Domains\User\Http\Controllers\Webhooks\NetIdUpdateController;
 use App\Domains\User\Listeners\ProcessNetIdUpdate;
-use App\Http\Controllers\Webhooks\NetIdUpdateController;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
 

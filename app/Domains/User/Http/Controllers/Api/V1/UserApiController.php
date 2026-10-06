@@ -12,7 +12,7 @@ use OpenApi\Attributes as OA;
 
 #[OA\Tag(
     name: 'Users',
-    description: 'Retrieve information about the authenticated API user.'
+    description: 'Information about whoever the access token acts as: an API user for a service client, or the person for a personal access token or an application.'
 )]
 class UserApiController extends ApiController
 {

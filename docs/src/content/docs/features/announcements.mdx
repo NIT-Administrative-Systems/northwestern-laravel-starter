@@ -56,6 +56,28 @@ An announcement that starts straight away is sent at once. One that starts later
     for announcements people need to act on.
 </Aside>
 
+## Publishing from Code
+
+Create a draft and publish it with the `PublishAnnouncement` action, which takes the start, an optional end, and whether to notify the audience:
+
+```php
+use App\Domains\Support\Actions\Announcements\PublishAnnouncement;
+use App\Domains\Support\Enums\AnnouncementAudience;
+use App\Domains\Support\Enums\AnnouncementSeverity;
+use App\Domains\Support\Models\Announcement;
+
+$announcement = Announcement::create([
+    'title' => 'Maintenance on Saturday',
+    'body' => 'The application is unavailable from 6 to 8 a.m.',
+    'severity' => AnnouncementSeverity::Warning,
+    'audience' => AnnouncementAudience::Everyone,
+]);
+
+resolve(PublishAnnouncement::class)($announcement, startsAt: now(), endsAt: now()->addDays(3), notify: false);
+```
+
+It refuses an announcement that isn't a draft, and an end that isn't after the start.
+
 ## Where the Code Lives
 
 - `app/Domains/Support/`: the `Announcement` and `AnnouncementDismissal` models, their enums, the publish, end, duplicate and dismiss actions, `NotifyAnnouncementAudience` and `AnnouncementNotification`.
