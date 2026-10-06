@@ -1,3 +1,3 @@
-<x-error-layout title="Unauthorized">
-    Sorry, but you are not authorized to access this page or resource.
+<x-error-layout title="Sign-In Required">
+    Sign in to see this page.
 </x-error-layout>

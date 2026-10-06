@@ -1,3 +1,3 @@
 <x-error-layout title="Page Expired">
-    Sorry, but this page is no longer available.
+    This page expired. Go back and try again.
 </x-error-layout>

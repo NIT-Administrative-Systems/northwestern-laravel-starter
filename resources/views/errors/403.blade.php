@@ -1,3 +1,3 @@
 <x-error-layout title="Access Denied">
-    Sorry, but you do not have permission to access this page or resource.
+    You don't have access to this page.
 </x-error-layout>
