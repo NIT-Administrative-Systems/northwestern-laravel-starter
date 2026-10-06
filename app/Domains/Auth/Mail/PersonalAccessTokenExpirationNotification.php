@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Domains\Auth\Mail;
 
 use App\Domains\Auth\Models\OAuthToken;
+use App\Domains\Core\Formatting\CountInWords;
+use App\Domains\Core\Formatting\NorthwesternDateTime;
 use App\Domains\User\Models\User;
 use App\Filament\App\Clusters\AccountCluster\Pages\AccessTokens;
 use App\Filament\App\Clusters\AccountCluster\Pages\Preferences;
@@ -31,7 +33,7 @@ class PersonalAccessTokenExpirationNotification extends Mailable implements Shou
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: 'Your Personal Access Token Is Expiring');
+        return new Envelope(subject: 'Your personal access token expires in ' . CountInWords::of($this->daysUntilExpiration, 'day'));
     }
 
     public function content(): Content
@@ -41,8 +43,8 @@ class PersonalAccessTokenExpirationNotification extends Mailable implements Shou
             with: [
                 'user' => $this->user,
                 'token' => $this->token,
-                'daysUntilExpiration' => $this->daysUntilExpiration,
-                'expirationDate' => $this->token->expires_at?->format('F j, Y \a\t g:i A T'),
+                'expiresIn' => CountInWords::of($this->daysUntilExpiration, 'day'),
+                'expiresAt' => $this->token->expires_at ? NorthwesternDateTime::format($this->token->expires_at, $this->user->timezone) : null,
                 'accessTokensUrl' => AccessTokens::getUrl(panel: AppPanelProvider::ID),
                 'preferencesUrl' => Preferences::getUrl(panel: AppPanelProvider::ID),
             ],

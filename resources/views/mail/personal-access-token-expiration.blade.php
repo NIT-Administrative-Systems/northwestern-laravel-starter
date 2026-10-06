@@ -1,14 +1,14 @@
 <x-mail::message>
-# Personal Access Token Expiring
+# Your personal access token is expiring
 
 Hello {{ $user->first_name ?: $user->full_name }},
 
-Your personal access token **{{ $token->name }}** for **{{ config('app.name') }}** expires on {{ $expirationDate }}, in {{ $daysUntilExpiration }} {{ Str::plural('day', $daysUntilExpiration) }}. Anything that uses it will stop working then.
+Your personal access token **{{ $token->name }}** for **{{ config('app.name') }}** expires at {{ $expiresAt }}, in {{ $expiresIn }}. Anything that uses it stops working then.
 
-To keep a script working, create a new token and update the script before the old one expires.
+To keep it working, create a new token and switch to it before this one expires.
 
 <x-mail::button :url="$accessTokensUrl">
-Manage your access tokens
+Manage Personal Access Tokens
 </x-mail::button>
 
 Thanks,<br>

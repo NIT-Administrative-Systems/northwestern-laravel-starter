@@ -43,7 +43,7 @@ final class AuthorizationCodeFlowTest extends TestCase
         [$consent, $verifier] = $this->requestAuthorization($client);
         $consent->assertOk()
             ->assertSee('Reporting Tool Wants to Access Your')
-            ->assertSee('Allows viewing all user profiles and their details.')
+            ->assertSee('View everyone\'s profiles and details.')
             ->assertSee('localhost')
             ->assertSee('Switch Account');
 

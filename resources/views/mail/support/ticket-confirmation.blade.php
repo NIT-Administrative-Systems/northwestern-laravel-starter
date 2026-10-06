@@ -1,7 +1,7 @@
 <x-mail::message>
 # We received your request
 
-Hi {{ $submitter }},
+Hello{{ filled($submitter) ? " {$submitter}" : '' }},
 
 Thanks for contacting us. Your request is with our team, and someone will follow up with you as soon as possible.
 
@@ -17,7 +17,7 @@ Thanks for contacting us. Your request is with our team, and someone will follow
 
 ---
 
-Please mention your reference number if you contact us about this request.
+Mention your reference number if you contact us about this request.
 
 Thanks,<br>
 {{ config('app.name') }}

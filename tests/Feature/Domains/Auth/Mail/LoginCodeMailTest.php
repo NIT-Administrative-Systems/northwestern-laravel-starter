@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Domains\Auth\Mail;
 
 use App\Domains\Auth\Mail\LoginCodeMail;
+use App\Domains\Core\Formatting\CountInWords;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Crypt;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -41,7 +42,7 @@ final class LoginCodeMailTest extends TestCase
 
         $this->assertEquals('mail.auth.login-code', $content->markdown);
         $this->assertEquals('654321', $content->with['code']);
-        $this->assertEquals($expectedMinutes, $content->with['expiresInMinutes']);
+        $this->assertEquals(CountInWords::of($expectedMinutes, 'minute'), $content->with['expiresIn']);
         $this->assertEquals('https://example.test/app/login/email?challenge=token', $content->with['signInUrl']);
     }
 }

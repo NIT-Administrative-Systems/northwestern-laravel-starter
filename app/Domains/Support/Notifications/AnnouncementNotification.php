@@ -51,7 +51,7 @@ class AnnouncementNotification extends Notification implements ShouldQueue
             ->iconColor($this->announcement->severity->getColor())
             ->actions([
                 Action::make('read')
-                    ->label('Read announcement')
+                    ->label('Read Announcement')
                     ->url($this->url()),
             ])
             ->getDatabaseMessage();
@@ -60,13 +60,16 @@ class AnnouncementNotification extends Notification implements ShouldQueue
     public function toMail(User $notifiable): MailMessage
     {
         return (new MailMessage())
+            // The same sign-off as the starter's own emails, rather than Laravel's "Regards," (two
+            // trailing spaces are a Markdown line break).
+            ->salutation("Thanks,  \n" . config('app.name'))
             ->subject($this->announcement->title)
             ->greeting('Hello ' . ($notifiable->first_name ?: $notifiable->full_name) . ',')
             ->line(config('app.name') . ' has an announcement:')
             ->line("**{$this->announcement->title}**")
             ->line($this->announcement->body)
-            ->action('Read announcement', $this->url())
-            ->line('You can turn off these emails in your Account preferences.');
+            ->action('Read Announcement', $this->url())
+            ->line('You can turn these emails off in Account > Preferences.');
     }
 
     private function url(): string

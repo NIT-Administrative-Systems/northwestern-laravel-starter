@@ -29,6 +29,14 @@ final class AuthenticatePassportTokenTest extends TestCase
 {
     use IssuesPersonalAccessTokens, IssuesServiceClientTokens, RunsAuthorizationCodeFlow;
 
+    // The realm comes from APP_NAME: config/api.php loads before the app config, so config('app.name') was empty there.
+    public function test_a_refused_request_names_the_applications_api_realm(): void
+    {
+        $this->getJson('/api/v1/me')
+            ->assertUnauthorized()
+            ->assertHeader('WWW-Authenticate', 'Bearer realm="' . config('app.name') . ' API"');
+    }
+
     public function test_a_service_client_acts_as_its_api_user(): void
     {
         $apiUser = User::factory()->api()->create();

@@ -83,34 +83,34 @@ enum SystemPermission: string implements HasLabel
     {
         return match ($this) {
             // System Administration
-            self::AccessAdministrationPanel => 'Allows access to the Administration panel.',
-            self::ManageImpersonation => 'Allows impersonating other users for troubleshooting and support purposes.',
-            self::ManageAll => 'Grants unrestricted administrative control over all resources and operations.',
+            self::AccessAdministrationPanel => 'Open the Administration panel.',
+            self::ManageImpersonation => 'Impersonate other people to troubleshoot and support them.',
+            self::ManageAll => 'Do anything, anywhere in the application.',
 
             // User Management
-            self::ViewUsers => 'Allows viewing all user profiles and their details.',
-            self::CreateUsers => 'Allows creating new user accounts.',
-            self::EditUsers => 'Allows editing existing user profiles and details.',
+            self::ViewUsers => 'View everyone\'s profiles and details.',
+            self::CreateUsers => 'Create user accounts.',
+            self::EditUsers => 'Edit people\'s profiles and details.',
 
             // Role Management
-            self::ViewRoles => 'Allows viewing all roles and their associated permissions.',
-            self::EditRoles => 'Allows creating and editing role definitions and permission assignments.',
-            self::DeleteRoles => 'Allows permanently deleting roles from the system.',
-            self::AssignRoles => 'Allows assigning, updating, or removing roles from users.',
+            self::ViewRoles => 'View every role and its permissions.',
+            self::EditRoles => 'Create and edit roles and their permissions.',
+            self::DeleteRoles => 'Delete roles permanently.',
+            self::AssignRoles => 'Assign roles to people and remove them.',
 
             // API Access
-            self::ManageApiAccess => 'Allows creating API users and managing their clients, roles, and access.',
-            self::ViewApiRequestLogs => 'Allows viewing API request logs and usage charts.',
-            self::CreatePersonalAccessTokens => 'Allows creating personal access tokens on the Account page, to call the API as yourself from scripts.',
-            self::UseMcp => 'Allows connecting AI clients such as Claude and VS Code to the MCP server, to use its tools as yourself.',
+            self::ManageApiAccess => 'Create API users and manage their service clients, roles, and access.',
+            self::ViewApiRequestLogs => 'View API request logs and usage charts.',
+            self::CreatePersonalAccessTokens => 'Create personal access tokens in Account, to use the API as yourself from your own code and tools.',
+            self::UseMcp => 'Connect AI clients such as Claude and VS Code to the MCP server, to use its tools as yourself.',
 
             // Audit & Monitoring
-            self::ViewAuditLogs => 'Allows viewing system audit logs and change history.',
-            self::ViewLoginRecords => 'Allows viewing user authentication history and login records.',
+            self::ViewAuditLogs => 'View audit logs of changes to records.',
+            self::ViewLoginRecords => 'View sign-in records.',
 
             // Support
-            self::ViewSupportTickets => 'Allows viewing submitted support tickets in the admin panel.',
-            self::ManageAnnouncements => 'Allows writing, publishing and ending announcements shown to the application\'s users.',
+            self::ViewSupportTickets => 'View support requests sent through Contact Support.',
+            self::ManageAnnouncements => 'Write, publish, and end announcements for the application\'s users.',
         };
     }
 

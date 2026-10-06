@@ -45,12 +45,12 @@ class ApplicationConnectedNotification extends Notification implements ShouldQue
     public function toDatabase(User $notifiable): array
     {
         return FilamentNotification::make()
-            ->title("{$this->applicationName()} connected to your account")
-            ->body('If you didn\'t do this, disconnect it.')
+            ->title("{$this->applicationName()} Connected to Your Account")
+            ->body('If you didn\'t connect it, disconnect it.')
             ->icon('heroicon-o-link')
             ->actions([
                 Action::make('review')
-                    ->label('Review connected applications')
+                    ->label('Review Connected Applications')
                     ->url(ConnectedApplications::getUrl(panel: AppPanelProvider::ID)),
             ])
             ->getDatabaseMessage();
@@ -59,11 +59,14 @@ class ApplicationConnectedNotification extends Notification implements ShouldQue
     public function toMail(User $notifiable): MailMessage
     {
         return (new MailMessage())
+            // The same sign-off as the starter's own emails, rather than Laravel's "Regards," (two
+            // trailing spaces are a Markdown line break).
+            ->salutation("Thanks,  \n" . config('app.name'))
             ->subject("{$this->applicationName()} connected to your account")
             ->greeting('Hello ' . ($notifiable->first_name ?: $notifiable->full_name) . ',')
             ->line("**{$this->applicationName()}** can now use " . config('app.name') . ' on your behalf.')
             ->line('If you didn\'t connect it, disconnect it and contact support.')
-            ->action('Review connected applications', ConnectedApplications::getUrl(panel: AppPanelProvider::ID));
+            ->action('Review Connected Applications', ConnectedApplications::getUrl(panel: AppPanelProvider::ID));
     }
 
     private function applicationName(): string

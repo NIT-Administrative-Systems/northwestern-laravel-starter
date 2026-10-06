@@ -6,6 +6,7 @@ namespace Tests\Feature\Domains\Auth\Mail;
 
 use App\Domains\Auth\Mail\ClientSecretExpirationNotification;
 use App\Domains\Auth\Models\OAuthClient;
+use App\Domains\Core\Formatting\NorthwesternDateTime;
 use App\Domains\User\Models\User;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
@@ -17,7 +18,7 @@ final class ClientSecretExpirationNotificationTest extends TestCase
     {
         $mailable = new ClientSecretExpirationNotification(User::factory()->make(), new OAuthClient(), 5);
 
-        $this->assertSame('API Client Secret Expiring Soon - Action Required', $mailable->envelope()->subject);
+        $this->assertSame('A service client secret expires in five days', $mailable->envelope()->subject);
     }
 
     public function test_content_has_correct_view_and_data(): void
@@ -32,7 +33,7 @@ final class ClientSecretExpirationNotificationTest extends TestCase
         $this->assertSame($user, $content->with['user']);
         $this->assertSame($client, $content->with['client']);
         $this->assertSame(5, $content->with['daysUntilExpiration']);
-        $this->assertSame($expirationDate->format('F j, Y \a\t g:i A T'), $content->with['expirationDate']);
+        $this->assertSame(NorthwesternDateTime::format($expirationDate, config('app.schedule_timezone')), $content->with['expiresAt']);
     }
 
     public function test_it_renders_the_client_and_what_to_do(): void
@@ -43,6 +44,6 @@ final class ClientSecretExpirationNotificationTest extends TestCase
         (new ClientSecretExpirationNotification($user, $client, 3))
             ->assertSeeInHtml('Nightly sync')
             ->assertSeeInHtml('019a0000-0000-7000-8000-000000000009')
-            ->assertSeeInHtml('Immediate Action Required');
+            ->assertSeeInHtml('Rotate this service client before');
     }
 }
