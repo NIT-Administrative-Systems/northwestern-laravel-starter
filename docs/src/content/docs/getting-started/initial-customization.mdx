@@ -297,6 +297,8 @@ The scheduler runs `model:prune` daily, which deletes records older than their r
 Audit logs often back FERPA, HIPAA or university record-keeping requirements, so the starter keeps them unless you set a period.
 </Aside>
 
+A few records are cleaned up on fixed schedules of their own: Filament's exports after 7 days, OAuth tokens and codes 31 days after they expire, and unused self-registered MCP clients. See [Cleanup and Revocation](/features/api-operations/#cleanup-and-revocation).
+
 To give another model a retention period, use the `PrunesAfterRetentionPeriod` trait, return its setting from `retentionConfigKey()`, and add the setting under `platform.retention`. Override `retentionColumn()` when the record's date isn't `created_at`, and prefer an indexed column.
 
 ## 8. Project Cleanup
