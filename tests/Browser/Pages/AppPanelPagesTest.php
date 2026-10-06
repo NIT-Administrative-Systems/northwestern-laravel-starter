@@ -62,5 +62,5 @@ it('is healthy on the OAuth consent screen', function () {
         'code_challenge_method' => 'S256',
     ]));
 
-    expect($page->assertSee('Reporting Tool Wants to Access Your'))->toBeHealthyInEachTheme();
+    expect($page->assertSee('Connect Reporting Tool'))->toBeHealthyInEachTheme();
 });
