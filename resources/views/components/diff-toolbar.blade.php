@@ -14,7 +14,7 @@
                     :class="diffStyle === 'split'
                         ?
                         'bg-white text-gray-900 ring-1 ring-gray-200 dark:bg-white/10 dark:text-white dark:ring-white/10' :
-                        'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'">
+                        'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'">
                 Split
             </button>
             <button class="rounded-md px-2.5 py-1 text-xs font-medium transition-all"
@@ -24,7 +24,7 @@
                     :class="diffStyle === 'unified'
                         ?
                         'bg-white text-gray-900 ring-1 ring-gray-200 dark:bg-white/10 dark:text-white dark:ring-white/10' :
-                        'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'">
+                        'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'">
                 Unified
             </button>
         </div>
@@ -39,7 +39,7 @@
                     :class="overflow === 'wrap'
                         ?
                         'bg-white text-gray-900 ring-1 ring-gray-200 dark:bg-white/10 dark:text-white dark:ring-white/10' :
-                        'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'">
+                        'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'">
                 Wrap
             </button>
             <button class="rounded-md px-2.5 py-1 text-xs font-medium transition-all"
@@ -49,7 +49,7 @@
                     :class="overflow === 'scroll'
                         ?
                         'bg-white text-gray-900 ring-1 ring-gray-200 dark:bg-white/10 dark:text-white dark:ring-white/10' :
-                        'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'">
+                        'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'">
                 Scroll
             </button>
         </div>
