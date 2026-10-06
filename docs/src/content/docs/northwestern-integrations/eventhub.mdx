@@ -99,7 +99,7 @@ Route::middleware(['eventhub_hmac'])->prefix('eventhub')->group(function () {
 The `->eventHubWebhook()` macro registers the route with EventHub's webhook discovery system and associates it with the `etidentity.ldap.netid.term` topic. The `eventhub_hmac` middleware ensures all incoming requests carry a valid HMAC signature.
 
 <Aside type="caution">
-After uncommenting the route, you must subscribe to the `etidentity.ldap.netid.term` topic and register your application's webhook URL through the [API Service Registry](https://apiserviceregistry.northwestern.edu/). The `laravel-soa` package provides Artisan commands for managing webhook subscriptions. See the [package documentation](https://nit-administrative-systems.github.io/SysDev-laravel-soa/) for details.
+After uncommenting the route, you must subscribe to the `etidentity.ldap.netid.term` topic and register your application's webhook URL through the [API Service Registry](https://apiserviceregistry.northwestern.edu/). Then run `php artisan eventhub:webhook:configure` to register the webhook with EventHub. The `laravel-soa` package also provides `eventhub:webhook:status`, `eventhub:webhook:toggle`, `eventhub:queue:status`, `eventhub:topic:status` and `eventhub:dlq:restore-messages`. See the [package documentation](https://nit-administrative-systems.github.io/SysDev-laravel-soa/) for details.
 </Aside>
 
 ---
