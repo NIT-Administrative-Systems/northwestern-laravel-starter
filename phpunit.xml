@@ -127,6 +127,14 @@
         </exclude>
     </source>
     <php>
+        <!--
+            Unlimited, as in CI. Without opcache (off by default on the CLI) a
+            parallel worker holds about 120MB, and compiling views from cold
+            pushed workers past PHP's 128M default. PHPUnit applies this in
+            every worker and over -d memory_limit, so any finite value would
+            also cap the coverage run.
+        -->
+        <ini name="memory_limit" value="-1" />
         <env name="APP_ENV" value="testing" />
         <env name="APP_MAINTENANCE_DRIVER" value="file" />
         <env name="BCRYPT_ROUNDS" value="4" />
