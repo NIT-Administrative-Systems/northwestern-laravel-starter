@@ -74,7 +74,7 @@ final class OAuthApplicationActionsTest extends TestCase
         $this->assertFalse($audits['application_updated']->old_values['first_party']);
         $this->assertTrue($audits['application_updated']->new_values['first_party']);
         $this->assertSame(0, $audits['application_revoked']->new_values['connections_removed']);
-        $this->assertStringNotContainsString($secret, $audits->toJson());
+        $this->assertStringNotContainsString($secret, (string) $audits->toJson());
     }
 
     public function test_regenerating_replaces_a_confidential_secret(): void
