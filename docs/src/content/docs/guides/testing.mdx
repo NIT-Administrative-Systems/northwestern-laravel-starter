@@ -231,7 +231,7 @@ expect(visit("/administration/audits/{$audit->getKey()}"))->toBeHealthyInEachThe
 
 ### In CI
 
-The **🌐 Browser Tests** job in `.github/workflows/check-pr.yml` starts PostgreSQL, installs Playwright's Chromium, builds the assets and runs the suite with `--parallel --ci`. `--ci` runs every test even when one is marked `->only()`. The job publishes the results as the **🌐 Browser Test Results** check, uploads the screenshots of failed tests as an artifact, and prints `storage/logs/laravel.log`. See [Continuous Integration](/guides/development-workflow/#continuous-integration).
+The **🌐 Browser Tests** job in `.github/workflows/check-pr.yml` starts PostgreSQL and RustFS. RustFS is S3-compatible, and the CI environment stores files in it as production stores them in S3, so a test that uploads a file exercises real signed URLs and CORS. The job then installs Playwright's Chromium, builds the assets and runs the suite with `--parallel --ci`. `--ci` runs every test even when one is marked `->only()`. The job publishes the results as the **🌐 Browser Test Results** check, uploads the screenshots of failed tests as an artifact, and prints `storage/logs/laravel.log`. See [Continuous Integration](/guides/development-workflow/#continuous-integration).
 
 ### Rules That Keep Pages Passing
 

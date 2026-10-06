@@ -4,6 +4,8 @@ env:
   NODE_VERSION: '26'
   PNPM_VERSION: '12.x.x'
   PHP_VERSION: '8.5'
+  S3_USERNAME: 's3admin'
+  S3_PASSWORD: 's3secret'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -494,7 +496,18 @@ jobs:
         contents: read
         checks: write
         pull-requests: write
+    # S3-compatible object storage, as in production: .env.ci points the application at it, so
+    # tests that upload files exercise real signed URLs and CORS.
     services:
+      s3:
+        image: rustfs/rustfs:1.0.0@sha256:8cc9801755448b71a786705ce76692c77e14936cccd87cf2fc31842e58f4d1ff
+        ports:
+          - 9000:9000
+        env:
+          RUSTFS_ACCESS_KEY: ${{ env.S3_USERNAME }}
+          RUSTFS_SECRET_KEY: ${{ env.S3_PASSWORD }}
+          RUSTFS_CONSOLE_ENABLE: 'false'
+        options: --health-cmd "curl -fsS http://localhost:9000/health/ready" --health-interval 3s --health-timeout 3s --health-retries 20
       postgres:
         image: postgres:16
         env:
@@ -520,6 +533,19 @@ jobs:
           install-playwright: true
           run-ide-helper: false
 
+      # Livewire uploads straight from the browser to the bucket with a signed PUT. The browser tests
+      # serve the application on 127.0.0.1 at a random port, so the CI bucket allows any origin.
+      - name: 🪣 Create S3 Bucket and Configure Uploads
+        run: |
+          aws --endpoint-url http://localhost:9000 s3api create-bucket --bucket northwestern-laravel-starter
+          aws --endpoint-url http://localhost:9000 s3api put-bucket-cors \
+            --bucket northwestern-laravel-starter \
+            --cors-configuration '{"CORSRules":[{"AllowedOrigins":["*"],"AllowedMethods":["GET","PUT","HEAD"],"AllowedHeaders":["*"],"ExposeHeaders":["ETag"]}]}'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ env.S3_USERNAME }}
+          AWS_SECRET_ACCESS_KEY: ${{ env.S3_PASSWORD }}
+          AWS_DEFAULT_REGION: us-east-1
+
       - name: 🎯 Configure PHPUnit Matcher
         uses: mheap/phpunit-matcher-action@dcbd4ead41890163b65d0b21534387ce72980ee5 # v1.4.0
 
@@ -533,6 +559,10 @@ jobs:
           --ci
           --log-junit .build/junit-browser.xml
           --teamcity
+        # The application runs inside this process, so it reads the bucket's credentials from here.
+        env:
+          AWS_ACCESS_KEY_ID: ${{ env.S3_USERNAME }}
+          AWS_SECRET_ACCESS_KEY: ${{ env.S3_PASSWORD }}
 
       - name: 📸 Upload Failure Screenshots
         if: failure()
