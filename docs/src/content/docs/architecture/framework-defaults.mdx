@@ -91,11 +91,15 @@ If you need additional relationships available on the authenticated user, add th
 
 ```php title="app/Providers/AppServiceProvider.php"
 Gate::before(static function (User $user): ?true {
+    if ($user->currentAccessToken() instanceof \Laravel\Passport\Contracts\ScopeAuthorizable) {
+        return null;
+    }
+
     return $user->hasPermissionTo(SystemPermission::ManageAll) ? true : null;
 });
 ```
 
-Users with the `ManageAll` permission bypass **all** Gate and Policy checks. Every `$this->authorize()`, `@can`, and `Gate::allows()` call returns `true` for them. This is the mechanism behind super admin access.
+Users with the `ManageAll` permission bypass Gate and Policy checks: every `$this->authorize()`, `@can`, and `Gate::allows()` call returns `true` for them. This is the mechanism behind super admin access. It doesn't apply to requests made with a token, which stay limited to the token's scopes and the person's own permissions.
 
 <Aside type="tip">
 When testing new authorization logic, always test with and without a super admin user. A bug in a policy will be invisible if you only test with `ManageAll` users or lack sufficient test coverage.

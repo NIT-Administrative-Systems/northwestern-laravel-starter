@@ -140,7 +140,7 @@ API_ENABLED=true
 ```
 
 <Aside type="tip">
-All rate limiters (API, authentication, support) are centralized in `config/rate-limiting.php` with env var overrides. See the [API](/features/api/#rate-limiting), [Authentication](/features/authentication/#rate-limiting), and [Support Tickets](/features/support-tickets/#rate-limiting) pages for details on each limiter.
+The API, authentication and support rate limiters are in `config/rate-limiting.php`, with env var overrides. The email verification code's hourly limits per email and per IP are in `config/local-auth.php`. See the [API](/features/api/#rate-limiting), [Authentication](/features/authentication/#rate-limiting), and [Support Tickets](/features/support-tickets/#rate-limiting) pages for details on each limiter.
 </Aside>
 
 ### Request Logging
@@ -254,11 +254,11 @@ Changing the default in `config/platform.php` has no effect while `.env.example`
 
 The following routes are always accessible, regardless of lockdown status:
 
-- Authentication routes (OAuth, verification codes, logout)
+- Sign-in and sign-out: the sign-in page, verification codes, Entra ID's sign-in and sign-out, WebSSO's sign-out, and `logout`
 - Impersonation routes (take/leave impersonation)
 - The lockdown page itself
 
-These exemptions ensure users can log in and administrators can manage impersonation. If you create additional routes that should be exempt, add them to the `exempted_routes` array in `config/platform.php`.
+These exemptions ensure people can sign in and out and administrators can manage impersonation. The OAuth consent screen is not exempt: a locked-out person can't connect an application. If you create additional routes that should be exempt, add them to the `exempted_routes` array in `config/platform.php`.
 
 ___
 

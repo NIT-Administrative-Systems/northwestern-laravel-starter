@@ -29,8 +29,9 @@ The starter ships with a minimal set of API endpoints. They live in `routes/api.
 
 - <Badge text="POST" variant="success" /> `/oauth/token` - Exchange a client ID
   and secret for an access token (Passport)
-- <Badge text="GET" variant="note" /> `/api/v1/me` - Returns the API user the
-  access token acts as
+- <Badge text="GET" variant="note" /> `/api/v1/me` - Returns whoever the access
+  token acts as: the API user for a service client, or the person for a
+  personal access token or an application
 - <Badge text="GET" variant="note" /> `/api/health` - [Health
   check](/features/health-checks/) results. It takes no bearer token and isn't
   affected by `API_ENABLED`; it requires an `X-Secret-Token` header matching
@@ -40,7 +41,7 @@ No endpoint creates credentials. Service clients and OAuth applications are regi
 
 Passport also serves `GET /oauth/authorize`, where a person approves an application on the consent screen.
 
-View the [API Specification](/api) for a complete reference of these endpoints.
+The [API Specification](/api) documents the endpoints under `/api` and how to authenticate with each kind of credential.
 
 ## Core Concepts
 
@@ -117,7 +118,7 @@ Most Northwestern integrations reach the application through an Apigee API proxy
 
 ## Personal Access Tokens
 
-People who hold the **Create Personal Access Tokens** permission can call the API as themselves from their own code and tools. No default role grants it. They create tokens on the Account area's [Access Tokens](/building/app-panel/#access-tokens) page:
+People who hold the **Create Personal Access Tokens** permission can call the API as themselves from their own code and tools. Of the default roles, only Super Administrator has it. They create tokens on the Account area's [Access Tokens](/building/app-panel/#access-tokens) page:
 
 - **Scopes** - A token can do only what its scopes name, chosen from the API-relevant permissions the person holds, and never more than the person's permissions allow.
 - **Lifetime** - Each token chooses 30, 90 (the default), 180 or 365 days, up to `API_PERSONAL_ACCESS_TOKEN_MAX_LIFETIME_DAYS`. Tokens can't be renewed; create a new one.
@@ -125,7 +126,7 @@ People who hold the **Create Personal Access Tokens** permission can call the AP
 - **Shown once** - The token is shown once, after it is created, and never stored in plain text.
 - **Reminders** - People are emailed before a token expires, unless they turn it off on their Preferences page.
 
-A token stops working as soon as its owner loses the permission, is deactivated or is deleted; `oauth:revoke-ineligible`, hourly in production, marks such tokens revoked. An administrator impersonating someone can see their tokens but can't create or revoke them. Administrators revoke a person's token, for example one that leaked, on the person's **Access Tokens** tab in the administration panel, which records it in the person's audit history.
+A token stops working as soon as its owner loses the permission, is deactivated or is deleted; `oauth:revoke-ineligible`, hourly in production, marks such tokens revoked. An administrator impersonating someone can see their tokens but can't create or revoke them. Administrators revoke a person's token, for example one that leaked, on the person's **Personal Access Tokens** tab in the administration panel, which records it in the person's audit history.
 
 Passport issues personal access tokens through a personal access client, which the starter creates the first time someone creates a token.
 
@@ -185,8 +186,10 @@ Passport signs access tokens with an RSA key pair.
 <Aside type="caution" title="Rotating the signing keys revokes every token">
     Every access token is signed with the private key. Replacing the key pair
     makes every outstanding access token invalid at once. Integrations recover
-    by requesting new access tokens with their existing client credentials, so
-    rotating the keys needs no new secrets.
+    by requesting new access tokens with their existing client credentials, and
+    applications and AI clients by refreshing or reconnecting. Personal access
+    tokens can't be reissued: they stop working for good, still listed as
+    active, and their owners have to create new ones.
 </Aside>
 
 ## Local Development

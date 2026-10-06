@@ -14,7 +14,7 @@ The starter has **one frontend stack**: [Filament](https://filamentphp.com), bui
 | Surface | URL | Built with | Use it for |
 |---|---|---|---|
 | [**App panel**](/building/app-panel/) | `/app` | Filament panel (`AppPanelProvider`) | Everything your application does for its users. It is the default panel, and it owns sign-in for the whole application. |
-| [**Administration panel**](#the-administration-panel) | `/administration` | Filament panel (`AdministrationPanelProvider`) | Back-office tooling: users, roles, audits, API tokens, platform settings. |
+| [**Administration panel**](#the-administration-panel) | `/administration` | Filament panel (`AdministrationPanelProvider`) | Back-office tooling: users and roles, API access, announcements, audits, support tickets and the platform overview. |
 | [**Public layout**](/building/public-pages/) | anywhere outside the panels, such as `/` and `/support/changelog` | `<x-layouts.public>` with Filament's Blade components | Pages people can see without signing in. |
 | [**Error layout**](/building/error-pages/) | 500, 503 and database-paused pages | `<x-layouts.error>` | Errors where the application may not be working. It renders without Filament, auth or the database. |
 | [**Mail**](/building/branding-and-mail/#email) | — | Laravel Markdown mail, with the starter's theme | Email. |
@@ -83,7 +83,7 @@ The access check for an entire panel is `User::canAccessPanel()`, which matches 
 
 ```php
 return match ($panel->getId()) {
-    AppPanelProvider::ID => true,
+    AppPanelProvider::ID => ! $this->is_api_user,
     AdministrationPanelProvider::ID => $this->can(SystemPermission::AccessAdministrationPanel),
 };
 ```

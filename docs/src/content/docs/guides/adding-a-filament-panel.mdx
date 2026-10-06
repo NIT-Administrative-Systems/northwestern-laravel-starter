@@ -165,7 +165,7 @@ The `User::canAccessPanel()` method uses a `match` statement that intentionally 
 // app/Domains/User/Models/User.php
 
 return match ($panel->getId()) {
-    AppPanelProvider::ID => true,
+    AppPanelProvider::ID => ! $this->is_api_user,
     AdministrationPanelProvider::ID => $this->can(SystemPermission::AccessAdministrationPanel),
     PortalPanelProvider::ID => $this->can(SystemPermission::AccessPortal),
 };

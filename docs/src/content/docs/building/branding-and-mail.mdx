@@ -97,7 +97,7 @@ The footer is required on university email, so keep the `@include('mail.partials
 
 </Steps>
 
-`resources/views/mail/auth/login-code.blade.php` and `resources/views/mail/access-token-expiration.blade.php` are working examples.
+`resources/views/mail/auth/login-code.blade.php` and `resources/views/mail/personal-access-token-expiration.blade.php` are working examples.
 
 <Aside type="caution" title="Don't let a formatter indent mail views">
     Markdown treats a line indented by four spaces as a code block, so an indented paragraph in a mail view arrives as a gray block of code. `.prettierignore` excludes `resources/views/mail/` and `resources/views/vendor/mail/` for this reason. Keep them out of any other formatter you add.
