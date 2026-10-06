@@ -6,7 +6,6 @@ namespace App\Console\Commands;
 
 use App\Domains\Auth\Actions\Applications\DisconnectApplication;
 use App\Domains\Auth\Actions\RevokeAllCredentials;
-use App\Domains\Auth\Enums\ClientOrigin;
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\Auth\Models\OAuthConnection;
@@ -59,7 +58,7 @@ class RevokeIneligibleCredentialsCommand extends Command
 
         $connections = OAuthConnection::query()
             ->with(['user', 'oauth_client'])
-            ->whereHas('oauth_client', fn (Builder $query) => $query->where('origin', ClientOrigin::Dynamic));
+            ->whereHas('oauth_client', fn (Builder $query) => $query->mcpClients());
 
         foreach ($connections->lazyById() as $connection) {
             if ($connection->user instanceof User && ! $connection->user->can(SystemPermission::UseMcp)) {

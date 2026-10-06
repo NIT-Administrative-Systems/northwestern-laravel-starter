@@ -11,16 +11,25 @@ use App\Domains\User\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Timebox;
 use Illuminate\Validation\ValidationException;
 
 /**
  * Verifies a login code against its challenge and resolves the local user it
  * signs in. Recording the login and marking the email verified happen here;
  * starting the session is left to the caller.
+ *
+ * Like {@see RequestLoginCode}, verification takes the same time whether or not the
+ * challenge is real: an unregistered email gets a decoy challenge ID, and without a
+ * floor the missing bcrypt check would reveal that.
  */
 class AuthenticateWithLoginCode
 {
+    /** Minimum time (in milliseconds) to resolve a challenge, above a bcrypt check at production cost. */
+    private const int MIN_RESOLVE_TIME_MS = 500;
+
     public function __construct(
+        private readonly Timebox $timebox,
         private readonly VerifyLoginChallengeCode $verifyLoginChallengeCode,
         private readonly RecordLogin $recordLogin,
     ) {
@@ -40,7 +49,18 @@ class AuthenticateWithLoginCode
             throw ValidationException::withMessages(['code' => 'That code didn\'t work. Check it and try again.']);
         }
 
-        $challenge = DB::transaction(fn () => $this->resolveChallenge($challengeId, $code, $request));
+        $minimumTimeMs = self::MIN_RESOLVE_TIME_MS + random_int(0, 50);
+
+        $challenge = $this->timebox->call(function (Timebox $timebox) use ($challengeId, $code, $request): LoginChallenge|ValidationException {
+            $timebox->dontReturnEarly();
+
+            // The rejection is returned, not thrown, so the transaction commits the failed attempt and any lockout.
+            return DB::transaction(fn () => $this->resolveChallenge($challengeId, $code, $request));
+        }, $minimumTimeMs * 1000);
+
+        if ($challenge instanceof ValidationException) {
+            throw $challenge;
+        }
 
         return $this->authenticateUser($challenge, $request);
     }
@@ -75,11 +95,10 @@ class AuthenticateWithLoginCode
     /**
      * Find the challenge, check lockout, and verify the code.
      *
-     * Must run inside a transaction with `lockForUpdate` to prevent race conditions.
-     *
-     * @throws ValidationException
+     * Must run inside a transaction with `lockForUpdate` to prevent race conditions. Returns the
+     * rejection rather than throwing it: a throw would roll back the attempt count.
      */
-    private function resolveChallenge(string $challengeId, string $code, Request $request): LoginChallenge
+    private function resolveChallenge(string $challengeId, string $code, Request $request): LoginChallenge|ValidationException
     {
         // Non-numeric IDs are decoy values stored for non-existent users to prevent timing enumeration.
         $challenge = ctype_digit($challengeId)
@@ -87,12 +106,13 @@ class AuthenticateWithLoginCode
             : null;
 
         if (! $challenge) {
-            throw ValidationException::withMessages(['code' => 'That code didn\'t work. Check it and try again.']);
+            return ValidationException::withMessages(['code' => 'That code didn\'t work. Check it and try again.']);
         }
 
         if ($challenge->isLocked()) {
             $lockoutMinutes = (int) config('local-auth.code.lock_minutes', 15);
-            throw ValidationException::withMessages([
+
+            return ValidationException::withMessages([
                 'code' => 'Too many attempts. Try again in ' . CountInWords::of($lockoutMinutes, 'minute') . '.',
             ]);
         }
@@ -105,7 +125,7 @@ class AuthenticateWithLoginCode
         );
 
         if (! $codeVerified) {
-            throw ValidationException::withMessages(['code' => 'That code didn\'t work. Check it and try again.']);
+            return ValidationException::withMessages(['code' => 'That code didn\'t work. Check it and try again.']);
         }
 
         return $challenge;

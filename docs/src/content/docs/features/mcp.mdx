@@ -186,7 +186,7 @@ See the [Laravel MCP documentation](https://laravel.com/docs/mcp) for resources,
 People see their MCP clients on their Account area's [Connected Applications](/building/app-panel/#connected-applications) page, labelled as AI clients whose names aren't verified, and can disconnect them there.
 
 - `mcp:prune-clients` runs daily. It deletes a client nobody connected within 24 hours of registering, and revokes one nobody has used for 90 days.
-- `oauth:revoke-ineligible` runs hourly. It disconnects the MCP clients of people who lost `UseMcp`. Their tokens stop working at once, before it runs.
+- `oauth:revoke-ineligible` runs hourly in production and at noon on weekdays elsewhere. It disconnects the MCP clients of people who lost `UseMcp`. Their tokens stop working at once, before it runs.
 
 ## Logging and Limits
 

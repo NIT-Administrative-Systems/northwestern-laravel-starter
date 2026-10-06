@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\OAuthApplications\Pages;
 
 use App\Domains\Auth\Actions\Applications\RegisterOAuthApplication;
+use App\Domains\User\Models\User;
 use App\Filament\Resources\OAuthApplications\OAuthApplicationResource;
 use App\Filament\Resources\OAuthApplications\Schemas\OAuthApplicationSchemas;
 use Filament\Actions\Action;
@@ -31,9 +32,11 @@ class ListOAuthApplications extends ListRecords
         return [
             Action::make('register')
                 ->label('Register Application')
+                ->hidden(fn (): bool => resolve('impersonate')->isImpersonating())
                 ->icon(Heroicon::OutlinedPlusCircle)
                 ->closeModalByClickingAway(false)
                 ->closeModalByEscaping(false)
+                ->mountUsing(OAuthApplicationSchemas::mountFresh())
                 ->steps([
                     Wizard\Step::make('Details')
                         ->schema([
@@ -56,6 +59,7 @@ class ListOAuthApplications extends ListRecords
                                 (bool) $state['first_party'],
                                 $state['description'] ?? null,
                                 $state['contact_email'] ?? null,
+                                registeredBy: $this->administrator(),
                             );
 
                             OAuthApplicationSchemas::storeCredentials($client, $secret);
@@ -66,5 +70,11 @@ class ListOAuthApplications extends ListRecords
                 ->action(fn () => OAuthApplicationSchemas::clearCredentials())
                 ->successNotificationTitle('Application Registered'),
         ];
+    }
+
+    private function administrator(): User
+    {
+        /** @var User */
+        return auth()->user();
     }
 }

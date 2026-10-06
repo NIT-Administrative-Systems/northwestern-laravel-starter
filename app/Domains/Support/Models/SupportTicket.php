@@ -11,7 +11,7 @@ use Database\Factories\Domains\Support\Models\SupportTicketFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Mews\Purifier\Casts\CleanHtml;
+use Illuminate\Support\HtmlString;
 
 /**
  * A user-submitted support ticket persisted as a local submission record.
@@ -30,13 +30,21 @@ class SupportTicket extends BaseModel
         'posted_to_ticketing_system_at' => 'datetime',
         'fallback_sent_at' => 'datetime',
         'post_error' => 'boolean',
-        'details' => CleanHtml::class,
     ];
 
     /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * The details as HTML, for the emails, TeamDynamix and Administration: the text as typed,
+     * escaped, with its line breaks. People type plain text, so no HTML they enter renders.
+     */
+    public function detailsHtml(): HtmlString
+    {
+        return new HtmlString(nl2br(e((string) $this->details), false));
     }
 
     public function wasPostedSuccessfully(): bool

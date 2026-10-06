@@ -30,6 +30,7 @@ class RotateServiceClientAction extends Action
         parent::setUp();
 
         $this->authorize(SystemPermission::ManageApiAccess)
+            ->hidden(fn (): bool => resolve('impersonate')->isImpersonating())
             ->label('Rotate')
             ->icon(Heroicon::OutlinedArrowPath)
             ->color('primary')
@@ -37,6 +38,7 @@ class RotateServiceClientAction extends Action
             ->size(Size::ExtraSmall)
             ->closeModalByClickingAway(false)
             ->closeModalByEscaping(false)
+            ->mountUsing(ServiceClientSchemas::mountFresh(ServiceClientSchemas::SESSION_KEY_ROTATE))
             ->steps([
                 Wizard\Step::make('Rotate Service Client')
                     ->schema([

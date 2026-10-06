@@ -143,26 +143,26 @@ Permissions are defined as cases in `SystemPermission`, the **single source of t
 
 ### Default Permissions
 
-| Permission                   | Description                                                      | System Managed | API Relevant |
-| ---------------------------- | ---------------------------------------------------------------- | :------------: | :----------: |
-| `ManageAll`                  | Bypasses all authorization checks                                |      Yes       |      —       |
-| `AccessAdministrationPanel`  | Access to the Filament admin panel                               |      Yes       |      —       |
-| `ManageImpersonation`        | Impersonate other users                                          |      Yes       |      —       |
-| `ViewUsers`                  | View user profiles and listings                                  |       —        |     Yes      |
-| `CreateUsers`                | Create new user accounts                                         |       —        |      —       |
-| `EditUsers`                  | Edit existing user accounts                                      |       —        |      —       |
-| `ViewRoles`                  | View role definitions and assignments                            |       —        |      —       |
-| `EditRoles`                  | Create and edit role definitions                                 |       —        |      —       |
-| `DeleteRoles`                | Permanently delete roles                                         |      Yes       |      —       |
-| `AssignRoles`                | Assign and remove roles from users                               |       —        |      —       |
-| `ManageApiAccess`            | Create API users and manage their clients                        |       —        |      —       |
-| `ViewApiRequestLogs`         | View API request logs and usage charts                           |       —        |      —       |
-| `CreatePersonalAccessTokens` | Create personal access tokens on the Account page                |       —        |      —       |
-| `UseMcp`                     | Connect AI clients to the [MCP server](/features/mcp/)           |       —        |      —       |
-| `ViewAuditLogs`              | View audit trail entries                                         |      Yes       |      —       |
-| `ViewLoginRecords`           | View login analytics                                             |      Yes       |      —       |
-| `ViewSupportTickets`         | View support ticket submissions                                  |      Yes       |      —       |
-| `ManageAnnouncements`        | Write, publish and end [announcements](/features/announcements/) |       —        |      —       |
+| Permission                   | Description                                                                                                 | System Managed | API Relevant |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------- | :------------: | :----------: |
+| `ManageAll`                  | Bypasses all authorization checks                                                                           |      Yes       |      —       |
+| `AccessAdministrationPanel`  | Access to the Filament admin panel                                                                          |      Yes       |      —       |
+| `ManageImpersonation`        | Impersonate other users                                                                                     |      Yes       |      —       |
+| `ViewUsers`                  | View user profiles and listings                                                                             |       —        |     Yes      |
+| `CreateUsers`                | Create new user accounts                                                                                    |       —        |      —       |
+| `EditUsers`                  | Edit existing user accounts                                                                                 |       —        |      —       |
+| `ViewRoles`                  | View role definitions and assignments                                                                       |       —        |      —       |
+| `EditRoles`                  | Create and edit role definitions                                                                            |       —        |      —       |
+| `DeleteRoles`                | Permanently delete roles                                                                                    |      Yes       |      —       |
+| `AssignRoles`                | Assign and remove roles from users                                                                          |       —        |      —       |
+| `ManageApiAccess`            | Manage API users, service clients, applications and MCP clients, and revoke people's tokens and connections |       —        |      —       |
+| `ViewApiRequestLogs`         | View API request logs and usage charts                                                                      |       —        |      —       |
+| `CreatePersonalAccessTokens` | Create personal access tokens on the Account page                                                           |       —        |      —       |
+| `UseMcp`                     | Connect AI clients to the [MCP server](/features/mcp/)                                                      |       —        |      —       |
+| `ViewAuditLogs`              | View audit trail entries                                                                                    |      Yes       |      —       |
+| `ViewLoginRecords`           | View login analytics                                                                                        |      Yes       |      —       |
+| `ViewSupportTickets`         | View support ticket submissions                                                                             |      Yes       |      —       |
+| `ManageAnnouncements`        | Write, publish and end [announcements](/features/announcements/)                                            |       —        |      —       |
 
 **System Managed** permissions are security-sensitive and can only be included in system-managed roles or by users with `ManageAll`. They appear in a separate "Sensitive Permissions" section in the role form.
 

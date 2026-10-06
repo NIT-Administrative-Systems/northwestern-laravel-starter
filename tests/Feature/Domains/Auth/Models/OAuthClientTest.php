@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Tests\Feature\Domains\Auth\Models;
 
 use App\Domains\Auth\Actions\Api\CreateServiceClient;
+use App\Domains\Auth\Actions\Applications\RegisterOAuthApplication;
+use App\Domains\Auth\Enums\ClientOrigin;
 use App\Domains\Auth\Enums\CredentialStatus;
 use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\User\Models\User;
@@ -62,5 +64,18 @@ final class OAuthClientTest extends TestCase
         [, $client] = resolve(CreateServiceClient::class)(User::factory()->api()->create(), 'Sync', now()->addDays(30));
 
         return $client;
+    }
+
+    public function test_each_kind_of_client_has_its_own_scope(): void
+    {
+        [, $serviceClient] = resolve(CreateServiceClient::class)(User::factory()->api()->create(), 'Sync', now()->addMonth());
+        [, $application] = resolve(RegisterOAuthApplication::class)('Portal', ['https://portal.example.edu/cb'], true, []);
+        [, $mcpClient] = resolve(RegisterOAuthApplication::class)('Claude', ['http://localhost/cb'], false, [], origin: ClientOrigin::Dynamic);
+
+        $this->assertSame([$serviceClient->getKey()], OAuthClient::query()->serviceClients()->pluck('id')->all());
+        $this->assertSame([$application->getKey()], OAuthClient::query()->applications()->pluck('id')->all());
+        $this->assertSame([$mcpClient->getKey()], OAuthClient::query()->mcpClients()->pluck('id')->all());
+        $this->assertTrue($mcpClient->isMcpClient());
+        $this->assertFalse($application->isMcpClient());
     }
 }

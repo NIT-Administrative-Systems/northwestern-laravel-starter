@@ -35,18 +35,18 @@ class DateRangeFilter
         ?string $fromLabel = null,
         ?string $untilLabel = null,
     ): Filter {
+        // The browser's own date input: Filament's custom picker nests its input inside a button,
+        // which screen readers can't operate and axe reports as a nested interactive control.
         $fromPicker = DatePicker::make($fromField)
-            ->label($fromLabel ?? 'From')
-            ->native(false);
+            ->label($fromLabel ?? 'From');
 
         $untilPicker = DatePicker::make($untilField)
             ->label($untilLabel ?? 'To')
-            ->native(false)
             ->minDate(fn (callable $get) => $get($fromField));
 
         if ($icon instanceof Heroicon) {
-            $fromPicker->prefixIcon($icon)->closeOnDateSelection();
-            $untilPicker->prefixIcon($icon)->closeOnDateSelection();
+            $fromPicker->prefixIcon($icon);
+            $untilPicker->prefixIcon($icon);
         }
 
         if ($limitUntilToToday) {

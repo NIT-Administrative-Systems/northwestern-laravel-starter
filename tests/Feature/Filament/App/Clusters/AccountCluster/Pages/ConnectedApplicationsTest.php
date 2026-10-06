@@ -52,9 +52,7 @@ final class ConnectedApplicationsTest extends TestCase
     public function test_it_lists_the_persons_live_connections(): void
     {
         $mine = $this->connect('Reporting Tool');
-        $this->actingAs(User::factory()->create());
-        $theirs = $this->connect('Calendar');
-        $this->actingAs($this->user);
+        [$theirs] = $this->connectAs(User::factory()->create(), 'Calendar');
 
         Livewire::test(ConnectedApplications::class)
             ->assertCanSeeTableRecords([$mine])
@@ -80,21 +78,25 @@ final class ConnectedApplicationsTest extends TestCase
 
     public function test_a_person_disconnects_an_application(): void
     {
+        [$theirs] = $this->connectAs(User::factory()->create(), 'Reporting Tool');
         $connection = $this->connect('Reporting Tool');
 
         Livewire::test(ConnectedApplications::class)->callAction(TestAction::make('disconnect')->table($connection));
 
-        $this->assertSame(0, OAuthConnection::query()->count());
+        $this->assertSame([$theirs->getKey()], OAuthConnection::query()->pluck('id')->all());
     }
 
+    // Disconnect All is scoped to the person by its own query; nobody else's connections or tokens are touched.
     public function test_a_person_disconnects_every_application(): void
     {
+        [$theirs, $theirToken] = $this->connectAs(User::factory()->create(), 'Reporting Tool');
         $this->connect('Reporting Tool');
         $this->connect('Calendar');
 
         Livewire::test(ConnectedApplications::class)->callAction(TestAction::make('disconnectAll')->table());
 
-        $this->assertSame(0, OAuthConnection::query()->count());
+        $this->assertSame([$theirs->getKey()], OAuthConnection::query()->pluck('id')->all());
+        $this->withToken($theirToken)->getJson('/api/v1/me')->assertOk();
     }
 
     public function test_an_impersonator_sees_connections_but_cannot_disconnect_them(): void
@@ -115,11 +117,21 @@ final class ConnectedApplicationsTest extends TestCase
 
     private function connect(string $name): OAuthConnection
     {
+        return $this->connectAs($this->user, $name)[0];
+    }
+
+    /**
+     * @return array{0: OAuthConnection, 1: string} The connection and its access token
+     */
+    private function connectAs(User $person, string $name): array
+    {
+        $this->actingAs($person);
         $client = $this->registerApplication();
         $client->forceFill(['name' => $name])->save();
         [, $verifier] = $this->requestAuthorization($client);
-        $this->exchange($client, $this->approve($client), $verifier)->assertOk();
+        $accessToken = $this->exchange($client, $this->approve($client), $verifier)->assertOk()->json('access_token');
+        $this->actingAs($this->user);
 
-        return OAuthConnection::query()->where('oauth_client_id', $client->getKey())->sole();
+        return [OAuthConnection::query()->where('oauth_client_id', $client->getKey())->sole(), $accessToken];
     }
 }

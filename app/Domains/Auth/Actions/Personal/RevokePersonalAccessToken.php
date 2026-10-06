@@ -7,8 +7,6 @@ namespace App\Domains\Auth\Actions\Personal;
 use App\Domains\Auth\Models\OAuthToken;
 use App\Domains\User\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Support\Facades\Event;
-use OwenIt\Auditing\Events\AuditCustom;
 
 /**
  * Revokes a personal access token. People revoke their own on the Account page; an
@@ -30,16 +28,11 @@ readonly class RevokePersonalAccessToken
         $owner = User::query()->find($token->user_id);
 
         if ($owner instanceof User && $owner->isNot($revokedBy)) {
-            $owner->auditEvent = 'personal_access_token_revoked';
-            $owner->isCustomEvent = true;
-            $owner->auditCustomOld = [];
-            $owner->auditCustomNew = [
+            $owner->recordCustomAudit('personal_access_token_revoked', [
                 'token_id' => $token->getKey(),
                 'name' => $token->name,
                 'scopes' => $token->scopes,
-            ];
-
-            Event::dispatch(new AuditCustom($owner));
+            ]);
         }
     }
 }

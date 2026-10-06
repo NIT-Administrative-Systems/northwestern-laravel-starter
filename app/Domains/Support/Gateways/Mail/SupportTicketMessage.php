@@ -43,7 +43,7 @@ class SupportTicketMessage extends Mailable implements ShouldQueue
             ->with([
                 'referenceNumber' => $this->referenceNumber,
                 'subject' => $this->ticket->subject,
-                'details' => $this->ticket->details,
+                'details' => $this->ticket->detailsHtml(),
                 'submitterName' => $user->full_name ?? 'Unknown',
                 'submitterEmail' => $user->email ?? 'Unknown',
                 'submitterUsername' => $user->username ?? 'Unknown',

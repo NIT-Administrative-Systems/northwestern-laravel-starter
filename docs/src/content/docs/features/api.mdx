@@ -125,7 +125,7 @@ People who hold the **Create Personal Access Tokens** permission can call the AP
 - **Shown once** - The token is shown once, after it is created, and never stored in plain text.
 - **Reminders** - People are emailed before a token expires, unless they turn it off on their Preferences page.
 
-A token stops working as soon as its owner loses the permission, is deactivated or is deleted; the hourly `oauth:revoke-ineligible` marks such tokens revoked. An administrator impersonating someone can see their tokens but can't create or revoke them. Administrators revoke a person's token, for example one that leaked, on the person's **Access Tokens** tab in the administration panel, which records it in the person's audit history.
+A token stops working as soon as its owner loses the permission, is deactivated or is deleted; `oauth:revoke-ineligible`, hourly in production, marks such tokens revoked. An administrator impersonating someone can see their tokens but can't create or revoke them. Administrators revoke a person's token, for example one that leaked, on the person's **Access Tokens** tab in the administration panel, which records it in the person's audit history.
 
 Passport issues personal access tokens through a personal access client, which the starter creates the first time someone creates a token.
 
@@ -203,18 +203,20 @@ You can adjust these intervals in the configuration:
 
 ```php
 // config/api.php
-'expiration_notifications' => [
+'client_secret_expiration_notifications' => [
     'enabled' => env('API_CLIENT_SECRET_EXPIRATION_NOTIFICATIONS_ENABLED', true),
     'intervals' => [30, 14, 7, 3, 1],
 ],
 ```
 
-To disable expiration notifications:
+To disable them:
 
 ```php
 // .env
 API_CLIENT_SECRET_EXPIRATION_NOTIFICATIONS_ENABLED=false
 ```
+
+Personal access token reminders have their own setting, `api.personal_access_tokens.expiration_notifications`, turned off with `API_PERSONAL_ACCESS_TOKEN_EXPIRATION_NOTIFICATIONS_ENABLED=false`.
 
 ## Request Logging
 
@@ -361,5 +363,5 @@ Each API-relevant permission is also an OAuth scope of the same name (`view-user
 
 Two permissions govern the API area of the administration panel:
 
-- **Manage API Access** (`ManageApiAccess`) - create API users and manage their clients
+- **Manage API Access** (`ManageApiAccess`) - manage API users and their service clients; register, edit and revoke applications, including first-party ones that skip consent; revoke MCP clients; and revoke anyone's personal access tokens and connected applications
 - **View API Request Logs** (`ViewApiRequestLogs`) - view request logs and usage charts

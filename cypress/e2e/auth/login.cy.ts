@@ -41,7 +41,8 @@ describe("Authentication - Login", () => {
             });
             cy.getBySel("continue-button").click();
             cy.contains("Check Your Email").should("be.visible");
-            cy.getBySel("code-input").should("be.visible");
+            // The Continue button that had focus is gone; focus moves to the code.
+            cy.getBySel("code-input").should("be.visible").and("have.focus");
         });
 
         it("should validate login code and authenticate user", () => {

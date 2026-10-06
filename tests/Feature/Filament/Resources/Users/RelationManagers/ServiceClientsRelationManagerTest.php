@@ -90,6 +90,25 @@ final class ServiceClientsRelationManagerTest extends TestCase
         $this->assertNull(session(ServiceClientSchemas::SESSION_KEY_CREATE));
     }
 
+    // Only the final submit clears the secret, so an abandoned run must not leak into the next one.
+    public function test_an_abandoned_create_does_not_carry_over_to_another_api_user(): void
+    {
+        $this->relationManager()
+            ->mountTableAction('createServiceClient')
+            ->fillForm(['name' => 'Abandoned', 'expiration' => TokenExpiration::ThreeMonths->value])
+            ->goToNextWizardStep();
+
+        $otherApiUser = User::factory()->api()->create();
+        $this->relationManager($otherApiUser)
+            ->mountTableAction('createServiceClient')
+            ->fillForm(['name' => 'Second', 'expiration' => TokenExpiration::ThreeMonths->value])
+            ->goToNextWizardStep();
+
+        $client = OAuthClient::query()->whereMorphedTo('owner', $otherApiUser)->sole();
+        $this->assertSame('Second', $client->name);
+        $this->assertSame($client->getKey(), session(ServiceClientSchemas::SESSION_KEY_CREATE)['client_id']);
+    }
+
     public function test_rotating_adds_a_replacement_and_keeps_the_client(): void
     {
         $client = $this->client('Sync');
@@ -133,10 +152,10 @@ final class ServiceClientsRelationManagerTest extends TestCase
     }
 
     /** @return Testable<ServiceClientsRelationManager> */
-    private function relationManager(): Testable
+    private function relationManager(?User $apiUser = null): Testable
     {
         return Livewire::test(ServiceClientsRelationManager::class, [
-            'ownerRecord' => $this->apiUser,
+            'ownerRecord' => $apiUser ?? $this->apiUser,
             'pageClass' => ViewUser::class,
         ]);
     }

@@ -16,6 +16,11 @@
     display: none;
 }
 
+/* The theme outlines focused buttons in Northwestern Purple, which vanishes on the purple site header. */
+.nu-site-header .fi-btn:focus-visible {
+    outline-color: var(--color-white);
+}
+
 /* The app panel's simple pages (sign-in, lockdown): a Northwestern Purple accent on the card. */
 .fi-simple-main {
     border-top: 4px solid var(--nu-purple-100);

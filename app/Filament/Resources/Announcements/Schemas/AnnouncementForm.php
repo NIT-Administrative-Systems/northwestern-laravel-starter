@@ -82,7 +82,9 @@ class AnnouncementForm
                                     ->visible(fn (Get $get): bool => self::isTargeted($get)),
                             ]),
                         Section::make('Schedule')
-                            ->description('Times are in your timezone.')
+                            ->description(fn (?Announcement $record): string => $record?->status === AnnouncementStatus::Ended
+                                ? 'This announcement has ended. Duplicate it to show it again.'
+                                : 'Times are in your timezone.')
                             ->schema([
                                 DateTimePicker::make('starts_at')
                                     ->label('Starts')
@@ -95,7 +97,9 @@ class AnnouncementForm
                                     ->helperText('Optional. Leave blank to keep it showing until you end it.'),
                             ])
                             ->columns(2)
-                            ->visible(fn (?Announcement $record): bool => $record instanceof Announcement && $record->status !== AnnouncementStatus::Draft),
+                            ->visible(fn (?Announcement $record): bool => $record instanceof Announcement && $record->status !== AnnouncementStatus::Draft)
+                            // An ended announcement can't be republished, only duplicated. Disabled fields aren't saved, so this also holds on the server.
+                            ->disabled(fn (?Announcement $record): bool => $record?->status === AnnouncementStatus::Ended),
                     ])->columnSpan(['xl' => 3]),
                     Section::make('Preview')
                         ->description('How the banner looks. Links don\'t work here.')

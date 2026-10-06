@@ -81,6 +81,25 @@ final class OAuthApplicationResourceTest extends TestCase
         $this->assertNull(session(OAuthApplicationSchemas::SESSION_KEY));
     }
 
+    // Register and regenerate share a session key; an abandoned registration must not stand in for a regeneration.
+    public function test_an_abandoned_registration_does_not_carry_over_to_a_regeneration(): void
+    {
+        Livewire::test(ListOAuthApplications::class)
+            ->mountAction(TestAction::make('register'))
+            ->fillForm(['name' => 'Abandoned', 'redirect_uris' => ['https://abandoned.example.edu/cb'], 'confidential' => true, 'first_party' => false])
+            ->goToNextWizardStep();
+
+        [, $application] = resolve(\App\Domains\Auth\Actions\Applications\RegisterOAuthApplication::class)('Portal', ['https://portal.example.edu/cb'], true, []);
+        $before = $application->secret;
+
+        Livewire::test(ListOAuthApplications::class)
+            ->mountAction(TestAction::make('regenerateSecret')->table($application))
+            ->goToNextWizardStep();
+
+        $this->assertNotSame($before, $application->fresh()?->secret);
+        $this->assertSame($application->getKey(), session(OAuthApplicationSchemas::SESSION_KEY)['client_id']);
+    }
+
     public function test_redirect_uris_must_be_https_or_loopback(): void
     {
         Livewire::test(ListOAuthApplications::class)

@@ -36,9 +36,6 @@ return [
     | endpoints. It identifies the API "realm" so clients know which API
     | is requesting bearer credentials.
     |
-    | This value will also be shown in access token expiration notifications
-    | if the feature is enabled.
-    |
     */
 
     // APP_NAME directly: config/api.php loads before the framework's app config, so config('app.name') is still empty here.
@@ -100,6 +97,11 @@ return [
     |
     */
 
+    'client_secret_expiration_notifications' => [
+        'enabled' => env('API_CLIENT_SECRET_EXPIRATION_NOTIFICATIONS_ENABLED', true),
+        'intervals' => [30, 14, 7, 3, 1],
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Personal Access Tokens
@@ -110,16 +112,19 @@ return [
     | lifetime, up to `max_lifetime_days`, and a person can hold at most
     | `max_active` working tokens at once.
     |
+    | 'expiration_notifications': Days before a token expires to email its
+    | owner, unless they turned the reminders off on their Preferences page.
+    |
     */
 
     'personal_access_tokens' => [
         'max_lifetime_days' => (int) env('API_PERSONAL_ACCESS_TOKEN_MAX_LIFETIME_DAYS', 365),
         'max_active' => (int) env('API_PERSONAL_ACCESS_TOKEN_MAX_ACTIVE', 10),
-    ],
 
-    'expiration_notifications' => [
-        'enabled' => env('API_CLIENT_SECRET_EXPIRATION_NOTIFICATIONS_ENABLED', true),
-        'intervals' => [30, 14, 7, 3, 1],
+        'expiration_notifications' => [
+            'enabled' => env('API_PERSONAL_ACCESS_TOKEN_EXPIRATION_NOTIFICATIONS_ENABLED', true),
+            'intervals' => [30, 14, 7, 3, 1],
+        ],
     ],
 
 ];

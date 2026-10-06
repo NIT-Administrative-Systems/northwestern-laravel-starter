@@ -20,6 +20,7 @@ use App\Filament\Resources\Announcements\Pages\ListAnnouncements;
 use App\Filament\Resources\Announcements\Schemas\AnnouncementForm;
 use App\Filament\Resources\Announcements\Tables\AnnouncementsTable;
 use App\Providers\Filament\AdministrationPanelProvider;
+use Carbon\CarbonImmutable;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Queue;
 use Livewire\Livewire;
@@ -113,6 +114,22 @@ final class AnnouncementResourceTest extends TestCase
         Queue::assertPushed(NotifyAnnouncementAudience::class);
     }
 
+    // Times are entered in the author's timezone and stored as instants. The other tests use a UTC author.
+    public function test_a_start_time_is_read_in_the_authors_timezone(): void
+    {
+        $this->travelTo(CarbonImmutable::parse('2026-10-06 12:00:00', 'UTC'));
+        $this->manager->forceFill(['timezone' => 'America/Chicago'])->save();
+        $announcement = Announcement::factory()->draft()->create();
+
+        Livewire::test(EditAnnouncement::class, ['record' => $announcement->getRouteKey()])
+            ->callAction('publish', data: ['starts_at' => '2026-10-20 09:00:00', 'ends_at' => null, 'notify' => false])
+            ->assertHasNoActionErrors();
+
+        $announcement->refresh();
+        $this->assertSame('2026-10-20 14:00:00', $announcement->starts_at->utc()->toDateTimeString());
+        $this->assertSame(AnnouncementStatus::Scheduled, $announcement->status);
+    }
+
     public function test_a_live_announcement_can_be_edited_shown_again_ended_and_duplicated(): void
     {
         $announcement = Announcement::factory()->create();
@@ -133,6 +150,23 @@ final class AnnouncementResourceTest extends TestCase
 
         $page()->callAction('duplicate')->assertNotified('Copied to a New Draft');
         $this->assertSame(1, Announcement::query()->whereNull('published_at')->where('title', 'Corrected title')->count());
+    }
+
+    // An ended announcement can't be republished by editing its dates; it has to be duplicated.
+    public function test_an_ended_announcements_schedule_cannot_be_changed(): void
+    {
+        $announcement = Announcement::factory()->ended()->create();
+        $endsAt = $announcement->ends_at;
+
+        Livewire::test(EditAnnouncement::class, ['record' => $announcement->getRouteKey()])
+            ->assertFormFieldDisabled('ends_at')
+            ->set('data.ends_at', null)
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $announcement->refresh();
+        $this->assertTrue($announcement->ends_at->equalTo($endsAt));
+        $this->assertSame(AnnouncementStatus::Ended, $announcement->status);
     }
 
     public function test_the_list_filters_by_status(): void

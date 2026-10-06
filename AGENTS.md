@@ -65,11 +65,12 @@ formatting fixes back to the pull request, so pull before pushing again.
 
 ## Rules that are easy to miss
 
-- **Tailwind only compiles classes from files it is told about.** A view outside
-  `app/Filament/App/` and `resources/views/filament/app/` must be covered by an `@source`
-  line in `resources/css/filament/app/theme.css` (or the administration theme), or its
-  classes silently do nothing. Error-layout pages (500, 503, database-paused) compile from
-  `resources/css/errors.css`, which has its own `@source` lines.
+- **Tailwind skips what git ignores.** The app and administration themes and
+  `resources/css/errors.css` detect sources automatically, so a class in any file the
+  repository tracks compiles. A class that appears only in a package's views under `vendor/`
+  needs an `@source` line, as `vendor/filament/**` has, or it silently does nothing. A new
+  panel's theme needs that line too. Error-layout pages (500, 503, database-paused) use
+  `resources/css/errors.css`, not a panel theme.
 - **Filament callout headings are always `<h4>`.** A callout directly under a page title or
   a top-level section skips heading levels and fails axe. Use `Callout::make()` with a
   description that opens with bold text instead of a heading.
@@ -81,8 +82,8 @@ formatting fixes back to the pull request, so pull before pushing again.
   `/app` and `/administration` in separate tests when asserting on panel chrome.
 - **Never add `$fillable` or `$guarded`** to models, never add foreign key constraints, and
   never implement a migration's `down()` (throw `NoRollbackException`). The only foreign keys
-  are in Filament's `imports`, `exports` and `failed_import_rows` migrations, shipped in
-  v1.10.0.
+  are in migrations published by packages and kept as published: Spatie's permission tables,
+  Telescope's, and Filament's `imports`, `exports` and `failed_import_rows`.
 - **Passport's migrations stay as Passport publishes them** (`create_oauth_*`): UUID client
   IDs, string token IDs, `foreignUuid()` and a `down()`. Columns elsewhere that refer to them
   (`oauth_client_id`, `token_id`) use Passport's types. Add the starter's own OAuth columns in a
@@ -103,6 +104,13 @@ formatting fixes back to the pull request, so pull before pushing again.
 - Mirror the namespace under `tests/Feature` or `tests/Unit`, and put a regression test in the
   existing test file for that class. Mark test classes with `#[CoversClass]`, or
   `#[CoversTrait]` for traits.
+- **Coverage must stay at 100%, and only declared targets count.** A test's lines count only
+  for the classes and traits its attributes name, so a new trait needs a `#[CoversTrait]`
+  somewhere. A test that exercises included code must not also name a class the `<source>`
+  exclusions in `phpunit.xml` leave out (models, enums, `app/Filament` and others): PHPUnit
+  warns and drops everything that test covers, so the included classes show as untested.
+  Check with
+  `herd coverage -dmemory_limit=2G vendor/bin/pest --coverage --min=100`.
 - Use factories. `UserFactory` gives SSO users the Northwestern User role; use `->affiliate()`
   for a user without roles.
 - Every page the starter ships is checked with axe in `cypress/e2e/accessibility.cy.ts`. Add

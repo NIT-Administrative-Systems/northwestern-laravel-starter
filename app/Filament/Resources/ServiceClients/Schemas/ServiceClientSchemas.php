@@ -8,6 +8,7 @@ use App\Domains\Auth\Enums\CredentialStatus;
 use App\Domains\Auth\Enums\TokenExpiration;
 use App\Domains\Auth\Models\OAuthClient;
 use Carbon\CarbonInterface;
+use Closure;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TagsInput;
@@ -16,6 +17,7 @@ use Filament\Infolists\Components\CodeEntry;
 use Filament\Infolists\Components\ViewEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Wizard;
+use Filament\Schemas\Schema;
 use Filament\Support\Enums\IconPosition;
 use Filament\Support\Enums\IconSize;
 use Filament\Support\Icons\Heroicon;
@@ -244,5 +246,20 @@ class ServiceClientSchemas
     public static function clearCredentials(string $sessionKey): void
     {
         Session::forget($sessionKey);
+    }
+
+    /**
+     * Mount a credentials wizard with nothing left from an earlier run.
+     *
+     * Only the final submit clears the session key, so a run that was cancelled or closed
+     * leaves its secret behind. Without this, the next run of the wizard, on any record,
+     * would skip its work and show that secret.
+     */
+    public static function mountFresh(string $sessionKey): Closure
+    {
+        return function (?Schema $schema) use ($sessionKey): void {
+            self::clearCredentials($sessionKey);
+            $schema?->fill();
+        };
     }
 }

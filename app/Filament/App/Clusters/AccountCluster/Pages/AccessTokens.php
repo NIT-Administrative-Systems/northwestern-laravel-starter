@@ -77,12 +77,6 @@ class AccessTokens extends Page implements HasTable
             && $user->can(SystemPermission::CreatePersonalAccessTokens);
     }
 
-    public function mount(): void
-    {
-        // A token from an abandoned wizard is never shown again.
-        Session::forget(self::SESSION_KEY);
-    }
-
     public function content(Schema $schema): Schema
     {
         return $schema->components([
@@ -156,6 +150,11 @@ class AccessTokens extends Page implements HasTable
             ->hidden(fn (): bool => $this->isImpersonating())
             ->closeModalByClickingAway(false)
             ->closeModalByEscaping(false)
+            ->mountUsing(function (?Schema $schema): void {
+                // A token from an abandoned run of this wizard is never shown again.
+                Session::forget(self::SESSION_KEY);
+                $schema?->fill();
+            })
             ->steps([
                 Wizard\Step::make('Configure')
                     ->schema([

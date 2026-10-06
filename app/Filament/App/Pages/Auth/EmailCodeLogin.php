@@ -191,6 +191,10 @@ class EmailCodeLogin extends SimplePage
 
         $this->email = $email;
         $this->codeForm->fill();
+
+        // The email form, and the button that had focus, are replaced by the code form. `autofocus`
+        // works once per page, so move focus to the code's first digit, which also names the new step.
+        $this->js("document.querySelector('.fi-one-time-code-input-digit')?.focus()");
     }
 
     public function verifyCode(): RedirectResponse|Redirector
@@ -268,5 +272,7 @@ class EmailCodeLogin extends SimplePage
         $this->email = null;
         $this->form->fill();
         $this->codeForm->fill();
+
+        $this->js("document.querySelector('input[type=\"email\"]')?.focus()");
     }
 }

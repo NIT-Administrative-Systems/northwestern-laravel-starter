@@ -26,11 +26,13 @@ class CreateServiceClientAction extends Action
         parent::setUp();
 
         $this->authorize(SystemPermission::ManageApiAccess)
+            ->hidden(fn (): bool => resolve('impersonate')->isImpersonating())
             ->label('Create Service Client')
             ->icon(Heroicon::OutlinedPlusCircle)
             ->outlined()
             ->closeModalByClickingAway(false)
             ->closeModalByEscaping(false)
+            ->mountUsing(ServiceClientSchemas::mountFresh(ServiceClientSchemas::SESSION_KEY_CREATE))
             ->steps([
                 Wizard\Step::make('Configure')
                     ->schema([

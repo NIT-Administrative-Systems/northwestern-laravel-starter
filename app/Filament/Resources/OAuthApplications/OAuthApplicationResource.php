@@ -7,11 +7,11 @@ namespace App\Filament\Resources\OAuthApplications;
 use App\Domains\Auth\Actions\Applications\RegenerateOAuthApplicationSecret;
 use App\Domains\Auth\Actions\Applications\RevokeOAuthApplication;
 use App\Domains\Auth\Actions\Applications\UpdateOAuthApplication;
-use App\Domains\Auth\Enums\ClientOrigin;
 use App\Domains\Auth\Enums\CredentialStatus;
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\Auth\Models\OAuthConnection;
+use App\Domains\User\Models\User;
 use App\Filament\Clusters\ApiCluster;
 use App\Filament\Resources\OAuthApplications\Pages\ListOAuthApplications;
 use App\Filament\Resources\OAuthApplications\Schemas\OAuthApplicationSchemas;
@@ -58,8 +58,7 @@ class OAuthApplicationResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return OAuthClient::query()
-            ->where('origin', ClientOrigin::Administrator)
-            ->where('grant_types', 'like', '%"authorization_code"%')
+            ->applications()
             ->withCount(['connections' => fn (Builder $query) => $query->whereIn('oauth_connections.id', OAuthConnection::query()->live()->select('id'))]);
     }
 
@@ -101,14 +100,17 @@ class OAuthApplicationResource extends Resource
                             (bool) $data['first_party'],
                             $data['description'] ?? null,
                             $data['contact_email'] ?? null,
+                            self::administrator(),
                         ))
                         ->successNotificationTitle('Application Updated')
                         ->visible(fn (OAuthClient $record): bool => $record->status === CredentialStatus::Active),
                     Action::make('regenerateSecret')
                         ->label('Regenerate Secret')
+                        ->hidden(fn (): bool => resolve('impersonate')->isImpersonating())
                         ->icon(Heroicon::OutlinedArrowPath)
                         ->closeModalByClickingAway(false)
                         ->closeModalByEscaping(false)
+                        ->mountUsing(OAuthApplicationSchemas::mountFresh())
                         ->steps([
                             Wizard\Step::make('Regenerate')
                                 ->description('The current secret stops working immediately. Update the application with the new one.')
@@ -117,7 +119,7 @@ class OAuthApplicationResource extends Resource
                                         return;
                                     }
 
-                                    OAuthApplicationSchemas::storeCredentials($record, $regenerate($record));
+                                    OAuthApplicationSchemas::storeCredentials($record, $regenerate($record, self::administrator()));
                                 }),
                             Wizard\Step::make('Copy Secret')->schema(OAuthApplicationSchemas::credentialsStep()),
                         ])
@@ -132,7 +134,7 @@ class OAuthApplicationResource extends Resource
                         ->modalHeading('Revoke Application')
                         ->modalDescription('The application loses access to everyone\'s account immediately, and every connection to it is removed. This can\'t be undone.')
                         ->modalSubmitActionLabel('Revoke Application')
-                        ->action(fn (OAuthClient $record, RevokeOAuthApplication $revoke) => $revoke($record))
+                        ->action(fn (OAuthClient $record, RevokeOAuthApplication $revoke) => $revoke($record, self::administrator()))
                         ->successNotificationTitle('Application Revoked')
                         ->visible(fn (OAuthClient $record): bool => $record->status === CredentialStatus::Active),
                 ])->label('Actions')->button(),
@@ -146,5 +148,11 @@ class OAuthApplicationResource extends Resource
         return [
             'index' => ListOAuthApplications::route('/'),
         ];
+    }
+
+    private static function administrator(): User
+    {
+        /** @var User */
+        return auth()->user();
     }
 }

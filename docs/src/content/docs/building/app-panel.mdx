@@ -32,7 +32,7 @@ php artisan make:filament-resource Project --generate --model-namespace=App\\Dom
 php artisan make:filament-page Reports
 ```
 
-Views for the panel's pages go in `resources/views/filament/app/`. The panel's Tailwind theme, `resources/css/filament/app/theme.css`, already compiles classes from that directory and from `app/Filament/App/`. A view anywhere else needs an `@source` line there, or its classes do nothing.
+Views for the panel's pages go in `resources/views/filament/app/`. The panel's Tailwind theme, `resources/css/filament/app/theme.css`, compiles classes from every file the repository tracks; only a package's views under `vendor/`, which git ignores, need an `@source` line, as Filament's have.
 
 ## The Dashboard
 

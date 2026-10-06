@@ -30,12 +30,14 @@ class CreateApiUserAction extends Action
         parent::setUp();
 
         $this->authorize(SystemPermission::ManageApiAccess)
+            ->hidden(fn (): bool => resolve('impersonate')->isImpersonating())
             ->visible((bool) config('api.enabled'))
             ->label('Add API User')
             ->icon(Heroicon::OutlinedKey)
             ->color('warning')
             ->closeModalByClickingAway(false)
             ->closeModalByEscaping(false)
+            ->mountUsing(ServiceClientSchemas::mountFresh(ServiceClientSchemas::SESSION_KEY_CREATE_API_USER))
             ->steps([
                 Wizard\Step::make('Details')
                     ->schema([

@@ -10,11 +10,9 @@
     @var string $authToken
 --}}
 @php
-    use App\Domains\Auth\Enums\ClientOrigin;
-
     $redirectUri = $request->string('redirect_uri')->toString() ?: $client->redirect_uris[0] ?? '';
     $redirectHost = parse_url($redirectUri, PHP_URL_HOST) ?: $redirectUri;
-    $unverified = $client->origin === ClientOrigin::Dynamic;
+    $unverified = $client->isMcpClient();
     // Passport narrows a token to the scopes its client may have only when it issues it, so the
     // screen lists only those, never more than the application can actually get.
     $scopes = array_values(array_filter($scopes, fn($scope) => $client->hasScope($scope->id)));

@@ -110,7 +110,7 @@ Add another panel when a distinct audience needs its own navigation, its own per
 
 6. **Give the panel a theme**
 
-    The Northwestern theme plugin is required. It is registered with `->withoutAssetRegistration()`, so the panel gets its styles from its own Vite theme instead. Create `resources/css/filament/portal/theme.css` with the App theme's imports, and point its `@source` lines at the new panel's directories and the Blade components it renders:
+    The Northwestern theme plugin is required. It is registered with `->withoutAssetRegistration()`, so the panel gets its styles from its own Vite theme instead. Create `resources/css/filament/portal/theme.css` with the App theme's imports. Tailwind finds classes in the repository's own files by itself, but skips `vendor/`, so keep the `@source` line for Filament's views. Lines for the panel's own directories are optional and make it plain what the theme serves:
 
     ```css
     /* resources/css/filament/portal/theme.css */

@@ -18,7 +18,6 @@ use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\HtmlString;
@@ -76,12 +75,6 @@ class Announcement extends BaseModel
         return $this->hasMany(AnnouncementDismissal::class);
     }
 
-    /** @return BelongsTo<User, $this> */
-    public function created_by_user(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'created_by_user_id');
-    }
-
     public function statusAt(CarbonInterface $at): AnnouncementStatus
     {
         return match (true) {
@@ -131,7 +124,8 @@ class Announcement extends BaseModel
             return $this->audience->getLabel();
         }
 
-        $roles = Role::query()->whereKey($this->role_ids ?? [])->orderBy('name')->pluck('name')->all();
+        $names = Role::namesById();
+        $roles = collect($this->role_ids ?? [])->map(fn (int|string $id): ?string => $names[(int) $id] ?? null)->filter()->sort()->values()->all();
         $affiliations = array_map(
             fn (string $affiliation): string => Affiliation::tryFrom($affiliation)?->getLabel() ?? $affiliation,
             $this->affiliations ?? [],

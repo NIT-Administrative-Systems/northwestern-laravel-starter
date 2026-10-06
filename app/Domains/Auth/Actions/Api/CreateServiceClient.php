@@ -9,6 +9,7 @@ use App\Domains\Auth\Enums\ClientOrigin;
 use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\User\Models\User;
 use Carbon\CarbonInterface;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 use Laravel\Passport\ClientRepository;
@@ -41,6 +42,11 @@ readonly class CreateServiceClient
     ): array {
         if ($apiUser->auth_type !== AuthType::API) {
             throw new InvalidArgumentException('Service clients can only belong to API users.');
+        }
+
+        // A secret outlives the session, so it is never issued while impersonating, as with personal access tokens. This covers rotation and new API users too.
+        if (resolve('impersonate')->isImpersonating()) {
+            throw new AuthorizationException('Service clients cannot be created or rotated while impersonating.');
         }
 
         if ($secretExpiresAt->isPast() || $secretExpiresAt->isAfter(now()->addYear()->addDay())) {

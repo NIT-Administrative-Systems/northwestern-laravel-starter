@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Clusters\ApiCluster\Pages;
 
-use App\Domains\Auth\Enums\ClientOrigin;
 use App\Domains\Auth\Models\ApiRequestLog;
 use App\Domains\Auth\Models\OAuthClient;
-use App\Domains\User\Models\User;
 use App\Filament\Clusters\ApiCluster;
 use BackedEnum;
 use Carbon\Carbon;
@@ -32,6 +30,14 @@ class Overview extends Page
     protected string $view = 'filament.clusters.api-cluster.pages.overview';
 
     protected ?string $subheading = 'API configuration and usage statistics';
+
+    /**
+     * Filament checks a cluster's rule only for its navigation; each clustered page needs its own.
+     */
+    public static function canAccess(): bool
+    {
+        return ApiCluster::canAccess();
+    }
 
     /** @return array<string, string> */
     public function getBreadcrumbs(): array
@@ -66,10 +72,7 @@ class Overview extends Page
     {
         $now = Carbon::now();
 
-        // Service clients only: OAuth applications and dynamically registered clients have no API user.
-        $serviceClients = fn () => OAuthClient::query()
-            ->where('origin', ClientOrigin::Administrator)
-            ->whereHasMorph('owner', [User::class]);
+        $serviceClients = fn () => OAuthClient::query()->serviceClients();
 
         $activeApiUsers = $serviceClients()->active($now)->distinct('owner_id')->count('owner_id');
 
@@ -132,8 +135,8 @@ class Overview extends Page
             'retention_days' => is_numeric($retention = config('platform.retention.api_request_logs')) ? (int) $retention : null,
             'sampling_enabled' => (bool) config('api.request_logging.sampling.enabled', false),
             'sampling_rate' => (float) config('api.request_logging.sampling.rate', 1.0),
-            'notifications_enabled' => (bool) config('api.expiration_notifications.enabled', true),
-            'notification_intervals' => config('api.expiration_notifications.intervals', []),
+            'notifications_enabled' => (bool) config('api.client_secret_expiration_notifications.enabled', true),
+            'notification_intervals' => config('api.client_secret_expiration_notifications.intervals', []),
         ];
     }
 

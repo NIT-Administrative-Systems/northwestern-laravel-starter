@@ -16,7 +16,7 @@ use Throwable;
 
 /**
  * Emails an API user's contact address about each service client whose secret is about to
- * expire, at the intervals in `api.expiration_notifications.intervals`. A client stops
+ * expire, at the intervals in `api.client_secret_expiration_notifications.intervals`. A client stops
  * working when its secret expires, so its owner needs time to rotate it.
  */
 class SendClientSecretExpirationNotificationsCommand extends Command
@@ -27,13 +27,13 @@ class SendClientSecretExpirationNotificationsCommand extends Command
 
     public function handle(): int
     {
-        if (! config('api.expiration_notifications.enabled')) {
+        if (! config('api.client_secret_expiration_notifications.enabled')) {
             $this->components->info('Client secret expiration notifications are disabled in the configuration');
 
             return self::SUCCESS;
         }
 
-        $intervals = config('api.expiration_notifications.intervals');
+        $intervals = config('api.client_secret_expiration_notifications.intervals');
 
         $this->components->info('Checking for client secrets expiring in: ' . implode(', ', $intervals) . ' days');
         $this->newLine();

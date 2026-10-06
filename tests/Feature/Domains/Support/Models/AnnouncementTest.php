@@ -12,6 +12,8 @@ use App\Domains\Support\Models\Announcement;
 use App\Domains\Support\Models\AnnouncementDismissal;
 use App\Domains\User\Enums\Affiliation;
 use App\Domains\User\Models\User;
+use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
@@ -117,6 +119,22 @@ final class AnnouncementTest extends TestCase
         $this->assertSame('Everyone Signed In', Announcement::factory()->make()->audienceSummary());
         $this->assertSame('Coordinators, Staff', Announcement::factory()->targeted([$role], [Affiliation::Staff])->make()->audienceSummary());
         $this->assertSame('Nobody', Announcement::factory()->targeted()->make()->audienceSummary());
+    }
+
+    // The announcements table summarizes every row, so role names are looked up once, not per row.
+    public function test_summaries_look_up_role_names_once(): void
+    {
+        $roles = Role::factory()->count(2)->create();
+        $announcements = Announcement::factory()->count(3)->targeted($roles->all())->create();
+
+        $roleQueries = 0;
+        DB::listen(function (QueryExecuted $query) use (&$roleQueries): void {
+            $roleQueries += str_contains($query->sql, '"roles"') ? 1 : 0;
+        });
+
+        $announcements->each(fn (Announcement $announcement) => $announcement->audienceSummary());
+
+        $this->assertSame(1, $roleQueries);
     }
 
     public function test_deleting_it_deletes_its_dismissals(): void

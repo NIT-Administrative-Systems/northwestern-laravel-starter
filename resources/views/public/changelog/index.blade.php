@@ -3,14 +3,31 @@
         <div class="flex flex-wrap items-center justify-between gap-4">
             <h1 class="font-nu-heading text-nu-purple-100 text-3xl font-bold">Changelog</h1>
 
-            <x-filament::button color="gray"
-                                outlined
-                                size="sm"
-                                icon="heroicon-m-rss"
-                                x-data="{}"
-                                x-on:click="window.navigator.clipboard.writeText({{ Js::from($feedUrl) }}).then(() => $tooltip('Feed URL copied', { timeout: 2000 })).catch(() => $tooltip('Unable to copy', { timeout: 2000 }))">
-                RSS Feed
-            </x-filament::button>
+            {{-- The tooltip shows the result; the status region announces it to screen readers. --}}
+            <div x-data="{
+                status: '',
+                copy() {
+                    navigator.clipboard.writeText({{ Js::from($feedUrl) }})
+                        .then(() => this.announce('Feed URL copied'))
+                        .catch(() => this.announce('Couldn\'t copy the feed URL'));
+                },
+                announce(message) {
+                    this.status = '';
+                    this.$nextTick(() => this.status = message);
+                    this.$tooltip(message, { timeout: 2000 });
+                },
+            }">
+                <x-filament::button color="gray"
+                                    outlined
+                                    size="sm"
+                                    icon="heroicon-m-rss"
+                                    x-on:click="copy()">
+                    RSS Feed
+                </x-filament::button>
+                <span class="sr-only"
+                      role="status"
+                      x-text="status"></span>
+            </div>
         </div>
 
         @forelse ($entries as $entry)
@@ -32,9 +49,7 @@
                     </h2>
 
                     <div class="fi-prose mt-4">
-                        <x-markdown :anchors="false" :options="['html_input' => 'escape']">
-                            {!! $entry->body !!}
-                        </x-markdown>
+                        {{ $entry->bodyHtml(topHeadingLevel: 3) }}
                     </div>
                 </div>
             </article>

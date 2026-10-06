@@ -8,8 +8,11 @@ use App\Domains\Auth\Mail\LoginCodeMail;
 use Carbon\CarbonImmutable;
 use Illuminate\Mail\Markdown;
 use Illuminate\Support\Facades\Crypt;
+use PHPUnit\Framework\Attributes\CoversNothing;
 use Tests\TestCase;
 
+// Tests the published mail templates' footer, which no class covers.
+#[CoversNothing]
 final class MailFooterTest extends TestCase
 {
     protected function setUp(): void

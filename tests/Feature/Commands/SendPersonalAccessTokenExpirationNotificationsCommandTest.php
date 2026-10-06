@@ -26,8 +26,8 @@ final class SendPersonalAccessTokenExpirationNotificationsCommandTest extends Te
         Mail::fake();
 
         config([
-            'api.expiration_notifications.enabled' => true,
-            'api.expiration_notifications.intervals' => [7],
+            'api.personal_access_tokens.expiration_notifications.enabled' => true,
+            'api.personal_access_tokens.expiration_notifications.intervals' => [7],
             'app.timezone' => 'UTC',
             'mail.from.address' => 'system@example.com',
         ]);
@@ -82,12 +82,23 @@ final class SendPersonalAccessTokenExpirationNotificationsCommandTest extends Te
 
     public function test_it_does_nothing_when_disabled(): void
     {
-        config(['api.expiration_notifications.enabled' => false]);
+        config(['api.personal_access_tokens.expiration_notifications.enabled' => false]);
         $this->expiringToken(User::factory()->create());
 
         $this->artisan(SendPersonalAccessTokenExpirationNotificationsCommand::class)->assertSuccessful();
 
         Mail::assertNothingQueued();
+    }
+
+    // Turning off reminders to integration owners must not stop the ones people opted into.
+    public function test_it_runs_when_client_secret_reminders_are_off(): void
+    {
+        config(['api.client_secret_expiration_notifications.enabled' => false]);
+        $this->expiringToken(User::factory()->create());
+
+        $this->artisan(SendPersonalAccessTokenExpirationNotificationsCommand::class)
+            ->expectsOutputToContain('Sent 1 notification(s)')
+            ->assertSuccessful();
     }
 
     private function expiringToken(User $user): \App\Domains\Auth\Models\OAuthToken

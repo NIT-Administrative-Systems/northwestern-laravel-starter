@@ -319,10 +319,8 @@ class RoleActivityTable
                     . '</span>';
             }
 
-            $pill = resolve(BadgePillRenderer::class)->render($role['name'], $roleType?->getColor() ?? 'gray');
-            $url = route('filament.administration.resources.roles.view', ['record' => $role['id']]);
-
-            return '<a href="' . e($url) . '">' . $pill . '</a>';
+            // No link of its own: the whole row already links to the audit, and a link can't sit inside another.
+            return resolve(BadgePillRenderer::class)->render($role['name'], $roleType?->getColor() ?? 'gray');
         }, $visible);
 
         if ($remaining > 0) {

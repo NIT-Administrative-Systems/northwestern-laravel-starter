@@ -77,4 +77,14 @@ class Role extends SpatieRole implements Auditable
     {
         return $query->where('assignment_locked', false);
     }
+
+    /**
+     * Every role's name by ID, looked up once per request, for lists that name each row's roles.
+     *
+     * @return array<int, string>
+     */
+    public static function namesById(): array
+    {
+        return once(fn (): array => self::query()->pluck('name', 'id')->all());
+    }
 }
