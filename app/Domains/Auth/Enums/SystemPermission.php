@@ -19,6 +19,8 @@ enum SystemPermission: string implements HasLabel
      *
      * A {@see Gate::before()} callback in {@see AppServiceProvider} returns `true` for
      * any user holding this permission, short-circuiting every Gate and Policy check.
+     * Not on API requests: there a Passport token is limited to its scopes, and the
+     * scope, the person's permissions and the policy decide.
      *
      * You never need to check for ManageAll inside a Policy. The `Gate::before` hook
      * fires first and grants access automatically. Adding an explicit check would be
@@ -134,8 +136,10 @@ enum SystemPermission: string implements HasLabel
     }
 
     /**
-     * An API-relevant permission is one that makes sense for API integrations to have.
-     * These are typically data access permissions rather than UI-specific permissions.
+     * Whether the permission is also an OAuth scope of the same name (`view-users`). People
+     * who hold it can grant it to their personal access tokens and to applications they
+     * connect, service clients hold every such scope, and a route requires it with
+     * {@see \App\Domains\Auth\Http\Middleware\RequireApiScope}. Data access, not interface.
      */
     public function isApiRelevant(): bool
     {

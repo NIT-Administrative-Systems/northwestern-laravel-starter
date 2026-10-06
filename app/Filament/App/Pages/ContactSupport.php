@@ -149,8 +149,8 @@ class ContactSupport extends Page
     }
 
     /**
-     * Apply the `support:contact` rate limits, which were route middleware for the
-     * previous controller-based form. Livewire actions don't pass through route middleware.
+     * Apply the `support:contact` limiter from RateLimitingServiceProvider by hand: Livewire
+     * actions don't pass through route middleware.
      */
     private function tooManyRequests(): bool
     {
