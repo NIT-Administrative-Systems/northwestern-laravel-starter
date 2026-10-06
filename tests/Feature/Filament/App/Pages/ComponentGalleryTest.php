@@ -72,7 +72,7 @@ final class ComponentGalleryTest extends TestCase
             ->fillForm(['name' => 'Willie the Wildcat'])
             ->call('submitExample')
             ->assertHasNoErrors()
-            ->assertNotified('Form submitted');
+            ->assertNotified('Form Submitted');
     }
 
     public function test_the_notification_example_sends_a_database_notification(): void
@@ -85,6 +85,6 @@ final class ComponentGalleryTest extends TestCase
             ->assertDispatched('databaseNotificationsSent');
 
         $this->assertSame(1, $user->notifications()->count());
-        $this->assertSame('A sample notification', $user->notifications()->first()?->data['title']);
+        $this->assertSame('A Sample Notification', $user->notifications()->first()?->data['title']);
     }
 }

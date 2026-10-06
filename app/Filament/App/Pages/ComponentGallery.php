@@ -46,7 +46,7 @@ class ComponentGallery extends Page implements HasTable
 {
     use InteractsWithTable;
 
-    protected static ?string $title = 'Component gallery';
+    protected static ?string $title = 'Component Gallery';
 
     protected static ?string $slug = 'gallery';
 
@@ -72,13 +72,13 @@ class ComponentGallery extends Page implements HasTable
         return $schema
             ->components([
                 Grid::make(2)->schema([
-                    TextInput::make('name')->label('Text input')->placeholder('Willie the Wildcat')->required(),
+                    TextInput::make('name')->label('Text Input')->placeholder('Willie the Wildcat')->required(),
                     Select::make('school')->label('Select')->options([
                         'mccormick' => 'McCormick School of Engineering',
                         'medill' => 'Medill School of Journalism',
                         'weinberg' => 'Weinberg College of Arts and Sciences',
                     ]),
-                    DatePicker::make('date')->label('Date picker'),
+                    DatePicker::make('date')->label('Date Picker'),
                     Radio::make('term')->label('Radio')->options(['fall' => 'Fall', 'winter' => 'Winter', 'spring' => 'Spring'])->inline(),
                     Toggle::make('notifications')->label('Toggle'),
                     Checkbox::make('agree')->label('Checkbox'),
@@ -118,7 +118,7 @@ class ComponentGallery extends Page implements HasTable
                 Callout::make()
                     ->description(new HtmlString(
                         '<strong>Starter placeholder.</strong> Sample content showing Filament\'s components in the Northwestern theme. '
-                        . 'It is not available in production. Delete <code>app/Filament/App/Pages/ComponentGallery.php</code> when you no longer need it.'
+                        . 'It isn\'t available in production. Delete <code>app/Filament/App/Pages/ComponentGallery.php</code> when you no longer need it.'
                     ))
                     ->icon(Heroicon::OutlinedSwatch)
                     ->warning(),
@@ -129,7 +129,7 @@ class ComponentGallery extends Page implements HasTable
                             Action::make('primary')->label('Primary'),
                             Action::make('gray')->label('Gray')->color('gray'),
                             Action::make('outlined')->label('Outlined')->outlined(),
-                            Action::make('withIcon')->label('With icon')->icon(Heroicon::OutlinedSparkles),
+                            Action::make('withIcon')->label('With Icon')->icon(Heroicon::OutlinedSparkles),
                             Action::make('danger')->label('Danger')->color('danger'),
                             Action::make('link')->label('Link')->link(),
                             Action::make('small')->label('Small')->size('sm'),
@@ -153,7 +153,7 @@ class ComponentGallery extends Page implements HasTable
                 // heading out and lead the description with bold text instead.
                 Section::make('Callouts')
                     ->schema([
-                        Section::make('With a heading')
+                        Section::make('With a Heading')
                             ->contained(false)
                             ->schema([
                                 Callout::make('Information')->description('Something people should know.')->info(),
@@ -161,7 +161,7 @@ class ComponentGallery extends Page implements HasTable
                                 Callout::make('Warning')->description('Something needs attention.')->warning(),
                                 Callout::make('Danger')->description('Something went wrong.')->danger(),
                             ]),
-                        Section::make('Without a heading')
+                        Section::make('Without a Heading')
                             ->contained(false)
                             ->schema([
                                 Callout::make()
@@ -170,7 +170,7 @@ class ComponentGallery extends Page implements HasTable
                             ]),
                     ]),
 
-                Section::make('Form fields')
+                Section::make('Form Fields')
                     ->schema([
                         Form::make([EmbeddedSchema::make('form')])
                             ->livewireSubmitHandler('submitExample')
@@ -184,32 +184,32 @@ class ComponentGallery extends Page implements HasTable
                 Section::make('Table')
                     ->schema([EmbeddedTable::make()]),
 
-                Section::make('Notifications and modals')
+                Section::make('Notifications and Modals')
                     ->schema([
                         Actions::make([
                             Action::make('notifySuccess')
-                                ->label('Success notification')
+                                ->label('Success Notification')
                                 ->color('gray')
                                 ->action(fn () => Notification::make()->title('Saved')->body('A sample success notification.')->success()->send()),
                             Action::make('notifyDanger')
-                                ->label('Danger notification')
+                                ->label('Danger Notification')
                                 ->color('gray')
-                                ->action(fn () => Notification::make()->title('Something went wrong')->body('A sample danger notification.')->danger()->send()),
+                                ->action(fn () => Notification::make()->title('Something Went Wrong')->body('A sample danger notification.')->danger()->send()),
                             Action::make('notifyDatabase')
-                                ->label('Send me a notification')
+                                ->label('Send Me a Notification')
                                 ->color('gray')
                                 ->action(fn () => $this->sendSampleNotification()),
                             Action::make('confirm')
-                                ->label('Confirmation modal')
+                                ->label('Confirmation Modal')
                                 ->color('gray')
                                 ->requiresConfirmation()
                                 ->modalDescription('A sample confirmation. Nothing happens when you confirm.')
                                 ->action(fn () => null),
                             Action::make('slideOver')
-                                ->label('Slide-over')
+                                ->label('Slide-Over')
                                 ->color('gray')
                                 ->slideOver()
-                                ->modalHeading('A sample slide-over')
+                                ->modalHeading('A Sample Slide-Over')
                                 ->modalDescription('Slide-overs suit longer forms and details.')
                                 ->modalSubmitAction(false),
                         ]),
@@ -220,20 +220,20 @@ class ComponentGallery extends Page implements HasTable
     public function sendSampleNotification(): void
     {
         Notification::make()
-            ->title('A sample notification')
+            ->title('A Sample Notification')
             ->body('Database notifications land in the bell in the top bar.')
             ->sendToDatabase(auth()->user());
 
         // Refresh the bell now rather than at its next 30-second poll.
         $this->dispatch('databaseNotificationsSent');
 
-        Notification::make()->title('Sent. Check the bell in the top bar.')->success()->send();
+        Notification::make()->title('Notification Sent')->body('Check the bell in the top bar.')->success()->send();
     }
 
     public function submitExample(): void
     {
         $this->form->getState();
 
-        Notification::make()->title('Form submitted')->body('The sample form validated. Nothing was saved.')->success()->send();
+        Notification::make()->title('Form Submitted')->body('The sample form validated. Nothing was saved.')->success()->send();
     }
 }
