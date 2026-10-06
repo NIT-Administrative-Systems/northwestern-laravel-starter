@@ -4,8 +4,6 @@ env:
   NODE_VERSION: '26'
   PNPM_VERSION: '12.x.x'
   PHP_VERSION: '8.5'
-  S3_USERNAME: 's3admin'
-  S3_PASSWORD: 's3secret'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -263,33 +261,13 @@ jobs:
         run: |
           composer openapi:generate:v1
 
-      - name: ❌ Remove Debug Code from Tests
+      # Pest's --ci flag runs every test even when one is marked ->only(). A ->debug() in a browser
+      # test opens a visible browser and waits for a key press, which a runner can't do.
+      - name: ❌ Check Browser Tests for Debug Calls
         run: |
-          # Remove it.only() from Cypress tests
-          files=$(grep -lR 'it.only' cypress/e2e/*.cy.ts || true)
-          if [ -n "$files" ]; then
-            echo "Found 'it.only()' in the following files: $files"
-            for file in $files; do
-              sed -i -e 's/it.only/it/g' "$file"
-            done
-          fi
-
-          # Remove describe.only() from Cypress tests
-          files=$(grep -lR 'describe.only' cypress/e2e/*.cy.ts || true)
-          if [ -n "$files" ]; then
-            echo "Found 'describe.only()' in the following files: $files"
-            for file in $files; do
-              sed -i -e 's/describe.only/describe/g' "$file"
-            done
-          fi
-
-          # Remove test.only() from PHP tests
-          files=$(grep -lR 'test\.only' tests/ || true)
-          if [ -n "$files" ]; then
-            echo "Found 'test.only()' in the following files: $files"
-            for file in $files; do
-              sed -i -e 's/test\.only(/test(/g' "$file"
-            done
+          if grep -rnE -- '->(debug|tinker)\(' tests/Browser; then
+            echo "::error::Remove ->debug() and ->tinker() from browser tests before merging."
+            exit 1
           fi
 
       - name: 🔄 Restore IDE Helper Annotations
@@ -380,7 +358,7 @@ jobs:
       # If you need to debug tests or follow the execution order more clearly, replace `--teamcity` with `--verbose`
       - name: 🧪 PHPUnit
         run: >
-          ./vendor/bin/pest --parallel
+          ./vendor/bin/pest --parallel --ci
           --shard ${{ matrix.shard }}/3
           --cache-result
           --cache-directory=.phpunit.cache
@@ -505,32 +483,18 @@ jobs:
           file: .build/clover.xml
           fail-on-error: false
 
-  end-to-end-tests:
-    name: 🌲 Cypress Tests
+  browser-tests:
+    name: 🌐 Browser Tests
     needs: [determine-scope]
     if: needs.determine-scope.outputs.code == 'true'
     runs-on: ubuntu-latest
     environment: ci-cd
-    timeout-minutes: 30
+    timeout-minutes: 20
     permissions:
         contents: read
-        pull-requests: write
         checks: write
-    # strategy:
-    #  fail-fast: false
-    #  matrix:
-    #    Run copies of the current job in parallel
-    #    containers: [1, 2, 3, 4]
+        pull-requests: write
     services:
-      s3:
-        image: rustfs/rustfs:1.0.0@sha256:8cc9801755448b71a786705ce76692c77e14936cccd87cf2fc31842e58f4d1ff
-        ports:
-          - 9000:9000
-        env:
-          RUSTFS_ACCESS_KEY: ${{ env.S3_USERNAME }}
-          RUSTFS_SECRET_KEY: ${{ env.S3_PASSWORD }}
-          RUSTFS_CONSOLE_ENABLE: 'false'
-        options: --health-cmd "curl -fsS http://localhost:9000/health/ready" --health-interval 3s --health-timeout 3s --health-retries 20
       postgres:
         image: postgres:16
         env:
@@ -553,52 +517,39 @@ jobs:
           php-version: ${{ env.PHP_VERSION }}
           node-version: ${{ env.NODE_VERSION }}
           pnpm-version: ${{ env.PNPM_VERSION }}
-          install-cypress: true
+          install-playwright: true
           run-ide-helper: false
 
-      - name: 🪣 Create S3 Bucket and Configure Uploads
-        run: |
-          aws --endpoint-url http://localhost:9000 s3api create-bucket --bucket northwestern-laravel-starter
-          # Livewire uploads directly from the browser to S3 using a signed PUT.
-          aws --endpoint-url http://localhost:9000 s3api put-bucket-cors \
-            --bucket northwestern-laravel-starter \
-            --cors-configuration '{"CORSRules":[{"AllowedOrigins":["http://localhost:8000"],"AllowedMethods":["GET","PUT","HEAD"],"AllowedHeaders":["*"],"ExposeHeaders":["ETag"]}]}'
-        env:
-          AWS_ACCESS_KEY_ID: ${{ env.S3_USERNAME }}
-          AWS_SECRET_ACCESS_KEY: ${{ env.S3_PASSWORD }}
-          AWS_DEFAULT_REGION: us-east-1
+      - name: 🎯 Configure PHPUnit Matcher
+        uses: mheap/phpunit-matcher-action@dcbd4ead41890163b65d0b21534387ce72980ee5 # v1.4.0
 
-      - name: 🌲 Cypress
-        uses: cypress-io/github-action@789d836053c5ca389c2905fc0c9f2909da778c46 # v7.4.5
+      # The application runs inside the test process, so there's no server to start. A failed
+      # assertion saves a screenshot to tests/Browser/Screenshots.
+      - name: 🌐 Run Browser Tests
+        run: >
+          ./vendor/bin/pest
+          --testsuite=Browser
+          --parallel
+          --ci
+          --log-junit .build/junit-browser.xml
+          --teamcity
+
+      - name: 📸 Upload Failure Screenshots
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          config: baseUrl=http://localhost:8000
-          start: php artisan serve --port=8000 --no-reload
-          wait-on: http://localhost:8000
-          wait-on-timeout: 180
-          browser: chrome
-          # group: "Integration Tests - Chrome"
-          # record: true
-          # parallel: true
-        env:
-          # CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          AWS_ACCESS_KEY_ID: ${{ env.S3_USERNAME }}
-          AWS_SECRET_ACCESS_KEY: ${{ env.S3_PASSWORD }}
-          PHP_CLI_SERVER_WORKERS: 4
+          name: Browser Test Screenshots PR${{ github.event.pull_request.number }} Run${{ github.run_id }}
+          path: tests/Browser/Screenshots
+          retention-days: 7
 
       - name: 📜 Display Laravel Logs
         if: always()
-        run: cat -n storage/logs/laravel.log | fold -w 120  || true
+        run: cat -n storage/logs/laravel.log | fold -w 120 || true
 
-      # This step can be removed if your project records results directly to Cypress Cloud
-      - name: 📜 Publish Test Summary Results
-        uses: ctrf-io/github-test-reporter@7974087018bf4857cf5a9d78723e152038c3fa31 # v1.3.0
+      - name: 📊 Publish Browser Test Results
+        if: always() && github.actor != 'dependabot[bot]'
+        uses: EnricoMi/publish-unit-test-result-action@d0a4676d0e0b938bc201470d88276b7c74c712b3 # v2.24.0
         with:
-          report-path: .build/ctrf-report.json
-          pull-request: true
-          github-report: true
-          overwrite-comment: true
-          upload-artifact: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        if: always()
+          check_name: "🌐 Browser Test Results"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          files: .build/junit-browser.xml
