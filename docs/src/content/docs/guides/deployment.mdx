@@ -43,7 +43,15 @@ Vapor runs the scheduler and queue workers for you. On any other target, you run
 - `php artisan schedule:run` every minute, from cron or an equivalent
 - A long-running `php artisan queue:work` process, kept alive by a process supervisor
 
-The scheduler (`routes/console.php`) runs retention pruning (`model:prune`), Telescope and temporary S3 file cleanup, the health checks, and the health check heartbeat. Without it, expired records are never deleted and the health check reports that the schedule has not run.
+The scheduler (`routes/console.php`) runs retention pruning (`model:prune`), Telescope and temporary S3 file cleanup, the health checks and their heartbeat, OAuth token purging and MCP client cleanup, revoking credentials people can no longer hold, the client secret and personal access token reminders, and announcement notifications. Without it, expired records are never deleted, reminders and scheduled announcement notifications never go out, and the health check reports that the schedule has not run. The full list is in [Scheduled Tasks](/reference/commands/#scheduled-tasks).
+
+### OAuth Signing Keys
+
+Passport signs access tokens with an RSA key pair, which every deployed environment needs before the API, personal access tokens, applications or MCP can issue a token. Give each environment its own pair:
+
+1. Generate one with `php artisan passport:keys --force` on your machine. It writes `storage/oauth-private.key` and `storage/oauth-public.key`, which git ignores.
+2. Put the files' contents in `PASSPORT_PRIVATE_KEY` and `PASSPORT_PUBLIC_KEY` in that environment's encrypted `.env.<environment>` or secrets. In a `.env` file, wrap each key in double quotes and keep its line breaks.
+3. Every instance of the environment uses the same pair. Replacing it invalidates every outstanding access token; see [API Operations](/features/api-operations/#signing-keys).
 
 ## Laravel Vapor
 

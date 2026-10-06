@@ -28,8 +28,11 @@ php artisan db:rebuild
 1. Clears application cache, queue, and schedule cache
 2. Runs `migrate:fresh` (drops all tables and re-runs migrations)
 3. Executes all seeders via `db:seed`
-4. Seeds demo data via `DemoSeeder`
-5. Regenerates IDE model helper annotations with `ide-helper:models -N`
+4. Generates the OAuth signing keys with `passport:keys` if `storage/oauth-private.key` doesn't exist
+5. Seeds demo data via `DemoSeeder`
+6. Regenerates IDE model helper annotations with `ide-helper:models -N`
+
+Afterwards it warns if jobs are waiting in the queue, and, locally with the API on, prints the demo API user's service client ID and secret to try the API with.
 
 <Aside type="caution" title="Destructive Operation">
     This command will **completely wipe your database**. Only use in local and
@@ -175,7 +178,7 @@ php artisan db:snapshot:restore my-snapshot-name
 
 ### `db:snapshot:list`
 
-List all available database snapshots.
+List all available database snapshots, then offer to restore one. Restoring from here skips the schema check that `db:snapshot:restore` runs.
 
 ```bash
 php artisan db:snapshot:list
@@ -422,6 +425,99 @@ php artisan oauth-clients:notify-secret-expiration
 
 ---
 
+### `personal-access-tokens:notify-expiration`
+
+Email people about their personal access tokens that are about to expire.
+
+```bash
+php artisan personal-access-tokens:notify-expiration
+```
+
+It emails the owner of each active token expiring in 30, 14, 7, 3 or 1 days (`api.personal_access_tokens.expiration_notifications.intervals`), unless they turned the reminders off on their Preferences page, and at most once a day per token. It does nothing while `API_PERSONAL_ACCESS_TOKEN_EXPIRATION_NOTIFICATIONS_ENABLED` is false.
+
+**See also:** [Personal Access Tokens](/features/api/#personal-access-tokens)
+
+---
+
+### `oauth:revoke-ineligible`
+
+Revoke credentials their holders may no longer have.
+
+```bash
+php artisan oauth:revoke-ineligible
+```
+
+It revokes everything belonging to deactivated or deleted accounts, the personal access tokens of people who lost `CreatePersonalAccessTokens`, and the MCP clients connected by people who lost `UseMcp`. The API already refuses these on every request; this makes the records say so, so the Account and Administration pages show them as revoked.
+
+---
+
+### `mcp:prune-clients`
+
+Clean up the clients MCP clients register for themselves.
+
+```bash
+php artisan mcp:prune-clients
+```
+
+It deletes a self-registered client nobody connected within `mcp.cleanup.unconnected_hours` (24) of registering, and revokes one nobody has used for `mcp.cleanup.unused_days` (90). Administrator-registered applications and service clients are never touched.
+
+**See also:** [MCP](/features/mcp/#managing-clients)
+
+---
+
+### `announcements:notify`
+
+Notify the audiences of announcements that have started, when their authors asked for it.
+
+```bash
+php artisan announcements:notify
+```
+
+Publishing notifies at once for an announcement that starts straight away; this catches the ones scheduled to start later. Outside production it's scheduled only at noon on weekdays, so run it by hand to send one sooner.
+
+**See also:** [Announcements](/features/announcements/#notifying-people)
+
+---
+
+## Passport Commands
+
+The starter schedules or calls these Laravel Passport commands.
+
+### `passport:keys`
+
+Generate the RSA key pair Passport signs access tokens with.
+
+```bash
+php artisan passport:keys
+```
+
+It writes `storage/oauth-private.key` and `storage/oauth-public.key`. `db:rebuild` runs it locally; deployed environments put the contents in `PASSPORT_PRIVATE_KEY` and `PASSPORT_PUBLIC_KEY` instead. Replacing the keys invalidates every outstanding access token.
+
+<PropertyTable title="Options">
+    <Property name="--force" type="flag">
+        Overwrite keys that already exist
+    </Property>
+    <Property name="--length" type="option">
+        Length of the private key (4096)
+    </Property>
+</PropertyTable>
+
+**See also:** [API Operations](/features/api-operations/#signing-keys)
+
+---
+
+### `passport:purge`
+
+Delete OAuth tokens and authorization codes that are no longer needed.
+
+```bash
+php artisan passport:purge --expired --hours=744
+```
+
+The starter runs it daily with `--expired --hours=744`, so tokens and codes go once they expired more than 31 days ago, revoked or not. Without `--expired`, Passport also deletes everything revoked at once. Don't run it that way: the starter finds a refresh token through its access token when access is revoked, so an access token has to outlive its refresh token's 30-day lifetime.
+
+---
+
 ## Health Check Commands
 
 ### `health:check`
@@ -444,7 +540,7 @@ Validates connectivity and configuration for:
 - **Optimized App** - Ensures app is optimized (non-local)
 - **Security Advisories** - Checks for known package vulnerabilities
 - **Redis** - Redis connectivity (when Redis driver is in use)
-- **Directory Search** - API connectivity and test query
+- **Directory Search** - API connectivity and test query (skipped locally when `DIRECTORY_SEARCH_API_KEY` is blank)
 
 **When to use:**
 
@@ -477,7 +573,7 @@ php artisan starter:check
 
 1. Reads the current version from `.starter-version.yaml`
 2. Queries the GitHub Releases API for newer versions
-3. Displays release notes and a compare URL for any available updates
+3. Lists each newer release with its tag, date and link, then a compare URL and the changelog's URL
 
 <PropertyTable title="Options">
     <Property name="--version-file" type="option">
@@ -528,7 +624,9 @@ If a file with the same slug already exists, a numeric suffix is appended automa
 
 ### `netid:update:test {netId} {action}`
 
-Simulate a message from the EventHub **NetID Updates** topic to test the NetID update webhook without Northwestern's systems.
+Simulate a message from the EventHub **NetID Updates** topic to test the NetID update webhook.
+
+By default it posts the message straight to the webhook, so the `netid-update` route in `routes/api.php`, which ships commented out, must be enabled first. With `--via-queue` it sends the message through the real EventHub API instead, so it needs EventHub's credentials.
 
 ```bash
 php artisan netid:update:test jdoe deactivate
@@ -602,7 +700,7 @@ php artisan ide-helper:meta
 
 ## Scheduled Tasks
 
-`routes/console.php` schedules these commands. The scheduler must be running (`php artisan schedule:work` locally) for any of them to run.
+`routes/console.php` schedules these commands. Times are Chicago time (`schedule_timezone` in `config/app.php`). The scheduler must be running for any of them to run: deployments run `php artisan schedule:run` every minute, and locally `composer dev` doesn't start it, so run `php artisan schedule:work`, or run a command by hand.
 
 | Command                                            | Frequency                                                    | Purpose                                                                                                                                                                                   |
 | -------------------------------------------------- | ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -615,7 +713,7 @@ php artisan ide-helper:meta
 | `announcements:notify`                             | Every five minutes in production, weekdays at noon elsewhere | Notifies the audiences of [announcements](/features/announcements/) that have started, when their authors asked; publishing notifies at once for one that starts straight away            |
 | `oauth:revoke-ineligible`                          | Hourly in production, weekdays at noon elsewhere             | Revokes the credentials of deleted and deactivated accounts, personal access tokens whose owners lost `CreatePersonalAccessTokens`, and MCP clients connected by people who lost `UseMcp` |
 | `mcp:prune-clients`                                | Daily                                                        | Deletes self-registered [MCP clients](/features/mcp/) nobody connected within a day, and revokes those nobody has used for 90 days                                                        |
-| `passport:purge --hours=744`                       | Daily                                                        | Deletes revoked and expired OAuth tokens and codes once they are more than 31 days past, longer than the 30-day refresh token lifetime                                                    |
+| `passport:purge --expired --hours=744`             | Daily                                                        | Deletes OAuth tokens and codes, revoked or not, once they expired more than 31 days ago: longer than the 30-day refresh token lifetime                                                    |
 | `health:schedule-check-heartbeat`                  | Every minute                                                 | Records the heartbeat the Schedule health check reads, in every environment                                                                                                               |
 | `health:queue-check-heartbeat`                     | Every five minutes, production only                          | Dispatches the job the Queue health check waits for                                                                                                                                       |
 | `health:check`                                     | Every minute, production only                                | Runs and stores the health checks                                                                                                                                                         |

@@ -178,19 +178,7 @@ The first time an application connects, the person is told in the notification b
 
 ## Signing Keys
 
-Passport signs access tokens with an RSA key pair.
-
-- **Deployed environments** set the keys in `PASSPORT_PRIVATE_KEY` and `PASSPORT_PUBLIC_KEY`. Generate a pair with `php artisan passport:keys`, store the contents of `storage/oauth-private.key` and `storage/oauth-public.key` in the environment's secrets, and keep the files out of the repository.
-- **Locally**, `php artisan db:rebuild` generates key files in `storage/` when they don't exist.
-
-<Aside type="caution" title="Rotating the signing keys revokes every token">
-    Every access token is signed with the private key. Replacing the key pair
-    makes every outstanding access token invalid at once. Integrations recover
-    by requesting new access tokens with their existing client credentials, and
-    applications and AI clients by refreshing or reconnecting. Personal access
-    tokens can't be reissued: they stop working for good, still listed as
-    active, and their owners have to create new ones.
-</Aside>
+Passport signs access tokens with an RSA key pair: `PASSPORT_PRIVATE_KEY` and `PASSPORT_PUBLIC_KEY` in deployed environments, key files in `storage/` locally. Setting them up, what rotating them or `APP_KEY` invalidates, the cleanup tasks and the refusals that protect credentials are in [API Operations](/features/api-operations/).
 
 ## Local Development
 
