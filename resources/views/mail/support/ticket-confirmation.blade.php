@@ -13,7 +13,7 @@ Thanks for contacting us. Your request is with our team, and someone will follow
 
 **What you sent**
 
-{!! $details !!}
+<div>{{ $details }}</div>
 
 ---
 

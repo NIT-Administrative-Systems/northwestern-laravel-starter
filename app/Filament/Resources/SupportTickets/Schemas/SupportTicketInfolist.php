@@ -13,6 +13,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontFamily;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\HtmlString;
 
 class SupportTicketInfolist
 {
@@ -39,6 +40,7 @@ class SupportTicketInfolist
                                             ->weight(FontWeight::SemiBold)
                                             ->columnSpanFull(),
                                         TextEntry::make('details')
+                                            ->formatStateUsing(fn (SupportTicket $record): HtmlString => $record->detailsHtml())
                                             ->html()
                                             ->columnSpanFull(),
                                     ]),

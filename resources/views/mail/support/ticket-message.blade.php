@@ -8,7 +8,7 @@
 <x-mail::panel>
 **{{ $subject }}**
 
-{!! $details !!}
+<div>{{ $details }}</div>
 </x-mail::panel>
 
 <x-mail::table>

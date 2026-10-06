@@ -39,7 +39,7 @@ class SupportTicketConfirmation extends Mailable implements ShouldQueue
             ->with([
                 'submitter' => $this->ticket->user->first_name ?: $this->ticket->user->full_name,
                 'subject' => $this->ticket->subject,
-                'details' => $this->ticket->details,
+                'details' => $this->ticket->detailsHtml(),
                 'referenceNumber' => $this->referenceNumber,
                 'submittedAt' => NorthwesternDateTime::format($this->ticket->created_at ?? now(), $this->ticket->user->timezone),
             ]);
