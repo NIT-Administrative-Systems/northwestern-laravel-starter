@@ -80,7 +80,7 @@ An administrator [impersonating](/features/authentication/#impersonating-users) 
 
 ### Adding a Preference
 
-Everything else a user chooses goes in the `users.preferences` JSON column, read through a typed class, `App\Domains\User\Data\UserPreferences`. It ships with two, `emailBeforeAccessTokensExpire` and `emailWhenApplicationConnects`. Each preference is a promoted constructor property with a default, so adding one needs no migration:
+Everything else a user chooses goes in the `users.preferences` JSON column, read through a typed class, `App\Domains\User\Data\UserPreferences`. It ships with three: `emailBeforeAccessTokensExpire`, `emailWhenApplicationConnects` and `emailAnnouncements`. Each preference is a promoted constructor property with a default, so adding one needs no migration:
 
 <Steps>
 
@@ -102,7 +102,8 @@ Everything else a user chooses goes in the `users.preferences` JSON column, read
 
     ```php
     Toggle::make('emailWeeklySummary')
-        ->label('Email Me a Weekly Summary'),
+        ->label('Weekly summary')
+        ->helperText('A digest of the week\'s activity, every Monday.'),
     ```
 
     The page fills the form from `$user->preferences` and saves every field except `timezone` back into it.

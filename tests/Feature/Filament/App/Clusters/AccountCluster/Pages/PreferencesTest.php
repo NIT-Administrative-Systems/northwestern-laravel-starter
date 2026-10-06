@@ -53,7 +53,7 @@ final class PreferencesTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        Livewire::test(Preferences::class)->assertDontSee('Email Me Before My Personal Access Tokens Expire');
+        Livewire::test(Preferences::class)->assertDontSee('Expiring personal access tokens');
 
         $user->givePermissionTo(SystemPermission::CreatePersonalAccessTokens);
 

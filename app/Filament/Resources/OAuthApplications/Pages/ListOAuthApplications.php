@@ -39,7 +39,7 @@ class ListOAuthApplications extends ListRecords
                         ->schema([
                             ...OAuthApplicationSchemas::detailsFields(),
                             Toggle::make('confidential')
-                                ->label('Confidential Application')
+                                ->label('Confidential application')
                                 ->helperText('On for applications with a server that can keep a secret. Off for desktop, mobile and browser applications, which use PKCE instead.')
                                 ->default(true),
                         ])

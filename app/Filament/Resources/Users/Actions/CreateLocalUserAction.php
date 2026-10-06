@@ -82,10 +82,10 @@ class CreateLocalUserAction extends Action
                     ->icon(Heroicon::OutlinedLockOpen)
                     ->schema([
                         Checkbox::make('send_login_link')
-                            ->label('Send Verification Code')
+                            ->label('Send a verification code now')
                             ->default(false)
                             ->helperText(
-                                'Select this when the user is ready to access the application immediately. If left unchecked, they can request a verification code on their own at any time.'
+                                'Leave this off if they aren\'t ready to sign in yet. They can request a code themselves at any time.'
                             ),
                     ]),
             ])

@@ -62,7 +62,7 @@ class OAuthApplicationSchemas
                 ->helperText('The most the application may ask for. People approve what it requests, and their own permissions still apply.')
                 ->options(OAuthServiceProvider::scopes()),
             Toggle::make('first_party')
-                ->label('First-Party Application')
+                ->label('First-party application')
                 ->helperText('Skip the consent screen. Only for applications your organization runs and trusts.'),
         ];
     }

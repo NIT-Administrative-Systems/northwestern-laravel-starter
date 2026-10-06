@@ -47,7 +47,7 @@ An announcement for **Everyone, Including Signed-Out Visitors** also shows under
 
 ## Notifying People
 
-Publishing doesn't notify anyone unless you tick **Also Notify the Audience**. Then, once, when the announcement starts, each signed-in person in its audience who can use the application gets a notification in the bell, and an email unless they've turned off **Email Me Announcements** in their [preferences](/building/app-panel/#preferences).
+Publishing doesn't notify anyone unless you turn on **Also notify the audience**. Then, once, when the announcement starts, each signed-in person in its audience who can use the application gets a notification in the bell, and an email unless they've turned off **Announcements** under Email Notifications in their [preferences](/building/app-panel/#preferences).
 
 An announcement that starts straight away is sent at once. One that starts later is sent by `announcements:notify`, which runs every five minutes in production and hourly elsewhere, so idle databases can scale to zero. Editing an announcement never notifies again.
 

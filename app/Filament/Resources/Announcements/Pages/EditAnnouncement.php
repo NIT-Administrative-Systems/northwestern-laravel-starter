@@ -57,7 +57,7 @@ class EditAnnouncement extends EditRecord
                         ->after('starts_at')
                         ->helperText('Optional. Leave blank to keep it showing until you end it.'),
                     Toggle::make('notify')
-                        ->label('Also Notify the Audience')
+                        ->label('Also notify the audience')
                         ->helperText('Once, when it starts: in the notifications bell, and by email to people who haven\'t turned announcement emails off.'),
                 ])
                 ->action(function (array $data, PublishAnnouncement $publish): void {

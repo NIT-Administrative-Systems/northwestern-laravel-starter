@@ -71,17 +71,19 @@ class Preferences extends Page
                             ->searchable()
                             ->required(),
                     ]),
-                Section::make('Email')
+                Section::make('Email Notifications')
+                    ->description('Choose what we email you about.')
                     ->schema([
                         Toggle::make('emailAnnouncements')
-                            ->label('Email Me Announcements')
-                            ->helperText('When an announcement is sent to you. You\'ll see it in your notifications either way.'),
+                            ->label('Announcements')
+                            ->helperText('When an administrator sends you an announcement. It also appears in your notifications.'),
                         Toggle::make('emailWhenApplicationConnects')
-                            ->label('Email Me When an Application Connects to My Account')
-                            ->helperText('You\'ll see it in your notifications either way.')
+                            ->label('Application connections')
+                            ->helperText('When an application connects to your account. It also appears in your notifications.')
                             ->visible(fn (): bool => (bool) config('api.enabled') || (bool) config('mcp.enabled')),
                         Toggle::make('emailBeforeAccessTokensExpire')
-                            ->label('Email Me Before My Personal Access Tokens Expire')
+                            ->label('Expiring personal access tokens')
+                            ->helperText('Reminders before one of your tokens expires.')
                             ->visible(fn (): bool => (bool) config('api.enabled') && $this->user()->can(SystemPermission::CreatePersonalAccessTokens)),
                     ]),
             ])

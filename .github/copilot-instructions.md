@@ -164,10 +164,11 @@ Write copy the way Northwestern does: plainly, in the second person, active voic
 
 **Names are title case; sentences are sentence case.**
 
-| Title case (names)                                                                                                                                                                                                          | Sentence case (sentences)                                                                                                                                                         |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Page titles, navigation, tabs, section headings, wizard steps, buttons, menu items, modal headings, field labels, column headers, filters and their options, enum labels, badges, notification titles, empty-state headings | Descriptions, subheadings, helper text, placeholders, modal descriptions, notification bodies, empty-state descriptions, validation and error messages, email subjects and bodies |
+| Title case (names)                                                                                                                                                                                                                            | Sentence case (sentences)                                                                                                                                                                                                                                                   |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Page titles, navigation, tabs, section headings, wizard steps, buttons, menu items, modal headings, field labels that name a value, column headers, filters and their options, enum labels, badges, notification titles, empty-state headings | Descriptions, subheadings, helper text, placeholders, modal descriptions, notification bodies, empty-state descriptions, validation and error messages, email subjects and bodies, toggle and checkbox labels, radio options that are phrases, labels phrased as a question |
 
+- A field label names a value ("Timezone", "Allowed Scopes", "Redirect URIs"). A toggle or checkbox states a choice the person turns on, so it is a sentence ("Also notify the audience", "First-party application"), and so is a label that asks a question ("What happened?"). If a label reads as a statement or a question, use sentence case.
 - Title case follows Chicago headline style: articles, coordinating conjunctions and prepositions of any length stay lowercase unless first or last ("Applications with Access to Your Account"); a verb's particle and the second part of a hyphenated word are capitalized ("Sign In with Email", "Sign-In Records"). `App\Filament\Support\Formatting\TitleCase::of()` applies it.
 - Keep model labels lowercase (`protected static ?string $modelLabel = 'service client';`) unless they start with a proper noun or acronym ("API request", "MCP client"). Filament puts them into sentences as they are, and title-cases them for page titles, navigation and the built-in actions configured in `FilamentServiceProvider`.
 - Filament's own labels follow the same rule through `lang/vendor/filament-*/en/`, which overrides only the keys that differ. Check those keys when upgrading Filament.
@@ -188,6 +189,11 @@ Write copy the way Northwestern does: plainly, in the second person, active voic
 - Times: "4 p.m.", "10:12 a.m.", "noon", "midnight", the time before the date, months spelled out, the year only when it isn't this year.
 - Spell out one through nine in sentences; numerals are fine in tables, badges and pickers. Use real plurals, never "minute(s)".
 - Use the serial comma; no ampersands in place of "and"; no exclamation points.
+
+**Wording:**
+
+- Address the person as "you" and "your", never "my": "When an application connects to your account".
+- When every item in a group starts with the same words, move them into the group's heading or description. A section named "Email Notifications" holds "Announcements", not three toggles that each start "Email me".
 
 **Tone:** say what happened and what to do next. Leave out "Sorry", "Please" and "Unable to": "We couldn't resend the code. Try again in a minute." Keep every sentence true for any application built from the starter (say "the team that supports {app name}", not "Northwestern IT").
 

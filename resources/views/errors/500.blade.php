@@ -70,7 +70,7 @@
                         </label>
                     </div>
                     <label class="block text-sm font-semibold text-gray-700">
-                        What Happened?
+                        What happened?
                         <textarea class="focus:border-nu-purple-100 focus:ring-nu-purple-100 mt-1 block w-full resize-none border border-gray-300 bg-white px-3 py-2 font-normal"
                                   name="message"
                                   rows="4"
