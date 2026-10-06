@@ -101,12 +101,6 @@ class OAuthClient extends Client
         return $this->first_party;
     }
 
-    /** @return HasMany<ApiRequestLog, $this> */
-    public function request_logs(): HasMany
-    {
-        return $this->hasMany(ApiRequestLog::class, 'oauth_client_id');
-    }
-
     /**
      * Whether the client is unusable, either revoked or past its secret expiry.
      *
