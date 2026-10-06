@@ -135,6 +135,23 @@ final class AnnouncementResourceTest extends TestCase
         $this->assertSame(1, Announcement::query()->whereNull('published_at')->where('title', 'Corrected title')->count());
     }
 
+    // D93: an ended announcement can't be republished by editing its dates; it has to be duplicated.
+    public function test_an_ended_announcements_schedule_cannot_be_changed(): void
+    {
+        $announcement = Announcement::factory()->ended()->create();
+        $endsAt = $announcement->ends_at;
+
+        Livewire::test(EditAnnouncement::class, ['record' => $announcement->getRouteKey()])
+            ->assertFormFieldDisabled('ends_at')
+            ->set('data.ends_at', null)
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $announcement->refresh();
+        $this->assertTrue($announcement->ends_at->equalTo($endsAt));
+        $this->assertSame(AnnouncementStatus::Ended, $announcement->status);
+    }
+
     public function test_the_list_filters_by_status(): void
     {
         $draft = Announcement::factory()->draft()->create();
