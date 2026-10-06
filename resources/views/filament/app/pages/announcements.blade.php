@@ -8,7 +8,7 @@
 
 <x-filament-panels::page>
     @if ($announcements->isEmpty())
-        <x-filament::empty-state :icon="Heroicon::OutlinedMegaphone" heading="No announcements">
+        <x-filament::empty-state :icon="Heroicon::OutlinedMegaphone" heading="No Announcements">
             Announcements for you appear here.
         </x-filament::empty-state>
     @else

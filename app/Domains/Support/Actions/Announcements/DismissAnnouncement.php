@@ -23,11 +23,11 @@ readonly class DismissAnnouncement
     public function __invoke(Announcement $announcement, User $user): void
     {
         if ($user->isImpersonated()) {
-            throw new AuthorizationException('Announcements cannot be dismissed while impersonating.');
+            throw new AuthorizationException('You can\'t dismiss announcements while impersonating someone.');
         }
 
         if (! $announcement->isDismissible() || ! Announcement::query()->live()->visibleTo($user)->whereKey($announcement->getKey())->exists()) {
-            throw new AuthorizationException('This announcement cannot be dismissed.');
+            throw new AuthorizationException('This announcement can\'t be dismissed.');
         }
 
         AnnouncementDismissal::query()->firstOrCreate(

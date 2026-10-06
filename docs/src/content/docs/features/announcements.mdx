@@ -17,7 +17,7 @@ People with the **Manage Announcements** permission (`ManageAnnouncements`) writ
 
 - **Title** and **Message** - The message is Markdown, links included. Raw HTML is shown as text, never rendered.
 - **Severity** - Info, Success, Warning or Critical. It sets the colour and icon, and which announcement the banner shows first. People can dismiss anything but a critical announcement.
-- **Audience** - Everyone signed in; specific roles and affiliations (anyone who fits any of them); or everyone, including signed-out visitors. Super Administrators see every announcement, whatever its audience.
+- **Audience** - **Everyone Signed In**; **Specific Roles and Affiliations** (anyone who fits any of them); or **Everyone, Including Signed-Out Visitors**. Super Administrators see every announcement, whatever its audience.
 
 The form shows a live preview of the banner. Every change is recorded in the [audit log](/features/audit-logging/).
 
@@ -27,27 +27,27 @@ The form shows a live preview of the banner. Every change is recorded in the [au
 
 1. **Save a draft.** A new announcement is a draft, which nobody else sees.
 2. **Publish it.** Choose when it starts (now, by default) and, optionally, when it ends, in your own timezone. Whether it shows is worked out from those times on every page load; nothing is scheduled.
-3. **End it, or let it end.** **End now** takes a live announcement out of the banner at once. An ended announcement stays on people's Announcements page as a past announcement. It can't be published again; **Duplicate** copies it into a new draft.
+3. **End it, or let it end.** **End Now** takes a live announcement out of the banner at once. An ended announcement stays on people's Announcements page as a past announcement. It can't be published again; **Duplicate** copies it into a new draft.
 
 </Steps>
 
-A published announcement stays editable, including its audience and dates. **Show again** returns a live announcement to the banner for everyone who dismissed it, for example after an important change.
+A published announcement stays editable, including its audience and dates. **Show Again** returns a live announcement to the banner for everyone who dismissed it, for example after an important change.
 
 Announcements are kept as an archive and never pruned.
 
 ## The Banner
 
-The banner shows one announcement at a time: the most important live one the person hasn't dismissed. Critical comes first, then Warning, Success and Info, newest first within each. It shows the title and the first two lines of the message, with **Read more** linking to the whole announcement on the Announcements page and a count of any others.
+The banner shows one announcement at a time: the most important live one the person hasn't dismissed. Critical comes first, then Warning, Success and Info, newest first within each. It shows the title and the first two lines of the message, with **Read More** linking to the whole announcement on the Announcements page and a count of any others.
 
 Dismissing an announcement removes it from that person's banner and shows the next one; it stays on their Announcements page. A critical announcement can't be dismissed and holds the banner until it ends. An administrator [impersonating](/features/authentication/#impersonating-users) someone sees their banner but can't dismiss for them.
 
 ### Signed-Out Visitors
 
-An announcement for "everyone, including signed-out visitors" also shows under the header on public pages and the sign-in pages, without dismissing or links, so write it for anyone. It never shows on error pages, which must work when the database doesn't.
+An announcement for **Everyone, Including Signed-Out Visitors** also shows under the header on public pages and the sign-in pages, without dismissing or links, so write it for anyone. It never shows on error pages, which must work when the database doesn't.
 
 ## Notifying People
 
-Publishing doesn't notify anyone unless you tick **Also notify the audience**. Then, once, when the announcement starts, each signed-in person in its audience who can use the application gets a notification in the bell, and an email unless they've turned off **Email Me Announcements** in their [preferences](/building/app-panel/#preferences).
+Publishing doesn't notify anyone unless you tick **Also Notify the Audience**. Then, once, when the announcement starts, each signed-in person in its audience who can use the application gets a notification in the bell, and an email unless they've turned off **Email Me Announcements** in their [preferences](/building/app-panel/#preferences).
 
 An announcement that starts straight away is sent at once. One that starts later is sent by `announcements:notify`, which runs every five minutes in production and hourly elsewhere, so idle databases can scale to zero. Editing an announcement never notifies again.
 

@@ -15,7 +15,7 @@ class ListAnnouncements extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make()->label('New announcement'),
+            CreateAction::make()->label('New Announcement'),
         ];
     }
 }
