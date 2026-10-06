@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6c86947b7081d0861276e4d354760486",
+    "content-hash": "ecf5763b893b1fd27a4ec49562677b3b",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -5692,16 +5692,16 @@
         },
         {
             "name": "northwestern-sysdev/northwestern-filament-theme",
-            "version": "v4.1.1",
+            "version": "v4.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/NIT-Administrative-Systems/northwestern-filament-theme",
-                "reference": "ba5924ac2e9dd50747a794ce3daf44e423feeaec"
+                "reference": "f14c2ebad39cc4efc8013a67dd2eb6498b0d33f1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/NIT-Administrative-Systems/northwestern-filament-theme/zipball/ba5924ac2e9dd50747a794ce3daf44e423feeaec",
-                "reference": "ba5924ac2e9dd50747a794ce3daf44e423feeaec",
+                "url": "https://api.github.com/repos/NIT-Administrative-Systems/northwestern-filament-theme/zipball/f14c2ebad39cc4efc8013a67dd2eb6498b0d33f1",
+                "reference": "f14c2ebad39cc4efc8013a67dd2eb6498b0d33f1",
                 "shasum": ""
             },
             "require": {
@@ -5756,7 +5756,7 @@
                 "issues": "https://github.com/NIT-Administrative-Systems/northwestern-filament-theme/issues",
                 "source": "https://github.com/NIT-Administrative-Systems/northwestern-filament-theme"
             },
-            "time": "2026-10-06T13:03:44+00:00"
+            "time": "2026-10-06T15:40:24+00:00"
         },
         {
             "name": "northwestern-sysdev/tdx-php-sdk",
