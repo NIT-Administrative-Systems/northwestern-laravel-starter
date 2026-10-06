@@ -1,0 +1,71 @@
+---
+title: Chassis
+description: The classes the starter uses from northwestern-sysdev/chassis, where it uses them, and the hooks they offer
+sidebar:
+    order: 3
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+[Chassis](https://github.com/NIT-Administrative-Systems/chassis) (`northwestern-sysdev/chassis`, version 1.3) is the package of building blocks that Northwestern Laravel applications share. The starter extends some of its classes and uses others as they are. You'll meet them in stack traces and when you change how the API, seeding or lockdown behaves.
+
+<Aside type="tip">
+    Change behavior by overriding a hook in the starter's subclass, not by
+    editing the vendored package. A fix that belongs in Chassis needs a Chassis
+    release.
+</Aside>
+
+## API and Passport
+
+| Chassis class                               | Starter class or use                                            | What it does                                                                                     |
+| ------------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `Http\Middleware\AuthenticatesPassportTokens` | `App\Domains\Auth\Http\Middleware\AuthenticatePassportToken`  | Authenticates a request's Passport token and refuses revoked, expired and restricted clients     |
+| `Http\Middleware\LogsPassportRequests`      | `App\Domains\Auth\Http\Middleware\LogsApiRequests`              | Writes each API request, including refused ones and why, to the request log                      |
+| `Passport\AccessRevoker`                    | Disconnecting an application, revoking all of a person's credentials | Revokes a person's access tokens, their refresh tokens and authorization codes for one client or all |
+| `Passport\ExpiringAccessTokenRepository`    | Bound in `OAuthServiceProvider`                                  | Gives each personal access token its own lifetime instead of Passport's single one               |
+| `ValueObjects\ApiRequestContext`            | Read anywhere during an API request                             | The request's trace ID, principal, client, token, scopes and grant, in Laravel's `Context`       |
+| `Enums\ApiPrincipalType`, `Enums\OAuthGrantType`, `Enums\ApiRequestFailure` | The request log and context              | Who the request acted as (`user` or `client`), how the token was issued, and why a request was refused |
+| `Http\Middleware\EnsureFeatureEnabled`      | `routes/api.php`, `routes/ai.php`                               | Answers 503, or 404 with `,404`, while a config flag is off                                       |
+| `Exceptions\ProblemDetailsRenderer`, `Http\Responses\ProblemDetails` | `bootstrap/app.php`, `AppServiceProvider`    | Renders the REST API's errors as RFC 9457 Problem Details, except on the paths it's told to skip |
+| `Rules\ValidIpOrCidrRule`                   | Service client IP allowlists                                    | Validates an IP address or CIDR range                                                            |
+
+`AuthenticatesPassportTokens` hooks, which `AuthenticatePassportToken` overrides:
+
+- `allowedIps(Client $client)` returns a client's IP allowlist, or `null` for none.
+- `isEligible(Authenticatable $user)` decides whether the token's user may still use the API; the starter refuses deleted and deactivated accounts, and personal access tokens whose owner lost `CreatePersonalAccessTokens`.
+- `clientOwner(Client $client)` and `allowsClientsWithoutUser()` resolve whom a client credentials token acts as.
+- `authenticated(Request $request, Client $client, ?Authenticatable $user)` runs after a token is accepted; the starter records when the client, the token and the person's connection were last used.
+
+`LogsPassportRequests` hooks, which `LogsApiRequests` overrides: `isEnabled()`, `isSamplingEnabled()`, `sampleRate()`, `additionalLogData()` and `persistLog(array $data)`.
+
+To read who an API request acts as in a controller:
+
+```php
+use Illuminate\Support\Facades\Context;
+use Northwestern\SysDev\Chassis\Enums\ApiPrincipalType;
+use Northwestern\SysDev\Chassis\ValueObjects\ApiRequestContext;
+
+$scopes = Context::get(ApiRequestContext::OAUTH_SCOPES);
+$isClient = Context::get(ApiRequestContext::PRINCIPAL_TYPE) === ApiPrincipalType::Client->value;
+```
+
+To gate your own routes on a feature flag, use `EnsureFeatureEnabled` with a config key, as `routes/api.php` does: `EnsureFeatureEnabled::class . ':api.enabled'`, or `':mcp.enabled,404'` to answer 404.
+
+## Models and Seeding
+
+| Chassis class                                    | Starter use                                         | What it does                                                                                  |
+| ------------------------------------------------ | --------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `Models\Concerns\Auditable`                      | `BaseModel`, `User`, `Role`, `Permission`           | Records each model's changes in the audit log                                                 |
+| `Attributes\AutomaticallyOrdered`                | Available to any model through `BaseModel`          | Orders a model's queries by `order_index`, then `label`, or the columns you name              |
+| `Seeding\IdempotentSeeder`, `Attributes\AutoSeed` | The starter's seeders                               | Seeders that are safe to run on every deployment; see [Idempotent Seeding](/architecture/idempotent-seeding/) |
+| `Console\Commands\RebuildDatabaseCommand`        | `db:rebuild`                                        | Rebuilds the local database; the starter adds key generation, demo data and IDE helpers       |
+| `Database\ConfigurableDbDumperFactory`           | [Database snapshots](/features/database-snapshots/) | Finds `pg_dump` and `psql`, including Herd's on macOS and Windows                             |
+| `Database\DatabasePausedDetector`                | `bootstrap/app.php`                                 | Recognizes a paused database so the error page can say it's starting                          |
+
+## Platform
+
+| Chassis class                                       | Starter use                                  | What it does                                                                         |
+| --------------------------------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `Http\Middleware\EnvironmentLockdown`               | `App\Http\Middleware\EnvironmentLockdown`    | While lockdown is on, sends people with only the default role to the lockdown page   |
+| `Contracts\ConfigValidator`, `Attributes\ValidatesConfig` | The starter's config validators       | The checks `config:validate` runs; see [Adding Custom Validators](/reference/commands/#adding-custom-validators) |
+| `Exceptions\SentryExceptionHandler`, `Http\Controllers\SentryTunnelController` | [Sentry](/features/sentry/) | Reports exceptions to Sentry and tunnels the browser SDK's events through the application |
