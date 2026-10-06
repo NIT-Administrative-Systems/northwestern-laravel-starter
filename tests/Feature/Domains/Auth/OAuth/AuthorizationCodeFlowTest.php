@@ -6,6 +6,7 @@ namespace Tests\Feature\Domains\Auth\OAuth;
 
 use App\Domains\Auth\Actions\Applications\DisconnectApplication;
 use App\Domains\Auth\Http\Controllers\SwitchOAuthAccountController;
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Http\Middleware\RefuseOAuthConsentWhileImpersonating;
 use App\Domains\Auth\Listeners\RecordOAuthConnection;
 use App\Domains\Auth\Models\OAuthConnection;
@@ -130,7 +131,7 @@ final class AuthorizationCodeFlowTest extends TestCase
         $client = $this->registerApplication(scopes: []);
 
         [$consent, $verifier] = $this->requestAuthorization($client);
-        $consent->assertDontSee('Allows viewing all user profiles and their details.');
+        $consent->assertDontSee(SystemPermission::ViewUsers->description());
 
         $tokens = $this->exchange($client, $this->approve($client), $verifier)->assertOk();
         $this->assertSame([], OAuthConnection::query()->sole()->scopes);
