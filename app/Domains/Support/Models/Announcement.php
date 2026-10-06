@@ -124,7 +124,7 @@ class Announcement extends BaseModel
             return $this->audience->getLabel();
         }
 
-        $names = self::roleNames();
+        $names = Role::namesById();
         $roles = collect($this->role_ids ?? [])->map(fn (int|string $id): ?string => $names[(int) $id] ?? null)->filter()->sort()->values()->all();
         $affiliations = array_map(
             fn (string $affiliation): string => Affiliation::tryFrom($affiliation)?->getLabel() ?? $affiliation,
@@ -132,16 +132,6 @@ class Announcement extends BaseModel
         );
 
         return implode(', ', [...$roles, ...$affiliations]) ?: 'Nobody';
-    }
-
-    /**
-     * Every role's name by ID, looked up once per request: the announcements table summarizes each row's audience.
-     *
-     * @return array<int, string>
-     */
-    private static function roleNames(): array
-    {
-        return once(fn (): array => Role::query()->pluck('name', 'id')->all());
     }
 
     /**
