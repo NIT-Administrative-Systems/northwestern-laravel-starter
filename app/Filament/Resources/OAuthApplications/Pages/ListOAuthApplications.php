@@ -31,6 +31,7 @@ class ListOAuthApplications extends ListRecords
         return [
             Action::make('register')
                 ->label('Register Application')
+                ->hidden(fn (): bool => resolve('impersonate')->isImpersonating())
                 ->icon(Heroicon::OutlinedPlusCircle)
                 ->closeModalByClickingAway(false)
                 ->closeModalByEscaping(false)

@@ -8,8 +8,10 @@ use App\Domains\Auth\Actions\Api\CreateServiceClient;
 use App\Domains\Auth\Enums\ClientOrigin;
 use App\Domains\User\Models\Audit;
 use App\Domains\User\Models\User;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Hash;
 use InvalidArgumentException;
+use Mockery;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
@@ -69,6 +71,23 @@ final class CreateServiceClientTest extends TestCase
             } catch (InvalidArgumentException) {
                 $this->assertSame(0, $apiUser->oauthApps()->count());
             }
+        }
+    }
+
+    // A secret outlives the session, so an impersonator can't take one away (D102).
+    public function test_it_is_refused_while_impersonating(): void
+    {
+        $apiUser = User::factory()->api()->create();
+        $impersonate = Mockery::mock();
+        $impersonate->shouldReceive('isImpersonating')->andReturn(true);
+        $impersonate->shouldReceive('getImpersonatorId')->andReturn(null);
+        $this->app->instance('impersonate', $impersonate);
+
+        try {
+            resolve(CreateServiceClient::class)($apiUser, 'Sync', now()->addDays(30));
+            $this->fail('A service client was created while impersonating.');
+        } catch (AuthorizationException) {
+            $this->assertSame(0, $apiUser->oauthApps()->count());
         }
     }
 }

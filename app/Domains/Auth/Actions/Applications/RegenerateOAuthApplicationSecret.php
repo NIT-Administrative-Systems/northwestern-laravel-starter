@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domains\Auth\Actions\Applications;
 
 use App\Domains\Auth\Models\OAuthClient;
+use Illuminate\Auth\Access\AuthorizationException;
 use InvalidArgumentException;
 use Laravel\Passport\ClientRepository;
 
@@ -26,6 +27,11 @@ readonly class RegenerateOAuthApplicationSecret
     {
         if (! $client->confidential()) {
             throw new InvalidArgumentException('A public application has no client secret.');
+        }
+
+        // A secret outlives the session, so it is never issued while impersonating (D102).
+        if (resolve('impersonate')->isImpersonating()) {
+            throw new AuthorizationException('Application secrets cannot be regenerated while impersonating.');
         }
 
         $this->clients->regenerateSecret($client);

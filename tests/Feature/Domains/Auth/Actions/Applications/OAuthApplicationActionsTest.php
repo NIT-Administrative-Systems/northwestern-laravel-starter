@@ -11,6 +11,7 @@ use App\Domains\Auth\Actions\Applications\RevokeOAuthApplication;
 use App\Domains\Auth\Actions\Applications\UpdateOAuthApplication;
 use App\Domains\Auth\Enums\ClientOrigin;
 use App\Domains\Auth\Enums\CredentialStatus;
+use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\Auth\Models\OAuthConnection;
 use App\Domains\User\Models\Audit;
 use App\Domains\User\Models\User;
@@ -66,6 +67,32 @@ final class OAuthApplicationActionsTest extends TestCase
 
         $this->assertNotSame($old, $new);
         $this->assertTrue(Hash::check($new, (string) $client->fresh()?->secret));
+    }
+
+    // A secret outlives the session, so an impersonator can't take one away (D102).
+    public function test_registering_and_regenerating_are_refused_while_impersonating(): void
+    {
+        [, $client] = resolve(RegisterOAuthApplication::class)('Portal', ['https://portal.example.edu/cb'], true, []);
+        $impersonate = Mockery::mock();
+        $impersonate->shouldReceive('isImpersonating')->andReturn(true);
+        $impersonate->shouldReceive('getImpersonatorId')->andReturn(null);
+        $this->app->instance('impersonate', $impersonate);
+
+        foreach ([
+            fn () => resolve(RegisterOAuthApplication::class)('Another', ['https://another.example.edu/cb'], true, []),
+            fn () => resolve(RegenerateOAuthApplicationSecret::class)($client),
+        ] as $refused) {
+            try {
+                $refused();
+                $this->fail('A secret was issued while impersonating.');
+            } catch (AuthorizationException) {
+                $this->assertSame(['Portal'], OAuthClient::query()->pluck('name')->all());
+            }
+        }
+
+        // Dynamic registration has no session and isn't affected.
+        resolve(RegisterOAuthApplication::class)('MCP client', ['http://localhost/cb'], false, [], origin: ClientOrigin::Dynamic);
+        $this->assertSame(2, OAuthClient::query()->count());
     }
 
     public function test_a_public_application_has_no_secret_to_regenerate(): void

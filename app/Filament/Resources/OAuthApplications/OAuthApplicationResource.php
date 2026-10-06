@@ -106,6 +106,7 @@ class OAuthApplicationResource extends Resource
                         ->visible(fn (OAuthClient $record): bool => $record->status === CredentialStatus::Active),
                     Action::make('regenerateSecret')
                         ->label('Regenerate Secret')
+                        ->hidden(fn (): bool => resolve('impersonate')->isImpersonating())
                         ->icon(Heroicon::OutlinedArrowPath)
                         ->closeModalByClickingAway(false)
                         ->closeModalByEscaping(false)

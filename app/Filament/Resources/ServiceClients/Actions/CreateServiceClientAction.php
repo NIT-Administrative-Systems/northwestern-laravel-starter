@@ -26,6 +26,7 @@ class CreateServiceClientAction extends Action
         parent::setUp();
 
         $this->authorize(SystemPermission::ManageApiAccess)
+            ->hidden(fn (): bool => resolve('impersonate')->isImpersonating())
             ->label('Create Service Client')
             ->icon(Heroicon::OutlinedPlusCircle)
             ->outlined()

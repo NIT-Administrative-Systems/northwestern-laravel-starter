@@ -6,6 +6,7 @@ namespace App\Domains\Auth\Actions\Applications;
 
 use App\Domains\Auth\Enums\ClientOrigin;
 use App\Domains\Auth\Models\OAuthClient;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
 use Laravel\Passport\ClientRepository;
 
@@ -38,6 +39,11 @@ readonly class RegisterOAuthApplication
         ?string $contactEmail = null,
         ClientOrigin $origin = ClientOrigin::Administrator,
     ): array {
+        // A secret outlives the session, so it is never issued while impersonating (D102). Dynamic registration has no session.
+        if ($origin === ClientOrigin::Administrator && resolve('impersonate')->isImpersonating()) {
+            throw new AuthorizationException('Applications cannot be registered while impersonating.');
+        }
+
         return DB::transaction(function () use ($name, $redirectUris, $confidential, $scopes, $firstParty, $description, $contactEmail, $origin): array {
             /** @var OAuthClient $client */
             $client = $this->clients->createAuthorizationCodeGrantClient($name, array_values($redirectUris), $confidential);
