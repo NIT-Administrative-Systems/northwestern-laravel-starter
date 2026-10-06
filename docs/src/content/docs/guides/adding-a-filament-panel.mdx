@@ -151,6 +151,12 @@ Add another panel when a distinct audience needs its own navigation, its own per
     ->renderHook(PanelsRenderHook::HEAD_END, fn (): string => Blade::render('<x-sentry-browser />'))
     ```
 
+    To show [announcements](/features/announcements/) at the top of the new panel's pages, as the app panel does, add its banner hook:
+
+    ```php
+    ->renderHook(PanelsRenderHook::PAGE_START, fn (): string => Blade::render('@livewire(\App\Filament\App\Livewire\AnnouncementBanner::class)'))
+    ```
+
     With `globalSearchResourceOptIn()`, a resource appears in global search only when it declares `protected static bool $isGloballySearchable = true;`. Every searchable resource runs its own query on each keystroke, so opt in only the resources people look up by name.
 
 </Steps>
