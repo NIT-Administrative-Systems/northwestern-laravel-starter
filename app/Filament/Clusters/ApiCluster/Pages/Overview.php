@@ -36,7 +36,7 @@ class Overview extends Page
      */
     public static function canAccess(): bool
     {
-        return ApiCluster::canAccess();
+        return ApiCluster::canAccessApi();
     }
 
     /** @return array<string, string> */

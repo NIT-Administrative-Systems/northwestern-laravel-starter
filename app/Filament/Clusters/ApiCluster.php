@@ -28,7 +28,19 @@ class ApiCluster extends Cluster
 
     protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
+    /**
+     * Open when the REST API is on, or when only MCP is on, for its MCP Clients page. Each
+     * clustered page checks its own feature too: Filament applies this only to navigation.
+     */
     public static function canAccess(): bool
+    {
+        return self::canAccessApi() || ((bool) config('mcp.enabled') && (bool) auth()->user()?->can(SystemPermission::ManageApiAccess));
+    }
+
+    /**
+     * The REST API is on, and the person manages it or reads its request logs.
+     */
+    public static function canAccessApi(): bool
     {
         if (! config('api.enabled')) {
             return false;
