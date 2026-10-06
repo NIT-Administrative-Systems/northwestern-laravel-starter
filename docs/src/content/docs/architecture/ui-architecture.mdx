@@ -14,7 +14,7 @@ The starter has **one frontend stack**: [Filament](https://filamentphp.com), bui
 | Surface | URL | Built with | Use it for |
 |---|---|---|---|
 | [**App panel**](/building/app-panel/) | `/app` | Filament panel (`AppPanelProvider`) | Everything your application does for its users. It is the default panel, and it owns sign-in for the whole application. |
-| [**Administration panel**](#the-administration-panel) | `/administration` | Filament panel (`AdministrationPanelProvider`) | Back-office tooling: users and roles, API access, announcements, audits, support tickets and the platform overview. |
+| [**Administration panel**](/building/administration-panel/) | `/administration` | Filament panel (`AdministrationPanelProvider`) | Back-office tooling: users and roles, API access, announcements, audits, support tickets and the platform overview. |
 | [**Public layout**](/building/public-pages/) | anywhere outside the panels, such as `/` and `/support/changelog` | `<x-layouts.public>` with Filament's Blade components | Pages people can see without signing in. |
 | [**Error layout**](/building/error-pages/) | 500, 503 and database-paused pages | `<x-layouts.error>` | Errors where the application may not be working. It renders without Filament, auth or the database. |
 | [**Mail**](/building/branding-and-mail/#email) | — | Laravel Markdown mail, with the starter's theme | Email. |
@@ -29,17 +29,7 @@ The app panel at `/app` is where an application built on the starter does its wo
 
 ## The administration panel
 
-The administration panel at `/administration` holds the starter's back-office tools. It requires the `AccessAdministrationPanel` permission, and each tool checks its own permission as well. Its resources and pages live in `app/Filament/` outside `app/Filament/App/`, and it has no footer.
-
-- **Users and roles.** Manage SSO, local and API users and their roles. See [Authorization](/features/authorization/) and [Creating Local Users](/features/authentication/#creating-local-users).
-- **Service clients and API request logs.** Create, rotate, restrict and revoke an API user's service clients on the user's **Service Clients** tab. The **API** section shows an overview, the request log and the registered OAuth applications when the API is enabled; a user's page also lists their personal access tokens and connected applications. See [API](/features/api/).
-- **Audit logs.** Every audited change, with a diff of each one. See [Audit Logging](/features/audit-logging/).
-- **Sign-in records.** Every sign-in with its user segment, with stats and charts of sign-ins over time and by segment (`app/Filament/Resources/UserLoginRecords`). Requires `ViewLoginRecords`. See [User Segmentation](/features/authentication/#user-segmentation).
-- **Role activity.** Role assignments and removals across all users, opened from the **Role Activity** button on the Roles page. See [Audited Role Changes](/features/authorization/#audited-role-changes).
-- **Support tickets.** A read-only log of Contact Support submissions, when support is enabled. See [Support Tickets](/features/support-tickets/#filament-admin-panel).
-- **Platform overview.** `/administration/overview` shows the environment, services, feature flags, health check results, queues, scheduled tasks, sign-in activity and API traffic. Requires `ManageAll`. See [Health Checks](/features/health-checks/).
-- **Impersonation.** The **Impersonate** button on a user's page. See [Impersonating Users](/features/authentication/#impersonating-users).
-- **Developer Tools.** Navigation links to Telescope, the RustFS console when `S3_CONSOLE_URL` is set, and MailPit when `MAIL_CAPTURE_URL` is set. They show only to users who can view Telescope (`ManageAll`), and open in a new tab.
+The administration panel at `/administration` holds the starter's back-office tools: users and roles, the API's credentials and request log, MCP clients, announcements, audit logs, sign-in records, support tickets, the platform overview and links to developer tools. It requires the `AccessAdministrationPanel` permission, and each tool checks its own permission as well. Its resources and pages live in `app/Filament/` outside `app/Filament/App/`, and it has no footer. See [The Administration Panel](/building/administration-panel/) for each tool, who can use it, and how to add your own.
 
 ## The public layout
 
