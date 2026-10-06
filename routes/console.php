@@ -85,8 +85,11 @@ Schedule::command(PruneMcpClientsCommand::class)->daily();
 | operations requiring regular intervals.
 */
 
-// The API refuses these credentials on every request already; this marks them revoked.
-Schedule::command(RevokeIneligibleCredentialsCommand::class)->hourly();
+// The API refuses these credentials on every request already; this marks them revoked. Outside
+// production it runs with the weekday group, so idle databases aren't woken every hour.
+if (App::isProduction()) {
+    Schedule::command(RevokeIneligibleCredentialsCommand::class)->hourly();
+}
 
 /*
 |--------------------------------------------------------------------------
@@ -106,7 +109,11 @@ Schedule::command(RevokeIneligibleCredentialsCommand::class)->hourly();
 | tasks that align with regular business hours.
 */
 
-//
+// Frequent production commands, grouped once a weekday elsewhere so idle databases can scale to zero.
+if (! App::isProduction()) {
+    Schedule::command(RevokeIneligibleCredentialsCommand::class)->weekdays()->at('12:00');
+    Schedule::command(NotifyAnnouncementAudiencesCommand::class)->weekdays()->at('12:00');
+}
 
 /*
 |--------------------------------------------------------------------------
@@ -122,11 +129,9 @@ Schedule::command(RevokeIneligibleCredentialsCommand::class)->hourly();
 Schedule::command(ScheduleCheckHeartbeatCommand::class)->everyMinute();
 
 // Notifies the audience of a scheduled announcement once it starts, when its author asked.
-// Hourly outside production, so idle databases can scale to zero.
+// Outside production it runs with the weekday group.
 if (App::isProduction()) {
     Schedule::command(NotifyAnnouncementAudiencesCommand::class)->everyFiveMinutes();
-} else {
-    Schedule::command(NotifyAnnouncementAudiencesCommand::class)->hourly();
 }
 
 if (App::isProduction()) {

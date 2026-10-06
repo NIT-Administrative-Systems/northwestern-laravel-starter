@@ -125,7 +125,7 @@ People who hold the **Create Personal Access Tokens** permission can call the AP
 - **Shown once** - The token is shown once, after it is created, and never stored in plain text.
 - **Reminders** - People are emailed before a token expires, unless they turn it off on their Preferences page.
 
-A token stops working as soon as its owner loses the permission, is deactivated or is deleted; the hourly `oauth:revoke-ineligible` marks such tokens revoked. An administrator impersonating someone can see their tokens but can't create or revoke them. Administrators revoke a person's token, for example one that leaked, on the person's **Access Tokens** tab in the administration panel, which records it in the person's audit history.
+A token stops working as soon as its owner loses the permission, is deactivated or is deleted; `oauth:revoke-ineligible`, hourly in production, marks such tokens revoked. An administrator impersonating someone can see their tokens but can't create or revoke them. Administrators revoke a person's token, for example one that leaked, on the person's **Access Tokens** tab in the administration panel, which records it in the person's audit history.
 
 Passport issues personal access tokens through a personal access client, which the starter creates the first time someone creates a token.
 
