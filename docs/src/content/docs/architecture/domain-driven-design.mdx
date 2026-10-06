@@ -22,13 +22,17 @@ import { FileTree } from '@astrojs/starlight/components';
             - Http/
             - Models/
             - Policies/
+            - Repositories/
             - Seeders/
             - ...
         - Core
             - Casts/
+            - Data/
             - Enums/
             - Exceptions/
+            - Formatting/
             - Health/
+            - Markdown/
             - Models/
             - Services/
             - ...
@@ -54,11 +58,13 @@ import { FileTree } from '@astrojs/starlight/components';
         - Navigation/
         - Pages/
         - Resources/
+        - Support/ shared filters and formatting
         - ...
     - Http/
         - Controllers/
         - Livewire/
         - Middleware/
+    - Mcp/ the MCP server and its tools
     - Providers/
     - View/
         - Components/
@@ -74,7 +80,9 @@ The **Core** domain contains foundational functionality that applies across the 
 
 **Responsibilities:**
 
-- `BaseModel` and model concerns, including `PrunesAfterRetentionPeriod` for records that expire
+- `BaseModel` and model concerns, including `PrunesAfterRetentionPeriod` for records that expire and `RecordsCustomAudits` for audit events a model's own changes don't capture
+- The typed preferences base class (`Data/Preferences`), which `UserPreferences` extends
+- Formatting for sentences (`NorthwesternDateTime`, `CountInWords`) and Markdown helpers (`ShiftHeadings`)
 - The `ExternalService` enum
 - Configuration validators (`Services/ConfigValidation/`)
 - Shared exceptions (`NoRollbackException`, `ServiceDownError`, `SentryExceptionHandler`)
@@ -97,9 +105,10 @@ The **Auth** domain handles everything related to authentication and authorizati
 
 **Responsibilities:**
 
-- Authentication (WebSSO, OAuth clients through Passport, local login challenges)
+- Authentication (WebSSO, Passport, local login challenges)
 - Authorization (roles, permissions, scopes)
-- Service client management and secret expiration
+- Service clients, personal access tokens, OAuth applications and the connections people make to them
+- MCP client registration and discovery
 - Login code generation and validation
 - Impersonation functionality
 - API request logging
@@ -122,7 +131,7 @@ The **User** domain handles everything related to user data and management:
 
 ### Support Domain
 
-The **Support** domain handles the changelog and support tickets:
+The **Support** domain handles the changelog, support tickets and announcements:
 
 **Location:** `app/Domains/Support/`
 
@@ -131,6 +140,7 @@ The **Support** domain handles the changelog and support tickets:
 - [Changelog](/features/changelog/) entries, synced from `resources/changelogs/` by `ChangelogSeeder`
 - [Support tickets](/features/support-tickets/) submitted from the Contact Support page
 - Ticket gateways (TeamDynamix and mail), with a fallback to mail when the primary gateway fails
+- [Announcements](/features/announcements/): publishing, audiences, dismissals and notifications
 
 ## Component Types
 
@@ -142,10 +152,11 @@ The **Support** domain handles the changelog and support tickets:
 
 **Characteristics:**
 
-- Single method (usually `__invoke()` or `handle()`)
+- Single method, `__invoke()`, usually on a `readonly` class
 - Focused on one specific operation
 - Testable in isolation
-- Can be injected into controllers or called from other actions
+- Resolved from the container: injected into controllers, other actions and Filament action closures, or called with `resolve(SomeAction::class)(...)`
+- The rules belong inside: an action that issues or revokes credentials takes the person acting, refuses while impersonating, and records its audit event when an administrator acts, so every caller gets the same behavior (`CreatePersonalAccessToken`, `DisconnectApplication`, `RegisterOAuthApplication`)
 
 **Example:**
 
@@ -216,7 +227,7 @@ For enums that will be represented in the Filament UI, consider implementing [av
 
 **Characteristics:**
 
-- Extend `BaseModel`
+- Extend `BaseModel`, except where a package needs to own the parent class: `User` extends `Authenticatable`, `Role` and `Permission` extend Spatie's, and `OAuthClient` and `OAuthToken` extend Passport's. `ApiRequestLog` extends Eloquent's `Model` directly, so the request log isn't audited.
 - Include relationships, scopes, and accessors
 
 **Base Model:**

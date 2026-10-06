@@ -48,7 +48,7 @@ The EventHub integration is provided by the [`northwestern-sysdev/laravel-soa`](
 
 ## Customizing Deprovisioning Logic
 
-The `ProcessNetIdUpdate` listener handles the default deprovisioning behavior (role removal and marking the NetID inactive) inside a database transaction. To add your own business logic, revoking API tokens, sending notifications, archiving data, etc., edit the transaction block in the listener:
+The `ProcessNetIdUpdate` listener handles the default deprovisioning behavior (role removal and marking the NetID inactive) inside a database transaction. To add your own business logic, such as sending notifications or archiving data, edit the transaction block in the listener. You don't need to revoke API credentials here: once `netid_inactive` is set, the API refuses the person's tokens on every request, and `oauth:revoke-ineligible` marks them revoked.
 
 ```php title="app/Domains/User/Listeners/ProcessNetIdUpdate.php"
 DB::transaction(static function () use ($event) {
