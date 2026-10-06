@@ -12,10 +12,10 @@ use App\Filament\App\Widgets\YourAccountWidget;
 use App\Providers\Filament\AppPanelProvider;
 use Filament\Facades\Filament;
 use Livewire\Livewire;
-use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversNothing;
 use Tests\TestCase;
 
-#[CoversClass(YourAccountWidget::class)]
+#[CoversNothing]
 final class YourAccountWidgetTest extends TestCase
 {
     protected function setUp(): void

@@ -13,10 +13,10 @@ use App\Filament\App\Pages\ContactSupport;
 use App\Providers\Filament\AppPanelProvider;
 use Filament\Facades\Filament;
 use Livewire\Livewire;
-use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversNothing;
 use Tests\TestCase;
 
-#[CoversClass(ContactSupport::class)]
+#[CoversNothing]
 final class ContactSupportTest extends TestCase
 {
     protected function setUp(): void

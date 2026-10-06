@@ -112,7 +112,7 @@ before pushing again.
   somewhere. A test that exercises included code must not also name a class the `<source>`
   exclusions in `phpunit.xml` leave out (models, enums, `app/Filament` and others): PHPUnit
   warns and drops everything that test covers, so the included classes show as untested.
-  Check with
+  Mark a test whose subject is excluded (a Filament page, a model) `#[CoversNothing]`. Check with
   `herd coverage -dmemory_limit=2G vendor/bin/pest --coverage --min=100`.
 - Use factories. `UserFactory` gives SSO users the Northwestern User role; use `->affiliate()`
   for a user without roles.

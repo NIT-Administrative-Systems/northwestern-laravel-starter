@@ -10,10 +10,10 @@ use App\Providers\Filament\AppPanelProvider;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Route;
 use Livewire\Livewire;
-use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversNothing;
 use Tests\TestCase;
 
-#[CoversClass(Login::class)]
+#[CoversNothing]
 final class LoginTest extends TestCase
 {
     protected function setUp(): void

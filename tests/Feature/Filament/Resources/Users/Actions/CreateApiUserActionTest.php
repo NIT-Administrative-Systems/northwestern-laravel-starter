@@ -10,16 +10,15 @@ use App\Domains\Auth\Enums\TokenExpiration;
 use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\User\Models\User;
 use App\Filament\Resources\ServiceClients\Schemas\ServiceClientSchemas;
-use App\Filament\Resources\Users\Actions\CreateApiUserAction;
 use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Providers\Filament\AdministrationPanelProvider;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Livewire\Livewire;
-use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversNothing;
 use Tests\TestCase;
 
-#[CoversClass(CreateApiUserAction::class)]
+#[CoversNothing]
 final class CreateApiUserActionTest extends TestCase
 {
     protected function setUp(): void

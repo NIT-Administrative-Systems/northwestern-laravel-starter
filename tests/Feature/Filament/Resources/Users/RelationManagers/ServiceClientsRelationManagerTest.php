@@ -10,10 +10,6 @@ use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Enums\TokenExpiration;
 use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\User\Models\User;
-use App\Filament\Resources\ServiceClients\Actions\CreateServiceClientAction;
-use App\Filament\Resources\ServiceClients\Actions\EditServiceClientIpRestrictionsAction;
-use App\Filament\Resources\ServiceClients\Actions\RevokeServiceClientAction;
-use App\Filament\Resources\ServiceClients\Actions\RotateServiceClientAction;
 use App\Filament\Resources\ServiceClients\Schemas\ServiceClientSchemas;
 use App\Filament\Resources\Users\Pages\ViewUser;
 use App\Filament\Resources\Users\RelationManagers\ServiceClientsRelationManager;
@@ -24,15 +20,10 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
-use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversNothing;
 use Tests\TestCase;
 
-#[CoversClass(ServiceClientsRelationManager::class)]
-#[CoversClass(ServiceClientSchemas::class)]
-#[CoversClass(CreateServiceClientAction::class)]
-#[CoversClass(RotateServiceClientAction::class)]
-#[CoversClass(EditServiceClientIpRestrictionsAction::class)]
-#[CoversClass(RevokeServiceClientAction::class)]
+#[CoversNothing]
 final class ServiceClientsRelationManagerTest extends TestCase
 {
     private User $apiUser;

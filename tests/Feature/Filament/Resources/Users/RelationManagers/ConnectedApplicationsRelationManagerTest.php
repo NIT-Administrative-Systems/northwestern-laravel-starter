@@ -14,11 +14,11 @@ use App\Providers\Filament\AdministrationPanelProvider;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Livewire\Livewire;
-use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversNothing;
 use Tests\Concerns\RunsAuthorizationCodeFlow;
 use Tests\TestCase;
 
-#[CoversClass(ConnectedApplicationsRelationManager::class)]
+#[CoversNothing]
 final class ConnectedApplicationsRelationManagerTest extends TestCase
 {
     use RunsAuthorizationCodeFlow;

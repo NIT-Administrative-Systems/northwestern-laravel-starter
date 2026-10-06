@@ -14,10 +14,10 @@ use App\Domains\User\Enums\Affiliation;
 use App\Domains\User\Models\User;
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Support\Facades\DB;
-use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversNothing;
 use Tests\TestCase;
 
-#[CoversClass(Announcement::class)]
+#[CoversNothing]
 final class AnnouncementTest extends TestCase
 {
     public function test_its_status_follows_its_dates(): void

@@ -8,12 +8,12 @@ use App\Domains\Auth\Enums\CredentialStatus;
 use App\Domains\Auth\Models\OAuthToken;
 use App\Domains\User\Models\User;
 use Laravel\Passport\Passport;
-use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversNothing;
 use Tests\Concerns\IssuesPersonalAccessTokens;
 use Tests\Concerns\IssuesServiceClientTokens;
 use Tests\TestCase;
 
-#[CoversClass(OAuthToken::class)]
+#[CoversNothing]
 final class OAuthTokenTest extends TestCase
 {
     use IssuesPersonalAccessTokens, IssuesServiceClientTokens;

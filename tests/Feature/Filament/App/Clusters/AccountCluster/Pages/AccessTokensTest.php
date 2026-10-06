@@ -16,11 +16,11 @@ use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Crypt;
 use Livewire\Livewire;
 use Mockery;
-use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversNothing;
 use Tests\Concerns\IssuesPersonalAccessTokens;
 use Tests\TestCase;
 
-#[CoversClass(AccessTokens::class)]
+#[CoversNothing]
 final class AccessTokensTest extends TestCase
 {
     use IssuesPersonalAccessTokens;

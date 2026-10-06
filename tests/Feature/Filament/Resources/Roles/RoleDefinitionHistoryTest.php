@@ -15,11 +15,10 @@ use App\Providers\Filament\AdministrationPanelProvider;
 use Filament\Facades\Filament;
 use Illuminate\Support\HtmlString;
 use Livewire\Livewire;
-use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversNothing;
 use Tests\TestCase;
 
-#[CoversClass(RoleDefinitionHistory::class)]
-#[CoversClass(RoleDefinitionHistoryTable::class)]
+#[CoversNothing]
 final class RoleDefinitionHistoryTest extends TestCase
 {
     private User $admin;

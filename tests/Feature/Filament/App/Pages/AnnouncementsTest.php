@@ -12,10 +12,10 @@ use App\Filament\App\Pages\Announcements;
 use App\Providers\Filament\AppPanelProvider;
 use Filament\Facades\Filament;
 use Livewire\Livewire;
-use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversNothing;
 use Tests\TestCase;
 
-#[CoversClass(Announcements::class)]
+#[CoversNothing]
 final class AnnouncementsTest extends TestCase
 {
     private User $user;

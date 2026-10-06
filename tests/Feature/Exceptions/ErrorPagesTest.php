@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace Tests\Feature\Exceptions;
 
 use App\Domains\User\Models\User;
-use App\View\Components\ErrorLayout;
 use Illuminate\Support\Facades\Route;
-use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversNothing;
 use RuntimeException;
 use Tests\TestCase;
 
-#[CoversClass(ErrorLayout::class)]
+#[CoversNothing]
 final class ErrorPagesTest extends TestCase
 {
     /**
