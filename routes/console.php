@@ -71,9 +71,11 @@ if (config('api.personal_access_tokens.expiration_notifications.enabled')) {
     Schedule::command(SendPersonalAccessTokenExpirationNotificationsCommand::class)->dailyAt('09:00');
 }
 
-// Delete revoked and expired OAuth tokens and codes. Keep them past the 30-day refresh token
-// lifetime: refresh tokens are found through their access tokens when access is revoked.
-Schedule::command(PurgeCommand::class, ['--hours' => 24 * 31])->daily();
+// Delete OAuth tokens and codes that expired more than 31 days ago, revoked or not. Not revoked
+// ones sooner: refresh tokens are found through their access tokens when access is revoked, so
+// an access token must outlive its refresh token's 30-day lifetime. Without `--expired`, Passport
+// would delete everything revoked on the next run.
+Schedule::command(PurgeCommand::class, ['--expired', '--hours' => 24 * 31])->daily();
 
 // Self-registered MCP clients nobody connected, or nobody uses any more.
 Schedule::command(PruneMcpClientsCommand::class)->daily();
