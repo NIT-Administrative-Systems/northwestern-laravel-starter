@@ -140,8 +140,8 @@ class Overview extends Page
             'retention_days' => is_numeric($retention = config('platform.retention.api_request_logs')) ? (int) $retention : null,
             'sampling_enabled' => (bool) config('api.request_logging.sampling.enabled', false),
             'sampling_rate' => (float) config('api.request_logging.sampling.rate', 1.0),
-            'notifications_enabled' => (bool) config('api.expiration_notifications.enabled', true),
-            'notification_intervals' => config('api.expiration_notifications.intervals', []),
+            'notifications_enabled' => (bool) config('api.client_secret_expiration_notifications.enabled', true),
+            'notification_intervals' => config('api.client_secret_expiration_notifications.intervals', []),
         ];
     }
 

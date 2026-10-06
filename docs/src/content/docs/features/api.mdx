@@ -203,18 +203,20 @@ You can adjust these intervals in the configuration:
 
 ```php
 // config/api.php
-'expiration_notifications' => [
+'client_secret_expiration_notifications' => [
     'enabled' => env('API_CLIENT_SECRET_EXPIRATION_NOTIFICATIONS_ENABLED', true),
     'intervals' => [30, 14, 7, 3, 1],
 ],
 ```
 
-To disable expiration notifications:
+To disable them:
 
 ```php
 // .env
 API_CLIENT_SECRET_EXPIRATION_NOTIFICATIONS_ENABLED=false
 ```
+
+Personal access token reminders have their own setting, `api.personal_access_tokens.expiration_notifications`, turned off with `API_PERSONAL_ACCESS_TOKEN_EXPIRATION_NOTIFICATIONS_ENABLED=false`.
 
 ## Request Logging
 

@@ -16,7 +16,7 @@ use Throwable;
 
 /**
  * Emails people about each of their personal access tokens that is about to expire, at the
- * intervals in `api.expiration_notifications.intervals`, unless they turned the emails off
+ * intervals in `api.personal_access_tokens.expiration_notifications.intervals`, unless they turned the emails off
  * on the Account area's Preferences page.
  */
 class SendPersonalAccessTokenExpirationNotificationsCommand extends Command
@@ -27,7 +27,7 @@ class SendPersonalAccessTokenExpirationNotificationsCommand extends Command
 
     public function handle(): int
     {
-        if (! config('api.expiration_notifications.enabled')) {
+        if (! config('api.personal_access_tokens.expiration_notifications.enabled')) {
             $this->components->info('Personal access token expiration notifications are disabled in the configuration');
 
             return self::SUCCESS;
@@ -36,7 +36,7 @@ class SendPersonalAccessTokenExpirationNotificationsCommand extends Command
         $sent = 0;
         $errors = 0;
 
-        foreach (config('api.expiration_notifications.intervals') as $daysBeforeExpiration) {
+        foreach (config('api.personal_access_tokens.expiration_notifications.intervals') as $daysBeforeExpiration) {
             foreach ($this->expiringTokensQuery($daysBeforeExpiration)->lazyById(100) as $token) {
                 $user = User::query()->find($token->user_id);
 

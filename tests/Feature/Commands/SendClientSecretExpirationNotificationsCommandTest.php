@@ -24,8 +24,8 @@ final class SendClientSecretExpirationNotificationsCommandTest extends TestCase
         Mail::fake();
 
         config([
-            'api.expiration_notifications.enabled' => true,
-            'api.expiration_notifications.intervals' => [7, 30],
+            'api.client_secret_expiration_notifications.enabled' => true,
+            'api.client_secret_expiration_notifications.intervals' => [7, 30],
             'app.timezone' => 'UTC',
             'mail.from.address' => 'system@example.com',
         ]);
@@ -35,7 +35,7 @@ final class SendClientSecretExpirationNotificationsCommandTest extends TestCase
 
     public function test_command_exits_successfully_when_notifications_are_disabled(): void
     {
-        config(['api.expiration_notifications.enabled' => false]);
+        config(['api.client_secret_expiration_notifications.enabled' => false]);
 
         $this->artisan(SendClientSecretExpirationNotificationsCommand::class)
             ->expectsOutputToContain('Client secret expiration notifications are disabled in the configuration')
