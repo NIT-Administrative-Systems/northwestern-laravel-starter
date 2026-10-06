@@ -6,13 +6,10 @@ namespace Tests\Feature\Filament\Clusters\ApiCluster\Pages;
 
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\User\Models\User;
-use App\Filament\Clusters\ApiCluster;
-use App\Filament\Clusters\ApiCluster\Pages\Overview;
-use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversNothing;
 use Tests\TestCase;
 
-#[CoversClass(Overview::class)]
-#[CoversClass(ApiCluster::class)]
+#[CoversNothing]
 final class OverviewTest extends TestCase
 {
     public function test_api_administrators_and_request_log_viewers_can_open_it(): void

@@ -13,26 +13,18 @@ use App\Domains\Support\Jobs\NotifyAnnouncementAudience;
 use App\Domains\Support\Models\Announcement;
 use App\Domains\Support\Models\AnnouncementDismissal;
 use App\Domains\User\Models\User;
-use App\Filament\Resources\Announcements\AnnouncementResource;
 use App\Filament\Resources\Announcements\Pages\CreateAnnouncement;
 use App\Filament\Resources\Announcements\Pages\EditAnnouncement;
 use App\Filament\Resources\Announcements\Pages\ListAnnouncements;
-use App\Filament\Resources\Announcements\Schemas\AnnouncementForm;
-use App\Filament\Resources\Announcements\Tables\AnnouncementsTable;
 use App\Providers\Filament\AdministrationPanelProvider;
 use Carbon\CarbonImmutable;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Queue;
 use Livewire\Livewire;
-use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversNothing;
 use Tests\TestCase;
 
-#[CoversClass(AnnouncementResource::class)]
-#[CoversClass(ListAnnouncements::class)]
-#[CoversClass(CreateAnnouncement::class)]
-#[CoversClass(EditAnnouncement::class)]
-#[CoversClass(AnnouncementForm::class)]
-#[CoversClass(AnnouncementsTable::class)]
+#[CoversNothing]
 final class AnnouncementResourceTest extends TestCase
 {
     private User $manager;

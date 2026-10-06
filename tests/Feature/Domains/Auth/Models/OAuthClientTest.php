@@ -12,10 +12,10 @@ use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\User\Models\User;
 use Laravel\Passport\ClientRepository;
 use Laravel\Passport\Passport;
-use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversNothing;
 use Tests\TestCase;
 
-#[CoversClass(OAuthClient::class)]
+#[CoversNothing]
 final class OAuthClientTest extends TestCase
 {
     public function test_passport_uses_it(): void

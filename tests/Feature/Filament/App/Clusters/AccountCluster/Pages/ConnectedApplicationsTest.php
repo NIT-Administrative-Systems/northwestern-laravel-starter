@@ -13,11 +13,11 @@ use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Livewire\Livewire;
 use Mockery;
-use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversNothing;
 use Tests\Concerns\RunsAuthorizationCodeFlow;
 use Tests\TestCase;
 
-#[CoversClass(ConnectedApplications::class)]
+#[CoversNothing]
 final class ConnectedApplicationsTest extends TestCase
 {
     use RunsAuthorizationCodeFlow;

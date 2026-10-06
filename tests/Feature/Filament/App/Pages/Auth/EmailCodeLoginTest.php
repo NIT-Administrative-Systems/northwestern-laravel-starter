@@ -16,10 +16,10 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Timebox;
 use Livewire\Livewire;
-use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversNothing;
 use Tests\TestCase;
 
-#[CoversClass(EmailCodeLogin::class)]
+#[CoversNothing]
 final class EmailCodeLoginTest extends TestCase
 {
     protected function setUp(): void

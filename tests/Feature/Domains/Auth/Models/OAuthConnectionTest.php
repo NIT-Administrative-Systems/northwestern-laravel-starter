@@ -7,11 +7,11 @@ namespace Tests\Feature\Domains\Auth\Models;
 use App\Domains\Auth\Models\OAuthConnection;
 use App\Domains\User\Models\User;
 use Laravel\Passport\Passport;
-use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversNothing;
 use Tests\Concerns\RunsAuthorizationCodeFlow;
 use Tests\TestCase;
 
-#[CoversClass(OAuthConnection::class)]
+#[CoversNothing]
 final class OAuthConnectionTest extends TestCase
 {
     use RunsAuthorizationCodeFlow;

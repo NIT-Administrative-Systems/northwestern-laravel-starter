@@ -7,10 +7,10 @@ namespace Tests\Feature\Domains\Core\Exceptions;
 use App\Domains\Core\Enums\ExternalService;
 use App\Domains\Core\Exceptions\ServiceDownError;
 use Illuminate\Support\Facades\Route;
-use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversNothing;
 use Tests\TestCase;
 
-#[CoversClass(ServiceDownError::class)]
+#[CoversNothing]
 final class ServiceDownErrorTest extends TestCase
 {
     protected function setUp(): void

@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Providers;
 
-use App\Providers\RateLimitingServiceProvider;
-use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversNothing;
 use Tests\TestCase;
 
-#[CoversClass(RateLimitingServiceProvider::class)]
+#[CoversNothing]
 final class RateLimitingServiceProviderTest extends TestCase
 {
     protected function setUp(): void

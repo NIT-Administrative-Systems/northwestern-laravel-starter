@@ -6,10 +6,10 @@ namespace Tests\Feature\Domains\Auth\Http\Controllers;
 
 use App\Domains\Auth\Http\Controllers\WebSSOController;
 use Illuminate\Support\Facades\Route;
-use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversNothing;
 use Tests\TestCase;
 
-#[CoversClass(WebSSOController::class)]
+#[CoversNothing]
 final class WebSSOControllerTest extends TestCase
 {
     // Socialite throws when services.northwestern-azure has no `redirect` key, even though

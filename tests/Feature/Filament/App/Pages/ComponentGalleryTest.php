@@ -9,10 +9,10 @@ use App\Filament\App\Pages\ComponentGallery;
 use App\Providers\Filament\AppPanelProvider;
 use Filament\Facades\Filament;
 use Livewire\Livewire;
-use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversNothing;
 use Tests\TestCase;
 
-#[CoversClass(ComponentGallery::class)]
+#[CoversNothing]
 final class ComponentGalleryTest extends TestCase
 {
     protected function setUp(): void

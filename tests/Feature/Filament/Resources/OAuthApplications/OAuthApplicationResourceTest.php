@@ -17,14 +17,12 @@ use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Livewire;
-use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversNothing;
 use Tests\Concerns\IssuesServiceClientTokens;
 use Tests\Concerns\RunsAuthorizationCodeFlow;
 use Tests\TestCase;
 
-#[CoversClass(OAuthApplicationResource::class)]
-#[CoversClass(ListOAuthApplications::class)]
-#[CoversClass(OAuthApplicationSchemas::class)]
+#[CoversNothing]
 final class OAuthApplicationResourceTest extends TestCase
 {
     use IssuesServiceClientTokens, RunsAuthorizationCodeFlow;

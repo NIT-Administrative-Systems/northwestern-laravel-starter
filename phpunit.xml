@@ -136,6 +136,11 @@
         -->
         <ini name="memory_limit" value="-1" />
         <env name="APP_ENV" value="testing" />
+        <!--
+            Set here, not by .env: a variable dotenv loads once belongs to it for the rest of the
+            process, and every later boot overwrites a test's own value with it.
+        -->
+        <env name="APP_URL" value="http://localhost" />
         <env name="APP_MAINTENANCE_DRIVER" value="file" />
         <env name="BCRYPT_ROUNDS" value="4" />
         <env name="CACHE_STORE" value="array" />

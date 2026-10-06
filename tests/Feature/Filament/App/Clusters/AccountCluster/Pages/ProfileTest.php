@@ -8,16 +8,14 @@ use App\Domains\Auth\Enums\RoleTypeEnum;
 use App\Domains\Auth\Models\Role;
 use App\Domains\User\Enums\Affiliation;
 use App\Domains\User\Models\User;
-use App\Filament\App\Clusters\AccountCluster;
 use App\Filament\App\Clusters\AccountCluster\Pages\Profile;
 use App\Providers\Filament\AppPanelProvider;
 use Filament\Facades\Filament;
 use Livewire\Livewire;
-use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversNothing;
 use Tests\TestCase;
 
-#[CoversClass(Profile::class)]
-#[CoversClass(AccountCluster::class)]
+#[CoversNothing]
 final class ProfileTest extends TestCase
 {
     protected function setUp(): void

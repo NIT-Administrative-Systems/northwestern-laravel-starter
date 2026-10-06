@@ -11,10 +11,10 @@ use App\Providers\Filament\AppPanelProvider;
 use Filament\Facades\Filament;
 use Livewire\Livewire;
 use Mockery;
-use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversNothing;
 use Tests\TestCase;
 
-#[CoversClass(Preferences::class)]
+#[CoversNothing]
 final class PreferencesTest extends TestCase
 {
     protected function setUp(): void

@@ -8,11 +8,10 @@ use App\Domains\Auth\Enums\RoleModificationOrigin;
 use App\Domains\Auth\Enums\SystemRole;
 use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\User;
-use App\Filament\App\Pages\EnvironmentLockdown;
-use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversNothing;
 use Tests\TestCase;
 
-#[CoversClass(EnvironmentLockdown::class)]
+#[CoversNothing]
 final class EnvironmentLockdownTest extends TestCase
 {
     private Role $adminRole;
