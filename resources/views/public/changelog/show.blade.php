@@ -13,35 +13,44 @@
                 </h1>
             </div>
 
-            {{-- The device's share sheet where there is one (phones, Safari); elsewhere it copies the link. --}}
-            <x-filament::button color="gray"
-                                outlined
-                                size="sm"
-                                icon="heroicon-m-share"
-                                x-data="{
-                                    url: {{ Js::from(route('support.changelog.show', $entry)) }},
-                                    title: {{ Js::from($entry->title ?? $entry->slug) }},
-                                    share() {
-                                        if (navigator.share) {
-                                            navigator.share({ title: this.title, url: this.url }).catch(() => {});
-                                
-                                            return;
-                                        }
-                                
-                                        navigator.clipboard.writeText(this.url)
-                                            .then(() => this.$tooltip('Link copied', { timeout: 2000 }))
-                                            .catch(() => this.$tooltip('Unable to copy', { timeout: 2000 }));
-                                    },
-                                }"
-                                x-on:click="share()">
-                Share
-            </x-filament::button>
+            {{-- The device's share sheet where there is one (phones, Safari); elsewhere it copies the link,
+                 shown in a tooltip and announced to screen readers through the status region. --}}
+            <div x-data="{
+                url: {{ Js::from(route('support.changelog.show', $entry)) }},
+                title: {{ Js::from($entry->title ?? $entry->slug) }},
+                status: '',
+                share() {
+                    if (navigator.share) {
+                        navigator.share({ title: this.title, url: this.url }).catch(() => {});
+            
+                        return;
+                    }
+            
+                    navigator.clipboard.writeText(this.url)
+                        .then(() => this.announce('Link copied'))
+                        .catch(() => this.announce('Couldn\'t copy the link'));
+                },
+                announce(message) {
+                    this.status = '';
+                    this.$nextTick(() => this.status = message);
+                    this.$tooltip(message, { timeout: 2000 });
+                },
+            }">
+                <x-filament::button color="gray"
+                                    outlined
+                                    size="sm"
+                                    icon="heroicon-m-share"
+                                    x-on:click="share()">
+                    Share
+                </x-filament::button>
+                <span class="sr-only"
+                      role="status"
+                      x-text="status"></span>
+            </div>
         </div>
 
         <div class="fi-prose mt-6">
-            <x-markdown :anchors="false" :options="['html_input' => 'escape']">
-                {!! $entry->body !!}
-            </x-markdown>
+            {{ $entry->bodyHtml(topHeadingLevel: 2) }}
         </div>
     </div>
 </x-layouts.public>

@@ -32,15 +32,7 @@ describe("Accessibility", () => {
                 "return App\\Domains\\Support\\Models\\Changelog::factory()->create(['body' => \"### Changes\\n\\n- A change\"])->slug;",
             ).then((slug) => {
                 visit(`/support/changelog/${slug}`);
-
-                // Entries are written with ### headings, which follow the index page's <h2> titles
-                // but skip a level after an entry page's <h1>.
-                cy.checkAxeViolations([
-                    ".fi-prose h1",
-                    ".fi-prose h2",
-                    ".fi-prose h3",
-                    ".fi-prose h4",
-                ]);
+                cy.checkAxeViolations();
             });
         });
     });
