@@ -2,15 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\Views;
+namespace Tests\Feature\View;
 
 use App\Domains\Support\Models\Announcement;
+use PHPUnit\Framework\Attributes\CoversNothing;
 use Tests\TestCase;
 
 /**
  * The announcement banner for signed-out visitors, in resources/views/components.
  */
-#[\PHPUnit\Framework\Attributes\CoversNothing]
+#[CoversNothing]
 final class PublicAnnouncementBannerTest extends TestCase
 {
     public function test_public_pages_and_sign_in_show_announcements_for_signed_out_visitors(): void
