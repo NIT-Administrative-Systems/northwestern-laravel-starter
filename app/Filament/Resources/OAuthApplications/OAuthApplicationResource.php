@@ -11,6 +11,7 @@ use App\Domains\Auth\Enums\CredentialStatus;
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\Auth\Models\OAuthConnection;
+use App\Domains\User\Models\User;
 use App\Filament\Clusters\ApiCluster;
 use App\Filament\Resources\OAuthApplications\Pages\ListOAuthApplications;
 use App\Filament\Resources\OAuthApplications\Schemas\OAuthApplicationSchemas;
@@ -99,6 +100,7 @@ class OAuthApplicationResource extends Resource
                             (bool) $data['first_party'],
                             $data['description'] ?? null,
                             $data['contact_email'] ?? null,
+                            self::administrator(),
                         ))
                         ->successNotificationTitle('Application Updated')
                         ->visible(fn (OAuthClient $record): bool => $record->status === CredentialStatus::Active),
@@ -117,7 +119,7 @@ class OAuthApplicationResource extends Resource
                                         return;
                                     }
 
-                                    OAuthApplicationSchemas::storeCredentials($record, $regenerate($record));
+                                    OAuthApplicationSchemas::storeCredentials($record, $regenerate($record, self::administrator()));
                                 }),
                             Wizard\Step::make('Copy Secret')->schema(OAuthApplicationSchemas::credentialsStep()),
                         ])
@@ -132,7 +134,7 @@ class OAuthApplicationResource extends Resource
                         ->modalHeading('Revoke Application')
                         ->modalDescription('The application loses access to everyone\'s account immediately, and every connection to it is removed. This can\'t be undone.')
                         ->modalSubmitActionLabel('Revoke Application')
-                        ->action(fn (OAuthClient $record, RevokeOAuthApplication $revoke) => $revoke($record))
+                        ->action(fn (OAuthClient $record, RevokeOAuthApplication $revoke) => $revoke($record, self::administrator()))
                         ->successNotificationTitle('Application Revoked')
                         ->visible(fn (OAuthClient $record): bool => $record->status === CredentialStatus::Active),
                 ])->label('Actions')->button(),
@@ -146,5 +148,11 @@ class OAuthApplicationResource extends Resource
         return [
             'index' => ListOAuthApplications::route('/'),
         ];
+    }
+
+    private static function administrator(): User
+    {
+        /** @var User */
+        return auth()->user();
     }
 }

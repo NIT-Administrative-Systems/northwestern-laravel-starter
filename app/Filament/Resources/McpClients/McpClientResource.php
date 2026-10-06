@@ -9,6 +9,7 @@ use App\Domains\Auth\Enums\CredentialStatus;
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\Auth\Models\OAuthConnection;
+use App\Domains\User\Models\User;
 use App\Filament\Clusters\ApiCluster;
 use App\Filament\Resources\McpClients\Pages\ListMcpClients;
 use BackedEnum;
@@ -84,7 +85,7 @@ class McpClientResource extends Resource
                     ->modalHeading('Revoke MCP Client')
                     ->modalDescription('The client loses access to everyone\'s account immediately, and every connection to it is removed. This can\'t be undone.')
                     ->modalSubmitActionLabel('Revoke MCP Client')
-                    ->action(fn (OAuthClient $record, RevokeOAuthApplication $revoke) => $revoke($record))
+                    ->action(fn (OAuthClient $record, RevokeOAuthApplication $revoke) => $revoke($record, self::administrator()))
                     ->successNotificationTitle('MCP Client Revoked')
                     ->visible(fn (OAuthClient $record): bool => $record->status === CredentialStatus::Active),
             ])
@@ -97,5 +98,11 @@ class McpClientResource extends Resource
         return [
             'index' => ListMcpClients::route('/'),
         ];
+    }
+
+    private static function administrator(): User
+    {
+        /** @var User */
+        return auth()->user();
     }
 }

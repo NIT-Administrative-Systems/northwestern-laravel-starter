@@ -12,6 +12,7 @@ use App\Domains\Auth\Models\ApiRequestLog;
 use App\Domains\Auth\Models\LoginChallenge;
 use App\Domains\Auth\Models\OAuthConnection;
 use App\Domains\Auth\Models\Role;
+use App\Domains\Core\Models\Concerns\RecordsCustomAudits;
 use App\Domains\Support\Models\SupportTicket;
 use App\Domains\User\Data\UserPreferences;
 use App\Domains\User\Enums\Affiliation;
@@ -60,7 +61,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable implements Auditable, FilamentUser, HasAvatar, HasName, OAuthenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use AuditableConcern, HandlesImpersonation, HasApiTokens, HasFactory, Notifiable, SoftDeletes, TracksPermissionSources;
+    use AuditableConcern, HandlesImpersonation, HasApiTokens, HasFactory, Notifiable, RecordsCustomAudits, SoftDeletes, TracksPermissionSources;
 
     use AuditsRoles, HasRoles {
         HasRoles::assignRole as private;

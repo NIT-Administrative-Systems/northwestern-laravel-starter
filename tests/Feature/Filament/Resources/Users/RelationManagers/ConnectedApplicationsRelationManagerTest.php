@@ -44,7 +44,7 @@ final class ConnectedApplicationsRelationManagerTest extends TestCase
             ->callAction(TestAction::make('disconnect')->table($connection));
 
         $this->assertSame(0, OAuthConnection::query()->count());
-        $this->assertTrue(Audit::query()->where('event', 'oauth_application_disconnected')->where('auditable_id', $person->getKey())->exists());
+        $this->assertTrue(Audit::query()->where('event', 'application_disconnected')->where('auditable_id', $person->getKey())->exists());
     }
 
     public function test_it_needs_manage_api_access(): void

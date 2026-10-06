@@ -8,9 +8,7 @@ use App\Domains\Auth\Models\OAuthConnection;
 use App\Domains\User\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Event;
 use Northwestern\SysDev\Chassis\Passport\AccessRevoker;
-use OwenIt\Auditing\Events\AuditCustom;
 
 /**
  * Disconnects an application from a person's account: revokes the access tokens, refresh
@@ -45,15 +43,10 @@ readonly class DisconnectApplication
         });
 
         if ($user->isNot($disconnectedBy)) {
-            $user->auditEvent = 'oauth_application_disconnected';
-            $user->isCustomEvent = true;
-            $user->auditCustomOld = [];
-            $user->auditCustomNew = [
+            $user->recordCustomAudit('application_disconnected', [
                 'oauth_client_id' => $connection->oauth_client_id,
                 'application' => $application,
-            ];
-
-            Event::dispatch(new AuditCustom($user));
+            ]);
         }
     }
 }

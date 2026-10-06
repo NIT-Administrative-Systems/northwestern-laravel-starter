@@ -50,7 +50,7 @@ final class OAuthApplicationActionsTest extends TestCase
     {
         $client = $this->registerApplication();
 
-        resolve(UpdateOAuthApplication::class)($client, 'Renamed', ['https://new.example.edu/cb'], [], true, 'New', 'new@example.edu');
+        resolve(UpdateOAuthApplication::class)($client, 'Renamed', ['https://new.example.edu/cb'], [], true, 'New', 'new@example.edu', User::factory()->create());
 
         $client->refresh();
         $this->assertSame('Renamed', $client->name);
@@ -59,11 +59,29 @@ final class OAuthApplicationActionsTest extends TestCase
         $this->assertTrue($client->first_party);
     }
 
+    // Applications have UUID keys that don't fit the audits table, so their changes are recorded on the administrator.
+    public function test_an_administrators_changes_are_audited_on_them(): void
+    {
+        $administrator = User::factory()->create();
+
+        [, $client] = resolve(RegisterOAuthApplication::class)('Portal', ['https://portal.example.edu/cb'], true, ['view-users'], registeredBy: $administrator);
+        resolve(UpdateOAuthApplication::class)($client, 'Portal', ['https://portal.example.edu/cb'], ['view-users'], true, null, null, $administrator);
+        $secret = resolve(RegenerateOAuthApplicationSecret::class)($client, $administrator);
+        resolve(RevokeOAuthApplication::class)($client, $administrator);
+
+        $audits = Audit::query()->where('auditable_type', $administrator->getMorphClass())->where('auditable_id', $administrator->getKey())->where('event', 'like', 'application_%')->get()->keyBy('event');
+        $this->assertSame(['application_registered', 'application_updated', 'application_secret_regenerated', 'application_revoked'], $audits->keys()->all());
+        $this->assertFalse($audits['application_updated']->old_values['first_party']);
+        $this->assertTrue($audits['application_updated']->new_values['first_party']);
+        $this->assertSame(0, $audits['application_revoked']->new_values['connections_removed']);
+        $this->assertStringNotContainsString($secret, $audits->toJson());
+    }
+
     public function test_regenerating_replaces_a_confidential_secret(): void
     {
         [$old, $client] = resolve(RegisterOAuthApplication::class)('Portal', ['https://portal.example.edu/cb'], true, []);
 
-        $new = resolve(RegenerateOAuthApplicationSecret::class)($client);
+        $new = resolve(RegenerateOAuthApplicationSecret::class)($client, User::factory()->create());
 
         $this->assertNotSame($old, $new);
         $this->assertTrue(Hash::check($new, (string) $client->fresh()?->secret));
@@ -80,7 +98,7 @@ final class OAuthApplicationActionsTest extends TestCase
 
         foreach ([
             fn () => resolve(RegisterOAuthApplication::class)('Another', ['https://another.example.edu/cb'], true, []),
-            fn () => resolve(RegenerateOAuthApplicationSecret::class)($client),
+            fn () => resolve(RegenerateOAuthApplicationSecret::class)($client, User::factory()->create()),
         ] as $refused) {
             try {
                 $refused();
@@ -99,7 +117,7 @@ final class OAuthApplicationActionsTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        resolve(RegenerateOAuthApplicationSecret::class)($this->registerApplication());
+        resolve(RegenerateOAuthApplicationSecret::class)($this->registerApplication(), User::factory()->create());
     }
 
     public function test_revoking_an_application_disconnects_everyone(): void
@@ -143,7 +161,7 @@ final class OAuthApplicationActionsTest extends TestCase
 
         $this->withToken($tokens[$other->getKey()])->getJson('/api/v1/me')->assertOk();
         $this->assertSame([$other->getKey()], OAuthConnection::query()->pluck('user_id')->all());
-        $this->assertFalse(Audit::query()->where('event', 'oauth_application_disconnected')->exists());
+        $this->assertFalse(Audit::query()->where('event', 'application_disconnected')->exists());
     }
 
     public function test_an_administrators_disconnect_is_audited_on_the_person(): void
@@ -156,7 +174,7 @@ final class OAuthApplicationActionsTest extends TestCase
 
         resolve(DisconnectApplication::class)(OAuthConnection::query()->sole(), User::factory()->create());
 
-        $audit = Audit::query()->where('event', 'oauth_application_disconnected')->sole();
+        $audit = Audit::query()->where('event', 'application_disconnected')->sole();
         $this->assertSame($person->getKey(), $audit->auditable_id);
         $this->assertSame('Reporting Tool', $audit->new_values['application']);
     }

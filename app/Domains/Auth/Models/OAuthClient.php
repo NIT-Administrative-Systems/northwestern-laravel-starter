@@ -28,7 +28,9 @@ use Laravel\Passport\Client;
  * endpoint and {@see \App\Domains\Auth\Http\Middleware\AuthenticatePassportToken} refuses
  * the tokens it already holds. `revoked` in the database still records an explicit revoke.
  *
- * Changes are audited on the owning API user by {@see \App\Domains\Auth\Actions\Api\AuditServiceClientChange}.
+ * The UUID key doesn't fit the audits table, so changes are audited as custom events on a user:
+ * a service client's on its API user ({@see \App\Domains\Auth\Actions\Api\AuditServiceClientChange}),
+ * an application's or MCP client's on the administrator who made them.
  *
  * @property string $id
  * @property string $name
