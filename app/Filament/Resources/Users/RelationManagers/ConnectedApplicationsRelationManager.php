@@ -10,6 +10,7 @@ use App\Domains\Auth\Enums\ClientOrigin;
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\OAuthConnection;
 use App\Domains\User\Models\User;
+use App\Providers\OAuthServiceProvider;
 use Filament\Actions\Action;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -50,8 +51,8 @@ class ConnectedApplicationsRelationManager extends RelationManager
             ->columns([
                 TextColumn::make('oauth_client.name')
                     ->label('Application')
-                    ->description(fn (OAuthConnection $record): ?string => $record->oauth_client?->origin === ClientOrigin::Dynamic ? 'AI client · self-reported name' : null),
-                TextColumn::make('scopes')->label('Scopes')->badge()->placeholder('None'),
+                    ->description(fn (OAuthConnection $record): ?string => $record->oauth_client?->origin === ClientOrigin::Dynamic ? 'AI client · name not verified' : null),
+                TextColumn::make('scopes')->label('Allowed To')->badge()->formatStateUsing(fn (string $state): string => OAuthServiceProvider::scopeLabel($state))->placeholder('See Their Account Details'),
                 TextColumn::make('connected_at')->label('Connected')->dateTime(),
                 TextColumn::make('last_used_at')->label('Last Used')->dateTime()->placeholder('Never'),
             ])
@@ -63,7 +64,7 @@ class ConnectedApplicationsRelationManager extends RelationManager
                     ->outlined()
                     ->requiresConfirmation()
                     ->modalHeading('Disconnect Application')
-                    ->modalDescription('The application loses access to this user\'s account immediately. This is recorded in the user\'s audit history.')
+                    ->modalDescription('The application loses access to this person\'s account immediately. This is recorded in their audit history.')
                     ->modalSubmitActionLabel('Disconnect')
                     ->authorize(SystemPermission::ManageApiAccess)
                     ->action(function (OAuthConnection $record, DisconnectApplication $disconnect): void {
@@ -72,9 +73,9 @@ class ConnectedApplicationsRelationManager extends RelationManager
 
                         $disconnect($record, $administrator);
                     })
-                    ->successNotificationTitle('Application disconnected'),
+                    ->successNotificationTitle('Application Disconnected'),
             ])
-            ->emptyStateHeading('No connected applications')
+            ->emptyStateHeading('No Connected Applications')
             ->paginated(false);
     }
 }

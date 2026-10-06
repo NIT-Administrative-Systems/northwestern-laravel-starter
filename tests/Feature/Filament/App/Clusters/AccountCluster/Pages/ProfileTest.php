@@ -65,7 +65,7 @@ final class ProfileTest extends TestCase
             ->assertSee('Mascot')
             ->assertSee('Athletics')
             ->assertSee('NetID')
-            ->assertDontSee('Request a change');
+            ->assertDontSee('Request a Change');
     }
 
     public function test_email_users_see_the_details_an_administrator_entered(): void
@@ -80,12 +80,12 @@ final class ProfileTest extends TestCase
         Livewire::test(Profile::class)
             ->assertSee('Entered by an administrator')
             ->assertSee('Visiting Scholar')
-            ->assertSee('Request a change')
+            ->assertSee('Request a Change')
             ->assertDontSee('willie-x1y2');
 
         config(['support.enabled' => false]);
 
-        Livewire::test(Profile::class)->assertDontSee('Request a change');
+        Livewire::test(Profile::class)->assertDontSee('Request a Change');
     }
 
     public function test_it_lists_roles_beyond_standard_access(): void

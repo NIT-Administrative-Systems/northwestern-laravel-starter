@@ -48,7 +48,7 @@ class Profile extends Page
                         : 'Entered by an administrator when your account was created.')
                     ->afterHeader([
                         Action::make('contactSupport')
-                            ->label('Request a change')
+                            ->label('Request a Change')
                             ->link()
                             ->url(fn (): string => ContactSupport::getUrl(panel: AppPanelProvider::ID))
                             ->visible(fn (): bool => ! $isNetIdUser && ContactSupport::canAccess()),
@@ -57,14 +57,14 @@ class Profile extends Page
                         Grid::make(['default' => 1, 'md' => 2])->schema([
                             TextEntry::make('full_name')->label('Name'),
                             TextEntry::make('username')->label('NetID')->visible($isNetIdUser),
-                            TextEntry::make('email')->label('Email address')->placeholder('None'),
+                            TextEntry::make('email')->label('Email')->placeholder('None'),
                             TextEntry::make('primary_affiliation')
-                                ->label('Primary affiliation')
+                                ->label('Primary Affiliation')
                                 ->formatStateUsing(fn ($state) => $state?->getLabel())
                                 ->placeholder('None')
                                 ->visible($isNetIdUser),
                             TextEntry::make('job_titles')
-                                ->label($isNetIdUser ? 'Job titles' : 'Title')
+                                ->label($isNetIdUser ? 'Job Titles' : 'Title')
                                 ->badge()
                                 ->placeholder('None'),
                             TextEntry::make('departments')

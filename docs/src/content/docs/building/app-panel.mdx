@@ -40,7 +40,7 @@ The panel's home page at `/app` is Filament's own `Filament\Pages\Dashboard`, re
 
 The starter ships one, `YourAccountWidget`, which shows the signed-in user:
 
-- a greeting: "Welcome" at the first sign-in, "Welcome back" after it
+- a greeting: "Welcome" at the first sign-in, "Welcome Back" after it
 - the roles they hold beyond the default Northwestern User role
 - an **Account** link to the [Account area](#the-account-area)
 - links to Contact Support and the documentation, each shown only when it is configured, as in the Help menu
@@ -61,7 +61,7 @@ The Account area at `/app/account` is each user's own: who they are, their prefe
 
 `/app/account/profile` is read-only:
 
-- **Details.** For a NetID user: name, NetID, email, primary affiliation, job titles and departments, which come from the [Northwestern Directory](/northwestern-integrations/directory-search/) and refresh at each sign-in. For an email user: the name, email, title and department an administrator entered, with a **Request a change** link to Contact Support when [support tickets](/features/support-tickets/) are enabled.
+- **Details.** For a NetID user: name, NetID, email, primary affiliation, job titles and departments, which come from the [Northwestern Directory](/northwestern-integrations/directory-search/) and refresh at each sign-in. For an email user: the name, email, title and department an administrator entered, with a **Request a Change** link to Contact Support when [support tickets](/features/support-tickets/) are enabled.
 - **Roles.** The roles they hold beyond the default Northwestern User role.
 
 ### Access Tokens
@@ -70,7 +70,7 @@ The Account area at `/app/account` is each user's own: who they are, their prefe
 
 ### Connected Applications
 
-`/app/account/connected-applications` lists the [applications](/features/api/#connected-applications) the user has allowed to act for them, one row per application, with what each may do, when it connected and when it was last used. **Disconnect** removes one application's access and **Disconnect all** removes every application's. Every user can open it while the API or the [MCP server](/features/mcp/) is enabled; AI clients are labelled with their self-reported names.
+`/app/account/connected-applications` lists the [applications](/features/api/#connected-applications) the user has allowed to act for them, one row per application, with what each may do, when it connected and when it was last used. **Disconnect** removes one application's access and **Disconnect All** removes every application's. Every user can open it while the API or the [MCP server](/features/mcp/) is enabled; AI clients are labelled as such, with a note that their names aren't verified.
 
 ### Preferences
 
@@ -102,7 +102,7 @@ Everything else a user chooses goes in the `users.preferences` JSON column, read
 
     ```php
     Toggle::make('emailWeeklySummary')
-        ->label('Email me a weekly summary'),
+        ->label('Email Me a Weekly Summary'),
     ```
 
     The page fills the form from `$user->preferences` and saves every field except `timezone` back into it.
@@ -172,7 +172,7 @@ The user menu has three items, set in `AppPanelProvider::userMenuItems()`:
 
 - **Account** links to the [Account area](#the-account-area).
 - **Administration** links to `/administration`. It shows only to users who can open that panel (`User::canAccessPanel()`).
-- **Sign out** goes to the `logout` route.
+- **Sign Out** goes to the `logout` route.
 
 ## Notifications
 
