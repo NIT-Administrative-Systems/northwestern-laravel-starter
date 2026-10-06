@@ -34,6 +34,7 @@ class ListOAuthApplications extends ListRecords
                 ->icon(Heroicon::OutlinedPlusCircle)
                 ->closeModalByClickingAway(false)
                 ->closeModalByEscaping(false)
+                ->mountUsing(OAuthApplicationSchemas::mountFresh())
                 ->steps([
                     Wizard\Step::make('Details')
                         ->schema([

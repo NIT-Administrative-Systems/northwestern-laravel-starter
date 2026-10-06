@@ -36,6 +36,7 @@ class CreateApiUserAction extends Action
             ->color('warning')
             ->closeModalByClickingAway(false)
             ->closeModalByEscaping(false)
+            ->mountUsing(ServiceClientSchemas::mountFresh(ServiceClientSchemas::SESSION_KEY_CREATE_API_USER))
             ->steps([
                 Wizard\Step::make('Details')
                     ->schema([

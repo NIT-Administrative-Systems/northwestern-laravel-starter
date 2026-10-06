@@ -7,6 +7,7 @@ namespace App\Filament\Resources\OAuthApplications\Schemas;
 use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\Auth\Rules\OAuthRedirectUri;
 use App\Providers\OAuthServiceProvider;
+use Closure;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
@@ -16,6 +17,7 @@ use Filament\Infolists\Components\CodeEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Session;
@@ -117,5 +119,20 @@ class OAuthApplicationSchemas
     public static function clearCredentials(): void
     {
         Session::forget(self::SESSION_KEY);
+    }
+
+    /**
+     * Mount the register or regenerate wizard with nothing left from an earlier run.
+     *
+     * Only the final submit clears the session key, so a run that was cancelled or closed
+     * leaves its secret behind. Without this, the next run, on any application, would skip
+     * its work and show that secret.
+     */
+    public static function mountFresh(): Closure
+    {
+        return function (?Schema $schema): void {
+            self::clearCredentials();
+            $schema?->fill();
+        };
     }
 }

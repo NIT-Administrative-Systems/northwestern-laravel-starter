@@ -109,6 +109,7 @@ class OAuthApplicationResource extends Resource
                         ->icon(Heroicon::OutlinedArrowPath)
                         ->closeModalByClickingAway(false)
                         ->closeModalByEscaping(false)
+                        ->mountUsing(OAuthApplicationSchemas::mountFresh())
                         ->steps([
                             Wizard\Step::make('Regenerate')
                                 ->description('The current secret stops working immediately. Update the application with the new one.')

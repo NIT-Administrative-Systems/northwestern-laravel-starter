@@ -79,6 +79,21 @@ final class AccessTokensTest extends TestCase
         $this->assertStringNotContainsString($shown, json_encode($component->instance()->all(), JSON_THROW_ON_ERROR));
     }
 
+    public function test_creating_again_after_cancelling_creates_a_new_token(): void
+    {
+        Livewire::test(AccessTokens::class)
+            ->mountAction(TestAction::make('createToken')->table())
+            ->fillForm(['name' => 'Abandoned', 'lifetime' => TokenExpiration::SixMonths->value])
+            ->goToNextWizardStep()
+            ->unmountAction()
+            ->mountAction(TestAction::make('createToken')->table())
+            ->fillForm(['name' => 'Second', 'lifetime' => TokenExpiration::SixMonths->value])
+            ->goToNextWizardStep();
+
+        $second = OAuthToken::query()->where('user_id', $this->user->getKey())->where('name', 'Second')->sole();
+        $this->assertSame($second->getKey(), session(AccessTokens::SESSION_KEY)['record_id']);
+    }
+
     public function test_a_person_can_only_choose_scopes_their_permissions_cover(): void
     {
         $this->user->revokePermissionTo(SystemPermission::ViewUsers);

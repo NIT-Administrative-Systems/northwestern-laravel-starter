@@ -31,6 +31,7 @@ class CreateServiceClientAction extends Action
             ->outlined()
             ->closeModalByClickingAway(false)
             ->closeModalByEscaping(false)
+            ->mountUsing(ServiceClientSchemas::mountFresh(ServiceClientSchemas::SESSION_KEY_CREATE))
             ->steps([
                 Wizard\Step::make('Configure')
                     ->schema([

@@ -37,6 +37,7 @@ class RotateServiceClientAction extends Action
             ->size(Size::ExtraSmall)
             ->closeModalByClickingAway(false)
             ->closeModalByEscaping(false)
+            ->mountUsing(ServiceClientSchemas::mountFresh(ServiceClientSchemas::SESSION_KEY_ROTATE))
             ->steps([
                 Wizard\Step::make('Rotate Service Client')
                     ->schema([
