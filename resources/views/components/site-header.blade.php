@@ -20,7 +20,7 @@
 @endphp
 
 <header @class([
-    'bg-nu-purple-120 w-full text-white',
+    'nu-site-header bg-nu-purple-120 w-full text-white',
     // The theme's top bar uses #A76616 for the rule in dark mode; the sign-in pages follow dark mode.
     'border-t-4 border-[var(--nu-gold)] dark:border-[#A76616]' => $showEnvironment,
 ])>
@@ -30,7 +30,7 @@
         'h-16' => !$showEnvironment,
         'h-15' => $showEnvironment,
     ])>
-        <a class="block shrink-0 [&_.nu-wordmark]:h-6 [&_.nu-wordmark]:w-auto [&_.nu-wordmark]:-translate-y-[10%] [&_.nu-wordmark]:text-white"
+        <a class="block shrink-0 [&_.nu-wordmark]:h-5 [&_.nu-wordmark]:w-auto [&_.nu-wordmark]:-translate-y-[10%] [&_.nu-wordmark]:text-white sm:[&_.nu-wordmark]:h-6"
            href="https://www.northwestern.edu/">
             @include('northwestern-filament-theme::wordmark')
         </a>
