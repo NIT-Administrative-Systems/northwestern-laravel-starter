@@ -171,8 +171,8 @@ Write copy the way Northwestern does: plainly, in the second person, active voic
 
 - A field label names a value ("Timezone", "Allowed Scopes", "Redirect URIs"). A toggle or checkbox states a choice the person turns on, so it is a sentence ("Also notify the audience", "First-party application"), and so is a label that asks a question ("What happened?"). If a label reads as a statement or a question, use sentence case.
 - Title case follows Chicago headline style: articles, coordinating conjunctions and prepositions of any length stay lowercase unless first or last ("Applications with Access to Your Account"); a verb's particle and the second part of a hyphenated word are capitalized ("Sign In with Email", "Sign-In Records"). Chassis's `Northwestern\SysDev\Chassis\Formatting\TitleCase::of()` applies it.
-- Keep model labels lowercase (`protected static ?string $modelLabel = 'service client';`) unless they start with a proper noun or acronym ("API request", "MCP client"). Filament puts them into sentences as they are, and title-cases them for page titles, navigation and the built-in actions configured in `FilamentServiceProvider`.
-- Filament's own labels follow the same rule through `lang/vendor/filament-*/en/`, which overrides only the keys that differ. Check those keys when upgrading Filament.
+- Keep model labels lowercase (`protected static ?string $modelLabel = 'service client';`) unless they start with a proper noun or acronym ("API request", "MCP client"). Filament puts them into sentences as they are, and title-cases them for page titles and navigation.
+- Filament's built-in labels keep Filament's own wording, in sentence case ("Save changes", "New service client"). Don't override them in `lang/vendor`; the rule applies to the copy you write.
 
 **One name for one thing:**
 

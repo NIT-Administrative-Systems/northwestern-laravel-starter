@@ -75,7 +75,7 @@ Version 3 removes the Bootstrap user interface. Every page now uses one stack, F
 - Browser and PHP Sentry reports share one user context, `SentryExceptionHandler::userContext()`.
 - Livewire's pagination theme is `tailwind`.
 - Requires `northwestern-sysdev/northwestern-filament-theme` `^4.2.1`.
-- Interface copy follows one rule throughout: names in title case and sentences in sentence case, "sign in" rather than "log in", one name for each kind of credential, and Northwestern style for times and counts. Filament's own labels are overridden to match. See Interface Conventions in the docs.
+- Interface copy follows one rule throughout: names in title case and sentences in sentence case, "sign in" rather than "log in", one name for each kind of credential, and Northwestern style for times and counts. Filament's built-in labels keep Filament's own wording. See Interface Conventions in the docs.
 - Date range filters use the browser's date input instead of Filament's custom picker, which screen readers couldn't operate.
 - Building blocks shared with other Northwestern applications come from Chassis 1.4: the `PrunesAfterRetentionPeriod` and `RecordsCustomAudits` model concerns, `OAuthClientRepository`, the `OAuthRedirectUri` rule, the `RequireSecretToken` middleware, and `TitleCase`, `NorthwesternDateTime`, `CountInWords` and `ShiftHeadings` for interface copy and Markdown. See the Chassis reference in the docs.
 - Views mark the elements tests use with `data-testid` instead of `data-cy`. Pest's `@name` selectors and Playwright's `getByTestId()` read it.

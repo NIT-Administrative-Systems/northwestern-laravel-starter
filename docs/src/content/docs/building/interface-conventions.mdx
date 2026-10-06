@@ -22,6 +22,7 @@ Write copy the way Northwestern does: plainly, in the second person, in the acti
 - A field label names a value ("Timezone", "Allowed Scopes"). A toggle or checkbox states a choice the person turns on, so it's a sentence ("Also notify the audience"), and so is a label that asks a question ("What happened?").
 - Title case follows Chicago headline style: articles, coordinating conjunctions and prepositions stay lowercase unless first or last ("Applications with Access to Your Account"). A verb's particle and the second part of a hyphenated word are capitalized ("Sign In with Email", "Sign-In Records").
 - Keep model labels lowercase (`protected static ?string $modelLabel = 'service client';`) unless they start with a proper noun or acronym ("MCP client"). Filament puts them into sentences as they are and title-cases them for titles and navigation.
+- Filament's built-in labels keep Filament's own wording, which is in sentence case ("Save changes", "New service client", "No service clients"). The rule applies to the copy you write: your pages, resources, actions, fields and messages.
 
 ### One Name for One Thing
 
@@ -46,8 +47,6 @@ Write copy the way Northwestern does: plainly, in the second person, in the acti
 TitleCase::of('applications with access to your account'); // "Applications with Access to Your Account"
 TitleCase::of('sign-in records');                          // "Sign-In Records"
 ```
-
-`FilamentServiceProvider` uses it so Filament's built-in labels follow the rule for any resource: the create, attach, delete and export actions, and every table's empty-state heading ("No Service Clients"). Filament's own fixed labels are overridden in `lang/vendor/filament-*/en/`, which changes only the keys that differ ("Save Changes", "Mark All as Read"). A test fails if Filament renames or drops one of those keys, so check them when upgrading Filament.
 
 ## Dates and Counts in Sentences
 
