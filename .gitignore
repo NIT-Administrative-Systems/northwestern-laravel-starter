@@ -47,3 +47,5 @@ report.xml
 /tmp/*
 *.bak
 *.new
+/tests/Browser/Screenshots/
+/tests/Browser/Traces/

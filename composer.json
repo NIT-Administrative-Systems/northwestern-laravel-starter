@@ -56,6 +56,7 @@
         "laravel/pint": "^1.21",
         "nunomaduro/collision": "^8.6",
         "pestphp/pest": "^5.1",
+        "pestphp/pest-plugin-browser": "^5.1",
         "phpstan/phpstan-mockery": "^2.0",
         "phpunit/phpunit": "^13.0",
         "rector/rector": "^2.0",
@@ -106,6 +107,7 @@
         "format:php": "vendor/bin/pint --parallel --ansi",
         "format:frontend": "pnpm run format",
         "analyse:php": "vendor/bin/phpstan analyse --memory-limit=2G",
+        "test:browser": "vendor/bin/pest --testsuite=Browser --parallel",
         "openapi:generate": "@php ./vendor/bin/openapi app/ vendor/northwestern-sysdev/chassis/src/",
         "openapi:generate:v1": "@php ./vendor/bin/openapi app/ vendor/northwestern-sysdev/chassis/src/ --exclude Api/V2 --output docs/schemas/api-schema.yaml",
         "ide-helper:generate": [

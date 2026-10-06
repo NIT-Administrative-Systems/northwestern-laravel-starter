@@ -11,6 +11,10 @@ parameters:
         - database
         - config
         - tests
+    excludePaths:
+        # Browser tests are Pest functions: `$this` and the Chassis expectations are bound at
+        # runtime, where PHPStan can't see them.
+        - tests/Browser
     level: 6
     editorUrl: 'phpstorm://open?file=%%file%%&line=%%line%%'
     tmpDir: /tmp/phpstan
