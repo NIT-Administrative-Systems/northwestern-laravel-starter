@@ -71,7 +71,7 @@ class ServiceClientSchemas
                     ->maxLength(255),
 
                 Select::make('expiration')
-                    ->label('Secret Expiration')
+                    ->label('Secret Expires')
                     ->options(TokenExpiration::class)
                     ->placeholder('Select Date')
                     ->required()
@@ -94,7 +94,7 @@ class ServiceClientSchemas
                     ->label('Allowed IP Addresses')
                     ->default(fn ($record) => $record instanceof OAuthClient ? ($record->allowed_ips ?? []) : null)
                     ->placeholder('e.g., 192.168.1.1 or 10.0.0.0/8')
-                    ->helperText('Leave empty to allow all IPs. Use CIDR notation for ranges (e.g., 10.0.0.0/8).')
+                    ->helperText('Leave empty to allow any address. Use CIDR notation for ranges, such as 10.0.0.0/8.')
                     ->hintIcon(Heroicon::OutlinedInformationCircle)
                     ->hintIconTooltip(
                         'For integrations routed through an API gateway (e.g., Apigee), network filtering can typically be managed by the proxy and this field is unnecessary. Only define IPs here for direct, external integrations requiring an extra layer of application-level security.'
@@ -177,7 +177,7 @@ class ServiceClientSchemas
                 ->icon(Heroicon::OutlinedExclamationTriangle)
                 ->iconColor('warning')
                 ->iconSize(IconSize::Large)
-                ->description(new HtmlString('Copy the client ID and secret and store them securely.<br><strong class="text-black dark:text-white">For security reasons, the secret will not be shown again.</strong>'))
+                ->description(new HtmlString('Copy the client ID and secret and store them somewhere safe.<br><strong class="text-black dark:text-white">The secret won\'t be shown again.</strong>'))
                 ->schema([
                     CodeEntry::make('client_id')
                         ->label('Client ID')
@@ -208,7 +208,7 @@ class ServiceClientSchemas
     public static function copyCredentialsSubmitButton(Action $action): Action
     {
         return $action
-            ->label('I have copied the secret')
+            ->label('I\'ve copied the secret')
             ->icon(Heroicon::OutlinedCheckCircle)
             ->iconPosition(IconPosition::After)
             ->color('success')

@@ -55,7 +55,7 @@ final class McpClientResourceTest extends TestCase
         Livewire::test(ListMcpClients::class)
             ->assertCanSeeTableRecords([$mcpClient])
             ->assertCanNotSeeTableRecords([$application])
-            ->assertSee('Self-reported');
+            ->assertSee('Name not verified');
     }
 
     public function test_an_administrator_revokes_a_client(): void
@@ -71,7 +71,7 @@ final class McpClientResourceTest extends TestCase
 
         Livewire::test(ListMcpClients::class)
             ->callAction(TestAction::make('revoke')->table($client))
-            ->assertNotified('MCP client revoked');
+            ->assertNotified('MCP Client Revoked');
 
         $this->assertSame(CredentialStatus::Revoked, $client->fresh()?->status);
         $this->mcp($token, 'tools/list')->assertUnauthorized();

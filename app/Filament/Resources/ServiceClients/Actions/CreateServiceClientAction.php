@@ -26,13 +26,13 @@ class CreateServiceClientAction extends Action
         parent::setUp();
 
         $this->authorize(SystemPermission::ManageApiAccess)
-            ->label('Create Client')
+            ->label('Create Service Client')
             ->icon(Heroicon::OutlinedPlusCircle)
             ->outlined()
             ->closeModalByClickingAway(false)
             ->closeModalByEscaping(false)
             ->steps([
-                Wizard\Step::make('Configure Client')
+                Wizard\Step::make('Configure')
                     ->schema([
                         ServiceClientSchemas::clientConfigurationSection(),
                     ])
@@ -59,6 +59,6 @@ class CreateServiceClientAction extends Action
             ])
             ->modalSubmitAction(fn (Action $action) => ServiceClientSchemas::copyCredentialsSubmitButton($action))
             ->action(fn () => ServiceClientSchemas::clearCredentials(ServiceClientSchemas::SESSION_KEY_CREATE))
-            ->successNotificationTitle('Client created');
+            ->successNotificationTitle('Service Client Created');
     }
 }

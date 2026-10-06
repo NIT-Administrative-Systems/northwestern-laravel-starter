@@ -145,14 +145,14 @@ class ApiRequestLogsTable
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('created_at')
-                    ->label('Recorded At')
+                    ->label('Recorded')
                     ->dateTime()
                     ->since()
                     ->dateTimeTooltip()
                     ->sortable(query: fn (Builder $query, string $direction): Builder => $query->orderBy('api_request_logs.created_at', $direction)),
             ])
             ->defaultSort('created_at', 'desc')
-            ->heading('API Request Logs')
+            ->heading('API Requests')
             ->searchable(! $isRelationManager)
             // The table polls; skip the full COUNT(*) the default paginator runs on every refresh.
             ->paginationMode(PaginationMode::Simple)
@@ -238,8 +238,8 @@ class ApiRequestLogsTable
                     ->exporter(ApiRequestLogExporter::class)
                     ->hidden($isRelationManager),
             ])
-            ->emptyStateHeading('No API requests recorded')
-            ->emptyStateDescription('API request logs will appear here as protected endpoints are called.')
+            ->emptyStateHeading('No API Requests Recorded')
+            ->emptyStateDescription('Requests to the API appear here.')
             ->emptyStateIcon('heroicon-o-globe-alt');
     }
 }

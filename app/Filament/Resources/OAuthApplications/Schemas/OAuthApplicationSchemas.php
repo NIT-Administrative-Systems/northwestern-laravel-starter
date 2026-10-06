@@ -62,7 +62,7 @@ class OAuthApplicationSchemas
                 ->helperText('The most the application may ask for. People approve what it requests, and their own permissions still apply.')
                 ->options(OAuthServiceProvider::scopes()),
             Toggle::make('first_party')
-                ->label('First-party application')
+                ->label('First-Party Application')
                 ->helperText('Skip the consent screen. Only for applications your organization runs and trusts.'),
         ];
     }
@@ -88,7 +88,7 @@ class OAuthApplicationSchemas
             Section::make()
                 ->icon(Heroicon::OutlinedExclamationTriangle)
                 ->iconColor('warning')
-                ->description(new HtmlString('Give these to the application\'s developers. <strong class="text-black dark:text-white">The secret will not be shown again.</strong>'))
+                ->description(new HtmlString('Give these to the application\'s developers. <strong class="text-black dark:text-white">The secret won\'t be shown again.</strong>'))
                 ->schema([
                     CodeEntry::make('client_id')
                         ->label('Client ID')

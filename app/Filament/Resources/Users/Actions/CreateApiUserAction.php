@@ -37,7 +37,7 @@ class CreateApiUserAction extends Action
             ->closeModalByClickingAway(false)
             ->closeModalByEscaping(false)
             ->steps([
-                Wizard\Step::make('User Information')
+                Wizard\Step::make('Details')
                     ->schema([
                         Section::make()
                             ->schema([
@@ -46,8 +46,8 @@ class CreateApiUserAction extends Action
                                     ->schema([
                                         TextInput::make('first_name')
                                             ->label('Label')
-                                            ->placeholder('e.g., McC Reporting Tool')
-                                            ->helperText('Human-readable name for this API user. Will be suffixed with "API" for display purposes.')
+                                            ->placeholder('e.g., McCormick Reporting Tool')
+                                            ->helperText('Shown with "API" after it, such as "McCormick Reporting Tool API".')
                                             ->required()
                                             ->maxLength(255)
                                             ->autocomplete(false),
@@ -56,7 +56,7 @@ class CreateApiUserAction extends Action
                                             ->label('Username')
                                             ->prefix('api-')
                                             ->placeholder('e.g., mcc-reporting')
-                                            ->helperText('Technical identifier using lowercase letters and hyphens only')
+                                            ->helperText('Lowercase letters and hyphens only.')
                                             ->required()
                                             ->maxLength(255)
                                             ->autocomplete(false)
@@ -81,7 +81,7 @@ class CreateApiUserAction extends Action
                                                 },
                                             ])
                                             ->validationMessages([
-                                                'regex' => 'Username must only contain lowercase letters and hyphens.',
+                                                'regex' => 'Use only lowercase letters and hyphens.',
                                             ])
                                             ->afterStateUpdated(function ($state, $set) {
                                                 if (blank($state)) {
@@ -96,8 +96,8 @@ class CreateApiUserAction extends Action
 
                                 Textarea::make('description')
                                     ->label('Description')
-                                    ->placeholder('e.g., Access to student data for McCormick reporting purposes...')
-                                    ->helperText('Optional. Describe the purpose and usage of this API integration for internal reference.')
+                                    ->placeholder('e.g., Student data for McCormick reporting…')
+                                    ->helperText('Optional. What the integration is for, for administrators\' reference.')
                                     ->rows(3)
                                     ->maxLength(1000)
                                     ->columnSpanFull(),
@@ -106,13 +106,13 @@ class CreateApiUserAction extends Action
                                     ->label('Contact Email')
                                     ->email()
                                     ->placeholder('team@northwestern.edu')
-                                    ->helperText('Optional. When provided, automated notifications will be sent before a client secret expires. Leave blank if no notifications are needed.')
+                                    ->helperText('Optional. Gets an email before a service client\'s secret expires.')
                                     ->maxLength(255)
                                     ->columnSpanFull(),
                             ]),
                     ]),
 
-                Wizard\Step::make('Configure Client')
+                Wizard\Step::make('Configure')
                     ->schema([
                         ServiceClientSchemas::clientConfigurationSection(),
                     ])
@@ -155,8 +155,8 @@ class CreateApiUserAction extends Action
                     $user = User::query()->find($userId);
                     if ($user) {
                         Notification::make()
-                            ->title('API user created')
-                            ->body("{$user->full_name} has been created with an active client.")
+                            ->title('API User Created')
+                            ->body("{$user->full_name} is ready, with a service client.")
                             ->success()
                             ->send();
 

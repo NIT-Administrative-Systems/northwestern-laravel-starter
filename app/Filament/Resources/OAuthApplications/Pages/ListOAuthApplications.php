@@ -39,7 +39,7 @@ class ListOAuthApplications extends ListRecords
                         ->schema([
                             ...OAuthApplicationSchemas::detailsFields(),
                             Toggle::make('confidential')
-                                ->label('Confidential application')
+                                ->label('Confidential Application')
                                 ->helperText('On for applications with a server that can keep a secret. Off for desktop, mobile and browser applications, which use PKCE instead.')
                                 ->default(true),
                         ])
@@ -64,7 +64,7 @@ class ListOAuthApplications extends ListRecords
                 ])
                 ->modalSubmitActionLabel('Done')
                 ->action(fn () => OAuthApplicationSchemas::clearCredentials())
-                ->successNotificationTitle('Application registered'),
+                ->successNotificationTitle('Application Registered'),
         ];
     }
 }

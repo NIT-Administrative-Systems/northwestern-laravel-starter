@@ -35,9 +35,9 @@ class McpClientResource extends Resource
 
     protected static ?string $navigationLabel = 'MCP Clients';
 
-    protected static ?string $modelLabel = 'MCP Client';
+    protected static ?string $modelLabel = 'MCP client';
 
-    protected static ?string $pluralModelLabel = 'MCP Clients';
+    protected static ?string $pluralModelLabel = 'MCP clients';
 
     protected static ?string $slug = 'mcp-clients';
 
@@ -62,7 +62,7 @@ class McpClientResource extends Resource
             ->columns([
                 TextColumn::make('name')
                     ->label('Name')
-                    ->description('Self-reported')
+                    ->description('Name not verified')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('redirect_uris')
@@ -70,7 +70,7 @@ class McpClientResource extends Resource
                     ->formatStateUsing(fn (string $state): string => parse_url($state, PHP_URL_HOST) ?: (parse_url($state, PHP_URL_SCHEME) ?: $state))
                     ->badge()
                     ->color('gray'),
-                TextColumn::make('connections_count')->label('Connected People')->numeric(),
+                TextColumn::make('connections_count')->label('Connections')->numeric(),
                 TextColumn::make('last_used_at')->label('Last Used')->since()->dateTimeTooltip()->placeholder('Never')->sortable(),
                 TextColumn::make('status')->badge(),
                 TextColumn::make('created_at')->label('Registered')->since()->dateTimeTooltip()->sortable(),
@@ -84,12 +84,12 @@ class McpClientResource extends Resource
                     ->requiresConfirmation()
                     ->modalHeading('Revoke MCP Client')
                     ->modalDescription('The client loses access to everyone\'s account immediately, and every connection to it is removed. This can\'t be undone.')
-                    ->modalSubmitActionLabel('Revoke Client')
+                    ->modalSubmitActionLabel('Revoke MCP Client')
                     ->action(fn (OAuthClient $record, RevokeOAuthApplication $revoke) => $revoke($record))
-                    ->successNotificationTitle('MCP client revoked')
+                    ->successNotificationTitle('MCP Client Revoked')
                     ->visible(fn (OAuthClient $record): bool => $record->status === CredentialStatus::Active),
             ])
-            ->emptyStateHeading('No MCP clients')
+            ->emptyStateHeading('No MCP Clients')
             ->emptyStateDescription('AI clients register themselves here when someone connects one.');
     }
 

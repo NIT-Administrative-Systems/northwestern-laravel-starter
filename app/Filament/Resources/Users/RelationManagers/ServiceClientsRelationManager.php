@@ -31,7 +31,7 @@ class ServiceClientsRelationManager extends RelationManager
 {
     protected static string $relationship = 'oauthApps';
 
-    protected static ?string $title = 'Clients';
+    protected static ?string $title = 'Service Clients';
 
     public function isReadOnly(): bool
     {
@@ -47,7 +47,7 @@ class ServiceClientsRelationManager extends RelationManager
 
     public static function getTabComponent(Model $ownerRecord, string $pageClass): Tab
     {
-        return Tab::make('Clients')
+        return Tab::make('Service Clients')
             ->icon(Heroicon::OutlinedKey);
     }
 
@@ -93,7 +93,7 @@ class ServiceClientsRelationManager extends RelationManager
                         : 'The client accepts requests from any IP address'),
                 TextColumn::make('rotated_from_client.name')
                     ->label('Replaces')
-                    ->tooltip('The client this one was rotated from')
+                    ->tooltip('The service client this one replaced')
                     ->placeholder('N/A')
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('rotated_by_user.clerical_name')

@@ -21,7 +21,7 @@ class ApiRequestLogsRelationManager extends RelationManager
 {
     protected static string $relationship = 'api_request_logs';
 
-    protected static ?string $title = 'API Request Logs';
+    protected static ?string $title = 'API Requests';
 
     protected static ?string $recordTitleAttribute = 'id';
 
@@ -43,7 +43,7 @@ class ApiRequestLogsRelationManager extends RelationManager
 
     public static function getTabComponent(Model $ownerRecord, string $pageClass): Tab
     {
-        return Tab::make('API Request Logs')
+        return Tab::make('API Requests')
             ->icon(Heroicon::OutlinedClipboardDocumentList);
     }
 

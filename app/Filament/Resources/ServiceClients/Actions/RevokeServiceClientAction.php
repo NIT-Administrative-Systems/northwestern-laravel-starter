@@ -30,11 +30,11 @@ class RevokeServiceClientAction extends Action
             ->outlined()
             ->size(Size::ExtraSmall)
             ->requiresConfirmation()
-            ->modalHeading('Revoke Client')
-            ->modalDescription('The client and every access token it holds stop working immediately. This can\'t be undone. Revoking a client that an integration still uses will cause an outage for it.')
-            ->modalSubmitActionLabel('Revoke Client')
+            ->modalHeading('Revoke Service Client')
+            ->modalDescription('The service client and every access token it holds stop working immediately, and so does any integration still using it. This can\'t be undone.')
+            ->modalSubmitActionLabel('Revoke Service Client')
             ->action(fn (OAuthClient $record, RevokeServiceClient $revokeServiceClient) => $revokeServiceClient($record))
-            ->successNotificationTitle('Client revoked')
+            ->successNotificationTitle('Service Client Revoked')
             ->visible(fn (OAuthClient $record): bool => ServiceClientSchemas::isMutable($record));
     }
 }

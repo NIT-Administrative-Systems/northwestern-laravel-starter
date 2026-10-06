@@ -12,7 +12,7 @@
                 <div>
                     <p class="text-danger-800 dark:text-danger-200 font-semibold">API Disabled</p>
                     <p class="text-danger-600 dark:text-danger-300 text-sm">
-                        All API routes are currently responding with 503 Service Unavailable.
+                        Every API route responds with 503 Service Unavailable.
                     </p>
                 </div>
             </div>
@@ -71,7 +71,7 @@
                     <x-filament::icon class="text-info-600 dark:text-info-400 h-5 w-5" icon="heroicon-o-clock" />
                 </div>
                 <div>
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Avg Response (24h)</p>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Average Response (24h)</p>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white">
                         {{ $stats['avg_response_time_24h'] !== null ? $stats['avg_response_time_24h'] . 'ms' : 'N/A' }}
                     </p>
@@ -108,14 +108,14 @@
                         <p class="mb-3 text-sm font-medium text-gray-700 dark:text-gray-300">Secrets Expiring Soon</p>
                         <div class="space-y-2">
                             <div class="flex items-center justify-between">
-                                <span class="text-sm text-gray-500 dark:text-gray-400">Within 7 days</span>
+                                <span class="text-sm text-gray-500 dark:text-gray-400">Within 7 Days</span>
                                 <span
                                       class="{{ $stats['secrets_expiring_7d'] > 0 ? 'bg-warning-100 text-warning-800 dark:bg-warning-500/20 dark:text-warning-300' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }} rounded-full px-2 py-0.5 text-xs font-medium">
                                     {{ $stats['secrets_expiring_7d'] }}
                                 </span>
                             </div>
                             <div class="flex items-center justify-between">
-                                <span class="text-sm text-gray-500 dark:text-gray-400">Within 30 days</span>
+                                <span class="text-sm text-gray-500 dark:text-gray-400">Within 30 Days</span>
                                 <span
                                       class="{{ $stats['secrets_expiring_30d'] > 0 ? 'bg-info-100 text-info-800 dark:bg-info-500/20 dark:text-info-300' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }} rounded-full px-2 py-0.5 text-xs font-medium">
                                     {{ $stats['secrets_expiring_30d'] }}

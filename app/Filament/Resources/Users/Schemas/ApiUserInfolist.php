@@ -69,7 +69,7 @@ class ApiUserInfolist
                                         ->color('primary')
                                         ->size(Size::ExtraSmall)
                                         ->modalHeading('Edit API User Description')
-                                        ->modalDescription('Optional. Describe the purpose and usage of this API integration for internal reference.')
+                                        ->modalDescription('Optional. What the integration is for, for administrators\' reference.')
                                         ->schema([
                                             Textarea::make('description')
                                                 ->label('Description')
@@ -85,15 +85,15 @@ class ApiUserInfolist
                                             ]);
 
                                             Notification::make()
-                                                ->title('Description updated')
-                                                ->body('The API user description has been updated.')
+                                                ->title('Description Updated')
+                                                ->body('The description was saved.')
                                                 ->success()
                                                 ->send();
                                         }),
                                 ]),
                         ]),
 
-                    Section::make('Account & Usage')
+                    Section::make('Account and Usage')
                         ->icon(Heroicon::OutlinedShieldCheck)
                         ->columnSpan([
                             'default' => 1,
@@ -107,13 +107,13 @@ class ApiUserInfolist
 
                             Group::make([
                                 TextEntry::make('active_clients_count')
-                                    ->label('Active Clients')
+                                    ->label('Active Service Clients')
                                     ->inlineLabel()
                                     ->getStateUsing(fn (User $record) => number_format(OAuthClient::query()->whereMorphedTo('owner', $record)->active()->count())),
 
                                 TextEntry::make('last_api_request_at')
                                     ->label('Last API Request')
-                                    ->tooltip('The most recent request from any of this user\'s clients')
+                                    ->tooltip('The most recent request from any of its service clients')
                                     ->placeholder('Never')
                                     ->inlineLabel()
                                     ->dateTime()
