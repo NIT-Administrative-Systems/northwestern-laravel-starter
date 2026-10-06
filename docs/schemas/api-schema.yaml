@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: 'Northwestern Laravel Starter API'
-  description: 'Core API endpoints provided by the Northwestern Laravel Starter, including user profile information and access token management.'
+  description: 'The API endpoints the Northwestern Laravel Starter ships. Applications add their own beside them.'
   version: 1.0.0
 paths:
   /api/v1/me:
@@ -269,11 +269,11 @@ components:
         first:
           type: string
           format: uri
-          example: 'https://example.test/api/v1/me/tokens?page=1'
+          example: 'https://example.test/api/v1/records?page=1'
         last:
           type: string
           format: uri
-          example: 'https://example.test/api/v1/me/tokens?page=1'
+          example: 'https://example.test/api/v1/records?page=1'
         prev:
           type: string
           format: uri
@@ -294,7 +294,7 @@ components:
         url:
           type: string
           format: uri
-          example: 'https://example.test/api/v1/me/tokens?page=1'
+          example: 'https://example.test/api/v1/records?page=1'
           nullable: true
         label:
           type: string
@@ -331,7 +331,7 @@ components:
         path:
           type: string
           format: uri
-          example: 'https://example.test/api/v1/me/tokens'
+          example: 'https://example.test/api/v1/records'
         per_page:
           type: integer
           example: 20
@@ -353,7 +353,7 @@ components:
               page: null
               active: false
             -
-              url: 'https://example.test/api/v1/me/tokens?page=1'
+              url: 'https://example.test/api/v1/records?page=1'
               label: '1'
               page: 1
               active: true
@@ -418,16 +418,23 @@ components:
   securitySchemes:
     oauth2:
       type: oauth2
-      description: "OAuth 2.0. Service integrations use the client credentials flow with a client created in Administration; the access token acts as the client's API user."
+      description: "OAuth 2.0. A service integration uses the client credentials flow with a service client created in Administration, and its token acts as the client's API user. An application registered in Administration uses the authorization code flow with PKCE, and its token acts as the person who connected it, within the scopes they approved."
       flows:
         clientCredentials:
           tokenUrl: /oauth/token
-          scopes: {}
+          scopes:
+            view-users: "View everyone's profiles and details."
+        authorizationCode:
+          authorizationUrl: /oauth/authorize
+          tokenUrl: /oauth/token
+          refreshUrl: /oauth/token
+          scopes:
+            view-users: "View everyone's profiles and details."
     bearerToken:
       type: http
-      description: 'An OAuth access token, sent as a bearer token in the Authorization header.'
+      description: 'A personal access token created on the Account page, or an access token from either OAuth flow, sent as a bearer token in the Authorization header.'
       scheme: bearer
 tags:
   -
     name: Users
-    description: 'Retrieve information about the authenticated API user.'
+    description: 'Information about whoever the access token acts as: an API user for a service client, or the person for a personal access token or an application.'
