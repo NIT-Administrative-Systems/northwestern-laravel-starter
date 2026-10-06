@@ -6,8 +6,8 @@ namespace Tests\Feature\Domains\Auth\Mail;
 
 use App\Domains\Auth\Mail\ClientSecretExpirationNotification;
 use App\Domains\Auth\Models\OAuthClient;
-use App\Domains\Core\Formatting\NorthwesternDateTime;
 use App\Domains\User\Models\User;
+use Northwestern\SysDev\Chassis\Formatting\NorthwesternDateTime;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 

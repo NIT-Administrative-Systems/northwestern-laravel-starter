@@ -12,8 +12,6 @@ use App\Domains\User\Models\User;
 use App\Domains\User\Support\UserOptionLabel;
 use App\Domains\User\Support\UserSearch;
 use App\Filament\Exports\RoleActivityExporter;
-use App\Filament\Support\Filters\DateRangeFilter;
-use App\Filament\Support\Formatting\BadgePillRenderer;
 use Filament\Actions\Action;
 use Filament\Actions\ExportAction;
 use Filament\Actions\ViewAction;
@@ -23,7 +21,9 @@ use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\HtmlString;
+use Northwestern\FilamentTheme\Filters\DateRangeFilter;
 
 class RoleActivityTable
 {
@@ -288,8 +288,7 @@ class RoleActivityTable
     /**
      * Format the changed roles for display as HTML badges.
      *
-     * Uses the pill() pattern from RoleDefinitionHistoryTable for consistent
-     * Filament-styled badges with proper dark mode support.
+     * Each role is a Filament badge in its role type's color.
      */
     private static function formatChangedRoles(Audit $record): string
     {
@@ -315,22 +314,33 @@ class RoleActivityTable
                 $tooltip = e(json_encode(['content' => 'This role has been deleted.', 'theme' => 'light']));
 
                 return '<span x-tooltip="' . $tooltip . '">'
-                    . resolve(BadgePillRenderer::class)->render($role['name'], 'gray', 'line-through opacity-60')
+                    . self::badge($role['name'], 'gray', 'line-through opacity-60')
                     . '</span>';
             }
 
             // No link of its own: the whole row already links to the audit, and a link can't sit inside another.
-            return resolve(BadgePillRenderer::class)->render($role['name'], $roleType?->getColor() ?? 'gray');
+            return self::badge($role['name'], $roleType?->getColor() ?? 'gray');
         }, $visible);
 
         if ($remaining > 0) {
             $overflowRoles = array_slice($changedRoles, $maxVisible);
             $tooltip = implode(', ', array_column($overflowRoles, 'name'));
             $parts[] = '<span x-tooltip="' . e(json_encode(['content' => $tooltip, 'theme' => 'light'])) . '">'
-                . resolve(BadgePillRenderer::class)->render('+' . $remaining . ' more', 'gray')
+                . self::badge('+' . $remaining . ' more', 'gray')
                 . '</span>';
         }
 
         return '<div class="flex flex-wrap items-center gap-1">' . implode('', $parts) . '</div>';
+    }
+
+    /**
+     * Filament's badge, for HTML the column builds itself.
+     */
+    private static function badge(string $label, string $color, string $class = ''): string
+    {
+        return Blade::render(
+            '<x-filament::badge :color="$color" size="sm" :class="$class">{{ $label }}</x-filament::badge>',
+            ['label' => $label, 'color' => $color, 'class' => $class],
+        );
     }
 }

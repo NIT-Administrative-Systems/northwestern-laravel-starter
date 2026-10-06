@@ -28,7 +28,7 @@
                             </time>
                             @if ($live && $announcement->ends_at)
                                 · Until
-                                {{ \App\Domains\Core\Formatting\NorthwesternDateTime::format($announcement->ends_at, $timezone, withZone: false) }}
+                                {{ \Northwestern\SysDev\Chassis\Formatting\NorthwesternDateTime::format($announcement->ends_at, $timezone, withZone: false) }}
                             @elseif (!$live)
                                 · Ended {{ $announcement->ends_at?->timezone($timezone)->format('F j, Y') }}
                             @endif

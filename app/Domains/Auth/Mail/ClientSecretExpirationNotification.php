@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace App\Domains\Auth\Mail;
 
 use App\Domains\Auth\Models\OAuthClient;
-use App\Domains\Core\Formatting\CountInWords;
-use App\Domains\Core\Formatting\NorthwesternDateTime;
 use App\Domains\User\Models\User;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -14,6 +12,8 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\Attributes\WithoutRelations;
+use Northwestern\SysDev\Chassis\Formatting\CountInWords;
+use Northwestern\SysDev\Chassis\Formatting\NorthwesternDateTime;
 
 class ClientSecretExpirationNotification extends Mailable implements ShouldQueue
 {

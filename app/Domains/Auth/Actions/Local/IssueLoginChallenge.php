@@ -7,7 +7,6 @@ namespace App\Domains\Auth\Actions\Local;
 use App\Domains\Auth\Contracts\OneTimeCodeGenerator;
 use App\Domains\Auth\Jobs\SendLoginCodeEmailJob;
 use App\Domains\Auth\Models\LoginChallenge;
-use App\Domains\Core\Formatting\CountInWords;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterval;
 use Illuminate\Support\Facades\Crypt;
@@ -15,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
+use Northwestern\SysDev\Chassis\Formatting\CountInWords;
 use RuntimeException;
 
 /**

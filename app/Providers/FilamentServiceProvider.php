@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Domains\User\Models\Export;
-use App\Filament\Support\Formatting\TitleCase;
 use Filament\Actions\AttachAction;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
@@ -20,6 +19,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\ServiceProvider;
+use Northwestern\SysDev\Chassis\Formatting\TitleCase;
 
 class FilamentServiceProvider extends ServiceProvider
 {

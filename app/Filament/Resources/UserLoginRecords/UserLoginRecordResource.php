@@ -9,11 +9,11 @@ use App\Domains\User\Models\UserLoginRecord;
 use App\Filament\Navigation\AdministrationNavGroup;
 use App\Filament\Resources\UserLoginRecords\Pages\ListUserLoginRecords;
 use App\Filament\Resources\UserLoginRecords\Tables\UserLoginRecordsTable;
-use App\Filament\Support\Formatting\TitleCase;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Northwestern\SysDev\Chassis\Formatting\TitleCase;
 use UnitEnum;
 
 class UserLoginRecordResource extends Resource

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\Support\Gateways\Mail;
 
-use App\Domains\Core\Formatting\NorthwesternDateTime;
 use App\Domains\Support\Gateways\Mail\SupportTicketConfirmation;
 use App\Domains\Support\Models\SupportTicket;
 use App\Domains\User\Models\User;
+use Northwestern\SysDev\Chassis\Formatting\NorthwesternDateTime;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 

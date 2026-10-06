@@ -7,7 +7,6 @@ namespace App\Filament\App\Pages\Auth;
 use App\Domains\Auth\Actions\Local\AuthenticateWithLoginCode;
 use App\Domains\Auth\Actions\Local\RequestLoginCode;
 use App\Domains\Auth\ValueObjects\LoginCodeSession;
-use App\Domains\Core\Formatting\CountInWords;
 use App\Filament\App\Pages\Concerns\HasSiteHeader;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
@@ -29,6 +28,7 @@ use Illuminate\Support\HtmlString;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Locked;
 use Livewire\Features\SupportRedirects\Redirector;
+use Northwestern\SysDev\Chassis\Formatting\CountInWords;
 
 /**
  * Passwordless sign-in for local (non-NetID) users, in two steps on one page:

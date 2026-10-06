@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Domains\User\Models;
 
 use App\Domains\Core\Models\BaseModel;
-use App\Domains\Core\Models\Concerns\PrunesAfterRetentionPeriod;
 use App\Domains\User\Models\Concerns\AuditsRoles;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -13,6 +12,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Northwestern\SysDev\Chassis\Models\Concerns\PrunesAfterRetentionPeriod;
 
 /**
  * @property int $id

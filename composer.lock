@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ecf5763b893b1fd27a4ec49562677b3b",
+    "content-hash": "88031303977f391c107ef3c4f90977f8",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -5506,16 +5506,16 @@
         },
         {
             "name": "northwestern-sysdev/chassis",
-            "version": "v1.3.0",
+            "version": "v1.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/NIT-Administrative-Systems/chassis",
-                "reference": "cac958e0e71348ca1de47cd0667c135ecd8ec411"
+                "reference": "bb2069fa1ca964b84cec6d0bf61009d98495dfa0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/NIT-Administrative-Systems/chassis/zipball/cac958e0e71348ca1de47cd0667c135ecd8ec411",
-                "reference": "cac958e0e71348ca1de47cd0667c135ecd8ec411",
+                "url": "https://api.github.com/repos/NIT-Administrative-Systems/chassis/zipball/bb2069fa1ca964b84cec6d0bf61009d98495dfa0",
+                "reference": "bb2069fa1ca964b84cec6d0bf61009d98495dfa0",
                 "shasum": ""
             },
             "require": {
@@ -5529,12 +5529,14 @@
             "require-dev": {
                 "brianium/paratest": "^7.8",
                 "driftingly/rector-laravel": "^2.0",
+                "filament/filament": "^4.0||^5.0",
                 "lab404/laravel-impersonate": "^1.7",
                 "larastan/larastan": "^3.0",
                 "laravel/passport": "^13.7",
                 "laravel/pint": "^1.21",
                 "orchestra/testbench": "^10.0||^11.0",
                 "pestphp/pest": "^4.1||^5.0",
+                "pestphp/pest-plugin-browser": "^4.1||^5.0",
                 "phpunit/phpunit": "^12.0||^13.0",
                 "rector/rector": "^2.0",
                 "spatie/laravel-db-snapshots": "^2.7"
@@ -5542,6 +5544,7 @@
             "suggest": {
                 "lab404/laravel-impersonate": "Required for impersonator tracking in audit records",
                 "laravel/passport": "Required for AuthenticatesPassportTokens, LogsPassportRequests and the Passport helpers (^13.7)",
+                "pestphp/pest-plugin-browser": "Required for the Testing\\Browser expectations and helpers (^4.1 or ^5.0)",
                 "sentry/sentry-laravel": "Required for SentryExceptionHandler",
                 "spatie/laravel-db-snapshots": "Required for database snapshot commands"
             },
@@ -5572,7 +5575,7 @@
                 "issues": "https://github.com/NIT-Administrative-Systems/chassis/issues",
                 "source": "https://github.com/NIT-Administrative-Systems/chassis"
             },
-            "time": "2026-10-05T19:05:29+00:00"
+            "time": "2026-10-06T19:20:47+00:00"
         },
         {
             "name": "northwestern-sysdev/event-hub-php-sdk",
@@ -5692,16 +5695,16 @@
         },
         {
             "name": "northwestern-sysdev/northwestern-filament-theme",
-            "version": "v4.1.2",
+            "version": "v4.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/NIT-Administrative-Systems/northwestern-filament-theme",
-                "reference": "f14c2ebad39cc4efc8013a67dd2eb6498b0d33f1"
+                "reference": "45ea0b904be7634a62c0cc18e69f99453833f6a6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/NIT-Administrative-Systems/northwestern-filament-theme/zipball/f14c2ebad39cc4efc8013a67dd2eb6498b0d33f1",
-                "reference": "f14c2ebad39cc4efc8013a67dd2eb6498b0d33f1",
+                "url": "https://api.github.com/repos/NIT-Administrative-Systems/northwestern-filament-theme/zipball/45ea0b904be7634a62c0cc18e69f99453833f6a6",
+                "reference": "45ea0b904be7634a62c0cc18e69f99453833f6a6",
                 "shasum": ""
             },
             "require": {
@@ -5756,7 +5759,7 @@
                 "issues": "https://github.com/NIT-Administrative-Systems/northwestern-filament-theme/issues",
                 "source": "https://github.com/NIT-Administrative-Systems/northwestern-filament-theme"
             },
-            "time": "2026-10-06T15:40:24+00:00"
+            "time": "2026-10-06T19:35:51+00:00"
         },
         {
             "name": "northwestern-sysdev/tdx-php-sdk",

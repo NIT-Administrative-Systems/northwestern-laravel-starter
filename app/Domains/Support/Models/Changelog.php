@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Domains\Support\Models;
 
 use App\Domains\Core\Casts\MarkdownWithJiraLinksCast;
-use App\Domains\Core\Markdown\ShiftHeadings;
 use App\Domains\Core\Models\BaseModel;
 use App\Domains\Support\Seeders\ChangelogSeeder;
 use Database\Factories\Domains\Support\Models\ChangelogFactory;
@@ -13,6 +12,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\HtmlString;
+use Northwestern\SysDev\Chassis\Markdown\ShiftHeadings;
 use Spatie\LaravelMarkdown\MarkdownRenderer;
 
 /**

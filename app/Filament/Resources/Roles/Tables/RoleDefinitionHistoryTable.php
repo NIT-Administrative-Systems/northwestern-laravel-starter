@@ -7,8 +7,6 @@ namespace App\Filament\Resources\Roles\Tables;
 use App\Domains\Auth\Models\RoleType;
 use App\Domains\User\Models\Audit;
 use App\Domains\User\Models\Concerns\AuditsPermissions;
-use App\Filament\Support\Filters\DateRangeFilter;
-use App\Filament\Support\Formatting\BadgePillRenderer;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\Layout\Panel;
 use Filament\Tables\Columns\Layout\Split;
@@ -18,8 +16,10 @@ use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
+use Northwestern\FilamentTheme\Filters\DateRangeFilter;
 
 /**
  * @phpstan-import-type PermissionData from AuditsPermissions
@@ -139,9 +139,9 @@ class RoleDefinitionHistoryTable
     public static function summarizeChanges(Audit $audit): HtmlString
     {
         $html = match ($audit->event) {
-            'created' => resolve(BadgePillRenderer::class)->render('Role Created', 'success'),
-            'deleted' => resolve(BadgePillRenderer::class)->render('Role Deleted', 'danger'),
-            'restored' => resolve(BadgePillRenderer::class)->render('Role Restored', 'success'),
+            'created' => self::badge('Role Created', 'success'),
+            'deleted' => self::badge('Role Deleted', 'danger'),
+            'restored' => self::badge('Role Restored', 'success'),
             'updated' => self::summarizeAttributeChanges($audit),
             'permissions_modified' => self::summarizePermissionChanges($audit),
             default => '<span class="text-sm text-gray-500">No details</span>',
@@ -195,7 +195,7 @@ class RoleDefinitionHistoryTable
 
         return filled($changes)
             ? '<div class="flex flex-col gap-1">' . implode('', $changes) . '</div>'
-            : resolve(BadgePillRenderer::class)->render('Role Updated', 'gray');
+            : self::badge('Role Updated', 'gray');
     }
 
     /**
@@ -239,7 +239,7 @@ class RoleDefinitionHistoryTable
 
         return filled($parts)
             ? '<div class="flex flex-col gap-1">' . implode('', $parts) . '</div>'
-            : resolve(BadgePillRenderer::class)->render('Permissions Modified', 'gray');
+            : self::badge('Permissions Modified', 'gray');
     }
 
     /**
@@ -255,13 +255,13 @@ class RoleDefinitionHistoryTable
         $visible = array_slice($labels, 0, $maxVisible);
         $remaining = $count - $maxVisible;
 
-        $parts = array_map(fn (string $label) => resolve(BadgePillRenderer::class)->render($prefix . ' ' . $label, $color), $visible);
+        $parts = array_map(fn (string $label) => self::badge($prefix . ' ' . $label, $color), $visible);
 
         if ($remaining > 0) {
             $overflowLabels = array_slice($labels, $maxVisible);
             $tooltip = e(implode(', ', $overflowLabels));
             $parts[] = '<span title="' . $tooltip . '">'
-                . resolve(BadgePillRenderer::class)->render('+' . $remaining . ' more', 'gray')
+                . self::badge('+' . $remaining . ' more', 'gray')
                 . '</span>';
         }
 
@@ -317,5 +317,16 @@ class RoleDefinitionHistoryTable
         }
 
         return (string) $value;
+    }
+
+    /**
+     * Filament's badge, for HTML the column builds itself.
+     */
+    private static function badge(string $label, string $color, string $class = ''): string
+    {
+        return Blade::render(
+            '<x-filament::badge :color="$color" size="sm" :class="$class">{{ $label }}</x-filament::badge>',
+            ['label' => $label, 'color' => $color, 'class' => $class],
+        );
     }
 }

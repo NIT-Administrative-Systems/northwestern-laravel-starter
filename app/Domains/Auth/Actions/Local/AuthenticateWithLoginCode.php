@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Domains\Auth\Actions\Local;
 
 use App\Domains\Auth\Models\LoginChallenge;
-use App\Domains\Core\Formatting\CountInWords;
 use App\Domains\User\Actions\RecordLogin;
 use App\Domains\User\Models\User;
 use Illuminate\Http\Request;
@@ -13,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Timebox;
 use Illuminate\Validation\ValidationException;
+use Northwestern\SysDev\Chassis\Formatting\CountInWords;
 
 /**
  * Verifies a login code against its challenge and resolves the local user it

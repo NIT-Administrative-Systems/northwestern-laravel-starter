@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Filament\Resources\OAuthApplications\Schemas;
 
 use App\Domains\Auth\Models\OAuthClient;
-use App\Domains\Auth\Rules\OAuthRedirectUri;
 use App\Providers\OAuthServiceProvider;
 use Closure;
 use Filament\Forms\Components\CheckboxList;
@@ -22,6 +21,7 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\HtmlString;
+use Northwestern\SysDev\Chassis\Rules\OAuthRedirectUri;
 use Phiki\Grammar\Grammar;
 
 /**

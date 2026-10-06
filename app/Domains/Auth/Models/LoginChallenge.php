@@ -10,8 +10,8 @@ use App\Domains\Auth\Actions\Local\RequestLoginCode;
 use App\Domains\Auth\Actions\Local\VerifyLoginChallengeCode;
 use App\Domains\Auth\Jobs\SendLoginCodeEmailJob;
 use App\Domains\Core\Models\BaseModel;
-use App\Domains\Core\Models\Concerns\PrunesAfterRetentionPeriod;
 use Carbon\CarbonImmutable;
+use Northwestern\SysDev\Chassis\Models\Concerns\PrunesAfterRetentionPeriod;
 
 /**
  * Represents the OTP challenge state for a local user authentication attempt.

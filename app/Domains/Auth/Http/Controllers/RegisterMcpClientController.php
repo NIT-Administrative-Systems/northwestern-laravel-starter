@@ -6,12 +6,12 @@ namespace App\Domains\Auth\Http\Controllers;
 
 use App\Domains\Auth\Actions\Applications\RegisterOAuthApplication;
 use App\Domains\Auth\Enums\ClientOrigin;
-use App\Domains\Auth\Rules\OAuthRedirectUri;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Laravel\Mcp\Server\Registrar;
+use Northwestern\SysDev\Chassis\Rules\OAuthRedirectUri;
 
 /**
  * OAuth dynamic client registration (RFC 7591) for MCP clients. Anyone may register, so a

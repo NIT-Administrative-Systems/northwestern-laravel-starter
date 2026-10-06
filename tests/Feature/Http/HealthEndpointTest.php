@@ -2,14 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\Http\Middleware;
+namespace Tests\Feature\Http;
 
-use App\Http\Middleware\RequireHealthSecretToken;
-use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversNothing;
 use Tests\TestCase;
 
-#[CoversClass(RequireHealthSecretToken::class)]
-final class RequireHealthSecretTokenTest extends TestCase
+/**
+ * The JSON health endpoint in routes/api.php, behind Chassis's RequireSecretToken: closed until
+ * HEALTH_SECRET_TOKEN is set, then open only to requests that send it.
+ */
+#[CoversNothing]
+final class HealthEndpointTest extends TestCase
 {
     // .env.example ships HEALTH_SECRET_TOKEN empty, and Spatie's middleware treats that as "no check".
     public function test_the_endpoint_is_closed_until_a_token_is_set(): void
