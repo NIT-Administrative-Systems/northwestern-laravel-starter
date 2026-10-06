@@ -108,15 +108,15 @@ class RoleForm
                     ->description(function ($get, $record) {
                         $roleTypeId = $get('role_type_id');
                         if (! $roleTypeId) {
-                            return 'The permissions that users with this role should have.';
+                            return 'What people with this role can do.';
                         }
 
                         $roleType = $record->role_type ?? once(fn () => RoleType::find($roleTypeId));
                         if ($roleType?->slug === RoleTypeEnum::ApiIntegration) {
-                            return 'Select data access permissions appropriate for API integrations. UI-specific permissions are not available for API roles.';
+                            return 'Choose the data an API integration needs. Permissions for the interface aren\'t available to API roles.';
                         }
 
-                        return 'The permissions that users with this role should have.';
+                        return 'What people with this role can do.';
                     })
                     ->collapsible()
                     ->schema(array_filter([
@@ -184,7 +184,7 @@ class RoleForm
 
                         // System Permissions - only visible to users with ManageAll and hidden for API roles
                         filled($systemPermissions) ? CheckboxList::make('system_permissions')
-                            ->label('System Managed Permissions')
+                            ->label('System-Managed Permissions')
                             ->helperText(new HtmlString(<<<'HTML'
         <div class="mt-3 rounded-md border border-red-500/40 bg-red-500/5 px-4 py-3 text-xs leading-relaxed text-red-700 dark:text-red-400">
             <p class="font-semibold text-red-700 dark:text-red-400">Sensitive Permissions</p>

@@ -87,29 +87,29 @@ class UsersTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('last_directory_sync_at')
-                    ->label('Last Directory Sync At')
+                    ->label('Last Directory Sync')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('directory_sync_last_failed_at')
-                    ->label('Last Directory Sync Failed At')
+                    ->label('Last Directory Sync Failed')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
-                    ->label('Created At')
+                    ->label('Created')
                     ->since()
                     ->dateTimeTooltip()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
-                    ->label('Updated At')
+                    ->label('Updated')
                     ->since()
                     ->dateTimeTooltip()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('deleted_at')
-                    ->label('Deleted At')
+                    ->label('Deleted')
                     ->since()
                     ->dateTimeTooltip()
                     ->sortable()
@@ -153,7 +153,7 @@ class UsersTable
                     ->color('gray')
                     ->exporter(UserExporter::class),
             ])
-            ->emptyStateHeading('No users found')
+            ->emptyStateHeading('No Users Found')
             ->emptyStateIcon('heroicon-o-users');
     }
 }

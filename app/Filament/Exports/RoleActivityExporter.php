@@ -27,11 +27,11 @@ class RoleActivityExporter extends Exporter
                 }),
 
             ExportColumn::make('auditable.username')
-                ->label('User NetID')
+                ->label('NetID')
                 ->formatStateUsing(fn (?string $state) => self::sanitizeCsvFormula($state)),
 
             ExportColumn::make('auditable.clerical_name')
-                ->label('User Name')
+                ->label('Name')
                 ->formatStateUsing(fn (?string $state) => self::sanitizeCsvFormula($state)),
 
             ExportColumn::make('changed_role_names')
@@ -72,11 +72,11 @@ class RoleActivityExporter extends Exporter
                 }),
 
             ExportColumn::make('user.username')
-                ->label('Performed By NetID')
+                ->label('Performed by NetID')
                 ->formatStateUsing(fn (?string $state) => self::sanitizeCsvFormula($state)),
 
             ExportColumn::make('user.clerical_name')
-                ->label('Performed By Name')
+                ->label('Performed by Name')
                 ->formatStateUsing(fn (?string $state) => self::sanitizeCsvFormula($state)),
 
             ExportColumn::make('impersonator.username')

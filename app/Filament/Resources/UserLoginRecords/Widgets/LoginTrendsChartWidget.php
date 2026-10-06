@@ -25,11 +25,11 @@ class LoginTrendsChartWidget extends ChartWidget
             $end = Carbon::parse($this->endDate, 'UTC')->setTimezone(auth()->user()->timezone);
 
             if ($start->isSameDay($end)) {
-                return '24-Hour Login Trends';
+                return '24-Hour Sign-In Trends';
             }
         }
 
-        return 'Login Trends';
+        return 'Sign-In Trends';
     }
 
     protected function getData(): array
@@ -107,7 +107,7 @@ class LoginTrendsChartWidget extends ChartWidget
         return [
             'datasets' => [
                 [
-                    'label' => 'Total Logins',
+                    'label' => 'Total Sign-Ins',
                     'data' => $totalData,
                     'borderColor' => 'rgb(59, 130, 246)',
                     'backgroundColor' => 'rgba(59, 130, 246, 0.1)',

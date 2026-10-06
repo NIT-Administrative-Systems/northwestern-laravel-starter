@@ -86,7 +86,7 @@ class SupportTicketInfolist
                                             ->placeholder('—'),
 
                                         TextEntry::make('posted_to_ticketing_system_at')
-                                            ->label('Delivered At')
+                                            ->label('Delivered')
                                             ->since()
                                             ->dateTimeTooltip()
                                             ->placeholder('—'),

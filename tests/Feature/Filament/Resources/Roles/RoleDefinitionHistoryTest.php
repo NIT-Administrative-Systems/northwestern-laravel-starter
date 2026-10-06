@@ -152,7 +152,7 @@ final class RoleDefinitionHistoryTest extends TestCase
         $result = RoleDefinitionHistoryTable::summarizeChanges($audit);
 
         $this->assertInstanceOf(HtmlString::class, $result);
-        $this->assertStringContainsString('Role created', $result->toHtml());
+        $this->assertStringContainsString('Role Created', $result->toHtml());
     }
 
     public function test_summarize_changes_for_deleted_event(): void
@@ -164,7 +164,7 @@ final class RoleDefinitionHistoryTest extends TestCase
 
         $result = RoleDefinitionHistoryTable::summarizeChanges($audit);
 
-        $this->assertStringContainsString('Role deleted', $result->toHtml());
+        $this->assertStringContainsString('Role Deleted', $result->toHtml());
     }
 
     public function test_summarize_changes_for_restored_event(): void
@@ -176,7 +176,7 @@ final class RoleDefinitionHistoryTest extends TestCase
 
         $result = RoleDefinitionHistoryTable::summarizeChanges($audit);
 
-        $this->assertStringContainsString('Role restored', $result->toHtml());
+        $this->assertStringContainsString('Role Restored', $result->toHtml());
     }
 
     public function test_summarize_changes_for_name_update(): void
@@ -204,7 +204,7 @@ final class RoleDefinitionHistoryTest extends TestCase
         $result = RoleDefinitionHistoryTable::summarizeChanges($audit);
 
         $this->assertStringContainsString('Name', $result->toHtml());
-        $this->assertStringContainsString('Assignment locked', $result->toHtml());
+        $this->assertStringContainsString('Assignment Locked', $result->toHtml());
     }
 
     public function test_summarize_changes_for_permissions_added(): void
@@ -270,7 +270,7 @@ final class RoleDefinitionHistoryTest extends TestCase
 
         // Same value should produce "Role updated" fallback
         $result = RoleDefinitionHistoryTable::summarizeChanges($audit);
-        $this->assertStringContainsString('Role updated', $result->toHtml());
+        $this->assertStringContainsString('Role Updated', $result->toHtml());
     }
 
     public function test_history_table_empty_state_renders(): void
@@ -285,6 +285,6 @@ final class RoleDefinitionHistoryTest extends TestCase
 
         Livewire::test(RoleDefinitionHistory::class, ['record' => $this->role->getKey()])
             ->assertSuccessful()
-            ->assertSee('No definition history yet');
+            ->assertSee('No Changes Yet');
     }
 }

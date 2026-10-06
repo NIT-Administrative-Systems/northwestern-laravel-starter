@@ -27,12 +27,12 @@ class CreateNorthwesternUserAction extends Action
         parent::setUp();
 
         $this->authorize(SystemPermission::CreateUsers)
-            ->label('Add NU User')
+            ->label('Add Northwestern User')
             ->name('create-nu-user')
             ->icon(Heroicon::OutlinedIdentification)
             ->color('primary')
-            ->modalHeading('Create NU User')
-            ->modalDescription('Enter a NetID or email to look up and create a user from the Northwestern Directory.')
+            ->modalHeading('Add Northwestern User')
+            ->modalDescription('Look someone up in the Northwestern Directory by NetID or email.')
             ->modalWidth('md')
             ->schema([
                 TextInput::make('netid')
@@ -68,7 +68,7 @@ class CreateNorthwesternUserAction extends Action
                                 }
                             } catch (Throwable $e) {
                                 report($e);
-                                $fail('Unable to search the directory. Please try again.');
+                                $fail('We couldn\'t search the directory. Try again.');
                             }
                         },
                     ]),
@@ -82,8 +82,8 @@ class CreateNorthwesternUserAction extends Action
                     if (! $user instanceof User) {
                         // This shouldn't happen since validation passed, but handle it
                         Notification::make()
-                            ->title('User not found')
-                            ->body('Unable to locate the user in the Northwestern Directory. Please verify the information and try again.')
+                            ->title('User Not Found')
+                            ->body('No one with that NetID or email is in the Northwestern Directory.')
                             ->danger()
                             ->send();
 
@@ -94,14 +94,14 @@ class CreateNorthwesternUserAction extends Action
 
                     if ($wasJustCreated) {
                         Notification::make()
-                            ->title('User created')
-                            ->body("{$user->full_name} has been added to the system.")
+                            ->title('User Created')
+                            ->body("{$user->full_name} was added.")
                             ->success()
                             ->send();
                     } else {
                         Notification::make()
-                            ->title('User found')
-                            ->body("{$user->full_name} already exists in the system.")
+                            ->title('User Found')
+                            ->body("{$user->full_name} already has an account.")
                             ->success()
                             ->send();
                     }
@@ -109,8 +109,8 @@ class CreateNorthwesternUserAction extends Action
                     return redirect()->route('filament.administration.resources.users.view', ['record' => $user]);
                 } catch (Throwable $e) {
                     Notification::make()
-                        ->title('User creation failed')
-                        ->body('An unexpected error occurred. Please try again or contact support if the issue persists.')
+                        ->title('User Creation Failed')
+                        ->body('Something went wrong. Try again, and contact support if it keeps happening.')
                         ->danger()
                         ->send();
 

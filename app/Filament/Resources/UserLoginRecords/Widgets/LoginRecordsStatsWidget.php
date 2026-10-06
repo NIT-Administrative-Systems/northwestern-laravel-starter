@@ -36,7 +36,7 @@ class LoginRecordsStatsWidget extends BaseWidget
 
     protected function getTotalLoginsState(int $total): Stat
     {
-        return Stat::make('Total Logins', number_format($total))
+        return Stat::make('Total Sign-Ins', number_format($total))
             ->icon(Heroicon::ArrowRightEndOnRectangle)
             ->color('primary');
     }
@@ -82,7 +82,7 @@ class LoginRecordsStatsWidget extends BaseWidget
             ? (int) round($total / $daysDiff)
             : 0;
 
-        return Stat::make('Average Logins/Day', number_format($averagePerDay))
+        return Stat::make('Average Sign-Ins per Day', number_format($averagePerDay))
             ->icon(Heroicon::CalendarDays)
             ->color('warning');
     }

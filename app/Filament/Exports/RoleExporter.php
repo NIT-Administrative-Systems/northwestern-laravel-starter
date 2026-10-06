@@ -46,14 +46,14 @@ class RoleExporter extends Exporter
                 ->enabledByDefault(false),
 
             ExportColumn::make('created_at')
-                ->label('Created At'),
+                ->label('Created'),
 
             ExportColumn::make('updated_at')
-                ->label('Updated At')
+                ->label('Updated')
                 ->enabledByDefault(false),
 
             ExportColumn::make('deleted_at')
-                ->label('Deleted At')
+                ->label('Deleted')
                 ->enabledByDefault(false),
         ];
     }

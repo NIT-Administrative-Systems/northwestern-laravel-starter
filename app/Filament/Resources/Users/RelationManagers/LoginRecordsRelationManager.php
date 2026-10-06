@@ -27,7 +27,7 @@ class LoginRecordsRelationManager extends RelationManager
 
     public static function getTabComponent(Model $ownerRecord, string $pageClass): Tab
     {
-        return Tab::make('Login Records')
+        return Tab::make('Sign-In Records')
             ->icon(Heroicon::OutlinedPresentationChartLine);
     }
 

@@ -91,7 +91,7 @@ class AuditInfolist
                                     ->columns()
                                     ->schema([
                                         TextEntry::make('user.username')
-                                            ->label('Modified By User')
+                                            ->label('Changed By')
                                             ->formatStateUsing(fn (Audit $r) => $r->user?->full_name
                                                 ? "{$r->user->full_name} ({$r->user->username})"
                                                 : ($r->user->username ?? '—'))
@@ -142,7 +142,7 @@ class AuditInfolist
                                             ->visible(fn (Audit $record) => filled($record->trace_id))
                                             ->icon(Heroicon::OutlinedHashtag)
                                             ->fontFamily(FontFamily::Mono)
-                                            ->tooltip('Correlate this change with API request logs and other events using the same Trace ID')
+                                            ->tooltip('Find related API requests and changes with the same trace ID.')
                                             ->copyable()
                                             ->color('primary')
                                             ->url(fn (Audit $record) => route('filament.administration.resources.audits.index', ['search' => $record->trace_id]))

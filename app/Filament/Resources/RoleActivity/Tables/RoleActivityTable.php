@@ -280,8 +280,8 @@ class RoleActivityTable
                     ->color('gray')
                     ->exporter(RoleActivityExporter::class),
             ])
-            ->emptyStateHeading('No role activity recorded')
-            ->emptyStateDescription('Role assignments and removals will appear here as administrators manage user roles.')
+            ->emptyStateHeading('No Role Activity')
+            ->emptyStateDescription('Role assignments and removals appear here.')
             ->emptyStateIcon('heroicon-o-shield-check');
     }
 

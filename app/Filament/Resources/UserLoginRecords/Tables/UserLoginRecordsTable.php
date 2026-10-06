@@ -37,7 +37,7 @@ class UserLoginRecordsTable
                     ->searchable()
                     ->hidden($isRelationManager),
                 TextColumn::make('logged_in_at')
-                    ->label('Logged In At')
+                    ->label('Signed In')
                     ->since()
                     ->dateTimeTooltip()
                     ->sortable(),
@@ -58,7 +58,7 @@ class UserLoginRecordsTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('logged_in_at', direction: 'desc')
-            ->heading('Login Records')
+            ->heading('Sign-In Records')
             ->searchable(! $isRelationManager)
             ->splitSearchTerms(false)
             ->searchDebounce('750ms')
@@ -87,8 +87,8 @@ class UserLoginRecordsTable
                     ->exporter(UserLoginRecordExporter::class)
                     ->hidden($isRelationManager),
             ])
-            ->emptyStateHeading('No login activity')
-            ->emptyStateDescription('Login records will appear here as users authenticate.')
+            ->emptyStateHeading('No Sign-Ins')
+            ->emptyStateDescription('Sign-ins appear here as people sign in.')
             ->emptyStateIcon('heroicon-o-arrow-right-on-rectangle');
     }
 }

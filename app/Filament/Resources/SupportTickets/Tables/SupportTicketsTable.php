@@ -155,8 +155,8 @@ class SupportTicketsTable
                     ->color('gray')
                     ->exporter(SupportTicketExporter::class),
             ])
-            ->emptyStateHeading('No support tickets')
-            ->emptyStateDescription('Tickets submitted through the contact form will appear here.')
+            ->emptyStateHeading('No Support Tickets')
+            ->emptyStateDescription('Requests sent through Contact Support appear here.')
             ->emptyStateIcon(Heroicon::OutlinedTicket);
     }
 }

@@ -91,7 +91,7 @@ class UsersRelationManager extends RelationManager
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('auth_type')
-                    ->label('Auth Type')
+                    ->label('Authentication')
                     ->badge()
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -102,7 +102,7 @@ class UsersRelationManager extends RelationManager
                     ->options(Affiliation::class)
                     ->multiple(),
                 SelectFilter::make('auth_type')
-                    ->label('Auth Type')
+                    ->label('Authentication')
                     ->options(AuthType::class)
                     ->multiple(),
             ])
@@ -177,7 +177,7 @@ class UsersRelationManager extends RelationManager
 
                         if ($role->role_type->slug === RoleTypeEnum::ApiIntegration && ! $user->is_api_user) {
                             Notification::make()
-                                ->title('Invalid user assignment')
+                                ->title('User Not Assigned')
                                 ->body('API Integration roles can only be assigned to API users.')
                                 ->danger()
                                 ->send();
@@ -189,7 +189,7 @@ class UsersRelationManager extends RelationManager
 
                         $user->assignRoleWithAudit($role, RoleModificationOrigin::UiAction);
                     })
-                    ->successNotificationTitle('User assigned'),
+                    ->successNotificationTitle('User Assigned'),
             ])
             ->recordUrl(fn (User $record) => route('filament.administration.resources.users.view', ['record' => $record]))
             ->recordActions([
@@ -209,7 +209,7 @@ class UsersRelationManager extends RelationManager
                         /** @var Role $role */
                         $role = $livewire->getOwnerRecord();
 
-                        return 'Are you sure you want to remove the ' . $role->name . ' role from ' . $record->clerical_name . '?';
+                        return 'Remove the ' . $role->name . ' role from ' . $record->clerical_name . '?';
                     })
                     ->modalSubmitActionLabel('Remove Role')
                     ->action(function (User $record, RelationManager $livewire): void {
@@ -221,7 +221,7 @@ class UsersRelationManager extends RelationManager
 
                         $record->removeRoleWithAudit($role, RoleModificationOrigin::UiAction);
                     })
-                    ->successNotificationTitle('Role removed'),
+                    ->successNotificationTitle('Role Removed'),
             ]);
     }
 }

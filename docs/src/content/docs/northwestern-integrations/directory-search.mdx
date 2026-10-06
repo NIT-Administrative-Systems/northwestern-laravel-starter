@@ -12,7 +12,7 @@ The Directory Search integration looks up Northwestern users by NetID, email, or
 
 The underlying API client is provided by the [`northwestern-sysdev/laravel-soa`](https://github.com/NIT-Administrative-Systems/SysDev-laravel-soa) package.
 
-Directory Search is optional in the `local` environment. Local demo users are seeded without it and `db:rebuild` doesn't call it. Without `DIRECTORY_SEARCH_API_KEY`, `config:validate` and the health check skip it locally, the administration panel's **Add NU User** says it isn't configured, and **Force Sync** is hidden. Deployed environments always need the key.
+Directory Search is optional in the `local` environment. Local demo users are seeded without it and `db:rebuild` doesn't call it. Without `DIRECTORY_SEARCH_API_KEY`, `config:validate` and the health check skip it locally, the administration panel's **Add Northwestern User** says it isn't configured, and **Refresh from Directory** is hidden. Deployed environments always need the key.
 
 ## How It Works
 
@@ -55,7 +55,7 @@ Directory Search is optional in the `local` environment. Local demo users are se
 
 ## Post-Retrieval Jobs
 
-After a user is synced and persisted, `FindOrUpdateUserFromDirectory` dispatches a configurable list of **post-retrieval jobs**. This is the extension point for running custom logic when a user is fetched from the directory, whether during SSO login, user creation in the administration panel, or the administration panel's **Force Sync** action.
+After a user is synced and persisted, `FindOrUpdateUserFromDirectory` dispatches a configurable list of **post-retrieval jobs**. This is the extension point for running custom logic when a user is fetched from the directory, whether during SSO sign-in, user creation in the administration panel, or the administration panel's **Refresh from Directory** action.
 
 Add your jobs to the `postRetrievalJobs()` method in `FindOrUpdateUserFromDirectory`:
 
@@ -110,7 +110,7 @@ The caller controls whether jobs run synchronously or are dispatched to the queu
 |--------|:------------:|----------|
 | SSO login | `false` | Jobs are **queued**, login completes immediately |
 | Filament user creation | `true` | Jobs run **synchronously**, the admin sees the result before the page redirects |
-| Filament **Force Sync** action | `true` | Jobs run **synchronously**, the admin sees the refreshed record |
+| Filament **Refresh from Directory** action | `true` | Jobs run **synchronously**, the admin sees the refreshed record |
 
 <Aside type="tip">
 When jobs run synchronously (`$immediate = true`), failures are caught and reported via your exception handler. They will **not** break the login or creation flow.

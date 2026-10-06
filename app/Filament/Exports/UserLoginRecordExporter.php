@@ -39,7 +39,7 @@ class UserLoginRecordExporter extends Exporter
                 ->formatStateUsing(fn ($state) => $state?->getLabel()),
 
             ExportColumn::make('logged_in_at')
-                ->label('Logged In At'),
+                ->label('Signed In'),
 
             ExportColumn::make('ip_address')
                 ->label('IP Address')
@@ -51,7 +51,7 @@ class UserLoginRecordExporter extends Exporter
                 ->enabledByDefault(false),
 
             ExportColumn::make('created_at')
-                ->label('Created At')
+                ->label('Created')
                 ->enabledByDefault(false),
         ];
     }

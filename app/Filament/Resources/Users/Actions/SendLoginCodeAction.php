@@ -30,22 +30,22 @@ class SendLoginCodeAction extends Action
             ->visible(fn (User $record) => $record->is_local_user && config('local-auth.enabled'))
             ->icon(Heroicon::OutlinedPaperAirplane)
             ->requiresConfirmation()
-            ->modalDescription('This will send a new verification code to the user\'s email address.')
+            ->modalDescription('Sends a new verification code to their email address.')
             ->action(function (User $record) {
                 try {
                     resolve(IssueLoginChallenge::class)($record->email, request()->ip(), request()->userAgent());
 
                     Notification::make()
                         ->success()
-                        ->title('Verification code sent')
-                        ->body('A new verification code has been sent to ' . $record->email . '.')
+                        ->title('Verification Code Sent')
+                        ->body('A new code was sent to ' . $record->email . '.')
                         ->send();
                 } catch (Throwable $e) {
                     report($e);
 
                     Notification::make()
                         ->danger()
-                        ->title('Failed to send verification code')
+                        ->title('Verification Code Not Sent')
                         ->body($e->getMessage())
                         ->send();
                 }

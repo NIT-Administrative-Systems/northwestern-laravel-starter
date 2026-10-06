@@ -79,7 +79,7 @@ class SupportTicketResource extends Resource
         /** @var SupportTicket $record */
         return array_filter([
             'Ticket' => $record->ticket_number,
-            'Submitted by' => $record->user?->full_name,
+            'Submitted By' => $record->user?->full_name,
             'Email' => $record->requester_email,
         ]);
     }

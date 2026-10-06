@@ -505,10 +505,10 @@ class Overview extends Page
         $when = $date->copy()->setTime($hour, 0)->format('D M j, H:i');
 
         if ($count === 0) {
-            return 'No logins · ' . $when;
+            return 'No sign-ins · ' . $when;
         }
 
-        return $count . ' ' . Str::plural('login', $count) . ' · ' . $when;
+        return $count . ' ' . Str::plural('sign-in', $count) . ' · ' . $when;
     }
 
     /**
