@@ -1,12 +1,7 @@
 allowBuilds:
   "@sentry/cli": true
   core-js-pure: false
-  cypress: true
   esbuild: true
 
 overrides:
   yaml: ">=2.8.3"
-
-peerDependencyRules:
-  allowedVersions:
-    cypress-axe>cypress: "16"

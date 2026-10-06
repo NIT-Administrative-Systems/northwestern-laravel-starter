@@ -29,10 +29,6 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectGuestsTo(fn () => route('filament.app.auth.login'));
         $middleware->redirectUsersTo('/');
 
-        $middleware->validateCsrfTokens(except: [
-            '/__cypress__/artisan',
-        ]);
-
         $middleware->web([
             EnvironmentLockdown::class,
         ]);

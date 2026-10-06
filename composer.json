@@ -50,7 +50,6 @@
         "driftingly/rector-laravel": "^2.0",
         "fakerphp/faker": "^1.23",
         "fruitcake/laravel-debugbar": "^4.0",
-        "laracasts/cypress": "^3.0.4",
         "larastan/larastan": "^3.0",
         "laravel/pail": "^1.2.2",
         "laravel/pint": "^1.21",

@@ -9,8 +9,6 @@
 /vendor
 .env
 .env.backup
-ctrf/*
-.env.cypress
 .env.develop
 .env.qa
 .env.production
@@ -30,10 +28,6 @@ yarn-error.log
 /.build
 .vapor/
 /iac/**/.terraform
-/cypress/videos/*
-/cypress/screenshots/*
-/cypress/downloads/*
-/cypress/support/routes.json
 /database/snapshots/
 clover.xml
 coverage/

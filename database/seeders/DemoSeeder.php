@@ -12,9 +12,6 @@ use Illuminate\Database\Seeder;
  *
  * You CANNOT make assumptions about any of this data existing during development. This is only our
  * sample data set, and the production values may differ!
- *
- * For E2E testing, you should list only the seeders that are necessary to run the tests in the
- * `cypress/support/seeders.ts` file.
  */
 class DemoSeeder extends Seeder
 {

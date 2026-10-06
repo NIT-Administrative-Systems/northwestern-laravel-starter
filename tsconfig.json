@@ -1,11 +1,13 @@
 {
     "compilerOptions": {
-        "target": "ES2015",
-        "lib": ["ES2019", "DOM"],
-        "types": ["cypress", "cypress-wait-until", "cypress-axe", "node"],
+        "target": "ES2022",
+        "lib": ["ES2022", "DOM", "DOM.Iterable"],
+        "types": ["node"],
         "moduleResolution": "Bundler",
         "noEmit": true,
-        "module": "ES2015"
+        "module": "ESNext",
+        "strict": true,
+        "skipLibCheck": true
     },
-    "include": ["cypress/e2e/**/*", "cypress/support/**/*"]
+    "include": ["resources/js/**/*.ts"]
 }
