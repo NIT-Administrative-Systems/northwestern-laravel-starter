@@ -20,6 +20,10 @@ use Laravel\Passport\Client;
  * Passport's OAuth client, with the starter's columns: where the client came from, an IP
  * allowlist, a secret expiry, and rotation history.
  *
+ * The starter has three kinds, each with a scope here so callers don't rebuild the rule:
+ * {@see serviceClients()}, {@see applications()} and {@see mcpClients()}. Passport also
+ * keeps one personal access client, which issues personal access tokens.
+ *
  * A client whose secret has expired counts as revoked, so Passport refuses it at the token
  * endpoint and {@see \App\Domains\Auth\Http\Middleware\AuthenticatePassportToken} refuses
  * the tokens it already holds. `revoked` in the database still records an explicit revoke.
@@ -70,6 +74,50 @@ class OAuthClient extends Client
         return $query
             ->where('revoked', false)
             ->where(fn (Builder $q) => $q->whereNull('secret_expires_at')->orWhere('secret_expires_at', '>', $at ?? Carbon::now()));
+    }
+
+    /**
+     * Service clients: client-credentials clients an administrator created for an API user.
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
+    #[Scope]
+    protected function serviceClients(Builder $query): Builder
+    {
+        return $query->where('origin', ClientOrigin::Administrator)->whereHasMorph('owner', [User::class]);
+    }
+
+    /**
+     * Applications an administrator registered for people to connect through the authorization code flow.
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
+    #[Scope]
+    protected function applications(Builder $query): Builder
+    {
+        return $query->where('origin', ClientOrigin::Administrator)->where('grant_types', 'like', '%"authorization_code"%');
+    }
+
+    /**
+     * MCP clients, which are the only clients that register themselves (D66).
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
+    #[Scope]
+    protected function mcpClients(Builder $query): Builder
+    {
+        return $query->where('origin', ClientOrigin::Dynamic);
+    }
+
+    /**
+     * Whether this is an MCP client. It registered itself, so its name is whatever it claimed.
+     */
+    public function isMcpClient(): bool
+    {
+        return $this->origin === ClientOrigin::Dynamic;
     }
 
     /** @return BelongsTo<self, $this> */

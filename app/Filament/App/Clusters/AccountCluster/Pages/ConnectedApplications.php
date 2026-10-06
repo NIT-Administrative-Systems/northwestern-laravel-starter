@@ -6,7 +6,6 @@ namespace App\Filament\App\Clusters\AccountCluster\Pages;
 
 use App\Domains\Auth\Actions\Applications\DisconnectApplication;
 use App\Domains\Auth\Enums\AuthType;
-use App\Domains\Auth\Enums\ClientOrigin;
 use App\Domains\Auth\Models\OAuthConnection;
 use App\Domains\User\Models\User;
 use App\Filament\App\Clusters\AccountCluster;
@@ -78,7 +77,7 @@ class ConnectedApplications extends Page implements HasTable
             ->columns([
                 TextColumn::make('oauth_client.name')
                     ->label('Application')
-                    ->description(fn (OAuthConnection $record): ?string => $record->oauth_client?->origin === ClientOrigin::Dynamic ? 'AI client · name not verified' : null),
+                    ->description(fn (OAuthConnection $record): ?string => $record->oauth_client?->isMcpClient() ? 'AI client · name not verified' : null),
                 TextColumn::make('scopes')->label('Allowed To')->badge()->formatStateUsing(fn (string $state): string => OAuthServiceProvider::scopeLabel($state))->placeholder('See Your Account Details'),
                 TextColumn::make('connected_at')->label('Connected')->date(),
                 TextColumn::make('last_used_at')->label('Last Used')->since()->dateTimeTooltip()->placeholder('Never'),

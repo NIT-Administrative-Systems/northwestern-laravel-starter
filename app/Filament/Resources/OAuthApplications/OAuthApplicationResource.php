@@ -7,7 +7,6 @@ namespace App\Filament\Resources\OAuthApplications;
 use App\Domains\Auth\Actions\Applications\RegenerateOAuthApplicationSecret;
 use App\Domains\Auth\Actions\Applications\RevokeOAuthApplication;
 use App\Domains\Auth\Actions\Applications\UpdateOAuthApplication;
-use App\Domains\Auth\Enums\ClientOrigin;
 use App\Domains\Auth\Enums\CredentialStatus;
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\OAuthClient;
@@ -58,8 +57,7 @@ class OAuthApplicationResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return OAuthClient::query()
-            ->where('origin', ClientOrigin::Administrator)
-            ->where('grant_types', 'like', '%"authorization_code"%')
+            ->applications()
             ->withCount(['connections' => fn (Builder $query) => $query->whereIn('oauth_connections.id', OAuthConnection::query()->live()->select('id'))]);
     }
 

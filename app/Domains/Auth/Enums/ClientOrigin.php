@@ -12,7 +12,7 @@ use Filament\Support\Contracts\HasLabel;
  */
 enum ClientOrigin: string implements HasLabel
 {
-    /** Created in Administration: a service client or an OAuth application. */
+    /** Created by the application: a service client or an OAuth application in Administration, or Passport's personal access client. */
     case Administrator = 'administrator';
 
     /** Registered by the client itself, such as an MCP client using dynamic registration. */

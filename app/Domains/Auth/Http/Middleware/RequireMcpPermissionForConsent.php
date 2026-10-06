@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Domains\Auth\Http\Middleware;
 
-use App\Domains\Auth\Enums\ClientOrigin;
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\User\Models\User;
@@ -33,7 +32,7 @@ class RequireMcpPermissionForConsent
         // Passport answers an unknown or malformed client ID itself.
         $client = Str::isUuid($clientId) ? OAuthClient::query()->find($clientId) : null;
 
-        if (! $client instanceof OAuthClient || $client->origin !== ClientOrigin::Dynamic) {
+        if (! $client instanceof OAuthClient || ! $client->isMcpClient()) {
             return $next($request);
         }
 

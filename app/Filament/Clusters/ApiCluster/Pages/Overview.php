@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Clusters\ApiCluster\Pages;
 
-use App\Domains\Auth\Enums\ClientOrigin;
 use App\Domains\Auth\Models\ApiRequestLog;
 use App\Domains\Auth\Models\OAuthClient;
-use App\Domains\User\Models\User;
 use App\Filament\Clusters\ApiCluster;
 use BackedEnum;
 use Carbon\Carbon;
@@ -74,10 +72,7 @@ class Overview extends Page
     {
         $now = Carbon::now();
 
-        // Service clients only: OAuth applications and dynamically registered clients have no API user.
-        $serviceClients = fn () => OAuthClient::query()
-            ->where('origin', ClientOrigin::Administrator)
-            ->whereHasMorph('owner', [User::class]);
+        $serviceClients = fn () => OAuthClient::query()->serviceClients();
 
         $activeApiUsers = $serviceClients()->active($now)->distinct('owner_id')->count('owner_id');
 

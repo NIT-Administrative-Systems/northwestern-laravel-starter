@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Filament\Resources\McpClients;
 
 use App\Domains\Auth\Actions\Applications\RevokeOAuthApplication;
-use App\Domains\Auth\Enums\ClientOrigin;
 use App\Domains\Auth\Enums\CredentialStatus;
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\OAuthClient;
@@ -52,7 +51,7 @@ class McpClientResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return OAuthClient::query()
-            ->where('origin', ClientOrigin::Dynamic)
+            ->mcpClients()
             ->withCount(['connections' => fn (Builder $query) => $query->whereIn('oauth_connections.id', OAuthConnection::query()->live()->select('id'))]);
     }
 

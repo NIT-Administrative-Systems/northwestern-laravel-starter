@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Domains\Auth\Actions\Applications\RevokeOAuthApplication;
-use App\Domains\Auth\Enums\ClientOrigin;
 use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\Auth\Models\OAuthConnection;
 use Illuminate\Console\Command;
@@ -65,6 +64,6 @@ class PruneMcpClientsCommand extends Command
      */
     private function dynamicClients(): Builder
     {
-        return OAuthClient::query()->where('origin', ClientOrigin::Dynamic);
+        return OAuthClient::query()->mcpClients();
     }
 }
