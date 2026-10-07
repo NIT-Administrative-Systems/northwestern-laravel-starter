@@ -13,9 +13,9 @@ concurrency:
 
 on:
   pull_request:
-    branches: [ main, v3 ]
+    branches: [ main ]
   push:
-    branches: [ main, v3 ]
+    branches: [ main ]
 
 jobs:
   determine-scope:
