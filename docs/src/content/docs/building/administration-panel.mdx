@@ -20,10 +20,10 @@ The sidebar groups the tools with the `App\Filament\Navigation\AdministrationNav
 
 | Tool                                      | Group                  | Needs                                                                                  |
 | ----------------------------------------- | ---------------------- | -------------------------------------------------------------------------------------- |
-| [Users](#users)                           | User Management        | `ViewUsers`                                                                            |
+| [Users](#users)                           | User Management        | `ViewUsers`, or `ManageApiAccess` for API users only                                   |
 | [Roles](#roles)                           | User Management        | `ViewRoles`                                                                            |
 | [Announcements](#announcements)           | Platform               | `ManageAnnouncements`                                                                  |
-| [API](#the-api-cluster)                   | Platform               | `ManageApiAccess` or `ViewApiRequestLogs`, with the API or MCP on                      |
+| [API](#the-api-cluster)                   | Platform               | `ManageApiAccess`, or `ViewApiRequestLogs` with the API on                             |
 | [Audit Logs](#audit-logs)                 | Platform               | `ViewAuditLogs`                                                                        |
 | [Sign-In Records](#sign-in-records)       | Platform               | `ViewLoginRecords`                                                                     |
 | [Support Tickets](#support-tickets)       | Platform               | `ViewSupportTickets`, with Contact Support on                                          |
@@ -36,11 +36,11 @@ The sidebar groups the tools with the `App\Filament\Navigation\AdministrationNav
 
 ## Users
 
-**Users** lists everyone, with filters for sign-in method, affiliation and role. Three actions create people:
+**Users** lists everyone, with filters for sign-in method, affiliation and role. Someone with `ManageApiAccess` but not `ViewUsers` sees only API users, whose service clients they manage. Three actions create people:
 
 - **Add Northwestern User** looks a person up in Directory Search by NetID or email and creates them. Needs `CreateUsers`.
 - **Add Local User** creates a person who signs in with an email verification code. Needs `CreateUsers`. See [Creating Local Users](/features/authentication/#creating-local-users).
-- **Create API User** creates an API user with its first service client. Needs `ManageApiAccess`. See [API System](/features/api/).
+- **Create API User** creates an API user with its first service client. Needs `ManageApiAccess`, with the API on. See [API System](/features/api/).
 
 A person's page shows their details and these tabs, each only when it applies to them and the viewer holds its permission:
 
@@ -50,10 +50,12 @@ A person's page shows their details and these tabs, each only when it applies to
 | Role History                     | Every role assignment and removal                                           | `ViewAuditLogs`                                         |
 | Audit Logs                       | Every audited change to them                                                | `ViewAuditLogs`                                         |
 | Login Records                    | Their sign-ins                                                              | `ViewLoginRecords`                                      |
-| Personal Access Tokens           | Their tokens, which can be revoked                                          | `ManageApiAccess`, with the API on                      |
-| Connected Applications           | Their applications and AI clients, which can be disconnected               | `ManageApiAccess`, with the API or MCP on               |
+| Personal Access Tokens           | Their tokens, which can be revoked                                          | `ManageApiAccess`                                       |
+| Connected Applications           | Their applications and AI clients, which can be disconnected               | `ManageApiAccess`                                       |
 | Service Clients                  | An API user's clients: create, rotate, restrict and revoke                  | `ManageApiAccess`, for API users                        |
 | API Requests                     | An API user's request log                                                   | `ViewApiRequestLogs`, for API users with logging on     |
+
+These tabs stay while the API or MCP is off, so an administrator can still revoke what exists; creating, rotating and editing wait until the feature is back on. Who may do what with each credential is decided by `CredentialAccess` (see [API Operations](/features/api-operations/#when-the-starter-refuses)).
 
 The **Impersonate** button signs you in as the person. See [Impersonating Users](/features/authentication/#impersonating-users).
 
@@ -67,10 +69,10 @@ The **Role Activity** button on the Roles page lists role assignments and remova
 
 **API** groups the API's tools under one sidebar entry, each page with its own rule:
 
-- **Overview** shows API users, clients, expiring secrets and the last day's traffic. It needs the API on and `ManageApiAccess` or `ViewApiRequestLogs`.
+- **Overview** shows API users, clients, expiring secrets and the last day's traffic. It needs `ManageApiAccess`, or `ViewApiRequestLogs` with the API on.
 - **API Requests** is the request log, with its charts. It needs `ViewApiRequestLogs`, with the API and request logging on. See [Request Logging](/features/api/#request-logging).
-- **Applications** registers and manages OAuth applications. It needs `ManageApiAccess`, with the API on. See [Connected Applications](/features/api/#connected-applications).
-- **MCP Clients** lists the clients that registered themselves and revokes them. It needs `ManageApiAccess`, with MCP on, even when the REST API is off. See [MCP](/features/mcp/#managing-clients).
+- **Applications** registers and manages OAuth applications. It needs `ManageApiAccess`; while the API is off it lists and revokes them but can't register or edit. See [Connected Applications](/features/api/#connected-applications).
+- **MCP Clients** lists the clients that registered themselves and revokes them. It needs `ManageApiAccess`, whether or not MCP is on. See [MCP](/features/mcp/#managing-clients).
 
 ## Announcements
 
