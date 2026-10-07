@@ -8,151 +8,135 @@ use App\Domains\Support\Actions\CreateSupportTicket;
 use App\Domains\Support\Contracts\TicketSystemGateway;
 use App\Domains\Support\Enums\TicketSystem;
 use App\Domains\Support\Gateways\CreationResult;
-use App\Domains\Support\Gateways\Mail\MailGateway;
-use App\Domains\Support\Gateways\TicketSystemGatewayFactory;
+use App\Domains\Support\Gateways\Mail\SupportTicketConfirmation;
+use App\Domains\Support\Gateways\Mail\SupportTicketMessage;
 use App\Domains\Support\Models\SupportTicket;
-use App\Domains\Support\Repositories\SupportTicketRepository;
-use Mockery;
+use App\Domains\User\Models\User;
+use App\Providers\SupportServiceProvider;
+use Exception;
+use Illuminate\Support\Facades\Mail;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(CreateSupportTicket::class)]
 final class CreateSupportTicketTest extends TestCase
 {
-    public function test_successful_primary_submission_does_not_trigger_fallback(): void
+    private const array REQUEST = ['subject' => 'Help with login', 'details' => 'I cannot sign in.'];
+
+    protected function setUp(): void
     {
-        $ticket = SupportTicket::factory()->pending()->create();
+        parent::setUp();
 
-        $gateway = Mockery::mock(TicketSystemGateway::class);
-        $gateway->expects('create')
-            ->andReturns(new CreationResult(
-                ticketSystemType: TicketSystem::Mail,
-                creationError: false,
-                ticketNumber: 'SUP-1',
-                errorMessage: null,
-            ));
-
-        $factory = Mockery::mock(TicketSystemGatewayFactory::class);
-        $factory->allows('fallback')->never();
-
-        $action = new CreateSupportTicket($gateway, $factory, resolve(SupportTicketRepository::class));
-        $result = $action($ticket);
-
-        $this->assertFalse($result->post_error);
-        $this->assertSame('SUP-1', $result->ticket_number);
-        $this->assertNull($result->fallback_sent_at);
+        config(['support.mail.to' => 'support@northwestern.edu']);
     }
 
-    public function test_failed_mail_primary_does_not_trigger_fallback(): void
+    public function test_it_saves_the_request_as_the_persons_ticket(): void
     {
-        $ticket = SupportTicket::factory()->pending()->create();
+        $this->useTicketSystem(new CreationResult(TicketSystem::TeamDynamix, creationError: false, ticketNumber: '1234567', errorMessage: null));
+        $person = User::factory()->create(['email' => 'willie@northwestern.edu']);
 
-        $gateway = Mockery::mock(TicketSystemGateway::class);
-        $gateway->expects('create')
-            ->andReturns(new CreationResult(
-                ticketSystemType: TicketSystem::Mail,
-                creationError: true,
-                ticketNumber: null,
-                errorMessage: 'Mail server down',
-            ));
+        $ticket = $this->createTicket($person);
 
-        $factory = Mockery::mock(TicketSystemGatewayFactory::class);
-        $factory->allows('fallback')->never();
-
-        $action = new CreateSupportTicket($gateway, $factory, resolve(SupportTicketRepository::class));
-        $result = $action($ticket);
-
-        $this->assertTrue($result->post_error);
-        $this->assertNull($result->fallback_sent_at);
+        $this->assertTrue($ticket->exists);
+        $this->assertSame($person->id, $ticket->user_id);
+        $this->assertSame('willie@northwestern.edu', $ticket->requester_email);
+        $this->assertSame('Help with login', $ticket->subject);
     }
 
-    public function test_failed_non_mail_primary_triggers_fallback(): void
+    public function test_it_records_what_the_ticket_system_returned(): void
     {
-        $ticket = SupportTicket::factory()->pending()->create();
+        Mail::fake();
+        $this->useTicketSystem(new CreationResult(TicketSystem::TeamDynamix, creationError: false, ticketNumber: '1234567', errorMessage: null));
 
-        $gateway = Mockery::mock(TicketSystemGateway::class);
-        $gateway->expects('create')
-            ->andReturns(new CreationResult(
-                ticketSystemType: TicketSystem::TeamDynamix,
-                creationError: true,
-                ticketNumber: null,
-                errorMessage: 'TDX timeout',
-            ));
+        $ticket = $this->createTicket()->fresh();
 
-        $fallbackGateway = Mockery::mock(MailGateway::class);
-        $fallbackGateway->expects('create')
-            ->andReturns(new CreationResult(
-                ticketSystemType: TicketSystem::Mail,
-                creationError: false,
-                ticketNumber: 'SUP-1',
-                errorMessage: null,
-            ));
-
-        $factory = Mockery::mock(TicketSystemGatewayFactory::class);
-        $factory->expects('fallback')
-            ->andReturns($fallbackGateway);
-
-        $action = new CreateSupportTicket($gateway, $factory, resolve(SupportTicketRepository::class));
-        $result = $action($ticket);
-
-        $this->assertTrue($result->post_error);
-        $this->assertNotNull($result->fallback_sent_at);
+        $this->assertInstanceOf(SupportTicket::class, $ticket);
+        $this->assertSame(TicketSystem::TeamDynamix, $ticket->ticketing_system);
+        $this->assertSame('1234567', $ticket->ticket_number);
+        $this->assertFalse($ticket->post_error);
+        $this->assertNotNull($ticket->posted_to_ticketing_system_at);
+        $this->assertTrue($ticket->wasPostedSuccessfully());
+        $this->assertNull($ticket->fallback_sent_at);
+        Mail::assertNothingQueued();
     }
 
-    public function test_fallback_sent_at_not_set_when_fallback_also_fails(): void
+    public function test_the_mail_ticket_system_emails_the_support_team_and_the_person(): void
     {
-        $ticket = SupportTicket::factory()->pending()->create();
+        Mail::fake();
+        config(['support.enabled' => true, 'support.driver' => 'mail']);
+        new SupportServiceProvider($this->app)->register();
 
-        $gateway = Mockery::mock(TicketSystemGateway::class);
-        $gateway->expects('create')
-            ->andReturns(new CreationResult(
-                ticketSystemType: TicketSystem::TeamDynamix,
-                creationError: true,
-                ticketNumber: null,
-                errorMessage: 'TDX down',
-            ));
+        $ticket = $this->createTicket();
 
-        $fallbackGateway = Mockery::mock(MailGateway::class);
-        $fallbackGateway->expects('create')
-            ->andReturns(new CreationResult(
-                ticketSystemType: TicketSystem::Mail,
-                creationError: true,
-                ticketNumber: null,
-                errorMessage: 'Mail also failed',
-            ));
-
-        $factory = Mockery::mock(TicketSystemGatewayFactory::class);
-        $factory->expects('fallback')
-            ->andReturns($fallbackGateway);
-
-        $action = new CreateSupportTicket($gateway, $factory, resolve(SupportTicketRepository::class));
-        $result = $action($ticket);
-
-        $this->assertTrue($result->post_error);
-        $this->assertNull($result->fallback_sent_at);
+        $this->assertSame(TicketSystem::Mail, $ticket->ticketing_system);
+        $this->assertSame("SUP-{$ticket->id}", $ticket->ticket_number);
+        Mail::assertQueued(SupportTicketMessage::class, fn (SupportTicketMessage $mail): bool => $mail->hasTo('support@northwestern.edu'));
+        Mail::assertQueued(SupportTicketConfirmation::class);
     }
 
-    public function test_primary_result_is_recorded_on_ticket(): void
+    // The request reaches the support team even when the ticket system is down.
+    public function test_a_failed_ticket_system_falls_back_to_email(): void
     {
-        $ticket = SupportTicket::factory()->pending()->create();
+        Mail::fake();
+        $this->useTicketSystem(new CreationResult(TicketSystem::TeamDynamix, creationError: true, ticketNumber: null, errorMessage: 'TDX timeout'));
 
-        $gateway = Mockery::mock(TicketSystemGateway::class);
-        $gateway->expects('create')
-            ->andReturns(new CreationResult(
-                ticketSystemType: TicketSystem::TeamDynamix,
-                creationError: false,
-                ticketNumber: '1234567',
-                errorMessage: null,
-            ));
+        $ticket = $this->createTicket();
 
-        $factory = Mockery::mock(TicketSystemGatewayFactory::class);
+        $this->assertTrue($ticket->post_error);
+        $this->assertSame('TDX timeout', $ticket->error_message);
+        $this->assertNull($ticket->posted_to_ticketing_system_at);
+        $this->assertNotNull($ticket->fallback_sent_at);
+        Mail::assertQueued(SupportTicketMessage::class, function (SupportTicketMessage $mail): bool {
+            $mail->build();
 
-        $action = new CreateSupportTicket($gateway, $factory, resolve(SupportTicketRepository::class));
-        $result = $action($ticket);
+            return $mail->buildViewData()['fallbackMode'] === true;
+        });
+    }
 
-        $this->assertSame(TicketSystem::TeamDynamix, $result->ticketing_system);
-        $this->assertSame('1234567', $result->ticket_number);
-        $this->assertFalse($result->post_error);
-        $this->assertNotNull($result->posted_to_ticketing_system_at);
+    public function test_the_fallback_is_not_marked_sent_when_email_fails_too(): void
+    {
+        $this->useTicketSystem(new CreationResult(TicketSystem::TeamDynamix, creationError: true, ticketNumber: null, errorMessage: 'TDX down'));
+        Mail::shouldReceive('to')->andThrow(new Exception('SMTP connection refused'));
+
+        $ticket = $this->createTicket();
+
+        $this->assertTrue($ticket->post_error);
+        $this->assertNull($ticket->fallback_sent_at);
+    }
+
+    // Email failing is already the email path; there's nothing left to fall back to.
+    public function test_a_failed_mail_ticket_system_does_not_fall_back(): void
+    {
+        Mail::fake();
+        $this->useTicketSystem(new CreationResult(TicketSystem::Mail, creationError: true, ticketNumber: null, errorMessage: 'Mail server down'));
+
+        $ticket = $this->createTicket();
+
+        $this->assertTrue($ticket->post_error);
+        $this->assertNull($ticket->fallback_sent_at);
+        Mail::assertNothingQueued();
+    }
+
+    private function createTicket(?User $person = null): SupportTicket
+    {
+        return resolve(CreateSupportTicket::class)($person ?? User::factory()->create(), self::REQUEST);
+    }
+
+    /**
+     * Stands in for the configured ticket system, as an application's own gateway would.
+     */
+    private function useTicketSystem(CreationResult $result): void
+    {
+        $this->app->bind(TicketSystemGateway::class, fn (): TicketSystemGateway => new readonly class($result) implements TicketSystemGateway
+        {
+            public function __construct(private CreationResult $result)
+            {
+            }
+
+            public function create(SupportTicket $ticket): CreationResult
+            {
+                return $this->result;
+            }
+        });
     }
 }

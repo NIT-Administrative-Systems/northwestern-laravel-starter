@@ -114,7 +114,6 @@
             <file>app/Providers/HealthServiceProvider.php</file>
             <file>app/Providers/IntegrationServiceProvider.php</file>
             <file>app/Providers/RateLimitingServiceProvider.php</file>
-            <file>app/Providers/SupportServiceProvider.php</file>
             <file>app/Providers/TelescopeServiceProvider.php</file>
             <file>app/Providers/ViewServiceProvider.php</file>
 

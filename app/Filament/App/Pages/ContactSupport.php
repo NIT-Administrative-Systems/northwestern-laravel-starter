@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace App\Filament\App\Pages;
 
 use App\Domains\Support\Actions\CreateSupportTicket;
-use App\Domains\Support\Models\SupportTicket;
-use App\Domains\Support\Repositories\SupportTicketRepository;
 use App\Domains\User\Models\User;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;
@@ -106,7 +104,7 @@ class ContactSupport extends Page
             ]);
     }
 
-    public function send(SupportTicketRepository $repository, CreateSupportTicket $createTicket): void
+    public function send(CreateSupportTicket $createTicket): void
     {
         abort_unless(static::canAccess(), 404);
 
@@ -125,7 +123,7 @@ class ContactSupport extends Page
         /** @var User $user */
         $user = auth()->user();
 
-        $ticket = $createTicket($repository->create($user, new SupportTicket($data)));
+        $ticket = $createTicket($user, $data);
 
         if ($ticket->wasPostedSuccessfully() || $ticket->fallback_sent_at !== null) {
             Notification::make()

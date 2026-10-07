@@ -6,49 +6,64 @@ namespace App\Domains\Support\Actions;
 
 use App\Domains\Support\Contracts\TicketSystemGateway;
 use App\Domains\Support\Enums\TicketSystem;
-use App\Domains\Support\Gateways\TicketSystemGatewayFactory;
+use App\Domains\Support\Gateways\CreationResult;
+use App\Domains\Support\Gateways\Mail\MailGateway;
 use App\Domains\Support\Models\SupportTicket;
-use App\Domains\Support\Repositories\SupportTicketRepository;
+use App\Domains\User\Models\User;
 
 /**
- * Orchestrates support ticket submission to the configured gateway.
+ * Submits a person's support request: saves it as their ticket, sends it to the configured
+ * ticket system ({@see TicketSystemGateway}, chosen by `support.driver` in SupportServiceProvider)
+ * and records the result on the ticket.
  *
- * Submits the ticket via the primary gateway, records the result, and — if
- * the primary gateway is not mail and fails — automatically falls back to
- * the {@see MailGateway} so the user's request is never silently lost.
- *
- * @see TicketSystemGateway
+ * If a ticket system other than mail fails, the request is emailed to the support team instead
+ * ({@see MailGateway}, marked as a fallback), so it's never silently lost.
  */
 class CreateSupportTicket
 {
     public function __construct(
         protected TicketSystemGateway $gateway,
-        protected TicketSystemGatewayFactory $factory,
-        protected SupportTicketRepository $repo,
     ) {
         //
     }
 
     /**
-     * Submit the ticket and handle fallback on failure.
+     * The ticket records which system took it, its number there, and any error. If the
+     * fallback email was sent, {@see SupportTicket::$fallback_sent_at} is set.
      *
-     * The returned ticket will have its gateway result fields populated
-     * ({@see SupportTicket::$ticketing_system}, {@see SupportTicket::$post_error}, etc.).
-     * If a fallback was attempted, {@see SupportTicket::$fallback_sent_at} will be set.
+     * @param  array<string, mixed>  $request  The Contact Support form's fields
      */
-    public function __invoke(SupportTicket $ticket): SupportTicket
+    public function __invoke(User $requester, array $request): SupportTicket
     {
-        $creationResult = $this->gateway->create($ticket);
-        $ticket = $this->repo->updatePostStatus($ticket, $creationResult);
+        $ticket = new SupportTicket($request);
+        $ticket->requester_email = $requester->email;
+        $requester->support_tickets()->save($ticket);
 
-        if ($creationResult->creationError && $creationResult->ticketSystemType !== TicketSystem::Mail) {
-            $fallbackResult = $this->factory->fallback()->create($ticket);
+        $result = $this->gateway->create($ticket);
+        $this->record($ticket, $result);
 
-            if (! $fallbackResult->creationError) {
+        if ($result->creationError && $result->ticketSystemType !== TicketSystem::Mail) {
+            $fallback = resolve(MailGateway::class, ['isFallbackStrategy' => true])->create($ticket);
+
+            if (! $fallback->creationError) {
                 $ticket->update(['fallback_sent_at' => now()]);
             }
         }
 
         return $ticket;
+    }
+
+    private function record(SupportTicket $ticket, CreationResult $result): void
+    {
+        $ticket->ticketing_system = $result->ticketSystemType;
+        $ticket->ticket_number = $result->ticketNumber;
+        $ticket->post_error = $result->creationError;
+        $ticket->error_message = $result->errorMessage;
+
+        if (! $result->creationError) {
+            $ticket->posted_to_ticketing_system_at = now();
+        }
+
+        $ticket->save();
     }
 }
