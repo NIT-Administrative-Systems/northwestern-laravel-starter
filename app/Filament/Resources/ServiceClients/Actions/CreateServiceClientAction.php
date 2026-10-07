@@ -52,7 +52,7 @@ class CreateServiceClientAction extends Action
                             name: $configuration['name'],
                             secretExpiresAt: $configuration['secret_expires_at'],
                             allowedIps: $configuration['allowed_ips'],
-                            createdBy: self::administrator(),
+                            createdBy: $this->administrator(),
                         );
 
                         ServiceClientSchemas::storeCredentials(ServiceClientSchemas::SESSION_KEY_CREATE, $client, $secret);
@@ -65,7 +65,7 @@ class CreateServiceClientAction extends Action
             ->successNotificationTitle('Service Client Created');
     }
 
-    private static function administrator(): User
+    private function administrator(): User
     {
         /** @var User */
         return auth()->user();

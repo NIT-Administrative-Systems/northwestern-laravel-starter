@@ -56,7 +56,7 @@ class EditServiceClientIpRestrictionsAction extends Action
                     ]),
             ])
             ->fillForm(fn (OAuthClient $record): array => ['allowed_ips' => $record->allowed_ips])
-            ->action(fn (OAuthClient $record, array $data, UpdateServiceClientIpRestrictions $updateIpRestrictions) => $updateIpRestrictions($record, $data['allowed_ips'] ?? null, self::administrator()))
+            ->action(fn (OAuthClient $record, array $data, UpdateServiceClientIpRestrictions $updateIpRestrictions) => $updateIpRestrictions($record, $data['allowed_ips'] ?? null, $this->administrator()))
             ->successNotification(
                 fn (OAuthClient $record) => Notification::make()
                     ->title('IP Restrictions Updated')
@@ -68,7 +68,7 @@ class EditServiceClientIpRestrictionsAction extends Action
             ->visible(fn (OAuthClient $record): bool => ServiceClientSchemas::isMutable($record));
     }
 
-    private static function administrator(): User
+    private function administrator(): User
     {
         /** @var User */
         return auth()->user();

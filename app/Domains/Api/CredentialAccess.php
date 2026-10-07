@@ -41,7 +41,7 @@ readonly class CredentialAccess
             return AccessDecision::refuse(AccessRefusal::Unsupported, $kind);
         }
 
-        if (! $kind->isEnabled() && ! ($administering && in_array($operation, [CredentialOperation::See, CredentialOperation::Revoke], true))) {
+        if (! $kind->isEnabled() && (! $administering || ! in_array($operation, [CredentialOperation::See, CredentialOperation::Revoke], true))) {
             return AccessDecision::refuse(AccessRefusal::FeatureOff, $kind);
         }
 

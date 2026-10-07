@@ -138,18 +138,16 @@ final class CredentialAccessTest extends TestCase
     }
 
     /**
-     * @return array<string, array{CredentialOperation, CredentialKind, bool}>
+     * @return \Iterator<string, array{CredentialOperation, CredentialKind, bool}>
      */
-    public static function operationsAdministratorsCannotDo(): array
+    public static function operationsAdministratorsCannotDo(): \Iterator
     {
-        return [
-            'use someone else\'s' => [CredentialOperation::Use, CredentialKind::PersonalAccessToken, true],
-            'issue someone\'s token' => [CredentialOperation::Issue, CredentialKind::PersonalAccessToken, true],
-            'connect someone\'s application' => [CredentialOperation::Issue, CredentialKind::ConnectedApplication, true],
-            'register an MCP client' => [CredentialOperation::Issue, CredentialKind::McpClient, false],
-            'modify an MCP client' => [CredentialOperation::Modify, CredentialKind::McpClient, false],
-            'issue a service client for no one' => [CredentialOperation::Issue, CredentialKind::ServiceClient, false],
-        ];
+        yield 'use someone else\'s' => [CredentialOperation::Use, CredentialKind::PersonalAccessToken, true];
+        yield 'issue someone\'s token' => [CredentialOperation::Issue, CredentialKind::PersonalAccessToken, true];
+        yield 'connect someone\'s application' => [CredentialOperation::Issue, CredentialKind::ConnectedApplication, true];
+        yield 'register an MCP client' => [CredentialOperation::Issue, CredentialKind::McpClient, false];
+        yield 'modify an MCP client' => [CredentialOperation::Modify, CredentialKind::McpClient, false];
+        yield 'issue a service client for no one' => [CredentialOperation::Issue, CredentialKind::ServiceClient, false];
     }
 
     #[DataProvider('operationsAdministratorsCannotDo')]

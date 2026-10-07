@@ -34,12 +34,12 @@ class RevokeServiceClientAction extends Action
             ->modalHeading('Revoke Service Client')
             ->modalDescription('The service client and every access token it holds stop working immediately, and so does any integration still using it. This can\'t be undone.')
             ->modalSubmitActionLabel('Revoke Service Client')
-            ->action(fn (OAuthClient $record, RevokeServiceClient $revokeServiceClient) => $revokeServiceClient($record, self::administrator()))
+            ->action(fn (OAuthClient $record, RevokeServiceClient $revokeServiceClient) => $revokeServiceClient($record, $this->administrator()))
             ->successNotificationTitle('Service Client Revoked')
             ->visible(fn (OAuthClient $record): bool => ServiceClientSchemas::isMutable($record));
     }
 
-    private static function administrator(): User
+    private function administrator(): User
     {
         /** @var User */
         return auth()->user();

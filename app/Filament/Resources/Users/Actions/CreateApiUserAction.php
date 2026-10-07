@@ -135,7 +135,7 @@ class CreateApiUserAction extends Action
                             description: $state['description'] ?? null,
                             email: $state['email'] ?? null,
                             allowedIps: $configuration['allowed_ips'],
-                            createdBy: self::administrator(),
+                            createdBy: $this->administrator(),
                         );
 
                         ServiceClientSchemas::storeCredentials(ServiceClientSchemas::SESSION_KEY_CREATE_API_USER, $client, $secret, [
@@ -169,7 +169,7 @@ class CreateApiUserAction extends Action
             });
     }
 
-    private static function administrator(): User
+    private function administrator(): User
     {
         /** @var User */
         return auth()->user();
