@@ -8,6 +8,7 @@ use App\Domains\Auth\Enums\ClientOrigin;
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Http\Controllers\McpDiscoveryController;
 use App\Domains\Auth\Http\Controllers\RegisterMcpClientController;
+use App\Domains\Auth\Http\Middleware\AddMcpScopeToChallenge;
 use App\Domains\Auth\Http\Middleware\RefuseMcpTokens;
 use App\Domains\Auth\Http\Middleware\RequireMcpAccess;
 use App\Domains\Auth\Http\Middleware\RequireMcpPermissionForConsent;
@@ -26,6 +27,7 @@ use Tests\TestCase;
  * An MCP client connecting the way Claude, VS Code and Cursor do: from the server's 401, through
  * discovery, self-registration and consent, to calling a tool.
  */
+#[CoversClass(AddMcpScopeToChallenge::class)]
 #[CoversClass(McpDiscoveryController::class)]
 #[CoversClass(RegisterMcpClientController::class)]
 #[CoversClass(RequireMcpAccess::class)]
@@ -51,7 +53,7 @@ final class McpFlowTest extends TestCase
 
         $this->mcp(null, 'initialize')
             ->assertUnauthorized()
-            ->assertHeader('WWW-Authenticate', 'Bearer realm="mcp", resource_metadata="' . url('/.well-known/oauth-protected-resource/mcp') . '"')
+            ->assertHeader('WWW-Authenticate', 'Bearer realm="mcp", resource_metadata="' . url('/.well-known/oauth-protected-resource/mcp') . '", scope="mcp:use"')
             // MCP clients expect the protocol's errors, not the REST API's Problem Details.
             ->assertHeader('Content-Type', 'application/json');
 

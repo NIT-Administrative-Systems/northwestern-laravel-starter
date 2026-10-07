@@ -19,11 +19,15 @@ return [
 
     // Passport's OAuth endpoints share the API's per-IP limit. Service clients can't get tokens while the
     // API is off. Consent is refused while impersonating, and for an MCP client without the UseMcp permission.
+    // A person sent to consent by a deleted or revoked client sees a page instead of Passport's JSON.
+    // No other site may frame the consent screen.
     'middleware' => [
         'throttle:api',
+        App\Domains\Auth\Http\Middleware\DenyFramingOfConsent::class,
         App\Domains\Auth\Http\Middleware\RefuseClientCredentialsWhileApiDisabled::class,
         App\Domains\Auth\Http\Middleware\RefuseOAuthConsentWhileImpersonating::class,
         App\Domains\Auth\Http\Middleware\RequireMcpPermissionForConsent::class,
+        Northwestern\SysDev\Chassis\Http\Middleware\DetectUnknownOAuthClient::class,
     ],
 
     /*

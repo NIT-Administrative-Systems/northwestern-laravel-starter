@@ -5,18 +5,22 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Domains\Auth\Enums\SystemPermission;
+use App\Domains\Auth\Http\Middleware\AddMcpScopeToChallenge;
 use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\Auth\Models\OAuthToken;
 use App\Providers\Filament\AppPanelProvider;
 use Carbon\CarbonInterval;
 use Filament\Facades\Filament;
+use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Mcp\Server\Middleware\AddWwwAuthenticateHeader;
 use Laravel\Mcp\Server\Registrar;
 use Laravel\Passport\Bridge\AccessTokenRepository;
 use Laravel\Passport\ClientRepository;
 use Laravel\Passport\Passport;
 use Northwestern\SysDev\Chassis\Passport\ExpiringAccessTokenRepository;
 use Northwestern\SysDev\Chassis\Passport\OAuthClientRepository;
+use Northwestern\SysDev\Chassis\ValueObjects\OAuthRedirectTarget;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -36,6 +40,9 @@ class OAuthServiceProvider extends ServiceProvider
 
         // Client IDs are UUIDs; a malformed one is an unknown client, not a database error.
         $this->app->bind(ClientRepository::class, OAuthClientRepository::class);
+
+        // The MCP server's 401 challenge also names the scope a client should request.
+        $this->app->bind(AddWwwAuthenticateHeader::class, AddMcpScopeToChallenge::class);
     }
 
     public function boot(): void
@@ -52,6 +59,15 @@ class OAuthServiceProvider extends ServiceProvider
         Passport::authorizationView(function (array $parameters): Response {
             Filament::setCurrentPanel(Filament::getPanel(AppPanelProvider::ID));
             Filament::bootCurrentPanel();
+
+            /** @var Request $request */
+            $request = $parameters['request'];
+            /** @var OAuthClient $client */
+            $client = $parameters['client'];
+
+            // Where approving sends the person. Passport has already matched the redirect URI to one the
+            // client registered; without one, it uses the client's only registered URI.
+            $parameters['redirectTarget'] = OAuthRedirectTarget::from($request->string('redirect_uri')->toString() ?: $client->redirect_uris[0]);
 
             return response()->view('public.oauth.authorize', $parameters);
         });

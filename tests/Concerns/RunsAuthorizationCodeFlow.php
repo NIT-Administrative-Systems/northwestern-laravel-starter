@@ -34,13 +34,13 @@ trait RunsAuthorizationCodeFlow
      * @param  list<string>  $scopes
      * @return array{0: TestResponse<\Symfony\Component\HttpFoundation\Response>, 1: string} The authorization response and the PKCE verifier
      */
-    protected function requestAuthorization(OAuthClient $client, array $scopes = ['view-users'], string $state = 'state-123'): array
+    protected function requestAuthorization(OAuthClient $client, array $scopes = ['view-users'], string $state = 'state-123', string $redirectUri = self::REDIRECT_URI): array
     {
         $verifier = Str::random(64);
 
         $response = $this->get('/oauth/authorize?' . http_build_query([
             'client_id' => $client->getKey(),
-            'redirect_uri' => self::REDIRECT_URI,
+            'redirect_uri' => $redirectUri,
             'response_type' => 'code',
             'scope' => implode(' ', $scopes),
             'state' => $state,
@@ -57,7 +57,6 @@ trait RunsAuthorizationCodeFlow
     protected function approve(OAuthClient $client): string
     {
         $response = $this->post('/oauth/authorize', [
-            'state' => 'state-123',
             'client_id' => $client->getKey(),
             'auth_token' => session('authToken'),
         ]);

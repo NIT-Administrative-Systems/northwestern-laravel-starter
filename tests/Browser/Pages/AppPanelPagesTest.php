@@ -62,5 +62,35 @@ it('is healthy on the OAuth consent screen', function () {
         'code_challenge_method' => 'S256',
     ]));
 
-    expect($page->assertSee('Connect Reporting Tool'))->toBeHealthyInEachTheme();
+    expect($page->assertSee('Connect Reporting Tool')->assertSee('Approving returns you to'))->toBeHealthyInEachTheme();
+});
+
+it('is healthy on the OAuth consent screen for an internationalized domain', function () {
+    [, $client] = resolve(RegisterOAuthApplication::class)('Reporting Tool', ['https://bücher.example/callback'], false, ['view-users']);
+
+    $page = visit('/oauth/authorize?' . http_build_query([
+        'client_id' => $client->getKey(),
+        'redirect_uri' => 'https://bücher.example/callback',
+        'response_type' => 'code',
+        'scope' => 'view-users',
+        'code_challenge' => 'E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM',
+        'code_challenge_method' => 'S256',
+    ]));
+
+    expect($page->assertVisible('@internationalized-domain-warning'))->toBeHealthyInEachTheme();
+});
+
+it('is healthy on the page for an application that is no longer registered', function () {
+    [, $client] = resolve(RegisterOAuthApplication::class)('Reporting Tool', ['http://localhost:4100/callback'], false, ['view-users']);
+    $client->delete();
+
+    $page = visit('/oauth/authorize?' . http_build_query([
+        'client_id' => $client->getKey(),
+        'redirect_uri' => 'http://localhost:4100/callback',
+        'response_type' => 'code',
+        'code_challenge' => 'E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM',
+        'code_challenge_method' => 'S256',
+    ]));
+
+    expect($page->assertSee('Application Not Registered'))->toBeHealthyInEachTheme();
 });
