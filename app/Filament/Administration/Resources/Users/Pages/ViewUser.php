@@ -1,0 +1,52 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Filament\Administration\Resources\Users\Pages;
+
+use App\Domains\Auth\Enums\AuthType;
+use App\Domains\User\Models\User;
+use App\Filament\Administration\Resources\Users\Actions\SendLoginCodeAction;
+use App\Filament\Administration\Resources\Users\Schemas\ApiUserInfolist;
+use App\Filament\Administration\Resources\Users\Schemas\LocalUserInfolist;
+use App\Filament\Administration\Resources\Users\Schemas\NorthwesternUserInfolist;
+use App\Filament\Administration\Resources\Users\UserResource;
+use Filament\Actions\Action;
+use Filament\Facades\Filament;
+use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
+
+class ViewUser extends ViewRecord
+{
+    protected static string $resource = UserResource::class;
+
+    public function infolist(Schema $schema): Schema
+    {
+        /** @var User $record */
+        $record = $this->getRecord();
+
+        $schema->record($record);
+
+        /** @phpstan-ignore match.unhandled (all AuthType cases are covered) */
+        return match ($record->auth_type) {
+            AuthType::SSO => NorthwesternUserInfolist::configure($schema),
+            AuthType::Local => LocalUserInfolist::configure($schema),
+            AuthType::API => ApiUserInfolist::configure($schema),
+        };
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            SendLoginCodeAction::make(),
+            Action::make('impersonate')
+                ->color('warning')
+                ->postToUrl()
+                ->hidden(fn (User $record) => ! Filament::auth()->user()->canImpersonateUser($record))
+                ->label('Impersonate')
+                ->icon(Heroicon::OutlinedEye)
+                ->url(fn (User $user): string => route('impersonate', [$user])),
+        ];
+    }
+}

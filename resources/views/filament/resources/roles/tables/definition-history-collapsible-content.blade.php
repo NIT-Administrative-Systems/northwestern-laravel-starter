@@ -1,5 +1,5 @@
 @php
-    use App\Filament\Resources\Audits\AuditResource;
+    use App\Filament\Administration\Resources\Audits\AuditResource;
     use Illuminate\Support\Facades\Vite;
 
     $record = $getRecord();

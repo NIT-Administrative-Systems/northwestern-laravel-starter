@@ -7,7 +7,7 @@ sidebar:
 
 import { Aside } from "@astrojs/starlight/components";
 
-The administration panel at `/administration` holds the starter's back-office tools. Opening it needs the `AccessAdministrationPanel` permission, and each tool checks its own permission as well, so a role can give someone just the tools they need. Its resources, pages, clusters and widgets live in `app/Filament/` outside `app/Filament/App/` and are discovered automatically.
+The administration panel at `/administration` holds the starter's back-office tools. Opening it needs the `AccessAdministrationPanel` permission, and each tool checks its own permission as well, so a role can give someone just the tools they need. Its resources, pages, clusters and widgets live in `app/Filament/Administration/` and are discovered automatically.
 
 <Aside type="tip">
     Build your application's features in the [app panel](/building/app-panel/).
@@ -16,7 +16,7 @@ The administration panel at `/administration` holds the starter's back-office to
 
 ## Navigation
 
-The sidebar groups the tools with the `App\Filament\Navigation\AdministrationNavGroup` enum: **User Management**, **Platform** and **Developer Tools**. Give a resource or page its group with `protected static string|UnitEnum|null $navigationGroup = AdministrationNavGroup::Platform;`.
+The sidebar groups the tools with the `App\Filament\Administration\Navigation\AdministrationNavGroup` enum: **User Management**, **Platform** and **Developer Tools**. Give a resource or page its group with `protected static string|UnitEnum|null $navigationGroup = AdministrationNavGroup::Platform;`.
 
 | Tool                                      | Group                  | Needs                                                                                  |
 | ----------------------------------------- | ---------------------- | -------------------------------------------------------------------------------------- |
@@ -32,7 +32,7 @@ The sidebar groups the tools with the `App\Filament\Navigation\AdministrationNav
 
 ## The Dashboard
 
-`/administration` opens on Filament's dashboard with a placeholder `WelcomeWidget` (`app/Filament/Widgets/WelcomeWidget.php`). Replace it with the widgets, stats and charts your administrators need.
+`/administration` opens on Filament's dashboard with a placeholder `WelcomeWidget` (`app/Filament/Administration/Widgets/WelcomeWidget.php`). Replace it with the widgets, stats and charts your administrators need.
 
 ## Users
 
@@ -112,7 +112,7 @@ Links to Telescope, to the RustFS console when `S3_CONSOLE_URL` is set, and to M
 
 ### Exports
 
-Extend `App\Filament\Exports\BaseExporter` instead of Filament's `Exporter`. Declare the columns and `recordNoun()` (what a row is: `'audit record'`, `'user'`), and the base class does the rest:
+Extend `App\Filament\Support\BaseExporter` instead of Filament's `Exporter`. Declare the columns and `recordNoun()` (what a row is: `'audit record'`, `'user'`), and the base class does the rest:
 
 - Every text cell that a spreadsheet would run as a formula, one starting with `=`, `+`, `-`, `@`, a tab or a carriage return, gets a leading apostrophe. A name like `=HYPERLINK(...)` can't act on whoever opens the file.
 - The completion notification says how many rows were exported and how many failed.

@@ -53,9 +53,10 @@ before pushing again.
   `php artisan make:mcp-tool`, list it in `AppServer`, and gate it on the person's permissions in
   `shouldRegister()`. The rest of `app/Mcp` (discovery, client registration, the 401 challenge and
   `McpServiceProvider`) is the connection the starter provides.
-- **The administration panel** (`/administration`) in `app/Filament/` outside `App/`, for
+- **The administration panel** (`/administration`) in `app/Filament/Administration/`, for
   back-office tools. Filament generators target the app panel unless you pass
-  `--panel=administration`.
+  `--panel=administration`. Helpers both panels use are in `app/Filament/Support/`: extend
+  `BaseExporter` for every export, and show a new credential's secret with `RevealOnceSecret`.
 - **Public pages** in `resources/views/public/`, on `<x-layouts.public>`, with routes in the
   `panel:app` middleware group in `routes/web.php`.
 - **Error pages** in `resources/views/errors/`. Client errors (401, 402, 403, 404, 419, 429)
