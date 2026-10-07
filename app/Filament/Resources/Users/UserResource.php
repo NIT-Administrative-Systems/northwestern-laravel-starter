@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users;
 
+use App\Domains\Auth\Enums\AuthType;
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\User\Models\User;
 use App\Filament\Navigation\AdministrationNavGroup;
 use App\Filament\Resources\Users\Pages\ListUsers;
@@ -78,7 +80,9 @@ class UserResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return number_format(Cache::flexible('nav_badge_users_count', [30, 60], fn () => static::getModel()::count()));
+        $scope = self::seesEveryone() ? 'all' : 'api';
+
+        return number_format(Cache::flexible("nav_badge_users_count:{$scope}", [30, 60], fn () => static::getEloquentQuery()->count()));
     }
 
     public static function getGlobalSearchResultTitle(Model $record): string|Htmlable
@@ -110,6 +114,19 @@ class UserResource extends Resource
         ];
     }
 
+    /**
+     * Everyone for View Users; only API users for someone who manages API access without it.
+     *
+     * @return Builder<User>
+     */
+    public static function getEloquentQuery(): Builder
+    {
+        /** @var Builder<User> $query */
+        $query = parent::getEloquentQuery();
+
+        return self::seesEveryone() ? $query : $query->where('auth_type', AuthType::API);
+    }
+
     /** @return Builder<User> */
     public static function getRecordRouteBindingEloquentQuery(): Builder
     {
@@ -120,5 +137,10 @@ class UserResource extends Resource
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);
+    }
+
+    private static function seesEveryone(): bool
+    {
+        return (bool) auth()->user()?->can(SystemPermission::ViewUsers);
     }
 }

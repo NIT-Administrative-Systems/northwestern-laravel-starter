@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\OAuthApplications;
 
+use App\Domains\Api\Concerns\AuthorizesCredentials;
+use App\Domains\Api\Enums\CredentialKind;
+use App\Domains\Api\Enums\CredentialOperation;
 use App\Domains\Auth\Actions\Applications\RegenerateOAuthApplicationSecret;
 use App\Domains\Auth\Actions\Applications\RevokeOAuthApplication;
 use App\Domains\Auth\Actions\Applications\UpdateOAuthApplication;
 use App\Domains\Auth\Enums\CredentialStatus;
-use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\Auth\Models\OAuthConnection;
-use App\Domains\User\Models\User;
 use App\Filament\Clusters\ApiCluster;
 use App\Filament\Resources\OAuthApplications\Pages\ListOAuthApplications;
 use App\Filament\Resources\OAuthApplications\Schemas\OAuthApplicationSchemas;
@@ -33,6 +34,8 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class OAuthApplicationResource extends Resource
 {
+    use AuthorizesCredentials;
+
     protected static ?string $model = OAuthClient::class;
 
     protected static ?string $cluster = ApiCluster::class;
@@ -51,7 +54,7 @@ class OAuthApplicationResource extends Resource
 
     public static function canAccess(): bool
     {
-        return (bool) config('api.enabled') && (bool) auth()->user()?->can(SystemPermission::ManageApiAccess);
+        return static::allowsCredential(CredentialOperation::See, CredentialKind::ConnectedApplication);
     }
 
     /** @return Builder<OAuthClient> */
@@ -100,13 +103,12 @@ class OAuthApplicationResource extends Resource
                             (bool) $data['first_party'],
                             $data['description'] ?? null,
                             $data['contact_email'] ?? null,
-                            self::administrator(),
+                            static::actingUser(),
                         ))
                         ->successNotificationTitle('Application Updated')
-                        ->visible(fn (OAuthClient $record): bool => $record->status === CredentialStatus::Active),
+                        ->visible(fn (OAuthClient $record): bool => $record->status === CredentialStatus::Active && self::allows(CredentialOperation::Modify)),
                     Action::make('regenerateSecret')
                         ->label('Regenerate Secret')
-                        ->hidden(fn (): bool => resolve('impersonate')->isImpersonating())
                         ->icon(Heroicon::OutlinedArrowPath)
                         ->closeModalByClickingAway(false)
                         ->closeModalByEscaping(false)
@@ -119,13 +121,13 @@ class OAuthApplicationResource extends Resource
                                         return;
                                     }
 
-                                    OAuthApplicationSchemas::storeCredentials($record, $regenerate($record, self::administrator()));
+                                    OAuthApplicationSchemas::storeCredentials($record, $regenerate($record, static::actingUser()));
                                 }),
                             Wizard\Step::make('Copy Secret')->schema(OAuthApplicationSchemas::credentialsStep()),
                         ])
                         ->modalSubmitActionLabel('I\'ve copied the secret')
                         ->action(fn () => OAuthApplicationSchemas::clearCredentials())
-                        ->visible(fn (OAuthClient $record): bool => $record->confidential() && $record->status === CredentialStatus::Active),
+                        ->visible(fn (OAuthClient $record): bool => $record->confidential() && $record->status === CredentialStatus::Active && self::allows(CredentialOperation::Modify)),
                     Action::make('revoke')
                         ->label('Revoke')
                         ->icon(Heroicon::OutlinedXCircle)
@@ -134,9 +136,9 @@ class OAuthApplicationResource extends Resource
                         ->modalHeading('Revoke Application')
                         ->modalDescription('The application loses access to everyone\'s account immediately, and every connection to it is removed. This can\'t be undone.')
                         ->modalSubmitActionLabel('Revoke Application')
-                        ->action(fn (OAuthClient $record, RevokeOAuthApplication $revoke) => $revoke($record, self::administrator()))
+                        ->action(fn (OAuthClient $record, RevokeOAuthApplication $revoke) => $revoke($record, static::actingUser()))
                         ->successNotificationTitle('Application Revoked')
-                        ->visible(fn (OAuthClient $record): bool => $record->status === CredentialStatus::Active),
+                        ->visible(fn (OAuthClient $record): bool => $record->status === CredentialStatus::Active && self::allows(CredentialOperation::Revoke)),
                 ])->label('Actions')->button(),
             ])
             ->emptyStateHeading('No Applications Registered')
@@ -150,9 +152,11 @@ class OAuthApplicationResource extends Resource
         ];
     }
 
-    private static function administrator(): User
+    /**
+     * Whether the signed-in administrator may do this to applications, which are decided as a whole.
+     */
+    private static function allows(CredentialOperation $operation): bool
     {
-        /** @var User */
-        return auth()->user();
+        return static::allowsCredential($operation, CredentialKind::ConnectedApplication);
     }
 }

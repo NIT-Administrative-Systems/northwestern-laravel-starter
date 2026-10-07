@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace App\Filament\Clusters;
 
-use App\Domains\Auth\Enums\SystemPermission;
+use App\Filament\Clusters\ApiCluster\Pages\Overview;
 use App\Filament\Navigation\AdministrationNavGroup;
+use App\Filament\Resources\ApiRequestLogs\ApiRequestLogResource;
+use App\Filament\Resources\McpClients\McpClientResource;
+use App\Filament\Resources\OAuthApplications\OAuthApplicationResource;
 use BackedEnum;
 use Filament\Clusters\Cluster;
 use Filament\Pages\Enums\SubNavigationPosition;
@@ -29,26 +32,14 @@ class ApiCluster extends Cluster
     protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     /**
-     * Open when the REST API is on, or when only MCP is on, for its MCP Clients page. Each
-     * clustered page checks its own feature too: Filament applies this only to navigation.
+     * Open when any of its pages is. Filament applies this only to navigation, so each page
+     * checks its own access too.
      */
     public static function canAccess(): bool
     {
-        return self::canAccessApi() || ((bool) config('mcp.enabled') && (bool) auth()->user()?->can(SystemPermission::ManageApiAccess));
-    }
-
-    /**
-     * The REST API is on, and the person manages it or reads its request logs.
-     */
-    public static function canAccessApi(): bool
-    {
-        if (! config('api.enabled')) {
-            return false;
-        }
-
-        $user = auth()->user();
-
-        return $user !== null
-            && ($user->can(SystemPermission::ManageApiAccess) || $user->can(SystemPermission::ViewApiRequestLogs));
+        return Overview::canAccess()
+            || OAuthApplicationResource::canAccess()
+            || McpClientResource::canAccess()
+            || ApiRequestLogResource::canAccess();
     }
 }

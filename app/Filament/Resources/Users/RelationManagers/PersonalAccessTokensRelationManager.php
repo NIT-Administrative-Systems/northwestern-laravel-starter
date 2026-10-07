@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users\RelationManagers;
 
+use App\Domains\Api\Concerns\AuthorizesCredentials;
+use App\Domains\Api\Enums\CredentialKind;
+use App\Domains\Api\Enums\CredentialOperation;
 use App\Domains\Auth\Actions\Personal\RevokePersonalAccessToken;
-use App\Domains\Auth\Enums\AuthType;
 use App\Domains\Auth\Enums\CredentialStatus;
-use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\OAuthToken;
 use App\Domains\User\Models\User;
 use App\Providers\OAuthServiceProvider;
@@ -26,6 +27,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class PersonalAccessTokensRelationManager extends RelationManager
 {
+    use AuthorizesCredentials;
+
     protected static string $relationship = 'tokens';
 
     protected static ?string $title = 'Personal Access Tokens';
@@ -33,9 +36,7 @@ class PersonalAccessTokensRelationManager extends RelationManager
     public static function canViewForRecord(Model $ownerRecord, string $pageClass): bool
     {
         /** @var User $ownerRecord */
-        return $ownerRecord->auth_type !== AuthType::API
-            && config('api.enabled')
-            && auth()->user()?->can(SystemPermission::ManageApiAccess);
+        return static::allowsCredential(CredentialOperation::See, CredentialKind::PersonalAccessToken, $ownerRecord);
     }
 
     public static function getTabComponent(Model $ownerRecord, string $pageClass): Tab
@@ -74,17 +75,18 @@ class PersonalAccessTokensRelationManager extends RelationManager
                     ->modalHeading('Revoke Token')
                     ->modalDescription('Anything using this token stops working immediately. This can\'t be undone, and it\'s recorded in the person\'s audit history.')
                     ->modalSubmitActionLabel('Revoke Token')
-                    ->authorize(SystemPermission::ManageApiAccess)
-                    ->visible(fn (OAuthToken $record): bool => $record->status === CredentialStatus::Active)
-                    ->action(function (OAuthToken $record, RevokePersonalAccessToken $revoke): void {
-                        /** @var User $administrator */
-                        $administrator = auth()->user();
-
-                        $revoke($record, $administrator);
-                    })
+                    ->visible(fn (OAuthToken $record): bool => $record->status === CredentialStatus::Active
+                        && static::allowsCredential(CredentialOperation::Revoke, CredentialKind::PersonalAccessToken, $this->person()))
+                    ->action(fn (OAuthToken $record, RevokePersonalAccessToken $revoke) => $revoke($record, static::actingUser()))
                     ->successNotificationTitle('Token Revoked'),
             ])
             ->emptyStateHeading('No Personal Access Tokens')
             ->paginated(false);
+    }
+
+    private function person(): User
+    {
+        /** @var User */
+        return $this->getOwnerRecord();
     }
 }

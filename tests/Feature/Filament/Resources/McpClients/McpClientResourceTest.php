@@ -35,14 +35,14 @@ final class McpClientResourceTest extends TestCase
         $this->actingAs($admin);
     }
 
-    public function test_it_needs_manage_api_access_and_mcp_enabled(): void
+    // While MCP is off administrators can still see and revoke the clients, to shut it down cleanly.
+    public function test_it_needs_manage_api_access_and_stays_open_while_mcp_is_off(): void
     {
         $this->assertTrue(McpClientResource::canAccess());
 
         config(['mcp.enabled' => false]);
-        $this->assertFalse(McpClientResource::canAccess());
+        $this->assertTrue(McpClientResource::canAccess());
 
-        config(['mcp.enabled' => true]);
         $this->actingAs(User::factory()->create());
         $this->assertFalse(McpClientResource::canAccess());
     }
@@ -56,9 +56,7 @@ final class McpClientResourceTest extends TestCase
             ->assertOk()
             ->assertSee('href="' . ApiCluster::getUrl(panel: AdministrationPanelProvider::ID) . '"', escape: false);
 
-        $this->get(ApiCluster::getUrl(panel: AdministrationPanelProvider::ID))
-            ->assertRedirect(McpClientResource::getUrl(panel: AdministrationPanelProvider::ID));
-        $this->get('/administration/api/overview')->assertForbidden();
+        $this->get(McpClientResource::getUrl(panel: AdministrationPanelProvider::ID))->assertOk();
     }
 
     public function test_it_lists_only_self_registered_clients(): void

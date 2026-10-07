@@ -150,4 +150,17 @@ final class ServiceClientsRelationManagerTest extends TestCase
             'pageClass' => ViewUser::class,
         ]);
     }
+
+    // While the API is off administrators can still revoke service clients, but not create or change them.
+    public function test_while_the_api_is_off_clients_can_be_revoked_but_not_created_or_changed(): void
+    {
+        [, $client] = resolve(CreateServiceClient::class)($this->apiUser, 'Sync', now()->addMonth());
+        config(['api.enabled' => false]);
+
+        Livewire::test(ServiceClientsRelationManager::class, ['ownerRecord' => $this->apiUser, 'pageClass' => ViewUser::class])
+            ->assertActionHidden(TestAction::make('createServiceClient')->table())
+            ->assertActionHidden(TestAction::make('rotateServiceClient')->table($client))
+            ->assertActionHidden(TestAction::make('editServiceClientIpRestrictions')->table($client))
+            ->assertActionVisible(TestAction::make('revokeServiceClient')->table($client));
+    }
 }

@@ -134,4 +134,24 @@ final class ConnectedApplicationsTest extends TestCase
 
         return [OAuthConnection::query()->where('oauth_client_id', $client->getKey())->sole(), $accessToken];
     }
+
+    // A person sees only the kinds whose feature is on, and Disconnect All leaves the rest alone.
+    public function test_mcp_clients_are_left_out_while_mcp_is_off(): void
+    {
+        config(['mcp.enabled' => true]);
+        $application = $this->connect('Reporting Tool');
+        $this->user->givePermissionTo(SystemPermission::UseMcp);
+        $client = $this->registerMcpClient();
+        [, $verifier] = $this->requestAuthorization($client, ['mcp:use']);
+        $this->exchange($client, $this->approve($client), $verifier)->assertOk();
+        $mcp = OAuthConnection::query()->where('oauth_client_id', $client->getKey())->sole();
+        config(['mcp.enabled' => false]);
+
+        Livewire::test(ConnectedApplications::class)
+            ->assertCanSeeTableRecords([$application])
+            ->assertCanNotSeeTableRecords([$mcp])
+            ->callAction(TestAction::make('disconnectAll')->table());
+
+        $this->assertSame([$mcp->getKey()], OAuthConnection::query()->pluck('id')->all());
+    }
 }

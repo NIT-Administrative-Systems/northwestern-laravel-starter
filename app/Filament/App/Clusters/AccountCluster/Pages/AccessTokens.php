@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace App\Filament\App\Clusters\AccountCluster\Pages;
 
+use App\Domains\Api\Concerns\AuthorizesCredentials;
 use App\Domains\Api\CredentialAccess;
+use App\Domains\Api\Enums\AccessRefusal;
 use App\Domains\Api\Enums\CredentialKind;
+use App\Domains\Api\Enums\CredentialOperation;
+use App\Domains\Api\ValueObjects\AccessDecision;
 use App\Domains\Auth\Actions\Personal\CreatePersonalAccessToken;
 use App\Domains\Auth\Actions\Personal\RevokePersonalAccessToken;
-use App\Domains\Auth\Enums\AuthType;
 use App\Domains\Auth\Enums\CredentialStatus;
-use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Enums\TokenExpiration;
 use App\Domains\Auth\Models\OAuthToken;
 use App\Domains\User\Models\User;
@@ -45,8 +47,8 @@ use InvalidArgumentException;
 use Phiki\Grammar\Grammar;
 
 /**
- * A person's personal access tokens, for calling the API as themselves from their own code. Shown
- * to holders of {@see SystemPermission::CreatePersonalAccessTokens}.
+ * A person's personal access tokens, for calling the API as themselves from their own code. Who
+ * sees, creates and revokes them is decided by {@see CredentialAccess}.
  *
  * A new token is shown once. Between the wizard's steps it is kept encrypted in the session,
  * never in Livewire state, and forgotten when the person confirms they have copied it. An
@@ -54,7 +56,7 @@ use Phiki\Grammar\Grammar;
  */
 class AccessTokens extends Page implements HasTable
 {
-    use InteractsWithTable;
+    use AuthorizesCredentials, InteractsWithTable;
 
     /** Session key for the token being shown once. Stored value: `['token' => string (encrypted), 'record_id' => string]` */
     public const string SESSION_KEY = 'personal_access_token:create';
@@ -73,10 +75,7 @@ class AccessTokens extends Page implements HasTable
     {
         $user = auth()->user();
 
-        return $user instanceof User
-            && $user->auth_type !== AuthType::API
-            && (bool) config('api.enabled')
-            && $user->can(SystemPermission::CreatePersonalAccessTokens);
+        return $user instanceof User && static::allowsCredential(CredentialOperation::See, CredentialKind::PersonalAccessToken, $user);
     }
 
     public function content(Schema $schema): Schema
@@ -86,7 +85,7 @@ class AccessTokens extends Page implements HasTable
             Callout::make()
                 ->description(new HtmlString('<strong>You\'re impersonating this person.</strong> You can see their tokens, but you can\'t create or revoke them. To revoke one, use their page in Administration.'))
                 ->warning()
-                ->visible($this->isImpersonating()),
+                ->visible($this->tokens(CredentialOperation::Issue)->reason === AccessRefusal::Impersonating),
             Section::make('Personal Access Tokens')
                 ->description('Use the API as yourself from your own code and tools. A token can do only what you choose for it, and never more than you can. Keep tokens secret: anyone with one can act as you.')
                 ->schema([EmbeddedTable::make()]),
@@ -128,7 +127,7 @@ class AccessTokens extends Page implements HasTable
                     ->modalHeading('Revoke Token')
                     ->modalDescription('Anything using this token stops working immediately. This can\'t be undone.')
                     ->modalSubmitActionLabel('Revoke Token')
-                    ->visible(fn (OAuthToken $record): bool => ! $this->isImpersonating() && $record->status === CredentialStatus::Active)
+                    ->visible(fn (OAuthToken $record): bool => $record->status === CredentialStatus::Active && $this->tokens(CredentialOperation::Revoke)->allowed)
                     ->action(function (OAuthToken $record, RevokePersonalAccessToken $revoke): void {
                         abort_unless($record->user_id === $this->user()->getKey(), 404);
 
@@ -149,7 +148,7 @@ class AccessTokens extends Page implements HasTable
         return Action::make('createToken')
             ->label('Create Token')
             ->icon(Heroicon::OutlinedPlusCircle)
-            ->hidden(fn (): bool => $this->isImpersonating())
+            ->visible(fn (): bool => $this->tokens(CredentialOperation::Issue)->allowed)
             ->closeModalByClickingAway(false)
             ->closeModalByEscaping(false)
             ->mountUsing(function (?Schema $schema): void {
@@ -219,14 +218,16 @@ class AccessTokens extends Page implements HasTable
             ->successNotificationTitle('Token Created');
     }
 
-    private function isImpersonating(): bool
+    /**
+     * What the signed-in person may do with their own tokens.
+     */
+    private function tokens(CredentialOperation $operation): AccessDecision
     {
-        return $this->user()->isImpersonated();
+        return static::credentialAccess($operation, CredentialKind::PersonalAccessToken, $this->user());
     }
 
     private function user(): User
     {
-        /** @var User */
-        return auth()->user();
+        return static::actingUser();
     }
 }

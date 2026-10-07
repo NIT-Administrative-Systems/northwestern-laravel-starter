@@ -50,7 +50,7 @@ The starter creates Passport's personal access client the first time someone cre
 
 ## When the Starter Refuses
 
-Every rule for who may see, issue, change, revoke or use a credential is decided in one place, `App\Domains\Api\CredentialAccess`. Each action that issues, changes or revokes a credential takes the person acting and asks it, and so do the middleware that authenticates tokens, the consent screen and `oauth:revoke-ineligible`. To change a rule, change it there, and add a case to `tests/Feature/Domains/Api/CredentialAccessTest.php`.
+Every rule for who may see, issue, change, revoke or use a credential is decided in one place, `App\Domains\Api\CredentialAccess`. Each action that issues, changes or revokes a credential takes the person acting and asks it, and so do the middleware that authenticates tokens, the consent screen and `oauth:revoke-ineligible`. To change a rule, change it there, and add a case to `tests/Feature/Domains/Api/CredentialAccessTest.php`. Pages, resources and actions ask it through the `App\Domains\Api\Concerns\AuthorizesCredentials` trait, which answers for the signed-in person: use it in your own pages too, rather than checking permissions, feature switches or impersonation yourself.
 
 ### While Impersonating
 
@@ -74,7 +74,7 @@ Administrators manage a person's tokens and connections from the person's page i
 - **`API_ENABLED=false`** makes every route under `/api` respond 404. Nobody can create a personal access token or connect an application (the consent screen answers 404), and `/oauth/token` refuses every grant to service clients and connected applications with `unauthorized_client`.
 - **`MCP_ENABLED=false`** makes the MCP server, its discovery documents and dynamic registration respond 404, the consent screen answers 404 for MCP clients, and `/oauth/token` refuses to refresh their tokens.
 
-Nothing is revoked when a feature is turned off. Turning it back on brings every credential back.
+Nothing is revoked when a feature is turned off. Turning it back on brings every credential back. Administrators can still see and revoke credentials of that kind in Administration, to shut a feature down cleanly, but can't create or change them.
 
 ## Behind a Proxy
 

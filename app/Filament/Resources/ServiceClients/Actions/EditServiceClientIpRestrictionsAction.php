@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\ServiceClients\Actions;
 
+use App\Domains\Api\Concerns\AuthorizesCredentials;
+use App\Domains\Api\Enums\CredentialKind;
+use App\Domains\Api\Enums\CredentialOperation;
 use App\Domains\Auth\Actions\Api\UpdateServiceClientIpRestrictions;
-use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\OAuthClient;
-use App\Domains\User\Models\User;
 use App\Filament\Resources\ServiceClients\Schemas\ServiceClientSchemas;
+use App\Filament\Resources\Users\RelationManagers\ServiceClientsRelationManager;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TagsInput;
 use Filament\Notifications\Notification;
@@ -20,6 +22,8 @@ use Northwestern\SysDev\Chassis\Rules\ValidIpOrCidrRule;
 
 class EditServiceClientIpRestrictionsAction extends Action
 {
+    use AuthorizesCredentials;
+
     public static function getDefaultName(): ?string
     {
         return 'editServiceClientIpRestrictions';
@@ -29,7 +33,7 @@ class EditServiceClientIpRestrictionsAction extends Action
     {
         parent::setUp();
 
-        $this->authorize(SystemPermission::ManageApiAccess)
+        $this->authorize(fn (ServiceClientsRelationManager $livewire): bool => static::allowsCredential(CredentialOperation::Modify, CredentialKind::ServiceClient, $livewire->apiUser()))
             ->label('Edit IP Restrictions')
             ->icon(Heroicon::OutlinedShieldCheck)
             ->color('gray')
@@ -56,7 +60,7 @@ class EditServiceClientIpRestrictionsAction extends Action
                     ]),
             ])
             ->fillForm(fn (OAuthClient $record): array => ['allowed_ips' => $record->allowed_ips])
-            ->action(fn (OAuthClient $record, array $data, UpdateServiceClientIpRestrictions $updateIpRestrictions) => $updateIpRestrictions($record, $data['allowed_ips'] ?? null, $this->administrator()))
+            ->action(fn (OAuthClient $record, array $data, UpdateServiceClientIpRestrictions $updateIpRestrictions) => $updateIpRestrictions($record, $data['allowed_ips'] ?? null, static::actingUser()))
             ->successNotification(
                 fn (OAuthClient $record) => Notification::make()
                     ->title('IP Restrictions Updated')
@@ -66,11 +70,5 @@ class EditServiceClientIpRestrictionsAction extends Action
                     ->success()
             )
             ->visible(fn (OAuthClient $record): bool => ServiceClientSchemas::isMutable($record));
-    }
-
-    private function administrator(): User
-    {
-        /** @var User */
-        return auth()->user();
     }
 }
