@@ -166,7 +166,7 @@ final readonly class RevealOnceSecret
     {
         $stored = $this->stored();
 
-        if ($stored === null || ($stored['scope'] !== null && ! ($record instanceof Model && $this->isFor($record)))) {
+        if ($stored === null || ($stored['scope'] !== null && (! $record instanceof Model || ! $this->isFor($record)))) {
             return null;
         }
 
