@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Domains\Api\CredentialAccess;
+use App\Domains\Api\Enums\CredentialKind;
+use App\Domains\Api\Enums\CredentialOperation;
 use App\Domains\Auth\Mail\ClientSecretExpirationNotification;
 use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\User\Models\User;
@@ -25,7 +28,7 @@ class SendClientSecretExpirationNotificationsCommand extends Command
 
     protected $description = 'Send expiration notifications for service client secrets that are approaching their expiration date';
 
-    public function handle(): int
+    public function handle(CredentialAccess $credentials): int
     {
         if (! config('api.client_secret_expiration_notifications.enabled')) {
             $this->components->info('Client secret expiration notifications are disabled in the configuration');
@@ -54,6 +57,13 @@ class SendClientSecretExpirationNotificationsCommand extends Command
             $this->components->info("Found {$count} client secret(s) expiring in {$daysBeforeExpiration} days");
 
             foreach ($query->lazyById(100) as $client) {
+                // Nobody is warned about a client its API user can no longer use, such as while the API is off.
+                $owner = $client->owner;
+
+                if (! $owner instanceof User || ! $credentials->decide($owner, CredentialOperation::Use, CredentialKind::ServiceClient, $owner)->allowed) {
+                    continue;
+                }
+
                 try {
                     $this->notify($client, $daysBeforeExpiration);
                     $totalNotificationsSent++;

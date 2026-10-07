@@ -124,4 +124,15 @@ final class SendClientSecretExpirationNotificationsCommandTest extends TestCase
 
         return $client;
     }
+
+    // Nobody is warned about a client that already doesn't work while the API is off.
+    public function test_command_skips_clients_while_the_api_is_off(): void
+    {
+        $this->client('user1@test.com', now()->addDays(7)->endOfDay());
+        config(['api.enabled' => false]);
+
+        $this->artisan(SendClientSecretExpirationNotificationsCommand::class)->assertSuccessful();
+
+        Mail::assertNothingQueued();
+    }
 }

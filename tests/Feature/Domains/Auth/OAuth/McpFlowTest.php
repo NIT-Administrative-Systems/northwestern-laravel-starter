@@ -9,9 +9,9 @@ use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Http\Controllers\McpDiscoveryController;
 use App\Domains\Auth\Http\Controllers\RegisterMcpClientController;
 use App\Domains\Auth\Http\Middleware\AddMcpScopeToChallenge;
+use App\Domains\Auth\Http\Middleware\AuthorizeOAuthConsent;
 use App\Domains\Auth\Http\Middleware\RefuseMcpTokens;
 use App\Domains\Auth\Http\Middleware\RequireMcpAccess;
-use App\Domains\Auth\Http\Middleware\RequireMcpPermissionForConsent;
 use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\Auth\Models\OAuthConnection;
 use App\Domains\User\Models\User;
@@ -32,7 +32,7 @@ use Tests\TestCase;
 #[CoversClass(RegisterMcpClientController::class)]
 #[CoversClass(RequireMcpAccess::class)]
 #[CoversClass(RefuseMcpTokens::class)]
-#[CoversClass(RequireMcpPermissionForConsent::class)]
+#[CoversClass(AuthorizeOAuthConsent::class)]
 #[CoversClass(AppServer::class)]
 final class McpFlowTest extends TestCase
 {
@@ -153,7 +153,8 @@ final class McpFlowTest extends TestCase
         }
     }
 
-    // Losing the permission ends access at once; oauth:revoke-ineligible then disconnects the client.
+    // Losing the permission ends access at once: the token stops working, so the client signs in
+    // again and the consent screen refuses it. oauth:revoke-ineligible then disconnects it.
     public function test_only_people_with_the_use_mcp_permission_connect_and_keep_using_a_client(): void
     {
         $this->actingAs(User::factory()->create());
@@ -168,7 +169,7 @@ final class McpFlowTest extends TestCase
 
         $user->revokePermissionTo(SystemPermission::UseMcp);
 
-        $this->mcp($token, 'tools/list')->assertForbidden();
+        $this->mcp($token, 'tools/list')->assertUnauthorized();
     }
 
     public function test_everything_answers_404_while_mcp_is_disabled(): void

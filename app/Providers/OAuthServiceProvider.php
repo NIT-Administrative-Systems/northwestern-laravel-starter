@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Domains\Api\CredentialAccess;
+use App\Domains\Api\Enums\CredentialKind;
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Http\Middleware\AddMcpScopeToChallenge;
 use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\Auth\Models\OAuthToken;
+use App\Domains\Auth\Passport\GrantableScopeRepository;
+use App\Domains\User\Models\User;
 use App\Providers\Filament\AppPanelProvider;
 use Carbon\CarbonInterval;
 use Filament\Facades\Filament;
@@ -16,8 +20,10 @@ use Illuminate\Support\ServiceProvider;
 use Laravel\Mcp\Server\Middleware\AddWwwAuthenticateHeader;
 use Laravel\Mcp\Server\Registrar;
 use Laravel\Passport\Bridge\AccessTokenRepository;
+use Laravel\Passport\Bridge\ScopeRepository;
 use Laravel\Passport\ClientRepository;
 use Laravel\Passport\Passport;
+use Laravel\Passport\Scope;
 use Northwestern\SysDev\Chassis\Passport\ExpiringAccessTokenRepository;
 use Northwestern\SysDev\Chassis\Passport\OAuthClientRepository;
 use Northwestern\SysDev\Chassis\ValueObjects\OAuthRedirectTarget;
@@ -43,6 +49,9 @@ class OAuthServiceProvider extends ServiceProvider
 
         // The MCP server's 401 challenge also names the scope a client should request.
         $this->app->bind(AddWwwAuthenticateHeader::class, AddMcpScopeToChallenge::class);
+
+        // A person can't give an application a scope they don't hold themselves.
+        $this->app->bind(ScopeRepository::class, GrantableScopeRepository::class);
     }
 
     public function boot(): void
@@ -68,6 +77,12 @@ class OAuthServiceProvider extends ServiceProvider
             // Where approving sends the person. Passport has already matched the redirect URI to one the
             // client registered; without one, it uses the client's only registered URI.
             $parameters['redirectTarget'] = OAuthRedirectTarget::from($request->string('redirect_uri')->toString() ?: $client->redirect_uris[0]);
+
+            // Only the scopes the person may grant, the same ones GrantableScopeRepository lets the token carry.
+            /** @var User $user */
+            $user = $parameters['user'];
+            $grantable = resolve(CredentialAccess::class)->grantableScopes($user, CredentialKind::of($client));
+            $parameters['scopes'] = array_values(array_filter($parameters['scopes'], fn (Scope $scope): bool => array_key_exists($scope->id, $grantable)));
 
             return response()->view('public.oauth.authorize', $parameters);
         });

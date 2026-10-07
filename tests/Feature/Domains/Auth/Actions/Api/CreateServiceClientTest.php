@@ -6,6 +6,7 @@ namespace Tests\Feature\Domains\Auth\Actions\Api;
 
 use App\Domains\Auth\Actions\Api\CreateServiceClient;
 use App\Domains\Auth\Enums\ClientOrigin;
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\User\Models\Audit;
 use App\Domains\User\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -78,16 +79,25 @@ final class CreateServiceClientTest extends TestCase
     public function test_it_is_refused_while_impersonating(): void
     {
         $apiUser = User::factory()->api()->create();
+        $administrator = $this->administrator();
         $impersonate = Mockery::mock();
         $impersonate->shouldReceive('isImpersonating')->andReturn(true);
         $impersonate->shouldReceive('getImpersonatorId')->andReturn(null);
         $this->app->instance('impersonate', $impersonate);
 
         try {
-            resolve(CreateServiceClient::class)($apiUser, 'Sync', now()->addDays(30));
+            resolve(CreateServiceClient::class)($apiUser, 'Sync', now()->addDays(30), createdBy: $administrator);
             $this->fail('A service client was created while impersonating.');
         } catch (AuthorizationException) {
             $this->assertSame(0, $apiUser->oauthApps()->count());
         }
+    }
+
+    private function administrator(): User
+    {
+        $administrator = User::factory()->affiliate()->create();
+        $administrator->givePermissionTo(SystemPermission::ManageApiAccess);
+
+        return $administrator;
     }
 }

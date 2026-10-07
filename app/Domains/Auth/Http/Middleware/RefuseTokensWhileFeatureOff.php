@@ -4,28 +4,40 @@ declare(strict_types=1);
 
 namespace App\Domains\Auth\Http\Middleware;
 
+use App\Domains\Api\Enums\CredentialKind;
+use App\Domains\Auth\Models\OAuthClient;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Refuses the client-credentials grant at Passport's token endpoint while `api.enabled` is
- * off, so service clients can't get tokens for an API that isn't there. The other grants
- * stay: MCP clients use the authorization-code and refresh grants at the same endpoint.
+ * Refuses every grant at Passport's token endpoint for a client whose feature is off: a
+ * service client or connected application while `api.enabled` is off, an MCP client while
+ * `mcp.enabled` is off. A credential whose feature is off can't get or refresh a token; turning
+ * the feature back on lets it continue, since nothing was revoked.
  *
- * The refusal is an OAuth error response, as Passport would give for a grant it doesn't support.
+ * The client comes from `client_id` in the body or the HTTP Basic username. An unknown one is
+ * left to Passport. The refusal is the OAuth error for a client that may not use the grant.
  */
-class RefuseClientCredentialsWhileApiDisabled
+class RefuseTokensWhileFeatureOff
 {
     /**
      * @param  Closure(Request): Response  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (! config('api.enabled') && $request->routeIs('passport.token') && $request->input('grant_type') === 'client_credentials') {
+        if (! $request->routeIs('passport.token')) {
+            return $next($request);
+        }
+
+        $clientId = (string) ($request->input('client_id') ?? $request->getUser() ?? '');
+        $client = Str::isUuid($clientId) ? OAuthClient::query()->find($clientId) : null;
+
+        if ($client instanceof OAuthClient && ! ($kind = CredentialKind::of($client))->isEnabled()) {
             return response()->json([
-                'error' => 'unsupported_grant_type',
-                'error_description' => 'The client credentials grant is not available while the API is turned off.',
+                'error' => 'unauthorized_client',
+                'error_description' => ucfirst($kind->plural()) . ' are turned off.',
             ], Response::HTTP_BAD_REQUEST);
         }
 

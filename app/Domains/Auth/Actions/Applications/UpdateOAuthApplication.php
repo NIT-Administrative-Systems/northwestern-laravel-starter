@@ -4,8 +4,13 @@ declare(strict_types=1);
 
 namespace App\Domains\Auth\Actions\Applications;
 
+use App\Domains\Api\CredentialAccess;
+use App\Domains\Api\Enums\CredentialKind;
+use App\Domains\Api\Enums\CredentialOperation;
 use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\User\Models\User;
+use Illuminate\Auth\Access\AuthorizationException;
+use InvalidArgumentException;
 
 /**
  * Changes an application's details, redirect URIs and allowed scopes. Tokens already issued
@@ -15,10 +20,17 @@ use App\Domains\User\Models\User;
  */
 readonly class UpdateOAuthApplication
 {
+    public function __construct(
+        private CredentialAccess $credentials,
+    ) {
+    }
+
     /**
      * @param  non-empty-string  $name
      * @param  list<non-empty-string>  $redirectUris
      * @param  list<string>  $scopes
+     *
+     * @throws AuthorizationException
      */
     public function __invoke(
         OAuthClient $client,
@@ -30,6 +42,12 @@ readonly class UpdateOAuthApplication
         ?string $contactEmail,
         User $updatedBy,
     ): void {
+        $this->credentials->decide($updatedBy, CredentialOperation::Modify, CredentialKind::ConnectedApplication, null)->authorize();
+
+        if ($client->getAttributes()['revoked']) {
+            throw new InvalidArgumentException('A revoked application cannot be changed.');
+        }
+
         $audited = ['name', 'redirect_uris', 'scopes', 'first_party', 'description', 'contact_email'];
         $old = $client->only($audited);
 

@@ -7,6 +7,8 @@ namespace Tests\Feature\Domains\User\Actions\Api;
 use App\Domains\Auth\Enums\AuthType;
 use App\Domains\User\Actions\Api\CreateApiUser;
 use App\Domains\User\Enums\Affiliation;
+use App\Domains\User\Models\User;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Hash;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
@@ -51,5 +53,22 @@ final class CreateApiUserTest extends TestCase
         $this->assertNull($user->email);
         $this->assertNull($user->description);
         $this->assertNull($client->allowed_ips);
+    }
+
+    // The first client is refused after the user exists, so the transaction takes the user back.
+    public function test_a_refused_creator_leaves_no_api_user_behind(): void
+    {
+        try {
+            resolve(CreateApiUser::class)(
+                username: 'api-reporting',
+                firstName: 'Reporting',
+                clientName: 'Production Server',
+                secretExpiresAt: now()->addDays(90),
+                createdBy: User::factory()->affiliate()->create(),
+            );
+            $this->fail('An API user was created without Manage API Access.');
+        } catch (AuthorizationException) {
+            $this->assertFalse(User::query()->where('username', 'api-reporting')->exists());
+        }
     }
 }

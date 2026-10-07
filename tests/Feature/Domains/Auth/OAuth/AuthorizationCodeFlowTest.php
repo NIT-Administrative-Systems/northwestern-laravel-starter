@@ -9,10 +9,11 @@ use App\Domains\Auth\Actions\Applications\RegisterOAuthApplication;
 use App\Domains\Auth\Actions\Applications\RevokeOAuthApplication;
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Http\Controllers\SwitchOAuthAccountController;
-use App\Domains\Auth\Http\Middleware\RefuseOAuthConsentWhileImpersonating;
+use App\Domains\Auth\Http\Middleware\AuthorizeOAuthConsent;
 use App\Domains\Auth\Listeners\RecordOAuthConnection;
 use App\Domains\Auth\Models\OAuthConnection;
 use App\Domains\Auth\Notifications\ApplicationConnectedNotification;
+use App\Domains\Auth\Passport\GrantableScopeRepository;
 use App\Domains\User\Models\User;
 use App\Providers\OAuthServiceProvider;
 use Illuminate\Support\Facades\Event;
@@ -30,7 +31,8 @@ use Tests\TestCase;
  */
 #[CoversClass(OAuthServiceProvider::class)]
 #[CoversClass(RecordOAuthConnection::class)]
-#[CoversClass(RefuseOAuthConsentWhileImpersonating::class)]
+#[CoversClass(AuthorizeOAuthConsent::class)]
+#[CoversClass(GrantableScopeRepository::class)]
 #[CoversClass(SwitchOAuthAccountController::class)]
 final class AuthorizationCodeFlowTest extends TestCase
 {
@@ -40,6 +42,7 @@ final class AuthorizationCodeFlowTest extends TestCase
     {
         Notification::fake();
         $user = User::factory()->create(['first_name' => 'Willie']);
+        $user->givePermissionTo(SystemPermission::ViewUsers);
         $client = $this->registerApplication();
         $this->actingAs($user);
 
@@ -153,6 +156,31 @@ final class AuthorizationCodeFlowTest extends TestCase
         $tokens = $this->exchange($client, $this->approve($client), $verifier)->assertOk();
         $this->assertSame([], OAuthConnection::query()->sole()->scopes);
         $this->assertNotEmpty($tokens->json('access_token'));
+    }
+
+    // A person can't give an application more than they hold, whatever it's allowed to ask for.
+    public function test_a_person_grants_only_the_scopes_they_hold(): void
+    {
+        $this->actingAs(User::factory()->affiliate()->create());
+        $client = $this->registerApplication(['view-users']);
+
+        [$consent, $verifier] = $this->requestAuthorization($client);
+        $consent->assertOk()->assertDontSee(SystemPermission::ViewUsers->description());
+
+        $this->exchange($client, $this->approve($client), $verifier)->assertOk();
+        $this->assertSame([], OAuthConnection::query()->sole()->scopes);
+    }
+
+    // Connected applications follow api.enabled, as MCP clients follow mcp.enabled.
+    public function test_consent_answers_404_while_the_api_is_off(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $client = $this->registerApplication();
+        config(['api.enabled' => false]);
+
+        [$consent] = $this->requestAuthorization($client);
+
+        $consent->assertNotFound();
     }
 
     public function test_a_signed_out_person_signs_in_first_and_returns_to_the_consent_screen(): void

@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Domains\Auth\Actions\Applications;
 
+use App\Domains\Api\CredentialAccess;
+use App\Domains\Api\Enums\CredentialKind;
+use App\Domains\Api\Enums\CredentialOperation;
 use App\Domains\Auth\Enums\ClientOrigin;
 use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\User\Models\User;
@@ -24,6 +27,7 @@ readonly class RegisterOAuthApplication
 {
     public function __construct(
         private ClientRepository $clients,
+        private CredentialAccess $credentials,
     ) {
     }
 
@@ -31,7 +35,10 @@ readonly class RegisterOAuthApplication
      * @param  non-empty-string  $name
      * @param  list<non-empty-string>  $redirectUris
      * @param  list<string>  $scopes  The scopes the application may request
+     * @param  User|null  $registeredBy  The administrator; null for a seeder or a self-registered MCP client
      * @return array{0: non-empty-string|null, 1: OAuthClient} The secret, shown once (null for a public application), and the client
+     *
+     * @throws AuthorizationException
      */
     public function __invoke(
         string $name,
@@ -44,9 +51,9 @@ readonly class RegisterOAuthApplication
         ClientOrigin $origin = ClientOrigin::Administrator,
         ?User $registeredBy = null,
     ): array {
-        // A secret outlives the session, so it is never issued while impersonating, as with personal access tokens. Dynamic registration has no session.
-        if ($origin === ClientOrigin::Administrator && resolve('impersonate')->isImpersonating()) {
-            throw new AuthorizationException('Applications cannot be registered while impersonating.');
+        // Dynamic registration is anonymous: the MCP routes decide whether it's open. Seeders and tests register without anyone.
+        if ($origin === ClientOrigin::Administrator && $registeredBy instanceof User) {
+            $this->credentials->decide($registeredBy, CredentialOperation::Issue, CredentialKind::ConnectedApplication, null)->authorize();
         }
 
         return DB::transaction(function () use ($name, $redirectUris, $confidential, $scopes, $firstParty, $description, $contactEmail, $origin, $registeredBy): array {

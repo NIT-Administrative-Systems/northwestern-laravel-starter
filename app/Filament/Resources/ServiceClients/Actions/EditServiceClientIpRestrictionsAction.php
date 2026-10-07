@@ -7,6 +7,7 @@ namespace App\Filament\Resources\ServiceClients\Actions;
 use App\Domains\Auth\Actions\Api\UpdateServiceClientIpRestrictions;
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\OAuthClient;
+use App\Domains\User\Models\User;
 use App\Filament\Resources\ServiceClients\Schemas\ServiceClientSchemas;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TagsInput;
@@ -55,7 +56,7 @@ class EditServiceClientIpRestrictionsAction extends Action
                     ]),
             ])
             ->fillForm(fn (OAuthClient $record): array => ['allowed_ips' => $record->allowed_ips])
-            ->action(fn (OAuthClient $record, array $data, UpdateServiceClientIpRestrictions $updateIpRestrictions) => $updateIpRestrictions($record, $data['allowed_ips'] ?? null))
+            ->action(fn (OAuthClient $record, array $data, UpdateServiceClientIpRestrictions $updateIpRestrictions) => $updateIpRestrictions($record, $data['allowed_ips'] ?? null, self::administrator()))
             ->successNotification(
                 fn (OAuthClient $record) => Notification::make()
                     ->title('IP Restrictions Updated')
@@ -65,5 +66,11 @@ class EditServiceClientIpRestrictionsAction extends Action
                     ->success()
             )
             ->visible(fn (OAuthClient $record): bool => ServiceClientSchemas::isMutable($record));
+    }
+
+    private static function administrator(): User
+    {
+        /** @var User */
+        return auth()->user();
     }
 }

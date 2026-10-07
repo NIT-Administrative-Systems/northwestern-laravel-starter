@@ -166,11 +166,12 @@ final class UserApiControllerTest extends ApiTestCase
         $response->assertUnauthorized();
     }
 
-    // With the API off its routes are unavailable, even for a token issued before it was turned off.
-    public function test_is_unavailable_while_the_api_is_off(): void
+    // With the API off its routes don't exist, even for a token issued before it was turned off:
+    // an owner turned it off on purpose, so it isn't a temporary outage.
+    public function test_is_not_found_while_the_api_is_off(): void
     {
         config(['api.enabled' => false]);
 
-        $this->authenticatedGet()->assertServiceUnavailable();
+        $this->authenticatedGet()->assertNotFound();
     }
 }

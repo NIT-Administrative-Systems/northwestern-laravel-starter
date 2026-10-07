@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Domains\Auth\Actions\Applications;
 
+use App\Domains\Api\CredentialAccess;
+use App\Domains\Api\Enums\CredentialKind;
+use App\Domains\Api\Enums\CredentialOperation;
+use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\Auth\Models\OAuthConnection;
 use App\Domains\User\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -19,33 +23,37 @@ readonly class DisconnectApplication
 {
     public function __construct(
         private AccessRevoker $accessRevoker,
+        private CredentialAccess $credentials,
     ) {
     }
 
     /**
-     * @param  User  $disconnectedBy  The person, or an administrator; an administrator's disconnect is audited on the person
+     * @param  User|null  $disconnectedBy  The person or an administrator, audited on the person when it's an administrator; null when the system disconnects it, also audited
      *
      * @throws AuthorizationException
      */
-    public function __invoke(OAuthConnection $connection, User $disconnectedBy): void
+    public function __invoke(OAuthConnection $connection, ?User $disconnectedBy): void
     {
-        if ($disconnectedBy->isImpersonated()) {
-            throw new AuthorizationException('Applications cannot be disconnected while impersonating.');
+        // The sweep disconnects deleted accounts too.
+        $user = $connection->user()->withTrashed()->first();
+        $client = $connection->loadMissing('oauth_client')->oauth_client;
+
+        if ($disconnectedBy instanceof User && $client instanceof OAuthClient) {
+            $this->credentials->decide($disconnectedBy, CredentialOperation::Revoke, CredentialKind::of($client), $user)->authorize();
         }
 
-        $connection->loadMissing(['user', 'oauth_client']);
-        $user = $connection->user;
-        $application = $connection->oauth_client?->name;
-
         DB::transaction(function () use ($connection, $user): void {
-            $this->accessRevoker->revokeClient($user, $connection->oauth_client_id);
+            if ($user instanceof User) {
+                $this->accessRevoker->revokeClient($user, $connection->oauth_client_id);
+            }
+
             $connection->delete();
         });
 
-        if ($user->isNot($disconnectedBy)) {
+        if ($user instanceof User && ! $user->is($disconnectedBy)) {
             $user->recordCustomAudit('application_disconnected', [
                 'oauth_client_id' => $connection->oauth_client_id,
-                'application' => $application,
+                'application' => $client?->name,
             ]);
         }
     }

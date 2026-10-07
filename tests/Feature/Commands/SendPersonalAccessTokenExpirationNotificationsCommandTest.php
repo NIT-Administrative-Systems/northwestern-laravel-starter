@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Commands;
 
 use App\Console\Commands\SendPersonalAccessTokenExpirationNotificationsCommand;
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Mail\PersonalAccessTokenExpirationNotification;
 use App\Domains\User\Data\UserPreferences;
 use App\Domains\User\Models\User;
@@ -107,5 +108,22 @@ final class SendPersonalAccessTokenExpirationNotificationsCommandTest extends Te
         $token->forceFill(['expires_at' => now()->addDays(7)->setTime(15, 0)])->save();
 
         return $token;
+    }
+
+    // Nobody is warned about a token that already doesn't work.
+    public function test_nobody_is_warned_about_a_token_they_can_no_longer_use(): void
+    {
+        $lost = User::factory()->create(['email' => 'lost@example.edu']);
+        $this->expiringToken($lost);
+        $lost->revokePermissionTo(SystemPermission::CreatePersonalAccessTokens);
+
+        $this->artisan(SendPersonalAccessTokenExpirationNotificationsCommand::class)->assertSuccessful();
+        Mail::assertNothingQueued();
+
+        $this->expiringToken(User::factory()->create(['email' => 'willie@example.edu']));
+        config(['api.enabled' => false]);
+
+        $this->artisan(SendPersonalAccessTokenExpirationNotificationsCommand::class)->assertSuccessful();
+        Mail::assertNothingQueued();
     }
 }

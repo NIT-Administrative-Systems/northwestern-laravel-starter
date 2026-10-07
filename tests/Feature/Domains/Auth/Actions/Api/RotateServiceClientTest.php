@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Tests\Feature\Domains\Auth\Actions\Api;
 
 use App\Domains\Auth\Actions\Api\CreateServiceClient;
+use App\Domains\Auth\Actions\Api\RevokeServiceClient;
 use App\Domains\Auth\Actions\Api\RotateServiceClient;
 use App\Domains\Auth\Enums\CredentialStatus;
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\User\Models\User;
 use InvalidArgumentException;
@@ -21,7 +23,7 @@ final class RotateServiceClientTest extends TestCase
     public function test_it_adds_a_replacement_and_leaves_the_old_client_active(): void
     {
         $apiUser = User::factory()->api()->create();
-        $admin = User::factory()->create();
+        $admin = $this->administrator();
         [, $previous] = resolve(CreateServiceClient::class)($apiUser, 'Sync', now()->addDays(10));
 
         [$secret, $replacement] = resolve(RotateServiceClient::class)($previous, $admin, 'Sync 2026', now()->addDays(90), ['10.0.0.1']);
@@ -42,6 +44,24 @@ final class RotateServiceClientTest extends TestCase
 
         $this->expectException(InvalidArgumentException::class);
 
-        resolve(RotateServiceClient::class)($client, User::factory()->create(), 'Replacement', now()->addDays(30));
+        resolve(RotateServiceClient::class)($client, $this->administrator(), 'Replacement', now()->addDays(30));
+    }
+
+    public function test_a_revoked_client_cannot_be_rotated(): void
+    {
+        [, $previous] = resolve(CreateServiceClient::class)(User::factory()->api()->create(), 'Sync', now()->addDays(10));
+        resolve(RevokeServiceClient::class)($previous);
+
+        $this->expectException(InvalidArgumentException::class);
+
+        resolve(RotateServiceClient::class)($previous, $this->administrator(), 'Replacement', now()->addDays(30));
+    }
+
+    private function administrator(): User
+    {
+        $administrator = User::factory()->affiliate()->create();
+        $administrator->givePermissionTo(SystemPermission::ManageApiAccess);
+
+        return $administrator;
     }
 }

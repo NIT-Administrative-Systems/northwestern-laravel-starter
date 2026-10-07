@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace App\Domains\Auth\Actions\Applications;
 
+use App\Domains\Api\CredentialAccess;
+use App\Domains\Api\Enums\CredentialKind;
+use App\Domains\Api\Enums\CredentialOperation;
 use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\Auth\Models\OAuthConnection;
 use App\Domains\User\Models\User;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
 use Laravel\Passport\Passport;
 
@@ -19,8 +23,22 @@ use Laravel\Passport\Passport;
  */
 readonly class RevokeOAuthApplication
 {
+    public function __construct(
+        private CredentialAccess $credentials,
+    ) {
+    }
+
+    /**
+     * @param  User|null  $revokedBy  The administrator; null when the system prunes it
+     *
+     * @throws AuthorizationException
+     */
     public function __invoke(OAuthClient $client, ?User $revokedBy = null): void
     {
+        if ($revokedBy instanceof User) {
+            $this->credentials->decide($revokedBy, CredentialOperation::Revoke, CredentialKind::of($client), null)->authorize();
+        }
+
         DB::transaction(function () use ($client, $revokedBy): void {
             $tokens = Passport::token()->newQuery()->where('client_id', $client->getKey());
 

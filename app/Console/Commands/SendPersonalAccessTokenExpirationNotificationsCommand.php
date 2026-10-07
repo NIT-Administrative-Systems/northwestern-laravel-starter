@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Domains\Api\CredentialAccess;
+use App\Domains\Api\Enums\CredentialKind;
+use App\Domains\Api\Enums\CredentialOperation;
 use App\Domains\Auth\Mail\PersonalAccessTokenExpirationNotification;
 use App\Domains\Auth\Models\OAuthToken;
 use App\Domains\User\Models\User;
@@ -25,7 +28,7 @@ class SendPersonalAccessTokenExpirationNotificationsCommand extends Command
 
     protected $description = 'Send expiration notifications for personal access tokens that are approaching their expiration date';
 
-    public function handle(): int
+    public function handle(CredentialAccess $credentials): int
     {
         if (! config('api.personal_access_tokens.expiration_notifications.enabled')) {
             $this->components->info('Personal access token expiration notifications are disabled in the configuration');
@@ -40,7 +43,10 @@ class SendPersonalAccessTokenExpirationNotificationsCommand extends Command
             foreach ($this->expiringTokensQuery($daysBeforeExpiration)->lazyById(100) as $token) {
                 $user = User::query()->find($token->user_id);
 
-                if (! $user instanceof User || ! $user->preferences->emailBeforeAccessTokensExpire) {
+                // Nobody is warned about a token they can no longer use, such as while the API is off.
+                if (! $user instanceof User
+                    || ! $user->preferences->emailBeforeAccessTokensExpire
+                    || ! $credentials->decide($user, CredentialOperation::Use, CredentialKind::PersonalAccessToken, $user)->allowed) {
                     continue;
                 }
 

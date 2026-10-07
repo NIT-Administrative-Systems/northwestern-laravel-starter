@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\App\Clusters\AccountCluster\Pages;
 
+use App\Domains\Api\CredentialAccess;
+use App\Domains\Api\Enums\CredentialKind;
 use App\Domains\Auth\Actions\Personal\CreatePersonalAccessToken;
 use App\Domains\Auth\Actions\Personal\RevokePersonalAccessToken;
 use App\Domains\Auth\Enums\AuthType;
@@ -165,7 +167,7 @@ class AccessTokens extends Page implements HasTable
                             ->maxLength(255),
                         CheckboxList::make('scopes')
                             ->label('Access')
-                            ->options(fn (): array => CreatePersonalAccessToken::scopesFor($this->user()))
+                            ->options(fn (CredentialAccess $credentials): array => $credentials->grantableScopes($this->user(), CredentialKind::PersonalAccessToken))
                             ->helperText('What the token can do. Choose only what it needs.'),
                         Select::make('lifetime')
                             ->label('Expires After')
