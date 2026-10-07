@@ -28,6 +28,7 @@
 - **Model concerns**: Extract reusable model behavior into traits in `Models/Concerns/`. Examples: `HandlesImpersonation`, `AuditsRoles`. Use Chassis's concerns before writing your own: `PrunesAfterRetentionPeriod` for records that expire and `RecordsCustomAudits` for audit events, both in `Northwestern\SysDev\Chassis\Models\Concerns`.
 - **Policies & authorization**: Register policies per model and check them explicitly. Align permissions with `spatie/laravel-permission` using enum-based permission constants (e.g., `SystemPermission`).
 - **Livewire & Filament**: Keep Livewire components lean, delegating heavy logic to actions. In Filament resources, extract form/table definitions into methods for reuse and keep validation centralized.
+- **Exports**: Extend `App\Filament\Exports\BaseExporter`, never Filament's `Exporter` directly: it neutralizes spreadsheet formulas in every cell and writes the completion notice from `recordNoun()`. `ExportAction`'s label, icon, format and disk are set once in `FilamentServiceProvider`.
 
 ## Testing & quality gates
 

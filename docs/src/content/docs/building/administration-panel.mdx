@@ -110,4 +110,13 @@ Links to Telescope, to the RustFS console when `S3_CONSOLE_URL` is set, and to M
     `canAccess()`, as the API cluster's pages do.
 </Aside>
 
+### Exports
+
+Extend `App\Filament\Exports\BaseExporter` instead of Filament's `Exporter`. Declare the columns and `recordNoun()` (what a row is: `'audit record'`, `'user'`), and the base class does the rest:
+
+- Every text cell that a spreadsheet would run as a formula, one starting with `=`, `+`, `-`, `@`, a tab or a carriage return, gets a leading apostrophe. A name like `=HYPERLINK(...)` can't act on whoever opens the file.
+- The completion notification says how many rows were exported and how many failed.
+
+`ExportAction` already has the label, icon, CSV format and S3 disk set in `FilamentServiceProvider`; pass only `->exporter(...)`.
+
 The panel's Tailwind theme is `resources/css/filament/administration/theme.css`. In tests, call `Filament::setCurrentPanel(AdministrationPanelProvider::ID)` before testing one of its Livewire pages, because the app panel is the default.
