@@ -10,11 +10,10 @@ use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\User\Models\User;
 use App\Filament\Resources\OAuthApplications\OAuthApplicationResource;
 use App\Filament\Resources\OAuthApplications\Pages\ListOAuthApplications;
-use App\Filament\Resources\OAuthApplications\Schemas\OAuthApplicationSchemas;
+use App\Filament\Support\RevealOnceSecret;
 use App\Providers\Filament\AdministrationPanelProvider;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\CoversNothing;
@@ -71,15 +70,15 @@ final class OAuthApplicationResourceTest extends TestCase
             ->assertHasNoFormErrors();
 
         $client = OAuthClient::query()->where('name', 'Student Portal')->sole();
-        $stored = session(OAuthApplicationSchemas::SESSION_KEY);
-        $this->assertSame($client->getKey(), $stored['client_id']);
-        $this->assertTrue(Hash::check(Crypt::decryptString($stored['secret']), (string) $client->secret));
+        $registration = RevealOnceSecret::for('application:register');
+        $this->assertSame($client->getKey(), $registration->identifier());
+        $this->assertTrue(Hash::check((string) $registration->secret(), (string) $client->secret));
 
         $component->callMountedAction();
-        $this->assertNull(session(OAuthApplicationSchemas::SESSION_KEY));
+        $this->assertFalse($registration->issued());
     }
 
-    // Register and regenerate share a session key; an abandoned registration must not stand in for a regeneration.
+    // An abandoned registration must not stand in for a regeneration.
     public function test_an_abandoned_registration_does_not_carry_over_to_a_regeneration(): void
     {
         Livewire::test(ListOAuthApplications::class)
@@ -95,7 +94,7 @@ final class OAuthApplicationResourceTest extends TestCase
             ->goToNextWizardStep();
 
         $this->assertNotSame($before, $application->fresh()?->secret);
-        $this->assertSame($application->getKey(), session(OAuthApplicationSchemas::SESSION_KEY)['client_id']);
+        $this->assertSame($application->getKey(), RevealOnceSecret::for('application:regenerate')->identifier($application));
     }
 
     public function test_redirect_uris_must_be_https_or_loopback(): void
@@ -140,7 +139,7 @@ final class OAuthApplicationResourceTest extends TestCase
             ->callMountedAction();
 
         $this->assertNotSame($before, $application->fresh()?->secret);
-        $this->assertNull(session(OAuthApplicationSchemas::SESSION_KEY));
+        $this->assertFalse(RevealOnceSecret::for('application:regenerate')->issued());
     }
 
     // While the API is off administrators can still see and revoke applications, but not add or change them.

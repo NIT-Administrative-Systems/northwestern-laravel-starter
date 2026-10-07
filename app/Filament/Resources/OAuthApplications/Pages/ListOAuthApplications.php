@@ -10,12 +10,12 @@ use App\Domains\Api\Enums\CredentialOperation;
 use App\Domains\Auth\Actions\Applications\RegisterOAuthApplication;
 use App\Filament\Resources\OAuthApplications\OAuthApplicationResource;
 use App\Filament\Resources\OAuthApplications\Schemas\OAuthApplicationSchemas;
+use App\Filament\Support\RevealOnceSecret;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Wizard;
 use Filament\Support\Icons\Heroicon;
-use Illuminate\Support\Facades\Session;
 
 class ListOAuthApplications extends ListRecords
 {
@@ -33,6 +33,8 @@ class ListOAuthApplications extends ListRecords
 
     protected function getHeaderActions(): array
     {
+        $secret = RevealOnceSecret::for('application:register');
+
         return [
             Action::make('register')
                 ->label('Register Application')
@@ -40,7 +42,7 @@ class ListOAuthApplications extends ListRecords
                 ->icon(Heroicon::OutlinedPlusCircle)
                 ->closeModalByClickingAway(false)
                 ->closeModalByEscaping(false)
-                ->mountUsing(OAuthApplicationSchemas::mountFresh())
+                ->mountUsing($secret->mountFresh())
                 ->steps([
                     Wizard\Step::make('Details')
                         ->schema([
@@ -50,12 +52,8 @@ class ListOAuthApplications extends ListRecords
                                 ->helperText('On for applications with a server that can keep a secret. Off for desktop, mobile and browser applications, which use PKCE instead.')
                                 ->default(true),
                         ])
-                        ->afterValidation(function (array $state, RegisterOAuthApplication $register): void {
-                            if (Session::has(OAuthApplicationSchemas::SESSION_KEY)) {
-                                return;
-                            }
-
-                            [$secret, $client] = $register(
+                        ->afterValidation(fn (array $state, RegisterOAuthApplication $register) => $secret->issueOnce(function () use ($state, $register): array {
+                            [$plain, $client] = $register(
                                 $state['name'],
                                 array_values($state['redirect_uris']),
                                 (bool) $state['confidential'],
@@ -66,12 +64,12 @@ class ListOAuthApplications extends ListRecords
                                 registeredBy: static::actingUser(),
                             );
 
-                            OAuthApplicationSchemas::storeCredentials($client, $secret);
-                        }),
-                    Wizard\Step::make('Credentials')->schema(OAuthApplicationSchemas::credentialsStep()),
+                            return ['id' => $client->getKey(), 'secret' => $plain];
+                        })),
+                    Wizard\Step::make('Credentials')->schema(OAuthApplicationSchemas::credentialsStep($secret)),
                 ])
                 ->modalSubmitActionLabel('Done')
-                ->action(fn () => OAuthApplicationSchemas::clearCredentials())
+                ->action(fn () => $secret->forget())
                 ->successNotificationTitle('Application Registered'),
         ];
     }

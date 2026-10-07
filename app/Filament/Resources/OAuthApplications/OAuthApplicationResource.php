@@ -16,6 +16,7 @@ use App\Domains\Auth\Models\OAuthConnection;
 use App\Filament\Clusters\ApiCluster;
 use App\Filament\Resources\OAuthApplications\Pages\ListOAuthApplications;
 use App\Filament\Resources\OAuthApplications\Schemas\OAuthApplicationSchemas;
+use App\Filament\Support\RevealOnceSecret;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
@@ -67,6 +68,8 @@ class OAuthApplicationResource extends Resource
 
     public static function table(Table $table): Table
     {
+        $secret = RevealOnceSecret::for('application:regenerate');
+
         return $table
             ->columns([
                 TextColumn::make('name')->label('Name')->searchable()->sortable(),
@@ -112,21 +115,18 @@ class OAuthApplicationResource extends Resource
                         ->icon(Heroicon::OutlinedArrowPath)
                         ->closeModalByClickingAway(false)
                         ->closeModalByEscaping(false)
-                        ->mountUsing(OAuthApplicationSchemas::mountFresh())
+                        ->mountUsing($secret->mountFresh())
                         ->steps([
                             Wizard\Step::make('Regenerate')
                                 ->description('The current secret stops working immediately. Update the application with the new one.')
-                                ->afterValidation(function (OAuthClient $record, RegenerateOAuthApplicationSecret $regenerate): void {
-                                    if (filled(session(OAuthApplicationSchemas::SESSION_KEY))) {
-                                        return;
-                                    }
-
-                                    OAuthApplicationSchemas::storeCredentials($record, $regenerate($record, static::actingUser()));
-                                }),
-                            Wizard\Step::make('Copy Secret')->schema(OAuthApplicationSchemas::credentialsStep()),
+                                ->afterValidation(fn (OAuthClient $record, RegenerateOAuthApplicationSecret $regenerate) => $secret->issueOnce(
+                                    fn (): array => ['id' => $record->getKey(), 'secret' => $regenerate($record, static::actingUser())],
+                                    scope: $record,
+                                )),
+                            Wizard\Step::make('Copy Secret')->schema(OAuthApplicationSchemas::credentialsStep($secret)),
                         ])
                         ->modalSubmitActionLabel('I\'ve copied the secret')
-                        ->action(fn () => OAuthApplicationSchemas::clearCredentials())
+                        ->action(fn () => $secret->forget())
                         ->visible(fn (OAuthClient $record): bool => $record->confidential() && $record->status === CredentialStatus::Active && self::allows(CredentialOperation::Modify)),
                     Action::make('revoke')
                         ->label('Revoke')

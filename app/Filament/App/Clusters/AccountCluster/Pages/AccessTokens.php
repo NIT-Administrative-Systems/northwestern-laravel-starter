@@ -17,13 +17,13 @@ use App\Domains\Auth\Enums\TokenExpiration;
 use App\Domains\Auth\Models\OAuthToken;
 use App\Domains\User\Models\User;
 use App\Filament\App\Clusters\AccountCluster;
+use App\Filament\Support\RevealOnceSecret;
 use App\Providers\OAuthServiceProvider;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Infolists\Components\CodeEntry;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Callout;
@@ -40,26 +40,19 @@ use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Support\HtmlString;
 use InvalidArgumentException;
-use Phiki\Grammar\Grammar;
 
 /**
  * A person's personal access tokens, for calling the API as themselves from their own code. Who
  * sees, creates and revokes them is decided by {@see CredentialAccess}.
  *
- * A new token is shown once. Between the wizard's steps it is kept encrypted in the session,
- * never in Livewire state, and forgotten when the person confirms they have copied it. An
+ * A new token is shown once, through {@see RevealOnceSecret}. An
  * administrator impersonating the person sees the tokens but can't create or revoke them.
  */
 class AccessTokens extends Page implements HasTable
 {
     use AuthorizesCredentials, InteractsWithTable;
-
-    /** Session key for the token being shown once. Stored value: `['token' => string (encrypted), 'record_id' => string]` */
-    public const string SESSION_KEY = 'personal_access_token:create';
 
     protected static ?string $cluster = AccountCluster::class;
 
@@ -143,6 +136,7 @@ class AccessTokens extends Page implements HasTable
 
     private function createAction(): Action
     {
+        $secret = RevealOnceSecret::for('personal_access_token:create');
         $maxDays = (int) config('api.personal_access_tokens.max_lifetime_days');
 
         return Action::make('createToken')
@@ -151,11 +145,7 @@ class AccessTokens extends Page implements HasTable
             ->visible(fn (): bool => $this->tokens(CredentialOperation::Issue)->allowed)
             ->closeModalByClickingAway(false)
             ->closeModalByEscaping(false)
-            ->mountUsing(function (?Schema $schema): void {
-                // A token from an abandoned run of this wizard is never shown again.
-                Session::forget(self::SESSION_KEY);
-                $schema?->fill();
-            })
+            ->mountUsing($secret->mountFresh())
             ->steps([
                 Wizard\Step::make('Configure')
                     ->schema([
@@ -175,11 +165,7 @@ class AccessTokens extends Page implements HasTable
                             ->required()
                             ->selectablePlaceholder(false),
                     ])
-                    ->afterValidation(function (array $state, CreatePersonalAccessToken $create): void {
-                        if (Session::has(self::SESSION_KEY)) {
-                            return;
-                        }
-
+                    ->afterValidation(fn (array $state, CreatePersonalAccessToken $create) => $secret->issueOnce(function () use ($state, $create): array {
                         try {
                             [$accessToken, $token] = $create(
                                 $this->user(),
@@ -193,28 +179,19 @@ class AccessTokens extends Page implements HasTable
                             throw new Halt($e->getMessage(), $e->getCode(), $e);
                         }
 
-                        Session::put(self::SESSION_KEY, ['token' => Crypt::encryptString($accessToken), 'record_id' => $token->getKey()]);
-                    }),
+                        return ['id' => $token->getKey(), 'secret' => $accessToken];
+                    })),
                 Wizard\Step::make('Copy Token')
                     ->schema([
                         Text::make(new HtmlString('Copy the token and store it somewhere safe. <strong>It won\'t be shown again.</strong> Send it in the <code>Authorization: Bearer</code> header.')),
-                        CodeEntry::make('token')
-                            ->label('Token')
-                            ->grammar(Grammar::Txt)
-                            ->state(function (): ?string {
-                                $stored = Session::get(self::SESSION_KEY);
-
-                                return is_array($stored) && is_string($stored['token'] ?? null) ? Crypt::decryptString($stored['token']) : null;
-                            })
-                            ->dehydrated(false)
-                            ->copyable(),
+                        $secret->secretEntry('token', 'Token'),
                     ]),
             ])
             ->modalSubmitAction(fn (Action $action): Action => $action
                 ->label('Done')
                 ->icon(Heroicon::OutlinedCheckCircle)
                 ->iconPosition(IconPosition::After))
-            ->action(fn () => Session::forget(self::SESSION_KEY))
+            ->action(fn () => $secret->forget())
             ->successNotificationTitle('Token Created');
     }
 

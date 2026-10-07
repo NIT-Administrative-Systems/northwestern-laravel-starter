@@ -11,6 +11,7 @@ use App\Domains\Auth\Enums\AuthType;
 use App\Domains\User\Actions\Api\CreateApiUser;
 use App\Domains\User\Models\User;
 use App\Filament\Resources\ServiceClients\Schemas\ServiceClientSchemas;
+use App\Filament\Support\RevealOnceSecret;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -19,7 +20,6 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Wizard;
 use Filament\Support\Icons\Heroicon;
-use Illuminate\Support\Facades\Session;
 
 class CreateApiUserAction extends Action
 {
@@ -34,6 +34,8 @@ class CreateApiUserAction extends Action
     {
         parent::setUp();
 
+        $secret = RevealOnceSecret::for('api_user:create');
+
         // Whether a service client may be issued to a new API user.
         $this->authorize(fn (): bool => static::allowsCredential(CredentialOperation::Issue, CredentialKind::ServiceClient, (new User())->forceFill(['auth_type' => AuthType::API])))
             ->label('Add API User')
@@ -41,7 +43,7 @@ class CreateApiUserAction extends Action
             ->color('warning')
             ->closeModalByClickingAway(false)
             ->closeModalByEscaping(false)
-            ->mountUsing(ServiceClientSchemas::mountFresh(ServiceClientSchemas::SESSION_KEY_CREATE_API_USER))
+            ->mountUsing($secret->mountFresh())
             ->steps([
                 Wizard\Step::make('Details')
                     ->schema([
@@ -68,10 +70,10 @@ class CreateApiUserAction extends Action
                                             ->autocomplete(false)
                                             ->regex('/^[a-z-]+$/')
                                             ->rules([
-                                                function () {
-                                                    return function (string $attribute, $value, $fail) {
-                                                        // Skip validation if we already created a user in this session
-                                                        if (Session::has(ServiceClientSchemas::SESSION_KEY_CREATE_API_USER)) {
+                                                function () use ($secret) {
+                                                    return function (string $attribute, $value, $fail) use ($secret) {
+                                                        // Skip validation if this run already created the user
+                                                        if ($secret->issued()) {
                                                             return;
                                                         }
 
@@ -122,16 +124,12 @@ class CreateApiUserAction extends Action
                     ->schema([
                         ServiceClientSchemas::clientConfigurationSection(),
                     ])
-                    ->afterValidation(function (array $state, CreateApiUser $createApiUser): void {
-                        if (Session::has(ServiceClientSchemas::SESSION_KEY_CREATE_API_USER)) {
-                            return;
-                        }
-
+                    ->afterValidation(fn (array $state, CreateApiUser $createApiUser) => $secret->issueOnce(function () use ($state, $createApiUser): array {
                         $username = 'api-' . preg_replace('/^api-/', '', strtolower((string) $state['username']));
 
                         $configuration = ServiceClientSchemas::normalizeConfigurationState($state);
 
-                        [$user, $secret, $client] = $createApiUser(
+                        [$user, $plain, $client] = $createApiUser(
                             username: $username,
                             firstName: $state['first_name'],
                             clientName: $configuration['name'],
@@ -142,20 +140,18 @@ class CreateApiUserAction extends Action
                             createdBy: static::actingUser(),
                         );
 
-                        ServiceClientSchemas::storeCredentials(ServiceClientSchemas::SESSION_KEY_CREATE_API_USER, $client, $secret, [
-                            'user_id' => $user->getKey(),
-                        ]);
-                    }),
+                        return ['id' => $client->getKey(), 'secret' => $plain, 'user_id' => $user->getKey()];
+                    })),
 
                 Wizard\Step::make('Copy Credentials')
                     ->schema(
-                        ServiceClientSchemas::copyCredentialsStepSchema(ServiceClientSchemas::SESSION_KEY_CREATE_API_USER),
+                        ServiceClientSchemas::copyCredentialsStepSchema($secret),
                     ),
             ])
             ->modalSubmitAction(fn (Action $action) => ServiceClientSchemas::copyCredentialsSubmitButton($action))
-            ->action(function () {
-                $userId = session(ServiceClientSchemas::SESSION_KEY_CREATE_API_USER . '.user_id');
-                ServiceClientSchemas::clearCredentials(ServiceClientSchemas::SESSION_KEY_CREATE_API_USER);
+            ->action(function () use ($secret) {
+                $userId = $secret->get('user_id');
+                $secret->forget();
 
                 if ($userId) {
                     /** @var User $user */
