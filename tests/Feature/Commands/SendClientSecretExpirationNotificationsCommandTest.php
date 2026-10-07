@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Tests\Feature\Commands;
 
 use App\Console\Commands\SendClientSecretExpirationNotificationsCommand;
-use App\Domains\Auth\Actions\Api\CreateServiceClient;
-use App\Domains\Auth\Mail\ClientSecretExpirationNotification;
-use App\Domains\Auth\Models\OAuthClient;
+use App\Domains\Api\Actions\ServiceClients\CreateServiceClient;
+use App\Domains\Api\Mail\ClientSecretExpirationNotification;
+use App\Domains\Api\Models\OAuthClient;
 use App\Domains\User\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
@@ -70,8 +70,8 @@ final class SendClientSecretExpirationNotificationsCommandTest extends TestCase
         Mail::assertQueued(ClientSecretExpirationNotification::class, fn (ClientSecretExpirationNotification $mail) => $mail->client->is($inSevenDays) && $mail->daysUntilExpiration === 7);
         Mail::assertQueued(ClientSecretExpirationNotification::class, fn (ClientSecretExpirationNotification $mail) => $mail->client->is($inThirtyDays) && $mail->daysUntilExpiration === 30);
 
-        $this->assertNotNull($inSevenDays->fresh()?->secret_expiration_notified_at);
-        $this->assertNotNull($inThirtyDays->fresh()?->secret_expiration_notified_at);
+        $this->assertInstanceOf(Carbon::class, $inSevenDays->fresh()?->secret_expiration_notified_at);
+        $this->assertInstanceOf(Carbon::class, $inThirtyDays->fresh()?->secret_expiration_notified_at);
     }
 
     public function test_command_ignores_clients_notified_within_24_hours(): void

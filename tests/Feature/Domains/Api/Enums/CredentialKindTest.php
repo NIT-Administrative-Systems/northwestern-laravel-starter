@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\Api\Enums;
 
+use App\Domains\Api\Actions\Applications\RegisterOAuthApplication;
+use App\Domains\Api\Actions\ServiceClients\CreateServiceClient;
+use App\Domains\Api\Enums\ClientOrigin;
 use App\Domains\Api\Enums\CredentialKind;
-use App\Domains\Auth\Actions\Api\CreateServiceClient;
-use App\Domains\Auth\Actions\Applications\RegisterOAuthApplication;
-use App\Domains\Auth\Enums\ClientOrigin;
 use App\Domains\User\Models\User;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;

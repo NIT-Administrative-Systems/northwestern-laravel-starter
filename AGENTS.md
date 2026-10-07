@@ -43,7 +43,8 @@ before pushing again.
 
 - **Domain code** in `app/Domains/{Domain}/`: `Actions/`, `Models/`, `Enums/`, `Jobs/`,
   `Policies/` and so on. `Core` holds shared building blocks (`BaseModel`, model concerns,
-  casts, health checks).
+  casts, health checks, the audit log). `Auth` is signing in and out, `Access` is roles and
+  permissions, and `Api` is the credentials that call the application.
 - **The app panel** (`/app`, the default panel) in `app/Filament/App/`. Applications build
   their features here, with their own pages in `App/Pages/`. The starter's pages (sign-in,
   lockdown, Contact Support, Announcements, the component gallery) are in `App/Starter/Pages/`. Its sidebar is for application features; site-wide links live in the

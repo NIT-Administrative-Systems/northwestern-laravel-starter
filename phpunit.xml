@@ -44,13 +44,13 @@
 
             <!-- Enums (declarative values, labels, colors) -->
             <file>app/Domains/Auth/Enums/AuthType.php</file>
-            <file>app/Domains/Auth/Enums/ClientOrigin.php</file>
-            <file>app/Domains/Auth/Enums/CredentialStatus.php</file>
-            <file>app/Domains/Auth/Enums/SystemPermission.php</file>
-            <file>app/Domains/Auth/Enums/PermissionScope.php</file>
-            <file>app/Domains/Auth/Enums/RoleModificationOrigin.php</file>
-            <file>app/Domains/Auth/Enums/RoleTypeEnum.php</file>
-            <file>app/Domains/Auth/Enums/SystemRole.php</file>
+            <file>app/Domains/Api/Enums/ClientOrigin.php</file>
+            <file>app/Domains/Api/Enums/CredentialStatus.php</file>
+            <file>app/Domains/Access/Enums/SystemPermission.php</file>
+            <file>app/Domains/Access/Enums/PermissionScope.php</file>
+            <file>app/Domains/Access/Enums/RoleModificationOrigin.php</file>
+            <file>app/Domains/Access/Enums/RoleTypeEnum.php</file>
+            <file>app/Domains/Access/Enums/SystemRole.php</file>
             <file>app/Domains/Core/Enums/ExternalService.php</file>
             <directory>app/Domains/Support/Enums</directory>
             <file>app/Domains/User/Enums/Affiliation.php</file>
@@ -58,24 +58,24 @@
             <file>app/Domains/User/Enums/UserSegment.php</file>
 
             <!-- Models (casts, relationships, property declarations) -->
-            <file>app/Domains/Auth/Models/ApiRequestLog.php</file>
+            <file>app/Domains/Api/Models/ApiRequestLog.php</file>
             <file>app/Domains/Auth/Models/LoginChallenge.php</file>
-            <file>app/Domains/Auth/Models/OAuthClient.php</file>
-            <file>app/Domains/Auth/Models/OAuthConnection.php</file>
-            <file>app/Domains/Auth/Models/OAuthToken.php</file>
-            <file>app/Domains/Auth/Models/Permission.php</file>
-            <file>app/Domains/Auth/Models/Role.php</file>
-            <file>app/Domains/Auth/Models/RoleType.php</file>
+            <file>app/Domains/Api/Models/OAuthClient.php</file>
+            <file>app/Domains/Api/Models/OAuthConnection.php</file>
+            <file>app/Domains/Api/Models/OAuthToken.php</file>
+            <file>app/Domains/Access/Models/Permission.php</file>
+            <file>app/Domains/Access/Models/Role.php</file>
+            <file>app/Domains/Access/Models/RoleType.php</file>
             <file>app/Domains/Core/Models/Audit.php</file>
             <file>app/Domains/Core/Models/BaseModel.php</file>
             <file>app/Domains/Core/Models/Export.php</file>
             <directory>app/Domains/Support/Models</directory>
             <file>app/Domains/User/Models/User.php</file>
-            <file>app/Domains/User/Models/ImpersonationLog.php</file>
+            <file>app/Domains/Auth/Models/ImpersonationLog.php</file>
             <file>app/Domains/User/Models/UserLoginRecord.php</file>
 
             <!-- Seeders -->
-            <directory>app/Domains/Auth/Seeders</directory>
+            <directory>app/Domains/Access/Seeders</directory>
             <directory>app/Domains/Support/Seeders</directory>
 
             <!-- Config validators -->
@@ -97,7 +97,7 @@
             <file>app/Domains/Support/Gateways/CreationResult.php</file>
 
             <!-- API Resources -->
-            <directory>app/Domains/Auth/Http/Resources</directory>
+            <directory>app/Domains/Access/Http/Resources</directory>
             <directory>app/Domains/User/Http/Resources</directory>
 
             <!-- Framework boilerplate / third-party -->

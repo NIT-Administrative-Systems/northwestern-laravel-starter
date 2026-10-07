@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Filament\Administration\Resources\Roles\RelationManagers;
 
+use App\Domains\Access\Enums\RoleModificationOrigin;
+use App\Domains\Access\Enums\RoleTypeEnum;
+use App\Domains\Access\Models\Role;
 use App\Domains\Auth\Enums\AuthType;
-use App\Domains\Auth\Enums\RoleModificationOrigin;
-use App\Domains\Auth\Enums\RoleTypeEnum;
-use App\Domains\Auth\Models\Role;
 use App\Domains\User\Enums\Affiliation;
 use App\Domains\User\Models\User;
 use App\Domains\User\QueryBuilders\UserBuilder;

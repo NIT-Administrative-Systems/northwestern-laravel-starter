@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Administration\Exports;
 
-use App\Domains\Auth\Enums\RoleModificationOrigin;
+use App\Domains\Access\Enums\RoleModificationOrigin;
 use App\Domains\Core\Enums\AuditEvent;
 use App\Domains\Core\Models\Audit;
 use App\Filament\Support\BaseExporter;

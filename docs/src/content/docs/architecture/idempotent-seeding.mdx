@@ -28,7 +28,7 @@ Tables that are idempotently seeded typically follow a common schema: a unique `
 
 Orphan deletion is on by default: a row whose slug is no longer in `data()` is deleted (soft-deleted on a `SoftDeletes` model). Set `protected bool $deleteOrphans = false;` to keep rows that are not in the seed data.
 
-A seeder that does not fit this template can extend `Illuminate\Database\Seeder` and implement `Northwestern\SysDev\Chassis\Contracts\IdempotentSeederInterface` instead, writing its own idempotent `run()`. `App\Domains\Auth\Seeders\RoleSeeder` does this with `updateOrCreate()`.
+A seeder that does not fit this template can extend `Illuminate\Database\Seeder` and implement `Northwestern\SysDev\Chassis\Contracts\IdempotentSeederInterface` instead, writing its own idempotent `run()`. `App\Domains\Access\Seeders\RoleSeeder` does this with `updateOrCreate()`.
 
 ### `AutoSeed` Attribute
 

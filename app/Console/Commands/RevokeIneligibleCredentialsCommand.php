@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Domains\Api\Actions\Applications\DisconnectApplication;
+use App\Domains\Api\Actions\PersonalAccessTokens\RevokePersonalAccessToken;
+use App\Domains\Api\Actions\ServiceClients\RevokeServiceClient;
 use App\Domains\Api\CredentialAccess;
 use App\Domains\Api\Enums\CredentialKind;
 use App\Domains\Api\Enums\CredentialOperation;
-use App\Domains\Auth\Actions\Api\RevokeServiceClient;
-use App\Domains\Auth\Actions\Applications\DisconnectApplication;
-use App\Domains\Auth\Actions\Personal\RevokePersonalAccessToken;
-use App\Domains\Auth\Models\OAuthClient;
-use App\Domains\Auth\Models\OAuthConnection;
-use App\Domains\Auth\Models\OAuthToken;
+use App\Domains\Api\Models\OAuthClient;
+use App\Domains\Api\Models\OAuthConnection;
+use App\Domains\Api\Models\OAuthToken;
 use App\Domains\User\Models\User;
 use Illuminate\Console\Command;
 

@@ -19,8 +19,8 @@ import { Aside } from "@astrojs/starlight/components";
 
 | Chassis class                               | Starter class or use                                            | What it does                                                                                     |
 | ------------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| `Http\Middleware\AuthenticatesPassportTokens` | `App\Domains\Auth\Http\Middleware\AuthenticatePassportToken`  | Authenticates a request's Passport token and refuses revoked, expired and restricted clients     |
-| `Http\Middleware\LogsPassportRequests`      | `App\Domains\Auth\Http\Middleware\LogsApiRequests`              | Writes each API request, including refused ones and why, to the request log                      |
+| `Http\Middleware\AuthenticatesPassportTokens` | `App\Domains\Api\Http\Middleware\AuthenticatePassportToken`  | Authenticates a request's Passport token and refuses revoked, expired and restricted clients     |
+| `Http\Middleware\LogsPassportRequests`      | `App\Domains\Api\Http\Middleware\LogsApiRequests`              | Writes each API request, including refused ones and why, to the request log                      |
 | `Passport\AccessRevoker`                    | Disconnecting an application, revoking all of a person's credentials | Revokes a person's access tokens, their refresh tokens and authorization codes for one client or all |
 | `Passport\ExpiringAccessTokenRepository`    | Bound in `OAuthServiceProvider`                                  | Gives each personal access token its own lifetime instead of Passport's single one               |
 | `Passport\OAuthClientRepository`            | Bound in `OAuthServiceProvider`                                  | Treats a `client_id` that isn't a UUID as an unknown client, so Passport answers 401 `invalid_client` instead of a database error |

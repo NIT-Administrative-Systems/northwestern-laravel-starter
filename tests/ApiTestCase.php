@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests;
 
-use App\Domains\Auth\Models\OAuthClient;
+use App\Domains\Api\Models\OAuthClient;
 use App\Domains\User\Models\User;
 use Illuminate\Http\Response;
 use Illuminate\Testing\TestResponse;

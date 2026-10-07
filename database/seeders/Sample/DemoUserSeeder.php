@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Database\Seeders\Sample;
 
-use App\Domains\Auth\Actions\Api\CreateServiceClient;
-use App\Domains\Auth\Enums\RoleTypeEnum;
+use App\Domains\Access\Enums\RoleTypeEnum;
+use App\Domains\Access\Models\Role;
+use App\Domains\Api\Actions\ServiceClients\CreateServiceClient;
 use App\Domains\Auth\Enums\SignInMethod;
-use App\Domains\Auth\Models\Role;
 use App\Domains\Auth\SignIn;
 use App\Domains\User\Models\User;
 use Illuminate\Database\Seeder;
@@ -97,7 +97,7 @@ class DemoUserSeeder extends Seeder
             ])
             ->createOne();
 
-        $user->roles()->attach(Role::whereHas('role_type', fn ($query) => $query->where('slug', RoleTypeEnum::SystemManaged))->firstOrFail());
+        $user->roles()->attach(Role::whereHas('role_type', fn (\Illuminate\Contracts\Database\Query\Builder $query) => $query->where('slug', RoleTypeEnum::SystemManaged))->firstOrFail());
     }
 
     private function apiUser(): void

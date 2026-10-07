@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Filament\App\Clusters\AccountCluster\Pages;
 
+use App\Domains\Api\Actions\Applications\DisconnectApplication;
 use App\Domains\Api\ApiScopes;
 use App\Domains\Api\Concerns\AuthorizesCredentials;
 use App\Domains\Api\Enums\AccessRefusal;
+use App\Domains\Api\Enums\ClientOrigin;
 use App\Domains\Api\Enums\CredentialKind;
 use App\Domains\Api\Enums\CredentialOperation;
+use App\Domains\Api\Models\OAuthConnection;
 use App\Domains\Api\ValueObjects\AccessDecision;
-use App\Domains\Auth\Actions\Applications\DisconnectApplication;
-use App\Domains\Auth\Enums\ClientOrigin;
-use App\Domains\Auth\Models\OAuthConnection;
 use App\Domains\User\Models\User;
 use App\Filament\App\Clusters\AccountCluster;
 use BackedEnum;

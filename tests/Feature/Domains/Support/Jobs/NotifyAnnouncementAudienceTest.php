@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\Support\Jobs;
 
-use App\Domains\Auth\Models\Role;
+use App\Domains\Access\Models\Role;
 use App\Domains\Support\Jobs\NotifyAnnouncementAudience;
 use App\Domains\Support\Models\Announcement;
 use App\Domains\Support\Notifications\AnnouncementNotification;

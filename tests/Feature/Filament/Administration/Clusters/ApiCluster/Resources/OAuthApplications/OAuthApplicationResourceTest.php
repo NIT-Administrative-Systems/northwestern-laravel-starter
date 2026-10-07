@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Filament\Administration\Clusters\ApiCluster\Resources\OAuthApplications;
 
-use App\Domains\Auth\Enums\CredentialStatus;
-use App\Domains\Auth\Enums\SystemPermission;
-use App\Domains\Auth\Models\OAuthClient;
+use App\Domains\Access\Enums\SystemPermission;
+use App\Domains\Api\Enums\CredentialStatus;
+use App\Domains\Api\Models\OAuthClient;
 use App\Domains\User\Models\User;
 use App\Filament\Administration\Clusters\ApiCluster\Resources\OAuthApplications\OAuthApplicationResource;
 use App\Filament\Administration\Clusters\ApiCluster\Resources\OAuthApplications\Pages\ListOAuthApplications;
@@ -86,7 +86,7 @@ final class OAuthApplicationResourceTest extends TestCase
             ->fillForm(['name' => 'Abandoned', 'redirect_uris' => ['https://abandoned.example.edu/cb'], 'confidential' => true, 'first_party' => false])
             ->goToNextWizardStep();
 
-        [, $application] = resolve(\App\Domains\Auth\Actions\Applications\RegisterOAuthApplication::class)('Portal', ['https://portal.example.edu/cb'], true, []);
+        [, $application] = resolve(\App\Domains\Api\Actions\Applications\RegisterOAuthApplication::class)('Portal', ['https://portal.example.edu/cb'], true, []);
         $before = $application->secret;
 
         Livewire::test(ListOAuthApplications::class)
@@ -130,7 +130,7 @@ final class OAuthApplicationResourceTest extends TestCase
 
     public function test_a_confidential_applications_secret_can_be_regenerated(): void
     {
-        [, $application] = resolve(\App\Domains\Auth\Actions\Applications\RegisterOAuthApplication::class)('Portal', ['https://portal.example.edu/cb'], true, []);
+        [, $application] = resolve(\App\Domains\Api\Actions\Applications\RegisterOAuthApplication::class)('Portal', ['https://portal.example.edu/cb'], true, []);
         $before = $application->secret;
 
         Livewire::test(ListOAuthApplications::class)
@@ -145,7 +145,7 @@ final class OAuthApplicationResourceTest extends TestCase
     // While the API is off administrators can still see and revoke applications, but not add or change them.
     public function test_while_the_api_is_off_applications_can_be_revoked_but_not_registered_or_edited(): void
     {
-        [, $client] = resolve(\App\Domains\Auth\Actions\Applications\RegisterOAuthApplication::class)('Portal', ['https://portal.example.edu/cb'], true, []);
+        [, $client] = resolve(\App\Domains\Api\Actions\Applications\RegisterOAuthApplication::class)('Portal', ['https://portal.example.edu/cb'], true, []);
         config(['api.enabled' => false]);
 
         $this->assertTrue(OAuthApplicationResource::canAccess());

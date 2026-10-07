@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
-use App\Domains\Auth\Http\Middleware\LimitAuthenticatedApiRequests;
+use App\Domains\Api\Http\Middleware\LimitAuthenticatedApiRequests;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;

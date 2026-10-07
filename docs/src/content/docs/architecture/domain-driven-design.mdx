@@ -16,13 +16,24 @@ import { FileTree } from '@astrojs/starlight/components';
     - Console
         - Commands/
     - Domains
-        - Auth
-            - Actions/
+        - Access
             - Enums/
             - Http/
             - Models/
             - Policies/
             - Seeders/
+        - Api
+            - Actions/
+            - Enums/
+            - Http/
+            - Models/
+            - Passport/
+            - ...
+        - Auth
+            - Actions/
+            - Enums/
+            - Http/
+            - Models/
             - ...
         - Core
             - Casts/
@@ -49,13 +60,16 @@ import { FileTree } from '@astrojs/starlight/components';
             - QueryBuilders/
             - ...
     - Filament
+        - Administration/ the administration panel
+            - Clusters/
+            - Pages/
+            - Resources/
+            - ...
         - App/ the app panel
             - Pages/
-        - Clusters/
-        - Navigation/
-        - Pages/
-        - Resources/
-        - ...
+            - Starter/Pages/
+            - ...
+        - Support/ helpers both panels use
     - Http/
         - Controllers/
         - Livewire/
@@ -96,20 +110,41 @@ The **Core** domain contains foundational functionality that applies across the 
 
 ### Auth Domain
 
-The **Auth** domain handles everything related to authentication and authorization:
+The **Auth** domain handles who someone is: signing in and out.
 
 **Location:** `app/Domains/Auth/`
 
 **Responsibilities:**
 
-- Authentication (WebSSO, Passport, local login challenges)
-- Authorization (roles, permissions, scopes)
+- The sign-in methods and the step every sign-in ends with (`SignIn`), and single sign-on through Online Passport or Entra ID
+- Email login codes (`LoginCodes`)
+- Sign-in-as for seeded users in the `local` environment
+- Impersonation and its log
+
+### Access Domain
+
+The **Access** domain handles what someone may do: roles and permissions.
+
+**Location:** `app/Domains/Access/`
+
+**Responsibilities:**
+
+- `SystemPermission`, the single source of truth for permissions, and the system roles
+- Roles, role types and permissions, and their seeding
+- Recording changes to roles and permissions (`AuditsRoles`, `AuditsPermissions`), and finding which role grants a permission (`TracksPermissionSources`)
+
+### Api Domain
+
+The **Api** domain handles the credentials that call the application:
+
+**Location:** `app/Domains/Api/`
+
+**Responsibilities:**
+
+- Who may see, issue, change, revoke or use each credential (`CredentialAccess`), and every OAuth scope (`ApiScopes`)
 - Service clients, personal access tokens, OAuth applications and the connections people make to them
-- MCP client registration and discovery
-- Login code generation and validation
-- Impersonation functionality
-- API request logging
-- Role and permission seeding
+- The OAuth consent screen
+- The API's middleware: authenticating tokens, scopes, rate limits and request logging
 
 ### User Domain
 
@@ -122,7 +157,6 @@ The **User** domain handles everything related to user data and management:
 - User management and profile data
 - User segmentation and affiliation
 - Directory integration (searching, syncing)
-- Recording changes to a user's roles (`AuditsRoles`)
 - User login tracking
 - Wildcard photo management
 

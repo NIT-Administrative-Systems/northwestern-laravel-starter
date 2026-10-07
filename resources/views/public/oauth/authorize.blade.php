@@ -4,9 +4,9 @@
     and deny endpoints, which return to the application's registered redirect URI. Passport keeps
     the authorization request, with the application's state, in the session.
 
-    What it shows is decided in App\Domains\Auth\Passport\OAuthConsent::screen().
+    What it shows is decided in App\Domains\Api\Passport\OAuthConsent::screen().
 
-    @var \App\Domains\Auth\Models\OAuthClient $client
+    @var \App\Domains\Api\Models\OAuthClient $client
     @var \Northwestern\SysDev\Chassis\ValueObjects\OAuthRedirectTarget $redirectTarget Where approving sends the person
     @var bool $unverified The client registered itself, so its name is only its own claim
     @var bool $seesAccount The token can read the person's account details

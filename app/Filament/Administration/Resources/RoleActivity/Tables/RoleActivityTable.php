@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Filament\Administration\Resources\RoleActivity\Tables;
 
-use App\Domains\Auth\Enums\RoleModificationOrigin;
-use App\Domains\Auth\Enums\RoleTypeEnum;
-use App\Domains\Auth\Models\Role;
+use App\Domains\Access\Enums\RoleModificationOrigin;
+use App\Domains\Access\Enums\RoleTypeEnum;
+use App\Domains\Access\Models\Role;
 use App\Domains\Core\Enums\AuditEvent;
 use App\Domains\Core\Models\Audit;
 use App\Domains\User\Models\User;

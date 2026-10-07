@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Filament\App\Clusters\AccountCluster\Pages;
 
-use App\Domains\Auth\Enums\RoleTypeEnum;
-use App\Domains\Auth\Models\Role;
+use App\Domains\Access\Enums\RoleTypeEnum;
+use App\Domains\Access\Models\Role;
 use App\Domains\User\Enums\Affiliation;
 use App\Domains\User\Models\User;
 use App\Filament\App\Clusters\AccountCluster\Pages\Profile;

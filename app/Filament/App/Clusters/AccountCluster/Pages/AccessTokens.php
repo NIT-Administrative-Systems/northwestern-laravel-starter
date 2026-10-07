@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace App\Filament\App\Clusters\AccountCluster\Pages;
 
+use App\Domains\Api\Actions\PersonalAccessTokens\CreatePersonalAccessToken;
+use App\Domains\Api\Actions\PersonalAccessTokens\RevokePersonalAccessToken;
 use App\Domains\Api\ApiScopes;
 use App\Domains\Api\Concerns\AuthorizesCredentials;
 use App\Domains\Api\CredentialAccess;
 use App\Domains\Api\Enums\AccessRefusal;
 use App\Domains\Api\Enums\CredentialKind;
 use App\Domains\Api\Enums\CredentialOperation;
+use App\Domains\Api\Enums\CredentialStatus;
+use App\Domains\Api\Enums\TokenExpiration;
+use App\Domains\Api\Models\OAuthToken;
 use App\Domains\Api\ValueObjects\AccessDecision;
-use App\Domains\Auth\Actions\Personal\CreatePersonalAccessToken;
-use App\Domains\Auth\Actions\Personal\RevokePersonalAccessToken;
-use App\Domains\Auth\Enums\CredentialStatus;
-use App\Domains\Auth\Enums\TokenExpiration;
-use App\Domains\Auth\Models\OAuthToken;
 use App\Domains\User\Models\User;
 use App\Filament\App\Clusters\AccountCluster;
 use App\Filament\Support\RevealOnceSecret;

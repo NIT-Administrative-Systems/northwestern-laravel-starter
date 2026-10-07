@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\Auth\Http\Controllers;
 
-use App\Domains\Auth\Enums\RoleTypeEnum;
+use App\Domains\Access\Enums\RoleTypeEnum;
+use App\Domains\Access\Models\Role;
 use App\Domains\Auth\Http\Controllers\SignInAsController;
-use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\User;
 use App\Providers\Filament\AppPanelProvider;
 use Illuminate\Foundation\Application;
@@ -137,7 +137,7 @@ final class SignInAsControllerTest extends TestCase
     private function seededAdmin(): User
     {
         $admin = User::factory()->create(['username' => 'nuit.admin', 'first_name' => 'NUIT', 'last_name' => 'Administrator']);
-        $admin->roles()->attach(Role::query()->whereHas('role_type', fn ($query) => $query->where('slug', RoleTypeEnum::SystemManaged))->where('name', 'Super Administrator')->firstOrFail());
+        $admin->roles()->attach(Role::query()->whereHas('role_type', fn (\Illuminate\Contracts\Database\Query\Builder $query) => $query->where('slug', RoleTypeEnum::SystemManaged))->where('name', 'Super Administrator')->firstOrFail());
 
         return $admin;
     }

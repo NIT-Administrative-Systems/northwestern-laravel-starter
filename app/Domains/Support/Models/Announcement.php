@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domains\Support\Models;
 
-use App\Domains\Auth\Enums\SystemPermission;
-use App\Domains\Auth\Models\Role;
+use App\Domains\Access\Enums\SystemPermission;
+use App\Domains\Access\Models\Role;
 use App\Domains\Core\Models\BaseModel;
 use App\Domains\Support\Enums\AnnouncementAudience;
 use App\Domains\Support\Enums\AnnouncementSeverity;

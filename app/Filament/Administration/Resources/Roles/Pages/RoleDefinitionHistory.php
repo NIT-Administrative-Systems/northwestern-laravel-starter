@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Administration\Resources\Roles\Pages;
 
-use App\Domains\Auth\Models\Role;
+use App\Domains\Access\Models\Role;
 use App\Filament\Administration\Resources\Roles\RoleResource;
 use App\Filament\Administration\Resources\Roles\Tables\RoleDefinitionHistoryTable;
 use BackedEnum;

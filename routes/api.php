@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-use App\Domains\Auth\Enums\TokenAudience;
-use App\Domains\Auth\Http\Middleware\AuthenticatePassportToken;
-use App\Domains\Auth\Http\Middleware\LimitAuthenticatedApiRequests;
-use App\Domains\Auth\Http\Middleware\LogsApiRequests;
-use App\Domains\Auth\Http\Middleware\RequireTokenAudience;
+use App\Domains\Api\Enums\TokenAudience;
+use App\Domains\Api\Http\Middleware\AuthenticatePassportToken;
+use App\Domains\Api\Http\Middleware\LimitAuthenticatedApiRequests;
+use App\Domains\Api\Http\Middleware\LogsApiRequests;
+use App\Domains\Api\Http\Middleware\RequireTokenAudience;
 use App\Domains\User\Http\Controllers\Api\V1\UserApiController;
 use Illuminate\Support\Facades\Route;
 use Northwestern\SysDev\Chassis\Http\Middleware\EnsureFeatureEnabled;

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Domains\Auth\Actions\Applications\RevokeOAuthApplication;
-use App\Domains\Auth\Models\OAuthClient;
-use App\Domains\Auth\Models\OAuthConnection;
+use App\Domains\Api\Actions\Applications\RevokeOAuthApplication;
+use App\Domains\Api\Models\OAuthClient;
+use App\Domains\Api\Models\OAuthConnection;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;

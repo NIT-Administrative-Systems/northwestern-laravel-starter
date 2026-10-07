@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Filament\Administration\Resources\Users\ServiceClients\Actions;
 
+use App\Domains\Api\Actions\ServiceClients\CreateServiceClient;
 use App\Domains\Api\Concerns\AuthorizesCredentials;
 use App\Domains\Api\Enums\CredentialKind;
 use App\Domains\Api\Enums\CredentialOperation;
-use App\Domains\Auth\Actions\Api\CreateServiceClient;
 use App\Filament\Administration\Resources\Users\RelationManagers\ServiceClientsRelationManager;
 use App\Filament\Administration\Resources\Users\ServiceClients\Schemas\ServiceClientSchemas;
 use App\Filament\Support\RevealOnceSecret;

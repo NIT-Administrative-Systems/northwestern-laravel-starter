@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Filament\App\Clusters\AccountCluster\Pages;
 
-use App\Domains\Auth\Enums\SystemPermission;
+use App\Domains\Access\Enums\SystemPermission;
 use App\Domains\User\Models\User;
 use App\Filament\App\Clusters\AccountCluster\Pages\Preferences;
 use App\Providers\Filament\AppPanelProvider;

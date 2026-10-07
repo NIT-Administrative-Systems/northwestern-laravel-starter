@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Administration\Resources\Roles;
 
-use App\Domains\Auth\Models\Role;
+use App\Domains\Access\Models\Role;
 use App\Filament\Administration\Navigation\AdministrationNavGroup;
 use App\Filament\Administration\Resources\Roles\Pages\CreateRole;
 use App\Filament\Administration\Resources\Roles\Pages\EditRole;

@@ -1,5 +1,5 @@
 @php
-    use App\Domains\Auth\Enums\SystemPermission;
+    use App\Domains\Access\Enums\SystemPermission;
 
     /**
      * Exception Detail Visibility Logic

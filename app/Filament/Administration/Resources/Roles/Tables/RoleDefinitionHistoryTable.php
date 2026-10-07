@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Administration\Resources\Roles\Tables;
 
-use App\Domains\Auth\Models\Concerns\AuditsPermissions;
-use App\Domains\Auth\Models\RoleType;
+use App\Domains\Access\Models\Concerns\AuditsPermissions;
+use App\Domains\Access\Models\RoleType;
 use App\Domains\Core\Enums\AuditEvent;
 use App\Domains\Core\Models\Audit;
 use Filament\Support\Icons\Heroicon;

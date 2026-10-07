@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Filament\Administration\Resources\Users\ServiceClients\Actions;
 
+use App\Domains\Api\Actions\ServiceClients\UpdateServiceClientIpRestrictions;
 use App\Domains\Api\Concerns\AuthorizesCredentials;
 use App\Domains\Api\Enums\CredentialKind;
 use App\Domains\Api\Enums\CredentialOperation;
-use App\Domains\Auth\Actions\Api\UpdateServiceClientIpRestrictions;
-use App\Domains\Auth\Models\OAuthClient;
+use App\Domains\Api\Models\OAuthClient;
 use App\Filament\Administration\Resources\Users\RelationManagers\ServiceClientsRelationManager;
 use App\Filament\Administration\Resources\Users\ServiceClients\Schemas\ServiceClientSchemas;
 use Filament\Actions\Action;

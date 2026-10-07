@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Concerns;
 
-use App\Domains\Auth\Actions\Personal\CreatePersonalAccessToken;
-use App\Domains\Auth\Enums\SystemPermission;
-use App\Domains\Auth\Enums\TokenExpiration;
-use App\Domains\Auth\Models\OAuthToken;
+use App\Domains\Access\Enums\SystemPermission;
+use App\Domains\Api\Actions\PersonalAccessTokens\CreatePersonalAccessToken;
+use App\Domains\Api\Enums\TokenExpiration;
+use App\Domains\Api\Models\OAuthToken;
 use App\Domains\User\Models\User;
 
 /**

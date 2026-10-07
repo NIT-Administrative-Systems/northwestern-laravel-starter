@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Providers;
 
+use App\Domains\Access\Enums\SystemPermission;
 use App\Domains\Api\ApiScopes;
-use App\Domains\Auth\Enums\SystemPermission;
 use App\Providers\OAuthServiceProvider;
 use Carbon\CarbonInterval;
 use Illuminate\Support\Facades\Route;

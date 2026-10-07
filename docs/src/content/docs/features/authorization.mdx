@@ -63,7 +63,7 @@ The starter ships with two system-managed roles, created by `RoleSeeder`:
 
 The **Northwestern User** role serves as a baseline. It confirms the user has authenticated via SSO but grants no application-specific permissions. Add permissions to this role in `RoleSeeder` if your application needs default access for all Northwestern users:
 
-```php title="app/Domains/Auth/Seeders/RoleSeeder.php"
+```php title="app/Domains/Access/Seeders/RoleSeeder.php"
 [
     'name' => SystemRole::NorthwesternUser,
     'role_type_id' => $systemManagedRoleId,
@@ -108,7 +108,7 @@ These are two independent concepts:
 
 Set `assignment_locked => true` in the role seeder:
 
-```php title="app/Domains/Auth/Seeders/RoleSeeder.php"
+```php title="app/Domains/Access/Seeders/RoleSeeder.php"
 Role::updateOrCreate(
     ['name' => 'My External Role'],
     [
@@ -174,7 +174,7 @@ Permissions are defined as cases in `SystemPermission`, the **single source of t
 
 1. **Add a case to `SystemPermission`**
 
-    ```php ins={1} title="app/Domains/Auth/Enums/SystemPermission.php"
+    ```php ins={1} title="app/Domains/Access/Enums/SystemPermission.php"
     case ViewReports = 'view-reports';
     ```
 

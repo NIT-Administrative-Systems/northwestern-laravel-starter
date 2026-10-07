@@ -210,7 +210,7 @@ For production seeders that manage security-relevant data (roles, permissions, s
 
 Add the trait to your seeder and wrap the seeding logic in `withAuditing()`:
 
-```php title="app/Domains/Auth/Seeders/RoleSeeder.php"
+```php title="app/Domains/Access/Seeders/RoleSeeder.php"
 use Northwestern\SysDev\Chassis\Seeding\Concerns\AuditsSeederChanges;
 
 class RoleSeeder extends Seeder implements IdempotentSeederInterface

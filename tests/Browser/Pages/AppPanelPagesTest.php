@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Domains\Auth\Actions\Applications\RegisterOAuthApplication;
+use App\Domains\Api\Actions\Applications\RegisterOAuthApplication;
 use App\Domains\Support\Enums\AnnouncementSeverity;
 use App\Domains\Support\Models\Announcement;
 use Northwestern\SysDev\Chassis\Testing\Browser\FilamentPages;

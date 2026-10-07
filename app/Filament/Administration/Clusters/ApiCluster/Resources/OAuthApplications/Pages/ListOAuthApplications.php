@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Filament\Administration\Clusters\ApiCluster\Resources\OAuthApplications\Pages;
 
+use App\Domains\Api\Actions\Applications\RegisterOAuthApplication;
 use App\Domains\Api\Concerns\AuthorizesCredentials;
 use App\Domains\Api\Enums\CredentialKind;
 use App\Domains\Api\Enums\CredentialOperation;
-use App\Domains\Auth\Actions\Applications\RegisterOAuthApplication;
 use App\Filament\Administration\Clusters\ApiCluster\Resources\OAuthApplications\OAuthApplicationResource;
 use App\Filament\Administration\Clusters\ApiCluster\Resources\OAuthApplications\Schemas\OAuthApplicationSchemas;
 use App\Filament\Support\RevealOnceSecret;

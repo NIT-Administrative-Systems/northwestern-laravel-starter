@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Filament\Administration\Resources\Users;
 
-use App\Domains\Auth\Enums\SystemPermission;
+use App\Domains\Access\Enums\SystemPermission;
 use App\Domains\User\Models\User;
 use App\Filament\Administration\Resources\UserLoginRecords\UserLoginRecordResource;
 use App\Filament\Administration\Resources\Users\Pages\ListUsers;

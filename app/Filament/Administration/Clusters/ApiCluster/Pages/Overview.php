@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Filament\Administration\Clusters\ApiCluster\Pages;
 
+use App\Domains\Access\Enums\SystemPermission;
 use App\Domains\Api\Concerns\AuthorizesCredentials;
 use App\Domains\Api\Enums\CredentialKind;
 use App\Domains\Api\Enums\CredentialOperation;
-use App\Domains\Auth\Enums\SystemPermission;
-use App\Domains\Auth\Models\ApiRequestLog;
-use App\Domains\Auth\Models\OAuthClient;
+use App\Domains\Api\Models\ApiRequestLog;
+use App\Domains\Api\Models\OAuthClient;
 use App\Filament\Administration\Clusters\ApiCluster;
 use BackedEnum;
 use Carbon\Carbon;

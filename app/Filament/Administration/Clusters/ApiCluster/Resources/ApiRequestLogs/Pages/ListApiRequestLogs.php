@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Administration\Clusters\ApiCluster\Resources\ApiRequestLogs\Pages;
 
-use App\Domains\Auth\Models\ApiRequestLog;
-use App\Domains\Auth\Services\ApiRouteInspector;
+use App\Domains\Api\Models\ApiRequestLog;
+use App\Domains\Api\Services\ApiRouteInspector;
 use App\Filament\Administration\Clusters\ApiCluster\Resources\ApiRequestLogs\ApiRequestLogResource;
 use App\Filament\Administration\Clusters\ApiCluster\Resources\ApiRequestLogs\Widgets\ApiRequestDurationChartWidget;
 use App\Filament\Administration\Clusters\ApiCluster\Resources\ApiRequestLogs\Widgets\ApiRequestFilterWidget;
