@@ -151,7 +151,7 @@ The **Support** domain handles the changelog, support tickets and announcements:
 - Focused on one specific operation
 - Testable in isolation
 - Resolved from the container: injected into controllers, other actions and Filament action closures, or called with `resolve(SomeAction::class)(...)`
-- The rules belong inside: an action that issues or revokes credentials takes the person acting, refuses while impersonating, and records its audit event when an administrator acts, so every caller gets the same behavior (`CreatePersonalAccessToken`, `DisconnectApplication`, `RegisterOAuthApplication`)
+- The rules belong inside: an action that issues, changes or revokes a credential takes the person acting, asks `App\Domains\Api\CredentialAccess` whether they may, and records its audit event when someone else's credential changes, so every caller gets the same behavior (`CreatePersonalAccessToken`, `DisconnectApplication`, `RegisterOAuthApplication`). Only seeders and scheduled sweeps pass no one
 
 **Example:**
 

@@ -92,6 +92,11 @@ before pushing again.
   separate migration, as `add_starter_columns_to_oauth_clients_table` does.
 - **Edit an unreleased migration instead of adding another one.** Check `git tag --contains`
   before deciding a migration has shipped.
+- **API credential rules live in `App\Domains\Api\CredentialAccess`.** Who may see, issue,
+  change, revoke or use a personal access token, connected application, MCP client or service
+  client is decided by `decide()`. Actions that touch a credential take the person acting and
+  call it; pass null only from seeders and scheduled sweeps. Don't re-check permissions, feature
+  switches or impersonation for credentials anywhere else.
 - **Retention:** records that should expire use Chassis's `PrunesAfterRetentionPeriod` trait
   (`Northwestern\SysDev\Chassis\Models\Concerns`) and a key under `platform.retention`; the
   daily `model:prune` deletes them. Don't cast those env values to `(int)`: `null` must stay

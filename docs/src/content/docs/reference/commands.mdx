@@ -441,13 +441,13 @@ It emails the owner of each active token expiring in 30, 14, 7, 3 or 1 days (`ap
 
 ### `oauth:revoke-ineligible`
 
-Revoke credentials their holders may no longer have.
+Revoke the API credentials their holders can no longer use.
 
 ```bash
 php artisan oauth:revoke-ineligible
 ```
 
-It revokes everything belonging to deactivated or deleted accounts, the personal access tokens of people who lost `CreatePersonalAccessTokens`, and the MCP clients connected by people who lost `UseMcp`. The API already refuses these on every request; this makes the records say so, so the Account and Administration pages show them as revoked.
+It revokes each live personal access token, connection and service client that `CredentialAccess` refuses for a lasting reason: a deactivated or deleted account, or a person who lost `CreatePersonalAccessTokens` or `UseMcp`. A feature that is turned off isn't one. The API already refuses these on every request; this makes the records say so, so the Account and Administration pages show them as revoked. Each goes through its action, so each is audited.
 
 ---
 
@@ -697,7 +697,7 @@ php artisan ide-helper:meta
 | `oauth-clients:notify-secret-expiration`           | Daily at 09:00                                               | Sends client secret expiration reminders, when `api.client_secret_expiration_notifications.enabled` is true                                                                               |
 | `personal-access-tokens:notify-expiration`         | Daily at 09:00                                               | Emails people before their personal access tokens expire, unless they turned it off in their preferences, when `api.personal_access_tokens.expiration_notifications.enabled` is true      |
 | `announcements:notify`                             | Every five minutes in production, weekdays at noon elsewhere | Notifies the audiences of [announcements](/features/announcements/) that have started, when their authors asked; publishing notifies at once for one that starts straight away            |
-| `oauth:revoke-ineligible`                          | Hourly in production, weekdays at noon elsewhere             | Revokes the credentials of deleted and deactivated accounts, personal access tokens whose owners lost `CreatePersonalAccessTokens`, and MCP clients connected by people who lost `UseMcp` |
+| `oauth:revoke-ineligible`                          | Hourly in production, weekdays at noon elsewhere             | Revokes the credentials their holders can no longer use: deleted and deactivated accounts, and people who lost `CreatePersonalAccessTokens` or `UseMcp` |
 | `mcp:prune-clients`                                | Daily                                                        | Deletes self-registered [MCP clients](/features/mcp/) nobody connected within a day, and revokes those nobody has used for 90 days                                                        |
 | `passport:purge --expired --hours=744`             | Daily                                                        | Deletes OAuth tokens and codes, revoked or not, once they expired more than 31 days ago: longer than the 30-day refresh token lifetime                                                    |
 | `health:schedule-check-heartbeat`                  | Every minute                                                 | Records the heartbeat the Schedule health check reads, in every environment                                                                                                               |
