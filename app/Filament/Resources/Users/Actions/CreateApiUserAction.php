@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users\Actions;
 
-use App\Domains\Auth\Enums\SystemPermission;
+use App\Domains\Api\Concerns\AuthorizesCredentials;
+use App\Domains\Api\Enums\CredentialKind;
+use App\Domains\Api\Enums\CredentialOperation;
+use App\Domains\Auth\Enums\AuthType;
 use App\Domains\User\Actions\Api\CreateApiUser;
 use App\Domains\User\Models\User;
 use App\Filament\Resources\ServiceClients\Schemas\ServiceClientSchemas;
@@ -20,6 +23,8 @@ use Illuminate\Support\Facades\Session;
 
 class CreateApiUserAction extends Action
 {
+    use AuthorizesCredentials;
+
     public static function getDefaultName(): ?string
     {
         return 'createApiUser';
@@ -29,9 +34,8 @@ class CreateApiUserAction extends Action
     {
         parent::setUp();
 
-        $this->authorize(SystemPermission::ManageApiAccess)
-            ->hidden(fn (): bool => resolve('impersonate')->isImpersonating())
-            ->visible((bool) config('api.enabled'))
+        // Whether a service client may be issued to a new API user.
+        $this->authorize(fn (): bool => static::allowsCredential(CredentialOperation::Issue, CredentialKind::ServiceClient, (new User())->forceFill(['auth_type' => AuthType::API])))
             ->label('Add API User')
             ->icon(Heroicon::OutlinedKey)
             ->color('warning')
@@ -135,7 +139,7 @@ class CreateApiUserAction extends Action
                             description: $state['description'] ?? null,
                             email: $state['email'] ?? null,
                             allowedIps: $configuration['allowed_ips'],
-                            createdBy: $this->administrator(),
+                            createdBy: static::actingUser(),
                         );
 
                         ServiceClientSchemas::storeCredentials(ServiceClientSchemas::SESSION_KEY_CREATE_API_USER, $client, $secret, [
@@ -167,11 +171,5 @@ class CreateApiUserAction extends Action
                     }
                 }
             });
-    }
-
-    private function administrator(): User
-    {
-        /** @var User */
-        return auth()->user();
     }
 }

@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Filament\App\Clusters\AccountCluster\Pages;
 
-use App\Domains\Auth\Enums\SystemPermission;
+use App\Domains\Api\Concerns\AuthorizesCredentials;
+use App\Domains\Api\Enums\CredentialKind;
+use App\Domains\Api\Enums\CredentialOperation;
 use App\Domains\User\Actions\UpdateUserPreferences;
 use App\Domains\User\Data\UserPreferences;
 use App\Domains\User\Models\User;
@@ -34,6 +36,8 @@ use Illuminate\Support\HtmlString;
  */
 class Preferences extends Page
 {
+    use AuthorizesCredentials;
+
     protected static ?string $cluster = AccountCluster::class;
 
     protected static ?string $title = 'Preferences';
@@ -80,11 +84,12 @@ class Preferences extends Page
                         Toggle::make('emailWhenApplicationConnects')
                             ->label('Application connections')
                             ->helperText('When an application connects to your account. It also appears in your notifications.')
-                            ->visible(fn (): bool => (bool) config('api.enabled') || (bool) config('mcp.enabled')),
+                            ->visible(fn (): bool => static::allowsCredential(CredentialOperation::See, CredentialKind::ConnectedApplication, $this->user())
+                                || static::allowsCredential(CredentialOperation::See, CredentialKind::McpClient, $this->user())),
                         Toggle::make('emailBeforeAccessTokensExpire')
                             ->label('Expiring personal access tokens')
                             ->helperText('Reminders before one of your tokens expires.')
-                            ->visible(fn (): bool => (bool) config('api.enabled') && $this->user()->can(SystemPermission::CreatePersonalAccessTokens)),
+                            ->visible(fn (): bool => static::allowsCredential(CredentialOperation::See, CredentialKind::PersonalAccessToken, $this->user())),
                     ]),
             ])
             ->disabled($this->isImpersonating())

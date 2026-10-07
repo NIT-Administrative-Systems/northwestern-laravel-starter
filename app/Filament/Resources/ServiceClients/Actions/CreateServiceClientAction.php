@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\ServiceClients\Actions;
 
+use App\Domains\Api\Concerns\AuthorizesCredentials;
+use App\Domains\Api\Enums\CredentialKind;
+use App\Domains\Api\Enums\CredentialOperation;
 use App\Domains\Auth\Actions\Api\CreateServiceClient;
-use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\User\Models\User;
 use App\Filament\Resources\ServiceClients\Schemas\ServiceClientSchemas;
 use App\Filament\Resources\Users\RelationManagers\ServiceClientsRelationManager;
@@ -16,6 +18,8 @@ use Illuminate\Support\Facades\Session;
 
 class CreateServiceClientAction extends Action
 {
+    use AuthorizesCredentials;
+
     public static function getDefaultName(): ?string
     {
         return 'createServiceClient';
@@ -25,8 +29,7 @@ class CreateServiceClientAction extends Action
     {
         parent::setUp();
 
-        $this->authorize(SystemPermission::ManageApiAccess)
-            ->hidden(fn (): bool => resolve('impersonate')->isImpersonating())
+        $this->authorize(fn (ServiceClientsRelationManager $livewire): bool => static::allowsCredential(CredentialOperation::Issue, CredentialKind::ServiceClient, $livewire->apiUser()))
             ->label('Create Service Client')
             ->icon(Heroicon::OutlinedPlusCircle)
             ->outlined()
@@ -52,7 +55,7 @@ class CreateServiceClientAction extends Action
                             name: $configuration['name'],
                             secretExpiresAt: $configuration['secret_expires_at'],
                             allowedIps: $configuration['allowed_ips'],
-                            createdBy: $this->administrator(),
+                            createdBy: static::actingUser(),
                         );
 
                         ServiceClientSchemas::storeCredentials(ServiceClientSchemas::SESSION_KEY_CREATE, $client, $secret);
@@ -63,11 +66,5 @@ class CreateServiceClientAction extends Action
             ->modalSubmitAction(fn (Action $action) => ServiceClientSchemas::copyCredentialsSubmitButton($action))
             ->action(fn () => ServiceClientSchemas::clearCredentials(ServiceClientSchemas::SESSION_KEY_CREATE))
             ->successNotificationTitle('Service Client Created');
-    }
-
-    private function administrator(): User
-    {
-        /** @var User */
-        return auth()->user();
     }
 }

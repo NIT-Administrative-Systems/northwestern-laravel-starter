@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\OAuthApplications\Pages;
 
+use App\Domains\Api\Concerns\AuthorizesCredentials;
+use App\Domains\Api\Enums\CredentialKind;
+use App\Domains\Api\Enums\CredentialOperation;
 use App\Domains\Auth\Actions\Applications\RegisterOAuthApplication;
-use App\Domains\User\Models\User;
 use App\Filament\Resources\OAuthApplications\OAuthApplicationResource;
 use App\Filament\Resources\OAuthApplications\Schemas\OAuthApplicationSchemas;
 use Filament\Actions\Action;
@@ -17,6 +19,8 @@ use Illuminate\Support\Facades\Session;
 
 class ListOAuthApplications extends ListRecords
 {
+    use AuthorizesCredentials;
+
     protected static string $resource = OAuthApplicationResource::class;
 
     protected ?string $subheading = 'External applications people can connect to their account';
@@ -32,7 +36,7 @@ class ListOAuthApplications extends ListRecords
         return [
             Action::make('register')
                 ->label('Register Application')
-                ->hidden(fn (): bool => resolve('impersonate')->isImpersonating())
+                ->visible(fn (): bool => static::allowsCredential(CredentialOperation::Issue, CredentialKind::ConnectedApplication))
                 ->icon(Heroicon::OutlinedPlusCircle)
                 ->closeModalByClickingAway(false)
                 ->closeModalByEscaping(false)
@@ -59,7 +63,7 @@ class ListOAuthApplications extends ListRecords
                                 (bool) $state['first_party'],
                                 $state['description'] ?? null,
                                 $state['contact_email'] ?? null,
-                                registeredBy: $this->administrator(),
+                                registeredBy: static::actingUser(),
                             );
 
                             OAuthApplicationSchemas::storeCredentials($client, $secret);
@@ -70,11 +74,5 @@ class ListOAuthApplications extends ListRecords
                 ->action(fn () => OAuthApplicationSchemas::clearCredentials())
                 ->successNotificationTitle('Application Registered'),
         ];
-    }
-
-    private function administrator(): User
-    {
-        /** @var User */
-        return auth()->user();
     }
 }

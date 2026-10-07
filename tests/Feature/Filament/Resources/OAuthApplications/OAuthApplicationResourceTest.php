@@ -142,4 +142,19 @@ final class OAuthApplicationResourceTest extends TestCase
         $this->assertNotSame($before, $application->fresh()?->secret);
         $this->assertNull(session(OAuthApplicationSchemas::SESSION_KEY));
     }
+
+    // While the API is off administrators can still see and revoke applications, but not add or change them.
+    public function test_while_the_api_is_off_applications_can_be_revoked_but_not_registered_or_edited(): void
+    {
+        [, $client] = resolve(\App\Domains\Auth\Actions\Applications\RegisterOAuthApplication::class)('Portal', ['https://portal.example.edu/cb'], true, []);
+        config(['api.enabled' => false]);
+
+        $this->assertTrue(OAuthApplicationResource::canAccess());
+
+        Livewire::test(ListOAuthApplications::class)
+            ->assertActionHidden('register')
+            ->assertActionHidden(TestAction::make('edit')->table($client))
+            ->assertActionHidden(TestAction::make('regenerateSecret')->table($client))
+            ->assertActionVisible(TestAction::make('revoke')->table($client));
+    }
 }

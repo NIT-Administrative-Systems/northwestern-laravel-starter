@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Filament\Clusters\ApiCluster\Pages;
 
+use App\Domains\Api\Concerns\AuthorizesCredentials;
+use App\Domains\Api\Enums\CredentialKind;
+use App\Domains\Api\Enums\CredentialOperation;
+use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\ApiRequestLog;
 use App\Domains\Auth\Models\OAuthClient;
 use App\Filament\Clusters\ApiCluster;
@@ -15,6 +19,8 @@ use Illuminate\Support\Number;
 
 class Overview extends Page
 {
+    use AuthorizesCredentials;
+
     protected static ?string $cluster = ApiCluster::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSquares2x2;
@@ -32,11 +38,13 @@ class Overview extends Page
     protected ?string $subheading = 'API configuration and usage statistics';
 
     /**
-     * Filament checks a cluster's rule only for its navigation; each clustered page needs its own.
+     * For whoever may see service clients, even while the API is off, and for request log
+     * readers while it's on. Filament checks a cluster's rule only for its navigation.
      */
     public static function canAccess(): bool
     {
-        return ApiCluster::canAccessApi();
+        return static::allowsCredential(CredentialOperation::See, CredentialKind::ServiceClient)
+            || ((bool) config('api.enabled') && (bool) auth()->user()?->can(SystemPermission::ViewApiRequestLogs));
     }
 
     /** @return array<string, string> */

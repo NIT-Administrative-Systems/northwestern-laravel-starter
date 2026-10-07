@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users\RelationManagers;
 
-use App\Domains\Auth\Enums\AuthType;
-use App\Domains\Auth\Enums\SystemPermission;
+use App\Domains\Api\Concerns\AuthorizesCredentials;
+use App\Domains\Api\Enums\CredentialKind;
+use App\Domains\Api\Enums\CredentialOperation;
 use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\User\Models\User;
 use App\Filament\Resources\ServiceClients\Actions\CreateServiceClientAction;
@@ -29,6 +30,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class ServiceClientsRelationManager extends RelationManager
 {
+    use AuthorizesCredentials;
+
     protected static string $relationship = 'oauthApps';
 
     protected static ?string $title = 'Service Clients';
@@ -41,8 +44,7 @@ class ServiceClientsRelationManager extends RelationManager
     public static function canViewForRecord(Model $ownerRecord, string $pageClass): bool
     {
         /** @var User $ownerRecord */
-        return $ownerRecord->auth_type === AuthType::API
-            && auth()->user()?->can(SystemPermission::ManageApiAccess);
+        return static::allowsCredential(CredentialOperation::See, CredentialKind::ServiceClient, $ownerRecord);
     }
 
     public static function getTabComponent(Model $ownerRecord, string $pageClass): Tab
@@ -120,5 +122,14 @@ class ServiceClientsRelationManager extends RelationManager
                 ])->label('Actions')->button(),
             ])
             ->paginated(false);
+    }
+
+    /**
+     * The API user whose service clients these are, the holder its actions ask about.
+     */
+    public function apiUser(): User
+    {
+        /** @var User */
+        return $this->getOwnerRecord();
     }
 }

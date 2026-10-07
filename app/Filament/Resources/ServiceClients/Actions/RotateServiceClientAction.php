@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\ServiceClients\Actions;
 
+use App\Domains\Api\Concerns\AuthorizesCredentials;
+use App\Domains\Api\Enums\CredentialKind;
+use App\Domains\Api\Enums\CredentialOperation;
 use App\Domains\Auth\Actions\Api\RotateServiceClient;
-use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\OAuthClient;
-use App\Domains\User\Models\User;
 use App\Filament\Resources\ServiceClients\Schemas\ServiceClientSchemas;
+use App\Filament\Resources\Users\RelationManagers\ServiceClientsRelationManager;
 use Filament\Actions\Action;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
@@ -20,6 +22,8 @@ use Illuminate\Support\HtmlString;
 
 class RotateServiceClientAction extends Action
 {
+    use AuthorizesCredentials;
+
     public static function getDefaultName(): ?string
     {
         return 'rotateServiceClient';
@@ -29,8 +33,7 @@ class RotateServiceClientAction extends Action
     {
         parent::setUp();
 
-        $this->authorize(SystemPermission::ManageApiAccess)
-            ->hidden(fn (): bool => resolve('impersonate')->isImpersonating())
+        $this->authorize(fn (ServiceClientsRelationManager $livewire): bool => static::allowsCredential(CredentialOperation::Modify, CredentialKind::ServiceClient, $livewire->apiUser()))
             ->label('Rotate')
             ->icon(Heroicon::OutlinedArrowPath)
             ->color('primary')
@@ -59,14 +62,11 @@ HTML))
                         if (Session::has(ServiceClientSchemas::SESSION_KEY_ROTATE)) {
                             return;
                         }
-
-                        /** @var User $rotatedBy */
-                        $rotatedBy = auth()->user();
                         $configuration = ServiceClientSchemas::normalizeConfigurationState($state);
 
                         [$secret, $replacement] = $rotateServiceClient(
                             previous: $record,
-                            rotatedBy: $rotatedBy,
+                            rotatedBy: static::actingUser(),
                             name: $configuration['name'],
                             secretExpiresAt: $configuration['secret_expires_at'],
                             allowedIps: $configuration['allowed_ips'],

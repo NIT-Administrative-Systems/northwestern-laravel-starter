@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users\RelationManagers;
 
+use App\Domains\Api\Concerns\AuthorizesCredentials;
+use App\Domains\Api\Enums\CredentialKind;
+use App\Domains\Api\Enums\CredentialOperation;
 use App\Domains\Auth\Actions\Applications\DisconnectApplication;
-use App\Domains\Auth\Enums\AuthType;
-use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\OAuthConnection;
 use App\Domains\User\Models\User;
 use App\Providers\OAuthServiceProvider;
@@ -25,6 +26,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class ConnectedApplicationsRelationManager extends RelationManager
 {
+    use AuthorizesCredentials;
+
     protected static string $relationship = 'oauth_connections';
 
     protected static ?string $title = 'Connected Applications';
@@ -32,9 +35,8 @@ class ConnectedApplicationsRelationManager extends RelationManager
     public static function canViewForRecord(Model $ownerRecord, string $pageClass): bool
     {
         /** @var User $ownerRecord */
-        return $ownerRecord->auth_type !== AuthType::API
-            && (config('api.enabled') || config('mcp.enabled'))
-            && auth()->user()?->can(SystemPermission::ManageApiAccess);
+        return static::allowsCredential(CredentialOperation::See, CredentialKind::ConnectedApplication, $ownerRecord)
+            || static::allowsCredential(CredentialOperation::See, CredentialKind::McpClient, $ownerRecord);
     }
 
     public static function getTabComponent(Model $ownerRecord, string $pageClass): Tab
@@ -65,16 +67,17 @@ class ConnectedApplicationsRelationManager extends RelationManager
                     ->modalHeading('Disconnect Application')
                     ->modalDescription('The application loses access to this person\'s account immediately. This is recorded in their audit history.')
                     ->modalSubmitActionLabel('Disconnect')
-                    ->authorize(SystemPermission::ManageApiAccess)
-                    ->action(function (OAuthConnection $record, DisconnectApplication $disconnect): void {
-                        /** @var User $administrator */
-                        $administrator = auth()->user();
-
-                        $disconnect($record, $administrator);
-                    })
+                    ->visible(fn (OAuthConnection $record): bool => static::allowsCredential(CredentialOperation::Revoke, CredentialKind::of($record->oauth_client), $this->person()))
+                    ->action(fn (OAuthConnection $record, DisconnectApplication $disconnect) => $disconnect($record, static::actingUser()))
                     ->successNotificationTitle('Application Disconnected'),
             ])
             ->emptyStateHeading('No Connected Applications')
             ->paginated(false);
+    }
+
+    private function person(): User
+    {
+        /** @var User */
+        return $this->getOwnerRecord();
     }
 }

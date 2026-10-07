@@ -29,11 +29,16 @@ final class OverviewTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_it_is_refused_when_the_api_is_off(): void
+    // API administrators keep the overview while the API is off, to see and revoke what's left.
+    public function test_only_api_administrators_open_it_while_the_api_is_off(): void
     {
         config(['api.enabled' => false]);
 
         $this->actingAs($this->administrator(SystemPermission::ManageApiAccess))
+            ->get('/administration/api/overview')
+            ->assertOk();
+
+        $this->actingAs($this->administrator(SystemPermission::ViewApiRequestLogs))
             ->get('/administration/api/overview')
             ->assertForbidden();
     }
