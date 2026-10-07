@@ -326,10 +326,8 @@ Perform these cleanup tasks to personalize the starter kit for your project and 
 
 </Steps>
 
-Leave these references to the upstream starter out of both replacements:
+Leave this reference to the upstream starter out of both replacements:
 
-- `.starter-version.yaml`, which records the starter version your project came from
-- `REPO` in `app/Console/Commands/StarterCheckCommand.php`, which `php artisan starter:check` uses to compare against starter releases
 - The Coveralls upload's `if: github.repository == ...` guard in `.github/workflows/check-pr.yml`; remove the step or the condition instead, as its comment explains
 
 ### Documentation Site

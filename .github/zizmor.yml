@@ -9,13 +9,11 @@ rules:
         "*": hash-pin
 
   artipacked:
-    # Deliberate: these two checkouts must persist git credentials because their jobs push.
+    # Deliberate: this checkout must persist git credentials because its job pushes.
     # Every other checkout in the repo sets `persist-credentials: false`.
     ignore:
       # The lint job commits automated formatting fixes back to the PR branch.
       - check-pr.yml:213
-      # The release job commits the .starter-version.yaml bump and pushes it to main.
-      - release.yml:29
 
   self-repository:
     # zizmor 1.30 recommends GitHub's `$/` self-repository syntax for local actions, but actionlint 1.7.12
