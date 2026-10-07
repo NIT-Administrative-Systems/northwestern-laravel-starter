@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
-## [v3.0.0] - 2026-10-08
+## [v3.0.0] - 2026-10-07
 
 Version 3 rebuilds the starter's interface on one stack, Filament (Livewire, Alpine and Tailwind CSS), with Northwestern branding from `northwestern-sysdev/northwestern-filament-theme` and Department Templates 4.0, and removes the Bootstrap interface. It replaces the bespoke API access tokens with Laravel Passport: service clients, personal access tokens, applications people connect through OAuth, and an MCP server for AI clients. Version 3 is for new applications; applications built on version 2 stay on version 2.
 
