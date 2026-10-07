@@ -19,8 +19,8 @@ return [
 
     // Passport's OAuth endpoints share the API's per-IP limit. No other site may frame the consent screen.
     // No token is issued or refreshed for a credential whose feature is off. Whether someone may connect
-    // a client is decided by App\Domains\Api\CredentialAccess. A person sent to consent by a deleted or
-    // revoked client sees a page instead of Passport's JSON.
+    // a client is decided by App\Domains\Auth\Passport\OAuthConsent. A person sent to consent by a deleted
+    // or revoked client sees a page instead of Passport's JSON.
     'middleware' => [
         'throttle:api',
         App\Domains\Auth\Http\Middleware\DenyFramingOfConsent::class,
