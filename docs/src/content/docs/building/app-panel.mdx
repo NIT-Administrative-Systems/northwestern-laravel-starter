@@ -27,14 +27,15 @@ The panel discovers Resources, Pages, Clusters and Widgets in `app/Filament/App/
             - Profile.php
     - Livewire/
         - AnnouncementBanner.php
-    - Pages/
+    - Pages/ discovered, empty until you add one
+    - Resources/ discovered, empty until you add one
+    - Starter/Pages/ the starter's own pages
         - Announcements.php
         - Auth/ sign-in pages
         - Concerns/HasSiteHeader.php
         - ComponentGallery.php
         - ContactSupport.php
         - EnvironmentLockdown.php
-    - Resources/ discovered, empty until you add one
     - Widgets/
         - YourAccountWidget.php
 
@@ -154,7 +155,7 @@ The base class, `App\Domains\Core\Data\Preferences`, works for any model: extend
 
 `/app/gallery` shows Filament's common components in the Northwestern theme with sample content: buttons, badges, callouts, form fields, a table, notifications and modals. It is in the sidebar outside production. `ComponentGallery::canAccess()` refuses it in production, which also hides its sidebar item.
 
-Delete `app/Filament/App/Pages/ComponentGallery.php` when you no longer need it.
+Delete `app/Filament/App/Starter/Pages/ComponentGallery.php` when you no longer need it.
 
 ## The Top Bar
 
@@ -239,10 +240,10 @@ Simple pages (Filament's `SimplePage`) render a single card without the sidebar.
 
 <Steps>
 
-1. Extend `Filament\Pages\SimplePage` in `app/Filament/App/Pages/`, and use `App\Filament\App\Pages\Concerns\HasSiteHeader`. The trait turns off Filament's own logo and simple-page user menu, which would repeat what the header shows.
+1. Extend `Filament\Pages\SimplePage` in `app/Filament/App/Pages/`, and use `App\Filament\App\Starter\Pages\Concerns\HasSiteHeader`. The trait turns off Filament's own logo and simple-page user menu, which would repeat what the header shows.
 
     ```php
-    use App\Filament\App\Pages\Concerns\HasSiteHeader;
+    use App\Filament\App\Starter\Pages\Concerns\HasSiteHeader;
     use Filament\Pages\SimplePage;
     use Filament\Schemas\Schema;
 

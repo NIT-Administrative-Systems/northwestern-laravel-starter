@@ -6,7 +6,7 @@ namespace App\Domains\Support\Notifications;
 
 use App\Domains\Support\Models\Announcement;
 use App\Domains\User\Models\User;
-use App\Filament\App\Pages\Announcements;
+use App\Filament\App\Starter\Pages\Announcements;
 use App\Providers\Filament\AppPanelProvider;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification as FilamentNotification;

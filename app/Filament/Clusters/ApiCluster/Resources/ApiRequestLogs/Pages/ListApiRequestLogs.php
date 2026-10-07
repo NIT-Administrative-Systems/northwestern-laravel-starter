@@ -1,0 +1,95 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Filament\Clusters\ApiCluster\Resources\ApiRequestLogs\Pages;
+
+use App\Domains\Auth\Models\ApiRequestLog;
+use App\Domains\Auth\Services\ApiRouteInspector;
+use App\Filament\Clusters\ApiCluster\Resources\ApiRequestLogs\ApiRequestLogResource;
+use App\Filament\Clusters\ApiCluster\Resources\ApiRequestLogs\Widgets\ApiRequestDurationChartWidget;
+use App\Filament\Clusters\ApiCluster\Resources\ApiRequestLogs\Widgets\ApiRequestFilterWidget;
+use App\Filament\Clusters\ApiCluster\Resources\ApiRequestLogs\Widgets\ApiRequestsByStatusChartWidget;
+use App\Filament\Clusters\ApiCluster\Resources\ApiRequestLogs\Widgets\NoProtectedApiRoutesBanner;
+use App\Filament\Clusters\ApiCluster\Resources\ApiRequestLogs\Widgets\SlowestApiRequestsByEndpointChartWidget;
+use App\Filament\Clusters\ApiCluster\Resources\ApiRequestLogs\Widgets\TopApiRequestsByEndpointChartWidget;
+use Filament\Resources\Pages\ListRecords;
+use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\On;
+
+class ListApiRequestLogs extends ListRecords
+{
+    protected static string $resource = ApiRequestLogResource::class;
+
+    protected ?string $subheading = 'Every API request, with response times and failures.';
+
+    /** @return array<string, string> */
+    public function getBreadcrumbs(): array
+    {
+        return [];
+    }
+
+    public ?string $tableStartDate = null;
+
+    public ?string $tableEndDate = null;
+
+    public ?int $tableUserId = null;
+
+    public function mount(): void
+    {
+        parent::mount();
+
+        $this->tableStartDate = now()->subDays(29)->startOfDay()->toDateTimeString();
+        $this->tableEndDate = now()->endOfDay()->toDateTimeString();
+    }
+
+    #[On(ApiRequestFilterWidget::EVENT_DATE_RANGE_UPDATED)]
+    public function updateTableDateRange(string $startDate, string $endDate): void
+    {
+        $this->tableStartDate = $startDate;
+        $this->tableEndDate = $endDate;
+
+        $this->resetPage();
+    }
+
+    #[On(ApiRequestFilterWidget::EVENT_USER_FILTER_UPDATED)]
+    public function updateTableUserFilter(?int $userId): void
+    {
+        $this->tableUserId = $userId;
+
+        $this->resetPage();
+    }
+
+    /** @return Builder<ApiRequestLog>|null */
+    public function getTableQuery(): ?Builder
+    {
+        $query = static::getResource()::getEloquentQuery();
+
+        if ($this->tableStartDate && $this->tableEndDate) {
+            $query->whereBetween('created_at', [$this->tableStartDate, $this->tableEndDate]);
+        }
+
+        if ($this->tableUserId) {
+            $query->where('user_id', $this->tableUserId);
+        }
+
+        return $query;
+    }
+
+    protected function getHeaderWidgets(): array
+    {
+        $widgets = [
+            ApiRequestFilterWidget::class,
+            ApiRequestsByStatusChartWidget::class,
+            ApiRequestDurationChartWidget::class,
+            TopApiRequestsByEndpointChartWidget::class,
+            SlowestApiRequestsByEndpointChartWidget::class,
+        ];
+
+        if (! resolve(ApiRouteInspector::class)->hasProtectedRoutes()) {
+            array_unshift($widgets, NoProtectedApiRoutesBanner::class);
+        }
+
+        return $widgets;
+    }
+}

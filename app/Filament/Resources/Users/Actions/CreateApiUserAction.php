@@ -10,7 +10,7 @@ use App\Domains\Api\Enums\CredentialOperation;
 use App\Domains\Auth\Enums\AuthType;
 use App\Domains\User\Actions\Api\CreateApiUser;
 use App\Domains\User\Models\User;
-use App\Filament\Resources\ServiceClients\Schemas\ServiceClientSchemas;
+use App\Filament\Resources\Users\ServiceClients\Schemas\ServiceClientSchemas;
 use App\Filament\Support\RevealOnceSecret;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;

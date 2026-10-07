@@ -7,7 +7,7 @@ namespace App\Filament\App\Livewire;
 use App\Domains\Support\Actions\Announcements\DismissAnnouncement;
 use App\Domains\Support\Models\Announcement;
 use App\Domains\User\Models\User;
-use App\Filament\App\Pages\Announcements;
+use App\Filament\App\Starter\Pages\Announcements;
 use App\Providers\Filament\AppPanelProvider;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;

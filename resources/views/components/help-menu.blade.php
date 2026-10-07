@@ -5,8 +5,8 @@
     `support.documentation_url`.
 --}}
 @php
-    use App\Filament\App\Pages\Announcements;
-    use App\Filament\App\Pages\ContactSupport;
+    use App\Filament\App\Starter\Pages\Announcements;
+    use App\Filament\App\Starter\Pages\ContactSupport;
     use App\Providers\Filament\AppPanelProvider;
     use Filament\Support\Icons\Heroicon;
     use Illuminate\Support\Facades\Route;

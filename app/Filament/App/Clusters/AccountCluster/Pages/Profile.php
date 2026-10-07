@@ -7,7 +7,7 @@ namespace App\Filament\App\Clusters\AccountCluster\Pages;
 use App\Domains\Auth\Enums\AuthType;
 use App\Domains\User\Models\User;
 use App\Filament\App\Clusters\AccountCluster;
-use App\Filament\App\Pages\ContactSupport;
+use App\Filament\App\Starter\Pages\ContactSupport;
 use App\Providers\Filament\AppPanelProvider;
 use BackedEnum;
 use Filament\Actions\Action;

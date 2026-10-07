@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Filament\Clusters;
 
 use App\Filament\Clusters\ApiCluster\Pages\Overview;
+use App\Filament\Clusters\ApiCluster\Resources\ApiRequestLogs\ApiRequestLogResource;
+use App\Filament\Clusters\ApiCluster\Resources\McpClients\McpClientResource;
+use App\Filament\Clusters\ApiCluster\Resources\OAuthApplications\OAuthApplicationResource;
 use App\Filament\Navigation\AdministrationNavGroup;
-use App\Filament\Resources\ApiRequestLogs\ApiRequestLogResource;
-use App\Filament\Resources\McpClients\McpClientResource;
-use App\Filament\Resources\OAuthApplications\OAuthApplicationResource;
 use BackedEnum;
 use Filament\Clusters\Cluster;
 use Filament\Pages\Enums\SubNavigationPosition;
