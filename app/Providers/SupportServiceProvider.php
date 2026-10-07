@@ -5,16 +5,18 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Domains\Support\Contracts\TicketSystemGateway;
-use App\Domains\Support\Gateways\TicketSystemGatewayFactory;
+use App\Domains\Support\Enums\TicketSystem;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
+use InvalidArgumentException;
 
 /**
- * Registers the support system's service container bindings.
+ * Chooses the ticket system support requests go to: the {@see TicketSystemGateway} for the
+ * `support.driver` config value, as {@see TicketSystem::gatewayClass()} maps it.
  *
- * When support is disabled ({@see config('support.enabled')}), no bindings
- * are registered and the support system is effectively inert. Projects can
- * override the {@see TicketSystemGateway} binding to use a completely
- * different gateway without modifying the factory or enum.
+ * When support is disabled ({@see config('support.enabled')}), nothing is bound and the support
+ * system is inert. An application can bind its own {@see TicketSystemGateway} in a provider's
+ * `boot()` to send requests somewhere else.
  */
 class SupportServiceProvider extends ServiceProvider
 {
@@ -24,13 +26,15 @@ class SupportServiceProvider extends ServiceProvider
             return;
         }
 
-        $this->app->bind(TicketSystemGateway::class, function ($app) {
-            return $app->make(TicketSystemGatewayFactory::class)->default();
-        });
-    }
+        $this->app->bind(TicketSystemGateway::class, function (Application $app): TicketSystemGateway {
+            $driver = config('support.driver');
+            $system = (is_string($driver) ? TicketSystem::tryFrom($driver) : null) ?? throw new InvalidArgumentException(sprintf(
+                'Unsupported support driver: [%s]. Supported: %s.',
+                is_scalar($driver) ? $driver : get_debug_type($driver),
+                implode(', ', array_column(TicketSystem::cases(), 'value')),
+            ));
 
-    public function boot(): void
-    {
-        //
+            return $app->make($system->gatewayClass());
+        });
     }
 }

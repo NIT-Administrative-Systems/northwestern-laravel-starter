@@ -64,6 +64,7 @@ Version 3 removes the Bootstrap user interface. Every page now uses one stack, F
 
 ### Changed
 
+- `CreateSupportTicket` takes the person and the Contact Support form's fields and does the whole submission: it saves the ticket, sends it to the configured ticket system, records the result and falls back to email. `SupportTicketRepository` and `TicketSystemGatewayFactory` are gone; `SupportServiceProvider` chooses the ticket system from `SUPPORT_DRIVER`.
 - The app panel is the default panel, so Filament's generators and Livewire tests target it unless told otherwise. The administration panel stays at `/administration`.
 - Sign-in is in the app panel, at `/app/login` and `/app/login/email`, and signing out returns there. The environment lockdown page is at `/app/access-restricted`.
 - The changelog and Contact Support pages were rebuilt on the public layout and the app panel; Contact Support is at `/app/support/contact`, and its rate limit shows on the page instead of as a 429 response. The changelog's URLs and RSS feed are unchanged.

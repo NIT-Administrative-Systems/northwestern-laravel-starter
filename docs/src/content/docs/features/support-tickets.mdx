@@ -14,13 +14,11 @@ The feature is disabled by default and can be enabled with a single environment 
 
 ## Overview
 
-The system follows a layered architecture:
+`CreateSupportTicket` is the whole submission: give it the person and the form's fields, and it saves the ticket, sends it to the configured ticket system, records the result and falls back to email when needed. Behind it:
 
-- **Contract** - `TicketSystemGateway` interface decouples orchestration from gateway implementations
-- **Enum-driven resolution** - `TicketSystem::gatewayClass()` maps each driver to its concrete class
-- **Immutable value object** - `CreationResult` carries the outcome of each gateway call
-- **Repository** - Keeps persistence concerns out of the action
-- **Action** - `CreateSupportTicket` orchestrates the workflow in one place
+- **Contract** - the `TicketSystemGateway` interface, which each ticket system implements
+- **Driver** - `SUPPORT_DRIVER` names a `TicketSystem` case, and `SupportServiceProvider` binds that case's gateway (`TicketSystem::gatewayClass()`)
+- **Result** - each gateway returns an immutable `CreationResult` with the outcome
 
 ---
 
@@ -47,15 +45,15 @@ When enabled, the **Contact Support** page appears in the Help menu and the subm
 
 2. **Ticket is persisted**
 
-   The `SupportTicketRepository` saves the submission to the `support_tickets` table, recording the user's email at the time of submission for audit purposes.
+   `CreateSupportTicket` saves the submission to the `support_tickets` table, recording the user's email at the time of submission for audit purposes.
 
 3. **Primary gateway submits the ticket**
 
-   The `CreateSupportTicket` action dispatches the ticket to the configured gateway (Email or TeamDynamix). The gateway returns an immutable `CreationResult` indicating success or failure.
+   It sends the ticket to the configured gateway (Email or TeamDynamix). The gateway returns an immutable `CreationResult` indicating success or failure.
 
 4. **Result is recorded**
 
-   The repository updates the ticket with the gateway's response: ticket number, system type, and any error message.
+   It updates the ticket with the gateway's response: ticket number, system type, and any error message.
 
 5. **Fallback fires if needed**
 
