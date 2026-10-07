@@ -10,10 +10,10 @@ use App\Domains\Auth\Enums\TokenExpiration;
 use App\Domains\Auth\Models\OAuthToken;
 use App\Domains\User\Models\User;
 use App\Filament\App\Clusters\AccountCluster\Pages\AccessTokens;
+use App\Filament\Support\RevealOnceSecret;
 use App\Providers\Filament\AppPanelProvider;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
-use Illuminate\Support\Facades\Crypt;
 use Livewire\Livewire;
 use Mockery;
 use PHPUnit\Framework\Attributes\CoversNothing;
@@ -71,11 +71,11 @@ final class AccessTokensTest extends TestCase
         $this->assertSame(['view-users'], $token->scopes);
         $this->assertTrue($token->expires_at->isSameDay(now()->addDays(180)));
 
-        $shown = Crypt::decryptString(session(AccessTokens::SESSION_KEY)['token']);
+        $shown = (string) RevealOnceSecret::for('personal_access_token:create')->secret();
         $this->withToken($shown)->getJson('/api/v1/me')->assertOk();
 
         $component->callMountedAction();
-        $this->assertNull(session(AccessTokens::SESSION_KEY));
+        $this->assertFalse(RevealOnceSecret::for('personal_access_token:create')->issued());
         $this->assertStringNotContainsString($shown, json_encode($component->instance()->all(), JSON_THROW_ON_ERROR));
     }
 
@@ -91,7 +91,7 @@ final class AccessTokensTest extends TestCase
             ->goToNextWizardStep();
 
         $second = OAuthToken::query()->where('user_id', $this->user->getKey())->where('name', 'Second')->sole();
-        $this->assertSame($second->getKey(), session(AccessTokens::SESSION_KEY)['record_id']);
+        $this->assertSame($second->getKey(), RevealOnceSecret::for('personal_access_token:create')->identifier());
     }
 
     public function test_a_person_can_only_choose_scopes_their_permissions_cover(): void

@@ -10,13 +10,12 @@ use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Enums\TokenExpiration;
 use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\User\Models\User;
-use App\Filament\Resources\ServiceClients\Schemas\ServiceClientSchemas;
 use App\Filament\Resources\Users\Pages\ViewUser;
 use App\Filament\Resources\Users\RelationManagers\ServiceClientsRelationManager;
+use App\Filament\Support\RevealOnceSecret;
 use App\Providers\Filament\AdministrationPanelProvider;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
@@ -69,16 +68,16 @@ final class ServiceClientsRelationManagerTest extends TestCase
 
         /** @var OAuthClient $client */
         $client = OAuthClient::query()->whereMorphedTo('owner', $this->apiUser)->sole();
-        $stored = session(ServiceClientSchemas::SESSION_KEY_CREATE);
+        $creation = RevealOnceSecret::for('service_client:create');
 
         $this->assertSame('Production sync', $client->name);
         $this->assertSame(['10.0.0.0/8'], $client->allowed_ips);
-        $this->assertSame($client->getKey(), $stored['client_id']);
-        $this->assertTrue(Hash::check(Crypt::decryptString($stored['secret']), (string) $client->secret));
+        $this->assertSame($client->getKey(), $creation->identifier());
+        $this->assertTrue(Hash::check((string) $creation->secret(), (string) $client->secret));
 
         $component->callMountedTableAction();
 
-        $this->assertNull(session(ServiceClientSchemas::SESSION_KEY_CREATE));
+        $this->assertFalse($creation->issued());
     }
 
     // Only the final submit clears the secret, so an abandoned run must not leak into the next one.
@@ -97,7 +96,7 @@ final class ServiceClientsRelationManagerTest extends TestCase
 
         $client = OAuthClient::query()->whereMorphedTo('owner', $otherApiUser)->sole();
         $this->assertSame('Second', $client->name);
-        $this->assertSame($client->getKey(), session(ServiceClientSchemas::SESSION_KEY_CREATE)['client_id']);
+        $this->assertSame($client->getKey(), RevealOnceSecret::for('service_client:create')->identifier());
     }
 
     public function test_rotating_adds_a_replacement_and_keeps_the_client(): void

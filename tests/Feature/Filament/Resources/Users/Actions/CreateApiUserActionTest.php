@@ -9,8 +9,8 @@ use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Enums\TokenExpiration;
 use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\User\Models\User;
-use App\Filament\Resources\ServiceClients\Schemas\ServiceClientSchemas;
 use App\Filament\Resources\Users\Pages\ListUsers;
+use App\Filament\Support\RevealOnceSecret;
 use App\Providers\Filament\AdministrationPanelProvider;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
@@ -50,11 +50,11 @@ final class CreateApiUserActionTest extends TestCase
         $user = User::query()->where('username', 'api-reporting')->sole();
         $this->assertSame(AuthType::API, $user->auth_type);
         $client = OAuthClient::query()->whereMorphedTo('owner', $user)->sole();
-        $this->assertSame($client->getKey(), session(ServiceClientSchemas::SESSION_KEY_CREATE_API_USER)['client_id']);
+        $this->assertSame($client->getKey(), RevealOnceSecret::for('api_user:create')->identifier());
 
         $component->callMountedAction()->assertRedirect();
 
-        $this->assertNull(session(ServiceClientSchemas::SESSION_KEY_CREATE_API_USER));
+        $this->assertFalse(RevealOnceSecret::for('api_user:create')->issued());
     }
 
     public function test_it_is_hidden_without_manage_api_access(): void

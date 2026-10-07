@@ -11,13 +11,13 @@ use App\Domains\Auth\Actions\Api\RotateServiceClient;
 use App\Domains\Auth\Models\OAuthClient;
 use App\Filament\Resources\ServiceClients\Schemas\ServiceClientSchemas;
 use App\Filament\Resources\Users\RelationManagers\ServiceClientsRelationManager;
+use App\Filament\Support\RevealOnceSecret;
 use Filament\Actions\Action;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Wizard;
 use Filament\Support\Enums\Size;
 use Filament\Support\Icons\Heroicon;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Support\HtmlString;
 
 class RotateServiceClientAction extends Action
@@ -33,6 +33,8 @@ class RotateServiceClientAction extends Action
     {
         parent::setUp();
 
+        $secret = RevealOnceSecret::for('service_client:rotate');
+
         $this->authorize(fn (ServiceClientsRelationManager $livewire): bool => static::allowsCredential(CredentialOperation::Modify, CredentialKind::ServiceClient, $livewire->apiUser()))
             ->label('Rotate')
             ->icon(Heroicon::OutlinedArrowPath)
@@ -41,7 +43,7 @@ class RotateServiceClientAction extends Action
             ->size(Size::ExtraSmall)
             ->closeModalByClickingAway(false)
             ->closeModalByEscaping(false)
-            ->mountUsing(ServiceClientSchemas::mountFresh(ServiceClientSchemas::SESSION_KEY_ROTATE))
+            ->mountUsing($secret->mountFresh())
             ->steps([
                 Wizard\Step::make('Rotate Service Client')
                     ->schema([
@@ -57,14 +59,10 @@ HTML))
                             ]),
                         ServiceClientSchemas::clientConfigurationSection(),
                     ])
-                    ->afterValidation(function (array $state, RotateServiceClient $rotateServiceClient, OAuthClient $record): void {
-                        // A rotation already happened in this wizard session; don't create a second replacement.
-                        if (Session::has(ServiceClientSchemas::SESSION_KEY_ROTATE)) {
-                            return;
-                        }
+                    ->afterValidation(fn (array $state, RotateServiceClient $rotateServiceClient, OAuthClient $record) => $secret->issueOnce(function () use ($state, $rotateServiceClient, $record): array {
                         $configuration = ServiceClientSchemas::normalizeConfigurationState($state);
 
-                        [$secret, $replacement] = $rotateServiceClient(
+                        [$plain, $replacement] = $rotateServiceClient(
                             previous: $record,
                             rotatedBy: static::actingUser(),
                             name: $configuration['name'],
@@ -72,16 +70,16 @@ HTML))
                             allowedIps: $configuration['allowed_ips'],
                         );
 
-                        ServiceClientSchemas::storeCredentials(ServiceClientSchemas::SESSION_KEY_ROTATE, $replacement, $secret, [
-                            'record_id' => $record->getKey(),
-                        ]);
-                    }),
+                        return ['id' => $replacement->getKey(), 'secret' => $plain];
+                    }, scope: $record)),
                 Wizard\Step::make('Copy Credentials')
-                    ->schema(ServiceClientSchemas::copyCredentialsStepSchema(ServiceClientSchemas::SESSION_KEY_ROTATE)),
+                    ->schema(ServiceClientSchemas::copyCredentialsStepSchema($secret)),
             ])
             ->modalSubmitAction(fn (Action $action) => ServiceClientSchemas::copyCredentialsSubmitButton($action))
-            ->action(fn () => ServiceClientSchemas::clearCredentials(ServiceClientSchemas::SESSION_KEY_ROTATE))
+            ->action(fn () => $secret->forget())
             ->successNotificationTitle('Replacement Service Client Created')
-            ->visible(fn (OAuthClient $record): bool => ServiceClientSchemas::canShowRotate($record));
+            // An active client, or the one whose rotation is in progress, so the wizard can finish even if
+            // the client changed state meanwhile.
+            ->visible(fn (OAuthClient $record): bool => ServiceClientSchemas::isMutable($record) || $secret->isFor($record));
     }
 }
