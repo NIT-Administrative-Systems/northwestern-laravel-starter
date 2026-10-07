@@ -119,4 +119,15 @@ Extend `App\Filament\Exports\BaseExporter` instead of Filament's `Exporter`. Dec
 
 `ExportAction` already has the label, icon, CSV format and S3 disk set in `FilamentServiceProvider`; pass only `->exporter(...)`.
 
+### Showing a Secret Once
+
+A wizard that issues a credential and shows its secret once uses `App\Filament\Support\RevealOnceSecret`, as the service client, application and personal access token wizards do. Name the wizard with `RevealOnceSecret::for('report_feed:create')`, then:
+
+- `->mountUsing($secret->mountFresh())`, so a cancelled run leaves nothing for the next one to show;
+- `$secret->issueOnce(fn () => ['id' => ..., 'secret' => ...])` in the first step, so stepping back and forward doesn't issue a second credential;
+- `$secret->identifierEntry()` and `$secret->secretEntry()` in the copy step;
+- `->action(fn () => $secret->forget())` on submit.
+
+The secret is kept encrypted in the session between the steps, never in Livewire state.
+
 The panel's Tailwind theme is `resources/css/filament/administration/theme.css`. In tests, call `Filament::setCurrentPanel(AdministrationPanelProvider::ID)` before testing one of its Livewire pages, because the app panel is the default.
