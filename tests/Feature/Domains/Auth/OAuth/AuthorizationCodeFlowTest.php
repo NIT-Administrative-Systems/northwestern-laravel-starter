@@ -14,6 +14,7 @@ use App\Domains\Auth\Listeners\RecordOAuthConnection;
 use App\Domains\Auth\Models\OAuthConnection;
 use App\Domains\Auth\Notifications\ApplicationConnectedNotification;
 use App\Domains\Auth\Passport\GrantableScopeRepository;
+use App\Domains\Auth\Passport\OAuthConsent;
 use App\Domains\User\Models\User;
 use App\Providers\OAuthServiceProvider;
 use Illuminate\Support\Facades\Event;
@@ -33,6 +34,7 @@ use Tests\TestCase;
 #[CoversClass(OAuthServiceProvider::class)]
 #[CoversClass(RecordOAuthConnection::class)]
 #[CoversClass(AuthorizeOAuthConsent::class)]
+#[CoversClass(OAuthConsent::class)]
 #[CoversClass(GrantableScopeRepository::class)]
 #[CoversClass(SwitchOAuthAccountController::class)]
 final class AuthorizationCodeFlowTest extends TestCase

@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domains\Auth\Http\Middleware;
 
-use App\Domains\Api\CredentialAccess;
-use App\Domains\Api\Enums\CredentialKind;
-use App\Domains\Api\Enums\CredentialOperation;
 use App\Domains\Auth\Models\OAuthClient;
+use App\Domains\Auth\Passport\OAuthConsent;
 use App\Domains\User\Models\User;
 use Closure;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -20,20 +18,20 @@ use League\OAuth2\Server\RequestTypes\AuthorizationRequest;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Whether the signed-in person may connect this client, on Passport's consent screen and its
- * approve and deny endpoints, as {@see CredentialAccess} decides for issuing the client's kind:
- * refused while impersonating, for an MCP client without the Use MCP permission, for a
- * deactivated account, and with a 404 while the client's feature is off. Applied to Passport's
- * routes; a guest is left to Passport, which sends them to sign in.
+ * Asks {@see OAuthConsent::authorize()} whether the signed-in person may connect the client, on
+ * Passport's consent screen and its approve and deny endpoints: refused while impersonating, for
+ * an MCP client without the Use MCP permission, for a deactivated account, and with a 404 while
+ * the client's feature is off. Applied to Passport's routes; a guest is left to Passport, which
+ * sends them to sign in.
  *
  * The client is the one Passport acts on: the screen's `client_id` query parameter, and on
  * approve and deny the authorization request Passport kept in the session, never a `client_id`
- * sent with the form. When there's no client to decide on, impersonating is still refused.
+ * sent with the form.
  */
 class AuthorizeOAuthConsent
 {
     public function __construct(
-        private readonly CredentialAccess $credentials,
+        private readonly OAuthConsent $consent,
     ) {
     }
 
@@ -50,13 +48,7 @@ class AuthorizeOAuthConsent
             return $next($request);
         }
 
-        $client = $this->client($request);
-
-        if ($client instanceof OAuthClient) {
-            $this->credentials->decide($user, CredentialOperation::Issue, CredentialKind::of($client), $user)->authorize();
-        } elseif (resolve('impersonate')->isImpersonating()) {
-            throw new AuthorizationException("Applications can't be connected while impersonating someone.");
-        }
+        $this->consent->authorize($user, $this->client($request));
 
         return $next($request);
     }

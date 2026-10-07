@@ -14,6 +14,7 @@ use App\Domains\Auth\Http\Middleware\RefuseMcpTokens;
 use App\Domains\Auth\Http\Middleware\RequireMcpAccess;
 use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\Auth\Models\OAuthConnection;
+use App\Domains\Auth\Passport\OAuthConsent;
 use App\Domains\User\Models\User;
 use App\Mcp\Servers\AppServer;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -33,6 +34,7 @@ use Tests\TestCase;
 #[CoversClass(RequireMcpAccess::class)]
 #[CoversClass(RefuseMcpTokens::class)]
 #[CoversClass(AuthorizeOAuthConsent::class)]
+#[CoversClass(OAuthConsent::class)]
 #[CoversClass(AppServer::class)]
 final class McpFlowTest extends TestCase
 {

@@ -168,6 +168,8 @@ Revoking an application removes everyone's access to it and every connection.
 
 The consent screen offers, and the token carries, only the requested scopes the person holds themselves, so an application can never do more than the person who connected it. The consent screen asks again when an application requests scopes the person hasn't granted, or after its access tokens have expired. An administrator impersonating someone can't approve applications for them. A person sent to the consent screen by an application that was deleted or revoked sees an **Application Not Registered** page instead of Passport's JSON error. No other site can show the consent screen in a frame, so none can trick someone into pressing Approve.
 
+Who may approve, which scopes a connection gets and what the screen shows are decided in `App\Domains\Auth\Passport\OAuthConsent`. Change the screen's wording in `resources/views/public/oauth/authorize.blade.php`, and what it decides in `OAuthConsent`.
+
 **Switching account** signs out of this application and returns to sign-in. With single sign-on, the identity provider may still be signed in and sign the same person straight back in; they may need to sign out of Northwestern first.
 
 ### Connections

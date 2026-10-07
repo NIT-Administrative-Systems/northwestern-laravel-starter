@@ -4,19 +4,17 @@
     and deny endpoints, which return to the application's registered redirect URI. Passport keeps
     the authorization request, with the application's state, in the session.
 
+    What it shows is decided in App\Domains\Auth\Passport\OAuthConsent::screen().
+
     @var \App\Domains\Auth\Models\OAuthClient $client
     @var \Northwestern\SysDev\Chassis\ValueObjects\OAuthRedirectTarget $redirectTarget Where approving sends the person
+    @var bool $unverified The client registered itself, so its name is only its own claim
+    @var bool $seesAccount The token can read the person's account details
     @var \App\Domains\User\Models\User $user
-    @var list<\Laravel\Passport\Scope> $scopes
+    @var list<\Laravel\Passport\Scope> $scopes The requested scopes the token will carry
     @var \Illuminate\Http\Request $request
     @var string $authToken
 --}}
-@php
-    $unverified = $client->isMcpClient();
-    // Passport narrows a token to the scopes its client may have only when it issues it, so the
-    // screen lists only those, never more than the application can actually get.
-    $scopes = array_values(array_filter($scopes, fn($scope) => $client->hasScope($scope->id)));
-@endphp
 
 <x-layouts.public title="Connect {{ $client->name }}">
     <section class="mx-auto max-w-lg px-4 py-12 sm:px-6 lg:py-16">
@@ -68,13 +66,13 @@
                 <h2 class="text-sm font-semibold text-gray-950">What It Can Do as You</h2>
 
                 <ul class="mt-3 space-y-2">
-                    {{-- A self-registered MCP client's token works only on the MCP server, never the REST API's /v1/me. --}}
-                    @unless ($unverified)
+                    {{-- An MCP client's token works only on the MCP server, never the REST API's /v1/me. --}}
+                    @if ($seesAccount)
                         <li class="flex gap-2 text-sm text-gray-700">
                             <x-filament::icon class="text-nu-purple-100 size-5 shrink-0" icon="heroicon-m-check" />
                             See your account details
                         </li>
-                    @endunless
+                    @endif
                     @foreach ($scopes as $scope)
                         <li class="flex gap-2 text-sm text-gray-700">
                             <x-filament::icon class="text-nu-purple-100 size-5 shrink-0" icon="heroicon-m-check" />
