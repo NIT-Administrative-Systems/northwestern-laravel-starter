@@ -67,6 +67,7 @@ Version 3 removes the Bootstrap user interface. Every page now uses one stack, F
 
 ### Changed
 
+- The MCP connection lives in `app/Mcp`: its discovery and registration controllers, the scope on its 401 challenge, and `McpServiceProvider`, which binds the challenge and registers the registration and tool-call rate limits. `RefuseMcpTokens` and `RequireMcpAccess` are one middleware, `RequireTokenAudience`, used with `TokenAudience::Api` on the REST API and `TokenAudience::Mcp` on the MCP server.
 - Only the configured single sign-on provider's routes are registered. With both Online Passport and Entra ID configured, sign-in and logout already used Online Passport; the Entra ID routes are no longer registered alongside it.
 - `CreateSupportTicket` takes the person and the Contact Support form's fields and does the whole submission: it saves the ticket, sends it to the configured ticket system, records the result and falls back to email. `SupportTicketRepository` and `TicketSystemGatewayFactory` are gone; `SupportServiceProvider` chooses the ticket system from `SUPPORT_DRIVER`.
 - The app panel is the default panel, so Filament's generators and Livewire tests target it unless told otherwise. The administration panel stays at `/administration`.

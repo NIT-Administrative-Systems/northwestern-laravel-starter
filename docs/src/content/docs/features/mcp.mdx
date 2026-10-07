@@ -82,7 +82,7 @@ Most clients return from sign-in to `https://` or `http://localhost`. A desktop 
 
 ### Separate from the REST API
 
-An MCP client's token carries only `mcp:use`. The REST API refuses any token with `mcp:use` (`403`), and the MCP server accepts only tokens with it, approved by a person who still has `UseMcp`. Service client, personal access and other application tokens are refused there (`403`).
+An MCP client's token carries only `mcp:use`. The REST API refuses any token with `mcp:use` (`403`), and the MCP server accepts only tokens with it, approved by a person who still has `UseMcp`. Service client, personal access and other application tokens are refused there (`403`). One middleware enforces both sides, `RequireTokenAudience`, with `TokenAudience::Api` on the REST API's routes and `TokenAudience::Mcp` on the server's.
 
 <Aside type="caution" title="Known gap: audience binding">
     The MCP specification asks a server to accept only tokens issued for it,
@@ -95,7 +95,7 @@ An MCP client's token carries only `mcp:use`. The REST API refuses any token wit
 
 ## Adding Tools
 
-The server is `App\Mcp\Servers\AppServer`, and its routes are in `routes/ai.php`. It ships with no tools, so a connected client can do nothing until you add some. A tool acts as the person who connected the client: `$request->user()` is that person, and your permissions and policies apply as they do in the browser.
+The server is `App\Mcp\Servers\AppServer`, and its routes are in `routes/ai.php`. The rest of `app/Mcp` is the connection the starter provides: the discovery documents and client registration (`Http/Controllers`), the scope on the 401 challenge (`Http/Middleware`), and `McpServiceProvider`, which wires them up with the registration and tool-call rate limits. It ships with no tools, so a connected client can do nothing until you add some. A tool acts as the person who connected the client: `$request->user()` is that person, and your permissions and policies apply as they do in the browser.
 
 <Steps>
 

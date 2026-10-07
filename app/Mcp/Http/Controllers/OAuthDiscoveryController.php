@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Domains\Auth\Http\Controllers;
+namespace App\Mcp\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
 use Laravel\Mcp\Server\Registrar;
@@ -12,7 +12,7 @@ use Laravel\Mcp\Server\Registrar;
  * authorization comes from (RFC 9728), and that authorization server's endpoints (RFC 8414).
  * A client starts from the `WWW-Authenticate` header on the server's 401 response.
  */
-class McpDiscoveryController
+class OAuthDiscoveryController
 {
     public function protectedResource(): JsonResponse
     {

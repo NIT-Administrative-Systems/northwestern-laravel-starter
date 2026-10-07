@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Domains\Auth\Enums\TokenAudience;
 use App\Domains\Auth\Http\Middleware\AuthenticatePassportToken;
 use App\Domains\Auth\Http\Middleware\LimitAuthenticatedApiRequests;
 use App\Domains\Auth\Http\Middleware\LogsApiRequests;
-use App\Domains\Auth\Http\Middleware\RefuseMcpTokens;
+use App\Domains\Auth\Http\Middleware\RequireTokenAudience;
 use App\Domains\User\Http\Controllers\Api\V1\UserApiController;
 use Illuminate\Support\Facades\Route;
 use Northwestern\SysDev\Chassis\Http\Middleware\EnsureFeatureEnabled;
@@ -39,7 +40,7 @@ Route::middleware([
     EnsureFeatureEnabled::class . ':api.enabled,404',
     LogsApiRequests::class,
     AuthenticatePassportToken::class,
-    RefuseMcpTokens::class,
+    RequireTokenAudience::for(TokenAudience::Api),
     LimitAuthenticatedApiRequests::class,
 ])->group(function () {
     Route::prefix('v1')->group(function () {

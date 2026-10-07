@@ -6,16 +6,16 @@ namespace Tests\Feature\Domains\Auth\OAuth;
 
 use App\Domains\Auth\Enums\ClientOrigin;
 use App\Domains\Auth\Enums\SystemPermission;
-use App\Domains\Auth\Http\Controllers\McpDiscoveryController;
-use App\Domains\Auth\Http\Controllers\RegisterMcpClientController;
-use App\Domains\Auth\Http\Middleware\AddMcpScopeToChallenge;
 use App\Domains\Auth\Http\Middleware\AuthorizeOAuthConsent;
-use App\Domains\Auth\Http\Middleware\RefuseMcpTokens;
-use App\Domains\Auth\Http\Middleware\RequireMcpAccess;
+use App\Domains\Auth\Http\Middleware\RequireTokenAudience;
 use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\Auth\Models\OAuthConnection;
 use App\Domains\Auth\Passport\OAuthConsent;
 use App\Domains\User\Models\User;
+use App\Mcp\Http\Controllers\OAuthDiscoveryController;
+use App\Mcp\Http\Controllers\RegisterClientController;
+use App\Mcp\Http\Middleware\AddScopeToChallenge;
+use App\Mcp\McpServiceProvider;
 use App\Mcp\Servers\AppServer;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\Concerns\IssuesPersonalAccessTokens;
@@ -28,11 +28,11 @@ use Tests\TestCase;
  * An MCP client connecting the way Claude, VS Code and Cursor do: from the server's 401, through
  * discovery, self-registration and consent, to calling a tool.
  */
-#[CoversClass(AddMcpScopeToChallenge::class)]
-#[CoversClass(McpDiscoveryController::class)]
-#[CoversClass(RegisterMcpClientController::class)]
-#[CoversClass(RequireMcpAccess::class)]
-#[CoversClass(RefuseMcpTokens::class)]
+#[CoversClass(AddScopeToChallenge::class)]
+#[CoversClass(OAuthDiscoveryController::class)]
+#[CoversClass(RegisterClientController::class)]
+#[CoversClass(RequireTokenAudience::class)]
+#[CoversClass(McpServiceProvider::class)]
 #[CoversClass(AuthorizeOAuthConsent::class)]
 #[CoversClass(OAuthConsent::class)]
 #[CoversClass(AppServer::class)]

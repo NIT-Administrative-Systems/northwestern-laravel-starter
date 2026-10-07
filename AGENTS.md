@@ -50,7 +50,8 @@ before pushing again.
 - **The MCP server** (`/mcp`, off unless `MCP_ENABLED`) in `app/Mcp/`: `Servers/AppServer.php`
   and its tools in `Tools/`, with routes in `routes/ai.php`. Generate a tool with
   `php artisan make:mcp-tool`, list it in `AppServer`, and gate it on the person's permissions in
-  `shouldRegister()`.
+  `shouldRegister()`. The rest of `app/Mcp` (discovery, client registration, the 401 challenge and
+  `McpServiceProvider`) is the connection the starter provides.
 - **The administration panel** (`/administration`) in `app/Filament/` outside `App/`, for
   back-office tools. Filament generators target the app panel unless you pass
   `--panel=administration`.
