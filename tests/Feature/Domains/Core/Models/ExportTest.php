@@ -6,7 +6,7 @@ namespace Tests\Feature\Domains\Core\Models;
 
 use App\Domains\Core\Models\Export;
 use App\Domains\User\Models\User;
-use App\Filament\Exports\AuditExporter;
+use App\Filament\Administration\Exports\AuditExporter;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use Tests\TestCase;
 
