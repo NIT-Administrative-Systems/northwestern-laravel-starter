@@ -70,7 +70,7 @@ final class OAuthApplicationActionsTest extends TestCase
         $secret = resolve(RegenerateOAuthApplicationSecret::class)($client, $administrator);
         resolve(RevokeOAuthApplication::class)($client, $administrator);
 
-        $audits = Audit::query()->where('auditable_type', $administrator->getMorphClass())->where('auditable_id', $administrator->getKey())->where('event', 'like', 'application_%')->get()->keyBy('event');
+        $audits = Audit::query()->where('auditable_type', $administrator->getMorphClass())->where('auditable_id', $administrator->getKey())->where('event', 'like', 'application_%')->orderBy('id')->get()->keyBy('event');
         $this->assertSame(['application_registered', 'application_updated', 'application_secret_regenerated', 'application_revoked'], $audits->keys()->all());
         $this->assertFalse($audits['application_updated']->old_values['first_party']);
         $this->assertTrue($audits['application_updated']->new_values['first_party']);
