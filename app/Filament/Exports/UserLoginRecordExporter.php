@@ -6,11 +6,8 @@ namespace App\Filament\Exports;
 
 use App\Domains\User\Models\UserLoginRecord;
 use Filament\Actions\Exports\ExportColumn;
-use Filament\Actions\Exports\Exporter;
-use Filament\Actions\Exports\Models\Export;
-use Illuminate\Support\Str;
 
-class UserLoginRecordExporter extends Exporter
+class UserLoginRecordExporter extends BaseExporter
 {
     protected static ?string $model = UserLoginRecord::class;
 
@@ -47,7 +44,6 @@ class UserLoginRecordExporter extends Exporter
 
             ExportColumn::make('user_agent')
                 ->label('User Agent')
-                ->formatStateUsing(fn (?string $state) => self::sanitizeCsvFormula($state))
                 ->enabledByDefault(false),
 
             ExportColumn::make('created_at')
@@ -56,24 +52,8 @@ class UserLoginRecordExporter extends Exporter
         ];
     }
 
-    private static function sanitizeCsvFormula(?string $value): ?string
+    protected static function recordNoun(): string
     {
-        if ($value === null) {
-            return null;
-        }
-
-        return preg_match('/^[=+\-@\t\r]/', $value) ? "'" . $value : $value;
-    }
-
-    public static function getCompletedNotificationBody(Export $export): string
-    {
-        $count = number_format($export->successful_rows);
-        $body = sprintf('Exported %s login %s.', $count, Str::plural('record', $export->successful_rows));
-
-        if (($failedRowsCount = $export->getFailedRowsCount()) !== 0) {
-            $body .= sprintf(' %s %s failed.', number_format($failedRowsCount), Str::plural('row', $failedRowsCount));
-        }
-
-        return $body;
+        return 'login record';
     }
 }

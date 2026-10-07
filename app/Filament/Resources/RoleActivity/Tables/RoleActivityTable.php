@@ -275,9 +275,6 @@ class RoleActivityTable
             ])
             ->toolbarActions([
                 ExportAction::make()
-                    ->label('Export')
-                    ->icon(Heroicon::OutlinedArrowDownTray)
-                    ->color('gray')
                     ->exporter(RoleActivityExporter::class),
             ])
             ->emptyStateHeading('No Role Activity')

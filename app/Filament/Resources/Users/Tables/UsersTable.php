@@ -13,7 +13,6 @@ use Filament\Actions\Action;
 use Filament\Actions\ExportAction;
 use Filament\Actions\ViewAction;
 use Filament\Support\Enums\FontFamily;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -148,9 +147,6 @@ class UsersTable
             ])
             ->toolbarActions([
                 ExportAction::make()
-                    ->label('Export')
-                    ->icon(Heroicon::OutlinedArrowDownTray)
-                    ->color('gray')
                     ->exporter(UserExporter::class),
             ])
             ->emptyStateHeading('No Users Found')

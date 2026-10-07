@@ -12,6 +12,7 @@ use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -70,6 +71,9 @@ class FilamentServiceProvider extends ServiceProvider
 
         ExportAction::configureUsing(
             fn (ExportAction $action) => $action
+                ->label('Export')
+                ->icon(Heroicon::OutlinedArrowDownTray)
+                ->color('gray')
                 ->fileDisk('s3')
                 ->formats([ExportFormat::Csv])
         );
