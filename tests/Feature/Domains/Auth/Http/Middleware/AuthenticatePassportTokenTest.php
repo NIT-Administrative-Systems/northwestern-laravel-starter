@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\Auth\Http\Middleware;
 
-use App\Domains\Auth\Enums\RoleTypeEnum;
-use App\Domains\Auth\Enums\SystemPermission;
+use App\Domains\Access\Enums\RoleTypeEnum;
+use App\Domains\Access\Enums\SystemPermission;
+use App\Domains\Access\Models\Role;
 use App\Domains\Auth\Http\Middleware\AuthenticatePassportToken;
 use App\Domains\Auth\Models\OAuthConnection;
-use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Context;

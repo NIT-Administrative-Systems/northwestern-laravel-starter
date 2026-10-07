@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Administration\Clusters\ApiCluster\Resources\ApiRequestLogs;
 
-use App\Domains\Auth\Enums\SystemPermission;
+use App\Domains\Access\Enums\SystemPermission;
 use App\Domains\Auth\Models\ApiRequestLog;
 use App\Filament\Administration\Clusters\ApiCluster;
 use App\Filament\Administration\Clusters\ApiCluster\Resources\ApiRequestLogs\Pages\ListApiRequestLogs;

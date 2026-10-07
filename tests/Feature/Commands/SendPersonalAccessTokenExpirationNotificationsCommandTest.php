@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Commands;
 
 use App\Console\Commands\SendPersonalAccessTokenExpirationNotificationsCommand;
-use App\Domains\Auth\Enums\SystemPermission;
+use App\Domains\Access\Enums\SystemPermission;
 use App\Domains\Auth\Mail\PersonalAccessTokenExpirationNotification;
 use App\Domains\User\Data\UserPreferences;
 use App\Domains\User\Models\User;

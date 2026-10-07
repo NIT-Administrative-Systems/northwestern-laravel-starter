@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Filament\App\Clusters\AccountCluster\Pages;
 
+use App\Domains\Access\Enums\SystemPermission;
 use App\Domains\Auth\Enums\CredentialStatus;
-use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Enums\TokenExpiration;
 use App\Domains\Auth\Models\OAuthToken;
 use App\Domains\User\Models\User;

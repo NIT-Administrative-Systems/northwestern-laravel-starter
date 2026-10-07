@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Administration\Exports;
 
-use App\Domains\Auth\Models\Role;
+use App\Domains\Access\Models\Role;
 use App\Filament\Support\BaseExporter;
 use Filament\Actions\Exports\ExportColumn;
 

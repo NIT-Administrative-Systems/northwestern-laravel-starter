@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\Api;
 
+use App\Domains\Access\Enums\SystemPermission;
 use App\Domains\Api\ApiScopes;
-use App\Domains\Auth\Enums\SystemPermission;
 use Laravel\Mcp\Server\Registrar;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Symfony\Component\Yaml\Yaml;

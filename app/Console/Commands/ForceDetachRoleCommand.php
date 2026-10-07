@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Domains\Auth\Enums\RoleModificationOrigin;
-use App\Domains\Auth\Models\Role;
+use App\Domains\Access\Enums\RoleModificationOrigin;
+use App\Domains\Access\Models\Role;
 use App\Domains\User\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Console\PromptsForMissingInput;

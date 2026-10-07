@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\Auth\Http\Middleware;
 
-use App\Domains\Auth\Enums\SystemPermission;
+use App\Domains\Access\Enums\SystemPermission;
 use App\Domains\Auth\Http\Middleware\LogsApiRequests;
 use App\Domains\Auth\Models\ApiRequestLog;
 use App\Domains\User\Models\User;

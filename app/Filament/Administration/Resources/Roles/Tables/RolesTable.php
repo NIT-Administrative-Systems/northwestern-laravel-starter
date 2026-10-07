@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Administration\Resources\Roles\Tables;
 
-use App\Domains\Auth\Enums\SystemPermission;
-use App\Domains\Auth\Models\Role;
+use App\Domains\Access\Enums\SystemPermission;
+use App\Domains\Access\Models\Role;
 use App\Filament\Administration\Exports\RoleExporter;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;

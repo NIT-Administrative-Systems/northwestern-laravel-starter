@@ -1,0 +1,86 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Database\Factories\Domains\Access\Models;
+
+use App\Domains\Access\Enums\RoleTypeEnum;
+use App\Domains\Access\Enums\SystemPermission;
+use App\Domains\Access\Models\Permission;
+use App\Domains\Access\Models\Role;
+use App\Domains\Access\Models\RoleType;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+/**
+ * @extends Factory<Role>
+ */
+class RoleFactory extends Factory
+{
+    protected $model = Role::class;
+
+    /**
+     * @var array<string, int>
+     */
+    protected array $roleTypes = [];
+
+    public function definition(): array
+    {
+        /** @phpstan-ignore-next-line  */
+        return [
+            'name' => fake()->unique()->slug(),
+            'role_type_id' => $this->getRoleType(),
+        ];
+    }
+
+    /**
+     * @param  SystemPermission[]  $permissions
+     */
+    public function hasPermissions(array $permissions): static
+    {
+        return $this->afterCreating(function (Role $role) use ($permissions) {
+            foreach ($permissions as $permission) {
+                $role->givePermissionTo(
+                    Permission::whereName($permission)->firstOrFail()
+                );
+            }
+        });
+    }
+
+    public function systemManaged(): static
+    {
+        return $this->forRoleType(RoleTypeEnum::SystemManaged);
+    }
+
+    public function assignmentLocked(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'assignment_locked' => true,
+        ]);
+    }
+
+    public function forRoleType(RoleTypeEnum $roleType): static
+    {
+        $name = fake()->unique()->slug() . '-' . $roleType->value;
+
+        return $this->state(function () use ($roleType, $name) {
+            return [
+                'name' => $name,
+                'role_type_id' => $this->getRoleType($roleType),
+            ];
+        });
+    }
+
+    protected function getRoleType(?RoleTypeEnum $type = null): int
+    {
+        if (! $this->roleTypes) {
+            /** @phpstan-ignore-next-line */
+            $this->roleTypes = RoleType::all()->pluck('id', 'slug.value')->all();
+        }
+
+        if (! $type instanceof RoleTypeEnum) {
+            return fake()->randomElement($this->roleTypes);
+        }
+
+        return $this->roleTypes[$type->value];
+    }
+}

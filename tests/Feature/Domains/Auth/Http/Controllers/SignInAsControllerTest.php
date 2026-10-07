@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\Auth\Http\Controllers;
 
-use App\Domains\Auth\Enums\RoleTypeEnum;
+use App\Domains\Access\Enums\RoleTypeEnum;
+use App\Domains\Access\Models\Role;
 use App\Domains\Auth\Http\Controllers\SignInAsController;
-use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\User;
 use App\Providers\Filament\AppPanelProvider;
 use Illuminate\Foundation\Application;

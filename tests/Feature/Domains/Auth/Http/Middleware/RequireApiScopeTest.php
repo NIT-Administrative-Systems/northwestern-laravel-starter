@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\Auth\Http\Middleware;
 
-use App\Domains\Auth\Enums\SystemPermission;
-use App\Domains\Auth\Enums\SystemRole;
+use App\Domains\Access\Enums\SystemPermission;
+use App\Domains\Access\Enums\SystemRole;
+use App\Domains\Access\Models\Role;
 use App\Domains\Auth\Http\Middleware\AuthenticatePassportToken;
 use App\Domains\Auth\Http\Middleware\RequireApiScope;
-use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;

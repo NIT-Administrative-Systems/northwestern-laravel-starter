@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Filament\Support;
 
-use App\Domains\Auth\Models\Role;
+use App\Domains\Access\Models\Role;
 use App\Domains\User\Models\User;
 use App\Filament\Administration\Exports\RoleExporter;
 use App\Filament\Administration\Exports\UserExporter;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Api;
 
-use App\Domains\Auth\Enums\SystemPermission;
+use App\Domains\Access\Enums\SystemPermission;
 use Laravel\Mcp\Server\Registrar;
 
 /**

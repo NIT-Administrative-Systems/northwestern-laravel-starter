@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Http\Middleware;
 
-use App\Domains\Auth\Enums\RoleModificationOrigin;
-use App\Domains\Auth\Enums\SystemRole;
-use App\Domains\Auth\Models\Role;
+use App\Domains\Access\Enums\RoleModificationOrigin;
+use App\Domains\Access\Enums\SystemRole;
+use App\Domains\Access\Models\Role;
 use App\Domains\User\Models\User;
 use App\Http\Middleware\EnvironmentLockdown;
 use Illuminate\Support\Facades\Route;

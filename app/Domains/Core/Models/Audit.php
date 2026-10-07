@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domains\Core\Models;
 
+use App\Domains\Access\Models\Concerns\AuditsRoles;
 use App\Domains\Core\Enums\AuditEvent;
-use App\Domains\User\Models\Concerns\AuditsRoles;
 use App\Domains\User\Models\User;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Attributes\Scope;

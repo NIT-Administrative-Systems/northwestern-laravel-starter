@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\Auth\Actions\Applications;
 
+use App\Domains\Access\Enums\SystemPermission;
 use App\Domains\Auth\Actions\Applications\DisconnectApplication;
 use App\Domains\Auth\Actions\Applications\RegenerateOAuthApplicationSecret;
 use App\Domains\Auth\Actions\Applications\RegisterOAuthApplication;
@@ -11,7 +12,6 @@ use App\Domains\Auth\Actions\Applications\RevokeOAuthApplication;
 use App\Domains\Auth\Actions\Applications\UpdateOAuthApplication;
 use App\Domains\Auth\Enums\ClientOrigin;
 use App\Domains\Auth\Enums\CredentialStatus;
-use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\Auth\Models\OAuthConnection;
 use App\Domains\Core\Models\Audit;

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\Auth\OAuth;
 
+use App\Domains\Access\Enums\SystemPermission;
 use App\Domains\Auth\Enums\ClientOrigin;
-use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Http\Middleware\AuthorizeOAuthConsent;
 use App\Domains\Auth\Http\Middleware\RequireTokenAudience;
 use App\Domains\Auth\Models\OAuthClient;

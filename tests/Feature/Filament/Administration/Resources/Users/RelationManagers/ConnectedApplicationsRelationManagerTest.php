@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Filament\Administration\Resources\Users\RelationManagers;
 
-use App\Domains\Auth\Enums\SystemPermission;
+use App\Domains\Access\Enums\SystemPermission;
 use App\Domains\Auth\Models\OAuthConnection;
 use App\Domains\Core\Models\Audit;
 use App\Domains\User\Models\User;

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\Auth\OAuth;
 
+use App\Domains\Access\Enums\SystemPermission;
 use App\Domains\Auth\Actions\Applications\DisconnectApplication;
 use App\Domains\Auth\Actions\Applications\RegisterOAuthApplication;
 use App\Domains\Auth\Actions\Applications\RevokeOAuthApplication;
-use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Http\Controllers\SwitchOAuthAccountController;
 use App\Domains\Auth\Http\Middleware\AuthorizeOAuthConsent;
 use App\Domains\Auth\Listeners\RecordOAuthConnection;

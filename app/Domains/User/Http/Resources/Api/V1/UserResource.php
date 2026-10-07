@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domains\User\Http\Resources\Api\V1;
 
+use App\Domains\Access\Http\Resources\Api\V1\RoleResource;
 use App\Domains\Auth\Enums\AuthType;
-use App\Domains\Auth\Http\Resources\Api\V1\RoleResource;
 use App\Domains\User\Enums\Affiliation;
 use App\Domains\User\Models\User;
 use Illuminate\Http\Request;

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Domains\User\Actions;
 
+use App\Domains\Access\Enums\RoleModificationOrigin;
+use App\Domains\Access\Enums\SystemRole;
+use App\Domains\Access\Models\Role;
 use App\Domains\Auth\Enums\AuthType;
-use App\Domains\Auth\Enums\RoleModificationOrigin;
-use App\Domains\Auth\Enums\SystemRole;
-use App\Domains\Auth\Models\Role;
 use App\Domains\User\Actions\Directory\FindOrUpdateUserFromDirectory;
 use App\Domains\User\Models\User;
 use Illuminate\Database\UniqueConstraintViolationException;

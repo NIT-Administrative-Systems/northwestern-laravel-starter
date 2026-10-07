@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Domains\Api;
 
+use App\Domains\Access\Enums\SystemPermission;
 use App\Domains\Api\Enums\AccessRefusal;
 use App\Domains\Api\Enums\CredentialKind;
 use App\Domains\Api\Enums\CredentialOperation;
 use App\Domains\Api\ValueObjects\AccessDecision;
 use App\Domains\Auth\Enums\AuthType;
-use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\User\Models\User;
 use Laravel\Mcp\Server\Registrar;
 

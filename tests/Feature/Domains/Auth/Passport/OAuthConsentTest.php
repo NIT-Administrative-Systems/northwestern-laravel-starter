@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\Auth\Passport;
 
+use App\Domains\Access\Enums\SystemPermission;
 use App\Domains\Auth\Actions\Applications\RegisterOAuthApplication;
-use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Passport\OAuthConsent;
 use App\Domains\User\Models\User;
 use PHPUnit\Framework\Attributes\CoversClass;

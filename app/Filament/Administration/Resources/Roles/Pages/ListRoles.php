@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Administration\Resources\Roles\Pages;
 
-use App\Domains\Auth\Enums\SystemPermission;
+use App\Domains\Access\Enums\SystemPermission;
 use App\Filament\Administration\Resources\RoleActivity\RoleActivityResource;
 use App\Filament\Administration\Resources\Roles\RoleResource;
 use Filament\Actions\Action;

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Filament\Administration\Resources\Users\RelationManagers;
 
+use App\Domains\Access\Enums\SystemPermission;
 use App\Domains\Auth\Enums\CredentialStatus;
-use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Core\Models\Audit;
 use App\Domains\User\Models\User;
 use App\Filament\Administration\Resources\Users\Pages\ViewUser;

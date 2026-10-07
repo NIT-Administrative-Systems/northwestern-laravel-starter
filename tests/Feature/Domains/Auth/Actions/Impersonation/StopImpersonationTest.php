@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\Auth\Actions\Impersonation;
 
+use App\Domains\Access\Enums\RoleTypeEnum;
+use App\Domains\Access\Models\Role;
 use App\Domains\Auth\Actions\Impersonation\StartImpersonation;
 use App\Domains\Auth\Actions\Impersonation\StopImpersonation;
-use App\Domains\Auth\Enums\RoleTypeEnum;
-use App\Domains\Auth\Models\Role;
 use App\Domains\User\Models\User;
 use Illuminate\Support\Facades\Event;
 use Lab404\Impersonate\Events\LeaveImpersonation;

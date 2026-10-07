@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Administration\Resources\Users\Actions;
 
+use App\Domains\Access\Enums\SystemPermission;
 use App\Domains\Auth\Enums\SignInMethod;
-use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\SignIn;
 use App\Domains\User\Actions\Local\CreateLocalUser;
 use Filament\Actions\Action;

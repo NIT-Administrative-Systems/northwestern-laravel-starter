@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Filament\Administration\Resources\Users\Actions;
 
+use App\Domains\Access\Enums\SystemPermission;
 use App\Domains\Auth\Enums\AuthType;
-use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Enums\TokenExpiration;
 use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\User\Models\User;

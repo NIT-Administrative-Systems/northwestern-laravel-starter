@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Administration\Resources\Announcements\Schemas;
 
-use App\Domains\Auth\Models\Role;
+use App\Domains\Access\Models\Role;
 use App\Domains\Support\Enums\AnnouncementAudience;
 use App\Domains\Support\Enums\AnnouncementSeverity;
 use App\Domains\Support\Enums\AnnouncementStatus;

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\Support\Models;
 
-use App\Domains\Auth\Enums\SystemRole;
-use App\Domains\Auth\Models\Role;
+use App\Domains\Access\Enums\SystemRole;
+use App\Domains\Access\Models\Role;
 use App\Domains\Support\Enums\AnnouncementSeverity;
 use App\Domains\Support\Enums\AnnouncementStatus;
 use App\Domains\Support\Models\Announcement;

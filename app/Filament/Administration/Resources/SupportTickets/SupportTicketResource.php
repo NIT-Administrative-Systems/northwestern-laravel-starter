@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Administration\Resources\SupportTickets;
 
-use App\Domains\Auth\Enums\SystemPermission;
+use App\Domains\Access\Enums\SystemPermission;
 use App\Domains\Support\Models\SupportTicket;
 use App\Filament\Administration\Navigation\AdministrationNavGroup;
 use App\Filament\Administration\Resources\SupportTickets\Schemas\SupportTicketInfolist;

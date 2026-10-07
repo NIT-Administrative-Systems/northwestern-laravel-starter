@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\Auth\Actions\Api;
 
+use App\Domains\Access\Enums\SystemPermission;
 use App\Domains\Auth\Actions\Api\CreateServiceClient;
 use App\Domains\Auth\Actions\Api\RevokeServiceClient;
 use App\Domains\Auth\Actions\Api\RotateServiceClient;
 use App\Domains\Auth\Enums\CredentialStatus;
-use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\User\Models\User;
 use InvalidArgumentException;
