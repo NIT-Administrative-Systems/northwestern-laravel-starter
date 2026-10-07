@@ -26,7 +26,7 @@ class AuditsRelationManager extends RelationManager
     {
         /** @var User $ownerRecord */
         return $ownerRecord->auth_type !== AuthType::API
-            && auth()->user()?->hasPermissionTo(SystemPermission::ViewAuditLogs);
+            && (bool) auth()->user()?->can(SystemPermission::ViewAuditLogs);
     }
 
     public static function getTabComponent(Model $ownerRecord, string $pageClass): Tab

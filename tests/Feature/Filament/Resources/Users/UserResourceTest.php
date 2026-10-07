@@ -6,7 +6,12 @@ namespace Tests\Feature\Filament\Resources\Users;
 
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\User\Models\User;
+use App\Filament\Resources\UserLoginRecords\UserLoginRecordResource;
 use App\Filament\Resources\Users\Pages\ListUsers;
+use App\Filament\Resources\Users\Pages\ViewUser;
+use App\Filament\Resources\Users\RelationManagers\AuditsRelationManager;
+use App\Filament\Resources\Users\RelationManagers\LoginRecordsRelationManager;
+use App\Filament\Resources\Users\RelationManagers\RoleActivityRelationManager;
 use App\Filament\Resources\Users\UserResource;
 use App\Providers\Filament\AdministrationPanelProvider;
 use Filament\Facades\Filament;
@@ -50,5 +55,24 @@ final class UserResourceTest extends TestCase
         $this->actingAs($administrator);
 
         Livewire::test(ListUsers::class)->assertCanSeeTableRecords([$apiUser, $person]);
+    }
+
+    // Manage All grants every permission through Gate::before, which a direct permission check skips.
+    public function test_manage_all_opens_the_history_tabs_and_sign_in_records(): void
+    {
+        $superAdministrator = User::factory()->affiliate()->create();
+        $superAdministrator->givePermissionTo(SystemPermission::ManageAll);
+        $person = User::factory()->create();
+        $this->actingAs($superAdministrator);
+
+        $this->assertTrue(AuditsRelationManager::canViewForRecord($person, ViewUser::class));
+        $this->assertTrue(RoleActivityRelationManager::canViewForRecord($person, ViewUser::class));
+        $this->assertTrue(LoginRecordsRelationManager::canViewForRecord($person, ViewUser::class));
+        $this->assertTrue(UserLoginRecordResource::canAccess());
+
+        $this->actingAs(User::factory()->affiliate()->create());
+
+        $this->assertFalse(AuditsRelationManager::canViewForRecord($person, ViewUser::class));
+        $this->assertFalse(UserLoginRecordResource::canAccess());
     }
 }

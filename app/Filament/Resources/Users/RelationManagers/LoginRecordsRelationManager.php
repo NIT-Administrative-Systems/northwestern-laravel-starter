@@ -22,7 +22,7 @@ class LoginRecordsRelationManager extends RelationManager
     {
         /** @var User $ownerRecord */
         return $ownerRecord->auth_type !== AuthType::API
-            && auth()->user()?->hasPermissionTo(SystemPermission::ViewLoginRecords);
+            && (bool) auth()->user()?->can(SystemPermission::ViewLoginRecords);
     }
 
     public static function getTabComponent(Model $ownerRecord, string $pageClass): Tab
