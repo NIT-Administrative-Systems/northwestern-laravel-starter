@@ -14,16 +14,14 @@ use PHPUnit\Framework\TestCase;
 final class AuditEventTest extends TestCase
 {
     /**
-     * @return array<string, array{AuditEvent, string}>
+     * @return \Iterator<string, array{AuditEvent, string}>
      */
-    public static function labelProvider(): array
+    public static function labelProvider(): \Iterator
     {
-        return [
-            'an Eloquent event' => [AuditEvent::Created, 'Created'],
-            'a custom event' => [AuditEvent::PermissionsModified, 'Permissions Modified'],
-            'an acronym' => [AuditEvent::ServiceClientIpRestrictionsUpdated, 'Service Client IP Restrictions Updated'],
-            'another acronym' => [AuditEvent::McpClientRevoked, 'MCP Client Revoked'],
-        ];
+        yield 'an Eloquent event' => [AuditEvent::Created, 'Created'];
+        yield 'a custom event' => [AuditEvent::PermissionsModified, 'Permissions Modified'];
+        yield 'an acronym' => [AuditEvent::ServiceClientIpRestrictionsUpdated, 'Service Client IP Restrictions Updated'];
+        yield 'another acronym' => [AuditEvent::McpClientRevoked, 'MCP Client Revoked'];
     }
 
     #[DataProvider('labelProvider')]
