@@ -1,0 +1,218 @@
+# MCP Server
+
+The starter can run a [Model Context Protocol](https://modelcontextprotocol.io/) (MCP) server, so AI clients such as Claude and VS Code can use the application’s tools. A client connects as the person using it: the person signs in and approves it on the same consent screen as any [connected application](https://laravel-starter.entapp.northwestern.edu/features/api/#connected-applications), and every tool works within that person’s permissions.
+
+It is built on [Laravel MCP](https://github.com/laravel/mcp) and the starter’s [Passport API](https://laravel-starter.entapp.northwestern.edu/features/api/), and it is off by default.
+
+## Turning It On
+
+1. Set `MCP_ENABLED=true`.
+2. Give the people who should connect AI clients the **Use MCP** permission (`UseMcp`). Of the default roles, only Super Administrator has it.
+3. [Add the tools](https://laravel-starter.entapp.northwestern.edu/features/mcp/#adding-tools) your application should offer. The server ships with none.
+
+While `MCP_ENABLED` is `false`, the server, its discovery documents and client registration all answer `404`, and no self-registered client can be approved.
+
+Settings
+
+[#](https://laravel-starter.entapp.northwestern.edu/features/mcp/#prop-mcp-enabled)`MCP_ENABLED``false`
+
+Turns the MCP server on
+
+[#](https://laravel-starter.entapp.northwestern.edu/features/mcp/#prop-mcp-custom-schemes)`MCP_CUSTOM_SCHEMES`
+
+URI schemes desktop clients may redirect to after sign-in, comma-separated. Most clients don’t need one; see below
+
+[#](https://laravel-starter.entapp.northwestern.edu/features/mcp/#prop-mcp-registrations-per-hour)`MCP_REGISTRATIONS_PER_HOUR``20`
+
+Client registrations allowed per IP address per hour
+
+[#](https://laravel-starter.entapp.northwestern.edu/features/mcp/#prop-mcp-tool-calls-per-minute)`MCP_TOOL_CALLS_PER_MINUTE``60`
+
+Tool calls allowed per person per minute
+
+## Connecting a Client
+
+The server is at `https://your-app.example.edu/mcp`. Add it to the client as a remote (Streamable HTTP) server with OAuth, and the client does the rest: it registers itself, opens the browser for the person to sign in and approve it, and stores the token.
+
+* **Claude Code**: `claude mcp add --transport http my-app https://your-app.example.edu/mcp`, then `/mcp` in Claude Code to sign in.
+
+* **VS Code**: add the server to `.vscode/mcp.json`:
+
+  ```json
+  {
+      "servers": {
+          "my-app": {
+              "type": "http",
+              "url": "https://your-app.example.edu/mcp"
+          }
+      }
+  }
+  ```
+
+* **Claude (claude.ai and Claude Desktop)**: add a custom connector with the server URL. Claude connects from Anthropic’s servers, so the application must be reachable from the internet.
+
+* **MCP Inspector**: `npx @modelcontextprotocol/inspector`, then connect to the URL with the Streamable HTTP transport.
+
+Any client that supports MCP’s OAuth sign-in can connect the same way. A client that can only send a fixed token, such as some IDE assistants, can’t sign in itself; a local proxy such as [`mcp-remote`](https://www.npmjs.com/package/mcp-remote) can do the sign-in for it.
+
+Most clients return from sign-in to `https://` or `http://localhost`. A desktop app that returns through its own URI scheme (`myapp://…`) needs that scheme listed in `MCP_CUSTOM_SCHEMES`.
+
+## How a Client Connects
+
+1. The client calls `POST /mcp` without a token. The server answers `401` with a `WWW-Authenticate` header pointing at its [protected resource metadata](https://datatracker.ietf.org/doc/html/rfc9728), `/.well-known/oauth-protected-resource/mcp`, and naming the scope to request, `mcp:use`. The same document is also served at `/.well-known/oauth-protected-resource` for clients that look there.
+2. That document names the application as the authorization server; `/.well-known/oauth-authorization-server` lists its endpoints.
+3. The client registers itself at `POST /oauth/register` ([dynamic client registration](https://datatracker.ietf.org/doc/html/rfc7591)). Its redirect URIs must use HTTPS, HTTP to the person’s own computer (`localhost`, `127.0.0.1` or `[::1]`), or one of `MCP_CUSTOM_SCHEMES`. It gets a public client, with no secret, that may ask only for the `mcp:use` scope.
+4. The person signs in and sees the consent screen, which marks the client as an **unverified AI client**: a client names itself, so its name is only a claim. The screen shows where approving returns the person, which they can check, and the plain (punycode) form of an internationalized domain, which can imitate another site’s name. Only people with `UseMcp` can approve it.
+5. The client exchanges the code, with PKCE, for an access token that lasts one hour and a refresh token that lasts 30 days, and calls the server with it.
+
+### Separate from the REST API
+
+An MCP client’s token carries only `mcp:use`. The REST API refuses any token with `mcp:use` (`403`), and the MCP server accepts only tokens with it, approved by a person who still has `UseMcp`. Service client, personal access and other application tokens are refused there (`403`). One middleware enforces both sides, `RequireTokenAudience`, with `TokenAudience::Api` on the REST API’s routes and `TokenAudience::Mcp` on the server’s.
+
+> **Known gap: audience binding**
+>
+> The MCP specification asks a server to accept only tokens issued for it, using [resource indicators](https://datatracker.ietf.org/doc/html/rfc8707) and the token’s audience. Laravel Passport doesn’t yet bind a token’s audience to a resource, so the starter separates MCP from the REST API with the `mcp:use` scope instead. Client ID Metadata Documents aren’t supported for the same reason: Passport doesn’t accept a URL as a client ID yet.
+
+## Adding Tools
+
+The server is `App\Mcp\Servers\AppServer`, and its routes are in `routes/ai.php`. The rest of `app/Mcp` is the connection the starter provides: the discovery documents and client registration (`Http/Controllers`), the scope on the 401 challenge (`Http/Middleware`), and `McpServiceProvider`, which wires them up with the registration and tool-call rate limits. It ships with no tools, so a connected client can do nothing until you add some. A tool acts as the person who connected the client: `$request->user()` is that person, and your permissions and policies apply as they do in the browser.
+
+1. Generate a tool with `php artisan make:mcp-tool SearchUsers`, which creates `app/Mcp/Tools/SearchUsers.php`.
+2. List it in `AppServer::$tools`.
+3. Hide it from people who may not use it, in its `shouldRegister()` method. A hidden tool isn’t listed and can’t be called.
+
+Design a tool for what an AI client should see, not for what’s easiest to return:
+
+* **Return only what’s needed.** Choose the fields, never whole models.
+* **Page large results** with a cursor the client passes back, and keep each query bounded.
+* **Declare an `outputSchema()`** and return `Response::structured()`, so clients get typed results. Write a nullable field as `anyOf` with a null branch: some clients reject a `type` array such as `["string", "null"]`.
+* **Annotate read-only tools** with `#[IsReadOnly]`, so clients can call them without asking every time.
+* **Inject services into `handle()`**, not the constructor: Laravel MCP’s test helpers create tools without the container.
+
+This tool finds people by name, NetID or email for anyone with **View Users**, 25 at a time:
+
+app/Mcp/Tools/SearchUsers.php
+
+```php
+#[Description('Find people by name, NetID or email. Returns up to 25 at a time; pass next_cursor back as cursor for the next page.')]
+#[IsReadOnly]
+class SearchUsers extends Tool
+{
+    public function shouldRegister(): bool
+    {
+        return (bool) auth()->user()?->can(SystemPermission::ViewUsers);
+    }
+
+
+    public function handle(Request $request, UserSearch $search): ResponseFactory
+    {
+        $validated = $request->validate([
+            'query' => ['required', 'string', 'min:2', 'max:100'],
+            'cursor' => ['nullable', 'string'],
+        ]);
+
+
+        /** @var UserBuilder<User> $people */
+        $people = User::query()->where('auth_type', '!=', AuthType::API);
+
+
+        $page = $search->apply($people, $validated['query'])
+            ->orderBy('id')
+            ->cursorPaginate(25, ['id', 'first_name', 'last_name', 'email'], 'cursor', $validated['cursor'] ?? null);
+
+
+        return Response::structured([
+            'users' => $page->getCollection()->map(fn (User $user): array => [
+                'name' => $user->full_name,
+                'email' => $user->email,
+            ])->values()->all(),
+            'next_cursor' => $page->nextCursor()?->encode(),
+        ]);
+    }
+
+
+    public function schema(JsonSchema $schema): array
+    {
+        return [
+            'query' => $schema->string()->description('A name, NetID or email address, or part of one.')->required(),
+            'cursor' => $schema->string()->description('next_cursor from the previous page.'),
+        ];
+    }
+
+
+    public function outputSchema(JsonSchema $schema): array
+    {
+        return [
+            'users' => $schema->array()->items($schema->object([
+                'name' => $schema->string()->required(),
+                'email' => $schema->anyOf([$schema->string()])->nullable()->required(),
+            ]))->required(),
+            'next_cursor' => $schema->anyOf([$schema->string()])->nullable()->required(),
+        ];
+    }
+}
+```
+
+Test a tool through the server, as the person who would call it:
+
+```php
+AppServer::actingAs($viewer)->tool(SearchUsers::class, ['query' => 'willie'])->assertHasNoErrors();
+AppServer::actingAs($someoneElse)->tools()->assertNotRegistered(SearchUsers::class);
+```
+
+See the [Laravel MCP documentation](https://laravel.com/docs/mcp) for resources, prompts and more testing helpers.
+
+## Managing Clients
+
+**API** → **MCP Clients** in the administration panel lists the clients that registered themselves, with how many people have them connected and when they were last used. Revoking one ends everyone’s access to it. It’s shown to people with `ManageApiAccess`, even while MCP is off, so its clients can still be revoked.
+
+People see their MCP clients on their Account area’s [Connected Applications](https://laravel-starter.entapp.northwestern.edu/building/app-panel/#connected-applications) page, labelled as AI clients whose names aren’t verified, and can disconnect them there.
+
+* `mcp:prune-clients` runs daily. It deletes a client nobody connected within 24 hours of registering, and revokes one nobody has used for 90 days.
+* `oauth:revoke-ineligible` runs hourly in production and at noon on weekdays elsewhere. It disconnects the MCP clients of people who lost `UseMcp`. Their tokens stop working at once, before it runs: the server answers `401`, the client signs in again, and the consent screen refuses it.
+
+### Reconnecting a Client
+
+A client keeps the client ID it registered, and can’t connect with it once that registration is gone: deleted by `mcp:prune-clients` because nobody connected within 24 hours, revoked after 90 days unused or by an administrator, or deleted by `db:rebuild` locally. When the client sends the person to sign in, they see an **Application Not Registered** page instead of the consent screen, telling them to remove the server from the client and add it again, so it registers anew.
+
+Disconnecting doesn’t do this. The client stays registered, and connecting again shows the consent screen.
+
+## Logging and Limits
+
+MCP requests are logged with the [API’s requests](https://laravel-starter.entapp.northwestern.edu/features/api/#request-logging), with three more fields, because a failed tool call still answers `200`:
+
+[#](https://laravel-starter.entapp.northwestern.edu/features/mcp/#prop-mcp-method)`mcp_method`
+
+The JSON-RPC method, such as `tools/call`
+
+[#](https://laravel-starter.entapp.northwestern.edu/features/mcp/#prop-mcp-tool)`mcp_tool`
+
+The tool called
+
+[#](https://laravel-starter.entapp.northwestern.edu/features/mcp/#prop-mcp-outcome)`mcp_outcome`
+
+`ok`, `error` for a JSON-RPC error, or `tool_error` for a tool that reported failure
+
+A tool’s arguments and results are never logged.
+
+The server, discovery and registration share the API’s per-IP limit. Registration is also limited per IP address (`MCP_REGISTRATIONS_PER_HOUR`), and tool calls per person (`MCP_TOOL_CALLS_PER_MINUTE`).
+
+Browser-based clients may call the server, discovery, registration and `/oauth/token` from any origin, without credentials (`cors.open_paths` in `config/cors.php`).
+
+## Local Development
+
+Turn MCP on in `.env` and give yourself `UseMcp`. Clients written in Node, such as Claude Code and MCP Inspector, don’t trust Herd’s local certificate authority, so start them with it:
+
+```bash
+NODE_EXTRA_CA_CERTS="$HOME/Library/Application Support/Herd/config/valet/CA/LaravelValetCASelfSigned.pem" claude
+```
+
+That covers a client started from the terminal. A client running inside an editor opened from the Dock or Finder, such as an MCP extension in VS Code or PhpStorm, doesn’t see the terminal’s variables. Set it for apps you open next, then quit and reopen the editor:
+
+```bash
+launchctl setenv NODE_EXTRA_CA_CERTS "$HOME/Library/Application Support/Herd/config/valet/CA/LaravelValetCASelfSigned.pem"
+```
+
+It lasts until you restart your Mac, and every Node process you open trusts Herd’s certificate authority until then. `launchctl unsetenv NODE_EXTRA_CA_CERTS` removes it sooner.
+
+`db:rebuild` deletes every registered client, but a client remembers the client ID it registered. After a rebuild, remove the server from the client and add it again so it registers anew (see [Reconnecting a Client](https://laravel-starter.entapp.northwestern.edu/features/mcp/#reconnecting-a-client)).

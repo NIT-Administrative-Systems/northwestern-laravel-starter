@@ -1,0 +1,201 @@
+# Directory Search
+
+The Directory Search integration looks up Northwestern users by NetID, email, or employee ID via the LDAP-backed Directory Search API. It is the primary mechanism for user provisioning during SSO login and for keeping user profile data synchronized with Northwestern’s identity system.
+
+The underlying API client is provided by the [`northwestern-sysdev/laravel-soa`](https://github.com/NIT-Administrative-Systems/SysDev-laravel-soa) package.
+
+Directory Search is optional in the `local` environment. Local demo users are seeded without it and `db:rebuild` doesn’t call it. Without `DIRECTORY_SEARCH_API_KEY`, `config:validate` and the health check skip it locally, the administration panel’s **Add Northwestern User** says it isn’t configured, and **Refresh from Directory** is hidden. Deployed environments always need the key.
+
+## How It Works
+
+1. **Search type detection**
+
+   `DirectorySearchType::fromSearchValue()` auto-detects whether the input is an email address, employee ID (numeric), or NetID (fallback).
+
+2. **API lookup**
+
+   The `DirectorySearch` class from `laravel-soa` calls Northwestern’s Directory Search API with a `basic` detail level.
+
+3. **Validation**
+
+   The response is validated to ensure required fields are present. `eduPersonPrimaryAffiliation` and `mail` must exist for the entry to be considered valid.
+
+4. **Field mapping**
+
+   `SyncUserFromDirectory` maps raw LDAP attributes onto the User model, handling multi-value arrays and student-specific field priority.
+
+5. **Persistence**
+
+   `PersistUserWithUniqueUsername` saves the user in a transaction and assigns the `Northwestern User` role to SSO users. If the save collides with an existing username, it returns the existing user instead.
+
+***
+
+## Key Classes
+
+| Class                           | Purpose                                                                                                   |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `FindOrUpdateUserFromDirectory` | Orchestrates the full lookup-validate-sync-persist flow                                                   |
+| `SyncUserFromDirectory`         | Maps LDAP attributes to User model fields                                                                 |
+| `DirectorySearchType`           | Auto-detects search input type (email, employee ID, NetID)                                                |
+| `PersistUserWithUniqueUsername` | Saves the user, assigns the Northwestern User role, and returns the existing user on a username collision |
+
+***
+
+## Post-Retrieval Jobs
+
+After a user is synced and persisted, `FindOrUpdateUserFromDirectory` dispatches a configurable list of **post-retrieval jobs**. This is the extension point for running custom logic when a user is fetched from the directory, whether during SSO sign-in, user creation in the administration panel, or the administration panel’s **Refresh from Directory** action.
+
+Add your jobs to the `postRetrievalJobs()` method in `FindOrUpdateUserFromDirectory`:
+
+app/Domains/User/Actions/Directory/FindOrUpdateUserFromDirectory.php
+
+```php
+private function postRetrievalJobs(): array
+{
+    $jobs = [
+        // Add your custom post-retrieval jobs here — see docs for the full job contract.
+    ];
+
+
+    if (config('platform.wildcard_photo_sync')) {
+        $jobs[] = DownloadWildcardPhotoJob::class;
+    }
+
+
+    return $jobs;
+}
+```
+
+### Job Contract
+
+Each job in the array must:
+
+* Implement `Illuminate\Contracts\Queue\ShouldQueue`
+* Accept a `User $user` as its constructor argument
+
+app/Domains/User/Jobs/AssignDepartmentJob.php
+
+```php
+use App\Domains\User\Models\User;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Queue\Queueable;
+
+
+class AssignDepartmentJob implements ShouldQueue
+{
+    use Queueable;
+
+
+    public function __construct(public User $user)
+    {
+        //
+    }
+
+
+    public function handle(): void
+    {
+        // Your custom logic here
+    }
+}
+```
+
+### Sync vs. Async Dispatch
+
+The caller controls whether jobs run synchronously or are dispatched to the queue via the `$immediate` flag:
+
+| Caller                                     | `$immediate` | Behavior                                                                        |
+| ------------------------------------------ | :----------: | ------------------------------------------------------------------------------- |
+| SSO login                                  |    `false`   | Jobs are **queued**, login completes immediately                                |
+| Filament user creation                     |    `true`    | Jobs run **synchronously**, the admin sees the result before the page redirects |
+| Filament **Refresh from Directory** action |    `true`    | Jobs run **synchronously**, the admin sees the refreshed record                 |
+
+> **Tip**
+>
+> When jobs run synchronously (`$immediate = true`), failures are caught and reported via your exception handler. They will **not** break the login or creation flow.
+
+The starter ships with [`DownloadWildcardPhotoJob`](https://laravel-starter.entapp.northwestern.edu/northwestern-integrations/wildcard-photos/) as a built-in post-retrieval job (enabled when `platform.wildcard_photo_sync` is `true`).
+
+***
+
+## Customizing Field Mappings
+
+The `SyncUserFromDirectory::syncDemographics()` method defines how LDAP directory attributes map onto User model fields. Customize this when your project needs different directory fields, additional attributes, or different priority logic.
+
+### Default Mappings
+
+| User Attribute   | LDAP Keys (priority order)          | Notes                                                                                                                                                                                                                                                                   |
+| ---------------- | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `first_name`     | `givenName`                         | Students prepend `nuStudentGivenName`                                                                                                                                                                                                                                   |
+| `last_name`      | `sn`                                | Students prepend `nuStudentSn`                                                                                                                                                                                                                                          |
+| `email`          | `mail`                              | Students prepend `nuStudentEmail`                                                                                                                                                                                                                                       |
+| `employee_id`    | `nuStudentNumber`, `employeeNumber` | IDs shorter than 7 characters are discarded                                                                                                                                                                                                                             |
+| `phone`          | `telephoneNumber`                   | Students prepend `nuAllStudentCurrentPhone`                                                                                                                                                                                                                             |
+| `departments`    | `nuAllDepartmentName`               | Multi-value (stored as JSON array)                                                                                                                                                                                                                                      |
+| `job_titles`     | `nuAllTitle`                        | Suppressed for students                                                                                                                                                                                                                                                 |
+| `hr_employee_id` | `employeeNumber`                    | Set when both `employeeNumber` and `nuStudentNumber` exist and differ                                                                                                                                                                                                   |
+| `timezone`       | —                                   | Set from `config('platform.default_user_timezone')` (default: `America/Chicago`) when the user is created. Later syncs keep the timezone the user chose in their [Account preferences](https://laravel-starter.entapp.northwestern.edu/building/app-panel/#preferences) |
+
+For students, student-specific LDAP fields are prepended to the key arrays so they take priority. The `findValue()` helper returns the first non-empty match, so earlier keys win.
+
+### Adding a New Mapped Field
+
+To sync an additional directory attribute (e.g., building/office location):
+
+1. **Add a migration**
+
+   ```bash
+   php artisan make:migration add_building_to_users_table
+   ```
+
+   ```php
+   Schema::table('users', function (Blueprint $table) {
+       $table->string('building')->nullable();
+   });
+   ```
+
+2. **Update the field mapping**
+
+   In `SyncUserFromDirectory::syncDemographics()`, add the new mapping alongside the existing ones:
+
+   app/Domains/User/Actions/Directory/SyncUserFromDirectory.php
+
+   ```php
+   $user->building = $this->findValue($directoryData, ['nuPosition1Building', 'postalAddress']);
+   ```
+
+3. **Update the User model** (if needed)
+
+   Add a cast if the field requires one (e.g., `array`, `datetime`). No `$fillable` changes are needed because the starter runs `Model::unguard()` globally.
+
+***
+
+## Invalid Directory Data
+
+When a directory lookup returns invalid data (missing required fields), the behavior depends on whether the user already exists:
+
+* **Existing SSO user** - The account is marked with `netid_inactive = true` and `directory_sync_last_failed_at` is recorded. The user is not deleted. Other existing users are returned unchanged, and API users skip the lookup entirely.
+* **New user** - A `BadDirectoryEntry` exception is thrown, preventing account creation with incomplete data.
+
+This ensures that transient directory issues don’t destroy existing accounts while still preventing invalid new accounts.
+
+***
+
+## Health Check
+
+The `DirectorySearchCheck` class provides a [Spatie Health](https://spatie.be/docs/laravel-health) check for the Directory Search API. It performs a test lookup against a configured NetID and validates the response structure.
+
+***
+
+## Environment Variables
+
+[#](https://laravel-starter.entapp.northwestern.edu/northwestern-integrations/directory-search/#prop-directory-search-url)`DIRECTORY_SEARCH_URL``https://northwestern-prod.apigee.net/directory-search`
+
+Directory Search API base URL
+
+[#](https://laravel-starter.entapp.northwestern.edu/northwestern-integrations/directory-search/#prop-directory-search-api-key)`DIRECTORY_SEARCH_API_KEY`Required
+
+Apigee API key for Directory Search
+
+[#](https://laravel-starter.entapp.northwestern.edu/northwestern-integrations/directory-search/#prop-directory-search-health-check-netid)`DIRECTORY_SEARCH_HEALTH_CHECK_NETID``swd2981`
+
+NetID used for health check lookups

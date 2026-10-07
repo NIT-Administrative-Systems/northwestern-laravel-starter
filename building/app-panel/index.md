@@ -1,0 +1,277 @@
+# The App Panel
+
+The app panel at `/app` is where an application built on the starter does its work. It is the default Filament panel, configured in `App\Providers\Filament\AppPanelProvider`, and any signed-in user can open it. API users can’t: they authenticate through OAuth clients and never have a panel session. Back-office tools belong in the [administration panel](https://laravel-starter.entapp.northwestern.edu/architecture/ui-architecture/#the-administration-panel) instead.
+
+The panel also owns sign-in for the whole application. Guests of any panel are sent to `/app/login` (see [Authentication](https://laravel-starter.entapp.northwestern.edu/features/authentication/#signing-in)), and in a locked-down environment users without an application role are sent to `/app/access-restricted` (see [Environment Lockdown](https://laravel-starter.entapp.northwestern.edu/getting-started/initial-customization/#5-environment-lockdown)).
+
+## Where Its Code Lives
+
+The panel discovers Resources, Pages, Clusters and Widgets in `app/Filament/App/`:
+
+* app/Filament/App/
+
+  * Clusters/
+
+    * AccountCluster.php
+
+    * AccountCluster/Pages/
+
+      * AccessTokens.php
+      * ConnectedApplications.php
+      * Preferences.php
+      * Profile.php
+
+  * Livewire/
+    * AnnouncementBanner.php
+
+  * Pages/ discovered, empty until you add one
+    * …
+
+  * Resources/ discovered, empty until you add one
+    * …
+
+  * Starter/Pages/ the starter’s own pages
+
+    * Announcements.php
+    * Auth/ sign-in pages
+      * …
+    * Concerns/HasSiteHeader.php
+    * ComponentGallery.php
+    * ContactSupport.php
+    * EnvironmentLockdown.php
+
+  * Widgets/
+    * YourAccountWidget.php
+
+The sidebar is for your application’s features. The starter ships only the dashboard and, outside production, the component gallery there; Contact Support is in the Help menu.
+
+Filament’s generators target the default panel, so new resources and pages land here without a `--panel` option:
+
+```bash
+php artisan make:filament-resource Project --generate --model-namespace=App\\Domains\\Project\\Models
+php artisan make:filament-page Reports
+```
+
+Views for the panel’s pages go in `resources/views/filament/app/`. The panel’s Tailwind theme, `resources/css/filament/app/theme.css`, compiles classes from every file the repository tracks; only a package’s views under `vendor/`, which git ignores, need an `@source` line, as Filament’s have.
+
+## The Dashboard
+
+The panel’s home page at `/app` is Filament’s own `Filament\Pages\Dashboard`, registered with `->pages()` in `AppPanelProvider`. It renders the widgets in `app/Filament/App/Widgets/`.
+
+The starter ships one, `YourAccountWidget`, which shows the signed-in user:
+
+* a greeting: “Welcome” at the first sign-in, “Welcome Back” after it
+* the roles they hold beyond the default Northwestern User role
+* an **Account** link to the [Account area](https://laravel-starter.entapp.northwestern.edu/building/app-panel/#the-account-area)
+* links to Contact Support and the documentation, each shown only when it is configured, as in the Help menu
+
+Its view is `resources/views/filament/app/widgets/your-account.blade.php`. Keep it, change it, or delete it as the application grows its own dashboard.
+
+Add widgets with `php artisan make:filament-widget`. For anything a grid of widgets can’t hold, write your own page that extends `Filament\Pages\Dashboard` in `app/Filament/App/Pages/` and register it in `->pages()` instead.
+
+## Announcements
+
+Every page shows the most important live [announcement](https://laravel-starter.entapp.northwestern.edu/features/announcements/) the user hasn’t dismissed in a banner above its heading, through the `PAGE_START` render hook in `AppPanelProvider` (`App\Filament\App\Livewire\AnnouncementBanner`). `/app/announcements` lists every announcement they can see, reached from the banner and the Help menu.
+
+## The Account Area
+
+The Account area at `/app/account` is each user’s own: who they are, their preferences, the applications connected to their account and, for those allowed, their personal access tokens. It is a cluster, `App\Filament\App\Clusters\AccountCluster`, with its pages as tabs across the top. It isn’t in the sidebar, which is for your application’s features; users reach it from the user menu’s **Account** item and the dashboard widget’s **Account** link. Every user who can open the app panel can open it.
+
+### Profile
+
+`/app/account/profile` is read-only:
+
+* **Details.** For a NetID user: name, NetID, email, primary affiliation, job titles and departments, which come from the [Northwestern Directory](https://laravel-starter.entapp.northwestern.edu/northwestern-integrations/directory-search/) and refresh at each sign-in. For an email user: the name, email, title and department an administrator entered, with a **Request a Change** link to Contact Support when [support tickets](https://laravel-starter.entapp.northwestern.edu/features/support-tickets/) are enabled.
+* **Roles.** The roles they hold beyond the default Northwestern User role.
+
+### Access Tokens
+
+`/app/account/access-tokens` lists the user’s [personal access tokens](https://laravel-starter.entapp.northwestern.edu/features/api/#personal-access-tokens) and creates and revokes them. It shows while the API is on (`API_ENABLED`) to people other than API users who hold the `CreatePersonalAccessTokens` permission; of the default roles, only Super Administrator has it. A new token is shown once.
+
+### Connected Applications
+
+`/app/account/connected-applications` lists the [applications](https://laravel-starter.entapp.northwestern.edu/features/api/#connected-applications) the user has allowed to act for them, one row per application, with what each may do, when it connected and when it was last used. **Disconnect** removes one application’s access and **Disconnect All** removes every application’s. Every user can open it while the API or the [MCP server](https://laravel-starter.entapp.northwestern.edu/features/mcp/) is enabled; AI clients are labelled as such, with a note that their names aren’t verified.
+
+### Preferences
+
+`/app/account/preferences` is where users change their own settings. The starter ships one, their timezone, which every date in both panels is shown in (see [Framework Defaults](https://laravel-starter.entapp.northwestern.edu/architecture/framework-defaults/#user-timezone-on-all-datetimes)). Directory sync sets a new user’s timezone to `DEFAULT_USER_TIMEZONE` and leaves it alone after that. Users also choose whether to be emailed [announcements](https://laravel-starter.entapp.northwestern.edu/features/announcements/#notifying-people) and when an application connects to their account (they’re always told in the notification bell), and those who can hold personal access tokens whether to be emailed before one expires.
+
+An administrator [impersonating](https://laravel-starter.entapp.northwestern.edu/features/authentication/#impersonating-users) a user sees that user’s preferences but can’t save them: the page hides **Save**, and `save()` refuses with a 403.
+
+### Adding a Preference
+
+Everything else a user chooses goes in the `users.preferences` JSON column, read through a typed class, `App\Domains\User\Data\UserPreferences`. It ships with three: `emailBeforeAccessTokensExpire`, `emailWhenApplicationConnects` and `emailAnnouncements`. Each preference is a promoted constructor property with a default, so adding one needs no migration:
+
+1. Add the property:
+
+   app/Domains/User/Data/UserPreferences.php
+
+   ```php
+   final readonly class UserPreferences extends Preferences
+   {
+       public function __construct(
+           public bool $emailBeforeAccessTokensExpire = true,
+           public bool $emailWhenApplicationConnects = true,
+           public bool $emailAnnouncements = true,
+           public bool $emailWeeklySummary = true,
+       ) {}
+   }
+   ```
+
+2. Add its field to the form in `App\Filament\App\Clusters\AccountCluster\Pages\Preferences`, named after the property:
+
+   ```php
+   Toggle::make('emailWeeklySummary')
+       ->label('Weekly summary')
+       ->helperText('A digest of the week\'s activity, every Monday.'),
+   ```
+
+   The page fills the form from `$user->preferences` and saves every field except `timezone` back into it.
+
+3. Read it wherever it matters:
+
+   ```php
+   if ($user->preferences->emailWeeklySummary) {
+       // ...
+   }
+   ```
+
+Properties can be `bool`, `int`, `float`, `string`, `array` or a backed enum, and may be nullable. Reading is forgiving, because stored JSON outlives code: a key with no matching property is dropped, and a missing or wrongly typed value gets its default. To change preferences in code, use `with()`, which returns a copy:
+
+```php
+$user->preferences = $user->preferences->with(['emailWeeklySummary' => false]);
+$user->save();
+```
+
+The base class, `App\Domains\Core\Data\Preferences`, works for any model: extend it and cast a JSON column with your subclass (`'settings' => TeamSettings::class`).
+
+> **Note**
+>
+> Keep a setting in its own column instead when queries filter or sort by it, as `timezone` is.
+
+## The Component Gallery
+
+`/app/gallery` shows Filament’s common components in the Northwestern theme with sample content: buttons, badges, callouts, form fields, a table, notifications and modals. It is in the sidebar outside production. `ComponentGallery::canAccess()` refuses it in production, which also hides its sidebar item.
+
+Delete `app/Filament/App/Starter/Pages/ComponentGallery.php` when you no longer need it.
+
+## The Top Bar
+
+The top bar holds what every page shares: the Northwestern wordmark, the application name (`<x-panel-brand>`), the environment badge outside production, the Help menu, the notification bell and the user menu.
+
+### The Help Menu
+
+`<x-help-menu>` (`resources/views/components/help-menu.blade.php`) is rendered in the app panel’s top bar, just ahead of the user menu, and in the header of public pages. The administration panel doesn’t show it. Each item shows only when it is available:
+
+* **Announcements**, for signed-in users: the [Announcements](https://laravel-starter.entapp.northwestern.edu/features/announcements/) page.
+* **Changelog**, when the [changelog](https://laravel-starter.entapp.northwestern.edu/features/changelog/) is enabled.
+* **Contact Support**, for signed-in users when [support tickets](https://laravel-starter.entapp.northwestern.edu/features/support-tickets/) are enabled.
+* **Documentation**, when `SUPPORT_DOCUMENTATION_URL` is set. It opens in a new tab.
+
+The menu disappears when none of them apply. To add an item, add an entry to the `$items` array, or `null` when it shouldn’t show:
+
+resources/views/components/help-menu.blade.php
+
+```php
+Route::has('policies.index')
+    ? [
+        'label' => 'Policies',
+        'url' => route('policies.index'),
+        'icon' => Heroicon::OutlinedDocumentText,
+        'external' => false,
+    ]
+    : null,
+```
+
+The component also renders on error pages, so keep anything that could query the database inside `rescue()`, as the Help menu’s signed-in check does.
+
+### The User Menu
+
+The user menu has three items, set in `AppPanelProvider::userMenuItems()`:
+
+* **Account** links to the [Account area](https://laravel-starter.entapp.northwestern.edu/building/app-panel/#the-account-area).
+* **Administration** links to `/administration`. It shows only to users who can open that panel (`User::canAccessPanel()`).
+* **Sign Out** goes to the `logout` route.
+
+## Notifications
+
+The bell in the top bar lists database notifications, refreshed every 30 seconds (`->databaseNotificationsPolling('30s')`). Notifications are stored in the `notifications` table, created by `2026_01_22_232242_create_notifications_table.php`. The administration panel has the same bell.
+
+Send one with Filament’s notification builder:
+
+```php
+use Filament\Notifications\Notification;
+
+
+Notification::make()
+    ->title('Report ready')
+    ->body('Your quarterly report finished processing.')
+    ->success()
+    ->sendToDatabase($user);
+```
+
+A Laravel notification class can send the same notification alongside mail or other channels. Return Filament’s database message from `toDatabase()`, so the bell can render it:
+
+```php
+use Filament\Notifications\Notification as FilamentNotification;
+use Illuminate\Notifications\Notification;
+
+
+class ReportReady extends Notification
+{
+    public function via(object $notifiable): array
+    {
+        return ['database', 'mail'];
+    }
+
+
+    public function toDatabase(object $notifiable): array
+    {
+        return FilamentNotification::make()
+            ->title('Report ready')
+            ->getDatabaseMessage();
+    }
+}
+```
+
+The bell picks up new notifications at its next poll. A Livewire component in the panel can refresh it at once with `$this->dispatch('databaseNotificationsSent')`, as the component gallery’s “Send Me a Notification” button does.
+
+## Simple Pages
+
+Simple pages (Filament’s `SimplePage`) render a single card without the sidebar. The sign-in pages and the lockdown page are simple pages. The app panel renders `<x-site-header>` above every simple page’s card, so they share the header of public and error pages.
+
+1. Extend `Filament\Pages\SimplePage` in `app/Filament/App/Pages/`, and use `App\Filament\App\Starter\Pages\Concerns\HasSiteHeader`. The trait turns off Filament’s own logo and simple-page user menu, which would repeat what the header shows.
+
+   ```php
+   use App\Filament\App\Starter\Pages\Concerns\HasSiteHeader;
+   use Filament\Pages\SimplePage;
+   use Filament\Schemas\Schema;
+
+
+   class Welcome extends SimplePage
+   {
+       use HasSiteHeader;
+
+
+       public function content(Schema $schema): Schema
+       {
+           return $schema->components([
+               // ...
+           ]);
+       }
+   }
+   ```
+
+2. Register its route in `AppPanelProvider::panel()`. Filament’s page discovery only picks up full pages, so simple pages are routed in `->routes()`, as the lockdown page is:
+
+   ```php
+   ->routes(function (): void {
+       Route::get('welcome', Welcome::class)
+           ->middleware(Authenticate::class)
+           ->name('welcome');
+   })
+   ```
+
+> **Tip**
+>
+> For a page that guests must see without the panel’s sign-in, use the [public layout](https://laravel-starter.entapp.northwestern.edu/building/public-pages/) instead.

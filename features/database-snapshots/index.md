@@ -1,0 +1,104 @@
+# Database Snapshots
+
+Database snapshots allow you to save the current state of your database and quickly restore it later. This is invaluable during development when you need to:
+
+* Test data modifications and quickly reset to a known state
+* Quickly switch between different test scenarios
+* Preserve data before making potentially destructive changes
+
+> **Development Only**
+>
+> Database snapshots are intended for development and testing environments only. For production backups, use proper database backup solutions.
+
+## Requirements
+
+The commands shell out to PostgreSQL’s `pg_dump` and `psql`. With Laravel Herd on macOS or Windows, they find Herd’s PostgreSQL on their own. Otherwise put them on your `PATH`, or set `PG_BIN_DIRECTORY` to the directory that contains them. `db:snapshot:create`, `db:snapshot:restore` and `db:snapshot:delete` refuse to run in production.
+
+## Creating Snapshots
+
+### Basic Snapshot Creation
+
+Create a snapshot with a descriptive name:
+
+```bash
+php artisan db:snapshot:create my-snapshot-name
+```
+
+The snapshot will be saved to the `database/snapshots/` directory.
+
+### Example Workflow
+
+```bash
+# Rebuild database with fresh data
+php artisan db:rebuild
+
+
+# Create some test data through the UI
+
+
+# Save this state
+php artisan db:snapshot:create clean-test-data
+
+
+# Now you can make changes, and restore whenever needed
+php artisan db:snapshot:restore clean-test-data
+```
+
+## Listing Snapshots
+
+View all available snapshots:
+
+```bash
+php artisan db:snapshot:list
+```
+
+After the table, it asks whether to restore one of the listed snapshots. A restore started from this prompt skips schema validation.
+
+## Restoring Snapshots
+
+Restore a snapshot by name:
+
+```bash
+php artisan db:snapshot:restore my-snapshot-name
+```
+
+Create an automatic backup before restoring:
+
+```bash
+php artisan db:snapshot:restore my-snapshot-name --backup
+```
+
+> **Destructive Operation**
+>
+> Restoring a snapshot will **completely replace** your current database with the snapshot data. All current data will be lost.
+
+## Viewing Snapshot Details
+
+Get detailed information about a specific snapshot:
+
+```bash
+php artisan db:snapshot:info my-snapshot-name
+```
+
+This displays:
+
+* File path and size
+* Creation timestamp
+* Schema checksum and migration/seeder counts
+* Comparison with current codebase schema
+
+## Deleting Snapshots
+
+Delete a single snapshot:
+
+```bash
+php artisan db:snapshot:delete my-snapshot-name
+```
+
+Delete all snapshots:
+
+```bash
+php artisan db:snapshot:delete --all
+```
+
+Both the SQL file and any associated metadata will be removed.

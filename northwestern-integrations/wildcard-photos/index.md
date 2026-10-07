@@ -1,0 +1,55 @@
+# Wildcard Photos
+
+The Wildcard Photos integration downloads a user’s Northwestern Wildcard ID card photo from the Directory Search API and stores it in S3. Photos are served to the application via time-limited presigned URLs.
+
+This feature is disabled by default and can be enabled with a single environment variable.
+
+## How It Works
+
+1. **Photo sync triggered**
+
+   When a user is fetched from the directory, `FindOrUpdateUserFromDirectory` dispatches a `DownloadWildcardPhotoJob` if `WILDCARD_PHOTO_SYNC_ENABLED` is true. During SSO sign-in the job is queued. It runs synchronously only when an administrator creates a user or uses **Refresh from Directory** in the administration panel.
+
+2. **LDAP photo retrieval**
+
+   The job calls `DirectorySearch::lookupByNetId()` with 3 retries and 100ms delay. The `jpegPhoto` attribute in the LDAP response contains the base64-encoded photo.
+
+3. **S3 storage**
+
+   The decoded photo is written to `wildcard-photos/{netid}.jpg` on the `s3` disk. The user record is updated with the `wildcard_photo_s3_key` and `wildcard_photo_last_synced_at` timestamp. If the lookup fails, no photo is found, or the upload fails, the existing key and timestamp are left unchanged.
+
+4. **Serving photos**
+
+   The photo is the user’s Filament avatar: `User::getFilamentAvatarUrl()` returns the photo route. `WildcardPhotoController` generates a 30-minute presigned S3 URL and returns a redirect response. If no photo is stored, or the viewer fails the `view` gate, it redirects to the default profile image instead.
+
+***
+
+## Authorization
+
+The photo endpoint requires authentication and checks `Gate::allows('view', $user)` before returning the photo URL. This ensures users can only access photos they are authorized to see.
+
+The response includes `Cache-Control: private, max-age=1800` (30 minutes) to match the presigned URL lifetime.
+
+***
+
+## Routes
+
+| Method | URI                            | Name                   | Notes                                   |
+| ------ | ------------------------------ | ---------------------- | --------------------------------------- |
+| `GET`  | `/users/{user}/wildcard-photo` | `users.wildcard-photo` | Only registered when feature is enabled |
+
+***
+
+## Enabling the Feature
+
+.env
+
+```bash
+WILDCARD_PHOTO_SYNC_ENABLED=true
+```
+
+When disabled, the photo route is not registered and the `DownloadWildcardPhotoJob` is not dispatched during login. The feature is completely inert.
+
+> **Note**
+>
+> The S3 bucket must support presigned URLs. The standard Laravel S3 filesystem configuration is used. No additional S3 setup is required beyond the standard `AWS_*` environment variables.

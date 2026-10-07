@@ -1,0 +1,238 @@
+# Audit Logging
+
+The starter includes an audit logging system that tracks user actions and data changes throughout your application, providing a historical record for compliance, security investigations, and debugging.
+
+## Why Audit Logging
+
+Compliance & Regulations
+
+Many Northwestern applications handle sensitive data subject to regulations requiring audit trails:
+
+* **FERPA** - Student education records
+* **HIPAA** - Healthcare information
+* **University Policies** - Administrative data retention requirements
+
+Security & Forensics
+
+Audit logs help detect and investigate security incidents:
+
+* Unauthorized access attempts
+* Suspicious data modifications
+* Account compromise indicators
+* Privilege escalation attempts
+
+Debugging & Troubleshooting
+
+Audit trails assist with diagnosing issues:
+
+* Understanding how data reached its current state
+* Identifying when changes were made
+* Determining who made specific changes
+* Reproducing reported issues
+
+Accountability & Transparency
+
+Complete audit trails provide:
+
+* Attribution for all actions
+* Transparency in administrative processes
+* Evidence for dispute resolution
+* Historical context for decisions
+
+***
+
+## What Gets Audited
+
+### Automatic Model Auditing
+
+All models extending `BaseModel` log the following Eloquent events with before/after state:
+
+* **Created** - When a new record is inserted
+* **Updated** - When an existing record is modified
+* **Deleted** - When a record is deleted (including soft deletes)
+* **Restored** - When a soft-deleted record is restored
+
+Each audit log entry includes:
+
+* **Event Type** - The operation performed (created, updated, deleted, restored)
+* **User** - Who performed the action
+* **Timestamp** - When the change occurred
+* **Old Values** - State before the change (for updates and deletes)
+* **New Values** - State after the change (for creates and updates)
+* **User Agent** - The browser/client that made the request
+* **IP Address** - Request origin
+* **URL** - The route where the action occurred
+
+### Custom Audit Events
+
+The system also logs custom events for critical operations:
+
+**Role Assignment & Removal**
+
+When roles are assigned to or removed from users:
+
+* User receiving the role change
+* Role being assigned/removed
+* Before state (previous roles)
+* After state (new roles)
+* User who made the change
+* Timestamp of the change
+
+**Permission Syncing**
+
+When a role’s permissions are modified:
+
+* Role whose permissions changed
+* Old permission set
+* New permission set
+* User who made the change
+* Timestamp of the sync
+
+**Impersonation Sessions**
+
+When an administrator starts impersonating a user, `LogImpersonationAccess` (listening for `TakeImpersonation`) writes an `ImpersonationLog` to the `user_impersonation_logs` table with:
+
+* Who started the impersonation
+* Who is being impersonated
+* When it started
+
+Nothing records when an impersonation ends. Audit entries for changes made while impersonating carry the administrator’s ID in `impersonator_user_id`.
+
+**API Credentials**
+
+OAuth clients and tokens have UUID or string keys, which the audits table can’t store, so their changes are recorded as custom events on a person instead:
+
+| Event                                                                                                    | Recorded on                       | When                                                        |
+| -------------------------------------------------------------------------------------------------------- | --------------------------------- | ----------------------------------------------------------- |
+| `service_client_created`, `service_client_revoked`, `service_client_ip_restrictions_updated`             | The API user that owns the client | A service client is created, rotated, restricted or revoked |
+| `application_registered`, `application_updated`, `application_secret_regenerated`, `application_revoked` | The administrator who acted       | An administrator manages an application                     |
+| `mcp_client_revoked`                                                                                     | The administrator who acted       | An administrator revokes an MCP client                      |
+| `personal_access_token_revoked`                                                                          | The token’s owner                 | An administrator revokes someone else’s token               |
+| `application_disconnected`                                                                               | The person                        | An administrator disconnects an application for someone     |
+
+None of them records a secret. Updates record the values before and after; revoking an application records how many connections it removed.
+
+***
+
+## Retention
+
+Audit entries are kept forever by default. Set `AUDIT_RETENTION_DAYS` to delete older entries; the scheduler’s daily `model:prune` removes them. Impersonation logs work the same way with `IMPERSONATION_LOG_RETENTION_DAYS`. Check your record-keeping requirements before setting either. See [Data Retention](https://laravel-starter.entapp.northwestern.edu/getting-started/initial-customization/#7-data-retention).
+
+***
+
+## Audit Exclusions
+
+You can exclude fields from audit logs at the model level:
+
+```php
+// Within an Eloquent model extending BaseModel
+
+
+protected array $auditExclude = [
+    'password',
+    'remember_token',
+];
+```
+
+### Reasons to Exclude
+
+Security
+
+Prevent sensitive data from being stored in audit logs:
+
+* Passwords (even hashed)
+* Access tokens and client secrets
+* Encryption keys
+* OAuth secrets
+
+Volume Control
+
+Exclude fields that change too frequently:
+
+* Session timestamps
+* Cache counters
+* Temporary flags
+* Analytics data
+
+Relevance
+
+Skip technical fields not meaningful for audits:
+
+* Internal system flags
+* Framework metadata
+* Computed values
+
+Storage Efficiency
+
+Reduce audit table size and improve performance:
+
+* Less disk space usage
+* Faster queries
+* Easier log analysis
+
+***
+
+## Creating Custom Audit Events
+
+For actions that don’t fit standard CRUD operations, log custom audit events. Each one is a case of `App\Domains\Core\Enums\AuditEvent`, which also says how it’s shown: its label, icon and color in the audit tables, the record timeline and exports, and its place in the Event filter. Add a case for a new event:
+
+```php
+case ReportExported = 'report_exported';
+```
+
+A model with the `RecordsAuditEvents` trait, as `User` and `Role` have, records one in a line:
+
+```php
+$user->recordAuditEvent(AuditEvent::ReportExported, new: ['report' => $report->name]);
+```
+
+The audit’s user is whoever is signed in. `tags` are stored with the audit, and each `context` entry is added as a `key: value` tag, as `AuditsRoles` does with the modification origin and a reason. An event with nothing before or after isn’t recorded.
+
+> **Additional Resources**
+>
+> For more advanced audit logging patterns, refer to the [Laravel Auditing documentation](https://laravel-auditing.com/guide/audit-custom.html#example-custom-log-event).
+
+***
+
+## Auditing in Seeders
+
+By default, [Laravel Auditing](https://laravel-auditing.com/) disables audit logging for console commands (the `audit.console` config is `false`). Seeders that create or update Auditable models, such as `RoleSeeder` and `PermissionSeeder`, would not produce audit entries by default.
+
+For production seeders that manage security-relevant data (roles, permissions, stakeholder assignments), this creates a gap in the audit trail. The `AuditsSeederChanges` trait solves this by registering the `AuditableObserver` directly on specified models.
+
+### Usage
+
+Add the trait to your seeder and wrap the seeding logic in `withAuditing()`:
+
+app/Domains/Access/Seeders/RoleSeeder.php
+
+```php
+use Northwestern\SysDev\Chassis\Seeding\Concerns\AuditsSeederChanges;
+
+
+class RoleSeeder extends Seeder implements IdempotentSeederInterface
+{
+    use AuditsSeederChanges;
+
+
+    public function run(): void
+    {
+        $this->withAuditing([Role::class], function () {
+            // Role creation and permission syncing logic...
+        });
+    }
+}
+```
+
+### Which seeders use it?
+
+| Seeder             | Audited Model | What gets audited                     |
+| ------------------ | ------------- | ------------------------------------- |
+| `RoleSeeder`       | `Role`        | Role creation, attribute updates      |
+| `PermissionSeeder` | `Permission`  | Permission creation, metadata updates |
+
+The `StakeholderSeeder` uses `assignRoleWithAudit()` instead, which fires custom audit events that bypass the console check entirely.
+
+> **Custom events vs. standard events**
+>
+> Custom audit events (like `role_assigned` and `permissions_modified`) use `AuditCustom` and bypass `isAuditingEnabled()`. They fire regardless of environment. The `AuditsSeederChanges` trait is only needed for **standard** Eloquent events (`created`, `updated`, `deleted`) that go through the `AuditableObserver`.

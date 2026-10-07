@@ -1,0 +1,357 @@
+# Initial Customization
+
+Customize these settings before launching your application.
+
+***
+
+## 1. Super Administrator Accounts
+
+*Super Administrators* have full access to the application and bypass all authorization checks. These accounts are typically reserved for IT staff or core development team members.
+
+This is a step for deployed environments. Locally you don’t need it: the seeded **NUIT Administrator** demo user is a Super Administrator, and the sign-in page offers it under **Sign In As**.
+
+### Configuration
+
+Add NetIDs to each deployed environment’s configuration, or to `.env.example` if they will be the same across environments:
+
+.env
+
+```bash
+# Comma-separated list of NetIDs
+SUPER_ADMIN_NETIDS=abc123,xyz789,def456
+```
+
+### How It Works
+
+The `StakeholderSeeder` runs on deploy (the reference `vapor.yml` in [Deployment](https://laravel-starter.entapp.northwestern.edu/guides/deployment/) runs `php artisan db:seed --class=StakeholderSeeder`) and:
+
+1. **Looks up each NetID** in the Northwestern Directory
+2. **Creates or refreshes user accounts** with their directory information (name, email, department, etc.)
+3. **Assigns the Super Administrator role** (full application access) to users who don’t already have it
+4. **Safe to run multiple times** - existing users are updated from the directory, not duplicated
+
+**Deployed Environments**
+
+Set `SUPER_ADMIN_NETIDS` and deploy; the seeder runs as part of the deploy. To add administrators between deploys, run it in that environment:
+
+```bash
+php artisan db:seed --class=StakeholderSeeder
+```
+
+**Locally (Optional)**
+
+`db:rebuild` doesn’t run the seeder, so it needs no network. To sign in locally as yourself with NetID, configure SSO and Directory Search, set `SUPER_ADMIN_NETIDS`, and run the seeder after a rebuild:
+
+```bash
+php artisan db:seed --class=StakeholderSeeder
+```
+
+> **Caution**
+>
+> The `StakeholderSeeder` requires a valid **Directory Search API key**. Ensure `DIRECTORY_SEARCH_API_KEY` is configured before running.
+
+***
+
+## 2. Local Authentication (Passwordless)
+
+> **Note**
+>
+> Local authentication allows external users (non-Northwestern) to access your application via emailed verification codes after an administrator invites them. Disable this if your app is Northwestern-only.
+
+### Configuration Options
+
+Edit `config/local-auth.php` or set environment variables:
+
+.env
+
+```bash
+# Enable/disable local authentication
+LOCAL_AUTH_ENABLED=true
+
+
+# Rate limit for login code requests per email (per hour)
+LOCAL_AUTH_RATE_LIMIT_PER_HOUR=10
+
+
+# Rate limit for login code requests per IP (per hour)
+# Prevents a single IP from exhausting multiple accounts' per-email rate limits
+LOCAL_AUTH_RATE_LIMIT_PER_IP_PER_HOUR=20
+```
+
+To change where users land after signing in, see [Where Users Land After Signing In](https://laravel-starter.entapp.northwestern.edu/features/authentication/#where-users-land-after-signing-in).
+
+Enabled
+
+**When to enable:**
+
+* Clients or partners without NetIDs
+* Testing accounts for non-Northwestern users
+
+Disabled
+
+**When to disable:**
+
+* Northwestern-only applications
+* No external user requirements
+
+### Passwordless Code Settings
+
+Edit `config/local-auth.php` to tune the OTP length, expiration, and lockout behavior.
+
+```php
+'code' => [
+    'digits' => 6,
+    'expires_in_minutes' => 10,
+    'max_attempts' => 8,
+    'lock_minutes' => 15,
+    'resend_cooldown_seconds' => 30,
+],
+```
+
+### How Local Auth Works
+
+1. Admin creates a local user account in the administration panel (`/administration`): **Users** → **Add User** → **Add Local User**
+2. Admin can trigger an immediate verification code, or the user can request one themselves
+3. User receives an email with a verification code valid for a limited time
+4. User enters the code and is authenticated (no password needed)
+5. Code expires and becomes invalid after use
+
+***
+
+## 3. API Configuration
+
+> **Note**
+>
+> The API layer is enabled by default. Disable it if your application doesn’t need programmatic access.
+
+### Core Settings
+
+.env
+
+```bash
+# Master on/off switch for all API functionality
+API_ENABLED=true
+```
+
+> **Tip**
+>
+> The API, authentication and support rate limiters are in `config/rate-limiting.php`, with env var overrides. The email verification code’s hourly limits per email and per IP are in `config/local-auth.php`. See the [API](https://laravel-starter.entapp.northwestern.edu/features/api/#rate-limiting), [Authentication](https://laravel-starter.entapp.northwestern.edu/features/authentication/#rate-limiting), and [Support Tickets](https://laravel-starter.entapp.northwestern.edu/features/support-tickets/#rate-limiting) pages for details on each limiter.
+
+### Request Logging
+
+.env
+
+```bash
+# Enable API request logging
+API_REQUEST_LOGGING_ENABLED=true
+
+
+# Slow request threshold for monitoring (milliseconds)
+API_REQUEST_LOGGING_SLOW_THRESHOLD_MS=500
+```
+
+How long request logs are kept is set by `API_REQUEST_LOG_RETENTION_DAYS`; see [Data Retention](https://laravel-starter.entapp.northwestern.edu/getting-started/initial-customization/#7-data-retention).
+
+### Sampling (High-Traffic Apps)
+
+> **Performance Optimization**
+>
+> For high-throughput APIs, enable sampling to log only a percentage of successful requests. **Errors are always logged** regardless of sampling settings.
+
+.env
+
+```bash
+# Enable probabilistic sampling
+API_REQUEST_LOGGING_SAMPLING_ENABLED=true
+
+
+# Sample rate (0.0 to 1.0) - 0.1 = 10% of successful requests
+API_REQUEST_LOGGING_SAMPLE_RATE=0.1
+```
+
+***
+
+## 4. Northwestern Integrations
+
+### NetID Update Webhook
+
+The **NetID Update** webhook receives notifications when Northwestern users are deactivated, deprovisioned, or placed on security hold. This enables automatic role removal, or additional business logic, when users leave Northwestern.
+
+**If you have an EventHub subscription to the `etidentity.ldap.netid.term` topic:**
+
+1. Open `routes/api.php`
+
+2. Uncomment the NetID Update webhook route:
+
+   routes/api.php
+
+   ```diff
+   Route::middleware(['eventhub_hmac'])->prefix('eventhub')->group(function () {
+       // Route::post('netid-update', App\Domains\User\Http\Controllers\Webhooks\NetIdUpdateController::class)->eventHubWebhook('etidentity.ldap.netid.term')->name('netid-update');
+       Route::post('netid-update', App\Domains\User\Http\Controllers\Webhooks\NetIdUpdateController::class)->eventHubWebhook('etidentity.ldap.netid.term')->name('netid-update');
+   });
+   ```
+
+   > **Important**
+   >
+   > If your application employs a scale-to-zero database strategy for non-production environments, consider **ONLY** enabling this webhook in production by wrapping it in an environment check. Failure to do so may lead to excessive database spin-ups and an accumulation of messages being sent to the DLQ.
+
+**If you don’t have an EventHub subscription, leave this route commented out.**
+
+***
+
+## 5. Environment Lockdown
+
+The **Environment Lockdown** feature restricts application access to users who have been explicitly assigned application-specific roles. Users with only the default *Northwestern User* role (automatically assigned during SSO login), or no roles, are redirected to a lockdown page explaining they need to be granted access by an administrator.
+
+This is most useful in **non-production** environments to prevent unauthorized users from accessing the application if they discover the URL.
+
+### Default Behavior
+
+By default, lockdown is **enabled** for non-production environments and **disabled** for production, local development, CI, and tests:
+
+config/platform.php
+
+```php
+'lockdown' => [
+    'enabled' => env('ENVIRONMENT_LOCKDOWN_ENABLED', match (env('APP_ENV')) {
+        'production', 'local', 'testing', 'ci' => false,
+        default => true,
+    }),
+],
+```
+
+### Disabling for Specific Environments
+
+To disable lockdown for a specific environment, add this to your `.env` file:
+
+.env
+
+```bash
+ENVIRONMENT_LOCKDOWN_ENABLED=false
+```
+
+> **Tip**
+>
+> To enable lockdown in production, for example during a closed beta launch, set `ENVIRONMENT_LOCKDOWN_ENABLED=true` in production’s `.env`.
+
+### Important: Production URL Configuration
+
+> **Action Required**
+>
+> If you plan to use Environment Lockdown in your lower environments, you **must** configure the production URL. The lockdown page displays a link to the production environment so users know where to find the live application.
+
+Set `PRODUCTION_URL` in `.env.example` so every environment inherits it:
+
+.env.example
+
+```bash
+PRODUCTION_URL=https://your-app.northwestern.edu
+```
+
+Changing the default in `config/platform.php` has no effect while `.env.example` ships `PRODUCTION_URL=` empty, because an empty environment value overrides the config default.
+
+### Exempted Routes
+
+The following routes are always accessible, regardless of lockdown status:
+
+* Sign-in and sign-out: the sign-in page, verification codes, Entra ID’s sign-in and sign-out, WebSSO’s sign-out, and `logout`
+* Impersonation routes (take/leave impersonation)
+* The lockdown page itself
+
+These exemptions ensure people can sign in and out and administrators can manage impersonation. The OAuth consent screen is not exempt: a locked-out person can’t connect an application. If you create additional routes that should be exempt, add them to the `exempted_routes` array in `config/platform.php`.
+
+***
+
+## 6. Your Unit’s Details
+
+The university’s Web Style Guide requires every page to show the responsible unit’s address, phone, fax (if any) and email. The footer on every page and every email reads them from `config/northwestern-filament-theme.php`. Until you set them, they show Information Technology’s details.
+
+.env
+
+```bash
+NU_UNIT_NAME="Your Office"
+NU_UNIT_ADDRESS="633 Clark Street"
+NU_UNIT_CITY="Evanston, IL 60208"
+NU_UNIT_PHONE="847-555-0100"
+NU_UNIT_FAX=
+NU_UNIT_EMAIL="your-office@northwestern.edu"
+
+
+# Optional: a unit lockup (URL or public path) instead of the Northwestern wordmark
+NU_LOCKUP=
+```
+
+Quick links and the “Connect” social accounts are set in the same config file, under `footer.links` and `footer.social`.
+
+## 7. Data Retention
+
+The scheduler runs `model:prune` daily, which deletes records older than their retention period. Every period is set in days under `retention` in `config/platform.php`, and `null` keeps records forever.
+
+| Records                                              | Setting                            | Default       |
+| ---------------------------------------------------- | ---------------------------------- | ------------- |
+| Audit logs                                           | `AUDIT_RETENTION_DAYS`             | `null` (kept) |
+| Sign-in records                                      | `LOGIN_RECORD_RETENTION_DAYS`      | `365`         |
+| Impersonation logs                                   | `IMPERSONATION_LOG_RETENTION_DAYS` | `null` (kept) |
+| Login code challenges                                | `LOGIN_CHALLENGE_RETENTION_DAYS`   | `30`          |
+| API request logs                                     | `API_REQUEST_LOG_RETENTION_DAYS`   | `90`          |
+| Table exports and their files, from when they finish | `EXPORT_RETENTION_DAYS`            | `7`           |
+
+> **Check your record-keeping requirements first**
+>
+> Audit logs often back FERPA, HIPAA or university record-keeping requirements, so the starter keeps them unless you set a period.
+
+A few records are cleaned up on fixed schedules of their own: OAuth tokens and codes 31 days after they expire, and unused self-registered MCP clients. See [Cleanup and Revocation](https://laravel-starter.entapp.northwestern.edu/features/api-operations/#cleanup-and-revocation).
+
+To give another model a retention period, use Chassis’s `Northwestern\SysDev\Chassis\Models\Concerns\PrunesAfterRetentionPeriod` trait, return its setting from `retentionConfigKey()`, and add the setting under `platform.retention`. Override `retentionColumn()` when the record’s date isn’t `created_at`, and prefer an indexed column.
+
+## 8. Project Cleanup
+
+> **Important**
+>
+> Perform these cleanup tasks to personalize the starter kit for your project and remove references to the Northwestern Laravel Starter.
+
+### Find & Replace
+
+1. **Application Name**
+
+   Find: `Northwestern Laravel Starter`
+
+   Replace: `Your Application Name`
+
+2. **Package/Project Identifier**
+
+   Find: `northwestern-laravel-starter`
+
+   Replace: `your-project-slug`
+
+Leave this reference to the upstream starter out of both replacements:
+
+* The Coveralls upload’s `if: github.repository == ...` guard in `.github/workflows/check-pr.yml`; remove the step or the condition instead, as its comment explains
+
+### Documentation Site
+
+By default, the `docs/` directory contains documentation for the starter kit itself. This can be removed entirely or modified to host your project’s documentation.
+
+If you want to remove the documentation module, follow these steps:
+
+```bash
+rm .github/workflows/deploy-docs.yml
+rm -rf docs/
+```
+
+If you keep it, update the `DOCS_CNAME` env var at the top of `.github/workflows/deploy-docs.yml` to point to your own domain.
+
+`.github/workflows/release.yml` and `.github/workflows/smoke-test.yml` release and test the starter itself. Delete them unless you adapt them for your project.
+
+### Starter Placeholders
+
+Replace the pages the starter ships as placeholders:
+
+* **Landing page**: `resources/views/public/landing.blade.php`, which guests see at `/`
+* **Component gallery**: delete `app/Filament/App/Starter/Pages/ComponentGallery.php` when you no longer need it
+* **Where signed-in users land**: `destinationFor()` in `app/Http/Controllers/HomeController.php` sends everyone to the app panel
+
+Keep `AGENTS.md` up to date as the application grows; coding agents read it.
+
+[Contact Support](https://laravel-starter.entapp.northwestern.edu/features/support-tickets/) (`SUPPORT_ENABLED`, `SUPPORT_MAIL_TO`) and the [public changelog](https://laravel-starter.entapp.northwestern.edu/features/changelog/) (`CHANGELOG_ENABLED`) are off by default. Turn them on in `.env.example` if your application uses them.

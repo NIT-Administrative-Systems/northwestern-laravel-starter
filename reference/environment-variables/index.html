@@ -1,0 +1,1218 @@
+<!DOCTYPE html><html lang="en" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-py2eiy7f"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Environment Variables | Northwestern Laravel Starter</title><link rel="canonical" href="https://laravel-starter.entapp.northwestern.edu/reference/environment-variables/"/><link rel="sitemap" href="/sitemap-index.xml"/><link rel="shortcut icon" href="/favicon.png" type="image/png"/><meta name="generator" content="Astro v7.3.5"/><meta name="generator" content="Starlight v0.42.4"/><meta property="og:title" content="Environment Variables"/><meta property="og:type" content="article"/><meta property="og:url" content="https://laravel-starter.entapp.northwestern.edu/reference/environment-variables/"/><meta property="og:locale" content="en"/><meta property="og:description" content="Every environment variable the starter reads, with its default"/><meta property="og:site_name" content="Northwestern Laravel Starter"/><meta name="twitter:card" content="summary_large_image"/><meta name="description" content="Every environment variable the starter reads, with its default"/><meta property="og:image" content="https://laravel-starter.entapp.northwestern.edu/og/reference/environment-variables.png"/><meta property="og:image:type" content="image/png"/><meta property="og:image:width" content="1200"/><meta property="og:image:height" content="630"/><meta property="og:image:alt" content="Environment Variables"/><meta property="og:logo" content="https://laravel-starter.entapp.northwestern.edu/favicon.png"/><meta name="twitter:image" content="https://laravel-starter.entapp.northwestern.edu/og/reference/environment-variables.png"/><meta name="twitter:image:alt" content="Environment Variables"/><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@id":"https://laravel-starter.entapp.northwestern.edu/#organization","@type":"Organization","name":"Northwestern University","url":"https://www.northwestern.edu","logo":"https://laravel-starter.entapp.northwestern.edu/favicon.png"},{"@id":"https://laravel-starter.entapp.northwestern.edu/#website","@type":"WebSite","name":"Northwestern Laravel Starter","url":"https://laravel-starter.entapp.northwestern.edu/","description":"Every environment variable the starter reads, with its default","image":"https://laravel-starter.entapp.northwestern.edu/og/reference/environment-variables.png","publisher":{"@id":"https://laravel-starter.entapp.northwestern.edu/#organization"}},{"@type":"TechArticle","headline":"Environment Variables","name":"Environment Variables","description":"Every environment variable the starter reads, with its default","image":"https://laravel-starter.entapp.northwestern.edu/og/reference/environment-variables.png","url":"https://laravel-starter.entapp.northwestern.edu/reference/environment-variables/","mainEntityOfPage":"https://laravel-starter.entapp.northwestern.edu/reference/environment-variables/","isPartOf":{"@id":"https://laravel-starter.entapp.northwestern.edu/#website"},"publisher":{"@id":"https://laravel-starter.entapp.northwestern.edu/#organization"}}]}</script><meta name="starlight-agent-docs" content="{&quot;title&quot;:&quot;Environment Variables&quot;,&quot;description&quot;:&quot;Every environment variable the starter reads, with its default&quot;,&quot;htmlPath&quot;:&quot;/reference/environment-variables/&quot;,&quot;markdownPath&quot;:&quot;/reference/environment-variables/index.md&quot;,&quot;sidebar&quot;:[{&quot;title&quot;:&quot;Getting Started&quot;,&quot;paths&quot;:[&quot;/getting-started/introduction/&quot;,&quot;/getting-started/requirements/&quot;,&quot;/getting-started/installation/&quot;,&quot;/getting-started/initial-customization/&quot;]},{&quot;title&quot;:&quot;Building Your Application&quot;,&quot;paths&quot;:[&quot;/building/app-panel/&quot;,&quot;/building/administration-panel/&quot;,&quot;/building/public-pages/&quot;,&quot;/building/error-pages/&quot;,&quot;/building/branding-and-mail/&quot;,&quot;/building/interface-conventions/&quot;]},{&quot;title&quot;:&quot;Architecture&quot;,&quot;paths&quot;:[&quot;/architecture/ui-architecture/&quot;,&quot;/architecture/domain-driven-design/&quot;,&quot;/architecture/idempotent-seeding/&quot;,&quot;/architecture/framework-defaults/&quot;]},{&quot;title&quot;:&quot;Features&quot;,&quot;paths&quot;:[&quot;/features/authentication/&quot;,&quot;/features/authorization/&quot;,&quot;/features/audit-logging/&quot;,&quot;/features/api/&quot;,&quot;/features/api-operations/&quot;,&quot;/features/mcp/&quot;,&quot;/features/database-snapshots/&quot;,&quot;/features/health-checks/&quot;,&quot;/features/announcements/&quot;,&quot;/features/support-tickets/&quot;,&quot;/features/changelog/&quot;,&quot;/features/sentry/&quot;]},{&quot;title&quot;:&quot;Northwestern Integrations&quot;,&quot;paths&quot;:[&quot;/northwestern-integrations/&quot;,&quot;/northwestern-integrations/directory-search/&quot;,&quot;/northwestern-integrations/websso/&quot;,&quot;/northwestern-integrations/eventhub/&quot;,&quot;/northwestern-integrations/wildcard-photos/&quot;]},{&quot;title&quot;:&quot;Guides&quot;,&quot;paths&quot;:[&quot;/guides/development-workflow/&quot;,&quot;/guides/testing/&quot;,&quot;/guides/adding-a-filament-panel/&quot;,&quot;/guides/deployment/&quot;,&quot;/guides/applying-upstream-updates/&quot;]},{&quot;title&quot;:&quot;Reference&quot;,&quot;paths&quot;:[&quot;/reference/commands/&quot;,&quot;/reference/environment-variables/&quot;,&quot;/reference/chassis/&quot;]},{&quot;title&quot;:&quot;API Specification&quot;,&quot;paths&quot;:[&quot;/api/&quot;,&quot;/api/operations/tags/users/&quot;,&quot;/api/operations/get-user-details/&quot;]}]}"/><link rel="alternate" type="text/markdown" href="/reference/environment-variables/index.md"/><link rel="describedby" href="/llms.txt"/><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-digtx6oc" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-digtx6oc" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-digtx6oc" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/_astro/print.ehPL0gv-.css" media="print"><link rel="stylesheet" href="/_astro/middleware.tPR6YHgI.css"><style>@layer starlight.components{:root{--sl-badge-default-border:var(--sl-color-accent);--sl-badge-default-bg:var(--sl-color-accent-low);--sl-badge-default-text:#fff;--sl-badge-note-border:var(--sl-color-blue);--sl-badge-note-bg:var(--sl-color-blue-low);--sl-badge-note-text:#fff;--sl-badge-danger-border:var(--sl-color-red);--sl-badge-danger-bg:var(--sl-color-red-low);--sl-badge-danger-text:#fff;--sl-badge-success-border:var(--sl-color-green);--sl-badge-success-bg:var(--sl-color-green-low);--sl-badge-success-text:#fff;--sl-badge-caution-border:var(--sl-color-orange);--sl-badge-caution-bg:var(--sl-color-orange-low);--sl-badge-caution-text:#fff;--sl-badge-tip-border:var(--sl-color-purple);--sl-badge-tip-bg:var(--sl-color-purple-low);--sl-badge-tip-text:#fff}[data-theme=light]:root{--sl-badge-default-bg:var(--sl-color-accent-high);--sl-badge-note-bg:var(--sl-color-blue-high);--sl-badge-danger-bg:var(--sl-color-red-high);--sl-badge-success-bg:var(--sl-color-green-high);--sl-badge-caution-bg:var(--sl-color-orange-high);--sl-badge-tip-bg:var(--sl-color-purple-high)}.sl-badge:where(.astro-lzjgmibl){border:1px solid var(--sl-color-border-badge);font-family:var(--sl-font-system-mono);color:var(--sl-color-text-badge);background-color:var(--sl-color-bg-badge);overflow-wrap:anywhere;border-radius:.25rem;line-height:normal;display:inline-block}.sidebar-content .sl-badge:where(.astro-lzjgmibl){line-height:1;font-size:var(--sl-text-xs);padding:.125rem .375rem}.sidebar-content a[aria-current=page]>.sl-badge:where(.astro-lzjgmibl){--sl-color-bg-badge:transparent;--sl-color-border-badge:currentColor;color:inherit}.default:where(.astro-lzjgmibl){--sl-color-bg-badge:var(--sl-badge-default-bg);--sl-color-border-badge:var(--sl-badge-default-border);--sl-color-text-badge:var(--sl-badge-default-text)}.note:where(.astro-lzjgmibl){--sl-color-bg-badge:var(--sl-badge-note-bg);--sl-color-border-badge:var(--sl-badge-note-border);--sl-color-text-badge:var(--sl-badge-note-text)}.danger:where(.astro-lzjgmibl){--sl-color-bg-badge:var(--sl-badge-danger-bg);--sl-color-border-badge:var(--sl-badge-danger-border);--sl-color-text-badge:var(--sl-badge-danger-text)}.success:where(.astro-lzjgmibl){--sl-color-bg-badge:var(--sl-badge-success-bg);--sl-color-border-badge:var(--sl-badge-success-border);--sl-color-text-badge:var(--sl-badge-success-text)}.tip:where(.astro-lzjgmibl){--sl-color-bg-badge:var(--sl-badge-tip-bg);--sl-color-border-badge:var(--sl-badge-tip-border);--sl-color-text-badge:var(--sl-badge-tip-text)}.caution:where(.astro-lzjgmibl){--sl-color-bg-badge:var(--sl-badge-caution-bg);--sl-color-border-badge:var(--sl-badge-caution-border);--sl-color-text-badge:var(--sl-badge-caution-text)}.small:where(.astro-lzjgmibl){font-size:var(--sl-text-xs);padding:.125rem .25rem}.medium:where(.astro-lzjgmibl){font-size:var(--sl-text-sm);padding:.175rem .35rem}.large:where(.astro-lzjgmibl){font-size:var(--sl-text-base);padding:.225rem .45rem}.sl-markdown-content :is(h1,h2,h3,h4,h5,h6) .sl-badge:where(.astro-lzjgmibl){vertical-align:middle}}
+@layer starlight.components{.card:where(.astro-5drc7tjw){--sl-card-border:var(--sl-color-purple);--sl-card-bg:var(--sl-color-purple-low);border:1px solid var(--sl-color-gray-5);background-color:var(--sl-color-black);flex-direction:column;gap:clamp(.5rem,.125rem + 1vw,1rem);padding:clamp(1rem,.125rem + 3vw,2.5rem)}.card:where(.astro-5drc7tjw):nth-child(4n+1){--sl-card-border:var(--sl-color-orange);--sl-card-bg:var(--sl-color-orange-low)}.card:where(.astro-5drc7tjw):nth-child(4n+3){--sl-card-border:var(--sl-color-green);--sl-card-bg:var(--sl-color-green-low)}.card:where(.astro-5drc7tjw):nth-child(4n+4){--sl-card-border:var(--sl-color-red);--sl-card-bg:var(--sl-color-red-low)}.card:where(.astro-5drc7tjw):nth-child(4n+5){--sl-card-border:var(--sl-color-blue);--sl-card-bg:var(--sl-color-blue-low)}.title:where(.astro-5drc7tjw){font-weight:600;font-size:var(--sl-text-h4);color:var(--sl-color-white);line-height:var(--sl-line-height-headings);align-items:center;gap:1rem}.card:where(.astro-5drc7tjw) .icon:where(.astro-5drc7tjw){border:1px solid var(--sl-card-border);background-color:var(--sl-card-bg);border-radius:.25rem;flex-shrink:0;padding:.2em}.card:where(.astro-5drc7tjw) .body:where(.astro-5drc7tjw){font-size:clamp(var(--sl-text-sm), calc(.5rem + 1vw), var(--sl-text-body));margin:0}}
+@layer starlight.components{.card-grid:where(.astro-xkp3v6yf){grid-template-columns:100%;gap:1rem;display:grid}.card-grid:where(.astro-xkp3v6yf)>*{margin-top:0!important}@media (width>=50rem){.card-grid:where(.astro-xkp3v6yf){grid-template-columns:1fr 1fr;gap:1.5rem}.stagger:where(.astro-xkp3v6yf){--stagger-height:5rem;padding-bottom:var(--stagger-height)}.stagger:where(.astro-xkp3v6yf)>:nth-child(2n){transform:translateY(var(--stagger-height))}}}
+@layer starlight.components{svg:where(.astro-digtx6oc){color:var(--sl-icon-color);font-size:var(--sl-icon-size,1em);width:1em;height:1em}}
+@layer starlight.components{starlight-tabs:where(.astro-5zpxmbrh){display:block}.tablist-wrapper:where(.astro-5zpxmbrh){overflow-x:auto}:where(.astro-5zpxmbrh)[role=tablist]{border-bottom:2px solid var(--sl-color-gray-5);padding:0;list-style:none;display:flex}.tab:where(.astro-5zpxmbrh){display:flex}.tab:where(.astro-5zpxmbrh)>:where(.astro-5zpxmbrh)[role=tab]{--sl-tab-color-border:var(--sl-color-gray-5);line-height:var(--sl-line-height-headings);box-shadow:0 2px 0 var(--sl-tab-color-border);color:var(--sl-color-gray-3);outline-offset:var(--sl-outline-offset-inside);overflow-wrap:initial;align-items:center;gap:.5rem;padding:.275rem 1.25rem;text-decoration:none;display:flex}.tab:where(.astro-5zpxmbrh) :where(.astro-5zpxmbrh)[role=tab][aria-selected=true]{--sl-tab-color-border:var(--sl-color-text-accent);color:var(--sl-color-white);font-weight:600}.tablist-wrapper:where(.astro-5zpxmbrh)~[role=tabpanel]{margin-top:1rem}}
+@layer starlight.components{.sl-steps{--bullet-size:calc(var(--sl-line-height) * 1rem);--bullet-margin:.375rem;counter-reset:steps-counter var(--sl-steps-start,0);padding-inline-start:0;list-style:none}.sl-steps>li{counter-increment:steps-counter;padding-inline-start:calc(var(--bullet-size) + 1rem);min-height:calc(var(--bullet-size) + var(--bullet-margin));padding-bottom:1px;position:relative}.sl-steps>li+li{margin-top:0}.sl-steps>li:before{content:counter(steps-counter);top:0;width:var(--bullet-size);height:var(--bullet-size);line-height:var(--bullet-size);font-size:var(--sl-text-xs);text-align:center;color:var(--sl-color-white);background-color:var(--sl-color-gray-6);box-shadow:inset 0 0 0 1px var(--sl-color-gray-5);border-radius:99rem;font-weight:600;position:absolute;inset-inline-start:0}.sl-steps>li:after{--guide-width:1px;content:"";top:calc(var(--bullet-size) + var(--bullet-margin));bottom:var(--bullet-margin);width:var(--guide-width);background-color:var(--sl-color-hairline-light);position:absolute;inset-inline-start:calc((var(--bullet-size) - var(--guide-width)) / 2)}}@layer starlight.content{.sl-steps>li>:first-child{--lh:calc(1em * var(--sl-line-height));--shift-y:calc(.5 * (var(--bullet-size) - var(--lh)));transform:translateY(var(--shift-y));margin-bottom:var(--shift-y)}.sl-steps>li>:first-child:where(h1,h2,h3,h4,h5,h6){--lh:calc(1em * var(--sl-line-height-headings))}@supports (--prop:1lh){.sl-steps>li>:first-child{--lh:1lh}}}
+@layer starlight.components{starlight-file-tree:where(.astro-6z5yx2te){--x-space:1.5rem;--y-space:.125rem;--y-pad:0;border:1px solid var(--sl-color-gray-5);background-color:var(--sl-color-gray-6);font-size:var(--sl-text-xs);font-family:var(--__sl-font-mono);padding:1rem;display:block;overflow-x:auto}starlight-file-tree:where(.astro-6z5yx2te) .directory>details{padding:0;background:0 0;border:0;padding-inline-start:var(--x-space)}starlight-file-tree:where(.astro-6z5yx2te) .directory>details>summary{padding:var(--y-pad) .625rem;color:var(--sl-color-white);border:0;max-width:100%;margin-inline-start:calc(-1 * var(--x-space));font-weight:400}starlight-file-tree:where(.astro-6z5yx2te) .directory>details>summary::marker{color:var(--sl-color-gray-3)}starlight-file-tree:where(.astro-6z5yx2te) .directory>details>summary::-webkit-details-marker{color:var(--sl-color-gray-3)}starlight-file-tree:where(.astro-6z5yx2te) .directory>details>summary:hover,starlight-file-tree:where(.astro-6z5yx2te) .directory>details>summary:hover .tree-icon{cursor:pointer;color:var(--sl-color-text-accent);fill:currentColor}starlight-file-tree:where(.astro-6z5yx2te) .directory>details>summary:hover~ul{border-color:var(--sl-color-gray-4)}starlight-file-tree:where(.astro-6z5yx2te) .directory>details>summary:hover .highlight .tree-icon{color:var(--sl-color-text-invert);fill:currentColor}starlight-file-tree:where(.astro-6z5yx2te) ul{border-inline-start:1px solid var(--sl-color-gray-5);margin-inline-start:.5rem;padding:0;padding-inline-start:.125rem;list-style:none}starlight-file-tree:where(.astro-6z5yx2te)>ul{border:0;margin:0;padding:0}starlight-file-tree:where(.astro-6z5yx2te) li{margin:var(--y-space) 0;padding:var(--y-pad) 0}starlight-file-tree:where(.astro-6z5yx2te) .file{color:var(--sl-color-white);margin-inline-start:calc(var(--x-space) - .125rem)}starlight-file-tree:where(.astro-6z5yx2te) .tree-entry{flex-wrap:wrap;align-items:flex-start;max-width:calc(100% - 1rem);display:inline-flex}@media (width>=30em){starlight-file-tree:where(.astro-6z5yx2te) .tree-entry{flex-wrap:nowrap}}starlight-file-tree:where(.astro-6z5yx2te) .tree-entry>:first-child{flex-shrink:0}starlight-file-tree:where(.astro-6z5yx2te) .empty{color:var(--sl-color-gray-3);padding-inline-start:.375rem}starlight-file-tree:where(.astro-6z5yx2te) .comment{color:var(--sl-color-gray-3);min-width:12rem;max-width:24rem;padding-inline-start:1.625rem}starlight-file-tree:where(.astro-6z5yx2te) .highlight{color:var(--sl-color-text-invert);background-color:var(--sl-color-text-accent);border-radius:.25rem;padding-inline-end:.5rem;display:inline-block}starlight-file-tree:where(.astro-6z5yx2te) svg{fill:var(--sl-color-gray-3);vertical-align:middle;width:.875rem;height:.875rem;margin-inline:.25rem .375rem;display:inline}starlight-file-tree:where(.astro-6z5yx2te) .highlight svg.tree-icon{fill:currentColor}}
+</style><script type="module" src="/_astro/page.DoRoFbdO.js"></script></head><body class="astro-py2eiy7f"><a class="sl-skip-link astro-fad3m6yo" href="#_top">Skip to content</a><div class="page sl-flex astro-g3vh2hji"><header class="header astro-g3vh2hji"><div class="header astro-yjstyvn6"><div class="title-wrapper sl-flex astro-yjstyvn6"><a href="/" class="site-title sl-flex astro-w242fp6p"><span class="astro-w242fp6p" translate="no">Northwestern Laravel Starter</span></a></div><div class="sl-flex print:hidden astro-yjstyvn6"><site-search class="astro-yjstyvn6 astro-x3w64nli" data-translations="{&quot;placeholder&quot;:&quot;Search&quot;}"><button data-open-modal disabled aria-label="Search" aria-keyshortcuts="Control+K" class="astro-x3w64nli"><svg aria-hidden="true" class="astro-x3w64nli astro-digtx6oc" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg><span class="sl-hidden md:sl-block astro-x3w64nli" aria-hidden="true">Search</span><kbd class="sl-hidden md:sl-flex astro-x3w64nli" style="display: none;"><kbd class="astro-x3w64nli">Ctrl</kbd><kbd class="astro-x3w64nli">K</kbd></kbd></button><dialog style="padding:0" aria-label="Search" class="astro-x3w64nli"><div class="dialog-frame sl-flex astro-x3w64nli"><button data-close-modal class="sl-flex md:sl-hidden astro-x3w64nli">Cancel</button><div class="search-container astro-x3w64nli"><div id="starlight__search" class="astro-x3w64nli"></div></div></div></dialog></site-search><script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script><script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.dp5CkdHx.js"></script></div><div class="sl-hidden md:sl-flex print:hidden right-group astro-yjstyvn6"><div class="sl-flex social-icons astro-yjstyvn6"><a href="https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter" rel="me" class="sl-flex astro-f2ruu2nv"><span class="sr-only astro-f2ruu2nv">GitHub</span><svg aria-hidden="true" class="astro-f2ruu2nv astro-digtx6oc" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a></div><northwestern-theme-toggle class="astro-tvgsgmae"><button aria-label="Select theme" aria-live="polite" title="Select theme" type="button" class="astro-tvgsgmae"><svg aria-hidden="true" height="16" viewBox="0 0 24 24" width="16" class="astro-tvgsgmae"><mask class="moon astro-tvgsgmae" id="northwestern-theme-mask-9626e7bd"><rect fill="white" height="100%" width="100%" x="0" y="0" class="astro-tvgsgmae"></rect><circle cx="24" cy="10" fill="black" r="6" class="astro-tvgsgmae"></circle></mask><circle class="sun astro-tvgsgmae" cx="12" cy="12" mask="url(#northwestern-theme-mask-9626e7bd)" r="6"></circle><g class="sun-beams astro-tvgsgmae" stroke="currentColor"><line x1="12" x2="12" y1="1" y2="3" class="astro-tvgsgmae"></line><line x1="12" x2="12" y1="21" y2="23" class="astro-tvgsgmae"></line><line x1="4.22" x2="5.64" y1="4.22" y2="5.64" class="astro-tvgsgmae"></line><line x1="18.36" x2="19.78" y1="18.36" y2="19.78" class="astro-tvgsgmae"></line><line x1="1" x2="3" y1="12" y2="12" class="astro-tvgsgmae"></line><line x1="21" x2="23" y1="12" y2="12" class="astro-tvgsgmae"></line><line x1="4.22" x2="5.64" y1="19.78" y2="18.36" class="astro-tvgsgmae"></line><line x1="18.36" x2="19.78" y1="5.64" y2="4.22" class="astro-tvgsgmae"></line></g></svg></button></northwestern-theme-toggle><script>
+    StarlightThemeProvider.updatePickers();
+</script><script type="module">var e=`starlight-theme`;function t(e){return e===`auto`||e===`dark`||e===`light`?e:`auto`}function n(){return t(typeof localStorage<`u`&&localStorage.getItem(e))}function r(t){typeof localStorage<`u`&&localStorage.setItem(e,t===`light`||t===`dark`?t:``)}function i(){return matchMedia(`(prefers-color-scheme: light)`).matches?`light`:`dark`}function a(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e===`auto`?i():e,r(e),o()}function o(){let e=t(document.documentElement.dataset.theme),n=e===`dark`?`light`:`dark`;document.querySelectorAll(`northwestern-theme-toggle button`).forEach(t=>{t instanceof HTMLButtonElement&&(t.setAttribute(`aria-label`,`${t.title}: ${n}`),t.setAttribute(`aria-pressed`,String(e===`dark`)))})}matchMedia(`(prefers-color-scheme: light)`).addEventListener(`change`,()=>{n()===`auto`&&a(`auto`)});var s=class extends HTMLElement{constructor(){super(),a(n()),this.querySelector(`button`)?.addEventListener(`click`,()=>{a(t(document.documentElement.dataset.theme)===`dark`?`light`:`dark`)})}};customElements.get(`northwestern-theme-toggle`)||customElements.define(`northwestern-theme-toggle`,s);</script><script type="module">var e=class extends HTMLElement{constructor(){super();let e=this.querySelector(`select`);e&&(e.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=e.currentTarget.value)}),window.addEventListener(`pageshow`,t=>{if(!t.persisted)return;let n=e.querySelector(`option[selected]`)?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}};customElements.define(`starlight-lang-select`,e);</script></div></div></header><nav class="sidebar print:hidden astro-g3vh2hji" aria-label="Main"><button popovertarget="starlight__sidebar" class="sl-menu-button sl-flex md:sl-hidden print:hidden astro-xwetm2dt"><svg aria-hidden="true" class="open-menu astro-xwetm2dt astro-digtx6oc" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg><svg aria-hidden="true" class="close-menu astro-xwetm2dt astro-digtx6oc" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg><span class="sr-only astro-xwetm2dt">Menu</span></button><script type="module">var e=class extends HTMLElement{constructor(){super();let e=matchMedia(`(min-width: 50em)`),t=()=>{this.popover=e.matches?null:`auto`};t(),e.addEventListener(`change`,()=>t()),this.addEventListener(`toggle`,({newState:e})=>this.trapFocus(e===`open`))}trapFocus(e){document.querySelectorAll(`.main-frame, .sl-skip-link`).forEach(t=>{t.toggleAttribute(`inert`,e)})}};customElements.define(`sl-sidebar-pane`,e);</script><sl-sidebar-pane popover id="starlight__sidebar" class="sidebar-pane astro-g3vh2hji"><div class="sidebar-content sl-flex astro-g3vh2hji"><sl-sidebar-state-persist data-hash="1u1jwad" class="astro-3ihxo5qh"><script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script><ul class="top-level astro-z3t5db2n"><li class="astro-z3t5db2n"><details open class="astro-z3t5db2n"><summary class="astro-z3t5db2n"><span class="group-label astro-z3t5db2n"><span class="large astro-z3t5db2n">Getting Started</span></span><svg aria-hidden="true" class="caret astro-z3t5db2n astro-digtx6oc" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="0"></sl-sidebar-restore><ul class="astro-z3t5db2n"><li class="astro-z3t5db2n"><a href="/getting-started/introduction/" class="astro-z3t5db2n"><span class="astro-z3t5db2n">Introduction</span></a></li><li class="astro-z3t5db2n"><a href="/getting-started/requirements/" class="astro-z3t5db2n"><span class="astro-z3t5db2n">Requirements</span></a></li><li class="astro-z3t5db2n"><a href="/getting-started/installation/" class="astro-z3t5db2n"><span class="astro-z3t5db2n">Installation</span></a></li><li class="astro-z3t5db2n"><a href="/getting-started/initial-customization/" class="astro-z3t5db2n"><span class="astro-z3t5db2n">Initial Customization</span></a></li></ul></details></li><li class="astro-z3t5db2n"><details open class="astro-z3t5db2n"><summary class="astro-z3t5db2n"><span class="group-label astro-z3t5db2n"><span class="large astro-z3t5db2n">Building Your Application</span></span><svg aria-hidden="true" class="caret astro-z3t5db2n astro-digtx6oc" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="1"></sl-sidebar-restore><ul class="astro-z3t5db2n"><li class="astro-z3t5db2n"><a href="/building/app-panel/" class="astro-z3t5db2n"><span class="astro-z3t5db2n">The App Panel</span></a></li><li class="astro-z3t5db2n"><a href="/building/administration-panel/" class="astro-z3t5db2n"><span class="astro-z3t5db2n">The Administration Panel</span></a></li><li class="astro-z3t5db2n"><a href="/building/public-pages/" class="astro-z3t5db2n"><span class="astro-z3t5db2n">Public Pages</span></a></li><li class="astro-z3t5db2n"><a href="/building/error-pages/" class="astro-z3t5db2n"><span class="astro-z3t5db2n">Error Pages</span></a></li><li class="astro-z3t5db2n"><a href="/building/branding-and-mail/" class="astro-z3t5db2n"><span class="astro-z3t5db2n">Branding &amp; Mail</span></a></li><li class="astro-z3t5db2n"><a href="/building/interface-conventions/" class="astro-z3t5db2n"><span class="astro-z3t5db2n">Interface Conventions</span></a></li></ul></details></li><li class="astro-z3t5db2n"><details open class="astro-z3t5db2n"><summary class="astro-z3t5db2n"><span class="group-label astro-z3t5db2n"><span class="large astro-z3t5db2n">Architecture</span></span><svg aria-hidden="true" class="caret astro-z3t5db2n astro-digtx6oc" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="2"></sl-sidebar-restore><ul class="astro-z3t5db2n"><li class="astro-z3t5db2n"><a href="/architecture/ui-architecture/" class="astro-z3t5db2n"><span class="astro-z3t5db2n">UI Architecture</span></a></li><li class="astro-z3t5db2n"><a href="/architecture/domain-driven-design/" class="astro-z3t5db2n"><span class="astro-z3t5db2n">Domain-Driven Design</span></a></li><li class="astro-z3t5db2n"><a href="/architecture/idempotent-seeding/" class="astro-z3t5db2n"><span class="astro-z3t5db2n">Idempotent Seeding</span></a></li><li class="astro-z3t5db2n"><a href="/architecture/framework-defaults/" class="astro-z3t5db2n"><span class="astro-z3t5db2n">Framework Defaults</span></a></li></ul></details></li><li class="astro-z3t5db2n"><details open class="astro-z3t5db2n"><summary class="astro-z3t5db2n"><span class="group-label astro-z3t5db2n"><span class="large astro-z3t5db2n">Features</span></span><svg aria-hidden="true" class="caret astro-z3t5db2n astro-digtx6oc" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="3"></sl-sidebar-restore><ul class="astro-z3t5db2n"><li class="astro-z3t5db2n"><a href="/features/authentication/" class="astro-z3t5db2n"><span class="astro-z3t5db2n">Authentication</span></a></li><li class="astro-z3t5db2n"><a href="/features/authorization/" class="astro-z3t5db2n"><span class="astro-z3t5db2n">Authorization</span></a></li><li class="astro-z3t5db2n"><a href="/features/audit-logging/" class="astro-z3t5db2n"><span class="astro-z3t5db2n">Audit Logging</span></a></li><li class="astro-z3t5db2n"><a href="/features/api/" class="astro-z3t5db2n"><span class="astro-z3t5db2n">API System</span></a></li><li class="astro-z3t5db2n"><a href="/features/api-operations/" class="astro-z3t5db2n"><span class="astro-z3t5db2n">API Operations</span></a></li><li class="astro-z3t5db2n"><a href="/features/mcp/" class="astro-z3t5db2n"><span class="astro-z3t5db2n">MCP Server</span></a></li><li class="astro-z3t5db2n"><a href="/features/database-snapshots/" class="astro-z3t5db2n"><span class="astro-z3t5db2n">Database Snapshots</span></a></li><li class="astro-z3t5db2n"><a href="/features/health-checks/" class="astro-z3t5db2n"><span class="astro-z3t5db2n">Health Checks</span></a></li><li class="astro-z3t5db2n"><a href="/features/announcements/" class="astro-z3t5db2n"><span class="astro-z3t5db2n">Announcements</span></a></li><li class="astro-z3t5db2n"><a href="/features/support-tickets/" class="astro-z3t5db2n"><span class="astro-z3t5db2n">Support Tickets</span></a></li><li class="astro-z3t5db2n"><a href="/features/changelog/" class="astro-z3t5db2n"><span class="astro-z3t5db2n">Changelog</span></a></li><li class="astro-z3t5db2n"><a href="/features/sentry/" class="astro-z3t5db2n"><span class="astro-z3t5db2n">Sentry</span></a></li></ul></details></li><li class="astro-z3t5db2n"><details open class="astro-z3t5db2n"><summary class="astro-z3t5db2n"><span class="group-label astro-z3t5db2n"><span class="large astro-z3t5db2n">Northwestern Integrations</span></span><svg aria-hidden="true" class="caret astro-z3t5db2n astro-digtx6oc" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="4"></sl-sidebar-restore><ul class="astro-z3t5db2n"><li class="astro-z3t5db2n"><a href="/northwestern-integrations/" class="astro-z3t5db2n"><span class="astro-z3t5db2n">Overview</span></a></li><li class="astro-z3t5db2n"><a href="/northwestern-integrations/directory-search/" class="astro-z3t5db2n"><span class="astro-z3t5db2n">Directory Search</span></a></li><li class="astro-z3t5db2n"><a href="/northwestern-integrations/websso/" class="astro-z3t5db2n"><span class="astro-z3t5db2n">WebSSO / Entra ID</span></a></li><li class="astro-z3t5db2n"><a href="/northwestern-integrations/eventhub/" class="astro-z3t5db2n"><span class="astro-z3t5db2n">EventHub</span></a></li><li class="astro-z3t5db2n"><a href="/northwestern-integrations/wildcard-photos/" class="astro-z3t5db2n"><span class="astro-z3t5db2n">Wildcard Photos</span></a></li></ul></details></li><li class="astro-z3t5db2n"><details open class="astro-z3t5db2n"><summary class="astro-z3t5db2n"><span class="group-label astro-z3t5db2n"><span class="large astro-z3t5db2n">Guides</span></span><svg aria-hidden="true" class="caret astro-z3t5db2n astro-digtx6oc" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="5"></sl-sidebar-restore><ul class="astro-z3t5db2n"><li class="astro-z3t5db2n"><a href="/guides/development-workflow/" class="astro-z3t5db2n"><span class="astro-z3t5db2n">Development Workflow</span></a></li><li class="astro-z3t5db2n"><a href="/guides/testing/" class="astro-z3t5db2n"><span class="astro-z3t5db2n">Testing</span></a></li><li class="astro-z3t5db2n"><a href="/guides/adding-a-filament-panel/" class="astro-z3t5db2n"><span class="astro-z3t5db2n">Adding a Filament Panel</span></a></li><li class="astro-z3t5db2n"><a href="/guides/deployment/" class="astro-z3t5db2n"><span class="astro-z3t5db2n">Deployment</span></a></li><li class="astro-z3t5db2n"><a href="/guides/applying-upstream-updates/" class="astro-z3t5db2n"><span class="astro-z3t5db2n">Applying Upstream Updates</span></a></li></ul></details></li><li class="astro-z3t5db2n"><details open class="astro-z3t5db2n"><summary class="astro-z3t5db2n"><span class="group-label astro-z3t5db2n"><span class="large astro-z3t5db2n">Reference</span></span><svg aria-hidden="true" class="caret astro-z3t5db2n astro-digtx6oc" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="6"></sl-sidebar-restore><ul class="astro-z3t5db2n"><li class="astro-z3t5db2n"><a href="/reference/commands/" class="astro-z3t5db2n"><span class="astro-z3t5db2n">Artisan Commands</span></a></li><li class="astro-z3t5db2n"><a href="/reference/environment-variables/" aria-current="page" class="astro-z3t5db2n"><span class="astro-z3t5db2n">Environment Variables</span></a></li><li class="astro-z3t5db2n"><a href="/reference/chassis/" class="astro-z3t5db2n"><span class="astro-z3t5db2n">Chassis</span></a></li></ul></details></li><li class="astro-z3t5db2n"><details class="astro-z3t5db2n"><summary class="astro-z3t5db2n"><span class="group-label astro-z3t5db2n"><span class="large astro-z3t5db2n">API Specification</span></span><svg aria-hidden="true" class="caret astro-z3t5db2n astro-digtx6oc" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="7"></sl-sidebar-restore><ul class="astro-z3t5db2n"><li class="astro-z3t5db2n"><a href="/api/" class="astro-z3t5db2n"><span class="astro-z3t5db2n">Overview</span></a></li><li class="astro-z3t5db2n"><details class="astro-z3t5db2n"><summary class="astro-z3t5db2n"><span class="group-label astro-z3t5db2n"><span class="large astro-z3t5db2n">Users</span></span><svg aria-hidden="true" class="caret astro-z3t5db2n astro-digtx6oc" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="8"></sl-sidebar-restore><ul class="astro-z3t5db2n"><li class="astro-z3t5db2n"><a href="/api/operations/tags/users/" class="astro-z3t5db2n"><span class="astro-z3t5db2n">Overview</span></a></li><li class="astro-z3t5db2n"><a href="/api/operations/get-user-details/" class="astro-z3t5db2n"><span class="astro-z3t5db2n">Get authenticated user details</span><span class="sl-badge caution small sl-openapi-method-get astro-z3t5db2n astro-lzjgmibl">GET</span></a></li></ul></details></li></ul></details></li></ul><script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script></sl-sidebar-state-persist><div class="md:sl-hidden"><div class="mobile-preferences sl-flex astro-qukvmoj5"><div class="social-icons astro-qukvmoj5"><a href="https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter" rel="me" class="sl-flex astro-f2ruu2nv"><span class="sr-only astro-f2ruu2nv">GitHub</span><svg aria-hidden="true" class="astro-f2ruu2nv astro-digtx6oc" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a></div><northwestern-theme-toggle class="astro-tvgsgmae"><button aria-label="Select theme" aria-live="polite" title="Select theme" type="button" class="astro-tvgsgmae"><svg aria-hidden="true" height="16" viewBox="0 0 24 24" width="16" class="astro-tvgsgmae"><mask class="moon astro-tvgsgmae" id="northwestern-theme-mask-4644e675"><rect fill="white" height="100%" width="100%" x="0" y="0" class="astro-tvgsgmae"></rect><circle cx="24" cy="10" fill="black" r="6" class="astro-tvgsgmae"></circle></mask><circle class="sun astro-tvgsgmae" cx="12" cy="12" mask="url(#northwestern-theme-mask-4644e675)" r="6"></circle><g class="sun-beams astro-tvgsgmae" stroke="currentColor"><line x1="12" x2="12" y1="1" y2="3" class="astro-tvgsgmae"></line><line x1="12" x2="12" y1="21" y2="23" class="astro-tvgsgmae"></line><line x1="4.22" x2="5.64" y1="4.22" y2="5.64" class="astro-tvgsgmae"></line><line x1="18.36" x2="19.78" y1="18.36" y2="19.78" class="astro-tvgsgmae"></line><line x1="1" x2="3" y1="12" y2="12" class="astro-tvgsgmae"></line><line x1="21" x2="23" y1="12" y2="12" class="astro-tvgsgmae"></line><line x1="4.22" x2="5.64" y1="19.78" y2="18.36" class="astro-tvgsgmae"></line><line x1="18.36" x2="19.78" y1="5.64" y2="4.22" class="astro-tvgsgmae"></line></g></svg></button></northwestern-theme-toggle><script>
+    StarlightThemeProvider.updatePickers();
+</script></div></div></div></sl-sidebar-pane></nav><div class="main-frame astro-g3vh2hji"><script type="module">var e=document.getElementById(`starlight__sidebar`),t=e?.querySelector(`sl-sidebar-state-persist`),n=`sl-sidebar-state`,r=()=>{let r=[],i=t?.dataset.hash||``;try{let e=sessionStorage.getItem(n),t=JSON.parse(e||`{}`);Array.isArray(t.open)&&t.hash===i&&(r=t.open)}catch{}return{hash:i,open:r,scroll:e?.scrollTop||0}},i=e=>{try{sessionStorage.setItem(n,JSON.stringify(e))}catch{}},a=()=>i(r()),o=(e,t)=>{let n=r();n.open[t]=e,i(n)};t?.addEventListener(`click`,e=>{if(!(e.target instanceof Element))return;let t=e.target.closest(`summary`)?.closest(`details`);if(!t)return;let n=t.querySelector(`sl-sidebar-restore`),r=parseInt(n?.dataset.index||``);isNaN(r)||o(!t.open,r)}),addEventListener(`visibilitychange`,()=>{document.visibilityState===`hidden`&&a()});</script><div class="lg:sl-flex astro-g7rbziof"><aside class="right-sidebar-container print:hidden astro-g7rbziof"><div class="right-sidebar astro-g7rbziof"><div class="lg:sl-hidden astro-nbsho7te"><mobile-starlight-toc data-min-h="2" data-max-h="3" class="astro-zwlxkrx3"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-zwlxkrx3"><details id="starlight__mobile-toc" class="astro-zwlxkrx3"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-zwlxkrx3"><span class="toggle sl-flex astro-zwlxkrx3">On this page<svg aria-hidden="true" class="caret astro-zwlxkrx3 astro-digtx6oc" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-zwlxkrx3"></span></summary><div class="dropdown astro-zwlxkrx3"><ul class="isMobile astro-7sqqrxxn" style="--depth: 0;"><li style="--depth: 0;" class="astro-7sqqrxxn"><a href="#_top" style="--depth: 0;" class="astro-7sqqrxxn"><span style="--depth: 0;" class="astro-7sqqrxxn">Overview</span></a></li><li style="--depth: 0;" class="astro-7sqqrxxn"><a href="#application" style="--depth: 0;" class="astro-7sqqrxxn"><span style="--depth: 0;" class="astro-7sqqrxxn">Application</span></a></li><li style="--depth: 0;" class="astro-7sqqrxxn"><a href="#database-and-storage" style="--depth: 0;" class="astro-7sqqrxxn"><span style="--depth: 0;" class="astro-7sqqrxxn">Database and storage</span></a></li><li style="--depth: 0;" class="astro-7sqqrxxn"><a href="#sessions-cache-queues-and-broadcasting" style="--depth: 0;" class="astro-7sqqrxxn"><span style="--depth: 0;" class="astro-7sqqrxxn">Sessions, cache, queues and broadcasting</span></a></li><li style="--depth: 0;" class="astro-7sqqrxxn"><a href="#mail" style="--depth: 0;" class="astro-7sqqrxxn"><span style="--depth: 0;" class="astro-7sqqrxxn">Mail</span></a></li><li style="--depth: 0;" class="astro-7sqqrxxn"><a href="#authentication" style="--depth: 0;" class="astro-7sqqrxxn"><span style="--depth: 0;" class="astro-7sqqrxxn">Authentication</span></a><ul class="isMobile astro-7sqqrxxn" style="--depth: 1;"><li style="--depth: 1;" class="astro-7sqqrxxn"><a href="#netid-sign-in" style="--depth: 1;" class="astro-7sqqrxxn"><span style="--depth: 1;" class="astro-7sqqrxxn">NetID sign-in</span></a></li><li style="--depth: 1;" class="astro-7sqqrxxn"><a href="#email-verification-codes" style="--depth: 1;" class="astro-7sqqrxxn"><span style="--depth: 1;" class="astro-7sqqrxxn">Email verification codes</span></a></li></ul></li><li style="--depth: 0;" class="astro-7sqqrxxn"><a href="#api" style="--depth: 0;" class="astro-7sqqrxxn"><span style="--depth: 0;" class="astro-7sqqrxxn">API</span></a></li><li style="--depth: 0;" class="astro-7sqqrxxn"><a href="#mcp" style="--depth: 0;" class="astro-7sqqrxxn"><span style="--depth: 0;" class="astro-7sqqrxxn">MCP</span></a></li><li style="--depth: 0;" class="astro-7sqqrxxn"><a href="#northwestern-integrations" style="--depth: 0;" class="astro-7sqqrxxn"><span style="--depth: 0;" class="astro-7sqqrxxn">Northwestern integrations</span></a></li><li style="--depth: 0;" class="astro-7sqqrxxn"><a href="#support-and-changelog" style="--depth: 0;" class="astro-7sqqrxxn"><span style="--depth: 0;" class="astro-7sqqrxxn">Support and changelog</span></a><ul class="isMobile astro-7sqqrxxn" style="--depth: 1;"><li style="--depth: 1;" class="astro-7sqqrxxn"><a href="#support-form" style="--depth: 1;" class="astro-7sqqrxxn"><span style="--depth: 1;" class="astro-7sqqrxxn">Support form</span></a></li><li style="--depth: 1;" class="astro-7sqqrxxn"><a href="#teamdynamix" style="--depth: 1;" class="astro-7sqqrxxn"><span style="--depth: 1;" class="astro-7sqqrxxn">TeamDynamix</span></a></li><li style="--depth: 1;" class="astro-7sqqrxxn"><a href="#changelog" style="--depth: 1;" class="astro-7sqqrxxn"><span style="--depth: 1;" class="astro-7sqqrxxn">Changelog</span></a></li></ul></li><li style="--depth: 0;" class="astro-7sqqrxxn"><a href="#branding" style="--depth: 0;" class="astro-7sqqrxxn"><span style="--depth: 0;" class="astro-7sqqrxxn">Branding</span></a></li><li style="--depth: 0;" class="astro-7sqqrxxn"><a href="#data-retention" style="--depth: 0;" class="astro-7sqqrxxn"><span style="--depth: 0;" class="astro-7sqqrxxn">Data retention</span></a></li><li style="--depth: 0;" class="astro-7sqqrxxn"><a href="#environment-lockdown" style="--depth: 0;" class="astro-7sqqrxxn"><span style="--depth: 0;" class="astro-7sqqrxxn">Environment lockdown</span></a></li><li style="--depth: 0;" class="astro-7sqqrxxn"><a href="#rate-limiting" style="--depth: 0;" class="astro-7sqqrxxn"><span style="--depth: 0;" class="astro-7sqqrxxn">Rate limiting</span></a></li><li style="--depth: 0;" class="astro-7sqqrxxn"><a href="#health-checks" style="--depth: 0;" class="astro-7sqqrxxn"><span style="--depth: 0;" class="astro-7sqqrxxn">Health checks</span></a></li><li style="--depth: 0;" class="astro-7sqqrxxn"><a href="#sentry" style="--depth: 0;" class="astro-7sqqrxxn"><span style="--depth: 0;" class="astro-7sqqrxxn">Sentry</span></a></li><li style="--depth: 0;" class="astro-7sqqrxxn"><a href="#developer-tools" style="--depth: 0;" class="astro-7sqqrxxn"><span style="--depth: 0;" class="astro-7sqqrxxn">Developer tools</span></a></li><li style="--depth: 0;" class="astro-7sqqrxxn"><a href="#testing" style="--depth: 0;" class="astro-7sqqrxxn"><span style="--depth: 0;" class="astro-7sqqrxxn">Testing</span></a></li></ul></div></details></nav></mobile-starlight-toc><script type="module" src="/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.C3fM4Kra.js"></script></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-nbsho7te"><div class="sl-container astro-nbsho7te"><starlight-toc data-min-h="2" data-max-h="3"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">On this page</h2><ul class="astro-7sqqrxxn" style="--depth: 0;"><li style="--depth: 0;" class="astro-7sqqrxxn"><a href="#_top" style="--depth: 0;" class="astro-7sqqrxxn"><span style="--depth: 0;" class="astro-7sqqrxxn">Overview</span></a></li><li style="--depth: 0;" class="astro-7sqqrxxn"><a href="#application" style="--depth: 0;" class="astro-7sqqrxxn"><span style="--depth: 0;" class="astro-7sqqrxxn">Application</span></a></li><li style="--depth: 0;" class="astro-7sqqrxxn"><a href="#database-and-storage" style="--depth: 0;" class="astro-7sqqrxxn"><span style="--depth: 0;" class="astro-7sqqrxxn">Database and storage</span></a></li><li style="--depth: 0;" class="astro-7sqqrxxn"><a href="#sessions-cache-queues-and-broadcasting" style="--depth: 0;" class="astro-7sqqrxxn"><span style="--depth: 0;" class="astro-7sqqrxxn">Sessions, cache, queues and broadcasting</span></a></li><li style="--depth: 0;" class="astro-7sqqrxxn"><a href="#mail" style="--depth: 0;" class="astro-7sqqrxxn"><span style="--depth: 0;" class="astro-7sqqrxxn">Mail</span></a></li><li style="--depth: 0;" class="astro-7sqqrxxn"><a href="#authentication" style="--depth: 0;" class="astro-7sqqrxxn"><span style="--depth: 0;" class="astro-7sqqrxxn">Authentication</span></a><ul class="astro-7sqqrxxn" style="--depth: 1;"><li style="--depth: 1;" class="astro-7sqqrxxn"><a href="#netid-sign-in" style="--depth: 1;" class="astro-7sqqrxxn"><span style="--depth: 1;" class="astro-7sqqrxxn">NetID sign-in</span></a></li><li style="--depth: 1;" class="astro-7sqqrxxn"><a href="#email-verification-codes" style="--depth: 1;" class="astro-7sqqrxxn"><span style="--depth: 1;" class="astro-7sqqrxxn">Email verification codes</span></a></li></ul></li><li style="--depth: 0;" class="astro-7sqqrxxn"><a href="#api" style="--depth: 0;" class="astro-7sqqrxxn"><span style="--depth: 0;" class="astro-7sqqrxxn">API</span></a></li><li style="--depth: 0;" class="astro-7sqqrxxn"><a href="#mcp" style="--depth: 0;" class="astro-7sqqrxxn"><span style="--depth: 0;" class="astro-7sqqrxxn">MCP</span></a></li><li style="--depth: 0;" class="astro-7sqqrxxn"><a href="#northwestern-integrations" style="--depth: 0;" class="astro-7sqqrxxn"><span style="--depth: 0;" class="astro-7sqqrxxn">Northwestern integrations</span></a></li><li style="--depth: 0;" class="astro-7sqqrxxn"><a href="#support-and-changelog" style="--depth: 0;" class="astro-7sqqrxxn"><span style="--depth: 0;" class="astro-7sqqrxxn">Support and changelog</span></a><ul class="astro-7sqqrxxn" style="--depth: 1;"><li style="--depth: 1;" class="astro-7sqqrxxn"><a href="#support-form" style="--depth: 1;" class="astro-7sqqrxxn"><span style="--depth: 1;" class="astro-7sqqrxxn">Support form</span></a></li><li style="--depth: 1;" class="astro-7sqqrxxn"><a href="#teamdynamix" style="--depth: 1;" class="astro-7sqqrxxn"><span style="--depth: 1;" class="astro-7sqqrxxn">TeamDynamix</span></a></li><li style="--depth: 1;" class="astro-7sqqrxxn"><a href="#changelog" style="--depth: 1;" class="astro-7sqqrxxn"><span style="--depth: 1;" class="astro-7sqqrxxn">Changelog</span></a></li></ul></li><li style="--depth: 0;" class="astro-7sqqrxxn"><a href="#branding" style="--depth: 0;" class="astro-7sqqrxxn"><span style="--depth: 0;" class="astro-7sqqrxxn">Branding</span></a></li><li style="--depth: 0;" class="astro-7sqqrxxn"><a href="#data-retention" style="--depth: 0;" class="astro-7sqqrxxn"><span style="--depth: 0;" class="astro-7sqqrxxn">Data retention</span></a></li><li style="--depth: 0;" class="astro-7sqqrxxn"><a href="#environment-lockdown" style="--depth: 0;" class="astro-7sqqrxxn"><span style="--depth: 0;" class="astro-7sqqrxxn">Environment lockdown</span></a></li><li style="--depth: 0;" class="astro-7sqqrxxn"><a href="#rate-limiting" style="--depth: 0;" class="astro-7sqqrxxn"><span style="--depth: 0;" class="astro-7sqqrxxn">Rate limiting</span></a></li><li style="--depth: 0;" class="astro-7sqqrxxn"><a href="#health-checks" style="--depth: 0;" class="astro-7sqqrxxn"><span style="--depth: 0;" class="astro-7sqqrxxn">Health checks</span></a></li><li style="--depth: 0;" class="astro-7sqqrxxn"><a href="#sentry" style="--depth: 0;" class="astro-7sqqrxxn"><span style="--depth: 0;" class="astro-7sqqrxxn">Sentry</span></a></li><li style="--depth: 0;" class="astro-7sqqrxxn"><a href="#developer-tools" style="--depth: 0;" class="astro-7sqqrxxn"><span style="--depth: 0;" class="astro-7sqqrxxn">Developer tools</span></a></li><li style="--depth: 0;" class="astro-7sqqrxxn"><a href="#testing" style="--depth: 0;" class="astro-7sqqrxxn"><span style="--depth: 0;" class="astro-7sqqrxxn">Testing</span></a></li></ul></nav></starlight-toc><script type="module" src="/_astro/TableOfContents.astro_astro_type_script_index_0_lang.BpJaGz7G.js"></script></div></div></div></aside><div class="main-pane astro-g7rbziof"><main data-pagefind-body class="astro-py2eiy7f" lang="en" dir="ltr"><div class="content-panel astro-64ouf32g"><div class="sl-container astro-64ouf32g"><h1 id="_top" class="astro-swqwmnzc">Environment Variables</h1></div></div><div class="content-panel astro-64ouf32g"><div class="sl-container astro-64ouf32g"><div class="sl-markdown-content"><p>The starter reads these variables from <code dir="auto">.env</code> through the files in <code dir="auto">config/</code>. The <strong>Default</strong> column is what the config uses when the variable is not set. <code dir="auto">.env.example</code> sets some of them to different values for local development.</p>
+<aside aria-label="An empty value is not an unset value" class="starlight-aside starlight-aside--caution"><p class="starlight-aside__title" aria-hidden="true"><svg aria-hidden="true" class="starlight-aside__icon astro-digtx6oc" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 16a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm10.67 1.47-8.05-14a3 3 0 0 0-5.24 0l-8 14A3 3 0 0 0 3.94 22h16.12a3 3 0 0 0 2.61-4.53Zm-1.73 2a1 1 0 0 1-.88.51H3.94a1 1 0 0 1-.88-.51 1 1 0 0 1 0-1l8-14a1 1 0 0 1 1.78 0l8.05 14a1 1 0 0 1 .05 1.02v-.02ZM12 8a1 1 0 0 0-1 1v4a1 1 0 0 0 2 0V9a1 1 0 0 0-1-1Z"/></svg>An empty value is not an unset value</p><div class="starlight-aside__content"><p><code dir="auto">FOO=</code> sets <code dir="auto">FOO</code> to an empty string, and the empty string overrides the
+config default. Delete or comment out the line to get the default. Laravel
+converts the values <code dir="auto">true</code>, <code dir="auto">false</code>, <code dir="auto">null</code> and <code dir="auto">empty</code> (with or without
+parentheses) to <code dir="auto">true</code>, <code dir="auto">false</code>, <code dir="auto">null</code> and <code dir="auto">''</code>.</p></div></aside>
+<p>Laravel’s own configuration files read many more variables than this page lists: the long tail in <code dir="auto">config/database.php</code>, <code dir="auto">config/cache.php</code>, <code dir="auto">config/session.php</code>, <code dir="auto">config/logging.php</code>, <code dir="auto">config/mail.php</code>, <code dir="auto">config/queue.php</code> and <code dir="auto">config/broadcasting.php</code>. This page lists only those in <code dir="auto">.env.example</code> or added by the starter. See <a href="https://laravel.com/docs/configuration">Laravel’s configuration documentation</a> and the config file itself for the rest.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="application">Application</h2><a class="sl-anchor-link" href="#application"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Application”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="nu-table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table><thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code dir="auto">APP_NAME</code></td><td><code dir="auto">Laravel</code></td><td>Application name, shown in the header, emails and the browser title</td></tr><tr><td><code dir="auto">APP_ENV</code></td><td><code dir="auto">production</code></td><td>Environment name. The starter recognizes <code dir="auto">local</code>, <code dir="auto">testing</code>, <code dir="auto">ci</code>, <code dir="auto">develop</code>, <code dir="auto">qa</code>, <code dir="auto">staging</code> and <code dir="auto">production</code></td></tr><tr><td><code dir="auto">APP_KEY</code></td><td><code dir="auto">null</code></td><td>Encryption key. Generate it with <code dir="auto">php artisan key:generate</code></td></tr><tr><td><code dir="auto">APP_DEBUG</code></td><td><code dir="auto">false</code></td><td>Show detailed error pages. Never <code dir="auto">true</code> in production</td></tr><tr><td><code dir="auto">APP_URL</code></td><td><code dir="auto">http://localhost</code></td><td>Base URL of this environment</td></tr><tr><td><code dir="auto">PRODUCTION_URL</code></td><td><code dir="auto">https://northwestern.edu</code></td><td>URL of the production environment, linked from the <a href="/getting-started/initial-customization/#5-environment-lockdown">lockdown page</a> in other environments</td></tr><tr><td><code dir="auto">APP_LOCALE</code></td><td><code dir="auto">en</code></td><td>Default locale</td></tr><tr><td><code dir="auto">APP_FALLBACK_LOCALE</code></td><td><code dir="auto">en</code></td><td>Locale used when a translation is missing</td></tr><tr><td><code dir="auto">APP_FAKER_LOCALE</code></td><td><code dir="auto">en_US</code></td><td>Locale for factory data</td></tr><tr><td><code dir="auto">APP_MAINTENANCE_DRIVER</code></td><td><code dir="auto">file</code></td><td>Where maintenance mode is stored (<code dir="auto">file</code> or <code dir="auto">cache</code>)</td></tr><tr><td><code dir="auto">APP_MAINTENANCE_STORE</code></td><td><code dir="auto">database</code></td><td>Cache store for maintenance mode when the driver is <code dir="auto">cache</code></td></tr><tr><td><code dir="auto">BCRYPT_ROUNDS</code></td><td><code dir="auto">12</code></td><td>Password hashing cost</td></tr><tr><td><code dir="auto">DEFAULT_USER_TIMEZONE</code></td><td><code dir="auto">America/Chicago</code></td><td>Timezone given to users that Directory Search creates, and the <code dir="auto">users.timezone</code> column’s default, set when the migration runs. Changing it later doesn’t change existing users or the column</td></tr><tr><td><code dir="auto">AUDITING_ENABLED</code></td><td><code dir="auto">true</code></td><td>Record model changes. See <a href="/features/audit-logging/">Audit Logging</a></td></tr><tr><td><code dir="auto">LOG_CHANNEL</code></td><td><code dir="auto">stack</code></td><td>Default log channel</td></tr><tr><td><code dir="auto">LOG_STACK</code></td><td><code dir="auto">single</code></td><td>Comma-separated channels the <code dir="auto">stack</code> channel writes to</td></tr><tr><td><code dir="auto">LOG_DEPRECATIONS_CHANNEL</code></td><td><code dir="auto">null</code></td><td>Channel for PHP and library deprecation warnings</td></tr><tr><td><code dir="auto">LOG_LEVEL</code></td><td><code dir="auto">debug</code></td><td>Minimum level written to the logs</td></tr></tbody></table></div>
+<div class="sl-heading-wrapper level-h2"><h2 id="database-and-storage">Database and storage</h2><a class="sl-anchor-link" href="#database-and-storage"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Database and storage”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="nu-table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table><thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code dir="auto">DB_CONNECTION</code></td><td><code dir="auto">pgsql</code></td><td>Default database connection</td></tr><tr><td><code dir="auto">DB_HOST</code></td><td><code dir="auto">127.0.0.1</code></td><td>PostgreSQL host</td></tr><tr><td><code dir="auto">DB_PORT</code></td><td><code dir="auto">5432</code></td><td>PostgreSQL port</td></tr><tr><td><code dir="auto">DB_DATABASE</code></td><td><code dir="auto">null</code></td><td>Database name</td></tr><tr><td><code dir="auto">DB_USERNAME</code></td><td><code dir="auto">root</code></td><td>Database user</td></tr><tr><td><code dir="auto">DB_PASSWORD</code></td><td><code dir="auto">''</code></td><td>Database password</td></tr><tr><td><code dir="auto">DB_PHPUNIT_DATABASE</code></td><td><code dir="auto">null</code></td><td>Separate database for the <code dir="auto">phpunit</code> connection, which <code dir="auto">phpunit.xml</code> selects, so tests never touch the main database</td></tr><tr><td><code dir="auto">REDIS_HOST</code></td><td><code dir="auto">127.0.0.1</code></td><td>Redis host</td></tr><tr><td><code dir="auto">REDIS_PASSWORD</code></td><td><code dir="auto">null</code></td><td>Redis password</td></tr><tr><td><code dir="auto">REDIS_PORT</code></td><td><code dir="auto">6379</code></td><td>Redis port</td></tr><tr><td><code dir="auto">FILESYSTEM_DISK</code></td><td><code dir="auto">s3</code></td><td>Default filesystem disk</td></tr><tr><td><code dir="auto">AWS_ACCESS_KEY_ID</code></td><td><code dir="auto">null</code></td><td>S3 access key. Also used by SES mail and the SQS and DynamoDB drivers</td></tr><tr><td><code dir="auto">AWS_SECRET_ACCESS_KEY</code></td><td><code dir="auto">null</code></td><td>S3 secret key</td></tr><tr><td><code dir="auto">AWS_DEFAULT_REGION</code></td><td><code dir="auto">null</code></td><td>S3 region</td></tr><tr><td><code dir="auto">AWS_BUCKET</code></td><td><code dir="auto">null</code></td><td>S3 bucket name</td></tr><tr><td><code dir="auto">AWS_URL</code></td><td><code dir="auto">null</code></td><td>Public URL of the bucket</td></tr><tr><td><code dir="auto">AWS_ENDPOINT</code></td><td><code dir="auto">null</code></td><td>Custom S3 endpoint, such as a local RustFS server</td></tr><tr><td><code dir="auto">AWS_USE_PATH_STYLE_ENDPOINT</code></td><td><code dir="auto">false</code></td><td>Use path-style bucket URLs. Required for RustFS</td></tr><tr><td><code dir="auto">AWS_BUCKET_KMS_KEY_ARN</code></td><td><code dir="auto">null</code></td><td>KMS key for server-side encryption. When set, uploads are encrypted with it</td></tr><tr><td><code dir="auto">AWS_BUCKET_ENCRYPTION_ALGORITHM</code></td><td><code dir="auto">aws:kms</code></td><td>Server-side encryption algorithm, used only when <code dir="auto">AWS_BUCKET_KMS_KEY_ARN</code> is set</td></tr><tr><td><code dir="auto">AWS_SSL_VERIFY</code></td><td><code dir="auto">true</code></td><td>Verify the S3 endpoint’s TLS certificate</td></tr><tr><td><code dir="auto">S3_STREAM_READS</code></td><td><code dir="auto">true</code></td><td>Stream S3 reads instead of loading whole files into memory. <code dir="auto">.env.example</code> sets <code dir="auto">false</code>; see its comment for the local HTTPS caveat</td></tr></tbody></table></div>
+<div class="sl-heading-wrapper level-h2"><h2 id="sessions-cache-queues-and-broadcasting">Sessions, cache, queues and broadcasting</h2><a class="sl-anchor-link" href="#sessions-cache-queues-and-broadcasting"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Sessions, cache, queues and broadcasting”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="nu-table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table><thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code dir="auto">SESSION_DRIVER</code></td><td><code dir="auto">database</code></td><td>Session storage</td></tr><tr><td><code dir="auto">SESSION_LIFETIME</code></td><td><code dir="auto">120</code></td><td>Minutes of inactivity before a session expires. <code dir="auto">.env.example</code> sets <code dir="auto">480</code></td></tr><tr><td><code dir="auto">SESSION_ENCRYPT</code></td><td><code dir="auto">true</code></td><td>Encrypt session data</td></tr><tr><td><code dir="auto">SESSION_SECURE_COOKIE</code></td><td><code dir="auto">true</code>, or <code dir="auto">false</code> in <code dir="auto">local</code> when <code dir="auto">APP_URL</code> is <code dir="auto">http://</code></td><td>Send the session cookie over HTTPS only</td></tr><tr><td><code dir="auto">SESSION_PATH</code></td><td><code dir="auto">/</code></td><td>Session cookie path</td></tr><tr><td><code dir="auto">SESSION_DOMAIN</code></td><td><code dir="auto">null</code></td><td>Session cookie domain</td></tr><tr><td><code dir="auto">CACHE_STORE</code></td><td><code dir="auto">file</code></td><td>Default cache store</td></tr><tr><td><code dir="auto">QUEUE_CONNECTION</code></td><td><code dir="auto">sync</code></td><td>Default queue connection. <code dir="auto">.env.example</code> sets <code dir="auto">redis</code></td></tr><tr><td><code dir="auto">BROADCAST_CONNECTION</code></td><td><code dir="auto">null</code></td><td>Default broadcaster</td></tr><tr><td><code dir="auto">PUSHER_APP_ID</code></td><td><code dir="auto">null</code></td><td>Pusher app ID, for the <code dir="auto">pusher</code> broadcaster</td></tr><tr><td><code dir="auto">PUSHER_APP_KEY</code></td><td><code dir="auto">null</code></td><td>Pusher app key</td></tr><tr><td><code dir="auto">PUSHER_APP_SECRET</code></td><td><code dir="auto">null</code></td><td>Pusher app secret</td></tr><tr><td><code dir="auto">PUSHER_APP_CLUSTER</code></td><td><code dir="auto">null</code></td><td>Pusher cluster</td></tr></tbody></table></div>
+<div class="sl-heading-wrapper level-h2"><h2 id="mail">Mail</h2><a class="sl-anchor-link" href="#mail"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Mail”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="nu-table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table><thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code dir="auto">MAIL_MAILER</code></td><td><code dir="auto">log</code></td><td>Default mailer. <code dir="auto">.env.example</code> sets <code dir="auto">smtp</code></td></tr><tr><td><code dir="auto">MAIL_HOST</code></td><td><code dir="auto">127.0.0.1</code></td><td>SMTP host</td></tr><tr><td><code dir="auto">MAIL_PORT</code></td><td><code dir="auto">2525</code></td><td>SMTP port</td></tr><tr><td><code dir="auto">MAIL_USERNAME</code></td><td><code dir="auto">null</code></td><td>SMTP username</td></tr><tr><td><code dir="auto">MAIL_PASSWORD</code></td><td><code dir="auto">null</code></td><td>SMTP password</td></tr><tr><td><code dir="auto">MAIL_FROM_ADDRESS</code></td><td><code dir="auto">no-reply@northwestern.edu</code></td><td>Sender address for all mail, including health check alerts</td></tr><tr><td><code dir="auto">MAIL_FROM_NAME</code></td><td><code dir="auto">Northwestern University</code></td><td>Sender name. <code dir="auto">.env.example</code> sets it to <code dir="auto">APP_NAME</code></td></tr><tr><td><code dir="auto">AWS_SES_EMAIL_REGION</code></td><td><code dir="auto">us-east-1</code></td><td>SES region, separate from <code dir="auto">AWS_DEFAULT_REGION</code></td></tr></tbody></table></div>
+<div class="sl-heading-wrapper level-h2"><h2 id="authentication">Authentication</h2><a class="sl-anchor-link" href="#authentication"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Authentication”</span></a></div>
+<p>See <a href="/features/authentication/">Authentication</a> and <a href="/northwestern-integrations/websso/">WebSSO</a>. None of these are needed in the <code dir="auto">local</code> environment, which offers <strong>Sign In As</strong> for the seeded demo users; deployed environments need a NetID provider.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="netid-sign-in">NetID sign-in</h3><a class="sl-anchor-link" href="#netid-sign-in"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “NetID sign-in”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="nu-table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table><thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code dir="auto">SUPER_ADMIN_NETIDS</code></td><td><code dir="auto">''</code></td><td>Comma-separated NetIDs given the Super Administrator role by <code dir="auto">StakeholderSeeder</code>, which deployments run (not <code dir="auto">db:rebuild</code>). See <a href="/getting-started/initial-customization/#1-super-administrator-accounts">Super Administrator Accounts</a></td></tr><tr><td><code dir="auto">AZURE_CLIENT_ID</code></td><td><code dir="auto">null</code></td><td>Entra ID application ID. Entra ID sign-in is available when this and <code dir="auto">AZURE_CLIENT_SECRET</code> are set</td></tr><tr><td><code dir="auto">AZURE_CLIENT_SECRET</code></td><td><code dir="auto">null</code></td><td>Entra ID client secret</td></tr><tr><td><code dir="auto">WEBSSO_API_KEY</code></td><td><code dir="auto">null</code></td><td>Apigee key for Online Passport. Setting it switches sign-in from Entra ID to Online Passport</td></tr><tr><td><code dir="auto">WEBSSO_STRATEGY</code></td><td><code dir="auto">apigee</code></td><td>Online Passport strategy: <code dir="auto">apigee</code> or <code dir="auto">forgerock-direct</code>. <code dir="auto">forgerock-direct</code> also enables Online Passport</td></tr><tr><td><code dir="auto">WEBSSO_URL_BASE</code></td><td><code dir="auto">https://uat-nusso.it.northwestern.edu</code></td><td>ForgeRock base URL. Production uses <code dir="auto">https://prd-nusso.it.northwestern.edu</code></td></tr><tr><td><code dir="auto">WEBSSO_API_URL_BASE</code></td><td><code dir="auto">https://northwestern-prod.apigee.net/agentless-websso</code></td><td>Agentless WebSSO API base URL</td></tr><tr><td><code dir="auto">WEBSSO_REALM</code></td><td><code dir="auto">northwestern</code></td><td>ForgeRock realm</td></tr><tr><td><code dir="auto">WEBSSO_TREE</code></td><td><code dir="auto">ldap-and-duo</code> when <code dir="auto">DUO_ENABLED</code> is true, otherwise <code dir="auto">ldap-registry</code></td><td>ForgeRock authentication tree</td></tr><tr><td><code dir="auto">WEBSSO_COOKIE_NAME</code></td><td><code dir="auto">nusso</code></td><td>Name of the SSO session cookie</td></tr><tr><td><code dir="auto">DUO_ENABLED</code></td><td><code dir="auto">false</code></td><td>Require Duo multi-factor authentication, by selecting the <code dir="auto">ldap-and-duo</code> tree</td></tr></tbody></table></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="email-verification-codes">Email verification codes</h3><a class="sl-anchor-link" href="#email-verification-codes"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Email verification codes”</span></a></div>
+<p>These configure <a href="/features/authentication/#passwordless-verification-codes">passwordless verification codes</a> for users without a NetID.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="nu-table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table><thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code dir="auto">LOCAL_AUTH_ENABLED</code></td><td><code dir="auto">true</code></td><td>Allow sign-in with a code sent by email</td></tr><tr><td><code dir="auto">LOCAL_AUTH_USE_FIXED_CODE</code></td><td><code dir="auto">false</code></td><td>Issue a predictable code (<code dir="auto">123456</code> for six digits). Throws in <code dir="auto">production</code>, <code dir="auto">develop</code> and <code dir="auto">qa</code></td></tr><tr><td><code dir="auto">LOCAL_AUTH_RATE_LIMIT_PER_HOUR</code></td><td><code dir="auto">10</code></td><td>Code requests per email address per hour</td></tr><tr><td><code dir="auto">LOCAL_AUTH_RATE_LIMIT_PER_IP_PER_HOUR</code></td><td><code dir="auto">20</code></td><td>Code requests per IP address per hour</td></tr><tr><td><code dir="auto">LOCAL_AUTH_CODE_DIGITS</code></td><td><code dir="auto">6</code></td><td>Digits in a code</td></tr><tr><td><code dir="auto">LOCAL_AUTH_CODE_EXPIRES_MINUTES</code></td><td><code dir="auto">10</code></td><td>Minutes before a code expires</td></tr><tr><td><code dir="auto">LOCAL_AUTH_CODE_MAX_ATTEMPTS</code></td><td><code dir="auto">8</code></td><td>Failed attempts before the challenge locks</td></tr><tr><td><code dir="auto">LOCAL_AUTH_CODE_LOCK_MINUTES</code></td><td><code dir="auto">15</code></td><td>Minutes a locked challenge stays locked</td></tr><tr><td><code dir="auto">LOCAL_AUTH_CODE_RESEND_COOLDOWN</code></td><td><code dir="auto">30</code></td><td>Seconds before another code can be sent</td></tr></tbody></table></div>
+<div class="sl-heading-wrapper level-h2"><h2 id="api">API</h2><a class="sl-anchor-link" href="#api"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “API”</span></a></div>
+<p>See <a href="/features/api/">API</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="nu-table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table><thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code dir="auto">API_ENABLED</code></td><td><code dir="auto">true</code></td><td>When <code dir="auto">false</code>, every API route responds <code dir="auto">404</code>, and no token is issued or refreshed for service clients or connected applications</td></tr><tr><td><code dir="auto">API_REQUEST_LOGGING_ENABLED</code></td><td><code dir="auto">true</code></td><td>Log API requests. See <a href="/features/api/#request-logging">Request Logging</a></td></tr><tr><td><code dir="auto">API_REQUEST_LOGGING_SLOW_THRESHOLD_MS</code></td><td><code dir="auto">500</code></td><td>Milliseconds after which a logged request counts as slow</td></tr><tr><td><code dir="auto">API_REQUEST_LOGGING_SAMPLING_ENABLED</code></td><td><code dir="auto">false</code></td><td>Log only a sample of successful requests. Failed requests are always logged</td></tr><tr><td><code dir="auto">API_REQUEST_LOGGING_SAMPLE_RATE</code></td><td><code dir="auto">1.0</code></td><td>Share of successful requests logged when sampling is on, from <code dir="auto">0.0</code> to <code dir="auto">1.0</code></td></tr><tr><td><code dir="auto">API_CLIENT_SECRET_EXPIRATION_NOTIFICATIONS_ENABLED</code></td><td><code dir="auto">true</code></td><td>Email API users’ contact addresses before a client secret expires. See <a href="/features/api/#secret-expiration-notifications">Secret Expiration Notifications</a></td></tr><tr><td><code dir="auto">API_PERSONAL_ACCESS_TOKEN_EXPIRATION_NOTIFICATIONS_ENABLED</code></td><td><code dir="auto">true</code></td><td>Email people before their personal access tokens expire, unless they turned it off on their Preferences page</td></tr><tr><td><code dir="auto">API_PERSONAL_ACCESS_TOKEN_MAX_LIFETIME_DAYS</code></td><td><code dir="auto">365</code></td><td>The longest a personal access token may last. See <a href="/features/api/#personal-access-tokens">Personal Access Tokens</a></td></tr><tr><td><code dir="auto">API_PERSONAL_ACCESS_TOKEN_MAX_ACTIVE</code></td><td><code dir="auto">10</code></td><td>How many working personal access tokens a person may hold at once</td></tr><tr><td><code dir="auto">PASSPORT_PRIVATE_KEY</code></td><td><code dir="auto">null</code></td><td>The RSA private key that signs access tokens. Set in deployed environments; locally, <code dir="auto">db:rebuild</code> generates key files. See <a href="/features/api/#signing-keys">Signing Keys</a></td></tr><tr><td><code dir="auto">PASSPORT_PUBLIC_KEY</code></td><td><code dir="auto">null</code></td><td>The matching public key</td></tr><tr><td><code dir="auto">PASSPORT_CONNECTION</code></td><td><code dir="auto">null</code></td><td>Database connection for Passport’s tables; the default connection when unset</td></tr><tr><td><code dir="auto">CORS_ALLOWED_ORIGINS</code></td><td>empty</td><td>Browser origins allowed to call the API, comma-separated. See <a href="/features/api/#browser-access-cors">Browser Access</a></td></tr></tbody></table></div>
+<div class="sl-heading-wrapper level-h2"><h2 id="mcp">MCP</h2><a class="sl-anchor-link" href="#mcp"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “MCP”</span></a></div>
+<p>See <a href="/features/mcp/">MCP Server</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="nu-table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table><thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code dir="auto">MCP_ENABLED</code></td><td><code dir="auto">false</code></td><td>Turns on the MCP server at <code dir="auto">/mcp</code>, its OAuth discovery documents and client registration. When <code dir="auto">false</code>, all of them respond <code dir="auto">404</code></td></tr><tr><td><code dir="auto">MCP_CUSTOM_SCHEMES</code></td><td>empty</td><td>URI schemes desktop clients may redirect to after sign-in, comma-separated</td></tr><tr><td><code dir="auto">MCP_REGISTRATIONS_PER_HOUR</code></td><td><code dir="auto">20</code></td><td>Client registrations allowed per IP address per hour</td></tr><tr><td><code dir="auto">MCP_TOOL_CALLS_PER_MINUTE</code></td><td><code dir="auto">60</code></td><td>Tool calls allowed per person per minute</td></tr><tr><td><code dir="auto">MCP_AUTHORIZATION_SERVER</code></td><td>the application URL</td><td>The OAuth issuer the discovery documents name</td></tr></tbody></table></div>
+<div class="sl-heading-wrapper level-h2"><h2 id="northwestern-integrations">Northwestern integrations</h2><a class="sl-anchor-link" href="#northwestern-integrations"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Northwestern integrations”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="nu-table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table><thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code dir="auto">DIRECTORY_SEARCH_API_KEY</code></td><td><code dir="auto">null</code></td><td>Apigee key for <a href="/northwestern-integrations/directory-search/">Directory Search</a>. Optional in <code dir="auto">local</code>; required in deployed environments</td></tr><tr><td><code dir="auto">DIRECTORY_SEARCH_URL</code></td><td><code dir="auto">https://northwestern-prod.apigee.net/directory-search</code></td><td>Directory Search API base URL</td></tr><tr><td><code dir="auto">DIRECTORY_SEARCH_HEALTH_CHECK_NETID</code></td><td><code dir="auto">swd2981</code></td><td>NetID the Directory Search health check looks up</td></tr><tr><td><code dir="auto">EVENT_HUB_MOCK_ENABLED</code></td><td><code dir="auto">true</code> when <code dir="auto">APP_ENV</code> is <code dir="auto">local</code>, otherwise <code dir="auto">false</code></td><td>Mock <a href="/northwestern-integrations/eventhub/">EventHub</a> instead of calling it</td></tr><tr><td><code dir="auto">EVENT_HUB_BASE_URL</code></td><td><code dir="auto">null</code></td><td>EventHub API base URL</td></tr><tr><td><code dir="auto">EVENT_HUB_API_KEY</code></td><td><code dir="auto">null</code></td><td>Apigee key for EventHub</td></tr><tr><td><code dir="auto">EVENT_HUB_HMAC_VERIFICATION_SHARED_SECRET</code></td><td><code dir="auto">null</code></td><td>Shared secret for verifying webhook signatures</td></tr><tr><td><code dir="auto">EVENT_HUB_HMAC_VERIFICATION_HEADER</code></td><td><code dir="auto">X-HMAC-Signature</code></td><td>Header that carries the webhook signature</td></tr><tr><td><code dir="auto">EVENT_HUB_HMAC_VERIFICATION_ALGORITHM_TYPE_REGISTRATION</code></td><td><code dir="auto">HmacSHA256</code></td><td>Algorithm name sent to EventHub when registering the webhook</td></tr><tr><td><code dir="auto">EVENT_HUB_HMAC_VERIFICATION_ALGORITHM_TYPE_PHP</code></td><td><code dir="auto">sha256</code></td><td>Matching algorithm name passed to <code dir="auto">hash_hmac()</code></td></tr><tr><td><code dir="auto">WILDCARD_PHOTO_SYNC_ENABLED</code></td><td><code dir="auto">false</code></td><td>Download users’ <a href="/northwestern-integrations/wildcard-photos/">Wildcard photos</a> to S3 at sign-in</td></tr></tbody></table></div>
+<div class="sl-heading-wrapper level-h2"><h2 id="support-and-changelog">Support and changelog</h2><a class="sl-anchor-link" href="#support-and-changelog"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Support and changelog”</span></a></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="support-form">Support form</h3><a class="sl-anchor-link" href="#support-form"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Support form”</span></a></div>
+<p>See <a href="/features/support-tickets/">Support Tickets</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="nu-table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table><thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code dir="auto">SUPPORT_ENABLED</code></td><td><code dir="auto">false</code></td><td>Register the contact form and its routes</td></tr><tr><td><code dir="auto">SUPPORT_DOCUMENTATION_URL</code></td><td><code dir="auto">null</code></td><td>User documentation linked from the Help menu. The link is hidden while empty, whether or not support is enabled</td></tr><tr><td><code dir="auto">SUPPORT_LIMITED_WARNING</code></td><td><code dir="auto">true</code> outside production, <code dir="auto">false</code> in production</td><td>Show a limited-support warning on the contact form</td></tr><tr><td><code dir="auto">SUPPORT_DRIVER</code></td><td><code dir="auto">mail</code></td><td>Ticket backend: <code dir="auto">mail</code> or <code dir="auto">team-dynamix</code></td></tr><tr><td><code dir="auto">SUPPORT_MAIL_TO</code></td><td><code dir="auto">your-team@northwestern.edu</code></td><td>Recipient of tickets from the <code dir="auto">mail</code> driver and of the fallback email</td></tr><tr><td><code dir="auto">SUPPORT_REFERENCE_PREFIX</code></td><td><code dir="auto">SUP</code></td><td>Prefix of mail ticket references, such as <code dir="auto">SUP-47</code></td></tr></tbody></table></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="teamdynamix">TeamDynamix</h3><a class="sl-anchor-link" href="#teamdynamix"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “TeamDynamix”</span></a></div>
+<p>Used only when <code dir="auto">SUPPORT_DRIVER</code> is <code dir="auto">team-dynamix</code>. See <a href="/features/support-tickets/#teamdynamix-gateway">TeamDynamix Gateway</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="nu-table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table><thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code dir="auto">TDX_API_BASE_URL</code></td><td><code dir="auto">null</code></td><td>TeamDynamix web API base URL, such as <code dir="auto">https://services.northwestern.edu/TDWebApi</code></td></tr><tr><td><code dir="auto">TDX_USERNAME</code></td><td><code dir="auto">null</code></td><td>API username</td></tr><tr><td><code dir="auto">TDX_PASSWORD</code></td><td><code dir="auto">null</code></td><td>API password</td></tr><tr><td><code dir="auto">TDX_TICKET_APP_NAME</code></td><td><code dir="auto">null</code></td><td>TDTickets application where tickets are created</td></tr><tr><td><code dir="auto">TDX_CLIENT_APP_NAME</code></td><td><code dir="auto">null</code></td><td>TDClient application where services are managed</td></tr><tr><td><code dir="auto">TDX_ASSIGNEE_ID</code></td><td><code dir="auto">null</code></td><td>Group that new tickets are assigned to</td></tr><tr><td><code dir="auto">TDX_TICKET_TYPE</code></td><td><code dir="auto">Default</code></td><td>Ticket type</td></tr><tr><td><code dir="auto">TDX_FORM_TYPE</code></td><td><code dir="auto">NU Base Service Request</code></td><td>Ticket form</td></tr><tr><td><code dir="auto">TDX_TICKET_STATUS</code></td><td><code dir="auto">New</code></td><td>Status of new tickets</td></tr><tr><td><code dir="auto">TDX_TICKET_PRIORITY</code></td><td><code dir="auto">Low (P4)</code></td><td>Priority of new tickets</td></tr><tr><td><code dir="auto">TDX_SERVICE</code></td><td>from <code dir="auto">APP_NAME</code></td><td>Service the tickets are filed under</td></tr></tbody></table></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="changelog">Changelog</h3><a class="sl-anchor-link" href="#changelog"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Changelog”</span></a></div>
+<p>See <a href="/features/changelog/">Changelog</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="nu-table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table><thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code dir="auto">CHANGELOG_ENABLED</code></td><td><code dir="auto">false</code></td><td>Register the changelog routes and navigation item</td></tr><tr><td><code dir="auto">JIRA_URL</code></td><td><code dir="auto">https://nuitadminsystems.atlassian.net</code></td><td>Jira instance that issue references link to</td></tr><tr><td><code dir="auto">JIRA_ISSUE_IDENTIFIER</code></td><td><code dir="auto">null</code></td><td>Jira project key, such as <code dir="auto">GSTS</code>. Issue references are linked only when this is set</td></tr></tbody></table></div>
+<div class="sl-heading-wrapper level-h2"><h2 id="branding">Branding</h2><a class="sl-anchor-link" href="#branding"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Branding”</span></a></div>
+<p>These fill the unit lockup and the footer that the Web Style Guide requires. See <a href="/building/branding-and-mail/">Branding and Mail</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="nu-table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table><thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code dir="auto">NU_LOCKUP</code></td><td><code dir="auto">null</code></td><td>Unit lockup shown as every panel’s logo, as a URL or a path in <code dir="auto">public/</code>. The Northwestern wordmark is used when unset</td></tr><tr><td><code dir="auto">NU_UNIT_NAME</code></td><td><code dir="auto">null</code></td><td>Unit name in the footer</td></tr><tr><td><code dir="auto">NU_UNIT_ADDRESS</code></td><td><code dir="auto">null</code></td><td>Street address</td></tr><tr><td><code dir="auto">NU_UNIT_CITY</code></td><td><code dir="auto">null</code></td><td>City, state and ZIP code</td></tr><tr><td><code dir="auto">NU_UNIT_PHONE</code></td><td><code dir="auto">null</code></td><td>Phone number</td></tr><tr><td><code dir="auto">NU_UNIT_FAX</code></td><td><code dir="auto">null</code></td><td>Fax number</td></tr><tr><td><code dir="auto">NU_UNIT_EMAIL</code></td><td><code dir="auto">null</code></td><td>Email address</td></tr></tbody></table></div>
+<p>A <code dir="auto">null</code> unit field shows Information Technology’s details. An empty value hides that field.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="data-retention">Data retention</h2><a class="sl-anchor-link" href="#data-retention"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Data retention”</span></a></div>
+<p>Days to keep each kind of record before the daily <code dir="auto">model:prune</code> deletes it. <code dir="auto">null</code> or an empty value keeps records forever. See <a href="/getting-started/initial-customization/#7-data-retention">Data Retention</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="nu-table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table><thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code dir="auto">AUDIT_RETENTION_DAYS</code></td><td><code dir="auto">null</code> (kept forever)</td><td>Audit logs</td></tr><tr><td><code dir="auto">LOGIN_RECORD_RETENTION_DAYS</code></td><td><code dir="auto">365</code></td><td>Sign-in records</td></tr><tr><td><code dir="auto">IMPERSONATION_LOG_RETENTION_DAYS</code></td><td><code dir="auto">null</code> (kept forever)</td><td>Impersonation logs</td></tr><tr><td><code dir="auto">LOGIN_CHALLENGE_RETENTION_DAYS</code></td><td><code dir="auto">30</code></td><td>Email verification code challenges</td></tr><tr><td><code dir="auto">API_REQUEST_LOG_RETENTION_DAYS</code></td><td><code dir="auto">90</code></td><td>API request logs</td></tr></tbody></table></div>
+<div class="sl-heading-wrapper level-h2"><h2 id="environment-lockdown">Environment lockdown</h2><a class="sl-anchor-link" href="#environment-lockdown"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Environment lockdown”</span></a></div>
+<p>See <a href="/getting-started/initial-customization/#5-environment-lockdown">Environment Lockdown</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="nu-table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table><thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code dir="auto">ENVIRONMENT_LOCKDOWN_ENABLED</code></td><td><code dir="auto">false</code> when <code dir="auto">APP_ENV</code> is <code dir="auto">production</code>, <code dir="auto">local</code>, <code dir="auto">testing</code> or <code dir="auto">ci</code>, otherwise <code dir="auto">true</code></td><td>Show the lockdown page to users who have only the default role</td></tr></tbody></table></div>
+<div class="sl-heading-wrapper level-h2"><h2 id="rate-limiting">Rate limiting</h2><a class="sl-anchor-link" href="#rate-limiting"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Rate limiting”</span></a></div>
+<p>All limits count requests. See the rate limiting sections of <a href="/features/authentication/#rate-limiting">Authentication</a>, <a href="/features/api/#rate-limiting">API</a> and <a href="/features/support-tickets/#rate-limiting">Support Tickets</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="nu-table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table><thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code dir="auto">RATE_LIMIT_API_PER_MINUTE</code></td><td><code dir="auto">1800</code></td><td>Authenticated requests per minute, per service client for client credentials tokens and per person for every other token</td></tr><tr><td><code dir="auto">RATE_LIMIT_API_PER_IP_PER_MINUTE</code></td><td><code dir="auto">3600</code></td><td>Requests per minute from one IP address to the API and Passport’s <code dir="auto">/oauth/*</code> routes, counted before authentication</td></tr><tr><td><code dir="auto">RATE_LIMIT_AUTH_LOGIN_CODE_REQUEST_PER_MINUTE</code></td><td><code dir="auto">5</code></td><td>Verification code requests per IP per minute</td></tr><tr><td><code dir="auto">RATE_LIMIT_AUTH_LOGIN_CODE_REQUEST_PER_EMAIL_PER_MINUTE</code></td><td><code dir="auto">3</code></td><td>Verification code requests per email address per minute</td></tr><tr><td><code dir="auto">RATE_LIMIT_AUTH_LOGIN_CODE_VERIFY_PER_MINUTE</code></td><td><code dir="auto">10</code></td><td>Code verification attempts per IP per minute</td></tr><tr><td><code dir="auto">RATE_LIMIT_AUTH_LOGIN_CODE_VERIFY_PER_CHALLENGE_PER_MINUTE</code></td><td><code dir="auto">5</code></td><td>Code verification attempts per challenge per minute</td></tr><tr><td><code dir="auto">RATE_LIMIT_AUTH_IMPERSONATE_PER_MINUTE</code></td><td><code dir="auto">10</code></td><td>Impersonation starts per user per minute</td></tr><tr><td><code dir="auto">RATE_LIMIT_SUPPORT_CONTACT_PER_MINUTE</code></td><td><code dir="auto">2</code></td><td>Contact form submissions per user (or IP) per minute</td></tr><tr><td><code dir="auto">RATE_LIMIT_SUPPORT_CONTACT_PER_HOUR</code></td><td><code dir="auto">5</code></td><td>Contact form submissions per user (or IP) per hour</td></tr><tr><td><code dir="auto">RATE_LIMIT_SUPPORT_CONTACT_PER_DAY</code></td><td><code dir="auto">10</code></td><td>Contact form submissions per user (or IP) per day</td></tr></tbody></table></div>
+<div class="sl-heading-wrapper level-h2"><h2 id="health-checks">Health checks</h2><a class="sl-anchor-link" href="#health-checks"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Health checks”</span></a></div>
+<p>See <a href="/features/health-checks/">Health Checks</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="nu-table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table><thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code dir="auto">HEALTH_SECRET_TOKEN</code></td><td><code dir="auto">null</code></td><td>Token required in the <code dir="auto">X-Secret-Token</code> header of <code dir="auto">GET /api/health</code>. The endpoint refuses every request with <code dir="auto">403</code> until it is set</td></tr><tr><td><code dir="auto">HEALTH_NOTIFICATIONS_ENABLED</code></td><td><code dir="auto">false</code></td><td>Email when a check fails</td></tr><tr><td><code dir="auto">HEALTH_NOTIFICATION_EMAIL</code></td><td><code dir="auto">null</code></td><td>Recipient of failure emails</td></tr><tr><td><code dir="auto">HEALTH_DB_CONNECTION</code></td><td>from <code dir="auto">DB_CONNECTION</code></td><td>Connection that stores check results</td></tr><tr><td><code dir="auto">SCHEDULE_HEARTBEAT_URL</code></td><td><code dir="auto">null</code></td><td>URL pinged when the Schedule check passes</td></tr></tbody></table></div>
+<div class="sl-heading-wrapper level-h2"><h2 id="sentry">Sentry</h2><a class="sl-anchor-link" href="#sentry"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Sentry”</span></a></div>
+<p>See <a href="/features/sentry/">Sentry</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="nu-table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table><thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code dir="auto">SENTRY_LARAVEL_DSN</code></td><td>from <code dir="auto">SENTRY_DSN</code></td><td>Project DSN. PHP and browser reporting are off while it is empty</td></tr><tr><td><code dir="auto">SENTRY_DSN</code></td><td><code dir="auto">null</code></td><td>Fallback for <code dir="auto">SENTRY_LARAVEL_DSN</code></td></tr><tr><td><code dir="auto">SENTRY_ENVIRONMENT</code></td><td><code dir="auto">null</code> (uses <code dir="auto">APP_ENV</code>)</td><td>Environment name PHP reports to Sentry. The browser SDK always reports <code dir="auto">APP_ENV</code>, so setting this splits PHP and JavaScript events</td></tr><tr><td><code dir="auto">SENTRY_SAMPLE_RATE</code></td><td><code dir="auto">1.0</code></td><td>Share of errors sent</td></tr><tr><td><code dir="auto">SENTRY_TRACES_SAMPLE_RATE</code></td><td><code dir="auto">null</code> (tracing off)</td><td>Share of requests traced, in PHP and the browser</td></tr><tr><td><code dir="auto">SENTRY_PROFILES_SAMPLE_RATE</code></td><td><code dir="auto">null</code> (profiling off)</td><td>Share of traced requests profiled</td></tr><tr><td><code dir="auto">SENTRY_SEND_DEFAULT_PII</code></td><td><code dir="auto">false</code></td><td>Send personally identifiable information by default</td></tr><tr><td><code dir="auto">SENTRY_ENABLE_APM_FOR_JS</code></td><td><code dir="auto">true</code></td><td>Load browser tracing in the JavaScript SDK</td></tr><tr><td><code dir="auto">VAPOR_COMMIT_HASH</code></td><td><code dir="auto">null</code></td><td>Release identifier for PHP events. Vapor sets it on deploys with <code dir="auto">--commit</code></td></tr><tr><td><code dir="auto">SENTRY_AUTH_TOKEN</code></td><td>unset</td><td>Build time. Enables the Vite plugin that uploads source maps; it is off without a token</td></tr><tr><td><code dir="auto">SENTRY_ORG</code></td><td>unset</td><td>Build time. Sentry organization for source map uploads</td></tr><tr><td><code dir="auto">SENTRY_PROJECT</code></td><td>unset</td><td>Build time. Sentry project for source map uploads</td></tr><tr><td><code dir="auto">SENTRY_RELEASE</code></td><td>unset</td><td>Build time. Release name the source maps and the JavaScript bundle are tagged with. See <a href="/features/sentry/#source-maps--release-tracking">Source Maps &#x26; Release Tracking</a></td></tr></tbody></table></div>
+<p><code dir="auto">config/sentry.php</code> also reads <code dir="auto">SENTRY_BREADCRUMBS_*</code> and <code dir="auto">SENTRY_TRACE_*</code> toggles for individual breadcrumb and tracing features. Their defaults are in the file.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="developer-tools">Developer tools</h2><a class="sl-anchor-link" href="#developer-tools"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Developer tools”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="nu-table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table><thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code dir="auto">MAIL_CAPTURE_URL</code></td><td><code dir="auto">null</code></td><td>URL of MailPit or a similar mail catcher. When set, the administration panel shows a MailPit link under Developer Tools to users who can view Telescope</td></tr><tr><td><code dir="auto">S3_CONSOLE_URL</code></td><td><code dir="auto">null</code></td><td>URL of the RustFS or S3 console. When set, the administration panel shows a link to it under Developer Tools, with the same visibility</td></tr><tr><td><code dir="auto">TELESCOPE_ENABLED</code></td><td><code dir="auto">true</code></td><td>Record requests, queries, jobs and more in Telescope</td></tr><tr><td><code dir="auto">DEBUGBAR_ENABLED</code></td><td><code dir="auto">null</code> (follows <code dir="auto">APP_DEBUG</code>)</td><td>Show Laravel Debugbar</td></tr><tr><td><code dir="auto">RAY_ENABLED</code></td><td><code dir="auto">true</code> outside production</td><td>Send <code dir="auto">ray()</code> output to the Ray app</td></tr><tr><td><code dir="auto">PG_BIN_DIRECTORY</code></td><td><code dir="auto">null</code> (auto-detected)</td><td>Directory containing <code dir="auto">pg_dump</code> and <code dir="auto">psql</code>, for the <code dir="auto">db:snapshot:*</code> commands. See <a href="/features/database-snapshots/">Database Snapshots</a></td></tr></tbody></table></div>
+<p><code dir="auto">config/telescope.php</code> and <code dir="auto">config/debugbar.php</code> read many more <code dir="auto">TELESCOPE_*</code> and <code dir="auto">DEBUGBAR_*</code> variables. Their defaults are in those files.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="testing">Testing</h2><a class="sl-anchor-link" href="#testing"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Testing”</span></a></div>
+<p><code dir="auto">phpunit.xml</code> sets its own values for the PHP and browser tests, including <code dir="auto">APP_ENV=testing</code> and <code dir="auto">DB_CONNECTION=phpunit</code>. Browser tests run the application inside the test process, so they use the same values. See <a href="/guides/testing/">Testing</a>.</p></div><footer class="sl-flex astro-xhsnbeks"><div class="meta sl-flex astro-xhsnbeks"><div class="agent-docs-links astro-ialbl7hh"><a href="https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/edit/main/docs/src/content/docs/reference/environment-variables.mdx" class="sl-flex print:hidden astro-iknedmyn"><svg aria-hidden="true" class="astro-iknedmyn astro-digtx6oc" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.2em;"><path d="M22 7.24a1 1 0 0 0-.29-.71l-4.24-4.24a1 1 0 0 0-1.1-.22 1 1 0 0 0-.32.22l-2.83 2.83L2.29 16.05a1 1 0 0 0-.29.71V21a1 1 0 0 0 1 1h4.24a1 1 0 0 0 .76-.29l10.87-10.93L21.71 8c.1-.1.17-.2.22-.33a1 1 0 0 0 0-.24v-.14l.07-.05ZM6.83 20H4v-2.83l9.93-9.93 2.83 2.83L6.83 20ZM18.17 8.66l-2.83-2.83 1.42-1.41 2.82 2.82-1.41 1.42Z"/></svg>Edit page</a><a href="/reference/environment-variables/index.md" class="print:hidden astro-ialbl7hh" data-agent-docs-link><svg aria-hidden="true" class="astro-ialbl7hh astro-digtx6oc" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.2em;"><path d="M9 10h1a1 1 0 1 0 0-2H9a1 1 0 0 0 0 2Zm0 2a1 1 0 0 0 0 2h6a1 1 0 0 0 0-2H9Zm11-3.06a1.3 1.3 0 0 0-.06-.27v-.09c-.05-.1-.11-.2-.19-.28l-6-6a1.07 1.07 0 0 0-.28-.19h-.09a.88.88 0 0 0-.33-.11H7a3 3 0 0 0-3 3v14a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V8.94Zm-6-3.53L16.59 8H15a1 1 0 0 1-1-1V5.41ZM18 19a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h5v3a3 3 0 0 0 3 3h3v9Zm-3-3H9a1 1 0 0 0 0 2h6a1 1 0 0 0 0-2Z"/></svg>View as Markdown</a></div></div><div class="pagination-links print:hidden astro-atj3pkpa" dir="ltr"><a href="/reference/commands/" rel="prev" class="astro-atj3pkpa"><svg aria-hidden="true" class="astro-atj3pkpa astro-digtx6oc" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17 11H9.41l3.3-3.29a1.004 1.004 0 1 0-1.42-1.42l-5 5a1 1 0 0 0-.21.33 1 1 0 0 0 0 .76 1 1 0 0 0 .21.33l5 5a1.002 1.002 0 0 0 1.639-.325 1 1 0 0 0-.219-1.095L9.41 13H17a1 1 0 0 0 0-2Z"/></svg><span class="astro-atj3pkpa">Previous<br class="astro-atj3pkpa"><span class="link-title astro-atj3pkpa">Artisan Commands</span></span></a><a href="/reference/chassis/" rel="next" class="astro-atj3pkpa"><svg aria-hidden="true" class="astro-atj3pkpa astro-digtx6oc" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17.92 11.62a1.001 1.001 0 0 0-.21-.33l-5-5a1.003 1.003 0 1 0-1.42 1.42l3.3 3.29H7a1 1 0 0 0 0 2h7.59l-3.3 3.29a1.002 1.002 0 0 0 .325 1.639 1 1 0 0 0 1.095-.219l5-5a1 1 0 0 0 .21-.33 1 1 0 0 0 0-.76Z"/></svg><span class="astro-atj3pkpa">Next<br class="astro-atj3pkpa"><span class="link-title astro-atj3pkpa">Chassis</span></span></a></div></footer></div></div></main></div></div></div></div></body></html>

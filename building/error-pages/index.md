@@ -1,0 +1,72 @@
+# Error Pages
+
+Error pages live in `resources/views/errors/`. Laravel renders `{status}.blade.php` for an HTTP error with that status. They use one of two layouts, depending on whether the application can be trusted to work when the error happens.
+
+| Page                                       | View                                               | Layout                                                                                                        |
+| ------------------------------------------ | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| 401, 402, 403, 404, 419, 429               | `<x-error-layout title="...">`                     | The [public layout](https://laravel-starter.entapp.northwestern.edu/building/public-pages/#the-public-layout) |
+| 503 (maintenance, external service outage) | `<x-error-layout title="..." :navigation="false">` | `<x-layouts.error>`                                                                                           |
+| 500                                        | Its own body                                       | `<x-layouts.error>`                                                                                           |
+| Database paused                            | Its own body                                       | `<x-layouts.error>`                                                                                           |
+
+## Client Errors on the Public Layout
+
+`<x-error-layout>` (`App\View\Components\ErrorLayout`) renders `resources/views/errors/layout.blade.php`: a heading from `title`, the slot as the message, and a **Back to Homepage** button. By default it renders on the public layout, so the header keeps the Help menu and **Sign In** or the user menu, and the page uses the app panel’s theme.
+
+The public layout looks up the signed-in user inside `rescue()`, so a failing lookup leaves the page signed out instead of failing it. A fallback route sends unknown URLs through the `web` middleware, so the not-found page knows who is signed in.
+
+## The Error Layout
+
+`<x-layouts.error>` (`resources/views/components/layouts/error.blade.php`) renders the pages that can’t rely on the application working: 500, 503 and database-paused. It must work when nothing else does:
+
+* It loads no Filament, makes no auth calls and doesn’t touch the database.
+* Its styles come from `resources/css/errors.css`, which imports Tailwind and the Northwestern design tokens directly instead of a panel theme.
+* It renders `<x-site-header>` without a Help menu or user menu, and the Northwestern footer.
+
+`<x-error-layout :navigation="false">` uses this layout. The 503 page passes it, because maintenance mode and outages are exactly when the panel and the database may be unavailable.
+
+> **Caution**
+>
+> Anything on an error-layout page that could query the database, such as checking the signed-in user’s permissions, must be wrapped in `rescue()` and fail closed. The 500 page shows how.
+
+## Adding or Changing an Error Page
+
+1. **Edit the message** of an existing client error in its view, for example `resources/views/errors/404.blade.php`:
+
+   ```blade
+   <x-error-layout title="Page Not Found">
+       We can't find that page. Check the address and try again.
+   </x-error-layout>
+   ```
+
+2. **Add a page for another status** as `resources/views/errors/{status}.blade.php`. Use `<x-error-layout>`, and pass `:navigation="false"` when the error means the application itself may not be working.
+
+3. **Cover a whole range** with `4xx.blade.php` or `5xx.blade.php`. Laravel falls back to them when no view matches the exact status. Without one, a status such as 405 renders Laravel’s plain error page.
+
+4. **Check it in the browser tests.** Add the status to the list in the error page test in `tests/Browser/Pages/PublicPagesTest.php`. `ErrorPages::path($status)` registers a test route that answers with that status, so pages only a failure shows are checked too. See [Browser Tests](https://laravel-starter.entapp.northwestern.edu/guides/testing/#browser-tests).
+
+Both `resources/css/filament/app/theme.css` and `resources/css/errors.css` compile classes from `resources/views/errors/`, so new views there need no `@source` change.
+
+## The 500 Page
+
+`resources/views/errors/500.blade.php` renders for unhandled exceptions when `APP_DEBUG` is off. With debug on, Laravel shows its own exception page instead.
+
+It asks the user to try again and links to the IT Service Desk. The rest depends on the environment and on Sentry:
+
+* **Error ID.** When Sentry captured the exception, the page shows Sentry’s event ID, so a user can quote it in a report.
+* **Help Us Fix This.** With an event ID, the page also shows a form for the user’s name, email and a description. It sends the report to Sentry with `captureFeedback`, linked to the event. Name and email are filled in for signed-in users. See [Sentry](https://laravel-starter.entapp.northwestern.edu/features/sentry/).
+* **Technical Details.** The exception message and stack trace show to everyone outside production, so testers without Sentry access can describe failures. In production they show only to users with the `ManageAll` permission.
+
+The user and permission lookups are wrapped in `rescue()`: if the database is down, the page renders without them and hides the technical details in production.
+
+## The Database-Paused Page
+
+Non-production environments on Aurora Serverless v2 can scale the database to zero. The first request after a pause can time out while the database wakes up. `bootstrap/app.php` uses chassis’s `DatabasePausedDetector` to recognize that PostgreSQL connection timeout and renders `errors.database-paused` with status 500 in place of the 500 page.
+
+The page names the environment (`APP_ENV`), explains that its database is starting, and reloads itself after 30 seconds. Outside production these timeouts aren’t reported to Sentry.
+
+## External Service Outages
+
+`App\Domains\Core\Exceptions\ServiceDownError` is thrown when a service the application depends on is unavailable. The starter throws it when Directory Search can’t provide a user’s details during single sign-on, after retrying.
+
+It renders the 503 page instead of the 500 page, because the fault is in another service. API and JSON requests get a Problem Details 503 response with `Retry-After: 60`. The error is still reported. To name another service in the message, add a case to `App\Domains\Core\Enums\ExternalService`.

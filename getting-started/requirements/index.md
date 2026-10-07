@@ -1,0 +1,92 @@
+# Requirements
+
+## System Requirements
+
+* **PHP**: `^8.5`
+* **Node.js**: `v26.x`
+* **pnpm**: `12.x` (CI’s version; `package.json` accepts `11.0+`)
+* **PostgreSQL**: `16+`
+* **Redis**: `7+`, for the queue (`QUEUE_CONNECTION=redis`), which `php artisan db:rebuild` also clears
+* **S3-compatible object storage**: the default filesystem disk and Livewire’s temporary uploads both use `s3` (RustFS locally)
+
+### PHP Extensions
+
+The following PHP extensions are required to satisfy application dependencies:
+
+```text
+ext-ctype       ext-curl        ext-dom         ext-fileinfo
+ext-filter      ext-hash        ext-iconv       ext-intl
+ext-json        ext-libxml      ext-mbstring    ext-openssl
+ext-pcre        ext-pdo         ext-pdo_pgsql   ext-phar
+ext-redis       ext-reflection  ext-session     ext-simplexml
+ext-sodium      ext-tokenizer   ext-xml         ext-xmlreader
+ext-xmlwriter   ext-zip
+```
+
+`ext-redis` is needed because `REDIS_CLIENT` defaults to `phpredis`; the `predis` package is not installed.
+
+### Database Requirements
+
+> **PostgreSQL Only**
+>
+> **PostgreSQL 16+** is the **only** officially supported database driver for this project. Further documentation will assume PostgreSQL is in use.
+>
+> The application has **not been tested** with MySQL, MariaDB, SQLite, or other database engines. Key limitations with other databases:
+>
+> * **Schema Compatibility** - Certain migrations may use PostgreSQL-specific features
+> * **Native Functions** - Filament charts and analytics widgets rely on PostgreSQL functions
+>
+> If you choose to use a different database driver, expect to modify migrations, seeders, and dashboard widgets.
+
+## Local Development Setup
+
+Laravel Herd
+
+**Recommended**
+
+[Laravel Herd](https://herd.laravel.com/) provides an all-in-one development environment for macOS and Windows:
+
+* PHP 8.5+ with extension management
+* Nginx web server
+* PostgreSQL, Redis, and RustFS services (Herd Pro)
+* Automatic site provisioning
+
+Laravel Valet
+
+**Alternative**
+
+[Laravel Valet](https://laravel.com/docs/valet) is a lightweight macOS environment requiring manual installation of PHP, PostgreSQL, Redis, S3-compatible storage, and other dependencies.
+
+Suitable as an alternative if you cannot use Laravel Herd.
+
+## Northwestern-Specific Requirements
+
+> **API Access Required**
+>
+> Access to Northwestern integrations requires approval and credentials through the [API Service Registry](https://apiserviceregistry.northwestern.edu/).
+
+You’ll need access to the following integrations:
+
+WebSSO / Entra ID
+
+SSO configuration for Northwestern authentication. Depending on your authentication strategy, you’ll need either **Entra ID** credentials (via Azure application registration) or an **Online Passport** API key (via the API Service Registry).
+
+**Required** for user authentication via NetID.
+
+Directory Search
+
+Service responsible for user lookups, demographic sync, and organizational data.
+
+**Required** for Northwestern user provisioning.
+
+EventHub
+
+Webhook configuration and HMAC shared secret for event subscriptions.
+
+**Optional** - Only needed if consuming or publishing events.
+
+NetID Updates Event Message
+
+Subscription to the `etidentity.ldap.netid.term` topic for receiving NetID lifecycle events.
+
+**Optional** - Enables automatic role removal when users leave Northwestern. Requires EventHub access.

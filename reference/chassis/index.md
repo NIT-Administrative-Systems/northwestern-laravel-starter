@@ -1,0 +1,105 @@
+# Chassis
+
+[Chassis](https://github.com/NIT-Administrative-Systems/chassis) (`northwestern-sysdev/chassis`, version 1.4) is the package of building blocks that Northwestern Laravel applications share. The starter extends some of its classes and uses others as they are. You’ll meet them in stack traces, in the browser tests, and when you change how the API, seeding or lockdown behaves.
+
+> **Tip**
+>
+> Change behavior by overriding a hook in the starter’s subclass, not by editing the vendored package. A fix that belongs in Chassis needs a Chassis release.
+
+## API and Passport
+
+| Chassis class                                                               | Starter class or use                                                 | What it does                                                                                                                      |
+| --------------------------------------------------------------------------- | -------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `Http\Middleware\AuthenticatesPassportTokens`                               | `App\Domains\Api\Http\Middleware\AuthenticatePassportToken`          | Authenticates a request’s Passport token and refuses revoked, expired and restricted clients                                      |
+| `Http\Middleware\LogsPassportRequests`                                      | `App\Domains\Api\Http\Middleware\LogsApiRequests`                    | Writes each API request, including refused ones and why, to the request log                                                       |
+| `Passport\AccessRevoker`                                                    | Disconnecting an application, revoking all of a person’s credentials | Revokes a person’s access tokens, their refresh tokens and authorization codes for one client or all                              |
+| `Passport\ExpiringAccessTokenRepository`                                    | Bound in `OAuthServiceProvider`                                      | Gives each personal access token its own lifetime instead of Passport’s single one                                                |
+| `Passport\OAuthClientRepository`                                            | Bound in `OAuthServiceProvider`                                      | Treats a `client_id` that isn’t a UUID as an unknown client, so Passport answers 401 `invalid_client` instead of a database error |
+| `Rules\OAuthRedirectUri`                                                    | MCP client registration, OAuth application redirect URIs             | Accepts HTTPS, HTTP to the loopback address, and the custom schemes you allow for desktop clients, with a valid host name         |
+| `ValueObjects\OAuthRedirectTarget`                                          | The consent screen (`OAuthConsent`)                                  | Where a redirect URI sends the person, with the punycode form of an internationalized domain                                      |
+| `Http\Middleware\DetectUnknownOAuthClient`                                  | `config/passport.php`, rendered in `bootstrap/app.php`               | Turns Passport’s `invalid_client` JSON on the consent screen into a page for a deleted or revoked client                          |
+| `Http\Middleware\RequireSecretToken`                                        | `/api/health` in `routes/api.php`                                    | Requires an `X-Secret-Token` header matching a config value, and refuses every request while that value is empty                  |
+| `ValueObjects\ApiRequestContext`                                            | Read anywhere during an API request                                  | The request’s trace ID, principal, client, token, scopes and grant, in Laravel’s `Context`                                        |
+| `Enums\ApiPrincipalType`, `Enums\OAuthGrantType`, `Enums\ApiRequestFailure` | The request log and context                                          | Who the request acted as (`user` or `client`), how the token was issued, and why a request was refused                            |
+| `Http\Middleware\EnsureFeatureEnabled`                                      | `routes/api.php`, `routes/ai.php`                                    | Answers 503, or 404 with `,404`, while a config flag is off                                                                       |
+| `Exceptions\ProblemDetailsRenderer`, `Http\Responses\ProblemDetails`        | `bootstrap/app.php`, `AppServiceProvider`                            | Renders the REST API’s errors as RFC 9457 Problem Details, except on the paths it’s told to skip                                  |
+| `Rules\ValidIpOrCidrRule`                                                   | Service client IP allowlists                                         | Validates an IP address or CIDR range                                                                                             |
+
+`AuthenticatesPassportTokens` hooks, which `AuthenticatePassportToken` overrides:
+
+* `allowedIps(Client $client)` returns a client’s IP allowlist, or `null` for none.
+* `isEligible(Authenticatable $user)` decides whether the token’s user may still use the API; the starter refuses deleted and deactivated accounts, and personal access tokens whose owner lost `CreatePersonalAccessTokens`.
+* `clientOwner(Client $client)` and `allowsClientsWithoutUser()` resolve whom a client credentials token acts as.
+* `authenticated(Request $request, Client $client, ?Authenticatable $user)` runs after a token is accepted; the starter records when the client, the token and the person’s connection were last used.
+
+`LogsPassportRequests` hooks, which `LogsApiRequests` overrides: `isEnabled()`, `isSamplingEnabled()`, `sampleRate()`, `additionalLogData()` and `persistLog(array $data)`.
+
+To read who an API request acts as in a controller:
+
+```php
+use Illuminate\Support\Facades\Context;
+use Northwestern\SysDev\Chassis\Enums\ApiPrincipalType;
+use Northwestern\SysDev\Chassis\ValueObjects\ApiRequestContext;
+
+
+$scopes = Context::get(ApiRequestContext::OAUTH_SCOPES);
+$isClient = Context::get(ApiRequestContext::PRINCIPAL_TYPE) === ApiPrincipalType::Client->value;
+```
+
+To gate your own routes on a feature flag, use `EnsureFeatureEnabled` with a config key, as `routes/api.php` does: `EnsureFeatureEnabled::class . ':api.enabled'`, or `':mcp.enabled,404'` to answer 404.
+
+## Models and Seeding
+
+| Chassis class                                     | Starter use                                                                                        | What it does                                                                                                                                                                                               |
+| ------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Models\Concerns\Auditable`                       | `BaseModel`, `User`, `Role`, `Permission`                                                          | Records each model’s changes in the audit log                                                                                                                                                              |
+| `Models\Concerns\RecordsCustomAudits`             | `RecordsAuditEvents`, on `User` and `Role`                                                         | Adds `recordCustomAudit()` for audit events that aren’t attribute changes; see [Audit Logging](https://laravel-starter.entapp.northwestern.edu/features/audit-logging/)                                    |
+| `Models\Concerns\PrunesAfterRetentionPeriod`      | `Audit`, `UserLoginRecord`, `ImpersonationLog`, `LoginChallenge`, `ApiRequestLog`                  | Deletes records older than the days in a config key when `model:prune` runs; see [Data Retention](https://laravel-starter.entapp.northwestern.edu/getting-started/initial-customization/#7-data-retention) |
+| `Attributes\AutomaticallyOrdered`                 | Available to any model through `BaseModel`                                                         | Orders a model’s queries by `order_index`, then `label`, or the columns you name                                                                                                                           |
+| `Seeding\IdempotentSeeder`, `Attributes\AutoSeed` | The starter’s seeders                                                                              | Seeders that are safe to run on every deployment; see [Idempotent Seeding](https://laravel-starter.entapp.northwestern.edu/architecture/idempotent-seeding/)                                               |
+| `Console\Commands\RebuildDatabaseCommand`         | `db:rebuild`                                                                                       | Rebuilds the local database; the starter adds key generation, demo data and IDE helpers                                                                                                                    |
+| `Database\ConfigurableDbDumperFactory`            | [Database snapshots](https://laravel-starter.entapp.northwestern.edu/features/database-snapshots/) | Finds `pg_dump` and `psql`, including Herd’s on macOS and Windows                                                                                                                                          |
+| `Database\DatabasePausedDetector`                 | `bootstrap/app.php`                                                                                | Recognizes a paused database so the error page can say it’s starting                                                                                                                                       |
+
+## Platform
+
+| Chassis class                                                                  | Starter use                                                                | What it does                                                                                                                                                    |
+| ------------------------------------------------------------------------------ | -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Http\Middleware\EnvironmentLockdown`                                          | `App\Http\Middleware\EnvironmentLockdown`                                  | While lockdown is on, sends people with only the default role to the lockdown page                                                                              |
+| `Contracts\ConfigValidator`, `Attributes\ValidatesConfig`                      | The starter’s config validators                                            | The checks `config:validate` runs; see [Adding Custom Validators](https://laravel-starter.entapp.northwestern.edu/reference/commands/#adding-custom-validators) |
+| `Exceptions\SentryExceptionHandler`, `Http\Controllers\SentryTunnelController` | [Sentry](https://laravel-starter.entapp.northwestern.edu/features/sentry/) | Reports exceptions to Sentry and tunnels the browser SDK’s events through the application                                                                       |
+
+## Formatting
+
+| Chassis class                     | Starter use                                   | What it does                                                                                            |
+| --------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `Formatting\TitleCase`            | Resource labels                               | Writes names in title case, keeping words that carry capitals and translation placeholders              |
+| `Formatting\NorthwesternDateTime` | Emails and notifications                      | Writes dates and times in Northwestern style: “10:12 a.m. CDT Saturday, October 10”                     |
+| `Formatting\CountInWords`         | Login code messages, expiration notifications | Writes a count and its noun: “five minutes”                                                             |
+| `Markdown\ShiftHeadings`          | `Changelog::bodyHtml()`                       | A CommonMark extension that moves a document’s headings so the shallowest lands at the level you choose |
+
+[Interface Conventions](https://laravel-starter.entapp.northwestern.edu/building/interface-conventions/) shows how to use them.
+
+## Browser Testing
+
+`Testing\Browser` adds health and accessibility checks to [Pest’s browser plugin](https://pestphp.com/docs/browser-testing). `tests/Pest.php` registers the expectations and the suite’s accessibility rules, and `Tests\BrowserTestCase` uses `Concerns\InteractsWithBrowser`, which fakes exceptions so a test sees what the application reported while serving the browser.
+
+| Expectation                                         | Fails when                                                                                                 |
+| --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `toBeAccessible(exclude: [], disableRules: [])`     | axe finds a violation of any impact outside the excluded selectors                                         |
+| `toHaveNoClientErrors()`                            | The page logged `console.error()`, threw, left a promise rejection unhandled, or a Livewire request failed |
+| `toHaveNoServerErrors()`                            | The application reported an exception while serving the browser, Livewire updates included                 |
+| `toBeHealthy(exclude: [])`                          | Any of the above, or an image failed to load. Every problem is listed at once                              |
+| `toBeHealthyInEachTheme()`, `toBeHealthyOnMobile()` | The page isn’t healthy in light and dark mode, or at a phone’s width                                       |
+| `toAllBeHealthy(exclude: [])`                       | Any page in a list of paths isn’t healthy. Every unhealthy page is listed                                  |
+
+| Helper                                 | What it does                                                                                                                                                                 |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `FilamentPages::in('administration')`  | Lists the paths of a panel’s pages the signed-in person can open: each resource’s index and create pages, and each page and dashboard. Pages that need a record are left out |
+| `ErrorPages::path(500)`                | Registers a test route that answers with that status, so error pages that only a failure shows can be checked                                                                |
+| `FilamentPage::press($page, 'Create')` | Clicks a Filament button by its label. Pest’s own `press()` clicks the first element with that text, which on a Filament page is often a breadcrumb                          |
+| `FilamentPage::openUserMenu($page)`    | Opens the user menu. `confirmModal()`, `cancelModal()`, `assertNotified()` and `assertFieldError()` drive the rest of Filament’s markup                                      |
+| `LivewireRequests::settle($page)`      | Waits out a debounced field and any Livewire request in flight, so the next read sees the result                                                                             |
+| `ClientErrors::capture($page)`         | Records every browser error from then on. Call it before interacting with a page                                                                                             |
+
+See [Browser Tests](https://laravel-starter.entapp.northwestern.edu/guides/testing/#browser-tests).

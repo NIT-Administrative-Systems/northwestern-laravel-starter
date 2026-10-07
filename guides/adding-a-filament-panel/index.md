@@ -1,0 +1,249 @@
+# Adding a Filament Panel
+
+The starter ships with two Filament panels: the **App** panel at `/app`, the default panel where your application’s features for its users belong, and the **Administration** panel at `/administration`, for back-office tooling. Most applications build everything in the App panel. See [UI Architecture](https://laravel-starter.entapp.northwestern.edu/architecture/ui-architecture).
+
+## When to Use a Separate Panel
+
+Add another panel when a distinct audience needs its own navigation, its own permission, and pages the App panel’s users shouldn’t see. Common use cases:
+
+* **Student or applicant portals** - review status, upload documents, view decisions
+* **Faculty/staff dashboards** - manage courses, events, or departmental data
+* **Reviewer or coordinator tools** - evaluate submissions, assign reviewers, track progress
+* **Self-service data management** - authenticated users managing their own records
+
+> **Tip**
+>
+> Sign-in belongs to the App panel. Leave `->login()` off a new panel: its guests are sent to the App panel’s sign-in page, and signing in once works across every panel.
+
+## Creating a New Panel
+
+1. **Generate the panel provider**
+
+   ```bash
+   php artisan make:filament-panel portal
+   ```
+
+   This creates a new provider at `app/Providers/Filament/PortalPanelProvider.php` and registers it automatically.
+
+2. **Define a panel ID constant**
+
+   Follow the pattern from `AppPanelProvider` and `AdministrationPanelProvider`. Define a public `ID` constant and reference it consistently:
+
+   app/Providers/Filament/PortalPanelProvider.php
+
+   ```php
+   class PortalPanelProvider extends PanelProvider
+   {
+       public const string ID = 'portal';
+
+
+       public function panel(Panel $panel): Panel
+       {
+           return $panel
+               ->id(self::ID)
+               ->path(self::ID)
+               // ...
+       }
+   }
+   ```
+
+   > **Caution**
+   >
+   > Do **not** mark a new panel as `->default()`. The App panel is already the default. Only one panel can be the default.
+
+3. **Configure the middleware stack**
+
+   Your new panel needs the same middleware foundation as the App panel. Panel routes don’t run the `web` middleware group, so add `EnvironmentLockdown` to the panel’s auth middleware yourself, or locked-down environments won’t apply to it:
+
+   ```php
+   ->middleware([
+       EncryptCookies::class,
+       AddQueuedCookiesToResponse::class,
+       StartSession::class,
+       ShareErrorsFromSession::class,
+       PreventRequestForgery::class,
+       SubstituteBindings::class,
+       DisableBladeIconComponents::class,
+       DispatchServingFilamentEvent::class,
+   ])
+   ->authMiddleware([
+       Authenticate::class,
+       EnvironmentLockdown::class,
+   ])
+   ```
+
+4. **Configure SPA mode**
+
+   SPA mode gives Filament a single-page-app feel with client-side navigation. If you enable it, exclude the authentication and impersonation routes so full page loads occur for those flows.
+
+   Each panel loads its own theme stylesheet, so navigation between panels must also be a full page load. List the other panels’ paths in the new panel’s exceptions, and add the new panel’s path to the exceptions of any panel that links to it, as `AppPanelProvider` does for the Administration panel:
+
+   ```php
+   ->spa()
+   ->spaUrlExceptions([
+       url('/auth/*'),
+       url('/impersonate/*'),
+       url('/' . AppPanelProvider::ID),
+       url('/' . AppPanelProvider::ID . '/*'),
+       url('/' . AdministrationPanelProvider::ID),
+       url('/' . AdministrationPanelProvider::ID . '/*'),
+   ])
+   ```
+
+5. **Set up resource discovery**
+
+   Create a dedicated directory for your panel’s resources and point the panel at it. This keeps resources cleanly separated from the Administration panel:
+
+   ```php
+   ->discoverResources(in: app_path('Filament/Portal/Resources'), for: 'App\Filament\Portal\Resources')
+   ->discoverPages(in: app_path('Filament/Portal/Pages'), for: 'App\Filament\Portal\Pages')
+   ->discoverWidgets(in: app_path('Filament/Portal/Widgets'), for: 'App\Filament\Portal\Widgets')
+   ```
+
+6. **Give the panel a theme**
+
+   The Northwestern theme plugin is required. It is registered with `->withoutAssetRegistration()`, so the panel gets its styles from its own Vite theme instead. Create `resources/css/filament/portal/theme.css` with the App theme’s imports. Tailwind finds classes in the repository’s own files by itself, but skips `vendor/`, so keep the `@source` line for Filament’s views. Lines for the panel’s own directories are optional and make it plain what the theme serves:
+
+   resources/css/filament/portal/theme.css
+
+   ```css
+   @import "tailwindcss";
+   @import "../../../../vendor/filament/filament/resources/css/index.css";
+   @import "../../../../vendor/northwestern-sysdev/northwestern-filament-theme/dist/theme.css";
+   @import "../../../../vendor/northwestern-sysdev/northwestern-filament-theme/dist/tailwind-tokens.css";
+
+
+   @source '../../../../app/Filament/Portal/**/*';
+   @source '../../../../resources/views/filament/portal/**/*';
+   @source '../../../../resources/views/components/**/*';
+   @source '../../../../vendor/filament/**/*';
+   ```
+
+   Add the file to the `input` array in `vite.config.js`, then register the theme, the plugin, and the application name beside the wordmark:
+
+   ```php
+   ->viteTheme('resources/css/filament/portal/theme.css')
+   ->renderHook(PanelsRenderHook::TOPBAR_LOGO_AFTER, fn (): string => Blade::render('<x-panel-brand />'))
+   ->plugins([
+       NorthwesternTheme::make()
+           ->impersonationBanner()
+           ->withoutAssetRegistration(),
+   ])
+   ```
+
+7. **Add optional features**
+
+   Consider which features from the Administration panel you want to carry over:
+
+   ```php
+   ->databaseNotifications()
+   ->databaseNotificationsPolling('30s')
+   ->globalSearch()
+   ->globalSearchResourceOptIn()
+   ->globalSearchDebounce('750ms')
+   // Browser error reporting, as in the other panels
+   ->renderHook(PanelsRenderHook::HEAD_END, fn (): string => Blade::render('<x-sentry-browser />'))
+   ```
+
+   To show [announcements](https://laravel-starter.entapp.northwestern.edu/features/announcements/) at the top of the new panel’s pages, as the app panel does, add its banner hook:
+
+   ```php
+   ->renderHook(PanelsRenderHook::PAGE_START, fn (): string => Blade::render('@livewire(\App\Filament\App\Livewire\AnnouncementBanner::class)'))
+   ```
+
+   With `globalSearchResourceOptIn()`, a resource appears in global search only when it declares `protected static bool $isGloballySearchable = true;`. Every searchable resource runs its own query on each keystroke, so opt in only the resources people look up by name.
+
+## Gating Access
+
+### Update `canAccessPanel()`
+
+The `User::canAccessPanel()` method uses a `match` statement that intentionally throws an exception for unrecognized panel IDs. You **must** add your new panel here:
+
+app/Domains/User/Models/User.php
+
+```php
+return match ($panel->getId()) {
+    AppPanelProvider::ID => ! $this->is_api_user,
+    AdministrationPanelProvider::ID => $this->can(SystemPermission::AccessAdministrationPanel),
+    PortalPanelProvider::ID => $this->can(SystemPermission::AccessPortal),
+};
+```
+
+### Add a new permission
+
+Define a new permission in `SystemPermission` for your panel:
+
+app/Domains/Access/Enums/SystemPermission.php
+
+```php
+case AccessPortal = 'access-portal';
+```
+
+Then add a description, set the system-managed flag, and configure the scope, following the patterns of the existing `AccessAdministrationPanel` permission.
+
+## Navigation Groups
+
+The Administration panel organizes its sidebar with a `HasLabel` enum. Create an equivalent for your new panel:
+
+app/Filament/Portal/Navigation/PortalNavGroup.php
+
+```php
+namespace App\Filament\Portal\Navigation;
+
+
+use Filament\Support\Contracts\HasLabel;
+
+
+enum PortalNavGroup implements HasLabel
+{
+    case Dashboard;
+    case MyRecords;
+
+
+    public function getLabel(): string
+    {
+        return match ($this) {
+            self::Dashboard => 'Dashboard',
+            self::MyRecords => 'My Records',
+        };
+    }
+}
+```
+
+Then reference it in your resources:
+
+```php
+protected static string|null|UnitEnum $navigationGroup = PortalNavGroup::MyRecords;
+protected static ?int $navigationSort = 1;
+```
+
+## Generating Resources
+
+When generating resources for your new panel, specify both the model namespace and the panel:
+
+```bash
+php artisan make:filament-resource Application \
+    --generate \
+    --model-namespace=App\\Domains\\Application\\Models \
+    --panel=portal
+```
+
+The `--panel` flag ensures the resource is placed in the correct directory for your panel’s discovery path.
+
+## Architecture Patterns to Follow
+
+The Administration panel establishes several patterns worth replicating:
+
+| Pattern                 | What to do                                                                                     | Reference                                         |
+| ----------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| **Panel ID constant**   | Define `public const string ID` on the provider                                                | `AdministrationPanelProvider::ID`                 |
+| **Permission gating**   | One permission per panel in `SystemPermission`                                                 | `AccessAdministrationPanel`                       |
+| **Nav group enum**      | A `HasLabel` enum per panel for sidebar organization                                           | `AdministrationNavGroup`                          |
+| **Heroicon constants**  | Use the `Heroicon` enum instead of raw strings                                                 | `Heroicon::OutlinedUsers`                         |
+| **Resource separation** | Dedicated directories per panel under `app/Filament/`                                          | `app/Filament/App/`                               |
+| **Policies**            | Standard Laravel policies (Filament respects them automatically)                               | `UserPolicy`, `RolePolicy`                        |
+| **Browser tests**       | Check every page of the new panel, as the existing panels’ tests do with `FilamentPages::in()` | `tests/Browser/Pages/AdministrationPagesTest.php` |
+
+> **Tip**
+>
+> You do not need to check for `ManageAll` inside policies. The `Gate::before()` callback in `AppServiceProvider` automatically grants super-administrators full access to every panel and resource.

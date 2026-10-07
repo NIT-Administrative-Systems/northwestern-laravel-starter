@@ -1,0 +1,215 @@
+# Framework Defaults
+
+The starter configures opinionated behaviors across its service providers and bootstrap that differ from stock Laravel. These defaults affect how you write code in this application. Understanding them helps avoid surprises.
+
+## Eloquent Behavior
+
+Configured in `EloquentServiceProvider`. These affect every model in the application.
+
+### Mass Assignment Unguarded
+
+```php
+Model::unguard();
+```
+
+**Laravel default:** Models are guarded, you must declare `$fillable` or `$guarded` to allow mass assignment.
+
+**Starter behavior:** All mass assignment is allowed on all models. `$fillable` and `$guarded` are ignored.
+
+**Rationale:** User input **MUST** pass through Laravel’s form request validation before reaching models. The validator returns only known validated fields, solving the problem `$fillable` was designed for, without keeping arrays in sync with your schema.
+
+### Lazy Loading Prevention
+
+```php
+Model::preventLazyLoading(! App::isProduction());
+```
+
+**Laravel default:** Lazy loading is allowed everywhere, which silently introduces N+1 query problems.
+
+**Starter behavior:** Prevention depends on the environment and debug mode:
+
+| Environment                    | Behavior                                                                             |
+| ------------------------------ | ------------------------------------------------------------------------------------ |
+| Non-production with debug mode | **Throws an exception**, you see the N+1 immediately                                 |
+| Non-production without debug   | **Reports** to your exception handler (Sentry and logs) without breaking the request |
+| Production                     | **Allowed silently**, nothing is thrown or reported                                  |
+
+Lazy loading is not checked in production at all, so catch violations locally and in non-production environments before they ship.
+
+### Missing Attribute Access Prevention
+
+```php
+Model::preventAccessingMissingAttributes(! App::isProduction());
+```
+
+**Laravel default:** Accessing a non-existent attribute returns `null` with no warning.
+
+**Starter behavior:** Throws in non-production, falls back to `null` in production.
+
+This catches typos during development (e.g., `$user->frist_name` instead of `$user->first_name`) that would otherwise produce `null`.
+
+### Morph Map Convention
+
+```php
+Relation::morphMap(array_merge(
+    // Model::MORPH_TYPE => Model::class,
+));
+```
+
+**Laravel default:** Polymorphic relationships store fully-qualified class names in `*_type` database columns.
+
+**Starter behavior:** The morph map is scaffolded but empty. When you add polymorphic relationships, register aliases here so the database stores stable strings (e.g., `user`) instead of class paths like `App\Domains\User\Models\User`.
+
+This prevents renaming/moving a model from breaking existing polymorphic references, and keeps implementation details out of the database. The recommended pattern is to define a `MORPH_TYPE_MAP` constant on each model’s base class and merge it here.
+
+***
+
+## Authentication
+
+Configured in `AppServiceProvider` and `EagerLoadEloquentUserProvider`.
+
+### Eager-Loaded Auth User
+
+app/Providers/EagerLoadEloquentUserProvider.php
+
+```php
+$this->withQuery(function (Builder $query) {
+    $query->with(['roles.role_type', 'roles.permissions']);
+});
+```
+
+A custom auth user provider (`EagerLoadEloquentUserProvider`) replaces Laravel’s default `EloquentUserProvider`. It eager-loads the `roles`, `roles.role_type`, and `roles.permissions` relationships on every authenticated request, preventing N+1 queries when checking authorization.
+
+If you need additional relationships available on the authenticated user, add them to the `withQuery` callback in this class.
+
+### Super Admin Gate Bypass
+
+app/Providers/AppServiceProvider.php
+
+```php
+Gate::before(static function (User $user): ?true {
+    if ($user->currentAccessToken() instanceof \Laravel\Passport\Contracts\ScopeAuthorizable) {
+        return null;
+    }
+
+
+    return $user->hasPermissionTo(SystemPermission::ManageAll) ? true : null;
+});
+```
+
+Users with the `ManageAll` permission bypass Gate and Policy checks: every `$this->authorize()`, `@can`, and `Gate::allows()` call returns `true` for them. This is the mechanism behind super admin access. It doesn’t apply to requests made with a token, which stay limited to the token’s scopes and the person’s own permissions.
+
+> **Tip**
+>
+> When testing new authorization logic, always test with and without a super admin user. A bug in a policy will be invisible if you only test with `ManageAll` users or lack sufficient test coverage.
+
+***
+
+## HTTP & Security
+
+Configured in `AppServiceProvider` and `bootstrap/app.php`.
+
+### Forced HTTPS
+
+```php
+$localOverHttp = App::isLocal() && ! str_starts_with((string) config('app.url'), 'https://');
+
+
+if (! App::environment(['ci', 'testing']) && ! $localOverHttp) {
+    URL::forceScheme('https');
+}
+```
+
+All generated URLs use HTTPS in deployed environments. CI and testing environments are excluded so tests don’t require SSL certificates. Locally, URLs follow `APP_URL`: HTTPS under Herd, and plain HTTP when a worktree or agent serves the app on another port. The session cookie’s `secure` flag follows the same rule unless `SESSION_SECURE_COOKIE` is set.
+
+### Destructive Command Prohibition
+
+```php
+DB::prohibitDestructiveCommands(App::isProduction());
+```
+
+`migrate:fresh`, `migrate:refresh`, `migrate:reset`, `migrate:rollback`, and `db:wipe` are blocked in production. `db:seed` is not blocked. This prevents accidentally destroying a production database.
+
+### Stray HTTP Request Prevention
+
+```php
+if (App::environment(['ci', 'testing'])) {
+    Http::preventStrayRequests();
+}
+```
+
+In CI and testing environments, any outbound HTTP request made via Laravel’s `Http` client that hasn’t been explicitly faked will throw an exception. This ensures your test suite doesn’t accidentally make real HTTP calls to external services, verifying that all network dependencies are properly mocked. If you see a stray request error, you need to add `Http::fake()` for that endpoint.
+
+### Untruncated Request Exceptions
+
+```php
+if (App::environment(['local', 'ci', 'testing'])) {
+    RequestException::dontTruncate();
+}
+```
+
+In local, CI, and testing environments, HTTP client exceptions include the full response body instead of truncating it. This makes debugging failed API calls easier.
+
+***
+
+## Filament Defaults
+
+Configured in `FilamentServiceProvider`, except the impersonation banner. These apply to every panel.
+
+### User Timezone on All Datetimes
+
+All `DateTimePicker`, `TextColumn`, and `TextEntry` components that display datetime values automatically use the authenticated user’s timezone. This means timestamps are displayed in each user’s local time in every panel. No manual `->timezone()` calls are needed. Users choose their timezone on the [Account area’s Preferences page](https://laravel-starter.entapp.northwestern.edu/building/app-panel/#preferences).
+
+### Table Defaults
+
+| Setting            | Value                                             |
+| ------------------ | ------------------------------------------------- |
+| Default pagination | 25 per page                                       |
+| Pagination options | 10, 25, 50, 100                                   |
+| Deferred filters   | Disabled (filters apply immediately)              |
+| DateTime format    | From `config('platform.datetime_display_format')` |
+
+### Non-Native Selects
+
+All `Select` and `SelectFilter` components render as Filament’s custom searchable select instead of the browser’s native `<select>` element. This provides a consistent, searchable dropdown experience across every panel.
+
+### Export Defaults
+
+All Filament export actions default to CSV format and write to the `s3` disk.
+
+### Impersonation Banner
+
+An impersonation warning banner is injected at the top of the page body when a user is being impersonated, ensuring administrators always know when they’re acting as another user.
+
+Each panel turns the banner on through the Northwestern theme plugin, in `AppPanelProvider` and `AdministrationPanelProvider`:
+
+```php
+NorthwesternTheme::make()
+    ->impersonationBanner()
+```
+
+A panel you add needs the same call to show it.
+
+***
+
+## Error Handling
+
+Configured in `bootstrap/app.php`.
+
+### RFC 9457 Problem Details for API
+
+API routes return errors as structured [RFC 9457 Problem Details](https://www.rfc-editor.org/rfc/rfc9457) JSON instead of Laravel’s default error format. This is handled by `ProblemDetailsRenderer` and applies to all `api/*` routes and requests that send `Accept: application/json`.
+
+### Database Timeout Handling
+
+When a database connection times out (common with scale-to-zero RDS in non-production), the application renders a custom “database paused” error page instead of a generic 500. In non-production environments, these timeout errors are also suppressed from error reporting to reduce noise during RDS wake-up periods.
+
+### Event Auto-Discovery
+
+```php
+->withEvents(discover: [
+    __DIR__ . '/../app/Domains/*/Listeners',
+])
+```
+
+Laravel’s event auto-discovery is scoped to `app/Domains/*/Listeners`. Listener classes in these directories are automatically registered without needing an `EventServiceProvider`. The framework infers the event from the `handle()` method’s type-hint.

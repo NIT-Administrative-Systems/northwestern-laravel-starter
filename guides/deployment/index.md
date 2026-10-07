@@ -1,0 +1,395 @@
+# Deployment
+
+The starter does not prescribe a deployment platform. Northwestern teams use AWS-native, container-based, and serverless architectures depending on application needs. The most common way to deploy a Laravel application internally is [Laravel Vapor](https://vapor.laravel.com/), Laravel’s serverless orchestration platform for AWS.
+
+This guide provides:
+
+* A high-level overview of deployment considerations
+* A complete Vapor deployment walkthrough
+* Certificate + DNS workflow
+* Infrastructure-as-Code (IaC) integration (e.g., Terraform / OpenTofu)
+* GitHub Actions deployment pipeline examples
+* A reference `vapor.yml`
+* Known limitations and best practices
+
+***
+
+## Choosing a Deployment Strategy
+
+> **Note**
+>
+> The starter does **not** bake in deployment infrastructure. Teams differ in AWS permissions, hosting patterns, and operational constraints.
+
+Your options typically include:
+
+* Laravel Vapor (recommended for new projects)
+* ECS / EC2 container-based deployments
+* Traditional EC2 hosts
+
+Most Northwestern teams choose Vapor, so the remainder of this documentation focuses on building, provisioning, and deploying your application using Vapor.
+
+### Scheduler and Queue Worker
+
+Vapor runs the scheduler and queue workers for you. On any other target, you run them yourself:
+
+* `php artisan schedule:run` every minute, from cron or an equivalent
+* A long-running `php artisan queue:work` process, kept alive by a process supervisor
+
+The scheduler (`routes/console.php`) runs retention pruning (`model:prune`), Telescope and temporary S3 file cleanup, the health checks and their heartbeat, OAuth token purging and MCP client cleanup, revoking credentials people can no longer hold, the client secret and personal access token reminders, and announcement notifications. Without it, expired records are never deleted, reminders and scheduled announcement notifications never go out, and the health check reports that the schedule has not run. The full list is in [Scheduled Tasks](https://laravel-starter.entapp.northwestern.edu/reference/commands/#scheduled-tasks).
+
+### OAuth Signing Keys
+
+Passport signs access tokens with an RSA key pair, which every deployed environment needs before the API, personal access tokens, applications or MCP can issue a token. Give each environment its own pair:
+
+1. Generate one in a temporary directory, outside the project:
+
+   ```bash
+   cd "$(mktemp -d)"
+   openssl genrsa -out oauth-private.key 4096
+   openssl rsa -in oauth-private.key -pubout -out oauth-public.key
+   ```
+
+   Don’t use `php artisan passport:keys --force` for this. It overwrites your own `storage/oauth-*.key`, which signs out every client connected to your local application, and leaves the environment’s private key on your machine as your local one.
+
+2. Put the files’ contents in `PASSPORT_PRIVATE_KEY` and `PASSPORT_PUBLIC_KEY` in that environment’s encrypted `.env.<environment>` or secrets. In a `.env` file, wrap each key in double quotes and keep its line breaks.
+
+3. Delete the temporary directory. The environment’s private key now lives only in its secrets.
+
+4. Every instance of the environment uses the same pair. Replacing it invalidates every outstanding access token; see [API Operations](https://laravel-starter.entapp.northwestern.edu/features/api-operations/#signing-keys).
+
+## Laravel Vapor
+
+Laravel Vapor is a serverless deployment platform built specifically for Laravel applications. Vapor:
+
+* Builds and deploys your application as AWS Lambda functions
+* Creates API Gateway endpoints, CloudFront distributions, and supporting infrastructure
+* Manages environment variables, assets, S3 file uploads, and build artifacts
+* Works with queues, scheduled tasks, and CLI operations
+
+Vapor reduces maintenance overhead for small and medium-scale applications.
+
+### How Northwestern Uses Vapor
+
+Northwestern mirrors the structure of AWS accounts:
+
+* A **nonprod** Vapor team → **nonprod AWS account**
+* A **prod** Vapor team → **prod AWS account**
+
+Because Vapor associates one project with one team, every application ends up with two Vapor projects, each with their own project ID.
+
+### Initial Setup
+
+1. **Install the Vapor packages**
+
+   The starter does not include Vapor’s packages. Add the runtime as a production dependency and the CLI as a development dependency:
+
+   ```bash
+   composer require laravel/vapor-core
+   composer require --dev laravel/vapor-cli
+   ```
+
+   The CLI provides `vendor/bin/vapor`, used in the steps below and in the deployment workflow.
+
+2. **Create the Vapor project**
+
+   Create one project inside the nonprod Vapor team and one inside the prod Vapor team.
+
+3. **Request certificates**
+
+   Create ACM certificates for each environment hostname:
+
+   ```bash
+   vendor/bin/vapor certificate dev-your-app.example.edu
+   vendor/bin/vapor certificate qa-your-app.example.edu
+   vendor/bin/vapor certificate your-app.example.edu
+   ```
+
+4. **Validate certificates via DNS**
+
+   Use your organization’s DNS request process to add the CNAME records Vapor provides.
+
+5. **Request VPC subnet allocations**
+
+   Obtain subnet IDs from your cloud/networking team.
+
+6. **Configure `vapor.yml`**
+
+   Add memory values, timeouts, subnets, security groups, queue names, and build/deploy steps.
+
+7. **Run your first deploy**
+
+   ```bash
+   vendor/bin/vapor deploy develop
+   ```
+
+> **Note**
+>
+> Certificates **must** be created in `us-east-1` even if your Lambdas run in another region. API Gateway edge-optimized endpoints only read ACM certificates from `us-east-1`.
+
+### Vapor Limitations
+
+Serverless constraints that may impact your application:
+
+* Lambda max runtime: 15 minutes
+* API Gateway timeout: 29 seconds
+* File uploads must use S3 (direct-to-S3 strategy)
+* Long-running queue jobs must be chunked
+* Persistent disk requires optional EFS integration
+* Limited customization of PHP extensions and binaries
+
+> **Caution**
+>
+> If your application requires multi-minute synchronous operations or custom PHP extensions, Vapor may not be suitable.
+
+### Best Practices
+
+#### Encrypted Environment Variables
+
+Rather than scattering secrets across GitHub Secrets and `.env.*` files, store nearly all variables in:
+
+```bash
+.env.production.encrypted
+.env.develop.encrypted
+```
+
+Commit these files to the repo and have Vapor decrypt them on deploy.
+
+Example update flow:
+
+```bash
+php artisan env:decrypt --env=production
+php artisan env:encrypt --env=production
+git add .
+git commit -m "Update production env"
+```
+
+Vapor reads these encrypted files at deploy time, so you can treat them as the single source of truth for environment configuration.
+
+#### IaC for Supporting Resources
+
+Although Vapor can provision RDS, S3, and ElastiCache, teams often prefer OpenTofu for:
+
+* Engine version management
+* Bucket policy control
+* VPC placement
+* Parameter Store integration
+
+Use OpenTofu/Terraform to provision long-lived infrastructure, and use Vapor primarily for application deployment and environment configuration.
+
+### Reference GitHub Actions Workflow (Vapor)
+
+Below is a simplified GitHub Actions template that can be adapted for your application.
+
+> **Danger**
+>
+> This workflow is a **reference implementation**. It includes branch-specific logic and environment variable patterns you may not need. Treat it as a starting point, not a drop-in solution.
+
+```yaml
+name: Deploy
+
+
+on:
+    push:
+        branches: [develop, qa, production]
+    workflow_dispatch:
+
+
+concurrency:
+    group: env-${{ github.ref }}
+
+
+env:
+    BRANCH_NAME: ${{ github.ref_name }}
+
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+
+
+        steps:
+            - name: 📂 Checkout Repository
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  ref: ${{ github.head_ref }}
+
+
+            - name: 🔑 Set Secrets Based on Branch
+              run: |
+                  if [ "$BRANCH_NAME" = "production" ]; then
+                    echo "TERRAFORM_KEY_VAR_NAME=TF_KEY_PROD" >> $GITHUB_ENV
+                    echo "TERRAFORM_SECRET_VAR_NAME=TF_SECRET_PROD" >> $GITHUB_ENV
+                    echo "VAPOR_API_VAR_NAME=PROD_VAPOR_API_TOKEN" >> $GITHUB_ENV
+                    sed -i 's/id: 123/id: 456/' vapor.yml # Example Vapor project ID swap
+                  else
+                    echo "TERRAFORM_KEY_VAR_NAME=TF_KEY_NONPROD" >> $GITHUB_ENV
+                    echo "TERRAFORM_SECRET_VAR_NAME=TF_SECRET_NONPROD" >> $GITHUB_ENV
+                    echo "VAPOR_API_VAR_NAME=NONPROD_VAPOR_API_TOKEN" >> $GITHUB_ENV
+                  fi
+
+
+            - name: 🌐 Set Environment URL for Deployment
+              id: environment-url
+              run: |
+                  if [ "$BRANCH_NAME" = "production" ]; then
+                    echo "URL=https://your-app.northwestern.edu/" >> $GITHUB_OUTPUT
+                  elif [ "$BRANCH_NAME" = "qa" ]; then
+                    echo "URL=https://qa-your-app.northwestern.edu/" >> $GITHUB_OUTPUT
+                  else
+                    echo "URL=https://dev-your-app.northwestern.edu/" >> $GITHUB_OUTPUT
+                  fi
+
+
+            - name: 🐘 Setup PHP
+              uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+              with:
+                  php-version: 8.5
+                  extensions: ctype, curl, dom, fileinfo, filter, hash, iconv, intl, json, libxml, mbstring, openssl, pcre, pdo, pdo_pgsql, phar, reflection, session, simplexml, sodium, tokenizer, xml, xmlreader, xmlwriter, zip
+
+
+            - name: 📦 Install pnpm
+              uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+              with:
+                  version: 12.x.x
+
+
+            - name: 🟢 Setup NodeJS
+              uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+              with:
+                  node-version: 26
+                  cache: pnpm
+
+
+            - name: 🌱 Setup OpenTofu
+              uses: opentofu/setup-opentofu@a1320f892987e89d278cc92dc5adc984fb93aca4 # v2.0.2
+              with:
+                  tofu_version: 1.12.6
+
+
+            - name: 🔧 Install dependencies
+              run: |
+                  composer install --no-interaction
+                  cp .env.ci .env
+                  php artisan key:generate
+                  pnpm install
+
+
+            - name: 🧱 OpenTofu Init
+              env:
+                  AWS_ACCESS_KEY_ID: ${{ secrets[env.TERRAFORM_KEY_VAR_NAME] }}
+                  AWS_SECRET_ACCESS_KEY: ${{ secrets[env.TERRAFORM_SECRET_VAR_NAME] }}
+                  TF_VAR_local_state_passphrase: ${{ secrets.TF_LOCAL_STATE_ENCRYPTION_KEY_2025_07 }}
+                  TF_VAR_shared_state_passphrase: ${{ secrets.TF_SHARED_RESOURCES_STATE_ENCRYPTION_KEY_2025_07 }}
+              run: |
+                  cd iac/${BRANCH_NAME}
+                  tofu init
+
+
+            - name: 🧱 OpenTofu Apply and Output
+              env:
+                  AWS_ACCESS_KEY_ID: ${{ secrets[env.TERRAFORM_KEY_VAR_NAME] }}
+                  AWS_SECRET_ACCESS_KEY: ${{ secrets[env.TERRAFORM_SECRET_VAR_NAME] }}
+                  TF_VAR_local_state_passphrase: ${{ secrets.TF_LOCAL_STATE_ENCRYPTION_KEY_2025_07 }}
+                  TF_VAR_shared_state_passphrase: ${{ secrets.TF_SHARED_RESOURCES_STATE_ENCRYPTION_KEY_2025_07 }}
+              run: |
+                  cd iac/${BRANCH_NAME}
+                  tofu apply -auto-approve -no-color -var="master_password=${{ secrets.DB_PASSWORD }}"
+                  db_name=$(tofu output -no-color -raw db_name)
+                  db_endpoint=$(tofu output -no-color -raw db_endpoint)
+                  db_username=$(tofu output -no-color -raw master_username)
+                  bucket_name=$(tofu output -no-color -raw file_uploads_bucket_name)
+                  echo "DB_HOST=$db_endpoint" >> $GITHUB_ENV
+                  echo "DB_USERNAME=$db_username" >> $GITHUB_ENV
+                  echo "DB_DATABASE=$db_name" >> $GITHUB_ENV
+                  echo "BUCKET_NAME=$bucket_name" >> $GITHUB_ENV
+
+
+            - name: 🚀 Deploy App
+              env:
+                  VAPOR_API_TOKEN: ${{ secrets[env.VAPOR_API_VAR_NAME] }}
+                  SHA: ${{ github.sha }}
+              run: |
+                  echo "${{ secrets.LARAVEL_ENV_ENCRYPTION_KEY }}" | vendor/bin/vapor secret --name "LARAVEL_ENV_ENCRYPTION_KEY" ${BRANCH_NAME}
+                  echo "${DB_HOST}" | vendor/bin/vapor secret --name "DB_HOST" ${BRANCH_NAME}
+                  echo "${DB_USERNAME}" | vendor/bin/vapor secret --name "DB_USERNAME" ${BRANCH_NAME}
+                  echo "${DB_DATABASE}" | vendor/bin/vapor secret --name "DB_DATABASE" ${BRANCH_NAME}
+                  echo "${{ secrets.DB_PASSWORD }}" | vendor/bin/vapor secret --name "DB_PASSWORD" ${BRANCH_NAME}
+                  sleep 5;
+                  echo "${BUCKET_NAME}" | vendor/bin/vapor secret --name "AWS_BUCKET" ${BRANCH_NAME}
+                  vendor/bin/vapor deploy --no-ansi ${BRANCH_NAME} --commit=${SHA}
+
+
+            - name: 🔗 Attach Scratch EFS
+              env:
+                  AWS_ACCESS_KEY_ID: ${{ secrets[env.TERRAFORM_KEY_VAR_NAME] }}
+                  AWS_SECRET_ACCESS_KEY: ${{ secrets[env.TERRAFORM_SECRET_VAR_NAME] }}
+                  TF_VAR_local_state_passphrase: ${{ secrets.TF_LOCAL_STATE_ENCRYPTION_KEY_2025_07 }}
+                  TF_VAR_shared_state_passphrase: ${{ secrets.TF_SHARED_RESOURCES_STATE_ENCRYPTION_KEY_2025_07 }}
+              run: |
+                  cd iac/${BRANCH_NAME}
+                  ARN=$(tofu output -no-color -raw scratch_efs_arn)
+                  aws lambda update-function-configuration --function-name vapor-your-app-${BRANCH_NAME} --file-system-configs Arn=$ARN,LocalMountPath=/mnt/scratch --region us-east-2
+                  aws lambda update-function-configuration --function-name vapor-your-app-${BRANCH_NAME}-cli --file-system-configs Arn=$ARN,LocalMountPath=/mnt/scratch --region us-east-2
+                  aws lambda update-function-configuration --function-name vapor-your-app-${BRANCH_NAME}-queue --file-system-configs Arn=$ARN,LocalMountPath=/mnt/scratch --region us-east-2
+```
+
+### Reference `vapor.yml` Configuration
+
+```yaml
+id: YOUR_PROJECT_ID
+name: your-app
+ignore:
+    - iac/
+    - docs/
+
+
+environments:
+    develop:
+        memory: 4096
+        timeout: 28
+        cli-memory: 2048
+        queue-memory: 2048
+        queue-timeout: 840
+        cli-timeout: 840
+        queue-concurrency: 30
+        runtime: "php-8.5:al2023"
+        domain:
+            - dev.your-app.example.edu
+        subnets:
+            - subnet-abc123
+            - subnet-def456
+        security-groups:
+            - sg-xyz890
+        queue-database-session-persist: true
+        build:
+            - "COMPOSER_MIRROR_PATH_REPOS=1 composer install --no-dev"
+            - "php artisan event:cache"
+            - "pnpm install && pnpm build && rm -rf node_modules"
+        deploy:
+            - "php artisan db:wake"
+            - "php artisan migrate --seed --force"
+            - "php artisan db:seed --class=StakeholderSeeder"
+```
+
+### Optional: Attaching EFS for Persistent Scratch Storage
+
+If your application needs a shared scratch disk for exports, temporary reports, or other short-lived files, attach an EFS file system to the Vapor Lambda functions:
+
+```bash
+aws lambda update-function-configuration \
+  --function-name vapor-your-app-${BRANCH_NAME} \
+  --file-system-configs Arn=$EFS_ARN,LocalMountPath=/mnt/scratch \
+  --region us-east-2
+
+
+aws lambda update-function-configuration \
+  --function-name vapor-your-app-${BRANCH_NAME}-cli \
+  --file-system-configs Arn=$EFS_ARN,LocalMountPath=/mnt/scratch \
+  --region us-east-2
+
+
+aws lambda update-function-configuration \
+  --function-name vapor-your-app-${BRANCH_NAME}-queue \
+  --file-system-configs Arn=$EFS_ARN,LocalMountPath=/mnt/scratch \
+  --region us-east-2
+```

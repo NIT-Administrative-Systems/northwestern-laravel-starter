@@ -1,0 +1,407 @@
+# Authentication
+
+The Northwestern Laravel Starter provides a multi-method authentication system that handles Northwestern users (via NetID/SSO) and external collaborators (via passwordless verification codes), and integrations through OAuth credentials issued by Laravel Passport.
+
+## Authentication Methods
+
+NetID Single Sign-On
+
+**Northwestern SSO (Entra ID or Online Passport)**
+
+Primary authentication method for Northwestern users via NetID.
+
+* Entra ID (OAuth2) or Online Passport (cookie-based)
+* Multi-factor authentication support
+* Automatic user provisioning
+* Session-based authentication
+
+Passwordless Verification Codes
+
+**Email OTP Authentication**
+
+Email-based passwordless authentication for external users.
+
+* No password management
+* Time-limited verification codes
+* Rate limiting protection
+* Invite-only access
+
+OAuth Clients
+
+**Laravel Passport**
+
+Client credentials for integrations, which get short-lived access tokens.
+
+* Multiple clients per API user
+* IP allowlisting
+* Expiring, rotatable secrets
+
+***
+
+## Signing In
+
+Sign-in belongs to the [App panel](https://laravel-starter.entapp.northwestern.edu/building/app-panel/). Guests who open a page in any panel are sent to `/app/login`, which lists the sign-in methods this application has configured:
+
+* **Sign In with NetID** appears when single sign-on is configured. It uses Online Passport (WebSSO) when that is configured, otherwise Entra ID.
+* **Sign In with Email** appears when `LOCAL_AUTH_ENABLED=true`.
+* **Sign In As** appears in the `local` environment only. See [Signing In Locally](https://laravel-starter.entapp.northwestern.edu/features/authentication/#signing-in-locally).
+* If none is available, the page explains that no sign-in methods are available.
+
+When NetID is the only method, `/app/login` skips the page and goes straight to single sign-on. The exceptions are the `ci` environment, where the page always renders so end-to-end tests can sign in with email codes, and `local`, where it offers **Sign In As**.
+
+Email sign-in is a single page, `/app/login/email`, with two steps: request a code, then enter it. Progress is kept in the session, so reloading the page returns to the current step.
+
+Which methods are offered, and the step every method ends with, are decided in `App\Domains\Auth\SignIn`. Every sign-in finishes with `SignIn::complete()`: a new session and CSRF token, a login record, and the page the person asked for, or `/`. An email code sign-in is remembered past the session (Laravel’s remember cookie), since a new code costs a trip to the inbox; single sign-on and Sign In As aren’t, since signing in again is usually silent or one click. `SignInMethod::remembers()` is where to change that.
+
+## Signing In Locally
+
+A local environment needs no SSO, email or credentials to sign in. In the `local` environment, the sign-in page has a **Development** section with a **Sign In As…** menu of the seeded demo users, each shown with its role:
+
+| User           | Signs in as                                             |
+| -------------- | ------------------------------------------------------- |
+| `nuit.admin`   | NUIT Administrator, a Super Administrator               |
+| `generic.user` | A Northwestern user with no extra roles                 |
+| `partner.user` | A local (email) account, when `LOCAL_AUTH_ENABLED=true` |
+
+Each menu item is a link to `/app/login/as/{username}`, which signs in as that user, records the sign-in like any other, and redirects to `/` (or the page you asked for). Agents and scripts can use the URL directly, at any host or port the application is served on.
+
+The users come from `DemoUserSeeder`, which `db:rebuild` runs. Add the users you seed for specific roles to its `SIGN_IN_AS` list and they appear here too. API users can’t be signed in as.
+
+> **Caution**
+>
+> The route is registered only when `APP_ENV=local`: an explicit check for `local`, not “anything but production”. It doesn’t exist in `ci`, `develop`, `qa`, `production` or any other environment, and the controller refuses outside `local` as well.
+
+To test real NetID sign-in locally, configure Entra ID or Online Passport (see [Installation](https://laravel-starter.entapp.northwestern.edu/getting-started/installation/#5-environment-configuration)). The Azure redirect URI must match the host you use.
+
+## Where Users Land After Signing In
+
+Every sign-in path ends at `/`. `HomeController` shows guests the landing page and sends signed-in users to `destinationFor()`, which returns the App panel by default. A user who started from a specific page, for example a link in an email, is returned to that page instead.
+
+To change where signed-in users go, override `destinationFor()`:
+
+**Per role**
+
+app/Http/Controllers/HomeController.php
+
+```php
+protected function destinationFor(User $user): string
+{
+    if ($user->can(SystemPermission::AccessAdministrationPanel)) {
+        return Filament::getPanel(AdministrationPanelProvider::ID)->getUrl();
+    }
+
+
+    return Filament::getPanel(AppPanelProvider::ID)->getUrl();
+}
+```
+
+**No landing page**
+
+To send guests straight to sign-in instead of showing the landing page, change the guest branch of `__invoke()`:
+
+app/Http/Controllers/HomeController.php
+
+```php
+if (! $user instanceof User) {
+    return redirect()->to(Filament::getPanel(AppPanelProvider::ID)->getLoginUrl());
+}
+```
+
+***
+
+## NetID Authentication
+
+Northwestern users authenticate via single sign-on using their NetID credentials. The starter supports two SSO providers, **Microsoft Entra ID** (OAuth2) and **Online Passport** (agentless WebSSO via ForgeRock), and auto-detects which one to use based on your configured credentials. See the [WebSSO / Entra ID](https://laravel-starter.entapp.northwestern.edu/northwestern-integrations/websso/) documentation for provider-specific details.
+
+### How It Works
+
+1. **User visits protected route**
+
+   User attempts to access a route requiring authentication
+
+2. **Redirect to SSO**
+
+   The application sends the guest to `/app/login`. When email sign-in is off, that page redirects straight to Northwestern’s authentication service; otherwise the user picks **Sign In with NetID** there
+
+3. **User authenticates**
+
+   User enters NetID and password (+ MFA if enabled)
+
+4. **Callback with token**
+
+   SSO provider redirects back with authentication token
+
+5. **User provisioning**
+
+   Application creates/updates user record from Directory Search data
+
+6. **Session established**
+
+   User is logged in and session cookie is set
+
+### User Provisioning
+
+When a Northwestern user logs in for the first time, the application:
+
+1. **Validates NetID** from SSO response
+
+2. **Queries Directory Search API** for user demographics
+
+3. **Creates user record** with demographic data:
+
+   * Full name
+   * Email address
+   * Department
+   * Affiliations (student, faculty, staff, etc.)
+   * etc.
+
+Subsequent logins update the user’s demographic data to keep it synchronized.
+
+***
+
+## Passwordless Verification Codes
+
+External users (non-Northwestern) can access the application via time-limited verification codes sent to their email.
+
+### How It Works
+
+1. **Admin creates local user**
+
+   Administrator creates a local user account in the Filament panel
+
+2. **Verification code sent**
+
+   The user requests a code on `/app/login/email`, or a super administrator (`ManageAll`) sends one with **Send Verification Code** on the user’s page (or the **Send a verification code now** option when creating the user)
+
+3. **User receives email**
+
+   The email contains the code (valid for 10 minutes by default, `LOCAL_AUTH_CODE_EXPIRES_MINUTES`) and an **Enter your code** button. The button opens `/app/login/email` at the code step for that challenge, so a code sent by an administrator or read on another device can be entered. The link alone does not sign anyone in, and an expired, used, locked or altered link is ignored.
+
+4. **User enters code**
+
+   On `/app/login/email`, the code authenticates the user and `SignIn::complete()` establishes a session
+
+5. **Code expires**
+
+   Code becomes invalid after use or expiration
+
+### Configuration
+
+.env
+
+```bash
+# Enable/disable local authentication
+LOCAL_AUTH_ENABLED=true
+
+
+# Rate limit for login code requests per email (per hour)
+LOCAL_AUTH_RATE_LIMIT_PER_HOUR=10
+
+
+# Rate limit for login code requests per IP (per hour)
+LOCAL_AUTH_RATE_LIMIT_PER_IP_PER_HOUR=20
+
+
+# Use a fixed, predictable verification code instead of random codes
+LOCAL_AUTH_USE_FIXED_CODE=false
+
+
+# Number of digits in a verification code
+LOCAL_AUTH_CODE_DIGITS=6
+
+
+# Minutes before a code expires
+LOCAL_AUTH_CODE_EXPIRES_MINUTES=10
+
+
+# Failed attempts before a challenge locks, and how many minutes it stays locked
+LOCAL_AUTH_CODE_MAX_ATTEMPTS=8
+LOCAL_AUTH_CODE_LOCK_MINUTES=15
+
+
+# Seconds before another code can be sent
+LOCAL_AUTH_CODE_RESEND_COOLDOWN=30
+```
+
+> **Tip**
+>
+> Setting `LOCAL_AUTH_USE_FIXED_CODE=true` in your local `.env` replaces random verification codes with a fixed, predictable code (e.g. `123456` for a 6-digit code). This avoids needing to check your mail trap every time you log in during development. This setting is blocked from running in production, develop, and QA environments as a safety measure.
+
+### Creating Local Users
+
+**Via Administration Panel**
+
+1. Navigate to **Users**
+2. Click **Add User** → **Add Local User**
+3. Enter the email address, first and last name, job title and organization (all required), and an optional description
+4. Select **Send a verification code now** if the user is ready to sign in. Otherwise they can request one themselves.
+5. Create the user
+
+**Programmatically**
+
+`CreateLocalUser` generates a unique username and creates the local user as an affiliate. With `sendLoginLink: true` (the default), it also emails a verification code.
+
+```php
+use App\Domains\User\Actions\Local\CreateLocalUser;
+
+
+$user = resolve(CreateLocalUser::class)(
+    email: 'jane.doe@example.com',
+    firstName: 'Jane',
+    lastName: 'Doe',
+    title: 'Research Partner',
+    department: 'Example University',
+    description: 'Collaborator on the 2026 study',
+    sendLoginLink: true,
+);
+```
+
+### Security Features
+
+Time-Limited Codes
+
+Codes expire after `LOCAL_AUTH_CODE_EXPIRES_MINUTES` (default: 10 minutes)
+
+Single-Use Codes
+
+Each code can only be used once, preventing replay attacks
+
+Rate Limiting
+
+Limits login code requests to prevent abuse and enumeration attacks
+
+Timing Attack Protection
+
+Consistent response times prevent user enumeration via timing analysis
+
+***
+
+## API Authentication
+
+Integrations authenticate as API users through OAuth service clients issued by Laravel Passport.
+
+### How It Works
+
+1. **Admin creates an API user and a client**
+
+   An administrator creates an API user with its first service client, or adds a client to an existing API user
+
+2. **Credentials delivered once**
+
+   The client ID and secret are shown only at creation; the secret is stored hashed and can’t be retrieved again
+
+3. **Client gets an access token**
+
+   The integration exchanges the client ID and secret at `POST /oauth/token` for an access token that lasts one hour
+
+4. **Token in requests**
+
+   The integration includes the access token in the `Authorization: Bearer` header
+
+5. **Middleware validates**
+
+   `AuthenticatePassportToken` validates the token, the client’s secret expiry and IP allowlist, and authenticates the request as the client’s API user
+
+6. **Request logged**
+
+   API request logged with metrics and analytics
+
+See the [API Documentation](https://laravel-starter.entapp.northwestern.edu/features/api/) for complete client management details.
+
+***
+
+## User Segmentation
+
+Every login creates a `UserLoginRecord` with a **segment**, a classification of the user at that moment. Segments feed the login analytics dashboard (charts, stats, filters) and are captured at login time so historical metrics remain accurate even if user roles change later.
+
+Sign-in records are deleted after `LOGIN_RECORD_RETENTION_DAYS` (default 365). See [Data Retention](https://laravel-starter.entapp.northwestern.edu/getting-started/initial-customization/#7-data-retention).
+
+### Default Segments
+
+| Segment       | Classification                                 | Color           |
+| ------------- | ---------------------------------------------- | --------------- |
+| Super Admin   | User has the `ManageAll` permission            | Danger (red)    |
+| External User | User authenticates via local/passwordless auth | Warning (amber) |
+| Other         | Everyone else (default)                        | Gray            |
+
+### Adding a New Segment
+
+All charts, filters, exports, and stats pull from the `UserSegment`. Adding a new case makes it appear everywhere.
+
+1. **Add a case to the enum**
+
+   app/Domains/User/Enums/UserSegment.php
+
+   ```php
+   case SuperAdmin = 'super-admin';
+   case ExternalUser = 'external-user';
+   case Faculty = 'faculty'; // New segment
+   case Other = 'other';
+   ```
+
+   Add a color and icon for the new case in `getColor()` and `getIcon()`. The label is auto-generated from the value (e.g., `'faculty'` → `"Faculty"`).
+
+2. **Add classification logic**
+
+   In `DetermineUserSegment`, add a check **above** the `default` case:
+
+   app/Domains/User/Actions/DetermineUserSegment.php
+
+   ```php
+   return match (true) {
+       $this->isSuperAdmin($user) => UserSegment::SuperAdmin,
+       $this->isExternalUser($user) => UserSegment::ExternalUser,
+       $this->isFaculty($user) => UserSegment::Faculty,
+       default => UserSegment::Other,
+   };
+   ```
+
+   Cases are evaluated top-to-bottom. Order matters when a user could match multiple segments.
+
+***
+
+## Rate Limiting
+
+Authentication uses layered rate limits to prevent brute force attacks and abuse. Limits are applied per IP and per identifier (email or challenge ID) to balance security with usability. `App\Domains\Auth\LoginCodes` enforces the passwordless limits itself, along with the resend cooldown, because the email sign-in page’s Livewire actions don’t pass through route middleware.
+
+### Passwordless Login
+
+Rate Limits
+
+[#](https://laravel-starter.entapp.northwestern.edu/features/authentication/#prop-rate-limit-auth-login-code-request-per-minute)`RATE_LIMIT_AUTH_LOGIN_CODE_REQUEST_PER_MINUTE``5`
+
+Code request attempts per minute (per IP)
+
+[#](https://laravel-starter.entapp.northwestern.edu/features/authentication/#prop-rate-limit-auth-login-code-request-per-email-per-minute)`RATE_LIMIT_AUTH_LOGIN_CODE_REQUEST_PER_EMAIL_PER_MINUTE``3`
+
+Code request attempts per minute (per email)
+
+[#](https://laravel-starter.entapp.northwestern.edu/features/authentication/#prop-rate-limit-auth-login-code-verify-per-minute)`RATE_LIMIT_AUTH_LOGIN_CODE_VERIFY_PER_MINUTE``10`
+
+Code verification attempts per minute (per IP)
+
+[#](https://laravel-starter.entapp.northwestern.edu/features/authentication/#prop-rate-limit-auth-login-code-verify-per-challenge-per-minute)`RATE_LIMIT_AUTH_LOGIN_CODE_VERIFY_PER_CHALLENGE_PER_MINUTE``5`
+
+Code verification attempts per minute (per challenge)
+
+### Impersonation
+
+Rate Limits
+
+[#](https://laravel-starter.entapp.northwestern.edu/features/authentication/#prop-rate-limit-auth-impersonate-per-minute)`RATE_LIMIT_AUTH_IMPERSONATE_PER_MINUTE``10`
+
+Impersonation actions per minute
+
+All rate limiters are defined in `config/rate-limiting.php`.
+
+***
+
+## Impersonating Users
+
+Users with the `ManageImpersonation` permission can sign in as another user to see the application as they do. The **Impersonate** button on a user’s page in the administration panel posts to `/impersonate/take/{id}`. API users can’t be impersonated, and only a user with `ManageAll` can impersonate another user who has it.
+
+While impersonating, both panels show the theme’s impersonation banner, whose leave button posts to `/impersonate/leave` and returns to the original account. Both routes are in `routes/auth.php` and share the [impersonation rate limit](https://laravel-starter.entapp.northwestern.edu/features/authentication/#impersonation).
+
+Each start is recorded in the impersonation log, which is kept forever unless `IMPERSONATION_LOG_RETENTION_DAYS` is set. See [Audit Logging](https://laravel-starter.entapp.northwestern.edu/features/audit-logging/#what-gets-audited).
+
+For information on roles, permissions, and policies after a user is authenticated, see the [Authorization](https://laravel-starter.entapp.northwestern.edu/features/authorization/) documentation.

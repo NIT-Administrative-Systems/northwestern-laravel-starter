@@ -1,0 +1,73 @@
+# Northwestern Laravel Starter
+
+Start with Getting Started to create an application, then Building Your Application for where code goes. Features and Northwestern Integrations explain what the starter ships and how to configure it. An application built from the starter also has an AGENTS.md in its repository root with the rules for working in it.
+
+## Getting Started
+
+- [Introduction](https://laravel-starter.entapp.northwestern.edu/getting-started/introduction/index.md): What the Northwestern Laravel Starter provides
+- [Requirements](https://laravel-starter.entapp.northwestern.edu/getting-started/requirements/index.md): System requirements for the Northwestern Laravel Starter
+- [Installation](https://laravel-starter.entapp.northwestern.edu/getting-started/installation/index.md): Step-by-step installation instructions for the Northwestern Laravel Starter
+- [Initial Customization](https://laravel-starter.entapp.northwestern.edu/getting-started/initial-customization/index.md): Configure and personalize the starter kit for your project
+
+## Building Your Application
+
+- [The App Panel](https://laravel-starter.entapp.northwestern.edu/building/app-panel/index.md): Where your application's features live, and what the starter puts in the panel for you
+- [The Administration Panel](https://laravel-starter.entapp.northwestern.edu/building/administration-panel/index.md): The starter's back-office tools, who can use each one, and how to add your own
+- [Public Pages](https://laravel-starter.entapp.northwestern.edu/building/public-pages/index.md): Pages people can see without signing in, built on the public layout
+- [Error Pages](https://laravel-starter.entapp.northwestern.edu/building/error-pages/index.md): Which layout each error page uses, and how to add or change one
+- [Branding & Mail](https://laravel-starter.entapp.northwestern.edu/building/branding-and-mail/index.md): The Northwestern theme, the footer the university requires, and the email theme
+- [Interface Conventions](https://laravel-starter.entapp.northwestern.edu/building/interface-conventions/index.md): How the starter writes interface copy, and the helpers that format names, dates, counts, filters and badges for you
+
+## Architecture
+
+- [UI Architecture](https://laravel-starter.entapp.northwestern.edu/architecture/ui-architecture/index.md): How the starter's interface is built on one stack, and where each kind of page belongs
+- [Domain-Driven Design](https://laravel-starter.entapp.northwestern.edu/architecture/domain-driven-design/index.md): Overview of the DDD architecture
+- [Idempotent Seeding](https://laravel-starter.entapp.northwestern.edu/architecture/idempotent-seeding/index.md): How the production-safe seeding system works
+- [Framework Defaults](https://laravel-starter.entapp.northwestern.edu/architecture/framework-defaults/index.md): Opinionated behaviors the starter configures at the framework level
+
+## Features
+
+- [Authentication](https://laravel-starter.entapp.northwestern.edu/features/authentication/index.md): Multi-method authentication system for Northwestern users and external collaborators
+- [Authorization](https://laravel-starter.entapp.northwestern.edu/features/authorization/index.md): Role-based access control with auditable role assignments, permission scoping, and role type segregation
+- [Audit Logging](https://laravel-starter.entapp.northwestern.edu/features/audit-logging/index.md): Comprehensive audit trail system for compliance and security
+- [API System](https://laravel-starter.entapp.northwestern.edu/features/api/index.md): OAuth credentials for the API through Laravel Passport, for integrations and people, with request logging, limits and analytics
+- [API Operations](https://laravel-starter.entapp.northwestern.edu/features/api-operations/index.md): Keeping the API's credentials healthy in a deployed application, from signing keys to cleanup, and the refusals that protect them
+- [MCP Server](https://laravel-starter.entapp.northwestern.edu/features/mcp/index.md): An MCP server that AI clients such as Claude and VS Code connect to as the person using them, through OAuth
+- [Database Snapshots](https://laravel-starter.entapp.northwestern.edu/features/database-snapshots/index.md): Using database snapshots to quickly restore state during development
+- [Health Checks](https://laravel-starter.entapp.northwestern.edu/features/health-checks/index.md): Monitoring application health and receiving alerts when services fail
+- [Announcements](https://laravel-starter.entapp.northwestern.edu/features/announcements/index.md): Messages from administrators shown in a banner across the application and on an Announcements page
+- [Support Tickets](https://laravel-starter.entapp.northwestern.edu/features/support-tickets/index.md): Contact form with pluggable gateway architecture and automatic email fallback
+- [Changelog](https://laravel-starter.entapp.northwestern.edu/features/changelog/index.md): Public changelog for communicating releases and updates to users
+- [Sentry](https://laravel-starter.entapp.northwestern.edu/features/sentry/index.md): Error tracking, performance monitoring, and source map integration
+
+## Northwestern Integrations
+
+- [Overview](https://laravel-starter.entapp.northwestern.edu/northwestern-integrations/index.md): Northwestern-specific service integrations
+- [Directory Search](https://laravel-starter.entapp.northwestern.edu/northwestern-integrations/directory-search/index.md): User provisioning and profile synchronization via Northwestern's LDAP Directory Search API
+- [WebSSO / Entra ID](https://laravel-starter.entapp.northwestern.edu/northwestern-integrations/websso/index.md): Single sign-on authentication via Microsoft Entra ID or Online Passport (agentless WebSSO), auto-detected from credentials
+- [EventHub](https://laravel-starter.entapp.northwestern.edu/northwestern-integrations/eventhub/index.md): Consume event messages from Northwestern's EventHub enterprise messaging platform
+- [Wildcard Photos](https://laravel-starter.entapp.northwestern.edu/northwestern-integrations/wildcard-photos/index.md): Sync Northwestern Wildcard ID card photos from Directory Search to S3
+
+## Guides
+
+- [Development Workflow](https://laravel-starter.entapp.northwestern.edu/guides/development-workflow/index.md): Running the application locally, the checks every change must pass, and what CI runs on a pull request
+- [Testing](https://laravel-starter.entapp.northwestern.edu/guides/testing/index.md): Writing and running the PHP tests, and the browser tests that check every page with axe
+- [Adding a Filament Panel](https://laravel-starter.entapp.northwestern.edu/guides/adding-a-filament-panel/index.md): How to create an additional Filament panel for user-facing or domain-specific functionality
+- [Deployment](https://laravel-starter.entapp.northwestern.edu/guides/deployment/index.md): Guidelines for deploying the starter
+- [Applying Upstream Updates](https://laravel-starter.entapp.northwestern.edu/guides/applying-upstream-updates/index.md): How to pull in changes from the Northwestern Laravel Starter after your project has diverged
+
+## Reference
+
+- [Artisan Commands](https://laravel-starter.entapp.northwestern.edu/reference/commands/index.md): Reference guide for custom Artisan commands in the starter
+- [Environment Variables](https://laravel-starter.entapp.northwestern.edu/reference/environment-variables/index.md): Every environment variable the starter reads, with its default
+- [Chassis](https://laravel-starter.entapp.northwestern.edu/reference/chassis/index.md): The classes the starter uses from northwestern-sysdev/chassis, where it uses them, and the hooks they offer
+
+## API Specification
+
+- [Overview](https://laravel-starter.entapp.northwestern.edu/api/index.md)
+- [Overview](https://laravel-starter.entapp.northwestern.edu/api/operations/tags/users/index.md)
+- [Get authenticated user details](https://laravel-starter.entapp.northwestern.edu/api/operations/get-user-details/index.md)
+
+## Other documentation
+
+- [Northwestern Laravel Starter](https://laravel-starter.entapp.northwestern.edu/index.md): A Laravel starter kit for Northwestern University applications

@@ -1,0 +1,138 @@
+# Idempotent Seeding
+
+The starter implements an **idempotent seeding system** that allows database seeders to run multiple times safely without creating duplicate data or causing errors. This is critical for production environments where you need to update seed data without rebuilding the entire database.
+
+## What is Idempotent Seeding?
+
+**Idempotent** means an operation can be performed multiple times without changing the result beyond the initial application.
+
+In the context of database seeders:
+
+* Running a seeder once creates the expected data
+* Running it again doesn’t create duplicates
+* Running it a third time still produces the same result
+* Data is updated if it exists, created if it doesn’t
+
+## Creating an Idempotent Seeder
+
+Tables that are idempotently seeded typically follow a common schema: a unique `slug` mapped to an enum case, a label, and potentially other descriptive fields.
+
+`Northwestern\SysDev\Chassis\Seeding\IdempotentSeeder`, from the `northwestern-sysdev/chassis` package, populates such tables. It handles `INSERT`, `UPDATE`, and `DELETE` operations based on the values it’s given. If something is removed or modified, the seeder will handle the change appropriately. It is aware of the `SoftDeletes` trait and can set (or unset) the `deleted_at` column correctly.
+
+Orphan deletion is on by default: a row whose slug is no longer in `data()` is deleted (soft-deleted on a `SoftDeletes` model). Set `protected bool $deleteOrphans = false;` to keep rows that are not in the seed data.
+
+A seeder that does not fit this template can extend `Illuminate\Database\Seeder` and implement `Northwestern\SysDev\Chassis\Contracts\IdempotentSeederInterface` instead, writing its own idempotent `run()`. `App\Domains\Access\Seeders\RoleSeeder` does this with `updateOrCreate()`.
+
+### `AutoSeed` Attribute
+
+To register an idempotent seeder to be run by `db:seed` and during deployments, provide the `Northwestern\SysDev\Chassis\Attributes\AutoSeed` attribute on the seeder class. It will be automatically discovered and executed.
+
+Discovery only scans `app/Domains/{Domain}/Seeders/`. A seeder with `#[AutoSeed]` anywhere else never runs. A class in those directories that carries `#[AutoSeed]` but does not implement `IdempotentSeederInterface` fails discovery with an error.
+
+If the data relies on other tables being seeded first, you can specify dependencies using the `dependsOn` parameter:
+
+```php
+use Northwestern\SysDev\Chassis\Attributes\AutoSeed;
+use Northwestern\SysDev\Chassis\Seeding\IdempotentSeeder;
+
+
+#[AutoSeed(dependsOn: [OtherSeeder::class])]
+class MySeeder extends IdempotentSeeder
+{
+    // ...
+}
+```
+
+### Implementation Example
+
+Provided below is an example of a simple idempotent seeder. The `$model` property must be provided. The `data()` method can get data from anywhere; this example is an implementation for an enum.
+
+**migration.php**
+
+```php
+Schema::create('product_statuses', function (Blueprint $table) {
+    $table->id();
+
+
+    $table->string('slug')->unique();
+    $table->string('label');
+
+
+    $table->tinyInteger('order_index')->default(5);
+
+
+    $table->timestamps();
+    $table->softDeletes();
+});
+```
+
+**ProductStatusEnum.php**
+
+```php
+enum ProductStatusEnum: string
+{
+    case Provisioning = 'provisioning';
+
+
+    public function label(): string
+    {
+        return Str::of($this->value)->replace('-', ' ')->title()->toString();
+    }
+}
+```
+
+**ProductStatus.php**
+
+```php
+class ProductStatus extends BaseModel
+{
+    use SoftDeletes;
+
+
+    protected $casts = [
+        'slug' => ProductStatusEnum::class,
+    ];
+}
+```
+
+**ProductStatusSeeder.php**
+
+```php
+use Northwestern\SysDev\Chassis\Attributes\AutoSeed;
+use Northwestern\SysDev\Chassis\Seeding\IdempotentSeeder;
+
+
+#[AutoSeed]
+class ProductStatusSeeder extends IdempotentSeeder
+{
+    protected string $model = ProductStatus::class;
+
+
+    protected string $slugColumn = 'slug';
+
+
+    public function data(): array
+    {
+        return collect(ProductStatusEnum::cases())
+            ->map(function (ProductStatusEnum $case): array {
+                return [
+                    'slug' => $case->value,
+                    'label' => $case->label(),
+                ];
+            })
+            ->all();
+    }
+}
+```
+
+### Viewing Idempotent Seeders
+
+```bash
+php artisan db:seed:list
+```
+
+This shows:
+
+* Seeder class names
+* Their dependencies
+* Execution order

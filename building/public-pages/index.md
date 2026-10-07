@@ -1,0 +1,67 @@
+# Public Pages
+
+Pages outside the panels, such as the landing page at `/` and the changelog at `/support/changelog`, render on `<x-layouts.public>`. Use it only for pages that must work without signing in. Everything else belongs in the [app panel](https://laravel-starter.entapp.northwestern.edu/building/app-panel/).
+
+## The Public Layout
+
+`<x-layouts.public>` (`resources/views/components/layouts/public.blade.php`) renders the site header, the page in a `<main>` element, and the Northwestern footer. It takes an optional `title`, which becomes “Title - Application Name” in the browser tab.
+
+Routes that use it run in the app panel’s context through the `panel:app` middleware. The page loads the app panel’s theme and colors, so Filament’s Blade components work on it:
+
+```blade
+<x-layouts.public title="About">
+    <div class="mx-auto max-w-3xl px-4 py-12">
+        <h1 class="font-nu-heading text-3xl font-bold">About</h1>
+
+
+        <x-filament::button tag="a" href="/app">Get started</x-filament::button>
+    </div>
+</x-layouts.public>
+```
+
+The layout is **light only**, as the university’s Department Templates are. It loads Livewire and Filament’s support scripts, which bring Alpine features such as tooltips, but not the panel core, which would apply each user’s panel theme, including dark mode.
+
+## The Site Header
+
+`<x-site-header>` (`resources/views/components/site-header.blade.php`) matches the panels’ top bar: the Northwestern wordmark, then the application name linking to `/`, then whatever the page puts in its slot. The public layout puts the Help menu there, then **Sign In** for guests or the user menu for signed-in users.
+
+The sign-in pages, the lockdown page and the error pages use the same header, so every page names the application. Outside production it shows the environment badge: top right on larger screens, centered below the header on phones.
+
+Error pages render it, so it must work without Filament, auth or the database. It always shows the wordmark: a unit lockup set in `NU_LOCKUP` replaces the logo in the panels’ top bar only.
+
+## The Landing Page
+
+Guests see `resources/views/public/landing.blade.php` at `/`. It is a starter placeholder, with a sign-in button and links to the starter’s documentation and repository. Replace its content with your application’s own.
+
+`HomeController` decides what `/` shows. Signed-in users never see the landing page: they are sent to the app panel, or wherever `destinationFor()` sends them. To change that, or to send guests straight to sign-in, follow the recipes in [Where Users Land After Signing In](https://laravel-starter.entapp.northwestern.edu/features/authentication/#where-users-land-after-signing-in). With the “No landing page” recipe, nothing renders the view, so delete `landing.blade.php`.
+
+## Adding a Public Page
+
+1. **Add the route** inside the `panel:app` middleware group in `routes/web.php`, so the page runs in the app panel’s context:
+
+   routes/web.php
+
+   ```php
+   Route::middleware('panel:' . AppPanelProvider::ID)->group(function () {
+       Route::get('/', Controllers\HomeController::class)->name('home');
+       Route::view('about', 'public.about')->name('about');
+       // ...
+   });
+   ```
+
+   Routes in `routes/web.php` run the `web` middleware group, so the session, CSRF protection and [environment lockdown](https://laravel-starter.entapp.northwestern.edu/getting-started/initial-customization/#5-environment-lockdown) apply. Add `->middleware('auth')` to a page that needs a signed-in user.
+
+2. **Add the view** in `resources/views/public/`, wrapped in `<x-layouts.public>`.
+
+3. **Use Tailwind classes freely.** The app panel’s theme, `resources/css/filament/app/theme.css`, compiles classes from every file the repository tracks. Only classes that appear solely in a package’s views under `vendor/`, which git ignores, need an `@source` line there.
+
+4. **Check it in the browser tests.** Add the path to the `public pages` dataset in `tests/Browser/Pages/PublicPagesTest.php`, which checks each page with axe and for errors, in light and dark mode and at a phone’s width. See [Browser Tests](https://laravel-starter.entapp.northwestern.edu/guides/testing/#browser-tests).
+
+> **Note**
+>
+> The group ends with a fallback route, so unknown URLs return the not-found page through the `web` middleware and the page knows who is signed in. Paths under `api/` are left out: they return JSON.
+
+## Examples in the Starter
+
+* **The changelog** is a public page. `Support\ChangelogController` returns `resources/views/public/changelog/index.blade.php` and `show.blade.php`, both on `<x-layouts.public>`, and its routes sit in the `panel:app` group when `CHANGELOG_ENABLED=true`. See [Changelog](https://laravel-starter.entapp.northwestern.edu/features/changelog/).
+* **The sign-in pages** (`/app/login` and `/app/login/email`) are not on the public layout. They are simple pages in the app panel, so they can use Livewire forms and Filament actions, and they show the same site header through `HasSiteHeader`. Follow them when a page needs the panel’s features but not its sidebar. See [Simple Pages](https://laravel-starter.entapp.northwestern.edu/building/app-panel/#simple-pages).

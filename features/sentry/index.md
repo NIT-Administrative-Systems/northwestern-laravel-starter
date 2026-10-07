@@ -1,0 +1,213 @@
+# Sentry
+
+The starter integrates [Sentry](https://sentry.io/) for both PHP and JavaScript error tracking. The PHP SDK (`sentry/sentry-laravel`) captures server-side exceptions, queue failures, and performance traces. The JavaScript SDK (`@sentry/browser`) captures client-side errors in the browser.
+
+## How JavaScript Initialization Works
+
+The `<x-sentry-browser />` component loads the browser SDK. It renders the configuration as JSON and loads the `resources/js/sentry.js` Vite entry, which reads that JSON and calls `init()`. It renders nothing when `sentry.dsn` is empty.
+
+It is included on every page:
+
+* **Both panels** add it through a render hook in their panel providers:
+
+  ```php
+  ->renderHook(PanelsRenderHook::HEAD_END, fn (): string => Blade::render('<x-sentry-browser />'))
+  ```
+
+* **The public layout and the error layout** include it directly.
+
+The configuration it passes to the browser:
+
+| Key                | Source                                                                                                    |
+| ------------------ | --------------------------------------------------------------------------------------------------------- |
+| `dsn`              | `sentry.dsn`, the same DSN as PHP                                                                         |
+| `environment`      | `APP_ENV`                                                                                                 |
+| `tunnel`           | the `sentry.tunnel` route (see below)                                                                     |
+| `tracing`          | `sentry.tracing.browser` (`SENTRY_ENABLE_APM_FOR_JS`, default `true`) loads `browserTracingIntegration()` |
+| `tracesSampleRate` | `sentry.traces_sample_rate`, the same rate as PHP; unset means `0`                                        |
+| `user`             | `SentryExceptionHandler::userContext()`, the same user fields as PHP reports                              |
+
+> **Note**
+>
+> `sentry.tracing.browser` is a starter setting. It lives under `tracing` because sentry-laravel passes top-level `config/sentry.php` keys to the PHP SDK, which rejects options it doesn’t know. sentry-laravel removes the `tracing` array before that.
+
+### The tunnel
+
+Ad blockers often block requests to `sentry.io`. The browser SDK sends its reports to `POST /sentry/tunnel` instead, and chassis’s `SentryTunnelController` relays them to Sentry. It forwards only envelopes addressed to the configured `sentry.dsn`, so it can’t be used to send data to other Sentry projects.
+
+### Selective Imports
+
+`resources/js/sentry.js` does **not** use `import * as Sentry`. A namespace import pulls the entire SDK into the bundle, including Session Replay, User Feedback UI, and Canvas integrations that most applications never use. That adds roughly 300 KB to the minified output.
+
+It imports only what the starter uses, and exposes `captureException` and `captureFeedback` on `window.Sentry` for inline scripts. The 500 error page uses `captureFeedback` to send the user’s description of what happened.
+
+The `dataCollection` object passed to `init()` turns off the browser SDK’s default collection of user info, cookies, HTTP headers and request and response bodies. Keep it when you edit `init()`.
+
+### Adding SDK Features
+
+To add a Sentry feature, import it in `resources/js/sentry.js` and add it to the integrations passed to `init()`. For example, [Session Replay](https://docs.sentry.io/platforms/javascript/session-replay/):
+
+```js
+import {
+    browserTracingIntegration,
+    captureException,
+    replayIntegration,
+    // ...
+} from "@sentry/browser";
+
+
+init({
+    // ...
+    integrations: [
+        ...(config.tracing ? [browserTracingIntegration()] : []),
+        replayIntegration(),
+    ],
+});
+```
+
+The same pattern applies to any other Sentry integration: `feedbackIntegration`, `replayCanvasIntegration`, `httpClientIntegration`, and so on.
+
+> **Note**
+>
+> Only import what you use. Each integration you add increases the JS bundle size. Session Replay alone adds roughly 100 KB (minified).
+
+***
+
+## PHP Configuration
+
+The starter ships `config/sentry.php` with sensible defaults:
+
+| Setting              | Default                                        | Description                                                             |
+| -------------------- | ---------------------------------------------- | ----------------------------------------------------------------------- |
+| `dsn`                | `env('SENTRY_LARAVEL_DSN', env('SENTRY_DSN'))` | Project DSN from Sentry                                                 |
+| `release`            | `env('VAPOR_COMMIT_HASH')`                     | Git SHA, set automatically by Vapor’s `--commit` flag                   |
+| `environment`        | `env('SENTRY_ENVIRONMENT')`                    | Falls back to `APP_ENV`                                                 |
+| `sample_rate`        | `1.0`                                          | Error sampling rate                                                     |
+| `traces_sample_rate` | `null` (disabled)                              | Performance trace sampling, for PHP and the browser                     |
+| `tracing.browser`    | `true`                                         | Load browser tracing in the JavaScript SDK (`SENTRY_ENABLE_APM_FOR_JS`) |
+| `send_default_pii`   | `false`                                        | Whether to send PII by default                                          |
+
+Breadcrumbs capture Laravel logs, cache events, Livewire components, SQL queries, queue jobs, commands, HTTP client requests, and notifications. Performance tracing captures SQL queries (with origin detection), views, Livewire, HTTP clients, cache, and queue jobs.
+
+All settings are overridable via environment variables. See [Sentry’s Laravel configuration docs](https://docs.sentry.io/platforms/php/guides/laravel/configuration/options/) for the full list.
+
+***
+
+## Source Maps & Release Tracking
+
+JS errors in Sentry show minified stack traces by default. The starter ships `@sentry/vite-plugin` in `vite.config.js` to upload source maps during CI builds. The plugin also creates a Sentry release and associates git commits, enabling “Suspect Commits” on both JS and PHP errors.
+
+### What the Starter Provides
+
+`vite.config.js` includes the plugin pre-configured:
+
+```js
+sentryVitePlugin({
+    org: process.env.SENTRY_ORG,
+    project: process.env.SENTRY_PROJECT,
+    disable: !process.env.SENTRY_AUTH_TOKEN,
+    telemetry: false,
+    release: {
+        name: process.env.SENTRY_RELEASE,
+        setCommits: {
+            auto: true,
+        },
+    },
+    sourcemaps: {
+        filesToDeleteAfterUpload: "public/build/assets/*.map",
+    },
+}),
+```
+
+| Option                     | Purpose                                                         |
+| -------------------------- | --------------------------------------------------------------- |
+| `sourcemap: true`          | Generates `.map` files for the plugin to upload.                |
+| `disable`                  | Skips the plugin in local dev where no auth token exists.       |
+| `telemetry: false`         | Prevents the plugin from sending its own diagnostics to Sentry. |
+| `release.name`             | Ties source maps to the same git SHA the PHP SDK uses.          |
+| `release.setCommits.auto`  | Associates git commits with the release for “Suspect Commits.”  |
+| `filesToDeleteAfterUpload` | Removes `.map` files before they reach production.              |
+
+The plugin reads `SENTRY_AUTH_TOKEN` from the environment automatically and creates/finalizes the release by default.
+
+### Prerequisites
+
+These are configured at the org level and should already exist:
+
+* `SENTRY_AUTH_TOKEN` as a GitHub org-level secret and `SENTRY_ORG` (`northwestern-university`) as an org-level variable
+* `SENTRY_AUTH_TOKEN` granted to the repository (request access from an org admin)
+* The [Sentry GitHub integration](https://docs.sentry.io/organization/integrations/source-code-mgmt/github/) connected to the Northwestern GitHub org
+
+### Enabling Source Maps in Your App
+
+1. **Set `SENTRY_PROJECT` as a GitHub repo variable**
+
+   In GitHub: **Repo Settings > Secrets and variables > Actions > Variables**
+
+   | Variable         | Example Value               |
+   | ---------------- | --------------------------- |
+   | `SENTRY_PROJECT` | `graduate-student-tracking` |
+
+   Use a variable, not a secret. The project slug is not sensitive.
+
+2. **Add a frontend build step to `deploy.yml`**
+
+   After dependency install, before `vapor deploy`:
+
+   ```yaml
+         - name: Build Frontend & Upload Source Maps
+           env:
+             SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+             SENTRY_ORG: ${{ vars.SENTRY_ORG }}
+             SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT }}
+             SENTRY_RELEASE: ${{ github.sha }}
+           run: pnpm build
+   ```
+
+3. **Move the frontend build out of `vapor.yml`**
+
+   Remove `pnpm install && pnpm build && rm -rf node_modules` from the build commands in **every environment**:
+
+   ```yaml
+   # Before
+   build:
+     - 'COMPOSER_MIRROR_PATH_REPOS=1 composer install --no-dev'
+     - 'php artisan event:cache'
+     - 'pnpm install && pnpm build && rm -rf node_modules'
+
+
+   # After
+   build:
+     - 'COMPOSER_MIRROR_PATH_REPOS=1 composer install --no-dev'
+     - 'php artisan event:cache'
+   ```
+
+   Add `node_modules` to the ignore list:
+
+   ```yaml
+   ignore:
+     - node_modules/
+     # ... existing ignores ...
+   ```
+
+4. **Deploy and verify**
+
+   Trigger a test error after deploying and confirm in Sentry:
+
+   * JS errors show readable (un-minified) source code
+   * PHP errors show inline source context linking to GitHub
+   * The release matches the deployed git SHA
+   * “Suspect Commits” appear on error details
+
+### How the Release Identifier Works
+
+The git SHA (`${{ github.sha }}`) reaches two consumers through different paths:
+
+* **JS (build time)**: The `pnpm build` step passes `SENTRY_RELEASE` as an env var. The Vite plugin reads it during build, uploads source maps tagged with that release, and injects it into the JS bundle. The browser SDK picks it up automatically at runtime.
+* **PHP (runtime)**: Vapor’s `--commit` flag (already in deploy workflows) sets `VAPOR_COMMIT_HASH` as an env var on Lambda. `config/sentry.php` reads it via `env('VAPOR_COMMIT_HASH')`. No additional Vapor secret is needed.
+
+Both point to the same git SHA, so JS and PHP errors land under the same release in Sentry.
+
+### Local Development
+
+The `disable` option turns off the plugin when `SENTRY_AUTH_TOKEN` is absent. `pnpm build` and `pnpm dev` work as before with zero plugin overhead. Source maps generate locally for browser DevTools but are not uploaded.

@@ -1,0 +1,208 @@
+# Installation
+
+## Initial Setup
+
+### 1. Create Project
+
+```bash
+composer create-project northwestern-sysdev/northwestern-laravel-starter your-project-name
+cd your-project-name
+```
+
+Then initialize a fresh Git repository:
+
+```bash
+git init -b develop # or `main` depending on your branching strategy
+git add .
+git commit -m "chore: initial commit from Northwestern Laravel Starter"
+```
+
+### 2. Provision Required Services
+
+The application expects specific services to exist before you can begin local development:
+
+> **Start the services first**
+>
+> PostgreSQL, Redis and RustFS must be running before you create the databases and bucket. In Laravel Herd Pro, add them under **Settings → Services** using the versions in `herd.yml` (PostgreSQL 16, Redis 7.0.0, RustFS 1.0.0). `herd init` in step 4 then links the site to them.
+
+1. **Create Databases**
+
+   Create the two databases required by the application:
+
+   ```text
+   your_project_name_local   # Primary application database
+   your_project_name_test    # PHPUnit test database
+   ```
+
+2. **Create RustFS Bucket**
+
+   Create a bucket for local object storage in the RustFS console (`http://localhost:9001` in Herd, signing in as `herd` / `secretkey`):
+
+   ```text
+   your-project-name
+   ```
+
+   Then open the bucket’s settings, edit **Bucket CORS**, and save the default rule. Livewire uploads files directly from the browser to the bucket, and RustFS sends no CORS headers until a rule exists.
+
+   With **Serve over HTTPS** enabled in Herd’s RustFS service settings, the S3 API is available at `https://rustfs.herd.<tld>` on macOS and `https://rustfs-9000.herd.<tld>` on Windows, where `<tld>` is your Herd TLD.
+
+   You can also create the bucket and its CORS rule from the command line with the RustFS CLI, [`rc`](https://github.com/rustfs/cli) (`brew install rustfs/tap/rc` on macOS):
+
+   ```bash
+   rc alias set local https://rustfs.herd.test herd secretkey
+   rc bucket create local/your-project-name
+   echo '{"CORSRules":[{"AllowedOrigins":["*"],"AllowedMethods":["GET","PUT","POST","DELETE","HEAD"],"AllowedHeaders":["*"],"ExposeHeaders":["ETag"]}]}' \
+       | rc bucket cors set local/your-project-name -
+   ```
+
+   > **Windows**
+   >
+   > Herd’s **Internal API Port** (Settings → General) defaults to `9001`, the same port as the RustFS console. Change it to another port, such as `9009`, before starting RustFS, or the `herd` CLI can fail with access denied errors.
+
+   > **Note**
+   >
+   > Herd’s RustFS `1.0.0` service, which `herd.yml` requests, is currently only published for Apple silicon. On an Intel Mac, install the RustFS version Herd offers and change the `version` in your local `herd.yml`.
+
+### 3. Update Configuration Files
+
+1. **`.env.example`**
+
+   Update the file by referencing the services you created in the previous step and setting other project-specific defaults:
+
+   .env.example
+
+   ```bash
+   APP_NAME="Your Project Name"
+   APP_URL=https://your-project-name.test
+   DB_DATABASE=your_project_name_local
+   DB_PHPUNIT_DATABASE=your_project_name_test
+   AWS_URL=https://rustfs.herd.test/your-project-name
+   AWS_ENDPOINT=https://rustfs.herd.test
+   AWS_BUCKET=your-project-name
+   ```
+
+   Replace `test` in `AWS_URL` and `AWS_ENDPOINT` with your Herd TLD (use `rustfs-9000.herd.<tld>` on Windows). `AWS_URL` ends with the bucket name.
+
+   Commit these changes to your repository as the base configuration for other developers.
+
+2. **`herd.yml`**
+
+   If you’re using [Laravel Herd](https://herd.laravel.com/), update the `name` field to match your folder/repository name:
+
+   herd.yml
+
+   ```diff
+    name: northwestern-laravel-starter
+    name: your-project-name
+   ```
+
+### 4. Install Dependencies
+
+```bash
+herd init    # If using Laravel Herd
+herd secure  # If using Laravel Herd
+
+
+composer install
+cp .env.example .env
+php artisan key:generate
+
+
+nvm install
+nvm use v26
+npm install -g pnpm@latest-12 # If pnpm is not already installed
+
+
+pnpm install
+pnpm build
+```
+
+### 5. Environment Configuration
+
+A local environment needs no credentials. With the `.env.example` values, the sign-in page offers **Sign In As** for the seeded demo users, `db:rebuild` makes no network calls, and `config:validate` skips the SSO and Directory Search checks. See [Signing In Locally](https://laravel-starter.entapp.northwestern.edu/features/authentication/#signing-in-locally).
+
+Configure SSO and Directory Search locally only to test real NetID sign-in or to add Northwestern users from the directory. Deployed environments always need them. See the [WebSSO / Entra ID](https://laravel-starter.entapp.northwestern.edu/northwestern-integrations/websso/) documentation for full details on each provider.
+
+> **Note**
+>
+> Entra ID only redirects back to the redirect URIs registered for the application in Azure, so local NetID sign-in works only at a host you have registered. Worktrees and agents on other hosts or ports use **Sign In As** instead.
+
+**Entra ID**
+
+If your application uses **Microsoft Entra ID** (the default):
+
+.env
+
+```bash
+AZURE_CLIENT_ID=your-client-id
+AZURE_CLIENT_SECRET=your-client-secret
+DIRECTORY_SEARCH_API_KEY=your-value-here
+EVENT_HUB_API_KEY=your-value-here # Only if the EventHub integration is needed
+```
+
+> **Tip**
+>
+> `AZURE_CLIENT_ID` can also be set in `.env.example` as a shared default for your team.
+
+**Online Passport (WebSSO)**
+
+If your application uses **Online Passport** (agentless WebSSO):
+
+.env
+
+```bash
+WEBSSO_URL_BASE=https://prd-nusso.it.northwestern.edu
+WEBSSO_API_URL_BASE=https://northwestern-prod.apigee.net/agentless-websso
+WEBSSO_API_KEY=your-api-key
+DIRECTORY_SEARCH_API_KEY=your-value-here
+EVENT_HUB_API_KEY=your-value-here # Only if the EventHub integration is needed
+```
+
+> **Tip**
+>
+> Setting `WEBSSO_API_KEY` automatically switches the starter from Entra ID to Online Passport. See the [WebSSO / Entra ID](https://laravel-starter.entapp.northwestern.edu/northwestern-integrations/websso/#online-passport-configuration) docs for additional configuration options like `WEBSSO_STRATEGY` and `DUO_ENABLED`.
+
+### 6. Validate Configuration
+
+To ensure your environment is correctly configured, run:
+
+```bash
+php artisan config:validate
+```
+
+If any issues are detected, the command will output error messages to help you resolve them.
+
+### 7. Database Scaffolding
+
+```bash
+php artisan db:rebuild
+```
+
+This will:
+
+* Clear the cache, the queue and the schedule cache (Redis must be running)
+* Create all database tables
+* Seed system permissions, role types and default roles
+* Sync changelog entries from `resources/changelogs/`
+* Seed the demo users, which the sign-in page offers under **Sign In As**
+* Regenerate the model IDE helper files
+
+> **Caution**
+>
+> This command is only intended for local and testing environments. Use this as needed as the schema or seeders change during development.
+
+## Verification
+
+### Test the Application
+
+Start the development processes:
+
+```bash
+composer dev
+```
+
+This runs the PHP server, a queue worker, the log viewer and Vite together. The queue worker is required: jobs go to Redis (`QUEUE_CONNECTION=redis`), and email sign-in codes are not sent until a worker runs them.
+
+With Laravel Herd, the site is served at `https://your-project-name.test`. Without Herd, use the address `php artisan serve` prints.
+
+As a guest you should see the landing page. Choose **Sign In**, then **Sign In As…** and a demo user such as NUIT Administrator, and you land in the app panel at `/app`.
