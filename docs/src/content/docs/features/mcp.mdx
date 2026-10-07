@@ -72,10 +72,10 @@ Most clients return from sign-in to `https://` or `http://localhost`. A desktop 
 
 <Steps>
 
-1. The client calls `POST /mcp` without a token. The server answers `401` with a `WWW-Authenticate` header pointing at its [protected resource metadata](https://datatracker.ietf.org/doc/html/rfc9728), `/.well-known/oauth-protected-resource/mcp`. The same document is also served at `/.well-known/oauth-protected-resource` for clients that look there.
+1. The client calls `POST /mcp` without a token. The server answers `401` with a `WWW-Authenticate` header pointing at its [protected resource metadata](https://datatracker.ietf.org/doc/html/rfc9728), `/.well-known/oauth-protected-resource/mcp`, and naming the scope to request, `mcp:use`. The same document is also served at `/.well-known/oauth-protected-resource` for clients that look there.
 2. That document names the application as the authorization server; `/.well-known/oauth-authorization-server` lists its endpoints.
 3. The client registers itself at `POST /oauth/register` ([dynamic client registration](https://datatracker.ietf.org/doc/html/rfc7591)). Its redirect URIs must use HTTPS, HTTP to the person's own computer (`localhost`, `127.0.0.1` or `[::1]`), or one of `MCP_CUSTOM_SCHEMES`. It gets a public client, with no secret, that may ask only for the `mcp:use` scope.
-4. The person signs in and sees the consent screen, which marks the client as an **unverified AI client**: a client names itself, so its name is only a claim. Only people with `UseMcp` can approve it.
+4. The person signs in and sees the consent screen, which marks the client as an **unverified AI client**: a client names itself, so its name is only a claim. The screen shows where approving returns the person, which they can check, and the plain (punycode) form of an internationalized domain, which can imitate another site's name. Only people with `UseMcp` can approve it.
 5. The client exchanges the code, with PKCE, for an access token that lasts one hour and a refresh token that lasts 30 days, and calls the server with it.
 
 </Steps>
@@ -188,6 +188,12 @@ People see their MCP clients on their Account area's [Connected Applications](/b
 - `mcp:prune-clients` runs daily. It deletes a client nobody connected within 24 hours of registering, and revokes one nobody has used for 90 days.
 - `oauth:revoke-ineligible` runs hourly in production and at noon on weekdays elsewhere. It disconnects the MCP clients of people who lost `UseMcp`. Their tokens stop working at once, before it runs.
 
+### Reconnecting a Client
+
+A client keeps the client ID it registered, and can't connect with it once that registration is gone: deleted by `mcp:prune-clients` because nobody connected within 24 hours, revoked after 90 days unused or by an administrator, or deleted by `db:rebuild` locally. When the client sends the person to sign in, they see an **Application Not Registered** page instead of the consent screen, telling them to remove the server from the client and add it again, so it registers anew.
+
+Disconnecting doesn't do this. The client stays registered, and connecting again shows the consent screen.
+
 ## Logging and Limits
 
 MCP requests are logged with the [API's requests](/features/api/#request-logging), with three more fields, because a failed tool call still answers `200`:
@@ -217,4 +223,12 @@ Turn MCP on in `.env` and give yourself `UseMcp`. Clients written in Node, such 
 NODE_EXTRA_CA_CERTS="$HOME/Library/Application Support/Herd/config/valet/CA/LaravelValetCASelfSigned.pem" claude
 ```
 
-`db:rebuild` deletes every registered client, but a client remembers the client ID it registered. After a rebuild, remove the server from the client and add it again so it registers anew.
+That covers a client started from the terminal. A client running inside an editor opened from the Dock or Finder, such as an MCP extension in VS Code or PhpStorm, doesn't see the terminal's variables. Set it for apps you open next, then quit and reopen the editor:
+
+```bash
+launchctl setenv NODE_EXTRA_CA_CERTS "$HOME/Library/Application Support/Herd/config/valet/CA/LaravelValetCASelfSigned.pem"
+```
+
+It lasts until you restart your Mac, and every Node process you open trusts Herd's certificate authority until then. `launchctl unsetenv NODE_EXTRA_CA_CERTS` removes it sooner.
+
+`db:rebuild` deletes every registered client, but a client remembers the client ID it registered. After a rebuild, remove the server from the client and add it again so it registers anew (see [Reconnecting a Client](#reconnecting-a-client)).

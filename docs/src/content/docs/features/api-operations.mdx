@@ -13,7 +13,7 @@ The [API System](/features/api/) page explains the credentials the starter issue
 
 Passport signs every access token with an RSA key pair.
 
-- **Deployed environments** set the keys in `PASSPORT_PRIVATE_KEY` and `PASSPORT_PUBLIC_KEY`. Generate a pair with `php artisan passport:keys --force`, store the contents of `storage/oauth-private.key` and `storage/oauth-public.key` in the environment's secrets, and keep the files out of the repository. See [OAuth Signing Keys](/guides/deployment/#oauth-signing-keys).
+- **Deployed environments** set the keys in `PASSPORT_PRIVATE_KEY` and `PASSPORT_PUBLIC_KEY`. Generate a pair with `openssl` in a temporary directory, store the contents of the two files in the environment's secrets, and delete them. See [OAuth Signing Keys](/guides/deployment/#oauth-signing-keys).
 - **Locally**, `php artisan db:rebuild` generates key files in `storage/` when they don't exist.
 - **Each environment** has its own pair, shared by all of its instances.
 
