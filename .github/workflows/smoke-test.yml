@@ -104,21 +104,12 @@ jobs:
 
       - name: ✅ Validate post-install hooks
         working-directory: test-project
-        env:
-          VERSION: ${{ steps.version.outputs.tag }}
         run: |
           echo "--- Checking .env exists (post-root-package-install) ---"
           test -f .env || { echo "::error::.env file not created"; exit 1; }
 
           echo "--- Checking APP_KEY was generated (post-create-project-cmd) ---"
           grep -q "^APP_KEY=base64:" .env || { echo "::error::APP_KEY not generated"; exit 1; }
-
-          echo "--- Checking .starter-version.yaml exists ---"
-          test -f .starter-version.yaml || { echo "::error::.starter-version.yaml not found"; exit 1; }
-          if [[ "$VERSION" != dev-* ]]; then
-            echo "--- Checking .starter-version.yaml matches release ---"
-            grep -q "version: $VERSION" .starter-version.yaml || { echo "::error::.starter-version.yaml does not contain $VERSION"; exit 1; }
-          fi
 
           echo "--- Validating composer.json ---"
           composer validate --strict

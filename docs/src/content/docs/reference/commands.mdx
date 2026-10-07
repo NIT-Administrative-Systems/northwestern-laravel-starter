@@ -559,32 +559,6 @@ curl -H "X-Secret-Token: your-secret-token" https://your-app.northwestern.edu/ap
 
 ---
 
-## Starter Commands
-
-### `starter:check`
-
-Check for newer releases of the Northwestern Laravel Starter.
-
-```bash
-php artisan starter:check
-```
-
-**What it does:**
-
-1. Reads the current version from `.starter-version.yaml`
-2. Queries the GitHub Releases API for newer versions
-3. Lists each newer release with its tag, date and link, then a compare URL and the changelog's URL
-
-<PropertyTable title="Options">
-    <Property name="--version-file" type="option">
-        Path to `.starter-version.yaml` (defaults to project root)
-    </Property>
-</PropertyTable>
-
-This command runs automatically via `composer install` and `composer update` in local environments. Results are cached for 4 hours to avoid unnecessary API calls.
-
----
-
 ## Changelog Commands
 
 ### `make:changelog`

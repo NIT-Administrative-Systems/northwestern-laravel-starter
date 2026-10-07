@@ -25,6 +25,7 @@ Version 3 rebuilds the starter's interface on one stack, Filament (Livewire, Alp
 - `App\Filament\Support\Filters\DateRangeFilter` and `App\Filament\Support\Formatting\BadgePillRenderer`. Role activity and role definition history filter by date with the theme's `Northwestern\FilamentTheme\Filters\DateRangeFilter`, and render their pills with Filament's `<x-filament::badge>` component.
 - `AZURE_REDIRECT_URI`. laravel-soa builds the Entra ID callback URL from the `login-oauth-callback` route, so the redirect URI registered in Azure must match the application's host.
 - The unused Slack, Oh Dear and Horizon settings in `config/health.php` (`HEALTH_SLACK_WEBHOOK_URL`, `OH_DEAR_HEALTH_CHECK_SECRET`, `HORIZON_HEARTBEAT_URL`), and `config/livewire-tables.php`, left over from a package the starter doesn't install.
+- `starter:check`, its Composer hooks and `.starter-version.yaml`. Watch the repository's releases on GitHub to hear about new versions; the newest version in an application's original `CHANGELOG.md` is the one it started from. Releasing no longer commits a version bump to `main`.
 - `SupportTicketRepository` and `TicketSystemGatewayFactory`. `CreateSupportTicket` does the whole submission, and `SupportServiceProvider` chooses the ticket system from `SUPPORT_DRIVER`.
 
 ### Added

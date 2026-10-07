@@ -94,7 +94,7 @@ A commented-out `validate-infrastructure` job plans OpenTofu changes under `iac/
 | Workflow          | Trigger                                    | What it does                                                                                                                                  |
 | ----------------- | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
 | `deploy-docs.yml` | Push to `main` that changes `docs/`, or manual | Builds the docs site and publishes it to GitHub Pages at the domain in `DOCS_CNAME`                                                       |
-| `release.yml`     | Manual, with a version                     | Checks the version and its changelog entry, bumps `.starter-version.yaml` and creates a GitHub release                                       |
+| `release.yml`     | Manual, with a version                     | Checks the version and its changelog entry, then creates a GitHub release from `main`                                       |
 | `smoke-test.yml`  | A published release, or manual             | Creates a project from the release with `composer create-project`, then migrates, seeds, builds assets, runs the tests and boots the app   |
 
 `release.yml` and `smoke-test.yml` release and test the starter itself. Delete them during [Project Cleanup](/getting-started/initial-customization/#8-project-cleanup) unless you adapt them for your application.

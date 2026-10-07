@@ -328,8 +328,4 @@ See [Sentry](/features/sentry/).
 
 ## Testing
 
-| Variable | Default | Description                                                                     |
-| -------- | ------- | ------------------------------------------------------------------------------- |
-| `CI`     | unset   | Set by CI providers. When set, `starter:check` skips the upstream version check |
-
 `phpunit.xml` sets its own values for the PHP and browser tests, including `APP_ENV=testing` and `DB_CONNECTION=phpunit`. Browser tests run the application inside the test process, so they use the same values. See [Testing](/guides/testing/).
