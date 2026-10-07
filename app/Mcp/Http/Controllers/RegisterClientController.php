@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Domains\Auth\Http\Controllers;
+namespace App\Mcp\Http\Controllers;
 
 use App\Domains\Auth\Actions\Applications\RegisterOAuthApplication;
 use App\Domains\Auth\Enums\ClientOrigin;
@@ -19,7 +19,7 @@ use Northwestern\SysDev\Chassis\Rules\OAuthRedirectUri;
  * (PKCE, no secret), may ask only for `mcp:use`, and its self-reported name is marked
  * unverified on the consent screen. `mcp:prune-clients` removes clients nobody connects.
  */
-class RegisterMcpClientController
+class RegisterClientController
 {
     public function __invoke(Request $request, RegisterOAuthApplication $register): JsonResponse
     {

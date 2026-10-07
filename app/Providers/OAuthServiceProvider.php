@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Domains\Auth\Enums\SystemPermission;
-use App\Domains\Auth\Http\Middleware\AddMcpScopeToChallenge;
 use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\Auth\Models\OAuthToken;
 use App\Domains\Auth\Passport\GrantableScopeRepository;
@@ -16,7 +15,6 @@ use Carbon\CarbonInterval;
 use Filament\Facades\Filament;
 use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
-use Laravel\Mcp\Server\Middleware\AddWwwAuthenticateHeader;
 use Laravel\Mcp\Server\Registrar;
 use Laravel\Passport\Bridge\AccessTokenRepository;
 use Laravel\Passport\Bridge\ScopeRepository;
@@ -44,9 +42,6 @@ class OAuthServiceProvider extends ServiceProvider
 
         // Client IDs are UUIDs; a malformed one is an unknown client, not a database error.
         $this->app->bind(ClientRepository::class, OAuthClientRepository::class);
-
-        // The MCP server's 401 challenge also names the scope a client should request.
-        $this->app->bind(AddWwwAuthenticateHeader::class, AddMcpScopeToChallenge::class);
 
         // A person can't give an application a scope they don't hold themselves.
         $this->app->bind(ScopeRepository::class, GrantableScopeRepository::class);
