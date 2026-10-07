@@ -29,7 +29,7 @@
         "league/flysystem-aws-s3-v3": "^3.29",
         "livewire/livewire": "^4.0",
         "mockery/mockery": "^1.6",
-        "northwestern-sysdev/chassis": "^1.5.0",
+        "northwestern-sysdev/chassis": "^1.5.1",
         "northwestern-sysdev/laravel-soa": "^12.0",
         "northwestern-sysdev/northwestern-filament-theme": "^4.2.1",
         "northwestern-sysdev/tdx-php-sdk": "^0.6",

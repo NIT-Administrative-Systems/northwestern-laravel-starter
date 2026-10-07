@@ -74,7 +74,7 @@ Version 3 removes the Bootstrap user interface. Every page now uses one stack, F
 - API request logs record who made each request as `principal_type`, `oauth_client_id`, `token_id` and `grant_type` instead of `access_token_id`. The API Requests table and its export show the client and grant.
 - `ManageApiUsers` is now `ManageApiAccess` (`manage-api-access`). The API area of the administration panel requires it, or `ViewApiRequestLogs` for request logs, instead of `ManageAll`.
 - On API requests, the super-administrator shortcut in `Gate::before` doesn't apply: a token is limited to its scopes and its user's permissions. Roles and permissions stay on the `web` guard (`User::$guard_name`), so permission checks find them while Passport's `api` guard is the default.
-- Requires `laravel/passport` `^13.8`, `laravel/mcp` `^1.0.1` and `northwestern-sysdev/chassis` `^1.5.0`.
+- Requires `laravel/passport` `^13.8`, `laravel/mcp` `^1.0.1` and `northwestern-sysdev/chassis` `^1.5.1`.
 - Panels, the public layout and the error layout use the Department Templates 4.0 wordmark and fonts. The app panel, public pages and error pages have the Northwestern footer; the administration panel still has none.
 - The support request confirmation email shows the reference number, subject, submission time and the user's message; the support team's email leads with the request.
 - The mail theme's links and panels use Northwestern Purple, and its header no longer falls back to the Laravel logo.
@@ -88,7 +88,7 @@ Version 3 removes the Bootstrap user interface. Every page now uses one stack, F
 
 ### Fixed
 
-- Saving a user or role after recording a custom audit event on it is audited as that save. The custom event's values stayed on the model, so the save was recorded as `updated` with the event's values instead of its own changes.
+- Saving a user or role after recording a custom audit event on it is audited as that save, through Chassis 1.5.1. The custom event's values stayed on the model, so the save was recorded as `updated` with the event's values instead of its own changes.
 - The user and role exports neutralize spreadsheet formulas, as the other exports already did: a name or description starting with `=`, `+`, `-`, `@`, a tab or a carriage return gets a leading apostrophe, so it can't run as a formula in Excel or Google Sheets. Every exporter now extends `App\Filament\Exports\BaseExporter`, which does this for every text cell and writes the completion notice, so a new exporter is safe without remembering to. `ExportAction`'s label, icon and color are set once in `FilamentServiceProvider`.
 - A user's Audit Logs, Role History and Login Records tabs, and Sign-In Records, check their permission through the Gate, so Manage All opens them, as it does every other page. They checked the permission directly, which skips `Gate::before`.
 - Setting `LOGIN_CHALLENGE_RETENTION_DAYS` or `API_REQUEST_LOG_RETENTION_DAYS` to `null` now keeps records, as documented. The settings were cast to an integer, so `null` became `0` and pruning deleted every record.

@@ -20,9 +20,6 @@ use Northwestern\SysDev\Chassis\Models\Concerns\RecordsCustomAudits;
  * Tags are stored with the audit; each context entry is added as a "key: value" tag. An event
  * with no values before or after isn't recorded, as owen-it skips empty audits.
  *
- * Unlike Chassis's `recordCustomAudit()` alone, it leaves the model as it found it, so the model's
- * next save is audited as that save, not with this event's values.
- *
  * @phpstan-require-implements \OwenIt\Auditing\Contracts\Auditable
  */
 trait RecordsAuditEvents
@@ -44,8 +41,6 @@ trait RecordsAuditEvents
             $this->recordCustomAudit($event->value, $new, $old);
         } finally {
             unset($this->auditCustomTags, $this->auditCustomContext);
-            $this->isCustomEvent = false;
-            $this->auditCustomOld = $this->auditCustomNew = null;
         }
     }
 }
