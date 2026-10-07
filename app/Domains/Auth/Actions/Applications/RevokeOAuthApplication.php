@@ -35,9 +35,7 @@ readonly class RevokeOAuthApplication
      */
     public function __invoke(OAuthClient $client, ?User $revokedBy = null): void
     {
-        if ($revokedBy instanceof User) {
-            $this->credentials->decide($revokedBy, CredentialOperation::Revoke, CredentialKind::of($client), null)->authorize();
-        }
+        $this->credentials->decide($revokedBy, CredentialOperation::Revoke, CredentialKind::of($client), null)->authorize();
 
         DB::transaction(function () use ($client, $revokedBy): void {
             $tokens = Passport::token()->newQuery()->where('client_id', $client->getKey());

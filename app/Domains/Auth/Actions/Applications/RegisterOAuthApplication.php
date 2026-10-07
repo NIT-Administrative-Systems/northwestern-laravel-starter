@@ -51,8 +51,8 @@ readonly class RegisterOAuthApplication
         ClientOrigin $origin = ClientOrigin::Administrator,
         ?User $registeredBy = null,
     ): array {
-        // Dynamic registration is anonymous: the MCP routes decide whether it's open. Seeders and tests register without anyone.
-        if ($origin === ClientOrigin::Administrator && $registeredBy instanceof User) {
+        // Dynamic registration is anonymous: the MCP routes decide whether it's open.
+        if ($origin === ClientOrigin::Administrator) {
             $this->credentials->decide($registeredBy, CredentialOperation::Issue, CredentialKind::ConnectedApplication, null)->authorize();
         }
 

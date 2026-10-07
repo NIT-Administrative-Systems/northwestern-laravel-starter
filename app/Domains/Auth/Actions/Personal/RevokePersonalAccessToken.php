@@ -32,9 +32,7 @@ readonly class RevokePersonalAccessToken
     {
         $owner = User::withTrashed()->find($token->user_id);
 
-        if ($revokedBy instanceof User) {
-            $this->credentials->decide($revokedBy, CredentialOperation::Revoke, CredentialKind::PersonalAccessToken, $owner)->authorize();
-        }
+        $this->credentials->decide($revokedBy, CredentialOperation::Revoke, CredentialKind::PersonalAccessToken, $owner)->authorize();
 
         $token->revoke();
 

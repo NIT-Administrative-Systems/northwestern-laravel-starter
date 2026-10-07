@@ -197,6 +197,20 @@ final class CredentialAccessTest extends TestCase
         $this->assertAllowed($holder, CredentialOperation::Use, CredentialKind::PersonalAccessToken, $holder);
     }
 
+    // A seeder or sweep acts as no one. Impersonating means a caller forgot to pass the person, so it fails closed.
+    public function test_the_system_may_do_anything_except_while_someone_is_impersonating(): void
+    {
+        config(['api.enabled' => false]);
+
+        $this->assertTrue(resolve(CredentialAccess::class)->decide(null, CredentialOperation::Issue, CredentialKind::ServiceClient, null)->allowed);
+
+        $this->impersonating();
+        $credentials = resolve(CredentialAccess::class);
+
+        $this->assertSame(AccessRefusal::Impersonating, $credentials->decide(null, CredentialOperation::Revoke, CredentialKind::PersonalAccessToken, null)->reason);
+        $this->assertTrue($credentials->decide(null, CredentialOperation::See, CredentialKind::PersonalAccessToken, null)->allowed);
+    }
+
     // Gate::before skips requests that carry a token; these rules must not.
     public function test_manage_all_satisfies_every_permission_even_with_a_token_attached(): void
     {

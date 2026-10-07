@@ -18,6 +18,7 @@ use App\Domains\User\Models\User;
 use App\Providers\OAuthServiceProvider;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Str;
 use Laravel\Passport\Events\AccessTokenCreated;
 use Mockery;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -181,6 +182,44 @@ final class AuthorizationCodeFlowTest extends TestCase
         [$consent] = $this->requestAuthorization($client);
 
         $consent->assertNotFound();
+    }
+
+    // Passport approves the request it kept in the session, so a client_id posted with the form decides nothing.
+    public function test_approving_is_decided_on_the_client_passport_approves(): void
+    {
+        config(['mcp.enabled' => true]);
+        $person = User::factory()->create();
+        $person->givePermissionTo(SystemPermission::UseMcp);
+        $this->actingAs($person);
+        $mcpClient = $this->registerMcpClient();
+        $application = $this->registerApplication();
+
+        [$consent] = $this->requestAuthorization($mcpClient, ['mcp:use']);
+        $consent->assertOk();
+        $person->revokePermissionTo(SystemPermission::UseMcp);
+
+        $this->post('/oauth/authorize', ['client_id' => $application->getKey(), 'auth_token' => session('authToken')])
+            ->assertForbidden();
+        $this->assertSame(0, OAuthConnection::query()->count());
+    }
+
+    // With no client to decide on, impersonating is still refused.
+    public function test_approving_while_impersonating_is_refused_whatever_client_is_posted(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $client = $this->registerApplication(scopes: []);
+        [$consent] = $this->requestAuthorization($client, []);
+        $consent->assertOk();
+
+        $impersonate = Mockery::mock();
+        $impersonate->shouldReceive('isImpersonating')->andReturn(true);
+        $impersonate->shouldReceive('getImpersonatorId')->andReturn(null);
+        $this->app->instance('impersonate', $impersonate);
+        session()->forget('authRequest');
+
+        $this->post('/oauth/authorize', ['client_id' => (string) Str::uuid(), 'auth_token' => session('authToken')])
+            ->assertForbidden();
+        $this->assertSame(0, OAuthConnection::query()->count());
     }
 
     public function test_a_signed_out_person_signs_in_first_and_returns_to_the_consent_screen(): void

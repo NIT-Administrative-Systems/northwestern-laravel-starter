@@ -21,6 +21,8 @@ use Laravel\Mcp\Server\Registrar;
  * Pass the credential's holder: the actor when it's their own credential, another person when
  * an administrator acts on theirs (an API user, for a service client), or null when an
  * administrator acts on a client as a whole, such as revoking an application for everyone.
+ * A null actor is the system, such as a seeder or a scheduled sweep: it may do anything, except
+ * while someone is impersonating, which means a caller forgot to pass the person acting.
  *
  * - A feature that is off refuses everything of its kind, except an administrator seeing and
  *   revoking what already exists, so a feature can be shut down cleanly.
@@ -33,8 +35,14 @@ use Laravel\Mcp\Server\Registrar;
  */
 readonly class CredentialAccess
 {
-    public function decide(User $actor, CredentialOperation $operation, CredentialKind $kind, ?User $holder): AccessDecision
+    public function decide(?User $actor, CredentialOperation $operation, CredentialKind $kind, ?User $holder): AccessDecision
     {
+        if (! $actor instanceof User) {
+            return $this->changes($operation) && $this->impersonating()
+                ? AccessDecision::refuse(AccessRefusal::Impersonating, $kind)
+                : AccessDecision::allow($kind);
+        }
+
         $administering = ! $holder instanceof User || $holder->isNot($actor);
 
         if (! $this->offers($operation, $kind, $administering, $holder instanceof User)) {
@@ -45,8 +53,7 @@ readonly class CredentialAccess
             return AccessDecision::refuse(AccessRefusal::FeatureOff, $kind);
         }
 
-        if (in_array($operation, [CredentialOperation::Issue, CredentialOperation::Modify, CredentialOperation::Revoke], true)
-            && resolve('impersonate')->isImpersonating()) {
+        if ($this->changes($operation) && $this->impersonating()) {
             return AccessDecision::refuse(AccessRefusal::Impersonating, $kind);
         }
 
@@ -140,6 +147,16 @@ readonly class CredentialAccess
         }
 
         return AccessDecision::allow($kind);
+    }
+
+    private function changes(CredentialOperation $operation): bool
+    {
+        return in_array($operation, [CredentialOperation::Issue, CredentialOperation::Modify, CredentialOperation::Revoke], true);
+    }
+
+    private function impersonating(): bool
+    {
+        return resolve('impersonate')->isImpersonating();
     }
 
     /**

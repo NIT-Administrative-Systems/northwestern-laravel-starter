@@ -17,8 +17,9 @@ use Symfony\Component\HttpFoundation\Response;
  * `mcp.enabled` is off. A credential whose feature is off can't get or refresh a token; turning
  * the feature back on lets it continue, since nothing was revoked.
  *
- * The client comes from `client_id` in the body or the HTTP Basic username. An unknown one is
- * left to Passport. The refusal is the OAuth error for a client that may not use the grant.
+ * The client comes from `client_id` in the body or the HTTP Basic username, as Passport reads
+ * it. An unknown one is left to Passport. The refusal is the OAuth error for a client that may
+ * not use the grant.
  */
 class RefuseTokensWhileFeatureOff
 {
@@ -31,7 +32,9 @@ class RefuseTokensWhileFeatureOff
             return $next($request);
         }
 
-        $clientId = (string) ($request->input('client_id') ?? $request->getUser() ?? '');
+        // As League reads it: the body, then the HTTP Basic username. Never the query string, which
+        // League ignores, so a client named there can't stand in for the one that gets the token.
+        $clientId = (string) ($request->request->get('client_id') ?? $request->getUser() ?? '');
         $client = Str::isUuid($clientId) ? OAuthClient::query()->find($clientId) : null;
 
         if ($client instanceof OAuthClient && ! ($kind = CredentialKind::of($client))->isEnabled()) {

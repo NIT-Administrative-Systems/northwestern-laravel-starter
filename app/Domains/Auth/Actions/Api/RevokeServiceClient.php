@@ -32,10 +32,8 @@ readonly class RevokeServiceClient
      */
     public function __invoke(OAuthClient $client, ?User $revokedBy = null): void
     {
-        if ($revokedBy instanceof User) {
-            $owner = $client->owner;
-            $this->credentials->decide($revokedBy, CredentialOperation::Revoke, CredentialKind::ServiceClient, $owner instanceof User ? $owner : null)->authorize();
-        }
+        $owner = $client->owner;
+        $this->credentials->decide($revokedBy, CredentialOperation::Revoke, CredentialKind::ServiceClient, $owner instanceof User ? $owner : null)->authorize();
 
         DB::transaction(function () use ($client): void {
             Passport::token()->newQuery()

@@ -51,9 +51,7 @@ readonly class CreateServiceClient
             throw new InvalidArgumentException('Service clients can only belong to API users.');
         }
 
-        if ($createdBy instanceof User) {
-            $this->credentials->decide($createdBy, CredentialOperation::Issue, CredentialKind::ServiceClient, $apiUser)->authorize();
-        }
+        $this->credentials->decide($createdBy, CredentialOperation::Issue, CredentialKind::ServiceClient, $apiUser)->authorize();
 
         if ($secretExpiresAt->isPast() || $secretExpiresAt->isAfter(now()->addYear()->addDay())) {
             throw new InvalidArgumentException('A client secret must expire within one year.');

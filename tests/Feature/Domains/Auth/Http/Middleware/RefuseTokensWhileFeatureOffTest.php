@@ -64,6 +64,20 @@ final class RefuseTokensWhileFeatureOffTest extends TestCase
             ->assertJsonPath('error_description', 'MCP clients are turned off.');
     }
 
+    // Passport ignores a client_id in the query string, so naming an enabled client there changes nothing.
+    public function test_a_client_named_in_the_query_string_is_ignored(): void
+    {
+        [$secret, $client] = resolve(CreateServiceClient::class)(User::factory()->api()->create(), 'Sync', now()->addMonth());
+        [, $mcpClient] = resolve(RegisterOAuthApplication::class)('Claude', ['http://localhost/cb'], false, [], origin: ClientOrigin::Dynamic);
+        config(['api.enabled' => false, 'mcp.enabled' => true]);
+
+        $this->withBasicAuth((string) $client->getKey(), $secret)
+            ->postJson('/oauth/token?client_id=' . $mcpClient->getKey(), ['grant_type' => 'client_credentials'])
+            ->assertBadRequest()
+            ->assertJsonPath('error_description', 'Service clients are turned off.')
+            ->assertJsonMissingPath('access_token');
+    }
+
     public function test_an_unknown_client_is_left_to_passport(): void
     {
         config(['api.enabled' => false]);
