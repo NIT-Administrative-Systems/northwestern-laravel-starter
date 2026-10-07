@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Domains\Auth\Models;
 
 use App\Domains\Auth\Enums\RoleTypeEnum;
-use App\Domains\User\Models\Concerns\AuditsPermissions;
-use App\Domains\User\Models\Concerns\RecordsAuditEvents;
+use App\Domains\Auth\Models\Concerns\AuditsPermissions;
+use App\Domains\Core\Models\Concerns\RecordsAuditEvents;
 use App\Domains\User\Models\User;
 use Database\Factories\Domains\Auth\Models\RoleFactory;
 use Illuminate\Database\Eloquent\Attributes\Scope;

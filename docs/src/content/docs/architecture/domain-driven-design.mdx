@@ -78,6 +78,8 @@ The **Core** domain contains foundational functionality that applies across the 
 
 - `BaseModel`, which models extend. Model concerns shared with other applications, such as `PrunesAfterRetentionPeriod` for records that expire and `RecordsCustomAudits` for audit events a model's own changes don't capture (which the starter's `RecordsAuditEvents` builds on), come from [Chassis](/reference/chassis/)
 - The typed preferences base class (`Data/Preferences`), which `UserPreferences` extends
+- The audit log: the `Audit` model, the `AuditEvent` enum that names every event, and `RecordsAuditEvents` for recording one
+- Filament's table `Export` model, which prunes exports and their files after `platform.retention.exports` days
 - The `ExternalService` enum
 - Configuration validators (`Services/ConfigValidation/`)
 - Shared exceptions (`NoRollbackException`, `ServiceDownError`, `SentryExceptionHandler`)
@@ -120,7 +122,7 @@ The **User** domain handles everything related to user data and management:
 - User management and profile data
 - User segmentation and affiliation
 - Directory integration (searching, syncing)
-- Audit logging of user actions
+- Recording changes to a user's roles (`AuditsRoles`)
 - User login tracking
 - Wildcard photo management
 

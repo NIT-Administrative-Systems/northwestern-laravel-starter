@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\RoleActivity\Widgets;
 
-use App\Domains\User\Enums\AuditEvent;
-use App\Domains\User\Models\Audit;
+use App\Domains\Core\Enums\AuditEvent;
+use App\Domains\Core\Models\Audit;
 use Carbon\Carbon;
 use Filament\Support\Icons\Heroicon;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;

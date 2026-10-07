@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Domains\Auth\Actions\Api;
 
 use App\Domains\Auth\Models\OAuthClient;
-use App\Domains\User\Enums\AuditEvent;
+use App\Domains\Core\Enums\AuditEvent;
 use App\Domains\User\Models\User;
 
 /**

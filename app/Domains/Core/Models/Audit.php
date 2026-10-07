@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Domains\User\Models;
+namespace App\Domains\Core\Models;
 
-use App\Domains\Core\Models\BaseModel;
-use App\Domains\User\Enums\AuditEvent;
+use App\Domains\Core\Enums\AuditEvent;
 use App\Domains\User\Models\Concerns\AuditsRoles;
+use App\Domains\User\Models\User;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;

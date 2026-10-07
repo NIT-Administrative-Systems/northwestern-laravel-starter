@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Domains\User\Models\Concerns;
+namespace App\Domains\Auth\Models\Concerns;
 
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\Permission;
 use App\Domains\Auth\Models\Role;
-use App\Domains\User\Enums\AuditEvent;
+use App\Domains\Core\Enums\AuditEvent;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Spatie\Permission\Models\Permission as SpatiePermission;
 

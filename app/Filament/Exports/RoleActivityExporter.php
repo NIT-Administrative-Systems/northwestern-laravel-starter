@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Filament\Exports;
 
 use App\Domains\Auth\Enums\RoleModificationOrigin;
-use App\Domains\User\Enums\AuditEvent;
-use App\Domains\User\Models\Audit;
+use App\Domains\Core\Enums\AuditEvent;
+use App\Domains\Core\Models\Audit;
 use Filament\Actions\Exports\ExportColumn;
 
 class RoleActivityExporter extends BaseExporter
@@ -30,7 +30,7 @@ class RoleActivityExporter extends BaseExporter
                 ->label('Role Name')
                 ->state(function (Audit $record): ?string {
                     $roles = $record->getChangedRoles();
-                    if (empty($roles)) {
+                    if ($roles === []) {
                         return null;
                     }
 
@@ -41,7 +41,7 @@ class RoleActivityExporter extends BaseExporter
                 ->label('Role Type')
                 ->state(function (Audit $record): ?string {
                     $roles = $record->getChangedRoles();
-                    if (empty($roles)) {
+                    if ($roles === []) {
                         return null;
                     }
 

@@ -7,6 +7,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use OpenApi\Attributes as OA;
 
+// The OAuth scopes listed here are ApiScopes::rest(): attributes can't call code, so ApiScopesTest
+// checks the generated schema against it.
 #[OA\SecurityScheme(
     securityScheme: 'oauth2',
     type: 'oauth2',

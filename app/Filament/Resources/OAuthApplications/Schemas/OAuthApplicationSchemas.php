@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\OAuthApplications\Schemas;
 
+use App\Domains\Api\ApiScopes;
 use App\Filament\Support\RevealOnceSecret;
-use App\Providers\OAuthServiceProvider;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
@@ -53,7 +53,7 @@ class OAuthApplicationSchemas
             CheckboxList::make('scopes')
                 ->label('Allowed Scopes')
                 ->helperText('The most the application may ask for. People approve what it requests, and their own permissions still apply.')
-                ->options(OAuthServiceProvider::scopes()),
+                ->options(ApiScopes::rest()),
             Toggle::make('first_party')
                 ->label('First-party application')
                 ->helperText('Skip the consent screen. Only for applications your organization runs and trusts.'),

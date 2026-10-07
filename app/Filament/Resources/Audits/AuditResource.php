@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Audits;
 
-use App\Domains\User\Models\Audit;
+use App\Domains\Core\Models\Audit;
 use App\Filament\Navigation\AdministrationNavGroup;
 use App\Filament\Resources\Audits\Pages\ListAudits;
 use App\Filament\Resources\Audits\Pages\ViewAudit;

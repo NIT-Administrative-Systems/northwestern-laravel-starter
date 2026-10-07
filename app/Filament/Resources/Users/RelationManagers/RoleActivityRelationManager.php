@@ -6,7 +6,7 @@ namespace App\Filament\Resources\Users\RelationManagers;
 
 use App\Domains\Auth\Enums\AuthType;
 use App\Domains\Auth\Enums\SystemPermission;
-use App\Domains\User\Models\Audit;
+use App\Domains\Core\Models\Audit;
 use App\Domains\User\Models\User;
 use App\Filament\Resources\RoleActivity\Tables\RoleActivityTable;
 use Filament\Resources\RelationManagers\RelationManager;
