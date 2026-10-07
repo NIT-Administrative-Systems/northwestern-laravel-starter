@@ -53,10 +53,16 @@
     @filamentStyles
     {{ filament()->getTheme()->getHtml() }}
     {{ filament()->getFontHtml() }}
+    {{ filament()->getMonoFontHtml() }}
+    {{ filament()->getSerifFontHtml() }}
 
     <style>
+        /* As Filament's panel layout sets them. Without the mono and serif variables, `font-mono`
+           and `font-serif` resolve to nothing and fall back to the body font. */
         :root {
             --font-family: '{!! filament()->getFontFamily() !!}';
+            --mono-font-family: '{!! filament()->getMonoFontFamily() !!}';
+            --serif-font-family: '{!! filament()->getSerifFontFamily() !!}';
         }
 
         /* These pages are light-only, so the user menu's theme switcher would do nothing here.
