@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Filament\App\Pages\Auth;
 
+use App\Domains\Auth\Actions\Local\FixedNumericOneTimeCodeGenerator;
+use App\Domains\Auth\Contracts\OneTimeCodeGenerator;
+use App\Domains\Auth\LoginCodes;
 use App\Domains\Auth\Models\LoginChallenge;
-use App\Domains\Auth\ValueObjects\LoginCodeSession;
 use App\Domains\User\Models\User;
 use App\Filament\App\Pages\Auth\EmailCodeLogin;
 use App\Providers\Filament\AppPanelProvider;
@@ -33,6 +35,8 @@ final class EmailCodeLoginTest extends TestCase
         config(['local-auth.code.resend_cooldown_seconds' => 30]);
 
         Mail::fake();
+        // Every code is 123456.
+        $this->app->bind(OneTimeCodeGenerator::class, FixedNumericOneTimeCodeGenerator::class);
 
         $this->mock(Timebox::class, function ($mock) {
             $mock->shouldReceive('call')->andReturnUsing(
@@ -71,10 +75,8 @@ final class EmailCodeLoginTest extends TestCase
             ->assertSet('email', 'test@example.com')
             ->assertSee('Check Your Email');
 
-        $challenge = LoginChallenge::query()->where('email', 'test@example.com')->sole();
-
-        $this->assertSame('test@example.com', session(LoginCodeSession::EMAIL));
-        $this->assertSame((string) $challenge->id, LoginCodeSession::challengeId());
+        $this->assertSame(1, LoginChallenge::query()->where('email', 'test@example.com')->count());
+        $this->assertSame('test@example.com', $this->loginCodes()->pendingEmail());
     }
 
     public function test_unknown_emails_get_the_same_code_step_with_a_decoy_challenge(): void
@@ -87,7 +89,7 @@ final class EmailCodeLoginTest extends TestCase
             ->assertSee('Check Your Email');
 
         $this->assertSame(0, LoginChallenge::count());
-        $this->assertFalse(ctype_digit((string) LoginCodeSession::challengeId()));
+        $this->assertSame('missing@example.com', $this->loginCodes()->pendingEmail());
     }
 
     public function test_email_is_required_and_validated(): void
@@ -117,7 +119,7 @@ final class EmailCodeLoginTest extends TestCase
 
     public function test_reloading_returns_to_the_code_step(): void
     {
-        session([LoginCodeSession::EMAIL => 'test@example.com']);
+        $this->startFlow('test@example.com');
 
         Livewire::test(EmailCodeLogin::class)
             ->assertSet('email', 'test@example.com')
@@ -127,7 +129,7 @@ final class EmailCodeLoginTest extends TestCase
     public function test_valid_code_signs_the_user_in_and_clears_the_flow(): void
     {
         $user = User::factory()->affiliate()->create(['email' => 'test@example.com']);
-        $this->startFlow($user->email, $this->challengeFor($user->email, '123456'));
+        $this->startFlow($user->email);
 
         Livewire::test(EmailCodeLogin::class)
             ->fillForm(['code' => '123456'], 'codeForm')
@@ -136,16 +138,13 @@ final class EmailCodeLoginTest extends TestCase
             ->assertRedirect('/');
 
         $this->assertAuthenticatedAs($user);
-
-        foreach (LoginCodeSession::KEYS as $key) {
-            $this->assertFalse(session()->has($key));
-        }
+        $this->assertNull($this->loginCodes()->pendingEmail());
     }
 
     public function test_valid_code_returns_users_to_the_page_they_asked_for(): void
     {
         $user = User::factory()->affiliate()->create(['email' => 'test@example.com']);
-        $this->startFlow($user->email, $this->challengeFor($user->email, '123456'));
+        $this->startFlow($user->email);
         session(['url.intended' => url('/app/some-page')]);
 
         Livewire::test(EmailCodeLogin::class)
@@ -160,7 +159,7 @@ final class EmailCodeLoginTest extends TestCase
         $user = User::factory()->affiliate()->create(['email' => 'test@example.com']);
         $challenge = $this->challengeFor($user->email, '123456');
 
-        Livewire::withQueryParams([LoginCodeSession::LINK_PARAMETER => $this->linkToken($challenge)])
+        Livewire::withQueryParams([LoginCodes::LINK_PARAMETER => $this->linkToken($challenge)])
             ->test(EmailCodeLogin::class)
             ->assertSet('email', 'test@example.com')
             ->assertSee('Check Your Email')
@@ -178,7 +177,7 @@ final class EmailCodeLoginTest extends TestCase
         $expired->update(['expires_at' => now()->subMinute()]);
 
         foreach ([$this->linkToken($expired), Crypt::encryptString('999999'), 'not-a-token'] as $token) {
-            Livewire::withQueryParams([LoginCodeSession::LINK_PARAMETER => $token])
+            Livewire::withQueryParams([LoginCodes::LINK_PARAMETER => $token])
                 ->test(EmailCodeLogin::class)
                 ->assertSet('email', null)
                 ->assertSee('Request a Verification Code');
@@ -188,7 +187,7 @@ final class EmailCodeLoginTest extends TestCase
     public function test_invalid_code_shows_an_error_on_the_code_field(): void
     {
         $user = User::factory()->affiliate()->create();
-        $this->startFlow($user->email, $this->challengeFor($user->email, '123456'));
+        $this->startFlow($user->email);
 
         Livewire::test(EmailCodeLogin::class)
             ->fillForm(['code' => '000000'], 'codeForm')
@@ -208,40 +207,49 @@ final class EmailCodeLoginTest extends TestCase
             ->assertHasFormErrors(['code'], 'codeForm');
     }
 
-    public function test_resend_replaces_the_challenge_and_starts_the_cooldown(): void
+    public function test_resend_sends_another_code_and_starts_the_cooldown(): void
     {
-        $user = User::factory()->affiliate()->create(['email' => 'test@example.com']);
-        $original = $this->challengeFor($user->email, '123456');
-        $this->startFlow($user->email, $original);
+        User::factory()->affiliate()->create(['email' => 'test@example.com']);
+        $this->startFlow('test@example.com');
 
         Livewire::test(EmailCodeLogin::class)
             ->call('resendCode')
-            ->assertNotified('Code Sent');
+            ->assertNotified('Code Sent')
+            ->call('resendCode')
+            ->assertNotified('Wait a Moment');
 
-        $this->assertNotSame((string) $original->id, LoginCodeSession::challengeId());
-        $this->assertTrue(RateLimiter::tooManyAttempts('login-code-resend:test@example.com', 1));
+        $this->assertSame(2, LoginChallenge::count());
     }
 
     public function test_resend_respects_the_cooldown(): void
     {
+        User::factory()->affiliate()->create(['email' => 'test@example.com']);
         $this->startFlow('test@example.com');
         RateLimiter::hit('login-code-resend:test@example.com', 30);
 
-        Livewire::test(EmailCodeLogin::class)->call('resendCode');
+        Livewire::test(EmailCodeLogin::class)->call('resendCode')->assertNotified('Wait a Moment');
 
-        $this->assertSame(0, LoginChallenge::count());
+        $this->assertSame(1, LoginChallenge::count());
     }
 
-    public function test_resend_keeps_the_decoy_for_unknown_emails(): void
+    // An unknown email looks the same as a known one, resends included.
+    public function test_resend_for_an_unknown_email_looks_the_same(): void
     {
         $this->startFlow('missing@example.com');
-        $decoy = LoginCodeSession::challengeId();
 
         Livewire::test(EmailCodeLogin::class)
             ->call('resendCode')
             ->assertNotified('Code Sent');
 
-        $this->assertSame($decoy, LoginCodeSession::challengeId());
+        $this->assertSame(0, LoginChallenge::count());
+    }
+
+    public function test_resend_without_a_pending_sign_in_returns_to_the_first_step(): void
+    {
+        Livewire::test(EmailCodeLogin::class)
+            ->call('resendCode')
+            ->assertSet('email', null)
+            ->assertSee('Request a Verification Code');
     }
 
     public function test_using_a_different_email_returns_to_the_first_step(): void
@@ -253,7 +261,7 @@ final class EmailCodeLoginTest extends TestCase
             ->assertSet('email', null)
             ->assertSee('Request a Verification Code');
 
-        $this->assertNull(LoginCodeSession::email());
+        $this->assertNull($this->loginCodes()->pendingEmail());
     }
 
     private function challengeFor(string $email, string $code): LoginChallenge
@@ -267,16 +275,21 @@ final class EmailCodeLoginTest extends TestCase
 
     private function linkToken(LoginChallenge $challenge): string
     {
-        parse_str((string) parse_url(LoginCodeSession::link($challenge), PHP_URL_QUERY), $query);
+        parse_str((string) parse_url($this->loginCodes()->link($challenge), PHP_URL_QUERY), $query);
 
-        return $query[LoginCodeSession::LINK_PARAMETER];
+        return $query[LoginCodes::LINK_PARAMETER];
     }
 
-    private function startFlow(string $email, ?LoginChallenge $challenge = null): void
+    /**
+     * Requests a code for `$email`, as the email step does: code 123456 for an account, a decoy otherwise.
+     */
+    private function startFlow(string $email): void
     {
-        session([
-            LoginCodeSession::EMAIL => $email,
-            LoginCodeSession::CHALLENGE_ID => Crypt::encryptString($challenge instanceof LoginChallenge ? (string) $challenge->id : 'decoy-uuid'),
-        ]);
+        $this->loginCodes()->request($email, request());
+    }
+
+    private function loginCodes(): LoginCodes
+    {
+        return resolve(LoginCodes::class);
     }
 }

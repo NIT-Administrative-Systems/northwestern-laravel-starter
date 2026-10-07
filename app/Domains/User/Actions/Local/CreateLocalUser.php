@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domains\User\Actions\Local;
 
-use App\Domains\Auth\Actions\Local\IssueLoginChallenge;
 use App\Domains\Auth\Enums\AuthType;
+use App\Domains\Auth\LoginCodes;
 use App\Domains\User\Enums\Affiliation;
 use App\Domains\User\Models\User;
 use Illuminate\Database\UniqueConstraintViolationException;
@@ -48,7 +48,7 @@ readonly class CreateLocalUser
 
         if ($sendLoginLink) {
             try {
-                resolve(IssueLoginChallenge::class)($user->email, request()->ip(), request()->userAgent());
+                resolve(LoginCodes::class)->issueFor($user, request());
             } catch (\Throwable $e) {
                 report($e);
             }

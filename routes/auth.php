@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Domains\Auth\Enums\SsoProvider;
 use App\Domains\Auth\Http\Controllers;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Support\Facades\Route;
@@ -10,12 +11,10 @@ use Northwestern\SysDev\Chassis\Http\Controllers\SentryTunnelController;
 Route::prefix('auth')->group(function () {
     Route::post('logout', Controllers\LogoutSelectionController::class)->name('logout');
 
-    $webssoConfigured = filled(config('nusoa.sso.apigeeApiKey'))
-        || config('nusoa.sso.strategy') === 'forgerock-direct';
-    $entraConfigured = filled(config('services.northwestern-azure.client_id'))
-        && filled(config('services.northwestern-azure.client_secret'));
+    // Only the provider people sign in with has routes.
+    $provider = SsoProvider::configured();
 
-    if ($entraConfigured) {
+    if ($provider === SsoProvider::EntraId) {
         Route::prefix('azure-ad')->group(function () {
             Route::get('redirect', [Controllers\WebSSOController::class, 'oauthRedirect'])->name('login-oauth-redirect');
             Route::post('callback', [Controllers\WebSSOController::class, 'oauthCallback'])->name('login-oauth-callback')
@@ -24,7 +23,7 @@ Route::prefix('auth')->group(function () {
         });
     }
 
-    if ($webssoConfigured) {
+    if ($provider === SsoProvider::OnlinePassport) {
         Route::prefix('websso')->group(function () {
             Route::get('login', [Controllers\WebSSOController::class, 'login'])->name('login-websso');
             Route::get('logout', [Controllers\WebSSOController::class, 'logout'])->name('login-websso-logout');

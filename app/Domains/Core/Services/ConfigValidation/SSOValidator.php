@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Core\Services\ConfigValidation;
 
+use App\Domains\Auth\Enums\SsoProvider;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
 use Northwestern\SysDev\Chassis\Attributes\ValidatesConfig;
@@ -49,14 +50,14 @@ class SSOValidator implements ConfigValidator
 
     public function successMessage(): string
     {
-        $provider = $this->isOnlinePassport ? 'Online Passport' : 'Entra ID';
+        $provider = ($this->isOnlinePassport ? SsoProvider::OnlinePassport : SsoProvider::EntraId)->label();
 
         return "SSO configured for <comment>{$provider}</comment>";
     }
 
     public function errorMessage(): string
     {
-        $provider = $this->isOnlinePassport ? 'Online Passport' : 'Entra ID';
+        $provider = ($this->isOnlinePassport ? SsoProvider::OnlinePassport : SsoProvider::EntraId)->label();
         $count = $this->missingVariables->count();
 
         return "{$count} required {$provider} " . ($count === 1 ? 'variable is' : 'variables are') . ' not set';
@@ -76,8 +77,7 @@ class SSOValidator implements ConfigValidator
 
     protected function detectOnlinePassport(): bool
     {
-        return filled(config('nusoa.sso.apigeeApiKey'))
-            || config('nusoa.sso.strategy') === 'forgerock-direct';
+        return SsoProvider::OnlinePassport->isConfigured();
     }
 
     /** @return Collection<string, string|null> */

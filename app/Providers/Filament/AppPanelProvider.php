@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Providers\Filament;
 
+use App\Domains\Auth\Enums\SignInMethod;
 use App\Domains\Auth\Http\Controllers\SignInAsController;
+use App\Domains\Auth\SignIn;
 use App\Filament\App\Clusters\AccountCluster\Pages\Profile;
 use App\Filament\App\Pages\Auth\EmailCodeLogin;
 use App\Filament\App\Pages\Auth\Login;
@@ -58,13 +60,14 @@ class AppPanelProvider extends PanelProvider
             ->path(self::ID)
             ->login(Login::class)
             ->routes(function (): void {
-                if (config('local-auth.enabled')) {
+                $signIn = resolve(SignIn::class);
+
+                if ($signIn->offers(SignInMethod::EmailCode)) {
                     Route::get('login/email', EmailCodeLogin::class)->name('auth.login-code');
                 }
 
                 // One-click sign-in as a seeded user, so local environments need no SSO or email.
-                // Only ever in `local`: an explicit allowlist, never "not production".
-                if ($this->app->environment('local')) {
+                if ($signIn->offers(SignInMethod::SignInAs)) {
                     Route::get('login/as/{username}', SignInAsController::class)->name('auth.login-as');
                 }
 

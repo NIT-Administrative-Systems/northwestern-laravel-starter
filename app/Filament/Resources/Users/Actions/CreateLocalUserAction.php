@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users\Actions;
 
+use App\Domains\Auth\Enums\SignInMethod;
 use App\Domains\Auth\Enums\SystemPermission;
+use App\Domains\Auth\SignIn;
 use App\Domains\User\Actions\Local\CreateLocalUser;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Checkbox;
@@ -26,7 +28,7 @@ class CreateLocalUserAction extends Action
         parent::setUp();
 
         $this->authorize(SystemPermission::CreateUsers)
-            ->visible(fn () => config('local-auth.enabled'))
+            ->visible(fn () => resolve(SignIn::class)->offers(SignInMethod::EmailCode))
             ->label('Add Local User')
             ->icon(Heroicon::OutlinedUserPlus)
             ->outlined()

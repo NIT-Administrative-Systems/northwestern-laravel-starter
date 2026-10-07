@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Filament\App\Pages\Auth;
 
-use App\Domains\Auth\Actions\Local\AuthenticateWithLoginCode;
-use App\Domains\Auth\Actions\Local\RequestLoginCode;
-use App\Domains\Auth\ValueObjects\LoginCodeSession;
+use App\Domains\Auth\Enums\SignInMethod;
+use App\Domains\Auth\LoginCodes;
+use App\Domains\Auth\SignIn;
 use App\Filament\App\Pages\Concerns\HasSiteHeader;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
@@ -21,20 +21,16 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Support\HtmlString;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Locked;
-use Livewire\Features\SupportRedirects\Redirector;
 use Northwestern\SysDev\Chassis\Formatting\CountInWords;
 
 /**
  * Passwordless sign-in for local (non-NetID) users, in two steps on one page:
  * request a code by email, then enter it.
  *
- * Progress lives in the session ({@see LoginCodeSession}), so reloading the page
+ * {@see LoginCodes} does the work and keeps progress in the session, so reloading the page
  * returns to the step the user was on.
  *
  * @property-read Schema $form
@@ -58,7 +54,7 @@ class EmailCodeLogin extends SimplePage
 
     public function mount(): void
     {
-        abort_unless(config('local-auth.enabled'), 404);
+        abort_unless(resolve(SignIn::class)->offers(SignInMethod::EmailCode), 404);
 
         if (Filament::auth()->check()) {
             $this->redirect('/');
@@ -66,13 +62,14 @@ class EmailCodeLogin extends SimplePage
             return;
         }
 
-        $token = request()->query(LoginCodeSession::LINK_PARAMETER);
+        $loginCodes = resolve(LoginCodes::class);
+        $token = request()->query(LoginCodes::LINK_PARAMETER);
 
         if (is_string($token) && $token !== '') {
-            LoginCodeSession::startFromLink($token);
+            $loginCodes->startFromLink($token);
         }
 
-        $this->email = LoginCodeSession::email();
+        $this->email = $loginCodes->pendingEmail();
 
         $this->form->fill();
         $this->codeForm->fill();
@@ -177,19 +174,19 @@ class EmailCodeLogin extends SimplePage
 
     public function requestCode(): void
     {
-        abort_unless(config('local-auth.enabled'), 404);
+        abort_unless(resolve(SignIn::class)->offers(SignInMethod::EmailCode), 404);
 
-        $email = mb_strtolower(trim((string) $this->form->getState()['email']));
+        $loginCodes = resolve(LoginCodes::class);
+
+        $email = (string) $this->form->getState()['email'];
 
         try {
-            $challenge = resolve(RequestLoginCode::class)($email, request()->ip(), request()->userAgent());
+            $loginCodes->request($email, request());
         } catch (ValidationException $e) {
             throw ValidationException::withMessages(['data.email' => $e->errors()['email'] ?? []]);
         }
 
-        LoginCodeSession::start($email, $challenge);
-
-        $this->email = $email;
+        $this->email = $loginCodes->pendingEmail();
         $this->codeForm->fill();
 
         // The email form, and the button that had focus, are replaced by the code form. `autofocus`
@@ -197,42 +194,33 @@ class EmailCodeLogin extends SimplePage
         $this->js("document.querySelector('.fi-one-time-code-input-digit')?.focus()");
     }
 
-    public function verifyCode(): RedirectResponse|Redirector
+    public function verifyCode(): RedirectResponse
     {
-        abort_unless(config('local-auth.enabled'), 404);
+        $signIn = resolve(SignIn::class);
+        abort_unless($signIn->offers(SignInMethod::EmailCode), 404);
 
         $code = (string) $this->codeForm->getState()['code'];
 
         try {
-            $user = resolve(AuthenticateWithLoginCode::class)(LoginCodeSession::challengeId(), $code, request());
+            $user = resolve(LoginCodes::class)->verify($code, request());
         } catch (ValidationException $e) {
             throw ValidationException::withMessages(['codeData.code' => $e->errors()['code'] ?? []]);
         }
 
-        Auth::login($user, remember: true);
-        Session::regenerate();
-        Session::regenerateToken();
-        LoginCodeSession::forget();
-
-        // Every sign-in path lands on `/`, where HomeController decides where signed-in users go.
-        return redirect()->intended('/');
+        return $signIn->complete($user, request(), SignInMethod::EmailCode);
     }
 
     public function resendCode(): void
     {
-        $email = LoginCodeSession::email();
+        $loginCodes = resolve(LoginCodes::class);
 
-        if ($email === null) {
+        if ($loginCodes->pendingEmail() === null) {
             $this->useDifferentEmail();
 
             return;
         }
 
-        $cooldownKey = "login-code-resend:{$email}";
-
-        if (RateLimiter::tooManyAttempts($cooldownKey, 1)) {
-            $seconds = RateLimiter::availableIn($cooldownKey);
-
+        if (($seconds = $loginCodes->resendAvailableIn()) > 0) {
             Notification::make()
                 ->title('Wait a Moment')
                 ->body('You can request another code in ' . CountInWords::of($seconds, 'second') . '.')
@@ -243,7 +231,7 @@ class EmailCodeLogin extends SimplePage
         }
 
         try {
-            $challenge = resolve(RequestLoginCode::class)($email, request()->ip(), request()->userAgent());
+            $loginCodes->resend(request());
         } catch (ValidationException $e) {
             Notification::make()
                 ->title('Code Not Sent')
@@ -254,10 +242,6 @@ class EmailCodeLogin extends SimplePage
             return;
         }
 
-        LoginCodeSession::replaceChallenge($challenge);
-
-        RateLimiter::hit($cooldownKey, (int) config('local-auth.code.resend_cooldown_seconds', 30));
-
         Notification::make()
             ->title('Code Sent')
             ->body('Check your email for the new code.')
@@ -267,7 +251,7 @@ class EmailCodeLogin extends SimplePage
 
     public function useDifferentEmail(): void
     {
-        LoginCodeSession::forget();
+        resolve(LoginCodes::class)->cancel();
 
         $this->email = null;
         $this->form->fill();

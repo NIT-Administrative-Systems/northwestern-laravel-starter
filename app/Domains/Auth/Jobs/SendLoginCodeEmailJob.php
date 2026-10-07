@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Domains\Auth\Jobs;
 
+use App\Domains\Auth\LoginCodes;
 use App\Domains\Auth\Mail\LoginCodeMail;
 use App\Domains\Auth\Models\LoginChallenge;
-use App\Domains\Auth\ValueObjects\LoginCodeSession;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -40,7 +40,7 @@ class SendLoginCodeEmailJob implements ShouldQueue
         //
     }
 
-    public function handle(): void
+    public function handle(LoginCodes $loginCodes): void
     {
         $challenge = LoginChallenge::find($this->loginChallengeId);
 
@@ -56,7 +56,7 @@ class SendLoginCodeEmailJob implements ShouldQueue
             new LoginCodeMail(
                 encryptedCode: $this->encryptedCode,
                 expiresAt: $challenge->expires_at,
-                signInUrl: LoginCodeSession::link($challenge),
+                signInUrl: $loginCodes->link($challenge),
             )
         );
 

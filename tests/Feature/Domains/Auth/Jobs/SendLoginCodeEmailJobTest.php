@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Tests\Feature\Domains\Auth\Jobs;
 
 use App\Domains\Auth\Jobs\SendLoginCodeEmailJob;
+use App\Domains\Auth\LoginCodes;
 use App\Domains\Auth\Mail\LoginCodeMail;
 use App\Domains\Auth\Models\LoginChallenge;
-use App\Domains\Auth\ValueObjects\LoginCodeSession;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
@@ -39,7 +39,7 @@ final class SendLoginCodeEmailJobTest extends TestCase
             Crypt::encryptString('123456')
         );
 
-        $job->handle();
+        $job->handle(resolve(LoginCodes::class));
 
         Mail::assertSent(LoginCodeMail::class, function (LoginCodeMail $mail) use ($challenge) {
             return $mail->hasTo($challenge->email);
@@ -57,20 +57,20 @@ final class SendLoginCodeEmailJobTest extends TestCase
             'expires_at' => now()->addMinutes(10),
         ]);
 
-        (new SendLoginCodeEmailJob($challenge->id, Crypt::encryptString('123456')))->handle();
+        (new SendLoginCodeEmailJob($challenge->id, Crypt::encryptString('123456')))->handle(resolve(LoginCodes::class));
 
         Mail::assertSent(LoginCodeMail::class, function (LoginCodeMail $mail) use ($challenge) {
             parse_str((string) parse_url($mail->signInUrl, PHP_URL_QUERY), $query);
 
             return str_starts_with($mail->signInUrl, url('/app/login/email'))
-                && Crypt::decryptString($query[LoginCodeSession::LINK_PARAMETER]) === (string) $challenge->id;
+                && Crypt::decryptString($query[LoginCodes::LINK_PARAMETER]) === (string) $challenge->id;
         });
     }
 
     public function test_job_skips_when_challenge_missing_or_already_sent(): void
     {
         $missingJob = new SendLoginCodeEmailJob(999, Crypt::encryptString('000000'));
-        $missingJob->handle();
+        $missingJob->handle(resolve(LoginCodes::class));
 
         Mail::assertNothingSent();
 
@@ -86,7 +86,7 @@ final class SendLoginCodeEmailJobTest extends TestCase
             Crypt::encryptString('123456')
         );
 
-        $job->handle();
+        $job->handle(resolve(LoginCodes::class));
 
         Mail::assertNothingSent();
         $this->assertTrue($challenge->fresh()->email_sent_at->eq(now()));

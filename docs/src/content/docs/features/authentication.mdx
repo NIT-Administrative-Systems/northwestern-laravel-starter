@@ -61,6 +61,8 @@ When NetID is the only method, `/app/login` skips the page and goes straight to 
 
 Email sign-in is a single page, `/app/login/email`, with two steps: request a code, then enter it. Progress is kept in the session, so reloading the page returns to the current step.
 
+Which methods are offered, and the step every method ends with, are decided in `App\Domains\Auth\SignIn`. Every sign-in finishes with `SignIn::complete()`: a new session and CSRF token, a login record, and the page the person asked for, or `/`. An email code sign-in is remembered past the session (Laravel's remember cookie), since a new code costs a trip to the inbox; single sign-on and Sign In As aren't, since signing in again is usually silent or one click. `SignInMethod::remembers()` is where to change that.
+
 ## Signing In Locally
 
 A local environment needs no SSO, email or credentials to sign in. In the `local` environment, the sign-in page has a **Development** section with a **Sign In As…** menu of the seeded demo users, each shown with its role:
@@ -188,7 +190,7 @@ External users (non-Northwestern) can access the application via time-limited ve
 
 4. **User enters code**
 
-   On `/app/login/email`, the code authenticates the user and establishes a session
+   On `/app/login/email`, the code authenticates the user and `SignIn::complete()` establishes a session
 
 5. **Code expires**
 
@@ -373,7 +375,7 @@ All charts, filters, exports, and stats pull from the `UserSegment`. Adding a ne
 
 ## Rate Limiting
 
-Authentication uses layered rate limits to prevent brute force attacks and abuse. Limits are applied per IP and per identifier (email or challenge ID) to balance security with usability. The email sign-in page enforces the passwordless limits itself, because Livewire actions don't pass through route middleware.
+Authentication uses layered rate limits to prevent brute force attacks and abuse. Limits are applied per IP and per identifier (email or challenge ID) to balance security with usability. `App\Domains\Auth\LoginCodes` enforces the passwordless limits itself, along with the resend cooldown, because the email sign-in page's Livewire actions don't pass through route middleware.
 
 ### Passwordless Login
 

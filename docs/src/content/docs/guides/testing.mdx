@@ -34,21 +34,21 @@ Tests mirror the namespace of the class they test, under `tests/Feature` or `tes
 
 | Class                                                  | Test                                                                 |
 | ------------------------------------------------------ | -------------------------------------------------------------------- |
-| `App\Domains\Auth\Actions\Local\RequestLoginCode`      | `tests/Feature/Domains/Auth/Actions/Local/RequestLoginCodeTest.php`  |
+| `App\Domains\Auth\LoginCodes`                          | `tests/Feature/Domains/Auth/LoginCodesTest.php`                      |
 | `App\Providers\Filament\AppPanelProvider`              | `tests/Feature/Providers/Filament/AppPanelProviderTest.php`          |
 | `App\Domains\User\Events\NetIdUpdated`                 | `tests/Unit/Domains/User/Events/NetIdUpdatedTest.php`                |
 
 The starter's tests are PHPUnit classes with `test_` methods, which Pest runs. Mark each class with `#[CoversClass]`, or `#[CoversTrait]` when it tests a trait:
 
 ```php
-// tests/Feature/Domains/Auth/Actions/Local/RequestLoginCodeTest.php
+// tests/Feature/Domains/Auth/LoginCodesTest.php
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
-#[CoversClass(RequestLoginCode::class)]
-final class RequestLoginCodeTest extends TestCase
+#[CoversClass(LoginCodes::class)]
+final class LoginCodesTest extends TestCase
 {
-    public function test_issues_a_challenge_for_an_existing_local_user(): void
+    public function test_a_local_account_gets_a_code_that_signs_it_in(): void
     {
         // ...
     }
