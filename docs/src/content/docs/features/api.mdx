@@ -162,11 +162,11 @@ Revoking an application removes everyone's access to it and every connection.
 
 1. The application sends the person to `GET /oauth/authorize` with `client_id`, `redirect_uri`, `response_type=code`, the `scope` it wants, a `state`, and a PKCE `code_challenge` (`S256`).
 2. A signed-out person signs in first, then returns to the consent screen.
-3. The consent screen shows the application, what it will be able to do, where the person returns, and who is signed in, with a **Switch Account** link. The person approves or denies; denying returns to the application with `error=access_denied`.
+3. The consent screen shows the application, what it will be able to do, where the person returns (with the punycode form of an internationalized domain, which can imitate another site's name), and who is signed in, with a **Switch Account** link. The person approves or denies; denying returns to the application with `error=access_denied`.
 4. The application exchanges the code at `POST /oauth/token` (`grant_type=authorization_code`, with its `code_verifier`) for an access token that lasts one hour and a refresh token.
 5. It refreshes at `POST /oauth/token` (`grant_type=refresh_token`). Each refresh token can be used once and lasts 30 days, so a connection unused for 30 days expires.
 
-The consent screen asks again when an application requests scopes the person hasn't granted, or after its access tokens have expired. An administrator impersonating someone can't approve applications for them.
+The consent screen asks again when an application requests scopes the person hasn't granted, or after its access tokens have expired. An administrator impersonating someone can't approve applications for them. A person sent to the consent screen by an application that was deleted or revoked sees an **Application Not Registered** page instead of Passport's JSON error. No other site can show the consent screen in a frame, so none can trick someone into pressing Approve.
 
 **Switching account** signs out of this application and returns to sign-in. With single sign-on, the identity provider may still be signed in and sign the same person straight back in; they may need to sign out of Northwestern first.
 

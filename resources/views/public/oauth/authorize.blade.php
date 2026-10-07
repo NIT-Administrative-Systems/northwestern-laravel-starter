@@ -1,9 +1,11 @@
 {{--
     The OAuth consent screen. Passport renders it (see OAuthServiceProvider) when an external
     application asks to act for the signed-in person, and posts the answer to its own approve
-    and deny endpoints, which return to the application's registered redirect URI.
+    and deny endpoints, which return to the application's registered redirect URI. Passport keeps
+    the authorization request, with the application's state, in the session.
 
     @var \App\Domains\Auth\Models\OAuthClient $client
+    @var \Northwestern\SysDev\Chassis\ValueObjects\OAuthRedirectTarget $redirectTarget Where approving sends the person
     @var \App\Domains\User\Models\User $user
     @var list<\Laravel\Passport\Scope> $scopes
     @var \Illuminate\Http\Request $request
@@ -43,6 +45,25 @@
                 <p class="mt-3 text-sm text-gray-600">{{ $client->description }}</p>
             @endif
 
+            {{-- A client's name is only a claim; where it sends the person is the part they can check. --}}
+            <p class="mt-5 text-sm text-gray-700">
+                {{ $redirectTarget->isLoopback ? 'Approving returns you to an app on this computer at' : 'Approving returns you to' }}
+                <span class="wrap-anywhere font-mono text-gray-950"><bdi>{{ $redirectTarget->display }}</bdi></span>.
+            </p>
+
+            @if ($redirectTarget->punycode !== null)
+                <x-filament::callout class="mt-3"
+                                     data-testid="internationalized-domain-warning"
+                                     color="warning"
+                                     icon="heroicon-o-exclamation-triangle">
+                    <x-slot name="description">
+                        <strong>Check this address.</strong> It uses international characters, which can imitate another
+                        site's name. Its plain form is <span
+                              class="wrap-anywhere font-mono"><bdi>{{ $redirectTarget->punycode }}</bdi></span>.
+                    </x-slot>
+                </x-filament::callout>
+            @endif
+
             <div class="mt-6 rounded-lg bg-gray-50 p-4 ring-1 ring-gray-950/5">
                 <h2 class="text-sm font-semibold text-gray-950">What It Can Do as You</h2>
 
@@ -73,9 +94,6 @@
                 <form method="post" action="{{ route('passport.authorizations.deny') }}">
                     @csrf
                     @method('DELETE')
-                    <input name="state"
-                           type="hidden"
-                           value="{{ $request->state }}">
                     <input name="client_id"
                            type="hidden"
                            value="{{ $client->getKey() }}">
@@ -90,9 +108,6 @@
 
                 <form method="post" action="{{ route('passport.authorizations.approve') }}">
                     @csrf
-                    <input name="state"
-                           type="hidden"
-                           value="{{ $request->state }}">
                     <input name="client_id"
                            type="hidden"
                            value="{{ $client->getKey() }}">

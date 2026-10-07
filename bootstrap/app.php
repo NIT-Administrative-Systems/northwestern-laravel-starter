@@ -14,6 +14,7 @@ use Illuminate\Http\Response;
 use Laravel\Passport\Exceptions\InvalidAuthTokenException;
 use Northwestern\SysDev\Chassis\Database\DatabasePausedDetector;
 use Northwestern\SysDev\Chassis\Exceptions\ProblemDetailsRenderer;
+use Northwestern\SysDev\Chassis\Exceptions\UnknownOAuthClientException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -52,6 +53,10 @@ return Application::configure(basePath: dirname(__DIR__))
         // the request is gone, so there is no application to return to.
         // Mapped before Laravel turns authorization exceptions into a 403.
         $exceptions->map(InvalidAuthTokenException::class, fn (InvalidAuthTokenException $e): HttpException => new HttpException(419, 'This authorization request has expired.', $e));
+
+        // A person sent to the OAuth consent screen by a deleted or revoked client, such as an MCP
+        // client that kept its client ID (DetectUnknownOAuthClient in config/passport.php).
+        $exceptions->render(fn (UnknownOAuthClientException $e): Response => response()->view('errors.unknown-oauth-client', status: $e->getStatusCode()));
 
         // Skip reporting database timeout noise in non-production environments - these are common when RDS is waking up
         $exceptions->report(function (Throwable $e): bool {

@@ -49,9 +49,19 @@ The scheduler (`routes/console.php`) runs retention pruning (`model:prune`), Tel
 
 Passport signs access tokens with an RSA key pair, which every deployed environment needs before the API, personal access tokens, applications or MCP can issue a token. Give each environment its own pair:
 
-1. Generate one with `php artisan passport:keys --force` on your machine. It writes `storage/oauth-private.key` and `storage/oauth-public.key`, which git ignores.
+1. Generate one in a temporary directory, outside the project:
+
+    ```bash
+    cd "$(mktemp -d)"
+    openssl genrsa -out oauth-private.key 4096
+    openssl rsa -in oauth-private.key -pubout -out oauth-public.key
+    ```
+
+    Don't use `php artisan passport:keys --force` for this. It overwrites your own `storage/oauth-*.key`, which signs out every client connected to your local application, and leaves the environment's private key on your machine as your local one.
+
 2. Put the files' contents in `PASSPORT_PRIVATE_KEY` and `PASSPORT_PUBLIC_KEY` in that environment's encrypted `.env.<environment>` or secrets. In a `.env` file, wrap each key in double quotes and keep its line breaks.
-3. Every instance of the environment uses the same pair. Replacing it invalidates every outstanding access token; see [API Operations](/features/api-operations/#signing-keys).
+3. Delete the temporary directory. The environment's private key now lives only in its secrets.
+4. Every instance of the environment uses the same pair. Replacing it invalidates every outstanding access token; see [API Operations](/features/api-operations/#signing-keys).
 
 ## Laravel Vapor
 

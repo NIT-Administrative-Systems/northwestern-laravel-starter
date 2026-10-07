@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Tests\Feature\Domains\Auth\OAuth;
 
 use App\Domains\Auth\Actions\Applications\DisconnectApplication;
+use App\Domains\Auth\Actions\Applications\RegisterOAuthApplication;
+use App\Domains\Auth\Actions\Applications\RevokeOAuthApplication;
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Http\Controllers\SwitchOAuthAccountController;
 use App\Domains\Auth\Http\Middleware\RefuseOAuthConsentWhileImpersonating;
@@ -92,9 +94,11 @@ final class AuthorizationCodeFlowTest extends TestCase
         $client = $this->registerApplication();
         $this->requestAuthorization($client);
 
-        $this->delete('/oauth/authorize', ['state' => 'state-123', 'client_id' => $client->getKey(), 'auth_token' => session('authToken')])
+        // Passport returns the application's state from the authorization request it kept in the session.
+        $this->delete('/oauth/authorize', ['client_id' => $client->getKey(), 'auth_token' => session('authToken')])
             ->assertRedirectContains(self::REDIRECT_URI)
-            ->assertRedirectContains('error=access_denied');
+            ->assertRedirectContains('error=access_denied')
+            ->assertRedirectContains('state=state-123');
 
         $this->assertSame(0, OAuthConnection::query()->count());
     }
@@ -182,9 +186,55 @@ final class AuthorizationCodeFlowTest extends TestCase
         $this->actingAs(User::factory()->create());
         $client = $this->registerApplication();
 
-        $this->post('/oauth/authorize', ['state' => 'state-123', 'client_id' => $client->getKey(), 'auth_token' => 'stale'])
+        $this->post('/oauth/authorize', ['client_id' => $client->getKey(), 'auth_token' => 'stale'])
             ->assertStatus(419)
             ->assertSee('Page Expired');
+    }
+
+    public function test_the_consent_screen_shows_where_approving_returns_the_person(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        [$consent] = $this->requestAuthorization($this->registerApplication());
+
+        $consent->assertOk()
+            ->assertSee('Approving returns you to an app on this computer at')
+            ->assertSee('http://localhost:4100')
+            ->assertDontSee('/callback')
+            ->assertDontSee('Check this address.');
+    }
+
+    // A domain in another script can imitate a familiar name, so its plain (punycode) form is shown too.
+    public function test_the_consent_screen_warns_about_an_internationalized_domain(): void
+    {
+        $this->actingAs(User::factory()->create());
+        [, $client] = resolve(RegisterOAuthApplication::class)('Reporting Tool', ['https://bücher.example/callback'], false, ['view-users']);
+
+        [$consent] = $this->requestAuthorization($client, redirectUri: 'https://bücher.example/callback');
+
+        $consent->assertOk()
+            ->assertSee('Approving returns you to')
+            ->assertSee('https://bücher.example')
+            ->assertSee('Check this address.')
+            ->assertSee('https://xn--bcher-kva.example');
+    }
+
+    // A self-registered MCP client keeps its client ID after it's deleted or revoked, and Passport would answer with JSON.
+    public function test_a_deleted_or_revoked_client_shows_a_page_instead_of_passports_json(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $deleted = $this->registerApplication();
+        $deleted->delete();
+        $revoked = $this->registerApplication();
+        resolve(RevokeOAuthApplication::class)($revoked);
+
+        foreach ([$deleted, $revoked] as $client) {
+            [$response] = $this->requestAuthorization($client);
+
+            $response->assertBadRequest()
+                ->assertSee('Application Not Registered')
+                ->assertSee('remove ' . config('app.name') . ' from it and add it again');
+        }
     }
 
     public function test_switch_account_signs_out_and_returns_to_the_consent_screen_after_sign_in(): void
