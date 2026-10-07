@@ -1,0 +1,111 @@
+---
+title: Development Workflow
+description: Running the application locally, the checks every change must pass, and what CI runs on a pull request
+sidebar:
+    order: 1
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## Running the app locally
+
+```bash
+composer dev
+```
+
+`composer dev` starts four processes with `concurrently`, each labelled in the output:
+
+| Name     | Command                             | Purpose                                                                     |
+| -------- | ----------------------------------- | --------------------------------------------------------------------------- |
+| `server` | `php artisan serve`                 | PHP's built-in server, at the address it prints                             |
+| `queue`  | `php artisan queue:listen --tries=1` | Runs queued jobs from Redis, reloading the code for each job                |
+| `logs`   | `php artisan pail --timeout=0`      | Streams the application log                                                 |
+| `vite`   | `pnpm run dev`                      | The Vite dev server, which rebuilds CSS and TypeScript and reloads the page |
+
+The queue worker is required. Jobs go to Redis (`QUEUE_CONNECTION=redis`), so mail such as email sign-in codes is not sent until a worker runs it.
+
+`composer dev` doesn't run the scheduler. Run `php artisan schedule:work` in another terminal when you need [scheduled tasks](/reference/commands/#scheduled-tasks), or run one by hand, such as `php artisan announcements:notify`.
+
+### The API Specification
+
+`composer openapi:generate:v1` writes the OpenAPI schema from the `#[OA\...]` attributes in `app/` to `docs/schemas/api-schema.yaml`, which the docs site renders as its [API Specification](/api). CI regenerates it on every pull request; run it yourself to check your attributes. `composer openapi:generate` prints the schema without writing it.
+
+### The Documentation Site
+
+The docs site is an [Astro Starlight](https://starlight.astro.build) project in `docs/`, with its own dependencies. Run `pnpm install` and then `pnpm dev` in `docs/` to preview it with live reload, or `pnpm build` to check that it builds and that every internal link resolves, as CI does.
+
+With [Laravel Herd](https://herd.laravel.com), Herd serves the site at `https://your-project-name.test`, named by `herd.yml`, and Herd Pro runs the PostgreSQL, Redis and RustFS services that `herd.yml` lists. Use that address rather than the one `php artisan serve` prints; `composer dev` still provides the queue worker, the log stream and Vite. [Installation](/getting-started/installation/) covers the first-time setup.
+
+A local environment needs no credentials: copy `.env.example`, run `php artisan key:generate` and `php artisan db:rebuild`, and sign in as a seeded demo user. That makes worktrees and agents cheap to set up. An agent working in the browser signs in by opening `/app/login/as/{username}` (for example `/app/login/as/nuit.admin`) at whatever host and port the app is served on. See [Signing In Locally](/features/authentication/#signing-in-locally).
+
+## Quality gates
+
+Every change must pass these checks. CI runs all of them except the type check.
+
+| Check               | Command                                       | Notes                                                                                                                                                         |
+| ------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| PHP tests           | `vendor/bin/pest --parallel`                  | The Unit and Feature suites. See [Testing](/guides/testing/)                                                                                                  |
+| Browser tests       | `composer test:browser`                       | Every page in a real browser, with axe, through Pest and Playwright. Run `pnpm build` first. See [Browser Tests](/guides/testing/#browser-tests)              |
+| Static analysis     | `composer analyse:php`                        | PHPStan at level 6 (`phpstan.neon`). It must report no errors.                                                                                                |
+| PHP formatting      | `composer format:php`                         | Laravel Pint with the rules in `pint.json`                                                                                                                    |
+| Frontend formatting | `pnpm format` or `composer format:frontend`   | Prettier on `.blade.php`, `.ts`, `.js`, `.css`, `.md`, `.json`, `.yml`, `.xml` and `.astro` files. It skips `.mdx`, the mail views and `.github/workflows`. |
+| Refactoring rules   | `composer rector`                             | Rector with the rules in `rector.php`. `composer rector:dry` shows the changes without making them.                                                          |
+| TypeScript          | `pnpm typecheck`                              | `tsc --noEmit` on `resources/js/**/*.ts`, in strict mode. Not run in CI.                                                                                      |
+| Asset build         | `pnpm build`                                  | Vite production build                                                                                                                                         |
+
+`composer all` runs the IDE helper generators, Rector, Pint, Prettier and PHPStan in that order. It does not run tests or build assets.
+
+<Aside type="caution" title="Mail views are not formatted">
+    `resources/views/mail/` and `resources/views/vendor/mail/` are listed in `.prettierignore`. Indentation inside Markdown mail turns into code blocks, so don't let an editor's Prettier integration reformat them.
+</Aside>
+
+### Before opening a pull request
+
+1. Run `vendor/bin/pest --parallel` and `composer analyse:php`.
+2. Run `composer format:php` and `pnpm format`.
+3. If you changed Blade, CSS or TypeScript, run `pnpm typecheck` and `pnpm build`.
+4. If you added or changed a page, make sure the browser tests check it, then run `composer test:browser`. See [Adding a Page](/guides/testing/#adding-a-page).
+
+The pull request template (`.github/pull-request-template.md`) has a checklist for tests, migrations and documentation.
+
+## Continuous integration
+
+`.github/workflows/check-pr.yml` runs on pull requests into, and pushes to, `main`. A newer push to the same branch cancels a run in progress.
+
+| Job                            | Runs when                       | What it does                                                                                                                                                                                                                                                      |
+| ------------------------------ | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🎯 Determine Scope             | Always                          | Sorts the changed files into code, `docs/`, `.github/` and `iac/`, and the jobs below run only for the scopes they check.                                                                                                                                        |
+| 🔍 Lint, Format & Analyse      | Code changed                    | Runs Rector, Pint and Prettier, regenerates the OpenAPI schema (`composer openapi:generate:v1`), fails if a browser test calls `->debug()` or `->tinker()`, then runs PHPStan and publishes its report as a check.                                            |
+| 🧪 Unit Tests (1/3, 2/3, 3/3)  | Code changed                    | Runs `vendor/bin/pest --parallel --ci --shard N/3` with PCOV coverage. `--ci` runs every test even when one is marked `->only()`. See [Test shards](/guides/testing/#test-shards).                                                                                                                                                |
+| 📊 Unit Test Results           | Code changed                    | Combines the shards' JUnit reports into the **📊 PHPUnit Test Results** check, and fails if any shard failed. Require this job, not the generated check, in your branch ruleset.                                                                                  |
+| 📈 Coverage Report             | Code changed                    | Merges the shards' coverage with `phpcov`, posts it as a pull request comment, and uploads it to Coveralls in the starter's own repository.                                                                                                                       |
+| 🌐 Browser Tests               | Code changed                    | Starts PostgreSQL and RustFS, creates the bucket and its CORS rule, installs Playwright's Chromium, builds assets and runs `vendor/bin/pest --testsuite=Browser --parallel --ci`. It publishes the **🌐 Browser Test Results** check, uploads the screenshots of failed tests, and prints `storage/logs/laravel.log`. |
+| 📚 Validate Documentation      | `docs/` changed                 | Installs the docs site's dependencies and runs `pnpm build` in `docs/`.                                                                                                                                                                                           |
+| 🔬 Lint Workflows              | `.github/` changed              | Checks the workflows with actionlint and audits them with zizmor. Suppressions live in `.github/zizmor.yml` with their reasons.                                                                                                                                  |
+
+A commented-out `validate-infrastructure` job plans OpenTofu changes under `iac/`. Uncomment it and set its secrets if your application keeps infrastructure there.
+
+<Aside type="caution" title="CI commits formatting fixes to your branch">
+    When Rector, Pint, Prettier or the OpenAPI schema changes any file, the lint job commits the changes as `style: apply automated formatting`, pushes them to the pull request's branch and fails. Pull before you push again, or your next push is rejected.
+</Aside>
+
+### Other workflows
+
+| Workflow          | Trigger                                    | What it does                                                                                                                                  |
+| ----------------- | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `deploy-docs.yml` | Push to `main` that changes `docs/`, or manual | Builds the docs site and publishes it to GitHub Pages at the domain in `DOCS_CNAME`                                                       |
+| `release.yml`     | Manual, with a version                     | Checks the version and its changelog entry, then creates a GitHub release from `main`                                       |
+| `smoke-test.yml`  | A published release, or manual             | Creates a project from the release with `composer create-project`, then migrates, seeds, builds assets, runs the tests and boots the app   |
+
+`release.yml` and `smoke-test.yml` release and test the starter itself. Delete them during [Project Cleanup](/getting-started/initial-customization/#8-project-cleanup) unless you adapt them for your application.
+
+## Guidance for coding agents
+
+The starter ships two files that tell coding agents how to work in the repository. An application keeps both and updates them as it grows: new domains, commands, conventions and rules that are easy to miss.
+
+| File                              | Read by                                                       | Holds                                                                                                                                                                                 |
+| --------------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AGENTS.md`                       | Codex and other agents that follow the `AGENTS.md` convention | The stack, the commands to run, where each kind of code goes, rules that are easy to miss, and testing conventions. It points to `copilot-instructions.md` for the detailed standards. |
+| `.github/copilot-instructions.md` | GitHub Copilot                                                | Detailed coding standards: PHP style, domain structure, models, migrations, factories, seeding, Blade, Tailwind, Livewire, Filament and accessibility                                  |
+
+Claude Code reads `CLAUDE.md` rather than `AGENTS.md`. To give it the same guidance, add a `CLAUDE.md` at the repository root that contains `@AGENTS.md`, which imports the file.

@@ -9,11 +9,12 @@ use App\Domains\User\Enums\UserSegment;
 use Database\Factories\Domains\User\Models\UserLoginRecordFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Northwestern\SysDev\Chassis\Models\Concerns\PrunesAfterRetentionPeriod;
 
 class UserLoginRecord extends BaseModel
 {
     /** @use HasFactory<UserLoginRecordFactory> */
-    use HasFactory;
+    use HasFactory, PrunesAfterRetentionPeriod;
 
     public static $auditingDisabled = true;
 
@@ -26,5 +27,15 @@ class UserLoginRecord extends BaseModel
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    protected function retentionConfigKey(): string
+    {
+        return 'platform.retention.login_records';
+    }
+
+    protected function retentionColumn(): string
+    {
+        return 'logged_in_at';
     }
 }

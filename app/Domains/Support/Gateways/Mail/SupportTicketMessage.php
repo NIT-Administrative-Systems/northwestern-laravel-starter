@@ -8,6 +8,7 @@ use App\Domains\Support\Models\SupportTicket;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Mail\Mailable;
+use Northwestern\SysDev\Chassis\Formatting\NorthwesternDateTime;
 
 /**
  * Email sent to the support team with the ticket details.
@@ -42,13 +43,14 @@ class SupportTicketMessage extends Mailable implements ShouldQueue
             ->with([
                 'referenceNumber' => $this->referenceNumber,
                 'subject' => $this->ticket->subject,
-                'details' => $this->ticket->details,
+                'details' => $this->ticket->detailsHtml(),
                 'submitterName' => $user->full_name ?? 'Unknown',
                 'submitterEmail' => $user->email ?? 'Unknown',
                 'submitterUsername' => $user->username ?? 'Unknown',
                 'submitterDepartments' => $user->departments ?? [],
                 'submitterAffiliation' => $user?->primary_affiliation?->getLabel(),
                 'environment' => ucfirst((string) config('app.env')),
+                'submittedAt' => NorthwesternDateTime::format($this->ticket->created_at ?? now(), config('app.schedule_timezone')),
                 'fallbackMode' => $this->isFallbackEmail,
             ]);
     }

@@ -13,8 +13,9 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
+    # The release is created with RELEASE_TOKEN, so the workflow's own token only reads.
     permissions:
-      contents: write
+      contents: read
 
     steps:
       - name: Validate version format
@@ -31,7 +32,7 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
-          token: ${{ secrets.RELEASE_TOKEN }}
+          persist-credentials: false
 
       - name: Check version doesn't already exist
         env:
@@ -81,33 +82,6 @@ jobs:
           ' "$CHANGELOG_HEADING")
 
           echo "CHANGELOG_ANCHOR=$CHANGELOG_ANCHOR" >> "$GITHUB_ENV"
-
-      - name: Bump .starter-version.yaml
-        env:
-          VERSION: ${{ inputs.version }}
-        run: |
-          cat > .starter-version.yaml << EOF
-          # Northwestern Laravel Starter
-          #
-          # This file tracks the version of the starter template that this project
-          # was originally cloned from. It serves as a reference point to compare
-          # against newer releases of the upstream template.
-          #
-          # To see changes introduced since this version, visit:
-          # https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/releases
-
-          version: $VERSION
-          EOF
-
-      - name: Commit and push
-        env:
-          VERSION: ${{ inputs.version }}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add .starter-version.yaml
-          git commit -m "chore: bump starter version to $VERSION [skip ci]"
-          git push origin main
 
       - name: Create GitHub release
         env:

@@ -2,15 +2,21 @@
 
 declare(strict_types=1);
 
-use App\Console\Commands\SendAccessTokenExpirationNotificationsCommand;
+use App\Console\Commands\NotifyAnnouncementAudiencesCommand;
+use App\Console\Commands\PruneMcpClientsCommand;
+use App\Console\Commands\RevokeIneligibleCredentialsCommand;
+use App\Console\Commands\SendClientSecretExpirationNotificationsCommand;
+use App\Console\Commands\SendPersonalAccessTokenExpirationNotificationsCommand;
 use Illuminate\Database\Console\PruneCommand;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Schedule;
+use Laravel\Passport\Console\PurgeCommand;
 use Laravel\Telescope\Console\PruneCommand as TelescopePruneCommand;
 use Livewire\Features\SupportConsoleCommands\Commands\S3CleanupCommand as CleanTemporaryS3FilesCommand;
 use Spatie\Health\Commands\DispatchQueueCheckJobsCommand;
 use Spatie\Health\Commands\RunHealthChecksCommand;
 use Spatie\Health\Commands\ScheduleCheckHeartbeatCommand;
+use Spatie\Health\Models\HealthCheckResultHistoryItem;
 
 /*
 |--------------------------------------------------------------------------|
@@ -55,11 +61,24 @@ use Spatie\Health\Commands\ScheduleCheckHeartbeatCommand;
 Schedule::command(TelescopePruneCommand::class)->daily();
 Schedule::command(CleanTemporaryS3FilesCommand::class)->daily();
 Schedule::command(PruneCommand::class, ['--path' => glob('app/Domains/*/Models')])->daily();
+Schedule::command(PruneCommand::class, ['--model' => [HealthCheckResultHistoryItem::class]])->daily();
 
-if (config('api.expiration_notifications.enabled')) {
-    Schedule::command(SendAccessTokenExpirationNotificationsCommand::class)
-        ->dailyAt('09:00');
+if (config('api.client_secret_expiration_notifications.enabled')) {
+    Schedule::command(SendClientSecretExpirationNotificationsCommand::class)->dailyAt('09:00');
 }
+
+if (config('api.personal_access_tokens.expiration_notifications.enabled')) {
+    Schedule::command(SendPersonalAccessTokenExpirationNotificationsCommand::class)->dailyAt('09:00');
+}
+
+// Delete OAuth tokens and codes that expired more than 31 days ago, revoked or not. Not revoked
+// ones sooner: refresh tokens are found through their access tokens when access is revoked, so
+// an access token must outlive its refresh token's 30-day lifetime. Without `--expired`, Passport
+// would delete everything revoked on the next run.
+Schedule::command(PurgeCommand::class, ['--expired', '--hours' => 24 * 31])->daily();
+
+// Self-registered MCP clients nobody connected, or nobody uses any more.
+Schedule::command(PruneMcpClientsCommand::class)->daily();
 
 /*
 |--------------------------------------------------------------------------
@@ -69,7 +88,11 @@ if (config('api.expiration_notifications.enabled')) {
 | operations requiring regular intervals.
 */
 
-//
+// The API refuses these credentials on every request already; this marks them revoked. Outside
+// production it runs with the weekday group, so idle databases aren't woken every hour.
+if (App::isProduction()) {
+    Schedule::command(RevokeIneligibleCredentialsCommand::class)->hourly();
+}
 
 /*
 |--------------------------------------------------------------------------
@@ -89,7 +112,11 @@ if (config('api.expiration_notifications.enabled')) {
 | tasks that align with regular business hours.
 */
 
-//
+// Frequent production commands, grouped once a weekday elsewhere so idle databases can scale to zero.
+if (! App::isProduction()) {
+    Schedule::command(RevokeIneligibleCredentialsCommand::class)->weekdays()->at('12:00');
+    Schedule::command(NotifyAnnouncementAudiencesCommand::class)->weekdays()->at('12:00');
+}
 
 /*
 |--------------------------------------------------------------------------
@@ -103,6 +130,12 @@ if (config('api.expiration_notifications.enabled')) {
 // traffic — so it runs in every environment. Without it, Spatie's ScheduleCheck
 // reports "the schedule did not run yet" indefinitely.
 Schedule::command(ScheduleCheckHeartbeatCommand::class)->everyMinute();
+
+// Notifies the audience of a scheduled announcement once it starts, when its author asked.
+// Outside production it runs with the weekday group.
+if (App::isProduction()) {
+    Schedule::command(NotifyAnnouncementAudiencesCommand::class)->everyFiveMinutes();
+}
 
 if (App::isProduction()) {
     // The other two health commands touch infrastructure on every tick and have

@@ -36,12 +36,10 @@ return [
     | endpoints. It identifies the API "realm" so clients know which API
     | is requesting bearer credentials.
     |
-    | This value will also be shown in access token expiration notifications
-    | if the feature is enabled.
-    |
     */
 
-    'auth_realm' => config('app.name') . ' API',
+    // APP_NAME directly: config/api.php loads before the framework's app config, so config('app.name') is still empty here.
+    'auth_realm' => env('APP_NAME', 'Laravel') . ' API',
 
     /*
     |--------------------------------------------------------------------------
@@ -64,21 +62,7 @@ return [
         // for internal monitoring/display purposes.
         'slow_request_threshold_ms' => (int) env('API_REQUEST_LOGGING_SLOW_THRESHOLD_MS', 500),
 
-        /*
-        |--------------------------------------------------------------------------
-        | Data Retention
-        |--------------------------------------------------------------------------
-        |
-        | Automatically delete logs older than this many days to prevent unbounded
-        | database growth.
-        |
-        | Set to null to disable automatic pruning (not recommended for production).
-        | For high-traffic apps, consider using a dedicated observability tool
-        | instead (Sentry, New Relic, Datadog, etc.).
-        |
-        */
-
-        'retention_days' => (int) env('API_REQUEST_LOG_RETENTION_DAYS', 90),
+        // Retention: see platform.retention.api_request_logs.
 
         /*
         |--------------------------------------------------------------------------
@@ -102,37 +86,45 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Access Token Expiration Notifications
+    | Client Secret Expiration Notifications
     |--------------------------------------------------------------------------
     |
-    | Configure when and how often users are notified about expiring API
-    | tokens. Multiple notification intervals ensure users have adequate
-    | warning to rotate tokens before they expire.
+    | When to email an API user's contact address about a service client whose
+    | secret is about to expire, so the integration's owner can rotate it in
+    | time. A client stops working when its secret expires.
     |
     | 'intervals': Days before expiration to send notifications
     |
     */
 
-    'expiration_notifications' => [
-        'enabled' => env('API_ACCESS_TOKEN_EXPIRATION_NOTIFICATIONS_ENABLED', true),
+    'client_secret_expiration_notifications' => [
+        'enabled' => env('API_CLIENT_SECRET_EXPIRATION_NOTIFICATIONS_ENABLED', true),
         'intervals' => [30, 14, 7, 3, 1],
     ],
 
     /*
     |--------------------------------------------------------------------------
-    | Demo Access Token
+    | Personal Access Tokens
     |--------------------------------------------------------------------------
     |
-    | The plaintext Bearer token to be assigned to the demo API user account
-    | created by the DemoUserSeeder.
+    | People who hold the Create Personal Access Tokens permission create these
+    | on the Account page to call the API as themselves. Each token chooses its
+    | lifetime, up to `max_lifetime_days`, and a person can hold at most
+    | `max_active` working tokens at once.
     |
-    | If not specified, a secure random token will be auto-generated. Set this
-    | to a known, simple value in local development for convenient API testing
-    | with consistent credentials across database refreshes. The system will
-    | automatically hash this value before storing it.
+    | 'expiration_notifications': Days before a token expires to email its
+    | owner, unless they turned the reminders off on their Preferences page.
     |
     */
 
-    'demo_user_token' => env('API_DEMO_USER_ACCESS_TOKEN'),
+    'personal_access_tokens' => [
+        'max_lifetime_days' => (int) env('API_PERSONAL_ACCESS_TOKEN_MAX_LIFETIME_DAYS', 365),
+        'max_active' => (int) env('API_PERSONAL_ACCESS_TOKEN_MAX_ACTIVE', 10),
+
+        'expiration_notifications' => [
+            'enabled' => env('API_PERSONAL_ACCESS_TOKEN_EXPIRATION_NOTIFICATIONS_ENABLED', true),
+            'intervals' => [30, 14, 7, 3, 1],
+        ],
+    ],
 
 ];

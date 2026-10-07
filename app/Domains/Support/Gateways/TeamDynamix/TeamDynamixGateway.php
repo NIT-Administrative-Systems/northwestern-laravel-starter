@@ -72,7 +72,7 @@ class TeamDynamixGateway implements TicketSystemGateway
             typeId: $this->cache->findTicketTypeId(config('support.team-dynamix.ticket_type')),
             formId: $this->cache->findTicketFormTypeId(config('support.team-dynamix.form_type')),
             title: $ticket->subject,
-            description: is_array($ticket->details) ? (json_encode($ticket->details) ?: null) : (string) $ticket->details,
+            description: $ticket->detailsHtml()->toHtml(),
             statusId: $this->cache->findTicketStatusId(config('support.team-dynamix.ticket_status')),
             priorityId: $this->cache->findTicketPriorityId(config('support.team-dynamix.ticket_priority')),
             requestorEmail: $ticket->requester_email ?? '',

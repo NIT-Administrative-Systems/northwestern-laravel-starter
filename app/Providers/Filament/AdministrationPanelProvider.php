@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers\Filament;
 
-use App\Filament\Navigation\AdministrationNavGroup;
-use App\Http\Middleware\InjectLivewireAssets;
+use App\Filament\Administration\Navigation\AdministrationNavGroup;
 use Filament\Actions\Action;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -16,11 +15,13 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Northwestern\FilamentTheme\NorthwesternTheme;
 
@@ -31,7 +32,6 @@ class AdministrationPanelProvider extends PanelProvider
     public function panel(Panel $panel): Panel
     {
         return $panel
-            ->default()
             ->spa()
             ->spaUrlExceptions([
                 url('/auth/*'),
@@ -41,19 +41,21 @@ class AdministrationPanelProvider extends PanelProvider
             ->path(self::ID)
             ->maxContentWidth(Width::Full)
             ->viteTheme('resources/css/filament/administration/theme.css')
+            ->renderHook(PanelsRenderHook::HEAD_END, fn (): string => Blade::render('<x-sentry-browser />'))
+            ->renderHook(PanelsRenderHook::TOPBAR_LOGO_AFTER, fn (): string => Blade::render('<x-panel-brand />'))
             ->userMenuItems([
                 'logout' => fn (Action $action) => $action
-                    ->label('Sign out')
+                    ->label('Sign Out')
                     ->icon(Heroicon::OutlinedArrowRightOnRectangle)
                     ->extraAttributes([
-                        'data-cy' => 'sign-out-menu-link',
+                        'data-testid' => 'sign-out-menu-link',
                     ])
                     ->url(route('logout')),
             ])
-            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
-            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
-            ->discoverClusters(in: app_path('Filament/Clusters'), for: 'App\Filament\Clusters')
-            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
+            ->discoverResources(in: app_path('Filament/Administration/Resources'), for: 'App\Filament\Administration\Resources')
+            ->discoverPages(in: app_path('Filament/Administration/Pages'), for: 'App\Filament\Administration\Pages')
+            ->discoverClusters(in: app_path('Filament/Administration/Clusters'), for: 'App\Filament\Administration\Clusters')
+            ->discoverWidgets(in: app_path('Filament/Administration/Widgets'), for: 'App\Filament\Administration\Widgets')
             ->pages([
                 Dashboard::class,
             ])
@@ -63,6 +65,8 @@ class AdministrationPanelProvider extends PanelProvider
             ->plugins([
                 NorthwesternTheme::make()
                     ->impersonationBanner()
+                    // A back-office panel; the footer is for the pages end users see.
+                    ->footer(false)
                     ->withoutAssetRegistration(),
             ])
             ->databaseNotifications()
@@ -88,7 +92,6 @@ class AdministrationPanelProvider extends PanelProvider
                     ->sort(1003),
             ])
             ->middleware([
-                InjectLivewireAssets::class,
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
                 StartSession::class,

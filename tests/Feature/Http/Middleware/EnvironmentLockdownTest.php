@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Http\Middleware;
 
-use App\Domains\Auth\Enums\RoleModificationOrigin;
-use App\Domains\Auth\Enums\SystemRole;
-use App\Domains\Auth\Models\Role;
+use App\Domains\Access\Enums\RoleModificationOrigin;
+use App\Domains\Access\Enums\SystemRole;
+use App\Domains\Access\Models\Role;
 use App\Domains\User\Models\User;
 use App\Http\Middleware\EnvironmentLockdown;
 use Illuminate\Support\Facades\Route;
@@ -66,7 +66,22 @@ final class EnvironmentLockdownTest extends TestCase
 
         $this->actingAs($user)
             ->get($this->endpoint)
-            ->assertRedirect(route('platform.environment-lockdown'));
+            ->assertRedirect(route('filament.app.environment-lockdown'));
+    }
+
+    // `logout` sends a WebSSO user on to WebSSO's sign-out, still signed in; lockdown must let them leave.
+    public function test_a_locked_out_websso_user_can_sign_out(): void
+    {
+        config(['platform.lockdown.enabled' => true]);
+        Route::middleware(['web', EnvironmentLockdown::class])->get('/auth/websso/logout', fn () => response('Signed out'))->name('login-websso-logout');
+
+        $user = User::factory()->create();
+        $user->assignRoleWithAudit($this->nuRole, RoleModificationOrigin::System);
+
+        $this->actingAs($user)
+            ->get('/auth/websso/logout')
+            ->assertOk()
+            ->assertSee('Signed out');
     }
 
     public function test_redirects_users_with_no_roles(): void
@@ -77,7 +92,7 @@ final class EnvironmentLockdownTest extends TestCase
 
         $this->actingAs($user)
             ->get($this->endpoint)
-            ->assertRedirect(route('platform.environment-lockdown'));
+            ->assertRedirect(route('filament.app.environment-lockdown'));
     }
 
     public function test_allows_users_with_non_default_roles(): void
@@ -147,7 +162,7 @@ final class EnvironmentLockdownTest extends TestCase
 
         $this->actingAs($user)
             ->get($this->endpoint)
-            ->assertRedirect(route('platform.environment-lockdown'));
+            ->assertRedirect(route('filament.app.environment-lockdown'));
     }
 
     public function test_all_exempted_routes_allow_users_with_only_default_role(): void
@@ -178,6 +193,6 @@ final class EnvironmentLockdownTest extends TestCase
 
         $this->actingAs($user)
             ->get($this->endpoint)
-            ->assertRedirect(route('platform.environment-lockdown'));
+            ->assertRedirect(route('filament.app.environment-lockdown'));
     }
 }

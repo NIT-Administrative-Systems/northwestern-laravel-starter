@@ -1,0 +1,331 @@
+---
+title: Environment Variables
+description: Every environment variable the starter reads, with its default
+sidebar:
+    order: 2
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+The starter reads these variables from `.env` through the files in `config/`. The **Default** column is what the config uses when the variable is not set. `.env.example` sets some of them to different values for local development.
+
+<Aside type="caution" title="An empty value is not an unset value">
+    `FOO=` sets `FOO` to an empty string, and the empty string overrides the
+    config default. Delete or comment out the line to get the default. Laravel
+    converts the values `true`, `false`, `null` and `empty` (with or without
+    parentheses) to `true`, `false`, `null` and `''`.
+</Aside>
+
+Laravel's own configuration files read many more variables than this page lists: the long tail in `config/database.php`, `config/cache.php`, `config/session.php`, `config/logging.php`, `config/mail.php`, `config/queue.php` and `config/broadcasting.php`. This page lists only those in `.env.example` or added by the starter. See [Laravel's configuration documentation](https://laravel.com/docs/configuration) and the config file itself for the rest.
+
+## Application
+
+| Variable                   | Default                    | Description                                                                                                                                              |
+| -------------------------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `APP_NAME`                 | `Laravel`                  | Application name, shown in the header, emails and the browser title                                                                                      |
+| `APP_ENV`                  | `production`               | Environment name. The starter recognizes `local`, `testing`, `ci`, `develop`, `qa`, `staging` and `production`                                           |
+| `APP_KEY`                  | `null`                     | Encryption key. Generate it with `php artisan key:generate`                                                                                              |
+| `APP_DEBUG`                | `false`                    | Show detailed error pages. Never `true` in production                                                                                                    |
+| `APP_URL`                  | `http://localhost`         | Base URL of this environment                                                                                                                             |
+| `PRODUCTION_URL`           | `https://northwestern.edu` | URL of the production environment, linked from the [lockdown page](/getting-started/initial-customization/#5-environment-lockdown) in other environments |
+| `APP_LOCALE`               | `en`                       | Default locale                                                                                                                                           |
+| `APP_FALLBACK_LOCALE`      | `en`                       | Locale used when a translation is missing                                                                                                                |
+| `APP_FAKER_LOCALE`         | `en_US`                    | Locale for factory data                                                                                                                                  |
+| `APP_MAINTENANCE_DRIVER`   | `file`                     | Where maintenance mode is stored (`file` or `cache`)                                                                                                     |
+| `APP_MAINTENANCE_STORE`    | `database`                 | Cache store for maintenance mode when the driver is `cache`                                                                                              |
+| `BCRYPT_ROUNDS`            | `12`                       | Password hashing cost                                                                                                                                    |
+| `DEFAULT_USER_TIMEZONE`    | `America/Chicago`          | Timezone given to users that Directory Search creates, and the `users.timezone` column's default, set when the migration runs. Changing it later doesn't change existing users or the column |
+| `AUDITING_ENABLED`         | `true`                     | Record model changes. See [Audit Logging](/features/audit-logging/)                                                                                      |
+| `LOG_CHANNEL`              | `stack`                    | Default log channel                                                                                                                                      |
+| `LOG_STACK`                | `single`                   | Comma-separated channels the `stack` channel writes to                                                                                                   |
+| `LOG_DEPRECATIONS_CHANNEL` | `null`                     | Channel for PHP and library deprecation warnings                                                                                                         |
+| `LOG_LEVEL`                | `debug`                    | Minimum level written to the logs                                                                                                                        |
+
+## Database and storage
+
+| Variable                          | Default     | Description                                                                                                                         |
+| --------------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `DB_CONNECTION`                   | `pgsql`     | Default database connection                                                                                                         |
+| `DB_HOST`                         | `127.0.0.1` | PostgreSQL host                                                                                                                     |
+| `DB_PORT`                         | `5432`      | PostgreSQL port                                                                                                                     |
+| `DB_DATABASE`                     | `null`      | Database name                                                                                                                       |
+| `DB_USERNAME`                     | `root`      | Database user                                                                                                                       |
+| `DB_PASSWORD`                     | `''`        | Database password                                                                                                                   |
+| `DB_PHPUNIT_DATABASE`             | `null`      | Separate database for the `phpunit` connection, which `phpunit.xml` selects, so tests never touch the main database                 |
+| `REDIS_HOST`                      | `127.0.0.1` | Redis host                                                                                                                          |
+| `REDIS_PASSWORD`                  | `null`      | Redis password                                                                                                                      |
+| `REDIS_PORT`                      | `6379`      | Redis port                                                                                                                          |
+| `FILESYSTEM_DISK`                 | `s3`        | Default filesystem disk                                                                                                             |
+| `AWS_ACCESS_KEY_ID`               | `null`      | S3 access key. Also used by SES mail and the SQS and DynamoDB drivers                                                               |
+| `AWS_SECRET_ACCESS_KEY`           | `null`      | S3 secret key                                                                                                                       |
+| `AWS_DEFAULT_REGION`              | `null`      | S3 region                                                                                                                           |
+| `AWS_BUCKET`                      | `null`      | S3 bucket name                                                                                                                      |
+| `AWS_URL`                         | `null`      | Public URL of the bucket                                                                                                            |
+| `AWS_ENDPOINT`                    | `null`      | Custom S3 endpoint, such as a local RustFS server                                                                                   |
+| `AWS_USE_PATH_STYLE_ENDPOINT`     | `false`     | Use path-style bucket URLs. Required for RustFS                                                                                     |
+| `AWS_BUCKET_KMS_KEY_ARN`          | `null`      | KMS key for server-side encryption. When set, uploads are encrypted with it                                                         |
+| `AWS_BUCKET_ENCRYPTION_ALGORITHM` | `aws:kms`   | Server-side encryption algorithm, used only when `AWS_BUCKET_KMS_KEY_ARN` is set                                                    |
+| `AWS_SSL_VERIFY`                  | `true`      | Verify the S3 endpoint's TLS certificate                                                                                            |
+| `S3_STREAM_READS`                 | `true`      | Stream S3 reads instead of loading whole files into memory. `.env.example` sets `false`; see its comment for the local HTTPS caveat |
+
+## Sessions, cache, queues and broadcasting
+
+| Variable                | Default                                                   | Description                                                               |
+| ----------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `SESSION_DRIVER`        | `database`                                                | Session storage                                                           |
+| `SESSION_LIFETIME`      | `120`                                                     | Minutes of inactivity before a session expires. `.env.example` sets `480` |
+| `SESSION_ENCRYPT`       | `true`                                                    | Encrypt session data                                                      |
+| `SESSION_SECURE_COOKIE` | `true`, or `false` in `local` when `APP_URL` is `http://` | Send the session cookie over HTTPS only                                   |
+| `SESSION_PATH`          | `/`                                                       | Session cookie path                                                       |
+| `SESSION_DOMAIN`        | `null`                                                    | Session cookie domain                                                     |
+| `CACHE_STORE`           | `file`                                                    | Default cache store                                                       |
+| `QUEUE_CONNECTION`      | `sync`                                                    | Default queue connection. `.env.example` sets `redis`                     |
+| `BROADCAST_CONNECTION`  | `null`                                                    | Default broadcaster                                                       |
+| `PUSHER_APP_ID`         | `null`                                                    | Pusher app ID, for the `pusher` broadcaster                               |
+| `PUSHER_APP_KEY`        | `null`                                                    | Pusher app key                                                            |
+| `PUSHER_APP_SECRET`     | `null`                                                    | Pusher app secret                                                         |
+| `PUSHER_APP_CLUSTER`    | `null`                                                    | Pusher cluster                                                            |
+
+## Mail
+
+| Variable               | Default                     | Description                                                |
+| ---------------------- | --------------------------- | ---------------------------------------------------------- |
+| `MAIL_MAILER`          | `log`                       | Default mailer. `.env.example` sets `smtp`                 |
+| `MAIL_HOST`            | `127.0.0.1`                 | SMTP host                                                  |
+| `MAIL_PORT`            | `2525`                      | SMTP port                                                  |
+| `MAIL_USERNAME`        | `null`                      | SMTP username                                              |
+| `MAIL_PASSWORD`        | `null`                      | SMTP password                                              |
+| `MAIL_FROM_ADDRESS`    | `no-reply@northwestern.edu` | Sender address for all mail, including health check alerts |
+| `MAIL_FROM_NAME`       | `Northwestern University`   | Sender name. `.env.example` sets it to `APP_NAME`          |
+| `AWS_SES_EMAIL_REGION` | `us-east-1`                 | SES region, separate from `AWS_DEFAULT_REGION`             |
+
+## Authentication
+
+See [Authentication](/features/authentication/) and [WebSSO](/northwestern-integrations/websso/). None of these are needed in the `local` environment, which offers **Sign In As** for the seeded demo users; deployed environments need a NetID provider.
+
+### NetID sign-in
+
+| Variable              | Default                                                              | Description                                                                                                                                                                                                                            |
+| --------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SUPER_ADMIN_NETIDS`  | `''`                                                                 | Comma-separated NetIDs given the Super Administrator role by `StakeholderSeeder`, which deployments run (not `db:rebuild`). See [Super Administrator Accounts](/getting-started/initial-customization/#1-super-administrator-accounts) |
+| `AZURE_CLIENT_ID`     | `null`                                                               | Entra ID application ID. Entra ID sign-in is available when this and `AZURE_CLIENT_SECRET` are set                                                                                                                                     |
+| `AZURE_CLIENT_SECRET` | `null`                                                               | Entra ID client secret                                                                                                                                                                                                                 |
+| `WEBSSO_API_KEY`      | `null`                                                               | Apigee key for Online Passport. Setting it switches sign-in from Entra ID to Online Passport                                                                                                                                           |
+| `WEBSSO_STRATEGY`     | `apigee`                                                             | Online Passport strategy: `apigee` or `forgerock-direct`. `forgerock-direct` also enables Online Passport |
+| `WEBSSO_URL_BASE`     | `https://uat-nusso.it.northwestern.edu`                              | ForgeRock base URL. Production uses `https://prd-nusso.it.northwestern.edu`                                                                                                                                                            |
+| `WEBSSO_API_URL_BASE` | `https://northwestern-prod.apigee.net/agentless-websso`              | Agentless WebSSO API base URL                                                                                                                                                                                                          |
+| `WEBSSO_REALM`        | `northwestern`                                                       | ForgeRock realm                                                                                                                                                                                                                        |
+| `WEBSSO_TREE`         | `ldap-and-duo` when `DUO_ENABLED` is true, otherwise `ldap-registry` | ForgeRock authentication tree                                                                                                                                                                                                          |
+| `WEBSSO_COOKIE_NAME`  | `nusso`                                                              | Name of the SSO session cookie                                                                                                                                                                                                         |
+| `DUO_ENABLED`         | `false`                                                              | Require Duo multi-factor authentication, by selecting the `ldap-and-duo` tree                                                                                                                                                          |
+
+### Email verification codes
+
+These configure [passwordless verification codes](/features/authentication/#passwordless-verification-codes) for users without a NetID.
+
+| Variable                                | Default | Description                                                                                    |
+| --------------------------------------- | ------- | ---------------------------------------------------------------------------------------------- |
+| `LOCAL_AUTH_ENABLED`                    | `true`  | Allow sign-in with a code sent by email                                                        |
+| `LOCAL_AUTH_USE_FIXED_CODE`             | `false` | Issue a predictable code (`123456` for six digits). Throws in `production`, `develop` and `qa` |
+| `LOCAL_AUTH_RATE_LIMIT_PER_HOUR`        | `10`    | Code requests per email address per hour                                                       |
+| `LOCAL_AUTH_RATE_LIMIT_PER_IP_PER_HOUR` | `20`    | Code requests per IP address per hour                                                          |
+| `LOCAL_AUTH_CODE_DIGITS`                | `6`     | Digits in a code                                                                               |
+| `LOCAL_AUTH_CODE_EXPIRES_MINUTES`       | `10`    | Minutes before a code expires                                                                  |
+| `LOCAL_AUTH_CODE_MAX_ATTEMPTS`          | `8`     | Failed attempts before the challenge locks                                                     |
+| `LOCAL_AUTH_CODE_LOCK_MINUTES`          | `15`    | Minutes a locked challenge stays locked                                                        |
+| `LOCAL_AUTH_CODE_RESEND_COOLDOWN`       | `30`    | Seconds before another code can be sent                                                        |
+
+## API
+
+See [API](/features/api/).
+
+| Variable                                                     | Default | Description                                                                                                                                                            |
+| ------------------------------------------------------------ | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `API_ENABLED`                                                | `true`  | When `false`, every API route responds `404`, and no token is issued or refreshed for service clients or connected applications                                                                   |
+| `API_REQUEST_LOGGING_ENABLED`                                | `true`  | Log API requests. See [Request Logging](/features/api/#request-logging)                                                                                                |
+| `API_REQUEST_LOGGING_SLOW_THRESHOLD_MS`                      | `500`   | Milliseconds after which a logged request counts as slow                                                                                                               |
+| `API_REQUEST_LOGGING_SAMPLING_ENABLED`                       | `false` | Log only a sample of successful requests. Failed requests are always logged                                                                                            |
+| `API_REQUEST_LOGGING_SAMPLE_RATE`                            | `1.0`   | Share of successful requests logged when sampling is on, from `0.0` to `1.0`                                                                                           |
+| `API_CLIENT_SECRET_EXPIRATION_NOTIFICATIONS_ENABLED`         | `true`  | Email API users' contact addresses before a client secret expires. See [Secret Expiration Notifications](/features/api/#secret-expiration-notifications)               |
+| `API_PERSONAL_ACCESS_TOKEN_EXPIRATION_NOTIFICATIONS_ENABLED` | `true`  | Email people before their personal access tokens expire, unless they turned it off on their Preferences page                                                           |
+| `API_PERSONAL_ACCESS_TOKEN_MAX_LIFETIME_DAYS`                | `365`   | The longest a personal access token may last. See [Personal Access Tokens](/features/api/#personal-access-tokens)                                                      |
+| `API_PERSONAL_ACCESS_TOKEN_MAX_ACTIVE`                       | `10`    | How many working personal access tokens a person may hold at once                                                                                                      |
+| `PASSPORT_PRIVATE_KEY`                                       | `null`  | The RSA private key that signs access tokens. Set in deployed environments; locally, `db:rebuild` generates key files. See [Signing Keys](/features/api/#signing-keys) |
+| `PASSPORT_PUBLIC_KEY`                                        | `null`  | The matching public key                                                                                                                                                |
+| `PASSPORT_CONNECTION` | `null`  | Database connection for Passport's tables; the default connection when unset |
+| `CORS_ALLOWED_ORIGINS`                                       | empty   | Browser origins allowed to call the API, comma-separated. See [Browser Access](/features/api/#browser-access-cors)                                                     |
+
+## MCP
+
+See [MCP Server](/features/mcp/).
+
+| Variable                     | Default             | Description                                                                                                                       |
+| ---------------------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `MCP_ENABLED`                | `false`             | Turns on the MCP server at `/mcp`, its OAuth discovery documents and client registration. When `false`, all of them respond `404` |
+| `MCP_CUSTOM_SCHEMES`         | empty               | URI schemes desktop clients may redirect to after sign-in, comma-separated                                                        |
+| `MCP_REGISTRATIONS_PER_HOUR` | `20`                | Client registrations allowed per IP address per hour                                                                              |
+| `MCP_TOOL_CALLS_PER_MINUTE`  | `60`                | Tool calls allowed per person per minute                                                                                          |
+| `MCP_AUTHORIZATION_SERVER`   | the application URL | The OAuth issuer the discovery documents name                                                                                     |
+
+## Northwestern integrations
+
+| Variable                                                  | Default                                                 | Description                                                                                                                             |
+| --------------------------------------------------------- | ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `DIRECTORY_SEARCH_API_KEY`                                | `null`                                                  | Apigee key for [Directory Search](/northwestern-integrations/directory-search/). Optional in `local`; required in deployed environments |
+| `DIRECTORY_SEARCH_URL`                                    | `https://northwestern-prod.apigee.net/directory-search` | Directory Search API base URL                                                                                                           |
+| `DIRECTORY_SEARCH_HEALTH_CHECK_NETID`                     | `swd2981`                                               | NetID the Directory Search health check looks up                                                                                        |
+| `EVENT_HUB_MOCK_ENABLED`                                  | `true` when `APP_ENV` is `local`, otherwise `false`     | Mock [EventHub](/northwestern-integrations/eventhub/) instead of calling it                                                             |
+| `EVENT_HUB_BASE_URL`                                      | `null`                                                  | EventHub API base URL                                                                                                                   |
+| `EVENT_HUB_API_KEY`                                       | `null`                                                  | Apigee key for EventHub                                                                                                                 |
+| `EVENT_HUB_HMAC_VERIFICATION_SHARED_SECRET`               | `null`                                                  | Shared secret for verifying webhook signatures                                                                                          |
+| `EVENT_HUB_HMAC_VERIFICATION_HEADER`                      | `X-HMAC-Signature`                                      | Header that carries the webhook signature                                                                                               |
+| `EVENT_HUB_HMAC_VERIFICATION_ALGORITHM_TYPE_REGISTRATION` | `HmacSHA256`                                            | Algorithm name sent to EventHub when registering the webhook                                                                            |
+| `EVENT_HUB_HMAC_VERIFICATION_ALGORITHM_TYPE_PHP`          | `sha256`                                                | Matching algorithm name passed to `hash_hmac()`                                                                                         |
+| `WILDCARD_PHOTO_SYNC_ENABLED`                             | `false`                                                 | Download users' [Wildcard photos](/northwestern-integrations/wildcard-photos/) to S3 at sign-in                                         |
+
+## Support and changelog
+
+### Support form
+
+See [Support Tickets](/features/support-tickets/).
+
+| Variable                    | Default                                          | Description                                                                                                     |
+| --------------------------- | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
+| `SUPPORT_ENABLED`           | `false`                                          | Register the contact form and its routes                                                                        |
+| `SUPPORT_DOCUMENTATION_URL` | `null`                                           | User documentation linked from the Help menu. The link is hidden while empty, whether or not support is enabled |
+| `SUPPORT_LIMITED_WARNING`   | `true` outside production, `false` in production | Show a limited-support warning on the contact form                                                              |
+| `SUPPORT_DRIVER`            | `mail`                                           | Ticket backend: `mail` or `team-dynamix`                                                                        |
+| `SUPPORT_MAIL_TO`           | `your-team@northwestern.edu`                     | Recipient of tickets from the `mail` driver and of the fallback email                                           |
+| `SUPPORT_REFERENCE_PREFIX`  | `SUP`                                            | Prefix of mail ticket references, such as `SUP-47`                                                              |
+
+### TeamDynamix
+
+Used only when `SUPPORT_DRIVER` is `team-dynamix`. See [TeamDynamix Gateway](/features/support-tickets/#teamdynamix-gateway).
+
+| Variable              | Default                   | Description                                                                        |
+| --------------------- | ------------------------- | ---------------------------------------------------------------------------------- |
+| `TDX_API_BASE_URL`    | `null`                    | TeamDynamix web API base URL, such as `https://services.northwestern.edu/TDWebApi` |
+| `TDX_USERNAME`        | `null`                    | API username                                                                       |
+| `TDX_PASSWORD`        | `null`                    | API password                                                                       |
+| `TDX_TICKET_APP_NAME` | `null`                    | TDTickets application where tickets are created                                    |
+| `TDX_CLIENT_APP_NAME` | `null`                    | TDClient application where services are managed                                    |
+| `TDX_ASSIGNEE_ID`     | `null`                    | Group that new tickets are assigned to                                             |
+| `TDX_TICKET_TYPE`     | `Default`                 | Ticket type                                                                        |
+| `TDX_FORM_TYPE`       | `NU Base Service Request` | Ticket form                                                                        |
+| `TDX_TICKET_STATUS`   | `New`                     | Status of new tickets                                                              |
+| `TDX_TICKET_PRIORITY` | `Low (P4)`                | Priority of new tickets                                                            |
+| `TDX_SERVICE`         | from `APP_NAME`           | Service the tickets are filed under                                                |
+
+### Changelog
+
+See [Changelog](/features/changelog/).
+
+| Variable                | Default                                  | Description                                                                         |
+| ----------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------- |
+| `CHANGELOG_ENABLED`     | `false`                                  | Register the changelog routes and navigation item                                   |
+| `JIRA_URL`              | `https://nuitadminsystems.atlassian.net` | Jira instance that issue references link to                                         |
+| `JIRA_ISSUE_IDENTIFIER` | `null`                                   | Jira project key, such as `GSTS`. Issue references are linked only when this is set |
+
+## Branding
+
+These fill the unit lockup and the footer that the Web Style Guide requires. See [Branding and Mail](/building/branding-and-mail/).
+
+| Variable          | Default | Description                                                                                                            |
+| ----------------- | ------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `NU_LOCKUP`       | `null`  | Unit lockup shown as every panel's logo, as a URL or a path in `public/`. The Northwestern wordmark is used when unset |
+| `NU_UNIT_NAME`    | `null`  | Unit name in the footer                                                                                                |
+| `NU_UNIT_ADDRESS` | `null`  | Street address                                                                                                         |
+| `NU_UNIT_CITY`    | `null`  | City, state and ZIP code                                                                                               |
+| `NU_UNIT_PHONE`   | `null`  | Phone number                                                                                                           |
+| `NU_UNIT_FAX`     | `null`  | Fax number                                                                                                             |
+| `NU_UNIT_EMAIL`   | `null`  | Email address                                                                                                          |
+
+A `null` unit field shows Information Technology's details. An empty value hides that field.
+
+## Data retention
+
+Days to keep each kind of record before the daily `model:prune` deletes it. `null` or an empty value keeps records forever. See [Data Retention](/getting-started/initial-customization/#7-data-retention).
+
+| Variable                           | Default               | Description                        |
+| ---------------------------------- | --------------------- | ---------------------------------- |
+| `AUDIT_RETENTION_DAYS`             | `null` (kept forever) | Audit logs                         |
+| `LOGIN_RECORD_RETENTION_DAYS`      | `365`                 | Sign-in records                    |
+| `IMPERSONATION_LOG_RETENTION_DAYS` | `null` (kept forever) | Impersonation logs                 |
+| `LOGIN_CHALLENGE_RETENTION_DAYS`   | `30`                  | Email verification code challenges |
+| `API_REQUEST_LOG_RETENTION_DAYS`   | `90`                  | API request logs                   |
+
+## Environment lockdown
+
+See [Environment Lockdown](/getting-started/initial-customization/#5-environment-lockdown).
+
+| Variable                       | Default                                                                              | Description                                                    |
+| ------------------------------ | ------------------------------------------------------------------------------------ | -------------------------------------------------------------- |
+| `ENVIRONMENT_LOCKDOWN_ENABLED` | `false` when `APP_ENV` is `production`, `local`, `testing` or `ci`, otherwise `true` | Show the lockdown page to users who have only the default role |
+
+## Rate limiting
+
+All limits count requests. See the rate limiting sections of [Authentication](/features/authentication/#rate-limiting), [API](/features/api/#rate-limiting) and [Support Tickets](/features/support-tickets/#rate-limiting).
+
+| Variable                                                     | Default | Description                                                             |
+| ------------------------------------------------------------ | ------- | ----------------------------------------------------------------------- |
+| `RATE_LIMIT_API_PER_MINUTE`                                  | `1800`  | Authenticated requests per minute, per service client for client credentials tokens and per person for every other token |
+| `RATE_LIMIT_API_PER_IP_PER_MINUTE` | `3600`  | Requests per minute from one IP address to the API and Passport's `/oauth/*` routes, counted before authentication |
+| `RATE_LIMIT_AUTH_LOGIN_CODE_REQUEST_PER_MINUTE`              | `5`     | Verification code requests per IP per minute                            |
+| `RATE_LIMIT_AUTH_LOGIN_CODE_REQUEST_PER_EMAIL_PER_MINUTE`    | `3`     | Verification code requests per email address per minute                 |
+| `RATE_LIMIT_AUTH_LOGIN_CODE_VERIFY_PER_MINUTE`               | `10`    | Code verification attempts per IP per minute                            |
+| `RATE_LIMIT_AUTH_LOGIN_CODE_VERIFY_PER_CHALLENGE_PER_MINUTE` | `5`     | Code verification attempts per challenge per minute                     |
+| `RATE_LIMIT_AUTH_IMPERSONATE_PER_MINUTE`                     | `10`    | Impersonation starts per user per minute                                |
+| `RATE_LIMIT_SUPPORT_CONTACT_PER_MINUTE`                      | `2`     | Contact form submissions per user (or IP) per minute                    |
+| `RATE_LIMIT_SUPPORT_CONTACT_PER_HOUR`                        | `5`     | Contact form submissions per user (or IP) per hour                      |
+| `RATE_LIMIT_SUPPORT_CONTACT_PER_DAY`                         | `10`    | Contact form submissions per user (or IP) per day                       |
+
+## Health checks
+
+See [Health Checks](/features/health-checks/).
+
+| Variable                       | Default              | Description                                                                                                                       |
+| ------------------------------ | -------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `HEALTH_SECRET_TOKEN`          | `null`               | Token required in the `X-Secret-Token` header of `GET /api/health`. The endpoint refuses every request with `403` until it is set |
+| `HEALTH_NOTIFICATIONS_ENABLED` | `false`              | Email when a check fails                                                                                                          |
+| `HEALTH_NOTIFICATION_EMAIL`    | `null`               | Recipient of failure emails                                                                                                       |
+| `HEALTH_DB_CONNECTION`         | from `DB_CONNECTION` | Connection that stores check results                                                                                              |
+| `SCHEDULE_HEARTBEAT_URL`       | `null`               | URL pinged when the Schedule check passes                                                                                         |
+
+## Sentry
+
+See [Sentry](/features/sentry/).
+
+| Variable                      | Default                 | Description                                                                                                                                                               |
+| ----------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SENTRY_LARAVEL_DSN`          | from `SENTRY_DSN`       | Project DSN. PHP and browser reporting are off while it is empty                                                                                                          |
+| `SENTRY_DSN`                  | `null`                  | Fallback for `SENTRY_LARAVEL_DSN`                                                                                                                                         |
+| `SENTRY_ENVIRONMENT`          | `null` (uses `APP_ENV`) | Environment name PHP reports to Sentry. The browser SDK always reports `APP_ENV`, so setting this splits PHP and JavaScript events |
+| `SENTRY_SAMPLE_RATE`          | `1.0`                   | Share of errors sent                                                                                                                                                      |
+| `SENTRY_TRACES_SAMPLE_RATE`   | `null` (tracing off)    | Share of requests traced, in PHP and the browser                                                                                                                          |
+| `SENTRY_PROFILES_SAMPLE_RATE` | `null` (profiling off)  | Share of traced requests profiled                                                                                                                                         |
+| `SENTRY_SEND_DEFAULT_PII`     | `false`                 | Send personally identifiable information by default                                                                                                                       |
+| `SENTRY_ENABLE_APM_FOR_JS`    | `true`                  | Load browser tracing in the JavaScript SDK                                                                                                                                |
+| `VAPOR_COMMIT_HASH`           | `null`                  | Release identifier for PHP events. Vapor sets it on deploys with `--commit`                                                                                               |
+| `SENTRY_AUTH_TOKEN`           | unset                   | Build time. Enables the Vite plugin that uploads source maps; it is off without a token                                                                                   |
+| `SENTRY_ORG`                  | unset                   | Build time. Sentry organization for source map uploads                                                                                                                    |
+| `SENTRY_PROJECT`              | unset                   | Build time. Sentry project for source map uploads                                                                                                                         |
+| `SENTRY_RELEASE`              | unset                   | Build time. Release name the source maps and the JavaScript bundle are tagged with. See [Source Maps & Release Tracking](/features/sentry/#source-maps--release-tracking) |
+
+`config/sentry.php` also reads `SENTRY_BREADCRUMBS_*` and `SENTRY_TRACE_*` toggles for individual breadcrumb and tracing features. Their defaults are in the file.
+
+## Developer tools
+
+| Variable            | Default                      | Description                                                                                                                                             |
+| ------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MAIL_CAPTURE_URL`  | `null`                       | URL of MailPit or a similar mail catcher. When set, the administration panel shows a MailPit link under Developer Tools to users who can view Telescope |
+| `S3_CONSOLE_URL`    | `null`                       | URL of the RustFS or S3 console. When set, the administration panel shows a link to it under Developer Tools, with the same visibility                  |
+| `TELESCOPE_ENABLED` | `true`                       | Record requests, queries, jobs and more in Telescope                                                                                                    |
+| `DEBUGBAR_ENABLED`  | `null` (follows `APP_DEBUG`) | Show Laravel Debugbar                                                                                                                                   |
+| `RAY_ENABLED`       | `true` outside production    | Send `ray()` output to the Ray app                                                                                                                      |
+| `PG_BIN_DIRECTORY`  | `null` (auto-detected)       | Directory containing `pg_dump` and `psql`, for the `db:snapshot:*` commands. See [Database Snapshots](/features/database-snapshots/)                   |
+
+`config/telescope.php` and `config/debugbar.php` read many more `TELESCOPE_*` and `DEBUGBAR_*` variables. Their defaults are in those files.
+
+## Testing
+
+`phpunit.xml` sets its own values for the PHP and browser tests, including `APP_ENV=testing` and `DB_CONNECTION=phpunit`. Browser tests run the application inside the test process, so they use the same values. See [Testing](/guides/testing/).

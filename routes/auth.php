@@ -2,36 +2,20 @@
 
 declare(strict_types=1);
 
+use App\Domains\Api\Http\Controllers\SwitchOAuthAccountController;
+use App\Domains\Auth\Enums\SsoProvider;
 use App\Domains\Auth\Http\Controllers;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Support\Facades\Route;
+use Northwestern\SysDev\Chassis\Http\Controllers\SentryTunnelController;
 
 Route::prefix('auth')->group(function () {
-    if (config('local-auth.enabled')) {
-        Route::middleware('guest')->group(function () {
-            Route::get('login', Controllers\Local\ShowLoginCodeRequestController::class)->name('login-code.request');
-            Route::post('login/request', [Controllers\Local\SendLoginCodeController::class, 'send'])
-                ->middleware('throttle:auth:login-code:request')
-                ->name('login-code.send');
-            Route::post('login/resend', [Controllers\Local\SendLoginCodeController::class, 'resend'])
-                ->middleware('throttle:auth:login-code:request')
-                ->name('login-code.resend');
-            Route::get('login/code', Controllers\Local\ShowLoginCodeFormController::class)->name('login-code.code');
-            Route::post('login/verify', Controllers\Local\VerifyLoginCodeController::class)
-                ->middleware('throttle:auth:login-code:verify')
-                ->name('login-code.verify');
-        });
-    }
-
-    Route::get('type', Controllers\LoginSelectionController::class)->name('login-selection');
     Route::post('logout', Controllers\LogoutSelectionController::class)->name('logout');
 
-    $webssoConfigured = filled(config('nusoa.sso.apigeeApiKey'))
-        || config('nusoa.sso.strategy') === 'forgerock-direct';
-    $entraConfigured = filled(config('services.northwestern-azure.client_id'))
-        && filled(config('services.northwestern-azure.client_secret'));
+    // Only the provider people sign in with has routes.
+    $provider = SsoProvider::configured();
 
-    if ($entraConfigured) {
+    if ($provider === SsoProvider::EntraId) {
         Route::prefix('azure-ad')->group(function () {
             Route::get('redirect', [Controllers\WebSSOController::class, 'oauthRedirect'])->name('login-oauth-redirect');
             Route::post('callback', [Controllers\WebSSOController::class, 'oauthCallback'])->name('login-oauth-callback')
@@ -40,7 +24,7 @@ Route::prefix('auth')->group(function () {
         });
     }
 
-    if ($webssoConfigured) {
+    if ($provider === SsoProvider::OnlinePassport) {
         Route::prefix('websso')->group(function () {
             Route::get('login', [Controllers\WebSSOController::class, 'login'])->name('login-websso');
             Route::get('logout', [Controllers\WebSSOController::class, 'logout'])->name('login-websso-logout');
@@ -48,7 +32,11 @@ Route::prefix('auth')->group(function () {
     }
 });
 
+Route::post('oauth/switch-account', SwitchOAuthAccountController::class)->middleware('auth')->name('oauth.switch-account');
+
 Route::post('/impersonate/take/{id}/{guardName?}', [Controllers\ImpersonationController::class, 'take'])->middleware('throttle:auth:impersonate')->name('impersonate');
 Route::post('/impersonate/leave', [Controllers\ImpersonationController::class, 'leave'])->middleware('throttle:auth:impersonate')->name('impersonate.leave');
 
-Route::sentryTunnel(withoutMiddleware: [PreventRequestForgery::class]);
+Route::post('sentry/tunnel', SentryTunnelController::class)
+    ->withoutMiddleware([PreventRequestForgery::class])
+    ->name('sentry.tunnel');

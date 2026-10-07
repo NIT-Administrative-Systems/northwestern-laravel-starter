@@ -15,6 +15,10 @@ Database snapshots allow you to save the current state of your database and quic
 Database snapshots are intended for development and testing environments only. For production backups, use proper database backup solutions.
 :::
 
+## Requirements
+
+The commands shell out to PostgreSQL's `pg_dump` and `psql`. With Laravel Herd on macOS or Windows, they find Herd's PostgreSQL on their own. Otherwise put them on your `PATH`, or set `PG_BIN_DIRECTORY` to the directory that contains them. `db:snapshot:create`, `db:snapshot:restore` and `db:snapshot:delete` refuse to run in production.
+
 ## Creating Snapshots
 
 ### Basic Snapshot Creation
@@ -49,6 +53,8 @@ View all available snapshots:
 ```bash
 php artisan db:snapshot:list
 ```
+
+After the table, it asks whether to restore one of the listed snapshots. A restore started from this prompt skips schema validation.
 
 ## Restoring Snapshots
 

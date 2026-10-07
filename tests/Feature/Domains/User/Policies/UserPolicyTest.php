@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\User\Policies;
 
-use App\Domains\Auth\Enums\SystemPermission;
+use App\Domains\Access\Enums\SystemPermission;
 use App\Domains\User\Models\User;
 use App\Domains\User\Policies\UserPolicy;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -81,5 +81,17 @@ final class UserPolicyTest extends TestCase
     protected function policy(): UserPolicy
     {
         return resolve(UserPolicy::class);
+    }
+
+    // An API user exists only to own service clients, so managing API access is enough to see one.
+    public function test_someone_who_manages_api_access_sees_api_users_but_not_people(): void
+    {
+        $administrator = User::factory()->affiliate()->create();
+        $administrator->givePermissionTo(SystemPermission::ManageApiAccess);
+        $policy = resolve(UserPolicy::class);
+
+        $this->assertTrue($policy->viewAny($administrator));
+        $this->assertTrue($policy->view($administrator, User::factory()->api()->create()));
+        $this->assertFalse($policy->view($administrator, User::factory()->create()));
     }
 }

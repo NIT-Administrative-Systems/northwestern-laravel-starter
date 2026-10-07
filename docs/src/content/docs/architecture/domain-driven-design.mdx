@@ -16,17 +16,31 @@ import { FileTree } from '@astrojs/starlight/components';
     - Console
         - Commands/
     - Domains
-        - Auth
-            - Actions/
+        - Access
             - Enums/
             - Http/
             - Models/
             - Policies/
             - Seeders/
+        - Api
+            - Actions/
+            - Enums/
+            - Http/
+            - Models/
+            - Passport/
+            - ...
+        - Auth
+            - Actions/
+            - Enums/
+            - Http/
+            - Models/
             - ...
         - Core
             - Casts/
+            - Data/
             - Enums/
+            - Exceptions/
+            - Health/
             - Models/
             - Services/
             - ...
@@ -46,12 +60,21 @@ import { FileTree } from '@astrojs/starlight/components';
             - QueryBuilders/
             - ...
     - Filament
-        - Resources/
-        - ...
+        - Administration/ the administration panel
+            - Clusters/
+            - Pages/
+            - Resources/
+            - ...
+        - App/ the app panel
+            - Pages/
+            - Starter/Pages/
+            - ...
+        - Support/ helpers both panels use
     - Http/
         - Controllers/
+        - Livewire/
         - Middleware/
-        - Requests/
+    - Mcp/ the MCP server and its tools
     - Providers/
     - View/
         - Components/
@@ -67,10 +90,15 @@ The **Core** domain contains foundational functionality that applies across the 
 
 **Responsibilities:**
 
-- Base models and concerns
-- Core enums (External Services, API Request Failures)
-- Core services (DateTime formatting, Configuration validation)
-- Shared utilities and helpers
+- `BaseModel`, which models extend. Model concerns shared with other applications, such as `PrunesAfterRetentionPeriod` for records that expire and `RecordsCustomAudits` for audit events a model's own changes don't capture (which the starter's `RecordsAuditEvents` builds on), come from [Chassis](/reference/chassis/)
+- The typed preferences base class (`Data/Preferences`), which `UserPreferences` extends
+- The audit log: the `Audit` model, the `AuditEvent` enum that names every event, and `RecordsAuditEvents` for recording one
+- Filament's table `Export` model, which prunes exports and their files after `platform.retention.exports` days
+- The `ExternalService` enum
+- Configuration validators (`Services/ConfigValidation/`)
+- Shared exceptions (`NoRollbackException`, `ServiceDownError`, `SentryExceptionHandler`)
+- Custom health checks (`Health/`)
+- Shared casts (`MarkdownWithJiraLinksCast`)
 
 **When to add code to Core:**
 
@@ -82,19 +110,41 @@ The **Core** domain contains foundational functionality that applies across the 
 
 ### Auth Domain
 
-The **Auth** domain handles everything related to authentication and authorization:
+The **Auth** domain handles who someone is: signing in and out.
 
 **Location:** `app/Domains/Auth/`
 
 **Responsibilities:**
 
-- Authentication (WebSSO, Access Tokens, local login challenges)
-- Authorization (roles, permissions, scopes)
-- Access token management and expiration
-- Login code generation and validation
-- Impersonation functionality
-- API request logging
-- Role and permission seeding
+- The sign-in methods and the step every sign-in ends with (`SignIn`), and single sign-on through Online Passport or Entra ID
+- Email login codes (`LoginCodes`)
+- Sign-in-as for seeded users in the `local` environment
+- Impersonation and its log
+
+### Access Domain
+
+The **Access** domain handles what someone may do: roles and permissions.
+
+**Location:** `app/Domains/Access/`
+
+**Responsibilities:**
+
+- `SystemPermission`, the single source of truth for permissions, and the system roles
+- Roles, role types and permissions, and their seeding
+- Recording changes to roles and permissions (`AuditsRoles`, `AuditsPermissions`), and finding which role grants a permission (`TracksPermissionSources`)
+
+### Api Domain
+
+The **Api** domain handles the credentials that call the application:
+
+**Location:** `app/Domains/Api/`
+
+**Responsibilities:**
+
+- Who may see, issue, change, revoke or use each credential (`CredentialAccess`), and every OAuth scope (`ApiScopes`)
+- Service clients, personal access tokens, OAuth applications and the connections people make to them
+- The OAuth consent screen
+- The API's middleware: authenticating tokens, scopes, rate limits and request logging
 
 ### User Domain
 
@@ -107,9 +157,21 @@ The **User** domain handles everything related to user data and management:
 - User management and profile data
 - User segmentation and affiliation
 - Directory integration (searching, syncing)
-- Audit logging of user actions
 - User login tracking
 - Wildcard photo management
+
+### Support Domain
+
+The **Support** domain handles the changelog, support tickets and announcements:
+
+**Location:** `app/Domains/Support/`
+
+**Responsibilities:**
+
+- [Changelog](/features/changelog/) entries, synced from `resources/changelogs/` by `ChangelogSeeder`
+- [Support tickets](/features/support-tickets/) submitted from the Contact Support page
+- Ticket gateways (TeamDynamix and mail), with a fallback to mail when the primary gateway fails
+- [Announcements](/features/announcements/): publishing, audiences, dismissals and notifications
 
 ## Component Types
 
@@ -121,10 +183,11 @@ The **User** domain handles everything related to user data and management:
 
 **Characteristics:**
 
-- Single method (usually `__invoke()` or `handle()`)
+- Single method, `__invoke()`, usually on a `readonly` class
 - Focused on one specific operation
 - Testable in isolation
-- Can be injected into controllers or called from other actions
+- Resolved from the container: injected into controllers, other actions and Filament action closures, or called with `resolve(SomeAction::class)(...)`
+- The rules belong inside: an action that issues, changes or revokes a credential takes the person acting, asks `App\Domains\Api\CredentialAccess` whether they may, and records its audit event when someone else's credential changes, so every caller gets the same behavior (`CreatePersonalAccessToken`, `DisconnectApplication`, `RegisterOAuthApplication`). Only seeders and scheduled sweeps pass no one
 
 **Example:**
 
@@ -195,7 +258,7 @@ For enums that will be represented in the Filament UI, consider implementing [av
 
 **Characteristics:**
 
-- Extend `BaseModel`
+- Extend `BaseModel`, except where a package needs to own the parent class: `User` extends `Authenticatable`, `Role` and `Permission` extend Spatie's, and `OAuthClient` and `OAuthToken` extend Passport's. `ApiRequestLog` extends Eloquent's `Model` directly, so the request log isn't audited.
 - Include relationships, scopes, and accessors
 
 **Base Model:**

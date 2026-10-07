@@ -7,18 +7,17 @@
 
             <div class="space-y-2">
                 <p class="font-semibold tracking-tight">
-                    Read-only submission log
+                    Read-Only Submission Log
                 </p>
 
                 <p class="leading-relaxed">
-                    This page provides a record of support tickets submitted through the contact form. It is not a
-                    ticket management system. Tickets are managed in the configured external system (e.g., TeamDynamix)
-                    or through the support team's email inbox.
+                    This page records requests sent through Contact Support. It isn't where tickets are managed: that's
+                    the ticketing system (such as TeamDynamix) or the support team's mailbox.
                 </p>
 
                 <p class="leading-relaxed text-blue-700 dark:text-blue-300/90">
-                    Use this log to verify whether submissions were delivered successfully, identify any delivery
-                    failures, and confirm that fallback emails were sent when a primary gateway error occurred.
+                    Use it to check that each request was delivered, find the ones that failed, and confirm that a
+                    fallback email went out when the ticketing system didn't respond.
                 </p>
             </div>
         </div>

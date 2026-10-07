@@ -1,5 +1,6 @@
 // @ts-check
 import { defineNorthwesternConfig } from '@nu-appdev/northwestern-starlight-theme/config';
+import starlightAgentDocs from '@nu-appdev/starlight-agent-docs';
 import starlightLinksValidator from 'starlight-links-validator';
 import starlightOpenAPI, { openAPISidebarGroups } from 'starlight-openapi';
 
@@ -24,6 +25,10 @@ export default defineNorthwesternConfig({
 			{
 				label: 'Getting Started',
 				items: [{ autogenerate: { directory: 'getting-started' } }],
+			},
+			{
+				label: 'Building Your Application',
+				items: [{ autogenerate: { directory: 'building' } }],
 			},
 			{
 				label: 'Architecture',
@@ -63,6 +68,12 @@ export default defineNorthwesternConfig({
 		]),
 		starlightLinksValidator({
 			exclude: ['/api/**'],
+		}),
+		// A Markdown copy of every page, and /llms.txt, for coding agents. Registered last, after
+		// anything that overrides EditLink, so its "View as Markdown" link is kept.
+		starlightAgentDocs({
+			guidance:
+				'Start with Getting Started to create an application, then Building Your Application for where code goes. Features and Northwestern Integrations explain what the starter ships and how to configure it. An application built from the starter also has an AGENTS.md in its repository root with the rules for working in it.',
 		}),
 	],
 });

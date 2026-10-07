@@ -4,21 +4,25 @@ declare(strict_types=1);
 
 namespace App\Domains\User\Models;
 
+use App\Domains\Access\Enums\SystemPermission;
+use App\Domains\Access\Enums\SystemRole;
+use App\Domains\Access\Models\Concerns\AuditsRoles;
+use App\Domains\Access\Models\Concerns\TracksPermissionSources;
+use App\Domains\Access\Models\Role;
+use App\Domains\Api\Actions\RevokeAllCredentials;
+use App\Domains\Api\Models\ApiRequestLog;
+use App\Domains\Api\Models\OAuthConnection;
 use App\Domains\Auth\Enums\AuthType;
-use App\Domains\Auth\Enums\SystemPermission;
-use App\Domains\Auth\Enums\SystemRole;
-use App\Domains\Auth\Models\AccessToken;
-use App\Domains\Auth\Models\ApiRequestLog;
+use App\Domains\Auth\Models\Concerns\HandlesImpersonation;
 use App\Domains\Auth\Models\LoginChallenge;
-use App\Domains\Auth\Models\Role;
+use App\Domains\Core\Models\Concerns\RecordsAuditEvents;
 use App\Domains\Support\Models\SupportTicket;
+use App\Domains\User\Data\UserPreferences;
 use App\Domains\User\Enums\Affiliation;
-use App\Domains\User\Models\Concerns\AuditsRoles;
-use App\Domains\User\Models\Concerns\HandlesImpersonation;
-use App\Domains\User\Models\Concerns\TracksPermissionSources;
 use App\Domains\User\QueryBuilders\UserBuilder;
 use App\Http\Middleware\EnvironmentLockdown;
 use App\Providers\Filament\AdministrationPanelProvider;
+use App\Providers\Filament\AppPanelProvider;
 use Database\Factories\Domains\User\Models\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
@@ -34,6 +38,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Passport\Contracts\OAuthenticatable;
+use Laravel\Passport\HasApiTokens;
 use Northwestern\SysDev\Chassis\Models\Concerns\Auditable as AuditableConcern;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\Permission\Traits\HasRoles;
@@ -46,21 +52,28 @@ use Spatie\Permission\Traits\HasRoles;
  *                                    their student ID and employee ID, the student ID will be stored here.
  * @property list<string> $departments
  * @property list<string> $job_titles
+ * @property UserPreferences $preferences
  *
  * @method BelongsToMany<Role, $this> roles()
  *
  * @property Collection<int, Role> $roles
  */
-class User extends Authenticatable implements Auditable, FilamentUser, HasAvatar, HasName
+class User extends Authenticatable implements Auditable, FilamentUser, HasAvatar, HasName, OAuthenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use AuditableConcern, HandlesImpersonation, HasFactory, Notifiable, SoftDeletes, TracksPermissionSources;
+    use AuditableConcern, HandlesImpersonation, HasApiTokens, HasFactory, Notifiable, RecordsAuditEvents, SoftDeletes, TracksPermissionSources;
 
     use AuditsRoles, HasRoles {
         HasRoles::assignRole as private;
         HasRoles::removeRole as private;
         HasRoles::syncRoles as private;
     }
+
+    /**
+     * Roles and permissions belong to the `web` guard. Without this, Spatie checks them against
+     * the `api` guard on API requests, where Passport's guard is the default, and finds none.
+     */
+    protected string $guard_name = 'web';
 
     /** @var list<string> */
     protected array $auditExclude = [
@@ -82,7 +95,14 @@ class User extends Authenticatable implements Auditable, FilamentUser, HasAvatar
         'wildcard_photo_last_synced_at' => 'datetime',
         'last_directory_sync_at' => 'datetime',
         'directory_sync_last_failed_at' => 'datetime',
+        'preferences' => UserPreferences::class,
     ];
+
+    protected static function booted(): void
+    {
+        // A deleted account can't call the API; its tokens and clients are revoked with it.
+        static::deleted(static fn (User $user) => resolve(RevokeAllCredentials::class)($user));
+    }
 
     /**
      * @param  Builder  $query
@@ -121,25 +141,17 @@ class User extends Authenticatable implements Auditable, FilamentUser, HasAvatar
     }
 
     /**
-     * @return HasMany<AccessToken, $this>
-     */
-    public function access_tokens(): HasMany
-    {
-        return $this->hasMany(AccessToken::class);
-    }
-
-    /** @return HasMany<AccessToken, $this> */
-    public function active_access_tokens(): HasMany
-    {
-        return $this->access_tokens()->active();
-    }
-
-    /**
      * @return HasMany<ApiRequestLog, $this>
      */
     public function api_request_logs(): HasMany
     {
         return $this->hasMany(ApiRequestLog::class);
+    }
+
+    /** @return HasMany<OAuthConnection, $this> */
+    public function oauth_connections(): HasMany
+    {
+        return $this->hasMany(OAuthConnection::class);
     }
 
     /** @return HasMany<SupportTicket, $this> */
@@ -230,6 +242,15 @@ class User extends Authenticatable implements Auditable, FilamentUser, HasAvatar
         return $this->full_name;
     }
 
+    /**
+     * The user provider Passport issues this model's tokens for. Passport can only infer it for
+     * the `eloquent` driver, and the `users` provider uses `eager-load-eloquent`.
+     */
+    public function getProviderName(): string
+    {
+        return 'users';
+    }
+
     public function canAccessPanel(Panel $panel): bool
     {
         /**
@@ -239,6 +260,8 @@ class User extends Authenticatable implements Auditable, FilamentUser, HasAvatar
          * @phpstan-ignore match.unhandled
          */
         return match ($panel->getId()) {
+            // API users authenticate with bearer tokens only and never have a panel session.
+            AppPanelProvider::ID => ! $this->is_api_user,
             AdministrationPanelProvider::ID => $this->can(SystemPermission::AccessAdministrationPanel),
         };
     }

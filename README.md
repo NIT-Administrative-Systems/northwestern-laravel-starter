@@ -1,55 +1,56 @@
 <p align="center">
-    <img width="650px" src="art/readme-lockup.png" alt="Logo lockup for the Northwestern Laravel Starter"/>
+    <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="art/lockup-dark.svg">
+        <img width="520" src="art/lockup-light.svg" alt="Northwestern Laravel Starter">
+    </picture>
 </p>
 
 <p align="center">
     <img src="https://img.shields.io/badge/PHP-8.5-blue" alt="PHP Version">
     <img src="https://img.shields.io/badge/Laravel-13.x-red" alt="Laravel Version">
+    <img src="https://img.shields.io/badge/Filament-5.x-orange" alt="Filament Version">
     <a href="https://coveralls.io/github/NIT-Administrative-Systems/northwestern-laravel-starter?branch=main"><img src="https://coveralls.io/repos/github/NIT-Administrative-Systems/northwestern-laravel-starter/badge.svg?branch=main" alt="Coverage Status"></a>
 </p>
 
-<hr/>
+<p align="center">
+    A Laravel starter kit for <a href="https://www.northwestern.edu">Northwestern University</a> applications, with Northwestern sign-in, roles and permissions, auditing, an OAuth-secured API and the University's branding built in.
+</p>
 
-<div align="center">
-  <p>An enterprise-focused Laravel starter kit for <a href="https://www.northwestern.edu" target="_blank">Northwestern University</a> projects. This opinionated project provides what you need to build secure, maintainable web applications or API-driven services.</p>
+<p align="center">
+    <a href="https://laravel-starter.entapp.northwestern.edu"><strong>Documentation</strong></a>
+    &nbsp;·&nbsp;
+    <a href="https://laravel-starter.entapp.northwestern.edu/getting-started/installation/">Installation</a>
+    &nbsp;·&nbsp;
+    <a href="CHANGELOG.md">Changelog</a>
+</p>
 
-  <table>
+<table>
     <tr>
-      <td align="center">
-        <a href="art/ui-preview-1.png" target="_blank">
-          <img src="art/ui-preview-1.png" width="500" alt="Authentication screen and homepage UI" />
-        </a>
-      </td>
-      <td align="center">
-        <a href="art/ui-preview-2.png" target="_blank">
-          <img src="art/ui-preview-2.png" width="500" alt="User profile and table UI" />
-        </a>
-      </td>
+        <td align="center">
+            <a href="art/ui-preview-1.png"><img src="art/ui-preview-1.png" width="500" alt="The public landing page, and the sign-in page on a phone"></a>
+        </td>
+        <td align="center">
+            <a href="art/ui-preview-2.png"><img src="art/ui-preview-2.png" width="500" alt="The component gallery, and the app panel with its notifications open"></a>
+        </td>
     </tr>
     <tr>
-      <td align="center">
-        <a href="art/ui-preview-3.png" target="_blank">
-          <img src="art/ui-preview-3.png" width="500" alt="API user profile, role creation form, and audit log UI" />
-        </a>
-      </td>
-      <td align="center">
-        <a href="art/ui-preview-4.png" target="_blank">
-          <img src="art/ui-preview-4.png" width="500" alt="API Request Log and Login Records dashboard UI" />
-        </a>
-      </td>
+        <td align="center">
+            <a href="art/ui-preview-3.png"><img src="art/ui-preview-3.png" width="500" alt="The users list, and an audit record of a role assignment"></a>
+        </td>
+        <td align="center">
+            <a href="art/ui-preview-4.png"><img src="art/ui-preview-4.png" width="500" alt="Sign-in records, and API request analytics"></a>
+        </td>
     </tr>
-  </table>
-</div>
+</table>
 
 ## Overview
 
-Modern web development extends beyond routes, controllers, and views. Before any business logic can take shape, teams must establish authentication flows, authorization layers, API conventions, auditing, CI/CD pipelines, frontend patterns, monitoring, and a maintainable project structure. These concerns take time and lead to duplicated effort across projects.
+Every application needs the same groundwork before it can do anything of its own: sign-in, permissions, auditing, an API, CI, monitoring, and a structure that holds up as it grows. Rebuilding it for each project takes time away from the work that matters, and every team ends up with a slightly different version.
 
-The **Northwestern Laravel Starter** handles this baseline work up front with a production-ready architecture, so teams can start building features instead of infrastructure.
+The starter builds it once, tested and documented, so your team starts with the work that's specific to your application.
 
 > [!IMPORTANT]
->
-> This starter kit is designed primarily for applications built within [Northwestern University](https://www.northwestern.edu)’s ecosystem. If you're outside Northwestern, you may not be able to use the project as-is. The architecture and patterns may still be useful as reference material. Contributions from the community are welcome.
+> The starter is built for applications inside [Northwestern University](https://www.northwestern.edu)'s environment: its sign-in and integrations rely on University services. Outside Northwestern, you can still borrow its architecture and patterns.
 
 ## Getting Started
 
@@ -58,67 +59,45 @@ composer create-project northwestern-sysdev/northwestern-laravel-starter your-pr
 cd your-project-name
 ```
 
-Visit the [documentation](https://laravel-starter.entapp.northwestern.edu) for complete installation, configuration, and
-usage guides.
+Then follow the [installation guide](https://laravel-starter.entapp.northwestern.edu/getting-started/installation/) to configure your environment and run the application. The [documentation](https://laravel-starter.entapp.northwestern.edu) covers everything below in full.
 
-## Features
-
-### Architectural Foundation
-
-- **Domain-Driven Design**: Code is grouped by business concerns for modularity and maintainability.
-- **Action-Based Business Logic**: Single-responsibility action classes encapsulate discrete operations for reusability
-  and testability.
-- **Flexible Configuration**: Fine-grained settings for authentication methods, API features, Northwestern integrations,
-  and application behavior.
-
-### Authentication & Authorization
-
-- **Multi-Authentication Methods**: Support for Entra ID SSO, Access Tokens, and passwordless email-based verification codes.
-- **Role-Based Access Control**: Fine-grained role and permissions system with a built-in management interface.
-- **User Impersonation**: Secure ability to troubleshoot user-specific issues and simulate user experiences.
-
-### API Features
-
-- **Advanced Access Token Management**: Cryptographically secure tokens with CIDR-based IP restrictions, rotation,
-  time-bound validity, and automatic expiration notifications.
-- **API Request Logging & Analytics**: Request tracking with performance metrics, failure analysis, and
-  probabilistic sampling.
-- **Request Tracing**: Automatic trace ID propagation for correlation across logs, audits, and error reports.
-- **Standardized Error Responses**: [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457.html) compliant machine-readable
-  error response formats.
-
-### Auditing & Compliance
-
-- **Full Audit Trail**: Logs all model changes and user actions with before/after history.
-- **Secure Data Handling**: Sensitive information is hashed or encrypted to limit data exposure risk.
+## What's Included
 
 ### Northwestern Integrations
 
-- **Northwestern Directory**: Just-in-time user provisioning, automatic data synchronization, and monitoring via the
-  Northwestern Directory service.
-- **EventHub**: Publish events and register webhooks with the EventHub system.
+- **[Single sign-on](https://laravel-starter.entapp.northwestern.edu/northwestern-integrations/websso/)**: NetID sign-in through Online Passport (WebSSO) or Entra ID.
+- **[Directory Search](https://laravel-starter.entapp.northwestern.edu/northwestern-integrations/directory-search/)**: Accounts created on first sign-in and kept in sync with the Northwestern Directory.
+- **[Wildcard photos](https://laravel-starter.entapp.northwestern.edu/northwestern-integrations/wildcard-photos/)**: People's ID photos, cached.
+- **[EventHub](https://laravel-starter.entapp.northwestern.edu/northwestern-integrations/eventhub/)**: Publish events, and receive them through webhooks.
 
-### Frontend & UX
+### Access and Accountability
 
-- **Modular Filament UI**: Ready-to-use administration panel with pre-built tables, forms, and dashboards for managing
-  application data.
-- **Brand Compliance**: Pre-built components, layouts, and styling that adhere to the University's branding guidelines.
-- **Responsive Design**: Consistent user experience across devices with various screen sizes.
-- **WCAG 2.1 Accessibility**: Built with accessibility best practices.
+- **[Sign-in](https://laravel-starter.entapp.northwestern.edu/features/authentication/)**: Single sign-on, emailed codes for partners without a NetID, and impersonation for troubleshooting.
+- **[Roles and permissions](https://laravel-starter.entapp.northwestern.edu/features/authorization/)**: Managed in the administration panel, with a history of every change.
+- **[Audit trail](https://laravel-starter.entapp.northwestern.edu/features/audit-logging/)**: Changes to your models, and every role, permission and credential event, with the values before and after.
+- **[Data retention](https://laravel-starter.entapp.northwestern.edu/getting-started/initial-customization/#7-data-retention)**: A retention period for each kind of record, with older records pruned daily.
+
+### API and AI Clients
+
+- **[OAuth credentials](https://laravel-starter.entapp.northwestern.edu/features/api/)**: Service clients for integrations, personal access tokens, and applications people connect through a consent screen, all on Laravel Passport.
+- **[MCP server](https://laravel-starter.entapp.northwestern.edu/features/mcp/)**: AI clients such as Claude and VS Code use your application's tools as the person who connected them.
+- **[Operations](https://laravel-starter.entapp.northwestern.edu/features/api-operations/)**: Request logs and analytics, trace IDs across logs, audits and errors, and [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457.html) error responses.
+
+### Interface
+
+- **[Two Filament panels](https://laravel-starter.entapp.northwestern.edu/architecture/ui-architecture/)**: An app panel for your application's features, and an administration panel for users, roles, credentials, audits and analytics.
+- **[Public pages](https://laravel-starter.entapp.northwestern.edu/building/public-pages/)**: A landing page, a public changelog, and branded error pages.
+- **[Announcements](https://laravel-starter.entapp.northwestern.edu/features/announcements/)** and **[Contact Support](https://laravel-starter.entapp.northwestern.edu/features/support-tickets/)**: Tell people what's changing, and take their requests as TeamDynamix tickets or email.
+- **[Northwestern branding](https://laravel-starter.entapp.northwestern.edu/building/branding-and-mail/)**: Themed to the University's guidelines, with the unit footer the Web Style Guide requires.
+- **[Accessibility](https://laravel-starter.entapp.northwestern.edu/guides/testing/)**: Every page the starter ships is checked with axe, in light and dark mode.
 
 ### Developer Experience
 
-- **Local Development**: Schema-validated database snapshots, configuration validation, and database rebuild
-  utilities.
-- **Testing**: Parallelized PHPUnit execution and end-to-end testing
-  with [Cypress](https://www.cypress.io).
-- **CI/CD Ready**: Pre-configured GitHub Actions workflows for static analysis, formatting, and automated testing.
-
-### Monitoring & Operations
-
-- **Health Checks & Monitoring**: Built-in health checks to monitor critical system components.
-- **Analytics Dashboards**: Pre-built dashboards for API request metrics and login activity.
+- **[Domain-driven structure](https://laravel-starter.entapp.northwestern.edu/architecture/domain-driven-design/)**: Code grouped by business domain, with single-purpose action classes.
+- **[Local development](https://laravel-starter.entapp.northwestern.edu/guides/development-workflow/)**: One-click sign-in as seeded users, database snapshots and rebuilds, and configuration validation.
+- **[Testing and CI](https://laravel-starter.entapp.northwestern.edu/guides/testing/)**: Parallel [Pest](https://pestphp.com) tests, browser tests through [Playwright](https://playwright.dev), and GitHub Actions for analysis, formatting and tests.
+- **[Monitoring](https://laravel-starter.entapp.northwestern.edu/features/health-checks/)**: Health checks, [Sentry](https://laravel-starter.entapp.northwestern.edu/features/sentry/) error reporting, and Laravel Telescope.
 
 ## Acknowledgements
 
-Numerous open-source packages power this starter kit. Special thanks to the Laravel community and [Northwestern University IT](https://www.it.northwestern.edu).
+Built on [Laravel](https://laravel.com), [Filament](https://filamentphp.com) and many other open-source packages. Thanks to the Laravel community and [Northwestern University IT](https://www.it.northwestern.edu).

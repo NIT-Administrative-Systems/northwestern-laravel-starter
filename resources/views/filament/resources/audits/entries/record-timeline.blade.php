@@ -1,7 +1,7 @@
 @php
-    use App\Domains\User\Models\Audit;
-    use App\Filament\Resources\Audits\AuditResource;
-    use Illuminate\Support\Str;
+    use App\Domains\Core\Enums\AuditEvent;
+    use App\Domains\Core\Models\Audit;
+    use App\Filament\Administration\Resources\Audits\AuditResource;
 
     $record = $getRecord();
 
@@ -27,12 +27,7 @@
     @forelse ($audits as $audit)
         @php
             $isCurrent = $audit->id === $record->id;
-            $eventColor = match ($audit->event) {
-                'created', 'restored', 'role_assigned' => 'success',
-                'deleted', 'role_removed' => 'danger',
-                'updated', 'permissions_modified' => 'warning',
-                default => 'gray',
-            };
+            $eventColor = AuditEvent::colorFor($audit->event);
         @endphp
 
         <div class="{{ !$loop->last ? 'pb-5' : '' }} relative flex gap-x-3">
@@ -55,7 +50,7 @@
                 @if ($isCurrent)
                     <div class="flex items-center gap-2">
                         <span class="text-sm font-semibold text-gray-950 dark:text-white">
-                            {{ Str::of($audit->event)->replace('_', ' ')->title() }}
+                            {{ AuditEvent::labelFor($audit->event) }}
                         </span>
                         <span
                               class="bg-primary-50 text-primary-600 dark:bg-primary-400/10 dark:text-primary-400 inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium">
@@ -65,7 +60,7 @@
                 @else
                     <a class="hover:text-primary-600 dark:hover:text-primary-400 text-sm font-medium text-gray-600 transition-colors dark:text-gray-400"
                        href="{{ AuditResource::getUrl('view', ['record' => $audit]) }}">
-                        {{ Str::of($audit->event)->replace('_', ' ')->title() }}
+                        {{ AuditEvent::labelFor($audit->event) }}
                     </a>
                 @endif
 

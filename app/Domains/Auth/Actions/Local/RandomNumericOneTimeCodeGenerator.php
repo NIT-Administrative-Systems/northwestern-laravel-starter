@@ -10,7 +10,7 @@ use InvalidArgumentException;
 /**
  * Generates a random, numeric, fixed-length one-time verification code for local sign-in challenges.
  *
- * @see IssueLoginChallenge
+ * @see \App\Domains\Auth\LoginCodes
  */
 final class RandomNumericOneTimeCodeGenerator implements OneTimeCodeGenerator
 {

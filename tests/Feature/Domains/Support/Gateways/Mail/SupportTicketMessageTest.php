@@ -55,4 +55,20 @@ final class SupportTicketMessageTest extends TestCase
 
         $this->assertTrue($mailable->viewData['fallbackMode']);
     }
+
+    // People type plain text: neither HTML nor Markdown in it should render in the team's email.
+    public function test_details_render_as_the_text_that_was_typed(): void
+    {
+        $ticket = SupportTicket::factory()->for(User::factory()->create())->pending()->create([
+            'subject' => 'Help',
+            'details' => "<a href=\"https://phish.example.com\">Open your ticket</a>\n[Sign in](https://phish.example.com) <img src=\"https://track.example.com/p.gif\">",
+        ]);
+
+        $html = new SupportTicketMessage($ticket, 'SUP-404', false)->render();
+
+        $this->assertStringNotContainsString('<a href="https://phish.example.com', $html);
+        $this->assertStringNotContainsString('<img src="https://track.example.com', $html);
+        $this->assertStringContainsString('&lt;a href=', $html);
+        $this->assertStringContainsString('[Sign in](https://phish.example.com)', $html);
+    }
 }

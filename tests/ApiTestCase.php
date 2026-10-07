@@ -4,16 +4,22 @@ declare(strict_types=1);
 
 namespace Tests;
 
-use App\Domains\Auth\Models\AccessToken;
+use App\Domains\Api\Models\OAuthClient;
 use App\Domains\User\Models\User;
 use Illuminate\Http\Response;
 use Illuminate\Testing\TestResponse;
+use Tests\Concerns\IssuesServiceClientTokens;
 
 abstract class ApiTestCase extends TestCase
 {
-    protected string $rawAccessToken = 'password';
+    use IssuesServiceClientTokens;
+
+    /** A client credentials access token for {@see self::$apiUser}, obtained from `/oauth/token`. */
+    protected string $accessToken;
 
     protected User $apiUser;
+
+    protected OAuthClient $serviceClient;
 
     protected function setUp(): void
     {
@@ -25,16 +31,14 @@ abstract class ApiTestCase extends TestCase
 
         $this->apiUser = User::factory()
             ->api()
-            ->has(AccessToken::factory()->state([
-                'token_hash' => AccessToken::hashFromPlain($this->rawAccessToken),
-                'expires_at' => null,
-            ]), 'access_tokens')
             ->state([
                 'username' => 'api-adoes-test',
                 'first_name' => 'ADOES',
                 'last_name' => 'API',
             ])
             ->createOne();
+
+        [$this->accessToken, $this->serviceClient] = $this->serviceClientToken($this->apiUser);
     }
 
     /**
@@ -54,7 +58,7 @@ abstract class ApiTestCase extends TestCase
     /** @return array<string, string> */
     protected function bearerAuthenticationHeader(): array
     {
-        return ['Authorization' => 'Bearer ' . $this->rawAccessToken];
+        return ['Authorization' => 'Bearer ' . $this->accessToken];
     }
 
     /**

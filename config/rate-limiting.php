@@ -9,14 +9,18 @@ return [
     | API Rate Limiting
     |--------------------------------------------------------------------------
     |
-    | Controls the global rate limit applied to all API routes via the
-    | throttleApi() middleware in bootstrap/app.php. This is keyed by
-    | the authenticated user ID, or by IP for unauthenticated requests.
+    | Two limits apply. `per_ip_per_minute` runs before authentication on every
+    | API route (throttleApi() in bootstrap/app.php) and on Passport's OAuth
+    | endpoints. `per_minute` runs after the token is authenticated, keyed by
+    | the client for client credentials and by the user for every other token.
     |
     */
 
     'api' => [
+        // Per client (client credentials) or per user (every other token), after authentication.
         'per_minute' => (int) env('RATE_LIMIT_API_PER_MINUTE', 1800),
+        // Per IP address, before authentication, for API and OAuth endpoints alike.
+        'per_ip_per_minute' => (int) env('RATE_LIMIT_API_PER_IP_PER_MINUTE', 3600),
     ],
 
     /*

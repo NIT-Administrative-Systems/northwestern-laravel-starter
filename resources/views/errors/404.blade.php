@@ -1,3 +1,3 @@
-<x-error-layout title="Not Found">
-    Sorry, but we can't find the page you're looking for.
+<x-error-layout title="Page Not Found">
+    We can't find that page. Check the address and try again.
 </x-error-layout>

@@ -99,7 +99,10 @@ class SyncUserFromDirectory
         $user->departments = $this->findAll($directoryData, $departmentKeys);
         $user->job_titles = $this->findAll($directoryData, $jobTitleKeys);
 
-        $user->timezone = config('platform.default_user_timezone');
+        // The directory has no timezone. New users get the default; after that it is the user's own preference.
+        if (! $user->exists) {
+            $user->timezone = config('platform.default_user_timezone');
+        }
 
         return $user;
     }

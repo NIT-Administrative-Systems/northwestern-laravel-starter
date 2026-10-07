@@ -1,3 +1,3 @@
-<x-error-layout title="Service Unavailable">
-    This service is temporarily unavailable. Please try again later.
+<x-error-layout title="Service Unavailable" :navigation="false">
+    This service isn't available right now. Try again later.
 </x-error-layout>

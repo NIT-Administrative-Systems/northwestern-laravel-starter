@@ -14,13 +14,11 @@ The feature is disabled by default and can be enabled with a single environment 
 
 ## Overview
 
-The system follows a layered architecture:
+`CreateSupportTicket` is the whole submission: give it the person and the form's fields, and it saves the ticket, sends it to the configured ticket system, records the result and falls back to email when needed. Behind it:
 
-- **Contract** - `TicketSystemGateway` interface decouples orchestration from gateway implementations
-- **Enum-driven resolution** - `TicketSystem::gatewayClass()` maps each driver to its concrete class
-- **Immutable value object** - `CreationResult` carries the outcome of each gateway call
-- **Repository** - Keeps persistence concerns out of the action
-- **Action** - `CreateSupportTicket` orchestrates the workflow in one place
+- **Contract** - the `TicketSystemGateway` interface, which each ticket system implements
+- **Driver** - `SUPPORT_DRIVER` names a `TicketSystem` case, and `SupportServiceProvider` binds that case's gateway (`TicketSystem::gatewayClass()`)
+- **Result** - each gateway returns an immutable `CreationResult` with the outcome
 
 ---
 
@@ -33,7 +31,7 @@ SUPPORT_DRIVER=mail
 SUPPORT_MAIL_TO=your-team@northwestern.edu
 ```
 
-When enabled, the contact form routes are registered and the submission log appears in the Filament admin panel. When disabled, no routes are registered and the feature is completely inert.
+When enabled, the **Contact Support** page appears in the Help menu and the submission log appears in the administration panel. When disabled, the Help menu hides the link, the page still has a route but returns 403 (`ContactSupport::canAccess()`), and no gateway is bound.
 
 ---
 
@@ -43,19 +41,19 @@ When enabled, the contact form routes are registered and the submission log appe
 
 1. **User visits the contact form**
 
-   Authenticated users access `/support/contact` and fill in a subject and details.
+   Signed-in users open **Contact Support** in the App panel (`/app/support/contact`) and fill in a subject and details.
 
 2. **Ticket is persisted**
 
-   The `SupportTicketRepository` saves the submission to the `support_tickets` table, recording the user's email at the time of submission for audit purposes.
+   `CreateSupportTicket` saves the submission to the `support_tickets` table, recording the user's email at the time of submission for audit purposes.
 
 3. **Primary gateway submits the ticket**
 
-   The `CreateSupportTicket` action dispatches the ticket to the configured gateway (Email or TeamDynamix). The gateway returns an immutable `CreationResult` indicating success or failure.
+   It sends the ticket to the configured gateway (Email or TeamDynamix). The gateway returns an immutable `CreationResult` indicating success or failure.
 
 4. **Result is recorded**
 
-   The repository updates the ticket with the gateway's response: ticket number, system type, and any error message.
+   It updates the ticket with the gateway's response: ticket number, system type, and any error message.
 
 5. **Fallback fires if needed**
 
@@ -63,10 +61,10 @@ When enabled, the contact form routes are registered and the submission log appe
 
 6. **User receives feedback**
 
-   The controller returns a contextual message:
-   - **Success** - includes the ticket reference number
-   - **Fallback sent** - confirms submission without exposing internal details
-   - **Both failed** - generic confirmation that the team will follow up
+   The `ContactSupport` page sends a Filament notification:
+   - **Success** - a success notification with the ticket reference number
+   - **Fallback sent** - a success notification that confirms submission without exposing internal details
+   - **Both failed** - a danger notification asking the user to try again later
 
 </Steps>
 
@@ -115,7 +113,7 @@ When the email gateway is used as a fallback after a primary gateway failure, th
 
 ### TeamDynamix Gateway
 
-The [TeamDynamix](https://services.northwestern.edu/TDNext) (TDX) gateway submits tickets to the TDX REST API using the [`northwestern-sysdev/tdx-php-sdk`](https://github.com/NIT-Administrative-Systems/tdx-php-sdk) package. The SDK handles authentication and token management, and covers a broad surface beyond ticket creation: people/group lookups, service catalog queries, and metadata management. Configuration is published to `config/team-dynamix.php`.
+The [TeamDynamix](https://services.northwestern.edu/TDNext) (TDX) gateway submits tickets to the TDX REST API using the [`northwestern-sysdev/tdx-php-sdk`](https://github.com/NIT-Administrative-Systems/tdx-php-sdk) package. The SDK handles authentication and token management, and covers a broad surface beyond ticket creation: people/group lookups, service catalog queries, and metadata management. The starter ships `config/team-dynamix.php`, which reads the connection settings below from the environment and replaces the SDK's own config, so there is nothing to publish.
 
 The gateway resolves metadata IDs (ticket type, form, status, priority, service) through the `TeamDynamixCacheRepository`, which caches name-to-ID lookups for one week to avoid repeated API round-trips:
 
@@ -124,7 +122,7 @@ The gateway resolves metadata IDs (ticket type, form, status, priority, service)
 SUPPORT_DRIVER=team-dynamix
 
 # TDX SDK credentials
-TDX_API_BASE_URL=https://solutions.teamdynamix.com/TDWebApi/
+TDX_API_BASE_URL=https://services.northwestern.edu/TDWebApi
 TDX_USERNAME=your-service-account
 TDX_PASSWORD=your-password
 TDX_TICKET_APP_NAME=your-app-name
@@ -154,13 +152,13 @@ The fallback only fires when:
 1. The primary gateway returned an error (`creationError: true`)
 2. The primary gateway is not the email driver itself (to avoid infinite loops)
 
-The `fallback_sent_at` timestamp on the ticket is only set when the fallback actually succeeds. If the fallback also fails (e.g. mail server is down), the timestamp remains `null`, giving administrators a clear signal that both delivery paths failed.
+The `fallback_sent_at` timestamp on the ticket is only set when the fallback succeeds. Both mailables are queued, so success means the fallback mail was queued, not delivered. If queueing fails (for example, the queue connection is down), the timestamp remains `null`, giving administrators a clear signal that neither path accepted the request.
 
 ---
 
 ## Filament Admin Panel
 
-The `SupportTicketResource` provides a **read-only** view of all submitted tickets in the Filament admin panel. It requires the `ViewSupportTickets` permission and is only visible when `SUPPORT_ENABLED=true`.
+The `SupportTicketResource` provides a **read-only** view of all submitted tickets in the administration panel, under the **Platform** navigation group. It requires the `ViewSupportTickets` permission and is only visible when `SUPPORT_ENABLED=true`.
 
 The resource displays a red badge on the navigation item showing the count of tickets where `post_error = true`, giving administrators immediate visibility into failed submissions.
 
@@ -170,7 +168,7 @@ Tickets are globally searchable by subject, ticket number, requester email, and 
 
 ## Contact Form
 
-The contact form is available at `/support/contact` for authenticated users. It collects a subject and details.
+The contact form is the **Contact Support** page in the app panel (`/app/support/contact`), reached from the Help menu in the header, available to signed-in users when `SUPPORT_ENABLED=true`. It collects a subject and details, and reports the result as a notification.
 
 ### Limited Support Warning
 
@@ -296,19 +294,22 @@ The factory resolves gateways through the enum, so no additional wiring is neede
 
 ### Alternative: Rebinding the Interface
 
-If you need a completely custom gateway that doesn't fit the enum-driven pattern, you can bypass the factory entirely by rebinding the `TicketSystemGateway` interface in your `AppServiceProvider`:
+If you need a completely custom gateway that doesn't fit the enum-driven pattern, you can bypass the factory entirely by rebinding the `TicketSystemGateway` interface in `AppServiceProvider::boot()`:
 
 ```php
 // app/Providers/AppServiceProvider.php
 
 use App\Domains\Support\Contracts\TicketSystemGateway;
 
-$this->app->bind(TicketSystemGateway::class, function () {
-    return new MyCustomGateway();
-});
+public function boot(): void
+{
+    $this->app->bind(TicketSystemGateway::class, function () {
+        return new MyCustomGateway();
+    });
+}
 ```
 
-This overrides the binding registered by `SupportServiceProvider` and gives you full control over gateway resolution.
+Bind it in `boot()`, not `register()`. `SupportServiceProvider` is listed after `AppServiceProvider` in `bootstrap/providers.php`, so its `register()` would overwrite a binding made in `AppServiceProvider::register()`. The custom gateway still returns a `CreationResult` with a `TicketSystem` case as its `ticketSystemType`.
 
 ---
 
@@ -328,7 +329,7 @@ The contact form uses tiered rate limiting (per-minute, per-hour, and per-day) t
     </Property>
 </PropertyTable>
 
-All rate limiters are defined in `config/rate-limiting.php`.
+The `support:contact` limiter is defined in `RateLimitingServiceProvider`, with its numbers read from `config/rate-limiting.php`. `ContactSupport::send()` enforces it, since a Livewire action does not pass through route middleware.
 
 ---
 
@@ -337,7 +338,10 @@ All rate limiters are defined in `config/rate-limiting.php`.
 <PropertyTable>
     <PropertyGroup title="General" />
     <Property name="SUPPORT_ENABLED" default="false">
-        Enable the contact form and submission routes
+        Enable the Contact Support page and the submission log
+    </Property>
+    <Property name="SUPPORT_DOCUMENTATION_URL">
+        User documentation linked from the Help menu; the link is hidden while empty. Independent of `SUPPORT_ENABLED`
     </Property>
     <Property name="SUPPORT_LIMITED_WARNING" default="true (non-production)">
         Show limited support warning banner
@@ -362,10 +366,10 @@ All rate limiters are defined in `config/rate-limiting.php`.
         TDX service account password
     </Property>
     <Property name="TDX_TICKET_APP_NAME" required>
-        TDX application name
+        TDTickets application where tickets are created (read by `config/team-dynamix.php`)
     </Property>
     <Property name="TDX_CLIENT_APP_NAME" required>
-        TDX client application name
+        TDClient application where services are managed (read by `config/team-dynamix.php`)
     </Property>
     <Property name="TDX_ASSIGNEE_ID" required>
         TDX group ID for ticket assignment (required for TDX driver)

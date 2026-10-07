@@ -28,7 +28,7 @@ blockquote {
 }
 
 a {
-    color: #3869D4;
+    color: #4e2a84;
 }
 
 a img {
@@ -109,14 +109,6 @@ img {
     text-decoration: none;
 }
 
-/* Logo */
-
-.logo {
-    height: 75px;
-    max-height: 75px;
-    width: 75px;
-}
-
 /* Body */
 
 .body {
@@ -176,7 +168,7 @@ img {
 }
 
 .footer a {
-    color: #b0adc5;
+    color: #b6acd1;
     text-decoration: underline;
 }
 
@@ -267,18 +259,18 @@ img {
 /* Panels */
 
 .panel {
-    border-left: #2d3748 solid 4px;
+    border-left: #4e2a84 solid 4px;
     margin: 21px 0;
 }
 
 .panel-content {
-    background-color: #edf2f7;
-    color: #718096;
+    background-color: #f2f0f7;
+    color: #2f3133;
     padding: 16px;
 }
 
 .panel-content p {
-    color: #718096;
+    color: #2f3133;
 }
 
 .panel-item {

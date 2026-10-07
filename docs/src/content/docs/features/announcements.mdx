@@ -1,0 +1,86 @@
+---
+title: Announcements
+description: Messages from administrators shown in a banner across the application and on an Announcements page
+sidebar:
+    order: 7
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+Announcements let administrators tell the application's users something: scheduled maintenance, a policy change, a new feature. A live announcement shows in a banner at the top of every app-panel page, and every announcement a person can see is listed on their Announcements page at `/app/announcements`.
+
+Nothing shows until someone publishes an announcement, so there's nothing to turn on.
+
+## Writing an Announcement
+
+People with the **Manage Announcements** permission (`ManageAnnouncements`) write announcements under **Platform** → **Announcements** in the administration panel. No default role has it besides Super Administrator.
+
+- **Title** and **Message** - The message is Markdown, links included. Raw HTML is shown as text, never rendered.
+- **Severity** - Info, Success, Warning or Critical. It sets the colour and icon, and which announcement the banner shows first. People can dismiss anything but a critical announcement.
+- **Audience** - **Everyone Signed In**; **Specific Roles and Affiliations** (anyone who fits any of them); or **Everyone, Including Signed-Out Visitors**. Super Administrators see every announcement, whatever its audience.
+
+The form shows a live preview of the banner. Every change is recorded in the [audit log](/features/audit-logging/).
+
+## Publishing
+
+<Steps>
+
+1. **Save a draft.** A new announcement is a draft, which nobody else sees.
+2. **Publish it.** Choose when it starts (now, by default) and, optionally, when it ends, in your own timezone. Whether it shows is worked out from those times on every page load; nothing is scheduled.
+3. **End it, or let it end.** **End Now** takes a live announcement out of the banner at once. An ended announcement stays on people's Announcements page as a past announcement. It can't be published again; **Duplicate** copies it into a new draft.
+
+</Steps>
+
+A published announcement stays editable, including its audience and dates. **Show Again** returns a live announcement to the banner for everyone who dismissed it, for example after an important change.
+
+Announcements are kept as an archive and never pruned.
+
+## The Banner
+
+The banner shows one announcement at a time: the most important live one the person hasn't dismissed. Critical comes first, then Warning, Success and Info, newest first within each. It shows the title and the first two lines of the message, with **Read More** linking to the whole announcement on the Announcements page and a count of any others.
+
+Dismissing an announcement removes it from that person's banner and shows the next one; it stays on their Announcements page. A critical announcement can't be dismissed and holds the banner until it ends. An administrator [impersonating](/features/authentication/#impersonating-users) someone sees their banner but can't dismiss for them.
+
+### Signed-Out Visitors
+
+An announcement for **Everyone, Including Signed-Out Visitors** also shows under the header on public pages and the sign-in pages, without dismissing or links, so write it for anyone. It never shows on error pages, which must work when the database doesn't.
+
+## Notifying People
+
+Publishing doesn't notify anyone unless you turn on **Also notify the audience**. Then, once, when the announcement starts, each signed-in person in its audience who can use the application gets a notification in the bell, and an email unless they've turned off **Announcements** under Email Notifications in their [preferences](/building/app-panel/#preferences).
+
+An announcement that starts straight away is sent at once. One that starts later is sent by `announcements:notify`, which runs every five minutes in production and at noon on weekdays elsewhere, so idle databases can scale to zero. Run it by hand to send one sooner outside production. Editing an announcement never notifies again.
+
+<Aside>
+    Notifying writes a notification for every person in the audience, so keep it
+    for announcements people need to act on.
+</Aside>
+
+## Publishing from Code
+
+Create a draft and publish it with the `PublishAnnouncement` action, which takes the start, an optional end, and whether to notify the audience:
+
+```php
+use App\Domains\Support\Actions\Announcements\PublishAnnouncement;
+use App\Domains\Support\Enums\AnnouncementAudience;
+use App\Domains\Support\Enums\AnnouncementSeverity;
+use App\Domains\Support\Models\Announcement;
+
+$announcement = Announcement::create([
+    'title' => 'Maintenance on Saturday',
+    'body' => 'The application is unavailable from 6 to 8 a.m.',
+    'severity' => AnnouncementSeverity::Warning,
+    'audience' => AnnouncementAudience::Everyone,
+]);
+
+resolve(PublishAnnouncement::class)($announcement, startsAt: now(), endsAt: now()->addDays(3), notify: false);
+```
+
+It refuses an announcement that isn't a draft, and an end that isn't after the start.
+
+## Where the Code Lives
+
+- `app/Domains/Support/`: the `Announcement` and `AnnouncementDismissal` models, their enums, the publish, end, duplicate and dismiss actions, `NotifyAnnouncementAudience` and `AnnouncementNotification`.
+- `app/Filament/Administration/Resources/Announcements/`: the administration resource.
+- `app/Filament/App/Livewire/AnnouncementBanner.php` and `app/Filament/App/Starter/Pages/Announcements.php`: the banner and the page.
+- `resources/views/components/announcement-banner.blade.php`: the banner itself, shared by the app panel, the public pages and the preview.

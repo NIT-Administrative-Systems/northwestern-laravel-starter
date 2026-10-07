@@ -21,7 +21,7 @@
     {{-- Footer --}}
     <x-slot:footer>
         <x-mail::footer>
-            © {{ date('Y') }} Northwestern University. @lang('All rights reserved.')
+            @include('mail.partials.footer')
         </x-mail::footer>
     </x-slot:footer>
 </x-mail::layout>

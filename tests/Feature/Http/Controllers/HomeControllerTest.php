@@ -6,34 +6,56 @@ namespace Tests\Feature\Http\Controllers;
 
 use App\Domains\User\Models\User;
 use App\Http\Controllers\HomeController;
-use Illuminate\Support\Facades\Route;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 #[CoversClass(HomeController::class)]
 final class HomeControllerTest extends TestCase
 {
-    protected function setUp(): void
+    public function test_guests_see_the_landing_page(): void
     {
-        parent::setUp();
-
-        Route::get('/', HomeController::class)->name('home');
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertViewIs('public.landing')
+            ->assertSee(config('app.name'))
+            ->assertSee('href="' . url('/app/login') . '"', escape: false);
     }
 
-    public function test_redirects_guest_users_to_login(): void
+    public function test_signed_in_users_are_sent_to_the_app_panel(): void
     {
-        $response = $this->get(route('home'));
-
-        $response->assertRedirectToRoute('login-selection');
+        $this->actingAs(User::factory()->create())
+            ->get(route('home'))
+            ->assertRedirect('/app');
     }
 
-    public function test_renders_default_home_view_for_authenticated_users(): void
+    public function test_the_landing_page_uses_the_light_only_public_layout_with_the_footer(): void
     {
-        $user = User::factory()->create();
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('<html class="fi min-h-screen"', escape: false)
+            ->assertSee('data-testid="sign-in-link"', escape: false)
+            ->assertSee('Privacy Statement')
+            ->assertSee('Report a Concern');
+    }
 
-        $response = $this->actingAs($user)->get(route('home'));
+    public function test_the_header_shows_the_environment_badge_outside_production(): void
+    {
+        $this->get(route('home'))->assertOk()->assertSee('Environment: Testing');
+    }
 
-        $response->assertOk();
-        $response->assertViewIs('default-home');
+    public function test_the_help_menu_lists_the_changelog_and_the_documentation_link_when_set(): void
+    {
+        config(['support.enabled' => true, 'support.documentation_url' => null]);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('data-testid="help-menu-trigger"', escape: false)
+            ->assertSee(route('support.changelog.index'), escape: false)
+            ->assertDontSee('Contact Support')
+            ->assertDontSee('https://docs.example.edu/', escape: false);
+
+        config(['support.documentation_url' => 'https://docs.example.edu/']);
+
+        $this->get(route('home'))->assertSee('https://docs.example.edu/', escape: false);
     }
 }

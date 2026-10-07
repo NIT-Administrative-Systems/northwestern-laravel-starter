@@ -5,4 +5,6 @@
 
 @source '../../../../app/Filament/**/*';
 @source '../../../../resources/views/filament/**/*';
+@source '../../../../resources/views/components/panel-brand.blade.php';
+@source '../../../../resources/views/components/announcement-banner.blade.php';
 @source '../../../../vendor/filament/**/*';

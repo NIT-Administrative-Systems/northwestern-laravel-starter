@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Domains\Access\Enums\SystemPermission;
 use App\Domains\Auth\Actions\Local\FixedNumericOneTimeCodeGenerator;
 use App\Domains\Auth\Actions\Local\RandomNumericOneTimeCodeGenerator;
 use App\Domains\Auth\Contracts\OneTimeCodeGenerator;
-use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\User\Models\User;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Client\RequestException;
-use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -23,7 +22,6 @@ use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Northwestern\SysDev\Chassis\Database\ConfigurableDbDumperFactory;
 use Northwestern\SysDev\Chassis\Exceptions\ProblemDetailsRenderer;
-use Northwestern\SysDev\UI\Providers\NorthwesternUiServiceProvider;
 use Spatie\DbSnapshots\DbDumperFactory;
 
 class AppServiceProvider extends ServiceProvider
@@ -31,7 +29,10 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(Authenticatable::class, User::class);
-        $this->app->singleton(ProblemDetailsRenderer::class);
+        // OAuth and MCP clients expect their own protocols' error bodies, not Problem Details.
+        $this->app->singleton(ProblemDetailsRenderer::class, fn (): ProblemDetailsRenderer => new ProblemDetailsRenderer(
+            exceptPaths: ['oauth/*', 'mcp', 'mcp/*', '.well-known/*'],
+        ));
         $this->app->bind(DbDumperFactory::class, function (): ConfigurableDbDumperFactory {
             return new ConfigurableDbDumperFactory();
         });
@@ -41,8 +42,6 @@ class AppServiceProvider extends ServiceProvider
                 ? FixedNumericOneTimeCodeGenerator::class
                 : RandomNumericOneTimeCodeGenerator::class,
         );
-
-        Paginator::useBootstrapFive();
     }
 
     public function boot(): void
@@ -52,7 +51,6 @@ class AppServiceProvider extends ServiceProvider
         $this->configureCommands();
         $this->configureRoutes();
         $this->configureRequests();
-        $this->configureSentry();
     }
 
     /** Configure Vite asset handling and prefetching strategy. */
@@ -73,8 +71,15 @@ class AppServiceProvider extends ServiceProvider
          * Users with the {@see SystemPermission::ManageAll} permission bypass all authorization checks.
          * This is important to remember when adding new authorization checks to the application.
          * Be sure to accurately test new features with and without the permission.
+         *
+         * Not on API requests: a token is limited to its scopes, and its user's own permissions
+         * and policies decide the rest, so a super-administrator's token is no exception.
          */
         Gate::before(static function (User $user): ?true {
+            if ($user->currentAccessToken() instanceof \Laravel\Passport\Contracts\ScopeAuthorizable) {
+                return null;
+            }
+
             return $user->hasPermissionTo(SystemPermission::ManageAll) ? true : null;
         });
     }
@@ -88,7 +93,11 @@ class AppServiceProvider extends ServiceProvider
     /** Force HTTPS in deployed environments. */
     public function configureRoutes(): void
     {
-        if (! App::environment(['ci', 'testing'])) {
+        // Deployed environments are always HTTPS behind their proxy. Locally, follow APP_URL, so a
+        // plain-HTTP server on any port (a worktree's, an agent's) keeps working.
+        $localOverHttp = App::isLocal() && ! str_starts_with((string) config('app.url'), 'https://');
+
+        if (! App::environment(['ci', 'testing']) && ! $localOverHttp) {
             URL::forceScheme('https');
         }
     }
@@ -103,28 +112,5 @@ class AppServiceProvider extends ServiceProvider
         if (App::environment(['ci', 'testing'])) {
             Http::preventStrayRequests();
         }
-    }
-
-    /**
-     * Registers user context for the browser Sentry SDK. The northwestern-laravel-ui
-     * Blade template calls `Sentry.setUser()` with the object on every page load,
-     * so JS errors carry user identity. PHP-side context is handled separately by
-     * {@see \App\Domains\Core\Exceptions\SentryExceptionHandler}.
-     */
-    public function configureSentry(): void
-    {
-        NorthwesternUiServiceProvider::setSentryUserContext(static function (?User $user) {
-            if (! $user instanceof User) {
-                return null;
-            }
-
-            return [
-                'id' => $user->id,
-                'username' => $user->username,
-                'email' => $user->email,
-                'primary_affiliation' => $user->primary_affiliation,
-                'auth_type' => $user->auth_type,
-            ];
-        });
     }
 }

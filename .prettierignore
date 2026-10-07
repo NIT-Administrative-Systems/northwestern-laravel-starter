@@ -3,7 +3,9 @@ composer.lock
 node_modules
 vendor
 
+# Markdown mail templates: indentation inside them turns into Markdown code blocks.
 resources/views/mail/
+resources/views/vendor/mail/
 
 public/build
 public/js/filament/

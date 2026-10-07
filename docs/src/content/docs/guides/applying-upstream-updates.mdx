@@ -2,7 +2,7 @@
 title: Applying Upstream Updates
 description: How to pull in changes from the Northwestern Laravel Starter after your project has diverged
 sidebar:
-    order: 3
+    order: 5
 ---
 
 import { Aside, Steps } from '@astrojs/starlight/components';
@@ -11,19 +11,13 @@ After running `composer create-project`, your application is an independent Git 
 
 ## Knowing When Updates Are Available
 
-The `starter:check` command compares the version in your `.starter-version.yaml` file against GitHub releases and notifies you when newer versions exist. It runs automatically during `composer install` and `composer update` in local environments, so you'll be notified without any extra effort.
+Watch the starter's repository on GitHub for releases (**Watch → Custom → Releases**) and GitHub notifies you of each one. Every release links to its section of the [changelog](https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/blob/main/CHANGELOG.md).
 
-If you want to check manually:
+The version your project started from is the newest one in the `CHANGELOG.md` that `composer create-project` gave you; note it before you replace that file with your own. To see everything the starter has changed since then, compare it with `main`, putting your version in place of `v3.0.0`:
 
-```bash
-php artisan starter:check
+```text
+https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v3.0.0...main
 ```
-
-When updates are available, the command shows each release with its date, a link to the release notes, and a comparison URL so you can review what changed.
-
-<Aside>
-After applying updates (or deciding to skip them), update the `version` in `.starter-version.yaml` to the latest release. This suppresses the notification until the next release.
-</Aside>
 
 ## Setup
 
@@ -79,19 +73,20 @@ git fetch starter
    git cherry-pick --continue
    ```
 
-   If a commit doesn't apply cleanly and isn't worth the effort, you can skip it:
+   If a commit doesn't apply cleanly and isn't worth the effort, you can skip it and move on to the next one in the range:
 
    ```bash
-   git cherry-pick --abort
+   git cherry-pick --skip
    ```
+
+   To give up on the whole cherry-pick instead, run `git cherry-pick --abort`. It returns the branch to where it was before you started, dropping any commits from the range that were already applied.
 
 </Steps>
 
 ## Tips
 
-- **Review the release notes first.** The comparison URL from `starter:check` shows exactly what changed. Some commits may depend on others or require configuration changes.
+- **Review the release notes first.** The comparison between your version and the latest release shows exactly what changed. Some commits may depend on others or require configuration changes.
 - **Cherry-pick in order** when applying multiple related commits. Applying them out of sequence increases the likelihood of conflicts.
-- **Update `.starter-version.yaml`** after you're done so `starter:check` stops notifying you about releases you've already handled.
 
 <Aside type="tip">
 If a cherry-pick produces too many conflicts, it may be easier to read the commit diff (`git show <hash>`) and apply the changes manually. This is common when your project has significantly restructured a file the starter also changed.

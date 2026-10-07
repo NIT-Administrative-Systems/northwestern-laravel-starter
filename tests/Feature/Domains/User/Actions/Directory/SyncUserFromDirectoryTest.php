@@ -82,6 +82,23 @@ final class SyncUserFromDirectoryTest extends TestCase
         ];
     }
 
+    public function test_new_users_get_the_default_timezone(): void
+    {
+        config(['platform.default_user_timezone' => 'America/Chicago']);
+
+        $user = $this->service()(new User(['auth_type' => AuthType::SSO, 'username' => 'foo']), self::studentData());
+
+        $this->assertSame('America/Chicago', $user->timezone);
+    }
+
+    // The directory has no timezone, so a sync must not undo the user's own choice.
+    public function test_an_existing_users_timezone_survives_a_sync(): void
+    {
+        $user = User::factory()->create(['timezone' => 'Europe/London']);
+
+        $this->assertSame('Europe/London', $this->service()($user, self::studentData())->timezone);
+    }
+
     public function test_assigns_username_from_directory_when_blank(): void
     {
         $user = new User(['auth_type' => AuthType::SSO]);

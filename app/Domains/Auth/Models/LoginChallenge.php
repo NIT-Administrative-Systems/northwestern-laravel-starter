@@ -4,29 +4,21 @@ declare(strict_types=1);
 
 namespace App\Domains\Auth\Models;
 
-use App\Domains\Auth\Actions\Local\IssueLoginChallenge;
-use App\Domains\Auth\Actions\Local\VerifyLoginChallengeCode;
-use App\Domains\Auth\Http\Controllers\Local\SendLoginCodeController;
-use App\Domains\Auth\Http\Controllers\Local\VerifyLoginCodeController;
 use App\Domains\Auth\Jobs\SendLoginCodeEmailJob;
+use App\Domains\Auth\LoginCodes;
 use App\Domains\Core\Models\BaseModel;
 use Carbon\CarbonImmutable;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\MassPrunable;
-use InvalidArgumentException;
+use Northwestern\SysDev\Chassis\Models\Concerns\PrunesAfterRetentionPeriod;
 
 /**
  * Represents the OTP challenge state for a local user authentication attempt.
  *
- * @see SendLoginCodeController
- * @see VerifyLoginCodeController
- * @see IssueLoginChallenge
- * @see VerifyLoginChallengeCode
+ * @see LoginCodes
  * @see SendLoginCodeEmailJob
  */
 class LoginChallenge extends BaseModel
 {
-    use MassPrunable;
+    use PrunesAfterRetentionPeriod;
 
     protected $casts = [
         'attempts' => 'int',
@@ -41,26 +33,9 @@ class LoginChallenge extends BaseModel
     /** @var list<string> */
     protected array $auditExclude = ['code_hash'];
 
-    /**
-     * Automatically deletes records older than the configured retention period.
-     *
-     * @return Builder<static>
-     */
-    public function prunable(): Builder
+    protected function retentionConfigKey(): string
     {
-        $retentionDays = config('local-auth.code.retention_days');
-
-        if ($retentionDays === null) {
-            return static::query()->whereRaw('1 = 0');
-        }
-
-        if (! is_numeric($retentionDays) || $retentionDays < 0) {
-            throw new InvalidArgumentException(
-                'Login challenge retention days must be a positive integer or null.'
-            );
-        }
-
-        return static::query()->where('created_at', '<', now()->subDays((int) $retentionDays));
+        return 'platform.retention.login_challenges';
     }
 
     public function isExpired(?CarbonImmutable $now = null): bool

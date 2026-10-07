@@ -4,6 +4,7 @@
     xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
     bootstrap="vendor/autoload.php"
     cacheDirectory=".phpunit.cache"
+    defaultTestSuite="Unit,Feature"
     colors="true"
     failOnPhpunitWarning="false"
     displayDetailsOnIncompleteTests="true"
@@ -19,6 +20,9 @@
         </testsuite>
         <testsuite name="Feature">
             <directory>tests/Feature</directory>
+        </testsuite>
+        <testsuite name="Browser">
+            <directory>tests/Browser</directory>
         </testsuite>
     </testsuites>
     <source>
@@ -39,31 +43,39 @@
             -->
 
             <!-- Enums (declarative values, labels, colors) -->
-            <file>app/Domains/Auth/Enums/AccessTokenStatus.php</file>
             <file>app/Domains/Auth/Enums/AuthType.php</file>
-            <file>app/Domains/Auth/Enums/SystemPermission.php</file>
-            <file>app/Domains/Auth/Enums/PermissionScope.php</file>
-            <file>app/Domains/Auth/Enums/RoleModificationOrigin.php</file>
-            <file>app/Domains/Auth/Enums/RoleTypeEnum.php</file>
-            <file>app/Domains/Auth/Enums/SystemRole.php</file>
-            <directory>app/Domains/Core/Enums</directory>
+            <file>app/Domains/Api/Enums/ClientOrigin.php</file>
+            <file>app/Domains/Api/Enums/CredentialStatus.php</file>
+            <file>app/Domains/Access/Enums/SystemPermission.php</file>
+            <file>app/Domains/Access/Enums/PermissionScope.php</file>
+            <file>app/Domains/Access/Enums/RoleModificationOrigin.php</file>
+            <file>app/Domains/Access/Enums/RoleTypeEnum.php</file>
+            <file>app/Domains/Access/Enums/SystemRole.php</file>
+            <file>app/Domains/Core/Enums/ExternalService.php</file>
             <directory>app/Domains/Support/Enums</directory>
             <file>app/Domains/User/Enums/Affiliation.php</file>
             <file>app/Domains/User/Enums/NetIdUpdateAction.php</file>
             <file>app/Domains/User/Enums/UserSegment.php</file>
 
             <!-- Models (casts, relationships, property declarations) -->
-            <directory>app/Domains/Auth/Models</directory>
+            <file>app/Domains/Api/Models/ApiRequestLog.php</file>
+            <file>app/Domains/Auth/Models/LoginChallenge.php</file>
+            <file>app/Domains/Api/Models/OAuthClient.php</file>
+            <file>app/Domains/Api/Models/OAuthConnection.php</file>
+            <file>app/Domains/Api/Models/OAuthToken.php</file>
+            <file>app/Domains/Access/Models/Permission.php</file>
+            <file>app/Domains/Access/Models/Role.php</file>
+            <file>app/Domains/Access/Models/RoleType.php</file>
+            <file>app/Domains/Core/Models/Audit.php</file>
             <file>app/Domains/Core/Models/BaseModel.php</file>
+            <file>app/Domains/Core/Models/Export.php</file>
             <directory>app/Domains/Support/Models</directory>
             <file>app/Domains/User/Models/User.php</file>
-            <file>app/Domains/User/Models/Audit.php</file>
-            <file>app/Domains/User/Models/Export.php</file>
-            <file>app/Domains/User/Models/ImpersonationLog.php</file>
+            <file>app/Domains/Auth/Models/ImpersonationLog.php</file>
             <file>app/Domains/User/Models/UserLoginRecord.php</file>
 
             <!-- Seeders -->
-            <directory>app/Domains/Auth/Seeders</directory>
+            <directory>app/Domains/Access/Seeders</directory>
             <directory>app/Domains/Support/Seeders</directory>
 
             <!-- Config validators -->
@@ -81,17 +93,16 @@
             <directory>app/Domains/Support/Contracts</directory>
 
             <!-- Value Objects (constants, readonly data containers) -->
-            <directory>app/Domains/Auth/ValueObjects</directory>
+            <file>app/Domains/User/Data/UserPreferences.php</file>
             <file>app/Domains/Support/Gateways/CreationResult.php</file>
 
             <!-- API Resources -->
-            <directory>app/Domains/Auth/Http/Resources</directory>
+            <directory>app/Domains/Access/Http/Resources</directory>
             <directory>app/Domains/User/Http/Resources</directory>
 
             <!-- Framework boilerplate / third-party -->
             <directory>app/Domains/Core/Concerns</directory>
             <directory>app/Domains/Core/Exceptions</directory>
-            <directory>app/Domains/Core/GlobalAlerts</directory>
             <directory>app/Domains/User/Exceptions</directory>
             <directory>app/Domains/Support/Exceptions</directory>
             <directory>app/Filament</directory>
@@ -99,7 +110,6 @@
             <file>app/Http/Controllers/Controller.php</file>
             <file>app/Http/Controllers/Api/BaseApiController.php</file>
             <file>app/Http/Controllers/Api/V1/ApiController.php</file>
-            <file>app/View/Components/Breadcrumbs.php</file>
             <file>app/View/Components/ErrorLayout.php</file>
 
             <!-- Service Providers (bootstrap wiring, no domain logic) -->
@@ -110,7 +120,6 @@
             <file>app/Providers/HealthServiceProvider.php</file>
             <file>app/Providers/IntegrationServiceProvider.php</file>
             <file>app/Providers/RateLimitingServiceProvider.php</file>
-            <file>app/Providers/SupportServiceProvider.php</file>
             <file>app/Providers/TelescopeServiceProvider.php</file>
             <file>app/Providers/ViewServiceProvider.php</file>
 
@@ -122,7 +131,20 @@
         </exclude>
     </source>
     <php>
+        <!--
+            Unlimited, as in CI. Without opcache (off by default on the CLI) a
+            parallel worker holds about 120MB, and compiling views from cold
+            pushed workers past PHP's 128M default. PHPUnit applies this in
+            every worker and over -d memory_limit, so any finite value would
+            also cap the coverage run.
+        -->
+        <ini name="memory_limit" value="-1" />
         <env name="APP_ENV" value="testing" />
+        <!--
+            Set here, not by .env: a variable dotenv loads once belongs to it for the rest of the
+            process, and every later boot overwrites a test's own value with it.
+        -->
+        <env name="APP_URL" value="http://localhost" />
         <env name="APP_MAINTENANCE_DRIVER" value="file" />
         <env name="BCRYPT_ROUNDS" value="4" />
         <env name="CACHE_STORE" value="array" />

@@ -1,29 +1,27 @@
-<b><u>Authorization with Bearer Tokens</u></b><br><br>
+<b><u>Authenticating with Client Credentials</u></b><br><br>
 
-Most Northwestern integrations authenticate through an Apigee API proxy.
-Apigee works together with the University's API Service Registry to manage access approvals,
-consumer onboarding, and fine-grained authorization controls. In these cases, the proxy is responsible
-for forwarding the correct Bearer token to the application.<br><br>
+An integration exchanges the client ID and secret for an access token, then sends the access token with each
+API request. Access tokens last one hour; request a new one when it expires. Every token acts as this API user,
+with its roles.<br><br>
 
-<b>1. Shared System Account (Simple)</b><br>
-Store a single Bearer token in Apigee's Key Value Maps (KVMs). All consumers of the proxy use the same
-token when Apigee forwards requests to the backend application. This works well when you don't need
-per-consumer RBAC or custom access boundaries.<br><br>
+<b>1. Get an Access Token</b><br>
+<code>POST {{ url('/oauth/token') }}</code> with the form fields
+<code>grant_type=client_credentials</code>, <code>client_id</code> and <code>client_secret</code>.
+The response's <code>access_token</code> is the token, and <code>expires_in</code> is its lifetime in seconds.<br><br>
 
-<b>2. Per-Consumer Service Accounts (Granular)</b><br>
-For more control, assign each downstream consumer its own API user and Bearer token within the application:
-<ul>
-    <li>&bull;&nbsp;Store each token as a unique entry in Apigee’s KVMs
-        (e.g., <code>ConsumerA_Token</code>, <code>ConsumerB_Token</code>)</li>
-    <li>&bull;&nbsp;Expose these keys as custom attributes on each Apigee App</li>
-    <li>&bull;&nbsp;In your proxy logic, use the caller’s API key to resolve their App attributes
-        and retrieve the appropriate token</li>
-</ul>
-This enables consumer-specific permissions, rate-limits, and auditability through the application’s RBAC model.<br><br>
+<b>2. Call the API</b><br>
+Send the token in the HTTP <code>Authorization</code> header:<br><br>
 
-<b>3. Direct Bearer Authentication (Fallback)</b><br>
-If an integration cannot use Apigee, such as certain third-party systems or internal services
-without a proxy, you may authenticate directly against the application by including the token
-in the HTTP <code>Authorization</code> header:<br><br>
+<code>Authorization: Bearer {access_token}</code><br><br>
 
-<code>Authorization: Bearer {token}</code><br><br>
+<b>Through Apigee</b><br>
+Most Northwestern integrations reach the application through an Apigee API proxy, which works with the
+University's API Service Registry to manage access approvals and consumer onboarding. Store the client ID and
+secret in Apigee's Key Value Maps (KVMs), and have the proxy request an access token, cache it until it
+expires, and forward it to the application. To give each downstream consumer its own permissions and audit
+trail, create an API user and service client per consumer and resolve the right credentials from the caller's Apigee
+App.<br><br>
+
+<b>Rotating</b><br>
+Rotating creates a replacement service client while this one keeps working. Update the integration with the
+new client ID and secret, then revoke the old service client.

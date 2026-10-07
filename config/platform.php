@@ -101,20 +101,17 @@ return [
             'login-oauth-redirect',
             'login-oauth-callback',
             'login-oauth-logout',
-            'login-selection',
+            'login-websso-logout',
+            'filament.app.auth.login',
+            'filament.app.auth.login-code',
             'logout',
-            'login-code.request',
-            'login-code.send',
-            'login-code.verify',
-            'login-code.code',
-            'login-code.resend',
 
             // Impersonation
             'impersonate',
             'impersonate.leave',
 
             // Lockdown Page
-            'platform.environment-lockdown',
+            'filament.app.environment-lockdown',
         ],
     ],
 
@@ -123,13 +120,39 @@ return [
     | Mail Capture URL
     |--------------------------------------------------------------------------
     |
-    | This setting controls whether a link to the MailPit server (or similar)
-    | is shown in the navigation to all users. This should be available to
-    | every user when in use, since anyone testing may need to see mail.
+    | When set, the administration panel's Developer Tools group links to the
+    | MailPit server (or similar) that captures outgoing mail. The link is
+    | shown to users who can view Telescope.
     |
     | Supported: string|null
     */
     'mail-capture' => [
         'url' => env('MAIL_CAPTURE_URL'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Data Retention
+    |--------------------------------------------------------------------------
+    |
+    | Days to keep each kind of record before the scheduled model:prune deletes
+    | it. Null keeps records forever.
+    |
+    | Audits are kept by default because they often back FERPA, HIPAA or
+    | university record-keeping requirements; check yours before setting one.
+    | Impersonation logs are a small security record, also kept by default.
+    | High-traffic APIs may prefer an observability tool (Sentry, Datadog)
+    | over long request-log retention. Exports count from when they finish, and
+    | their files are deleted with them.
+    |
+    */
+
+    'retention' => [
+        'audits' => env('AUDIT_RETENTION_DAYS'),
+        'login_records' => env('LOGIN_RECORD_RETENTION_DAYS', 365),
+        'impersonation_logs' => env('IMPERSONATION_LOG_RETENTION_DAYS'),
+        'login_challenges' => env('LOGIN_CHALLENGE_RETENTION_DAYS', 30),
+        'api_request_logs' => env('API_REQUEST_LOG_RETENTION_DAYS', 90),
+        'exports' => env('EXPORT_RETENTION_DAYS', 7),
     ],
 ];

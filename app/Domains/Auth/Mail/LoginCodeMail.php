@@ -11,6 +11,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Support\Facades\Crypt;
+use Northwestern\SysDev\Chassis\Formatting\CountInWords;
 
 /**
  * Mailable containing a login verification code for {@see AuthType::Local} users.
@@ -22,6 +23,7 @@ class LoginCodeMail extends Mailable
     public function __construct(
         public readonly string $encryptedCode,
         public readonly CarbonImmutable $expiresAt,
+        public readonly string $signInUrl,
     ) {
         //
     }
@@ -43,7 +45,8 @@ class LoginCodeMail extends Mailable
             markdown: 'mail.auth.login-code',
             with: [
                 'code' => $code,
-                'expiresInMinutes' => $expiresInMinutes,
+                'expiresIn' => CountInWords::of($expiresInMinutes, 'minute'),
+                'signInUrl' => $this->signInUrl,
             ]
         );
     }

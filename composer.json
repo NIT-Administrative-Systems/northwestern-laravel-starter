@@ -22,16 +22,16 @@
         "filament/filament": "^5.0",
         "lab404/laravel-impersonate": "^1.7",
         "laravel/framework": "^13.0",
+        "laravel/mcp": "^1.0.1",
+        "laravel/passport": "^13.8",
         "laravel/telescope": "^5.5",
         "laravel/tinker": "^3.0",
         "league/flysystem-aws-s3-v3": "^3.29",
         "livewire/livewire": "^4.0",
-        "mews/purifier": "^3.4.4",
         "mockery/mockery": "^1.6",
-        "northwestern-sysdev/chassis": "^1.1.1",
+        "northwestern-sysdev/chassis": "^1.5.1",
         "northwestern-sysdev/laravel-soa": "^12.0",
-        "northwestern-sysdev/northwestern-filament-theme": "^3.0",
-        "northwestern-sysdev/northwestern-laravel-ui": "^4.0",
+        "northwestern-sysdev/northwestern-filament-theme": "^4.2.1",
         "northwestern-sysdev/tdx-php-sdk": "^0.6",
         "owen-it/laravel-auditing": "^14.0",
         "phiki/phiki": "^2.0",
@@ -50,12 +50,12 @@
         "driftingly/rector-laravel": "^2.0",
         "fakerphp/faker": "^1.23",
         "fruitcake/laravel-debugbar": "^4.0",
-        "laracasts/cypress": "^3.0.4",
         "larastan/larastan": "^3.0",
         "laravel/pail": "^1.2.2",
         "laravel/pint": "^1.21",
         "nunomaduro/collision": "^8.6",
         "pestphp/pest": "^5.1",
+        "pestphp/pest-plugin-browser": "^5.1",
         "phpstan/phpstan-mockery": "^2.0",
         "phpunit/phpunit": "^13.0",
         "rector/rector": "^2.0",
@@ -80,15 +80,11 @@
             "@php artisan package:discover --ansi",
             "@php artisan filament:upgrade"
         ],
-        "post-install-cmd": [
-            "@php artisan starter:check --ansi"
-        ],
         "post-update-cmd": [
             "@php artisan ide-helper:generate",
             "@php artisan ide-helper:meta",
             "@php artisan ide-helper:models -N",
-            "@php artisan vendor:publish --tag=laravel-assets --ansi --force",
-            "@php artisan starter:check --ansi"
+            "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
         ],
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
@@ -99,13 +95,14 @@
         ],
         "dev": [
             "Composer\\Config::disableProcessTimeout",
-            "npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1\" \"php artisan pail --timeout=0\" \"npm run dev\" --names=server,queue,logs,vite"
+            "pnpm exec concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1\" \"php artisan pail --timeout=0\" \"pnpm run dev\" --names=server,queue,logs,vite"
         ],
         "rector": "vendor/bin/rector process --ansi",
         "rector:dry": "vendor/bin/rector process --dry-run --ansi",
         "format:php": "vendor/bin/pint --parallel --ansi",
         "format:frontend": "pnpm run format",
         "analyse:php": "vendor/bin/phpstan analyse --memory-limit=2G",
+        "test:browser": "vendor/bin/pest --testsuite=Browser --parallel",
         "openapi:generate": "@php ./vendor/bin/openapi app/ vendor/northwestern-sysdev/chassis/src/",
         "openapi:generate:v1": "@php ./vendor/bin/openapi app/ vendor/northwestern-sysdev/chassis/src/ --exclude Api/V2 --output docs/schemas/api-schema.yaml",
         "ide-helper:generate": [

@@ -1,0 +1,241 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Filament\Administration\Clusters\ApiCluster\Resources\ApiRequestLogs\Tables;
+
+use App\Domains\Api\Models\ApiRequestLog;
+use App\Filament\Administration\Exports\ApiRequestLogExporter;
+use Carbon\Carbon;
+use Filament\Actions\Action;
+use Filament\Actions\ExportAction;
+use Filament\Actions\ViewAction;
+use Filament\Support\Enums\FontFamily;
+use Filament\Support\Enums\FontWeight;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\PaginationMode;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Number;
+use Northwestern\SysDev\Chassis\Enums\ApiRequestFailure;
+use Northwestern\SysDev\Chassis\Enums\OAuthGrantType;
+
+class ApiRequestLogsTable
+{
+    public static function configure(Table $table, bool $isRelationManager = false): Table
+    {
+        return $table
+            ->poll()
+            ->recordClasses(fn (ApiRequestLog $record): ?string => $record->duration_ms > (int) config('api.request_logging.slow_request_threshold_ms')
+                ? 'bg-red-50/50 dark:bg-red-900/10'
+                : null)
+            ->columns([
+                TextColumn::make('trace_id')
+                    ->label('Trace ID')
+                    ->fontFamily(FontFamily::Mono)
+                    ->searchable(isIndividual: true, isGlobal: false)
+                    ->copyable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('user.username')
+                    ->label('User')
+                    ->fontFamily(FontFamily::Mono)
+                    ->placeholder('Unauthenticated')
+                    ->searchable()
+                    ->hidden($isRelationManager),
+
+                TextColumn::make('oauth_client.name')
+                    ->label('Client')
+                    ->placeholder('N/A')
+                    ->searchable(isIndividual: true, isGlobal: false)
+                    ->toggleable(),
+
+                TextColumn::make('grant_type')
+                    ->label('Grant')
+                    ->badge()
+                    ->color('gray')
+                    ->placeholder('N/A')
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('token_id')
+                    ->label('Token ID')
+                    ->fontFamily(FontFamily::Mono)
+                    ->limit(12)
+                    ->placeholder('N/A')
+                    ->copyable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('method')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'GET' => 'success',
+                        'POST' => 'warning',
+                        'PUT', 'PATCH' => 'info',
+                        'DELETE' => 'danger',
+                        default => 'gray',
+                    })
+                    ->sortable(),
+
+                TextColumn::make('path')
+                    ->label('Endpoint')
+                    ->limit(40)
+                    ->wrap()
+                    ->tooltip(fn ($record) => $record->path)
+                    ->fontFamily(FontFamily::Mono)
+                    ->searchable(),
+
+                TextColumn::make('route_name')
+                    ->label('Route Name')
+                    ->placeholder('N/A')
+                    ->tooltip('The named route for this request')
+                    ->wrap()
+                    ->fontFamily(FontFamily::Mono)
+                    ->searchable(isIndividual: true, isGlobal: false)
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('status_code')
+                    ->label('Status')
+                    ->badge()
+                    ->color(fn (int $state): string => match (true) {
+                        $state >= 200 && $state < 300 => 'success',
+                        $state >= 300 && $state < 400 => 'info',
+                        $state >= 400 && $state < 500 => 'warning',
+                        $state >= 500 => 'danger',
+                        default => 'gray',
+                    })
+                    ->sortable(),
+
+                TextColumn::make('failure_reason')
+                    ->label('Failure Reason')
+                    ->placeholder('N/A')
+                    ->badge()
+                    ->tooltip(fn (ApiRequestLog $record) => $record->failure_reason?->getDescription())
+                    ->sortable(),
+
+                TextColumn::make('duration_ms')
+                    ->label('Duration')
+                    ->suffix(' ms')
+                    ->color(fn (int $state): string => $state > config('api.request_logging.slow_request_threshold_ms') ? 'danger' : 'gray')
+                    ->weight(fn (int $state) => $state > config('api.request_logging.slow_request_threshold_ms') ? FontWeight::Bold : FontWeight::Normal)
+                    ->numeric()
+                    ->sortable(),
+
+                TextColumn::make('request_bytes')
+                    ->label('Request Size')
+                    ->placeholder('N/A')
+                    ->formatStateUsing(fn (?int $state): string => $state !== null ? Number::fileSize($state) : 'N/A')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('response_bytes')
+                    ->label('Response Size')
+                    ->placeholder('N/A')
+                    ->formatStateUsing(fn (?int $state): string => $state !== null ? Number::fileSize($state) : 'N/A')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('ip_address')
+                    ->label('IP Address')
+                    ->fontFamily(FontFamily::Mono)
+                    ->copyable()
+                    ->searchable(isIndividual: true, isGlobal: false)
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('created_at')
+                    ->label('Recorded')
+                    ->dateTime()
+                    ->since()
+                    ->dateTimeTooltip()
+                    ->sortable(query: fn (Builder $query, string $direction): Builder => $query->orderBy('api_request_logs.created_at', $direction)),
+            ])
+            ->defaultSort('created_at', 'desc')
+            ->heading('API Requests')
+            ->searchable(! $isRelationManager)
+            // The table polls; skip the full COUNT(*) the default paginator runs on every refresh.
+            ->paginationMode(PaginationMode::Simple)
+            // Global search covers the user and endpoint. Hidden columns search individually.
+            ->splitSearchTerms(false)
+            ->searchDebounce('750ms')
+            ->defaultPaginationPageOption(10)
+            ->filters([
+                SelectFilter::make('date_preset')
+                    ->label('Date Range')
+                    ->options([
+                        'today' => 'Today',
+                        '7days' => 'Last 7 Days',
+                        '30days' => 'Last 30 Days',
+                        '90days' => 'Last 90 Days',
+                    ])
+                    ->query(fn (Builder $query, array $data): Builder => match ($data['value'] ?? null) {
+                        'today' => $query->whereDate('api_request_logs.created_at', Carbon::today()),
+                        '7days' => $query->where('api_request_logs.created_at', '>=', Carbon::now()->subDays(7)),
+                        '30days' => $query->where('api_request_logs.created_at', '>=', Carbon::now()->subDays(30)),
+                        '90days' => $query->where('api_request_logs.created_at', '>=', Carbon::now()->subDays(90)),
+                        default => $query,
+                    }),
+
+                Filter::make('slow_requests')
+                    ->label('Slow Requests (> ' . config('api.request_logging.slow_request_threshold_ms') . ' ms)')
+                    ->query(fn (Builder $query) => $query->where('duration_ms', '>', (int) config('api.request_logging.slow_request_threshold_ms')))
+                    ->toggle(),
+
+                SelectFilter::make('status_range')
+                    ->label('Status Range')
+                    ->options([
+                        '2xx' => '2xx Success',
+                        '4xx' => '4xx Client Error',
+                        '5xx' => '5xx Server Error',
+                    ])
+                    ->query(fn (Builder $query, array $data): Builder => match ($data['value'] ?? null) {
+                        '2xx' => $query->whereBetween('status_code', [200, 299]),
+                        '4xx' => $query->whereBetween('status_code', [400, 499]),
+                        '5xx' => $query->whereBetween('status_code', [500, 599]),
+                        default => $query,
+                    }),
+
+                SelectFilter::make('method')
+                    ->options([
+                        'GET' => 'GET',
+                        'POST' => 'POST',
+                        'PUT' => 'PUT',
+                        'PATCH' => 'PATCH',
+                        'DELETE' => 'DELETE',
+                    ])
+                    ->multiple(),
+
+                SelectFilter::make('oauth_client_id')
+                    ->label('Client')
+                    ->relationship('oauth_client', 'name')
+                    ->searchable(),
+                SelectFilter::make('grant_type')
+                    ->label('Grant')
+                    ->options(OAuthGrantType::class),
+                SelectFilter::make('failure_reason')
+                    ->label('Failure Reason')
+                    ->options(ApiRequestFailure::class)
+                    ->multiple()
+                    ->preload(),
+            ])
+            ->filtersTriggerAction(
+                fn (Action $action) => $action
+                    ->button()
+                    ->label('Filters'),
+            )
+            ->recordActions([
+                ViewAction::make()
+                    ->label('View User')
+                    ->url(fn (ApiRequestLog $record) => $record->user_id ? route('filament.administration.resources.users.view', ['record' => $record->user]) : null)
+                    ->hidden(fn (ApiRequestLog $record) => $isRelationManager || ! $record->user_id),
+            ])
+            ->toolbarActions([
+                ExportAction::make()
+                    ->exporter(ApiRequestLogExporter::class)
+                    ->hidden($isRelationManager),
+            ])
+            ->emptyStateHeading('No API Requests Recorded')
+            ->emptyStateDescription('Requests to the API appear here.')
+            ->emptyStateIcon('heroicon-o-globe-alt');
+    }
+}

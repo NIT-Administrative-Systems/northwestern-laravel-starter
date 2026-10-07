@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Domains\Auth\Enums\RoleModificationOrigin;
-use App\Domains\Auth\Enums\RoleTypeEnum;
-use App\Domains\Auth\Models\Role;
+use App\Domains\Access\Enums\RoleModificationOrigin;
+use App\Domains\Access\Enums\RoleTypeEnum;
+use App\Domains\Access\Models\Role;
 use App\Domains\User\Actions\Directory\FindOrUpdateUserFromDirectory;
 use App\Domains\User\Models\User;
 use Illuminate\Database\Seeder;
@@ -17,8 +17,8 @@ use Throwable;
  * Seed the environment with users who have specific roles in the application. These are users that
  * at a minimum are affiliated with Northwestern University and have a NetID.
  *
- * This is called from the {@see DemoSeeder}, but it can additionally be run
- * once in production to initialize users with their roles.
+ * The {@see DemoSeeder} doesn't call it: it looks people up in Directory Search. Run it on its
+ * own in a deployed environment to give the stakeholders their roles.
  */
 class StakeholderSeeder extends Seeder
 {
@@ -53,7 +53,7 @@ class StakeholderSeeder extends Seeder
 
         $this->createAndAssignRole(
             $userNetIds,
-            Role::whereHas('role_type', fn ($query) => $query->where('slug', RoleTypeEnum::SystemManaged))->firstOrFail()
+            Role::whereHas('role_type', fn (\Illuminate\Contracts\Database\Query\Builder $query) => $query->where('slug', RoleTypeEnum::SystemManaged))->firstOrFail()
         );
     }
 

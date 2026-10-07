@@ -1,0 +1,80 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Unit\Domains\Api\Enums;
+
+use App\Domains\Api\Enums\TokenExpiration;
+use Illuminate\Support\Carbon;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\TestCase;
+
+#[CoversClass(TokenExpiration::class)]
+final class TokenExpirationTest extends TestCase
+{
+    #[DataProvider('labelProvider')]
+    public function test_get_label(TokenExpiration $enum, string $expected): void
+    {
+        $this->assertSame($expected, $enum->getLabel());
+    }
+
+    /** @return \Iterator<string, array{TokenExpiration, string}> */
+    public static function labelProvider(): \Iterator
+    {
+        yield 'one day' => [TokenExpiration::OneDay, '1 Day'];
+        yield 'one week' => [TokenExpiration::OneWeek, '7 Days'];
+        yield 'one month' => [TokenExpiration::OneMonth, '30 Days'];
+        yield 'two months' => [TokenExpiration::TwoMonths, '60 Days'];
+        yield 'three months' => [TokenExpiration::ThreeMonths, '90 Days'];
+        yield 'six months' => [TokenExpiration::SixMonths, '180 Days'];
+        yield 'one year' => [TokenExpiration::OneYear, '1 Year'];
+    }
+
+    #[DataProvider('expiresAtProvider')]
+    public function test_expires_at_adds_correct_days(TokenExpiration $enum, int $expectedDays): void
+    {
+        $from = Carbon::parse('2026-01-01 00:00:00');
+        $expected = Carbon::parse('2026-01-01 00:00:00')->addDays($expectedDays);
+        $result = $enum->expiresAt($from);
+
+        $this->assertInstanceOf(Carbon::class, $result);
+        $this->assertTrue(
+            $expected->equalTo($result),
+            "Expected {$expectedDays} days added for {$enum->name}"
+        );
+    }
+
+    /** @return \Iterator<string, array{TokenExpiration, int}> */
+    public static function expiresAtProvider(): \Iterator
+    {
+        yield 'one day' => [TokenExpiration::OneDay, 1];
+        yield 'one week' => [TokenExpiration::OneWeek, 7];
+        yield 'one month' => [TokenExpiration::OneMonth, 30];
+        yield 'two months' => [TokenExpiration::TwoMonths, 60];
+        yield 'three months' => [TokenExpiration::ThreeMonths, 90];
+        yield 'six months' => [TokenExpiration::SixMonths, 180];
+        yield 'one year' => [TokenExpiration::OneYear, 365];
+    }
+
+    public function test_personal_access_tokens_offer_the_lifetimes_up_to_the_maximum(): void
+    {
+        $this->assertSame(
+            [TokenExpiration::OneMonth, TokenExpiration::ThreeMonths, TokenExpiration::SixMonths, TokenExpiration::OneYear],
+            TokenExpiration::forPersonalAccessTokens(365),
+        );
+        $this->assertSame([TokenExpiration::OneMonth, TokenExpiration::ThreeMonths], TokenExpiration::forPersonalAccessTokens(90));
+        $this->assertSame([], TokenExpiration::forPersonalAccessTokens(7));
+    }
+
+    public function test_expires_at_defaults_to_now_when_no_from_date(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-06-15 12:00:00'));
+
+        $result = TokenExpiration::OneWeek->expiresAt();
+
+        $this->assertTrue(Carbon::parse('2026-06-22 12:00:00')->equalTo($result));
+
+        Carbon::setTestNow();
+    }
+}

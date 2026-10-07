@@ -15,7 +15,9 @@ Providers:
 - **Microsoft Entra ID** (formerly Azure AD) - OAuth2 authorization code flow directly to Microsoft
 - **Online Passport** (agentless WebSSO) - Cookie-based SSO via OpenAM/ForgeRock, validated through Apigee
 
-The starter **auto-detects** which provider to use based on your credentials. If `WEBSSO_API_KEY` is set or `WEBSSO_STRATEGY` is `forgerock-direct`, login/logout routes through Online Passport. Otherwise, it defaults to Entra ID. Only one provider is active at a time.
+The starter **auto-detects** which provider to use based on your credentials (`SsoProvider::configured()`). Online Passport is used when `WEBSSO_API_KEY` is set or `WEBSSO_STRATEGY` is `forgerock-direct`; otherwise Entra ID is used when both `AZURE_CLIENT_ID` and `AZURE_CLIENT_SECRET` are set. Only that provider's routes are registered, and sign-in, logout and `config:validate` all use it. When neither is configured, the sign-in page has no NetID button.
+
+SSO is optional in the `local` environment, where the sign-in page offers **Sign In As** for the seeded demo users and `config:validate` skips the SSO check when no provider is configured. See [Signing In Locally](/features/authentication/#signing-in-locally). Deployed environments always need a provider.
 
 For a higher-level overview of all authentication methods, see the [Authentication](/features/authentication/) documentation.
 
@@ -23,7 +25,7 @@ For a higher-level overview of all authentication methods, see the [Authenticati
 
 <Steps>
 
-1. **User clicks "Sign in with NetID"**
+1. **User clicks "Sign In with NetID"**
 
    The application redirects to Microsoft's login endpoint via `WebSSOController@oauthRedirect`. The OAuth2 authorization code flow goes directly to `login.microsoftonline.com`, not through Apigee or ForgeRock.
 
@@ -37,11 +39,11 @@ For a higher-level overview of all authentication methods, see the [Authenticati
 
 4. **Directory Search lookup**
 
-   `WebSSOController::findUserByNetID()` calls `FindOrUpdateUserFromDirectory` to provision or update the user from Northwestern's directory. This includes a 3-attempt retry with 500ms delays. If all retries fail, a 503 error page is rendered.
+   `WebSSOController::findUserByNetID()` calls `FindOrUpdateUserFromDirectory` to provision or update the user from Northwestern's directory. This includes a 3-attempt retry with 500ms delays. If all retries fail, the user sees the 503 page (see [Error Handling](#error-handling)).
 
 5. **Session established**
 
-   The `authenticated()` hook regenerates the session and CSRF token, creates a `UserLoginRecord` for audit purposes, and logs the user in.
+   The `laravel-soa` trait logs the user in, then calls the starter's `authenticated()` hook, which finishes with `SignIn::complete()`, as every sign-in method does: a new session and CSRF token, a `UserLoginRecord`, and `/`, where `HomeController` sends them on to the app panel, unless they were headed for another page first. Single sign-on isn't remembered past the session, since signing in again is usually silent.
 
 </Steps>
 
@@ -49,7 +51,7 @@ For a higher-level overview of all authentication methods, see the [Authenticati
 
 <Steps>
 
-1. **User clicks "Sign in with NetID"**
+1. **User clicks "Sign In with NetID"**
 
    The application redirects to ForgeRock's login page via `WebSSOController@login`. The user is sent to Northwestern's Online Passport login portal.
 
@@ -67,13 +69,15 @@ For a higher-level overview of all authentication methods, see the [Authenticati
 
 5. **Session established**
 
-   The `authenticated()` hook regenerates the session and CSRF token, creates a `UserLoginRecord` for audit purposes, and logs the user in.
+   The `laravel-soa` trait logs the user in, then calls the starter's `authenticated()` hook, which finishes with `SignIn::complete()`, as every sign-in method does: a new session and CSRF token, a `UserLoginRecord`, and `/`, where `HomeController` sends them on to the app panel, unless they were headed for another page first. Single sign-on isn't remembered past the session, since signing in again is usually silent.
 
 </Steps>
 
 ---
 
 ## Routes
+
+Routes are defined in `routes/auth.php`. The Entra ID and Online Passport routes are registered only when that provider is configured; the shared logout route is always registered.
 
 ### Entra ID Routes
 
@@ -90,6 +94,14 @@ For a higher-level overview of all authentication methods, see the [Authenticati
 | `GET` | `/auth/websso/login` | `WebSSOController@login` | `login-websso` |
 | `GET` | `/auth/websso/logout` | `WebSSOController@logout` | `login-websso-logout` |
 
+### Shared Route
+
+| Method | URI | Controller | Name |
+|--------|-----|------------|------|
+| `POST` | `/auth/logout` | `LogoutSelectionController` | `logout` |
+
+`LogoutSelectionController` asks `SignIn::signOut()`, which sends SSO users to the configured provider's logout route. Local users, and SSO users when no provider is configured, are signed out locally.
+
 ---
 
 ## Logout
@@ -98,7 +110,7 @@ For a higher-level overview of all authentication methods, see the [Authenticati
 
 The `oauthLogout()` method handles SSO session cleanup:
 
-- **Production** - Delegates to the `laravel-soa` trait's `oauthLogout()` method, redirecting to Entra ID's logout endpoint. The local session is cleared afterward.
+- **Outside CI** - Delegates to the `laravel-soa` trait's `oauthLogout()` method, which clears the local session and then redirects to Entra ID's logout endpoint.
 - **CI environment** - Skips the Entra redirect and performs a local-only logout to avoid external service dependencies.
 
 ### Online Passport Logout
@@ -109,7 +121,7 @@ The `logout()` method (from the `WebSSOAuthentication` trait) redirects the user
 
 ## Error Handling
 
-If the Directory Search lookup fails after 3 retries during the SSO callback, the controller throws a `ServiceDownError` identifying the `DIRECTORY_SEARCH` service. The application's exception handler renders a user-facing 503 page rather than exposing a stack trace.
+If the Directory Search lookup fails after 3 retries during the SSO callback, the controller throws a `ServiceDownError` for `ExternalService::DirectorySearch` (`directory-search`). The exception renders itself: browser requests get the 503 page (`resources/views/errors/503.blade.php`), and API or JSON requests get a Problem Details 503 response with `Retry-After: 60`. The error is still reported to Sentry.
 
 ---
 
@@ -122,13 +134,10 @@ If the Directory Search lookup fails after 3 retries during the SSO callback, th
     <Property name="AZURE_CLIENT_SECRET" required>
         Entra ID application client secret
     </Property>
-    <Property name="AZURE_REDIRECT_URI" required>
-        OAuth callback URL
-    </Property>
 </PropertyTable>
 
 <Aside type="tip">
-Entra ID requires registering the application in Azure's control panel. You'll need to generate a client ID and secret, and register the callback URI. The callback must use HTTPS.
+Entra ID requires registering the application in Azure's control panel. You'll need to generate a client ID and secret, and register the callback URI. The callback must use HTTPS. The starter builds the callback URL from the `login-oauth-callback` route (`https://your-app.northwestern.edu/auth/azure-ad/callback`), so there is no redirect URI setting. `php artisan websso:callback` prints the URL to register.
 </Aside>
 
 ---

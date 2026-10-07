@@ -8,7 +8,7 @@ sidebar:
 import { Card, CardGrid, Aside, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
 import { PropertyTable, Property } from '@nu-appdev/northwestern-starlight-theme/components';
 
-The Northwestern Laravel Starter provides a multi-method authentication system that handles Northwestern users (via NetID/SSO) and external collaborators (via passwordless verification codes or Access Tokens).
+The Northwestern Laravel Starter provides a multi-method authentication system that handles Northwestern users (via NetID/SSO) and external collaborators (via passwordless verification codes), and integrations through OAuth credentials issued by Laravel Passport.
 
 ## Authentication Methods
 
@@ -35,16 +35,85 @@ The Northwestern Laravel Starter provides a multi-method authentication system t
     - Invite-only access
   </Card>
 
-  <Card title="Access Tokens" icon="rocket">
-    **Bearer Token Authentication**
+  <Card title="OAuth Clients" icon="rocket">
+    **Laravel Passport**
 
-    Long-lived tokens for programmatic API access.
+    Client credentials for integrations, which get short-lived access tokens.
 
-    - Multiple tokens per user
+    - Multiple clients per API user
     - IP allowlisting
-    - Token expiration
+    - Expiring, rotatable secrets
   </Card>
 </CardGrid>
+
+---
+
+## Signing In
+
+Sign-in belongs to the [App panel](/building/app-panel/). Guests who open a page in any panel are sent to `/app/login`, which lists the sign-in methods this application has configured:
+
+- **Sign In with NetID** appears when single sign-on is configured. It uses Online Passport (WebSSO) when that is configured, otherwise Entra ID.
+- **Sign In with Email** appears when `LOCAL_AUTH_ENABLED=true`.
+- **Sign In As** appears in the `local` environment only. See [Signing In Locally](#signing-in-locally).
+- If none is available, the page explains that no sign-in methods are available.
+
+When NetID is the only method, `/app/login` skips the page and goes straight to single sign-on. The exceptions are the `ci` environment, where the page always renders so end-to-end tests can sign in with email codes, and `local`, where it offers **Sign In As**.
+
+Email sign-in is a single page, `/app/login/email`, with two steps: request a code, then enter it. Progress is kept in the session, so reloading the page returns to the current step.
+
+Which methods are offered, and the step every method ends with, are decided in `App\Domains\Auth\SignIn`. Every sign-in finishes with `SignIn::complete()`: a new session and CSRF token, a login record, and the page the person asked for, or `/`. An email code sign-in is remembered past the session (Laravel's remember cookie), since a new code costs a trip to the inbox; single sign-on and Sign In As aren't, since signing in again is usually silent or one click. `SignInMethod::remembers()` is where to change that.
+
+## Signing In Locally
+
+A local environment needs no SSO, email or credentials to sign in. In the `local` environment, the sign-in page has a **Development** section with a **Sign In As…** menu of the seeded demo users, each shown with its role:
+
+| User | Signs in as |
+|---|---|
+| `nuit.admin` | NUIT Administrator, a Super Administrator |
+| `generic.user` | A Northwestern user with no extra roles |
+| `partner.user` | A local (email) account, when `LOCAL_AUTH_ENABLED=true` |
+
+Each menu item is a link to `/app/login/as/{username}`, which signs in as that user, records the sign-in like any other, and redirects to `/` (or the page you asked for). Agents and scripts can use the URL directly, at any host or port the application is served on.
+
+The users come from `DemoUserSeeder`, which `db:rebuild` runs. Add the users you seed for specific roles to its `SIGN_IN_AS` list and they appear here too. API users can't be signed in as.
+
+<Aside type="caution">
+The route is registered only when `APP_ENV=local`: an explicit check for `local`, not "anything but production". It doesn't exist in `ci`, `develop`, `qa`, `production` or any other environment, and the controller refuses outside `local` as well.
+</Aside>
+
+To test real NetID sign-in locally, configure Entra ID or Online Passport (see [Installation](/getting-started/installation/#5-environment-configuration)). The Azure redirect URI must match the host you use.
+
+## Where Users Land After Signing In
+
+Every sign-in path ends at `/`. `HomeController` shows guests the landing page and sends signed-in users to `destinationFor()`, which returns the App panel by default. A user who started from a specific page, for example a link in an email, is returned to that page instead.
+
+To change where signed-in users go, override `destinationFor()`:
+
+<Tabs>
+  <TabItem label="Per role">
+    ```php
+    // app/Http/Controllers/HomeController.php
+    protected function destinationFor(User $user): string
+    {
+        if ($user->can(SystemPermission::AccessAdministrationPanel)) {
+            return Filament::getPanel(AdministrationPanelProvider::ID)->getUrl();
+        }
+
+        return Filament::getPanel(AppPanelProvider::ID)->getUrl();
+    }
+    ```
+  </TabItem>
+  <TabItem label="No landing page">
+    To send guests straight to sign-in instead of showing the landing page, change the guest branch of `__invoke()`:
+
+    ```php
+    // app/Http/Controllers/HomeController.php
+    if (! $user instanceof User) {
+        return redirect()->to(Filament::getPanel(AppPanelProvider::ID)->getLoginUrl());
+    }
+    ```
+  </TabItem>
+</Tabs>
 
 ---
 
@@ -62,7 +131,7 @@ Northwestern users authenticate via single sign-on using their NetID credentials
 
 2. **Redirect to SSO**
 
-   Application redirects to Northwestern's authentication service
+   The application sends the guest to `/app/login`. When email sign-in is off, that page redirects straight to Northwestern's authentication service; otherwise the user picks **Sign In with NetID** there
 
 3. **User authenticates**
 
@@ -113,15 +182,15 @@ External users (non-Northwestern) can access the application via time-limited ve
 
 2. **Verification code sent**
 
-   Admin triggers a code email or user requests one themselves
+   The user requests a code on `/app/login/email`, or a super administrator (`ManageAll`) sends one with **Send Verification Code** on the user's page (or the **Send a verification code now** option when creating the user)
 
 3. **User receives email**
 
-   Email contains a time-limited verification code (valid for 10 minutes by default)
+   The email contains the code (valid for 10 minutes by default, `LOCAL_AUTH_CODE_EXPIRES_MINUTES`) and an **Enter your code** button. The button opens `/app/login/email` at the code step for that challenge, so a code sent by an administrator or read on another device can be entered. The link alone does not sign anyone in, and an expired, used, locked or altered link is ignored.
 
 4. **User enters code**
 
-   Code authenticates the user and establishes a session
+   On `/app/login/email`, the code authenticates the user and `SignIn::complete()` establishes a session
 
 5. **Code expires**
 
@@ -143,11 +212,21 @@ LOCAL_AUTH_RATE_LIMIT_PER_HOUR=10
 # Rate limit for login code requests per IP (per hour)
 LOCAL_AUTH_RATE_LIMIT_PER_IP_PER_HOUR=20
 
-# Where to redirect after successful login
-LOCAL_AUTH_REDIRECT_AFTER_LOGIN=/
-
 # Use a fixed, predictable verification code instead of random codes
 LOCAL_AUTH_USE_FIXED_CODE=false
+
+# Number of digits in a verification code
+LOCAL_AUTH_CODE_DIGITS=6
+
+# Minutes before a code expires
+LOCAL_AUTH_CODE_EXPIRES_MINUTES=10
+
+# Failed attempts before a challenge locks, and how many minutes it stays locked
+LOCAL_AUTH_CODE_MAX_ATTEMPTS=8
+LOCAL_AUTH_CODE_LOCK_MINUTES=15
+
+# Seconds before another code can be sent
+LOCAL_AUTH_CODE_RESEND_COOLDOWN=30
 ```
 
 <Aside type="tip">
@@ -159,29 +238,27 @@ LOCAL_AUTH_USE_FIXED_CODE=false
 <Tabs>
   <TabItem label="Via Administration Panel" icon="seti:config">
     1. Navigate to **Users**
-    2. Click **Actions** → **Create Local User**
-    3. Enter user details (name, email, etc.)
-    6. Create the user
+    2. Click **Add User** → **Add Local User**
+    3. Enter the email address, first and last name, job title and organization (all required), and an optional description
+    4. Select **Send a verification code now** if the user is ready to sign in. Otherwise they can request one themselves.
+    5. Create the user
   </TabItem>
 
   <TabItem label="Programmatically" icon="seti:php">
+    `CreateLocalUser` generates a unique username and creates the local user as an affiliate. With `sendLoginLink: true` (the default), it also emails a verification code.
+
     ```php
-    use App\Domains\User\Models\User;
-    use App\Domains\User\Enums\Affiliation;
-    use App\Domains\Auth\Enums\AuthType;
-    use App\Domains\Auth\Actions\Local\IssueLoginChallenge;
+    use App\Domains\User\Actions\Local\CreateLocalUser;
 
-    $user = User::create([
-        'username' => 'jdoe',
-        'auth_type' => AuthType::Local,
-        'primary_affiliation' => Affiliation::Affiliate,
-        'email' => 'jane.doe@example.com',
-        'first_name' => 'Jane',
-        'last_name' => 'Doe',
-    ]);
-
-    // Send verification code
-    resolve(IssueLoginChallenge::class)($user->email, request()->ip(), request()->userAgent());
+    $user = resolve(CreateLocalUser::class)(
+        email: 'jane.doe@example.com',
+        firstName: 'Jane',
+        lastName: 'Doe',
+        title: 'Research Partner',
+        department: 'Example University',
+        description: 'Collaborator on the 2026 study',
+        sendLoginLink: true,
+    );
     ```
   </TabItem>
 </Tabs>
@@ -190,7 +267,7 @@ LOCAL_AUTH_USE_FIXED_CODE=false
 
 <CardGrid>
   <Card title="Time-Limited Codes" icon="approve-check">
-    Codes automatically expire after configured duration (default: 10 minutes)
+    Codes expire after `LOCAL_AUTH_CODE_EXPIRES_MINUTES` (default: 10 minutes)
   </Card>
 
   <Card title="Single-Use Codes" icon="approve-check">
@@ -208,33 +285,33 @@ LOCAL_AUTH_USE_FIXED_CODE=false
 
 ---
 
-## Access Token Authentication
+## API Authentication
 
-API users authenticate using long-lived Bearer tokens for programmatic access.
+Integrations authenticate as API users through OAuth service clients issued by Laravel Passport.
 
 ### How It Works
 
 <Steps>
 
-1. **Admin creates API user**
+1. **Admin creates an API user and a client**
 
-   Administrator creates an API user and generates first token
+   An administrator creates an API user with its first service client, or adds a client to an existing API user
 
-2. **Token delivered once**
+2. **Credentials delivered once**
 
-   Plain-text token shown only at creation (never retrievable again)
+   The client ID and secret are shown only at creation; the secret is stored hashed and can't be retrieved again
 
-3. **Client stores token**
+3. **Client gets an access token**
 
-   Client securely stores token for API requests
+   The integration exchanges the client ID and secret at `POST /oauth/token` for an access token that lasts one hour
 
 4. **Token in requests**
 
-   Client includes token in `Authorization: Bearer` header
+   The integration includes the access token in the `Authorization: Bearer` header
 
 5. **Middleware validates**
 
-   `AuthenticatesAccessTokens` middleware validates token and IP allowlist
+   `AuthenticatePassportToken` validates the token, the client's secret expiry and IP allowlist, and authenticates the request as the client's API user
 
 6. **Request logged**
 
@@ -242,13 +319,15 @@ API users authenticate using long-lived Bearer tokens for programmatic access.
 
 </Steps>
 
-See the [API Documentation](/features/api/) for complete Access Token management details.
+See the [API Documentation](/features/api/) for complete client management details.
 
 ---
 
 ## User Segmentation
 
 Every login creates a `UserLoginRecord` with a **segment**, a classification of the user at that moment. Segments feed the login analytics dashboard (charts, stats, filters) and are captured at login time so historical metrics remain accurate even if user roles change later.
+
+Sign-in records are deleted after `LOGIN_RECORD_RETENTION_DAYS` (default 365). See [Data Retention](/getting-started/initial-customization/#7-data-retention).
 
 ### Default Segments
 
@@ -296,7 +375,7 @@ All charts, filters, exports, and stats pull from the `UserSegment`. Adding a ne
 
 ## Rate Limiting
 
-Authentication endpoints use layered rate limiters to prevent brute force attacks and abuse. Limits are applied per IP and per identifier (email or challenge ID) to balance security with usability.
+Authentication uses layered rate limits to prevent brute force attacks and abuse. Limits are applied per IP and per identifier (email or challenge ID) to balance security with usability. `App\Domains\Auth\LoginCodes` enforces the passwordless limits itself, along with the resend cooldown, because the email sign-in page's Livewire actions don't pass through route middleware.
 
 ### Passwordless Login
 
@@ -324,5 +403,15 @@ Authentication endpoints use layered rate limiters to prevent brute force attack
 </PropertyTable>
 
 All rate limiters are defined in `config/rate-limiting.php`.
+
+---
+
+## Impersonating Users
+
+Users with the `ManageImpersonation` permission can sign in as another user to see the application as they do. The **Impersonate** button on a user's page in the administration panel posts to `/impersonate/take/{id}`. API users can't be impersonated, and only a user with `ManageAll` can impersonate another user who has it.
+
+While impersonating, both panels show the theme's impersonation banner, whose leave button posts to `/impersonate/leave` and returns to the original account. Both routes are in `routes/auth.php` and share the [impersonation rate limit](#impersonation).
+
+Each start is recorded in the impersonation log, which is kept forever unless `IMPERSONATION_LOG_RETENTION_DAYS` is set. See [Audit Logging](/features/audit-logging/#what-gets-audited).
 
 For information on roles, permissions, and policies after a user is authenticated, see the [Authorization](/features/authorization/) documentation.

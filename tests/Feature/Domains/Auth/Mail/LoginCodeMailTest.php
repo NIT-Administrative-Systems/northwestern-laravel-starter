@@ -7,6 +7,7 @@ namespace Tests\Feature\Domains\Auth\Mail;
 use App\Domains\Auth\Mail\LoginCodeMail;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Crypt;
+use Northwestern\SysDev\Chassis\Formatting\CountInWords;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
@@ -18,7 +19,8 @@ final class LoginCodeMailTest extends TestCase
         config(['app.name' => 'Test App']);
         $mailable = new LoginCodeMail(
             Crypt::encryptString('123456'),
-            CarbonImmutable::now()->addMinutes(10)
+            CarbonImmutable::now()->addMinutes(10),
+            'https://example.test/app/login/email?challenge=token',
         );
 
         $this->assertEquals('Sign in to Test App', $mailable->envelope()->subject);
@@ -32,13 +34,15 @@ final class LoginCodeMailTest extends TestCase
 
         $mailable = new LoginCodeMail(
             Crypt::encryptString('654321'),
-            $expiresAt
+            $expiresAt,
+            'https://example.test/app/login/email?challenge=token',
         );
 
         $content = $mailable->content();
 
         $this->assertEquals('mail.auth.login-code', $content->markdown);
         $this->assertEquals('654321', $content->with['code']);
-        $this->assertEquals($expectedMinutes, $content->with['expiresInMinutes']);
+        $this->assertEquals(CountInWords::of($expectedMinutes, 'minute'), $content->with['expiresIn']);
+        $this->assertEquals('https://example.test/app/login/email?challenge=token', $content->with['signInUrl']);
     }
 }

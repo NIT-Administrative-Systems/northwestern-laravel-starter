@@ -4,13 +4,18 @@ declare(strict_types=1);
 
 use App\Domains\Core\Exceptions\SentryExceptionHandler;
 use App\Http\Middleware\EnvironmentLockdown;
+use App\Http\Middleware\HandleCors;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Middleware\HandleCors as FrameworkHandleCors;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Laravel\Passport\Exceptions\InvalidAuthTokenException;
 use Northwestern\SysDev\Chassis\Database\DatabasePausedDetector;
 use Northwestern\SysDev\Chassis\Exceptions\ProblemDetailsRenderer;
+use Northwestern\SysDev\Chassis\Exceptions\UnknownOAuthClientException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -22,18 +27,17 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__ . '/../routes/console.php',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->redirectGuestsTo(fn () => route('login-selection'));
+        $middleware->redirectGuestsTo(fn () => route('filament.app.auth.login'));
         $middleware->redirectUsersTo('/');
-
-        $middleware->validateCsrfTokens(except: [
-            '/__cypress__/artisan',
-        ]);
 
         $middleware->web([
             EnvironmentLockdown::class,
         ]);
 
         $middleware->throttleApi();
+
+        // Adds cors.open_paths, for the MCP server and the OAuth endpoints its clients call.
+        $middleware->replace(FrameworkHandleCors::class, HandleCors::class);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         // Database pause errors (custom handling for web)
@@ -44,6 +48,15 @@ return Application::configure(basePath: dirname(__DIR__))
 
             return null;
         });
+
+        // An OAuth consent screen approved or denied after its session expired, or in another tab:
+        // the request is gone, so there is no application to return to.
+        // Mapped before Laravel turns authorization exceptions into a 403.
+        $exceptions->map(InvalidAuthTokenException::class, fn (InvalidAuthTokenException $e): HttpException => new HttpException(419, 'This authorization request has expired.', $e));
+
+        // A person sent to the OAuth consent screen by a deleted or revoked client, such as an MCP
+        // client that kept its client ID (DetectUnknownOAuthClient in config/passport.php).
+        $exceptions->render(fn (UnknownOAuthClientException $e): Response => response()->view('errors.unknown-oauth-client', status: $e->getStatusCode()));
 
         // Skip reporting database timeout noise in non-production environments - these are common when RDS is waking up
         $exceptions->report(function (Throwable $e): bool {

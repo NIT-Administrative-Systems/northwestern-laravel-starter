@@ -1,0 +1,23 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Domains\Auth\Listeners;
+
+use App\Domains\Auth\Models\ImpersonationLog;
+use Lab404\Impersonate\Events\TakeImpersonation;
+
+/**
+ * When a {@see TakeImpersonation} event is fired by the {@see \Lab404\Impersonate\Impersonate} package, create a new
+ * {@see ImpersonationLog} so that we can track who impersonated who.
+ */
+class LogImpersonationAccess
+{
+    public function handle(TakeImpersonation $event): void
+    {
+        ImpersonationLog::create([
+            'impersonator_user_id' => $event->impersonator->getAuthIdentifier(),
+            'impersonated_user_id' => $event->impersonated->getAuthIdentifier(),
+        ]);
+    }
+}

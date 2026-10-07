@@ -8,14 +8,14 @@
             <div class="space-y-3">
                 <div class="flex flex-wrap items-center gap-2">
                     <p class="font-semibold tracking-tight">
-                        No protected API routes detected
+                        No Protected API Routes Detected
                     </p>
                 </div>
 
                 <p class="leading-relaxed">
                     This dashboard records traffic for routes that are protected by the
                     <code
-                          class="bg-warning-100/60 dark:bg-warning-500/20 rounded px-1.5 py-0.5 font-mono text-[0.8rem]">AuthenticatesAccessTokens</code>
+                          class="bg-warning-100/60 dark:bg-warning-500/20 rounded px-1.5 py-0.5 font-mono text-[0.8rem]">AuthenticatePassportToken</code>
                     middleware. No matching routes have been observed in
                     <code
                           class="bg-warning-100/60 dark:bg-warning-500/20 rounded px-1.5 py-0.5 font-mono text-[0.8rem]">routes/api.php</code>.
@@ -23,14 +23,14 @@
 
                 <div class="space-y-1">
                     <p class="text-warning-700 dark:text-warning-300 text-xs font-semibold uppercase tracking-wide">
-                        Next steps
+                        Next Steps
                     </p>
 
                     <ul class="text-warning-900/90 dark:text-warning-100/90 list-disc space-y-1 pl-5">
                         <li>
                             Protect at least one route with
                             <code
-                                  class="bg-warning-100/60 dark:bg-warning-500/20 rounded px-1.5 py-0.5 font-mono text-[0.8rem]">AuthenticatesAccessTokens</code>
+                                  class="bg-warning-100/60 dark:bg-warning-500/20 rounded px-1.5 py-0.5 font-mono text-[0.8rem]">AuthenticatePassportToken</code>
                             to begin collecting metrics.
                         </li>
                         <li>

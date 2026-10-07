@@ -3,12 +3,12 @@
         <div class="flex items-start gap-6">
             <div class="flex-1">
                 <h2 class="text-xl font-bold tracking-tight text-gray-950 dark:text-white">
-                    {{ config('app.name') }}
+                    Welcome
                 </h2>
 
                 <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                    This dashboard is yours to customize. Add widgets, stats, and charts to create the perfect overview
-                    for your application.
+                    Replace this with your application's dashboard: add widgets, stats, and charts for what
+                    administrators need to see.
                 </p>
 
                 <div class="mt-4 flex flex-wrap gap-3">

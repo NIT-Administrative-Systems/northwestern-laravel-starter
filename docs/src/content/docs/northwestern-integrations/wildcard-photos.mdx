@@ -17,7 +17,7 @@ This feature is disabled by default and can be enabled with a single environment
 
 1. **Photo sync triggered**
 
-   During SSO login, `FindOrUpdateUserFromDirectory` conditionally dispatches a `DownloadWildcardPhotoJob` if `WILDCARD_PHOTO_SYNC_ENABLED` is true. The job can run synchronously (during login) or asynchronously on the queue.
+   When a user is fetched from the directory, `FindOrUpdateUserFromDirectory` dispatches a `DownloadWildcardPhotoJob` if `WILDCARD_PHOTO_SYNC_ENABLED` is true. During SSO sign-in the job is queued. It runs synchronously only when an administrator creates a user or uses **Refresh from Directory** in the administration panel.
 
 2. **LDAP photo retrieval**
 
@@ -25,11 +25,11 @@ This feature is disabled by default and can be enabled with a single environment
 
 3. **S3 storage**
 
-   The decoded photo is written to `wildcard-photos/{netid}.jpg` on the `s3` disk. The user record is updated with the `wildcard_photo_s3_key` and `wildcard_photo_last_synced_at` timestamp. If no photo is found, the key is set to `null`.
+   The decoded photo is written to `wildcard-photos/{netid}.jpg` on the `s3` disk. The user record is updated with the `wildcard_photo_s3_key` and `wildcard_photo_last_synced_at` timestamp. If the lookup fails, no photo is found, or the upload fails, the existing key and timestamp are left unchanged.
 
 4. **Serving photos**
 
-   `WildcardPhotoController` generates a 30-minute presigned S3 URL and returns a redirect response. If no photo is stored, it falls back to a default profile image.
+   The photo is the user's Filament avatar: `User::getFilamentAvatarUrl()` returns the photo route. `WildcardPhotoController` generates a 30-minute presigned S3 URL and returns a redirect response. If no photo is stored, or the viewer fails the `view` gate, it redirects to the default profile image instead.
 
 </Steps>
 

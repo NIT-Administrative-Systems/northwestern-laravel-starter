@@ -54,25 +54,12 @@ return [
                 'name' => env('MAIL_FROM_NAME'),
             ],
         ],
-
-        'slack' => [
-            'webhook_url' => env('HEALTH_SLACK_WEBHOOK_URL', ''),
-
-            /*
-             * If this is set to null the default channel of the webhook will be used.
-             */
-            'channel' => null,
-
-            'username' => null,
-
-            'icon' => null,
-        ],
     ],
 
     /*
-     * You can let Oh Dear monitor the results of all health checks. This way, you'll
-     * get notified of any problems even if your application goes totally down. Via
-     * Oh Dear, you can also have access to more advanced notification options.
+     * The starter doesn't use Oh Dear, but Spatie's JSON results controller behind /api/health
+     * reads always_send_fresh_results from this block, so the endpoint runs the checks on
+     * every request instead of returning the last stored results.
      */
     'oh_dear_endpoint' => [
         'enabled' => false,
@@ -82,25 +69,6 @@ return [
          * Otherwise, we'll send the results from the last time the checks have run.
          */
         'always_send_fresh_results' => true,
-
-        /*
-         * The secret that is displayed at the Application Health settings at Oh Dear.
-         */
-        'secret' => env('OH_DEAR_HEALTH_CHECK_SECRET'),
-
-        /*
-         * The URL that should be configured in the Application health settings at Oh Dear.
-         */
-        'url' => '/oh-dear-health-check-results',
-    ],
-
-    /*
-     * You can specify a heartbeat URL for the Horizon check.
-     * This URL will be pinged if the Horizon check is successful.
-     * This way you can get notified if Horizon goes down.
-     */
-    'horizon' => [
-        'heartbeat_url' => env('HORIZON_HEARTBEAT_URL'),
     ],
 
     /*
@@ -137,11 +105,12 @@ return [
      */
     'secret_token' => env('HEALTH_SECRET_TOKEN'),
 
-/**
- * By default, conditionally skipped health checks are treated as failures.
- * You can override this behavior by uncommenting the configuration below.
- *
- * @link https://spatie.be/docs/laravel-health/v1/basic-usage/conditionally-running-or-modifying-checks
- */
-    // 'treat_skipped_as_failure' => false
+    /*
+     * Spatie treats a conditionally skipped check as a failure by default. The starter skips the
+     * database, queue and Redis checks where they don't apply (see HealthServiceProvider), so a
+     * skipped check must not turn /api/health into a 503.
+     *
+     * @link https://spatie.be/docs/laravel-health/v1/basic-usage/conditionally-running-or-modifying-checks
+     */
+    'treat_skipped_as_failure' => false,
 ];

@@ -1,0 +1,87 @@
+@import "tailwindcss";
+@import "../../../../vendor/filament/filament/resources/css/index.css";
+@import "../../../../vendor/northwestern-sysdev/northwestern-filament-theme/dist/theme.css";
+@import "../../../../vendor/northwestern-sysdev/northwestern-filament-theme/dist/tailwind-tokens.css";
+
+@source '../../../../app/Filament/App/**/*';
+@source '../../../../resources/views/filament/app/**/*';
+@source '../../../../resources/views/components/**/*';
+@source '../../../../resources/views/public/**/*';
+@source '../../../../resources/views/errors/**/*';
+@source '../../../../resources/views/vendor/pagination/tailwind.blade.php';
+@source '../../../../vendor/filament/**/*';
+
+/* The app panel's simple pages show the environment badge in <x-site-header>, not above the card. */
+.fi-simple-layout .nu-env-indicator-simple {
+    display: none;
+}
+
+/* The theme outlines focused buttons in Northwestern Purple, which vanishes on the purple site header. */
+.nu-site-header .fi-btn:focus-visible {
+    outline-color: var(--color-white);
+}
+
+/* The app panel's simple pages (sign-in, lockdown): a Northwestern Purple accent on the card. */
+.fi-simple-main {
+    border-top: 4px solid var(--nu-purple-100);
+}
+
+/* Filament runs the card edge to edge on phones; keep a gutter so it reads as a card there too. */
+.fi-simple-main-ctn {
+    padding-inline: 1rem;
+}
+
+/* Local "Sign in as" menu: its trigger spans the card like the sign-in buttons above it. */
+.nu-sign-in-as .fi-dropdown,
+.nu-sign-in-as .fi-dropdown-trigger,
+.nu-sign-in-as .fi-btn {
+    width: 100%;
+}
+
+/* A muted line under each sign-in button saying who it is for. */
+.nu-sign-in-hint {
+    display: block;
+    color: var(--gray-500);
+    font-size: 0.8125rem;
+    text-align: center;
+}
+
+/* "or" between the sign-in methods, with a rule on each side. */
+.nu-sign-in-divider {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--gray-500);
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.nu-sign-in-divider::before,
+.nu-sign-in-divider::after {
+    flex: 1;
+    border-top: 1px solid var(--gray-200);
+    content: "";
+}
+
+.dark .nu-sign-in-hint,
+.dark .nu-sign-in-divider {
+    color: var(--gray-400);
+}
+
+.dark .nu-sign-in-divider::before,
+.dark .nu-sign-in-divider::after {
+    border-top-color: var(--gray-700);
+}
+
+/* Login code boxes fill the card, however many digits local-auth.code.digits sets. */
+.nu-login-code .fi-one-time-code-input-ctn {
+    width: 100%;
+}
+
+.nu-login-code .fi-one-time-code-input-digit {
+    flex: 1 1 0;
+    min-width: 0;
+    height: 3rem;
+    font-size: 1.25rem;
+}

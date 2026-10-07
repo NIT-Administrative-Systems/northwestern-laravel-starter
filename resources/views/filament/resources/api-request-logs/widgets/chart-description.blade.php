@@ -26,7 +26,7 @@
             {{ $leftValue }}
 
             @if ($leftMeta)
-                <span class="ml-1 align-baseline text-xs font-normal text-gray-500 dark:text-gray-400">
+                <span class="ml-1 whitespace-nowrap align-baseline text-xs font-normal text-gray-500 dark:text-gray-400">
                     ({{ $leftMeta }})
                 </span>
             @endif

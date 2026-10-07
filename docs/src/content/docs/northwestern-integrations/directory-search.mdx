@@ -12,6 +12,8 @@ The Directory Search integration looks up Northwestern users by NetID, email, or
 
 The underlying API client is provided by the [`northwestern-sysdev/laravel-soa`](https://github.com/NIT-Administrative-Systems/SysDev-laravel-soa) package.
 
+Directory Search is optional in the `local` environment. Local demo users are seeded without it and `db:rebuild` doesn't call it. Without `DIRECTORY_SEARCH_API_KEY`, `config:validate` and the health check skip it locally, the administration panel's **Add Northwestern User** says it isn't configured, and **Refresh from Directory** is hidden. Deployed environments always need the key.
+
 ## How It Works
 
 <Steps>
@@ -34,7 +36,7 @@ The underlying API client is provided by the [`northwestern-sysdev/laravel-soa`]
 
 5. **Persistence**
 
-   `PersistUserWithUniqueUsername` saves the user record and assigns the default `Northwestern User` role.
+   `PersistUserWithUniqueUsername` saves the user in a transaction and assigns the `Northwestern User` role to SSO users. If the save collides with an existing username, it returns the existing user instead.
 
 </Steps>
 
@@ -47,13 +49,13 @@ The underlying API client is provided by the [`northwestern-sysdev/laravel-soa`]
 | `FindOrUpdateUserFromDirectory` | Orchestrates the full lookup-validate-sync-persist flow |
 | `SyncUserFromDirectory` | Maps LDAP attributes to User model fields |
 | `DirectorySearchType` | Auto-detects search input type (email, employee ID, NetID) |
-| `PersistUserWithUniqueUsername` | Saves/updates user with unique username generation |
+| `PersistUserWithUniqueUsername` | Saves the user, assigns the Northwestern User role, and returns the existing user on a username collision |
 
 ---
 
 ## Post-Retrieval Jobs
 
-After a user is synced and persisted, `FindOrUpdateUserFromDirectory` dispatches a configurable list of **post-retrieval jobs**. This is the extension point for running custom logic when a user is fetched from the directory, whether during SSO login, manual creation in Filament, or a scheduled directory sync.
+After a user is synced and persisted, `FindOrUpdateUserFromDirectory` dispatches a configurable list of **post-retrieval jobs**. This is the extension point for running custom logic when a user is fetched from the directory, whether during SSO sign-in, user creation in the administration panel, or the administration panel's **Refresh from Directory** action.
 
 Add your jobs to the `postRetrievalJobs()` method in `FindOrUpdateUserFromDirectory`:
 
@@ -108,7 +110,7 @@ The caller controls whether jobs run synchronously or are dispatched to the queu
 |--------|:------------:|----------|
 | SSO login | `false` | Jobs are **queued**, login completes immediately |
 | Filament user creation | `true` | Jobs run **synchronously**, the admin sees the result before the page redirects |
-| Scheduled directory sync | `false` | Jobs are **queued**, sync processes users in bulk |
+| Filament **Refresh from Directory** action | `true` | Jobs run **synchronously**, the admin sees the refreshed record |
 
 <Aside type="tip">
 When jobs run synchronously (`$immediate = true`), failures are caught and reported via your exception handler. They will **not** break the login or creation flow.
@@ -134,7 +136,7 @@ The `SyncUserFromDirectory::syncDemographics()` method defines how LDAP director
 | `departments` | `nuAllDepartmentName` | Multi-value (stored as JSON array) |
 | `job_titles` | `nuAllTitle` | Suppressed for students |
 | `hr_employee_id` | `employeeNumber` | Set when both `employeeNumber` and `nuStudentNumber` exist and differ |
-| `timezone` | — | Set from `config('platform.default_user_timezone')` (default: `America/Chicago`) |
+| `timezone` | — | Set from `config('platform.default_user_timezone')` (default: `America/Chicago`) when the user is created. Later syncs keep the timezone the user chose in their [Account preferences](/building/app-panel/#preferences) |
 
 For students, student-specific LDAP fields are prepended to the key arrays so they take priority. The `findValue()` helper returns the first non-empty match, so earlier keys win.
 
@@ -176,7 +178,7 @@ To sync an additional directory attribute (e.g., building/office location):
 
 When a directory lookup returns invalid data (missing required fields), the behavior depends on whether the user already exists:
 
-- **Existing user** - The account is marked with `netid_inactive = true` and `directory_sync_last_failed_at` is recorded. The user is not deleted.
+- **Existing SSO user** - The account is marked with `netid_inactive = true` and `directory_sync_last_failed_at` is recorded. The user is not deleted. Other existing users are returned unchanged, and API users skip the lookup entirely.
 - **New user** - A `BadDirectoryEntry` exception is thrown, preventing account creation with incomplete data.
 
 This ensures that transient directory issues don't destroy existing accounts while still preventing invalid new accounts.

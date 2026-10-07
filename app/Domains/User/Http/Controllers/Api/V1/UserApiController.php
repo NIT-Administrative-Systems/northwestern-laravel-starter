@@ -12,7 +12,7 @@ use OpenApi\Attributes as OA;
 
 #[OA\Tag(
     name: 'Users',
-    description: 'Retrieve information about the authenticated API user.'
+    description: 'Information about whoever the access token acts as: an API user for a service client, or the person for a personal access token or an application.'
 )]
 class UserApiController extends ApiController
 {
@@ -20,7 +20,7 @@ class UserApiController extends ApiController
         path: '/api/v1/me',
         operationId: 'get-user-details',
         summary: 'Get authenticated user details',
-        security: [['bearerToken' => []]],
+        security: [['oauth2' => []], ['bearerToken' => []]],
         tags: ['Users'],
         responses: [
             new OA\Response(

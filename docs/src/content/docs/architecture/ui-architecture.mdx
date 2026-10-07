@@ -1,91 +1,41 @@
 ---
 title: UI Architecture
-description: Understanding the dual UI stack approach
+description: How the starter's interface is built on one stack, and where each kind of page belongs
 sidebar:
     order: 1
 ---
 
-import { Card, CardGrid, Aside, Badge } from '@astrojs/starlight/components';
+import { Aside } from '@astrojs/starlight/components';
 
-The starter uses **two separate UI stacks**: a custom, branded stack for users, and a rapid administration panel for staff/developers.
+The starter has **one frontend stack**: [Filament](https://filamentphp.com), built on Livewire, Alpine and Tailwind CSS. Every page, from sign-in to error pages, uses it or the Northwestern design tokens it is built on. Northwestern branding comes from the [Northwestern Filament Theme](https://github.com/NIT-Administrative-Systems/northwestern-filament-theme), which follows the university's Department Templates 4.0.
 
-## User Facing Interface - Northwestern Laravel UI
+## Where pages live
 
-This stack is dedicated to creating a cohesive, branded experience for end-users and the public.
-
-**Repository:** [Northwestern Laravel UI](https://github.com/NIT-Administrative-Systems/northwestern-laravel-ui)
-
-### Stack Details
-
-* **View Layer:** Blade Templates
-* **Styling:** Customized Bootstrap 5
-* **Icons:** Font Awesome
-
-### Purpose & Use Cases
-
-* **Public Facing Pages:** Landing pages, informational content.
-* **Custom Experiences:** User dashboards, complex custom workflows.
-* **Branding:** Achieving the official **Northwestern branded look and feel**.
-* **Design Flexibility:** Provides full control over the design and frontend code.
-
-> **Example:** The application's default home page (`/`) is built entirely with this stack.
-
-## Filament
-
-Filament is a rapid application development framework built on Livewire and Tailwind. The starter ships with a single **Administration** panel for back-end staff tooling, but Filament works well for any authenticated, data-driven user experience: portals, dashboards, and self-service tools.
-
-**Framework:** [Filament](https://filamentphp.com)
-
-### Stack Details
-
-* **View Layer:** Filament
-* **Styling:** Tailwind CSS
-* **Icons:** Heroicons
-
-### Purpose & Use Cases
-
-* **Administration:** Internal staff tooling, system configuration, and user management.
-* **Data Management:** Full **CRUD** operations, interactive tables, filters, and bulk actions.
-* **Analytics:** Custom reporting dashboards and chart metrics.
-* **User-Facing Panels:** Portals, self-service tools, and data-driven workflows for authenticated users.
-* **Access:** The built-in Administration panel is available at `/administration` (requires authentication and specific permissions). Additional panels can be created on separate routes.
+| Surface | URL | Built with | Use it for |
+|---|---|---|---|
+| [**App panel**](/building/app-panel/) | `/app` | Filament panel (`AppPanelProvider`) | Everything your application does for its users. It is the default panel, and it owns sign-in for the whole application. |
+| [**Administration panel**](/building/administration-panel/) | `/administration` | Filament panel (`AdministrationPanelProvider`) | Back-office tooling: users and roles, API access, announcements, audits, support tickets and the platform overview. |
+| [**Public layout**](/building/public-pages/) | anywhere outside the panels, such as `/` and `/support/changelog` | `<x-layouts.public>` with Filament's Blade components | Pages people can see without signing in. |
+| [**Error layout**](/building/error-pages/) | 500, 503 and database-paused pages | `<x-layouts.error>` | Errors where the application may not be working. It renders without Filament, auth or the database. |
+| [**Mail**](/building/branding-and-mail/#email) | — | Laravel Markdown mail, with the starter's theme | Email. |
 
 <Aside type="tip">
-    See the [Adding a Filament Panel](/guides/adding-a-filament-panel) guide for step-by-step instructions on creating additional panels for user-facing functionality.
+    Build features in the **app panel**. Reach for the public layout only for pages that must work without signing in.
 </Aside>
 
----
+## The app panel
 
-## Choosing the Right Stack
+The app panel at `/app` is where an application built on the starter does its work. Any signed-in user can open it, except API users, and Resources, Pages, Clusters and Widgets in `app/Filament/App/` are discovered automatically. See [The App Panel](/building/app-panel/) for its dashboard, Account area, Help menu, notifications and simple pages.
 
-The choice depends on the audience and the required level of customization.
+## The administration panel
 
-<CardGrid>
-    <Card title="Northwestern Laravel UI" icon="seti:html">
-        <Badge text="Best For" variant="success" />
-        * **Custom User Experiences**
-        * Public-facing Content & Landing Pages
-        * Official Branded Pages
-        * Complex Custom Workflows
-        <hr />
-        <Badge text="Trade-offs" variant="caution" />
-        * **More Development Time**
-        * Manual building of forms/tables
-    </Card>
+The administration panel at `/administration` holds the starter's back-office tools: users and roles, the API's credentials and request log, MCP clients, announcements, audit logs, sign-in records, support tickets, the platform overview and links to developer tools. It requires the `AccessAdministrationPanel` permission, and each tool checks its own permission as well. Its resources and pages live in `app/Filament/Administration/`, and it has no footer. See [The Administration Panel](/building/administration-panel/) for each tool, who can use it, and how to add your own.
 
-    <Card title="Filament" icon="rocket">
-        <Badge text="Best For" variant="success" />
-        * **Data-Driven Interfaces**
-        * Rapid CRUD Operations
-        * User/System Configuration
-        * Analytics Dashboards
-        * Portals & Self-Service Tools
-        <hr />
-        <Badge text="Trade-offs" variant="caution" />
-        * **Limited UI Customization**
-        * Not suited for public/unauthenticated pages
-    </Card>
-</CardGrid>
+## The public layout
+
+`<x-layouts.public>` is the layout for pages outside the panels, such as the landing page and the changelog. Its routes run in the app panel's context, so it can use Filament's Blade components, and it is light only. See [Public Pages](/building/public-pages/) for adding a page, and [Error Pages](/building/error-pages/) for the error pages that also use it.
+
+The theme, footer and email are covered in [Branding & Mail](/building/branding-and-mail/).
 
 ---
 
@@ -97,17 +47,17 @@ Filament is structured around **Panels** and **Resources**.
 
 A **Panel** is a discrete, isolated area of the site with its own navigation, set of resources, and pages.
 
-> **Example:** Everything under `/administration` is driven by the `AdministrationPanelProvider`.
+> **Example:** Everything under `/app` is driven by the `AppPanelProvider`, and everything under `/administration` by the `AdministrationPanelProvider`.
 
 #### Panel ID & Authorization
 
-When adding a new Panel, the **ID** is critical for authorization:
+Each panel has an **ID**, which is also the key for authorization:
 
 ```php {4, 10}
-// app/Providers/Filament/AdministrationPanelProvider.php
-class AdministrationPanelProvider extends PanelProvider
+// app/Providers/Filament/AppPanelProvider.php
+class AppPanelProvider extends PanelProvider
 {
-    public const string ID = 'administration';
+    public const string ID = 'app';
 
     public function panel(Panel $panel): Panel
     {
@@ -119,7 +69,18 @@ class AdministrationPanelProvider extends PanelProvider
 }
 ```
 
-The initial access check for the entire panel is determined by the `User::canAccessPanel()` method, which uses this ID constant to execute the appropriate permission check.
+The access check for an entire panel is `User::canAccessPanel()`, which matches on the panel ID. A panel that isn't listed there throws, so a new panel can't be opened by accident:
+
+```php
+return match ($panel->getId()) {
+    AppPanelProvider::ID => ! $this->is_api_user,
+    AdministrationPanelProvider::ID => $this->can(SystemPermission::AccessAdministrationPanel),
+};
+```
+
+<Aside type="caution" title="Testing administration pages">
+    `app` is the default panel. Livewire tests for administration pages must set the panel first: `Filament::setCurrentPanel(AdministrationPanelProvider::ID)`.
+</Aside>
 
 ### Filament Resources
 
@@ -137,10 +98,15 @@ php artisan make:filament-resource User --generate --model-namespace=App\\Domain
 ```
 The `--generate` flag is highly recommended as it uses model introspection to create reasonable defaults for forms and columns.
 
+Filament's generators target the default panel, which is the app panel. For an administration resource or page, add `--panel=administration`:
+```bash
+php artisan make:filament-resource User --generate --model-namespace=App\\Domains\\User\\Models --panel=administration
+```
+
 #### Relation Managers
 
-To facilitate relationships between resources (e.g., users belonging to a role), you use *Relation Managers*. You must specify the related model's full path:
+To facilitate relationships between resources (e.g., users belonging to a role), you use *Relation Managers*. You must specify the related model's full path, and the panel when the resource is not in the app panel. `RoleResource` is in the administration panel:
 ```bash
 # Example: Generating a manager for the Role::users() relationship
-php artisan make:filament-relation-manager --related-model=App\\Domains\\User\\Models\\User --attach Role users username
+php artisan make:filament-relation-manager --related-model=App\\Domains\\User\\Models\\User --attach --panel=administration Role users username
 ```

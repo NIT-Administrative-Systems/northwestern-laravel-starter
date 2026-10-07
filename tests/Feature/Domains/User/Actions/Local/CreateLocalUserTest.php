@@ -8,6 +8,7 @@ use App\Domains\Auth\Enums\AuthType;
 use App\Domains\Auth\Models\LoginChallenge;
 use App\Domains\User\Actions\Local\CreateLocalUser;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\RateLimiter;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
@@ -168,13 +169,11 @@ final class CreateLocalUserTest extends TestCase
         $this->assertEquals('203.0.113.42', $loginChallenge->requested_ip);
     }
 
+    // The account is still created when its first code can't be sent, here because the email's hourly limit is used up.
     public function test_returns_user_when_login_challenge_fails(): void
     {
-        $this->mock(\App\Domains\Auth\Actions\Local\IssueLoginChallenge::class, function ($mock) {
-            $mock->shouldReceive('__invoke')
-                ->once()
-                ->andThrow(new \RuntimeException('Too many login attempts.'));
-        });
+        config(['local-auth.rate_limit_per_hour' => 1]);
+        RateLimiter::hit('login-code:challenge-fail@example.com', 3600);
 
         $user = $this->action()(
             email: 'challenge-fail@example.com',
@@ -187,6 +186,7 @@ final class CreateLocalUserTest extends TestCase
 
         $this->assertTrue($user->exists);
         $this->assertEquals('challenge-fail@example.com', $user->email);
+        $this->assertSame(0, LoginChallenge::query()->where('email', 'challenge-fail@example.com')->count());
     }
 
     protected function action(): CreateLocalUser

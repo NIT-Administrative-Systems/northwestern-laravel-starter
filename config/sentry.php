@@ -78,6 +78,10 @@ return [
 
     // Performance monitoring specific configuration
     'tracing' => [
+        // Starter: load the browser tracing integration in the Sentry browser SDK (resources/js/sentry.js). It
+        // lives under `tracing` because sentry-laravel strips this array before passing options to the PHP SDK.
+        'browser' => (bool) env('SENTRY_ENABLE_APM_FOR_JS', true),
+
         // Trace queue jobs as their own transactions (this enables tracing for queue jobs)
         'queue_job_transactions' => env('SENTRY_TRACE_QUEUE_ENABLED', true),
 

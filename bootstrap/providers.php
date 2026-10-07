@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 return [
     App\Providers\AppServiceProvider::class,
+    App\Providers\OAuthServiceProvider::class,
+    App\Mcp\McpServiceProvider::class,
     App\Providers\RateLimitingServiceProvider::class,
     App\Providers\EloquentServiceProvider::class,
     App\Providers\TelescopeServiceProvider::class,
@@ -12,5 +14,6 @@ return [
     App\Providers\HealthServiceProvider::class,
     App\Providers\SupportServiceProvider::class,
     App\Providers\FilamentServiceProvider::class,
+    App\Providers\Filament\AppPanelProvider::class,
     App\Providers\Filament\AdministrationPanelProvider::class,
 ];
