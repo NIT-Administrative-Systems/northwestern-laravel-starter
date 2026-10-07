@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Administration\Clusters\ApiCluster\Resources\ApiRequestLogs\Tables;
 
-use App\Domains\Auth\Models\ApiRequestLog;
+use App\Domains\Api\Models\ApiRequestLog;
 use App\Filament\Administration\Exports\ApiRequestLogExporter;
 use Carbon\Carbon;
 use Filament\Actions\Action;

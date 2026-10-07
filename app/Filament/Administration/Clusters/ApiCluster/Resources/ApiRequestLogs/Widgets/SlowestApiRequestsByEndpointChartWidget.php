@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Administration\Clusters\ApiCluster\Resources\ApiRequestLogs\Widgets;
 
-use App\Domains\Auth\Models\ApiRequestLog;
+use App\Domains\Api\Models\ApiRequestLog;
 use Filament\Support\RawJs;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\HtmlString;

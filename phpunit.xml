@@ -44,8 +44,8 @@
 
             <!-- Enums (declarative values, labels, colors) -->
             <file>app/Domains/Auth/Enums/AuthType.php</file>
-            <file>app/Domains/Auth/Enums/ClientOrigin.php</file>
-            <file>app/Domains/Auth/Enums/CredentialStatus.php</file>
+            <file>app/Domains/Api/Enums/ClientOrigin.php</file>
+            <file>app/Domains/Api/Enums/CredentialStatus.php</file>
             <file>app/Domains/Access/Enums/SystemPermission.php</file>
             <file>app/Domains/Access/Enums/PermissionScope.php</file>
             <file>app/Domains/Access/Enums/RoleModificationOrigin.php</file>
@@ -58,11 +58,11 @@
             <file>app/Domains/User/Enums/UserSegment.php</file>
 
             <!-- Models (casts, relationships, property declarations) -->
-            <file>app/Domains/Auth/Models/ApiRequestLog.php</file>
+            <file>app/Domains/Api/Models/ApiRequestLog.php</file>
             <file>app/Domains/Auth/Models/LoginChallenge.php</file>
-            <file>app/Domains/Auth/Models/OAuthClient.php</file>
-            <file>app/Domains/Auth/Models/OAuthConnection.php</file>
-            <file>app/Domains/Auth/Models/OAuthToken.php</file>
+            <file>app/Domains/Api/Models/OAuthClient.php</file>
+            <file>app/Domains/Api/Models/OAuthConnection.php</file>
+            <file>app/Domains/Api/Models/OAuthToken.php</file>
             <file>app/Domains/Access/Models/Permission.php</file>
             <file>app/Domains/Access/Models/Role.php</file>
             <file>app/Domains/Access/Models/RoleType.php</file>

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Mcp\Http\Controllers;
 
-use App\Domains\Auth\Actions\Applications\RegisterOAuthApplication;
-use App\Domains\Auth\Enums\ClientOrigin;
+use App\Domains\Api\Actions\Applications\RegisterOAuthApplication;
+use App\Domains\Api\Enums\ClientOrigin;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;

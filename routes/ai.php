@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-use App\Domains\Auth\Enums\TokenAudience;
-use App\Domains\Auth\Http\Middleware\AuthenticatePassportToken;
-use App\Domains\Auth\Http\Middleware\LogsApiRequests;
-use App\Domains\Auth\Http\Middleware\RequireTokenAudience;
+use App\Domains\Api\Enums\TokenAudience;
+use App\Domains\Api\Http\Middleware\AuthenticatePassportToken;
+use App\Domains\Api\Http\Middleware\LogsApiRequests;
+use App\Domains\Api\Http\Middleware\RequireTokenAudience;
 use App\Mcp\Http\Controllers\OAuthDiscoveryController;
 use App\Mcp\Http\Controllers\RegisterClientController;
 use App\Mcp\Servers\AppServer;

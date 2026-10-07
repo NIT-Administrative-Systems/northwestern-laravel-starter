@@ -139,7 +139,7 @@ enum SystemPermission: string implements HasLabel
      * Whether the permission is also an OAuth scope of the same name (`view-users`). People
      * who hold it can grant it to their personal access tokens and to applications they
      * connect, service clients hold every such scope, and a route requires it with
-     * {@see \App\Domains\Auth\Http\Middleware\RequireApiScope}. Data access, not interface.
+     * {@see \App\Domains\Api\Http\Middleware\RequireApiScope}. Data access, not interface.
      */
     public function isApiRelevant(): bool
     {

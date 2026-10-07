@@ -6,9 +6,9 @@ namespace Tests\Feature\Commands;
 
 use App\Console\Commands\RevokeIneligibleCredentialsCommand;
 use App\Domains\Access\Enums\SystemPermission;
-use App\Domains\Auth\Enums\CredentialStatus;
-use App\Domains\Auth\Models\OAuthConnection;
-use App\Domains\Auth\Models\OAuthToken;
+use App\Domains\Api\Enums\CredentialStatus;
+use App\Domains\Api\Models\OAuthConnection;
+use App\Domains\Api\Models\OAuthToken;
 use App\Domains\Core\Models\Audit;
 use App\Domains\User\Models\User;
 use PHPUnit\Framework\Attributes\CoversClass;

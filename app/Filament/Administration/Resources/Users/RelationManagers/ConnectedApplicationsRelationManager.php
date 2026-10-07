@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Filament\Administration\Resources\Users\RelationManagers;
 
+use App\Domains\Api\Actions\Applications\DisconnectApplication;
 use App\Domains\Api\ApiScopes;
 use App\Domains\Api\Concerns\AuthorizesCredentials;
 use App\Domains\Api\Enums\CredentialKind;
 use App\Domains\Api\Enums\CredentialOperation;
-use App\Domains\Auth\Actions\Applications\DisconnectApplication;
-use App\Domains\Auth\Models\OAuthConnection;
+use App\Domains\Api\Models\OAuthConnection;
 use App\Domains\User\Models\User;
 use Filament\Actions\Action;
 use Filament\Resources\RelationManagers\RelationManager;

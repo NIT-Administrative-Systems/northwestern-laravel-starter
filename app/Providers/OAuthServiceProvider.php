@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Domains\Api\ApiScopes;
-use App\Domains\Auth\Models\OAuthClient;
-use App\Domains\Auth\Models\OAuthToken;
-use App\Domains\Auth\Passport\GrantableScopeRepository;
-use App\Domains\Auth\Passport\OAuthConsent;
+use App\Domains\Api\Models\OAuthClient;
+use App\Domains\Api\Models\OAuthToken;
+use App\Domains\Api\Passport\GrantableScopeRepository;
+use App\Domains\Api\Passport\OAuthConsent;
 use App\Domains\User\Models\User;
 use App\Providers\Filament\AppPanelProvider;
 use Carbon\CarbonInterval;

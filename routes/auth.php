@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Domains\Api\Http\Controllers\SwitchOAuthAccountController;
 use App\Domains\Auth\Enums\SsoProvider;
 use App\Domains\Auth\Http\Controllers;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -31,7 +32,7 @@ Route::prefix('auth')->group(function () {
     }
 });
 
-Route::post('oauth/switch-account', Controllers\SwitchOAuthAccountController::class)->middleware('auth')->name('oauth.switch-account');
+Route::post('oauth/switch-account', SwitchOAuthAccountController::class)->middleware('auth')->name('oauth.switch-account');
 
 Route::post('/impersonate/take/{id}/{guardName?}', [Controllers\ImpersonationController::class, 'take'])->middleware('throttle:auth:impersonate')->name('impersonate');
 Route::post('/impersonate/leave', [Controllers\ImpersonationController::class, 'leave'])->middleware('throttle:auth:impersonate')->name('impersonate.leave');

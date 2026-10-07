@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Commands;
 
-use App\Domains\Auth\Models\OAuthToken;
+use App\Domains\Api\Models\OAuthToken;
 use App\Domains\User\Models\User;
 use Illuminate\Console\Scheduling\Event;
 use Illuminate\Console\Scheduling\Schedule;

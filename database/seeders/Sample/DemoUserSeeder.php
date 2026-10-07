@@ -6,7 +6,7 @@ namespace Database\Seeders\Sample;
 
 use App\Domains\Access\Enums\RoleTypeEnum;
 use App\Domains\Access\Models\Role;
-use App\Domains\Auth\Actions\Api\CreateServiceClient;
+use App\Domains\Api\Actions\ServiceClients\CreateServiceClient;
 use App\Domains\Auth\Enums\SignInMethod;
 use App\Domains\Auth\SignIn;
 use App\Domains\User\Models\User;

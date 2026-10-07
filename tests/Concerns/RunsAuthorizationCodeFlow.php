@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Concerns;
 
-use App\Domains\Auth\Actions\Applications\RegisterOAuthApplication;
-use App\Domains\Auth\Models\OAuthClient;
+use App\Domains\Api\Actions\Applications\RegisterOAuthApplication;
+use App\Domains\Api\Models\OAuthClient;
 use Illuminate\Foundation\Testing\TestCase;
 use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;

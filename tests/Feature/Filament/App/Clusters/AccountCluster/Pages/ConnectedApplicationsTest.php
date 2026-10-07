@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Filament\App\Clusters\AccountCluster\Pages;
 
 use App\Domains\Access\Enums\SystemPermission;
-use App\Domains\Auth\Models\OAuthConnection;
+use App\Domains\Api\Models\OAuthConnection;
 use App\Domains\User\Models\User;
 use App\Filament\App\Clusters\AccountCluster\Pages\ConnectedApplications;
 use App\Providers\Filament\AppPanelProvider;

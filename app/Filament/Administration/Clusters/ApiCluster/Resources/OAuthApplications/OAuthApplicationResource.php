@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Filament\Administration\Clusters\ApiCluster\Resources\OAuthApplications;
 
+use App\Domains\Api\Actions\Applications\RegenerateOAuthApplicationSecret;
+use App\Domains\Api\Actions\Applications\RevokeOAuthApplication;
+use App\Domains\Api\Actions\Applications\UpdateOAuthApplication;
 use App\Domains\Api\Concerns\AuthorizesCredentials;
 use App\Domains\Api\Enums\CredentialKind;
 use App\Domains\Api\Enums\CredentialOperation;
-use App\Domains\Auth\Actions\Applications\RegenerateOAuthApplicationSecret;
-use App\Domains\Auth\Actions\Applications\RevokeOAuthApplication;
-use App\Domains\Auth\Actions\Applications\UpdateOAuthApplication;
-use App\Domains\Auth\Enums\CredentialStatus;
-use App\Domains\Auth\Models\OAuthClient;
-use App\Domains\Auth\Models\OAuthConnection;
+use App\Domains\Api\Enums\CredentialStatus;
+use App\Domains\Api\Models\OAuthClient;
+use App\Domains\Api\Models\OAuthConnection;
 use App\Filament\Administration\Clusters\ApiCluster;
 use App\Filament\Administration\Clusters\ApiCluster\Resources\OAuthApplications\Pages\ListOAuthApplications;
 use App\Filament\Administration\Clusters\ApiCluster\Resources\OAuthApplications\Schemas\OAuthApplicationSchemas;

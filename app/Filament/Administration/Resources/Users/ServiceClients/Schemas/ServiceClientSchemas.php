@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Filament\Administration\Resources\Users\ServiceClients\Schemas;
 
-use App\Domains\Auth\Enums\CredentialStatus;
-use App\Domains\Auth\Enums\TokenExpiration;
-use App\Domains\Auth\Models\OAuthClient;
+use App\Domains\Api\Enums\CredentialStatus;
+use App\Domains\Api\Enums\TokenExpiration;
+use App\Domains\Api\Models\OAuthClient;
 use App\Filament\Support\RevealOnceSecret;
 use Carbon\CarbonInterface;
 use Filament\Actions\Action;

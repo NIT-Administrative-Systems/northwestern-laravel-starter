@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Tests\Feature\Commands;
 
 use App\Console\Commands\SendClientSecretExpirationNotificationsCommand;
-use App\Domains\Auth\Actions\Api\CreateServiceClient;
-use App\Domains\Auth\Mail\ClientSecretExpirationNotification;
-use App\Domains\Auth\Models\OAuthClient;
+use App\Domains\Api\Actions\ServiceClients\CreateServiceClient;
+use App\Domains\Api\Mail\ClientSecretExpirationNotification;
+use App\Domains\Api\Models\OAuthClient;
 use App\Domains\User\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;

@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Filament\Administration\Clusters\ApiCluster\Resources\McpClients;
 
+use App\Domains\Api\Actions\Applications\RevokeOAuthApplication;
 use App\Domains\Api\Concerns\AuthorizesCredentials;
 use App\Domains\Api\Enums\CredentialKind;
 use App\Domains\Api\Enums\CredentialOperation;
-use App\Domains\Auth\Actions\Applications\RevokeOAuthApplication;
-use App\Domains\Auth\Enums\CredentialStatus;
-use App\Domains\Auth\Models\OAuthClient;
-use App\Domains\Auth\Models\OAuthConnection;
+use App\Domains\Api\Enums\CredentialStatus;
+use App\Domains\Api\Models\OAuthClient;
+use App\Domains\Api\Models\OAuthConnection;
 use App\Filament\Administration\Clusters\ApiCluster;
 use App\Filament\Administration\Clusters\ApiCluster\Resources\McpClients\Pages\ListMcpClients;
 use BackedEnum;

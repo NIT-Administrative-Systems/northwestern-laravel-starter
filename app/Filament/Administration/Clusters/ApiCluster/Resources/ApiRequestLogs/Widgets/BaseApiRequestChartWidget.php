@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Administration\Clusters\ApiCluster\Resources\ApiRequestLogs\Widgets;
 
-use App\Domains\Auth\Models\ApiRequestLog;
+use App\Domains\Api\Models\ApiRequestLog;
 use Carbon\Carbon;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Database\Eloquent\Builder;

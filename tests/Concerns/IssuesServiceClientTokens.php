@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Concerns;
 
-use App\Domains\Auth\Actions\Api\CreateServiceClient;
-use App\Domains\Auth\Models\OAuthClient;
+use App\Domains\Api\Actions\ServiceClients\CreateServiceClient;
+use App\Domains\Api\Models\OAuthClient;
 use App\Domains\User\Models\User;
 use Illuminate\Foundation\Testing\TestCase;
 

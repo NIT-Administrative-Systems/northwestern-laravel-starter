@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Domains\User\Actions\Api;
 
-use App\Domains\Auth\Actions\Api\CreateServiceClient;
+use App\Domains\Api\Actions\ServiceClients\CreateServiceClient;
+use App\Domains\Api\Models\OAuthClient;
 use App\Domains\Auth\Enums\AuthType;
-use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\User\Enums\Affiliation;
 use App\Domains\User\Models\User;
 use Carbon\CarbonInterface;

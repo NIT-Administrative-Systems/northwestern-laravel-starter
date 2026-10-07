@@ -6,7 +6,7 @@ namespace Tests\Feature\Commands;
 
 use App\Console\Commands\SendPersonalAccessTokenExpirationNotificationsCommand;
 use App\Domains\Access\Enums\SystemPermission;
-use App\Domains\Auth\Mail\PersonalAccessTokenExpirationNotification;
+use App\Domains\Api\Mail\PersonalAccessTokenExpirationNotification;
 use App\Domains\User\Data\UserPreferences;
 use App\Domains\User\Models\User;
 use Illuminate\Support\Carbon;
@@ -102,7 +102,7 @@ final class SendPersonalAccessTokenExpirationNotificationsCommandTest extends Te
             ->assertSuccessful();
     }
 
-    private function expiringToken(User $user): \App\Domains\Auth\Models\OAuthToken
+    private function expiringToken(User $user): \App\Domains\Api\Models\OAuthToken
     {
         [, $token] = $this->personalAccessToken($user);
         $token->forceFill(['expires_at' => now()->addDays(7)->setTime(15, 0)])->save();

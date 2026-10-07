@@ -7,7 +7,7 @@ namespace App\Filament\Administration\Resources\Users\RelationManagers;
 use App\Domains\Api\Concerns\AuthorizesCredentials;
 use App\Domains\Api\Enums\CredentialKind;
 use App\Domains\Api\Enums\CredentialOperation;
-use App\Domains\Auth\Models\OAuthClient;
+use App\Domains\Api\Models\OAuthClient;
 use App\Domains\User\Models\User;
 use App\Filament\Administration\Resources\Users\ServiceClients\Actions\CreateServiceClientAction;
 use App\Filament\Administration\Resources\Users\ServiceClients\Actions\EditServiceClientIpRestrictionsAction;
