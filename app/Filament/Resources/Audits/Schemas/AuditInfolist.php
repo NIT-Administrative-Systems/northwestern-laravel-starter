@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Audits\Schemas;
 
+use App\Domains\User\Enums\AuditEvent;
 use App\Domains\User\Models\Audit;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ViewEntry;
@@ -32,23 +33,9 @@ class AuditInfolist
                             ->badge()
                             ->size(TextSize::Large)
                             ->weight(FontWeight::Bold)
-                            ->formatStateUsing(fn (string $state) => Str::of($state)->replace('_', ' ')->title()->toString())
-                            ->icon(fn (string $state) => match ($state) {
-                                'created' => Heroicon::OutlinedPlusCircle,
-                                'deleted' => Heroicon::OutlinedMinusCircle,
-                                'updated' => Heroicon::OutlinedPencilSquare,
-                                'restored' => Heroicon::OutlinedArrowUturnLeft,
-                                'role_assigned' => Heroicon::OutlinedUserPlus,
-                                'role_removed' => Heroicon::OutlinedUserMinus,
-                                'permissions_modified' => Heroicon::OutlinedShieldCheck,
-                                default => Heroicon::OutlinedTag,
-                            })
-                            ->color(fn (string $state) => match ($state) {
-                                'created', 'restored', 'role_assigned' => 'success',
-                                'deleted', 'role_removed' => 'danger',
-                                'updated', 'permissions_modified' => 'warning',
-                                default => 'gray',
-                            }),
+                            ->formatStateUsing(fn (string $state): string => AuditEvent::labelFor($state))
+                            ->icon(fn (string $state): Heroicon => AuditEvent::iconFor($state))
+                            ->color(fn (string $state): string => AuditEvent::colorFor($state)),
 
                         TextEntry::make('auditable_type')
                             ->label('Record')

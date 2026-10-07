@@ -8,6 +8,7 @@ use App\Domains\Api\CredentialAccess;
 use App\Domains\Api\Enums\CredentialKind;
 use App\Domains\Api\Enums\CredentialOperation;
 use App\Domains\Auth\Models\OAuthClient;
+use App\Domains\User\Enums\AuditEvent;
 use App\Domains\User\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use InvalidArgumentException;
@@ -60,6 +61,6 @@ readonly class UpdateOAuthApplication
             'contact_email' => $contactEmail,
         ])->save();
 
-        $updatedBy->recordCustomAudit('application_updated', ['client_id' => $client->getKey(), ...$client->only($audited)], ['client_id' => $client->getKey(), ...$old]);
+        $updatedBy->recordAuditEvent(AuditEvent::ApplicationUpdated, ['client_id' => $client->getKey(), ...$client->only($audited)], ['client_id' => $client->getKey(), ...$old]);
     }
 }

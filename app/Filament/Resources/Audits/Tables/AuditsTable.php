@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Audits\Tables;
 
+use App\Domains\User\Enums\AuditEvent;
 use App\Domains\User\Models\Audit;
 use App\Filament\Exports\AuditExporter;
 use Carbon\Carbon;
@@ -55,25 +56,9 @@ class AuditsTable
 
                 TextColumn::make('event')
                     ->badge()
-                    ->formatStateUsing(
-                        fn (string $state) => Str::of($state)->replace('_', ' ')->title()->toString()
-                    )
-                    ->icon(fn (string $state) => match ($state) {
-                        'created' => Heroicon::OutlinedPlusCircle,
-                        'deleted' => Heroicon::OutlinedMinusCircle,
-                        'updated' => Heroicon::OutlinedPencilSquare,
-                        'restored' => Heroicon::OutlinedArrowUturnLeft,
-                        'role_assigned' => Heroicon::OutlinedUserPlus,
-                        'role_removed' => Heroicon::OutlinedUserMinus,
-                        'permissions_modified' => Heroicon::OutlinedShieldCheck,
-                        default => Heroicon::OutlinedTag,
-                    })
-                    ->color(fn (string $state) => match ($state) {
-                        'created', 'restored', 'role_assigned' => 'success',
-                        'deleted', 'role_removed' => 'danger',
-                        'updated', 'permissions_modified' => 'warning',
-                        default => 'gray',
-                    })
+                    ->formatStateUsing(fn (string $state): string => AuditEvent::labelFor($state))
+                    ->icon(fn (string $state): Heroicon => AuditEvent::iconFor($state))
+                    ->color(fn (string $state): string => AuditEvent::colorFor($state))
                     ->sortable(),
                 TextColumn::make('auditable_type')
                     ->label('Record')
@@ -159,15 +144,7 @@ class AuditsTable
                 SelectFilter::make('event')
                     ->label('Event')
                     ->multiple()
-                    ->options([
-                        'created' => 'Created',
-                        'updated' => 'Updated',
-                        'deleted' => 'Deleted',
-                        'restored' => 'Restored',
-                        'role_assigned' => 'Role Assigned',
-                        'role_removed' => 'Role Removed',
-                        'permissions_modified' => 'Permissions Modified',
-                    ])
+                    ->options(AuditEvent::options())
                     ->searchable()
                     ->preload(),
                 SelectFilter::make('auditable_type')

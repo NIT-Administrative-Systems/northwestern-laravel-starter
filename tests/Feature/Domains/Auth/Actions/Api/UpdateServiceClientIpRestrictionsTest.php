@@ -10,6 +10,7 @@ use App\Domains\Auth\Actions\Api\RevokeServiceClient;
 use App\Domains\Auth\Actions\Api\UpdateServiceClientIpRestrictions;
 use App\Domains\Auth\Actions\Applications\RegisterOAuthApplication;
 use App\Domains\Auth\Enums\SystemPermission;
+use App\Domains\User\Enums\AuditEvent;
 use App\Domains\User\Models\Audit;
 use App\Domains\User\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -48,7 +49,7 @@ final class UpdateServiceClientIpRestrictionsTest extends TestCase
     {
         [, $client] = resolve(RegisterOAuthApplication::class)('Reporting Tool', ['https://reports.example.edu/callback'], true, []);
 
-        resolve(AuditServiceClientChange::class)($client, 'service_client_revoked');
+        resolve(AuditServiceClientChange::class)($client, AuditEvent::ServiceClientRevoked);
 
         $this->assertFalse(Audit::query()->where('event', 'service_client_revoked')->exists());
     }

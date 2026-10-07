@@ -9,6 +9,7 @@ use App\Domains\Api\Enums\CredentialKind;
 use App\Domains\Api\Enums\CredentialOperation;
 use App\Domains\Auth\Enums\ClientOrigin;
 use App\Domains\Auth\Models\OAuthClient;
+use App\Domains\User\Enums\AuditEvent;
 use App\Domains\User\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
@@ -71,7 +72,7 @@ readonly class RegisterOAuthApplication
                 'contact_email' => $contactEmail,
             ])->save();
 
-            $registeredBy?->recordCustomAudit('application_registered', [
+            $registeredBy?->recordAuditEvent(AuditEvent::ApplicationRegistered, [
                 'client_id' => $client->getKey(),
                 'name' => $client->name,
                 'redirect_uris' => $client->redirect_uris,

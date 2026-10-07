@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domains\User\Models;
 
 use App\Domains\Core\Models\BaseModel;
+use App\Domains\User\Enums\AuditEvent;
 use App\Domains\User\Models\Concerns\AuditsRoles;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -64,7 +65,7 @@ class Audit extends BaseModel
     }
 
     /**
-     * Scope to role activity audit records (role_assigned / role_removed events for Users).
+     * Scope to role activity audit records (role assigned and role removed events for Users).
      *
      * Backed by the partial `audits_role_activity_index`, whose predicate repeats this
      * event list. Change both together.
@@ -76,7 +77,7 @@ class Audit extends BaseModel
     protected function roleActivity(Builder $query): Builder
     {
         return $query
-            ->whereIn('event', ['role_assigned', 'role_removed'])
+            ->whereIn('event', [AuditEvent::RoleAssigned->value, AuditEvent::RoleRemoved->value])
             ->where('auditable_type', new User()->getMorphClass());
     }
 
@@ -98,9 +99,9 @@ class Audit extends BaseModel
             $oldIds = array_column($oldRoles, 'id');
             $newIds = array_column($newRoles, 'id');
 
-            return match ($this->event) {
-                'role_assigned' => array_values(array_filter($newRoles, fn (array $r): bool => ! in_array($r['id'], $oldIds))),
-                'role_removed' => array_values(array_filter($oldRoles, fn (array $r): bool => ! in_array($r['id'], $newIds))),
+            return match (AuditEvent::tryFrom($this->event)) {
+                AuditEvent::RoleAssigned => array_values(array_filter($newRoles, fn (array $r): bool => ! in_array($r['id'], $oldIds))),
+                AuditEvent::RoleRemoved => array_values(array_filter($oldRoles, fn (array $r): bool => ! in_array($r['id'], $newIds))),
                 default => [],
             };
         });

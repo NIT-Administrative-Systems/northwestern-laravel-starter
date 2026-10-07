@@ -8,6 +8,7 @@ use App\Domains\Api\CredentialAccess;
 use App\Domains\Api\Enums\CredentialKind;
 use App\Domains\Api\Enums\CredentialOperation;
 use App\Domains\Auth\Models\OAuthToken;
+use App\Domains\User\Enums\AuditEvent;
 use App\Domains\User\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 
@@ -37,7 +38,7 @@ readonly class RevokePersonalAccessToken
         $token->revoke();
 
         if ($owner instanceof User && ! $owner->is($revokedBy)) {
-            $owner->recordCustomAudit('personal_access_token_revoked', [
+            $owner->recordAuditEvent(AuditEvent::PersonalAccessTokenRevoked, [
                 'token_id' => $token->getKey(),
                 'name' => $token->name,
                 'scopes' => $token->scopes,

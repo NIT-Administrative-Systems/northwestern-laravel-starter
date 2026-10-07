@@ -7,9 +7,8 @@ namespace App\Domains\User\Models\Concerns;
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\Permission;
 use App\Domains\Auth\Models\Role;
+use App\Domains\User\Enums\AuditEvent;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
-use Illuminate\Support\Facades\Event;
-use OwenIt\Auditing\Events\AuditCustom;
 use Spatie\Permission\Models\Permission as SpatiePermission;
 
 /**
@@ -89,21 +88,6 @@ trait AuditsPermissions
      */
     private function auditPermissionChange(array $oldPermissions, array $newPermissions): void
     {
-        $auditData = [
-            'auditEvent' => 'permissions_modified',
-            'isCustomEvent' => true,
-            'auditCustomOld' => [
-                'permissions' => $oldPermissions,
-            ],
-            'auditCustomNew' => [
-                'permissions' => $newPermissions,
-            ],
-        ];
-
-        foreach ($auditData as $key => $value) {
-            $this->{$key} = $value;
-        }
-
-        Event::dispatch(new AuditCustom($this));
+        $this->recordAuditEvent(AuditEvent::PermissionsModified, new: ['permissions' => $newPermissions], old: ['permissions' => $oldPermissions]);
     }
 }

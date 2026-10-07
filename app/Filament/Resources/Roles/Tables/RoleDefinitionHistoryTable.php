@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Roles\Tables;
 
 use App\Domains\Auth\Models\RoleType;
+use App\Domains\User\Enums\AuditEvent;
 use App\Domains\User\Models\Audit;
 use App\Domains\User\Models\Concerns\AuditsPermissions;
 use Filament\Support\Icons\Heroicon;
@@ -35,23 +36,9 @@ class RoleDefinitionHistoryTable
                 Split::make([
                     TextColumn::make('event')
                         ->badge()
-                        ->formatStateUsing(
-                            fn (string $state) => Str::of($state)->replace('_', ' ')->title()->toString()
-                        )
-                        ->icon(fn (string $state) => match ($state) {
-                            'created' => Heroicon::OutlinedPlusCircle,
-                            'deleted' => Heroicon::OutlinedMinusCircle,
-                            'updated' => Heroicon::OutlinedPencilSquare,
-                            'restored' => Heroicon::OutlinedArrowUturnLeft,
-                            'permissions_modified' => Heroicon::OutlinedShieldCheck,
-                            default => Heroicon::OutlinedTag,
-                        })
-                        ->color(fn (string $state) => match ($state) {
-                            'created', 'restored' => 'success',
-                            'deleted' => 'danger',
-                            'updated', 'permissions_modified' => 'warning',
-                            default => 'gray',
-                        })
+                        ->formatStateUsing(fn (string $state): string => AuditEvent::labelFor($state))
+                        ->icon(fn (string $state): Heroicon => AuditEvent::iconFor($state))
+                        ->color(fn (string $state): string => AuditEvent::colorFor($state))
                         ->grow(false)
                         ->extraAttributes(['class' => 'min-w-[10rem]']),
 
@@ -106,13 +93,13 @@ class RoleDefinitionHistoryTable
                 SelectFilter::make('event')
                     ->label('Event')
                     ->multiple()
-                    ->options([
-                        'created' => 'Created',
-                        'updated' => 'Updated',
-                        'deleted' => 'Deleted',
-                        'restored' => 'Restored',
-                        'permissions_modified' => 'Permissions Modified',
-                    ])
+                    ->options(AuditEvent::options(
+                        AuditEvent::Created,
+                        AuditEvent::Updated,
+                        AuditEvent::Deleted,
+                        AuditEvent::Restored,
+                        AuditEvent::PermissionsModified,
+                    ))
                     ->native(false)
                     ->searchable()
                     ->preload(),
@@ -138,12 +125,12 @@ class RoleDefinitionHistoryTable
      */
     public static function summarizeChanges(Audit $audit): HtmlString
     {
-        $html = match ($audit->event) {
-            'created' => self::badge('Role Created', 'success'),
-            'deleted' => self::badge('Role Deleted', 'danger'),
-            'restored' => self::badge('Role Restored', 'success'),
-            'updated' => self::summarizeAttributeChanges($audit),
-            'permissions_modified' => self::summarizePermissionChanges($audit),
+        $html = match (AuditEvent::tryFrom($audit->event)) {
+            AuditEvent::Created => self::badge('Role Created', 'success'),
+            AuditEvent::Deleted => self::badge('Role Deleted', 'danger'),
+            AuditEvent::Restored => self::badge('Role Restored', 'success'),
+            AuditEvent::Updated => self::summarizeAttributeChanges($audit),
+            AuditEvent::PermissionsModified => self::summarizePermissionChanges($audit),
             default => '<span class="text-sm text-gray-500">No details</span>',
         };
 

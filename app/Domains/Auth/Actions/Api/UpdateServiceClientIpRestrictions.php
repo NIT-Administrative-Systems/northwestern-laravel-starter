@@ -8,6 +8,7 @@ use App\Domains\Api\CredentialAccess;
 use App\Domains\Api\Enums\CredentialKind;
 use App\Domains\Api\Enums\CredentialOperation;
 use App\Domains\Auth\Models\OAuthClient;
+use App\Domains\User\Enums\AuditEvent;
 use App\Domains\User\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use InvalidArgumentException;
@@ -40,7 +41,7 @@ readonly class UpdateServiceClientIpRestrictions
 
         $client->forceFill(['allowed_ips' => filled($allowedIps) ? array_values($allowedIps) : null])->save();
 
-        ($this->auditChange)($client, 'service_client_ip_restrictions_updated', ['allowed_ips' => $previous]);
+        ($this->auditChange)($client, AuditEvent::ServiceClientIpRestrictionsUpdated, ['allowed_ips' => $previous]);
     }
 
     private function apiUser(OAuthClient $client): User

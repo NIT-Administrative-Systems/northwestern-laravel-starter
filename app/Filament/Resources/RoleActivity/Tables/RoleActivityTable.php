@@ -7,6 +7,7 @@ namespace App\Filament\Resources\RoleActivity\Tables;
 use App\Domains\Auth\Enums\RoleModificationOrigin;
 use App\Domains\Auth\Enums\RoleTypeEnum;
 use App\Domains\Auth\Models\Role;
+use App\Domains\User\Enums\AuditEvent;
 use App\Domains\User\Models\Audit;
 use App\Domains\User\Models\User;
 use App\Domains\User\Support\UserOptionLabel;
@@ -33,21 +34,9 @@ class RoleActivityTable
             ->columns([
                 TextColumn::make('event')
                     ->badge()
-                    ->formatStateUsing(fn (string $state) => match ($state) {
-                        'role_assigned' => 'Role Assigned',
-                        'role_removed' => 'Role Removed',
-                        default => $state,
-                    })
-                    ->icon(fn (string $state) => match ($state) {
-                        'role_assigned' => Heroicon::OutlinedUserPlus,
-                        'role_removed' => Heroicon::OutlinedUserMinus,
-                        default => Heroicon::OutlinedTag,
-                    })
-                    ->color(fn (string $state) => match ($state) {
-                        'role_assigned' => 'success',
-                        'role_removed' => 'danger',
-                        default => 'gray',
-                    })
+                    ->formatStateUsing(fn (string $state): string => AuditEvent::labelFor($state))
+                    ->icon(fn (string $state): Heroicon => AuditEvent::iconFor($state))
+                    ->color(fn (string $state): string => AuditEvent::colorFor($state))
                     ->sortable()
                     ->tooltip(fn (Audit $record) => $record->created_at
                         ->setTimezone(auth()->user()->timezone ?? config('app.timezone'))
@@ -159,10 +148,7 @@ class RoleActivityTable
             ->filters([
                 SelectFilter::make('event')
                     ->label('Event')
-                    ->options([
-                        'role_assigned' => 'Role Assigned',
-                        'role_removed' => 'Role Removed',
-                    ])
+                    ->options(AuditEvent::options(AuditEvent::RoleAssigned, AuditEvent::RoleRemoved))
                     ->searchable()
                     ->preload(),
 
