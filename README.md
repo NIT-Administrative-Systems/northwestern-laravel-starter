@@ -6,7 +6,6 @@
 </p>
 
 <p align="center">
-    <a href="https://laravel-starter.entapp.northwestern.edu"><img src="https://img.shields.io/badge/Documentation-4E2A84" alt="Documentation"></a>
     <img src="https://img.shields.io/badge/PHP-8.5-blue" alt="PHP Version">
     <img src="https://img.shields.io/badge/Laravel-13.x-red" alt="Laravel Version">
     <img src="https://img.shields.io/badge/Filament-5.x-orange" alt="Filament Version">
