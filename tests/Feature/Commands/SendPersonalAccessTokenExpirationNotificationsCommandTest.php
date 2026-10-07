@@ -46,7 +46,7 @@ final class SendPersonalAccessTokenExpirationNotificationsCommandTest extends Te
             ->assertSuccessful();
 
         Mail::assertQueued(PersonalAccessTokenExpirationNotification::class, fn (PersonalAccessTokenExpirationNotification $mail) => $mail->token->is($token) && $mail->daysUntilExpiration === 7 && $mail->hasTo('willie@example.edu'));
-        $this->assertNotNull($token->fresh()?->expiration_notified_at);
+        $this->assertInstanceOf(Carbon::class, $token->fresh()?->expiration_notified_at);
     }
 
     public function test_it_respects_the_preference_and_skips_recent_and_revoked_tokens(): void

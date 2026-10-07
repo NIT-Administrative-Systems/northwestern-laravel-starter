@@ -22,7 +22,7 @@ final class StopImpersonationTest extends TestCase
         Event::fake();
 
         $staffUser = User::factory()->staff()->createOne();
-        $staffUser->roles()->attach(Role::whereHas('role_type', fn ($query) => $query->where('slug', RoleTypeEnum::SystemManaged))->firstOrFail());
+        $staffUser->roles()->attach(Role::whereHas('role_type', fn (\Illuminate\Contracts\Database\Query\Builder $query) => $query->where('slug', RoleTypeEnum::SystemManaged))->firstOrFail());
 
         $studentUser = User::factory()->student()->createOne();
 

@@ -150,7 +150,7 @@ final class AuthenticatePassportTokenTest extends TestCase
 
         $this->withToken($token)->getJson('/api/v1/me')->assertOk();
 
-        $this->assertNotNull($record->fresh()?->last_used_at);
+        $this->assertInstanceOf(\Illuminate\Support\Carbon::class, $record->fresh()?->last_used_at);
     }
 
     public function test_it_records_when_a_connected_application_was_last_used(): void
@@ -162,7 +162,7 @@ final class AuthenticatePassportTokenTest extends TestCase
 
         $this->withToken($token)->getJson('/api/v1/me')->assertOk();
 
-        $this->assertNotNull(OAuthConnection::query()->sole()->last_used_at);
+        $this->assertInstanceOf(\Illuminate\Support\Carbon::class, OAuthConnection::query()->sole()->last_used_at);
     }
 
     public function test_it_records_when_a_client_was_last_used_at_most_every_five_minutes(): void
@@ -171,7 +171,7 @@ final class AuthenticatePassportTokenTest extends TestCase
 
         $this->withToken($token)->getJson('/api/v1/me')->assertOk();
         $firstUse = $client->fresh()?->last_used_at;
-        $this->assertNotNull($firstUse);
+        $this->assertInstanceOf(\Illuminate\Support\Carbon::class, $firstUse);
 
         $this->travel(2)->minutes();
         $this->withToken($token)->getJson('/api/v1/me')->assertOk();

@@ -53,7 +53,7 @@ class StakeholderSeeder extends Seeder
 
         $this->createAndAssignRole(
             $userNetIds,
-            Role::whereHas('role_type', fn ($query) => $query->where('slug', RoleTypeEnum::SystemManaged))->firstOrFail()
+            Role::whereHas('role_type', fn (\Illuminate\Contracts\Database\Query\Builder $query) => $query->where('slug', RoleTypeEnum::SystemManaged))->firstOrFail()
         );
     }
 

@@ -137,7 +137,7 @@ final class SignInAsControllerTest extends TestCase
     private function seededAdmin(): User
     {
         $admin = User::factory()->create(['username' => 'nuit.admin', 'first_name' => 'NUIT', 'last_name' => 'Administrator']);
-        $admin->roles()->attach(Role::query()->whereHas('role_type', fn ($query) => $query->where('slug', RoleTypeEnum::SystemManaged))->where('name', 'Super Administrator')->firstOrFail());
+        $admin->roles()->attach(Role::query()->whereHas('role_type', fn (\Illuminate\Contracts\Database\Query\Builder $query) => $query->where('slug', RoleTypeEnum::SystemManaged))->where('name', 'Super Administrator')->firstOrFail());
 
         return $admin;
     }
