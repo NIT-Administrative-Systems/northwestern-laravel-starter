@@ -44,7 +44,7 @@
     </tr>
 </table>
 
-## Why a Starter
+## Overview
 
 Every application needs the same groundwork before it can do anything of its own: sign-in, permissions, auditing, an API, CI, monitoring, and a structure that holds up as it grows. Rebuilding it for each project takes time away from the work that matters, and every team ends up with a slightly different version.
 
