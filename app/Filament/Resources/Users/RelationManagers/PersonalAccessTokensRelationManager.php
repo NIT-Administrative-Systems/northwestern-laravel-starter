@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users\RelationManagers;
 
+use App\Domains\Api\ApiScopes;
 use App\Domains\Api\Concerns\AuthorizesCredentials;
 use App\Domains\Api\Enums\CredentialKind;
 use App\Domains\Api\Enums\CredentialOperation;
@@ -11,7 +12,6 @@ use App\Domains\Auth\Actions\Personal\RevokePersonalAccessToken;
 use App\Domains\Auth\Enums\CredentialStatus;
 use App\Domains\Auth\Models\OAuthToken;
 use App\Domains\User\Models\User;
-use App\Providers\OAuthServiceProvider;
 use Filament\Actions\Action;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -58,7 +58,7 @@ class PersonalAccessTokensRelationManager extends RelationManager
                 TextColumn::make('scopes')
                     ->label('Access')
                     ->badge()
-                    ->formatStateUsing(fn (string $state): string => OAuthServiceProvider::scopeLabel($state))
+                    ->formatStateUsing(fn (string $state): string => ApiScopes::label($state))
                     ->placeholder('None'),
                 TextColumn::make('status')->label('Status')->badge(),
                 TextColumn::make('created_at')->label('Created')->dateTime(),

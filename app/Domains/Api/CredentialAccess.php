@@ -11,7 +11,6 @@ use App\Domains\Api\ValueObjects\AccessDecision;
 use App\Domains\Auth\Enums\AuthType;
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\User\Models\User;
-use App\Providers\OAuthServiceProvider;
 use Laravel\Mcp\Server\Registrar;
 
 /**
@@ -73,7 +72,7 @@ readonly class CredentialAccess
     {
         return match ($kind) {
             CredentialKind::PersonalAccessToken, CredentialKind::ConnectedApplication => array_filter(
-                OAuthServiceProvider::scopes(),
+                ApiScopes::rest(),
                 fn (string $scope): bool => $this->holds($holder, SystemPermission::from($scope)),
                 ARRAY_FILTER_USE_KEY,
             ),

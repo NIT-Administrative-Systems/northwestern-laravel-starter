@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users\RelationManagers;
 
+use App\Domains\Api\ApiScopes;
 use App\Domains\Api\Concerns\AuthorizesCredentials;
 use App\Domains\Api\Enums\CredentialKind;
 use App\Domains\Api\Enums\CredentialOperation;
 use App\Domains\Auth\Actions\Applications\DisconnectApplication;
 use App\Domains\Auth\Models\OAuthConnection;
 use App\Domains\User\Models\User;
-use App\Providers\OAuthServiceProvider;
 use Filament\Actions\Action;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -53,7 +53,7 @@ class ConnectedApplicationsRelationManager extends RelationManager
                 TextColumn::make('oauth_client.name')
                     ->label('Application')
                     ->description(fn (OAuthConnection $record): ?string => $record->oauth_client?->isMcpClient() ? 'AI client · name not verified' : null),
-                TextColumn::make('scopes')->label('Allowed To')->badge()->formatStateUsing(fn (string $state): string => OAuthServiceProvider::scopeLabel($state))->placeholder('See Their Account Details'),
+                TextColumn::make('scopes')->label('Allowed To')->badge()->formatStateUsing(fn (string $state): string => ApiScopes::label($state))->placeholder('See Their Account Details'),
                 TextColumn::make('connected_at')->label('Connected')->dateTime(),
                 TextColumn::make('last_used_at')->label('Last Used')->dateTime()->placeholder('Never'),
             ])

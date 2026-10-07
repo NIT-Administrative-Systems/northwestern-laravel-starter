@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Providers;
 
+use App\Domains\Api\ApiScopes;
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Providers\OAuthServiceProvider;
 use Carbon\CarbonInterval;
 use Illuminate\Support\Facades\Route;
-use Laravel\Mcp\Server\Registrar;
 use Laravel\Passport\Bridge\AccessTokenRepository;
 use Laravel\Passport\Passport;
 use Northwestern\SysDev\Chassis\Passport\ExpiringAccessTokenRepository;
@@ -18,12 +18,9 @@ use Tests\TestCase;
 #[CoversClass(OAuthServiceProvider::class)]
 final class OAuthServiceProviderTest extends TestCase
 {
-    public function test_each_api_relevant_permission_is_a_scope(): void
+    public function test_passport_issues_the_catalogs_scopes(): void
     {
-        $apiRelevant = array_values(array_filter(SystemPermission::cases(), fn (SystemPermission $permission): bool => $permission->isApiRelevant()));
-
-        $this->assertSame(array_map(fn (SystemPermission $permission): string => $permission->value, $apiRelevant), array_keys(OAuthServiceProvider::scopes()));
-        $this->assertTrue(Passport::hasScope(SystemPermission::ViewUsers->value));
+        $this->assertSame(array_keys(ApiScopes::all()), array_column(Passport::scopes()->all(), 'id'));
         $this->assertFalse(Passport::hasScope(SystemPermission::ManageAll->value));
     }
 
@@ -54,12 +51,5 @@ final class OAuthServiceProviderTest extends TestCase
     public function test_access_tokens_can_expire_before_their_signed_lifetime(): void
     {
         $this->assertInstanceOf(ExpiringAccessTokenRepository::class, resolve(AccessTokenRepository::class));
-    }
-
-    public function test_scopes_are_named_after_their_permission(): void
-    {
-        $this->assertSame('View Users', OAuthServiceProvider::scopeLabel(SystemPermission::ViewUsers->value));
-        $this->assertSame('Use Tools', OAuthServiceProvider::scopeLabel(Registrar::OAUTH_SCOPE));
-        $this->assertSame('unknown-scope', OAuthServiceProvider::scopeLabel('unknown-scope'));
     }
 }

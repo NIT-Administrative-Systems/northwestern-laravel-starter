@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\App\Clusters\AccountCluster\Pages;
 
+use App\Domains\Api\ApiScopes;
 use App\Domains\Api\Concerns\AuthorizesCredentials;
 use App\Domains\Api\CredentialAccess;
 use App\Domains\Api\Enums\AccessRefusal;
@@ -18,7 +19,6 @@ use App\Domains\Auth\Models\OAuthToken;
 use App\Domains\User\Models\User;
 use App\Filament\App\Clusters\AccountCluster;
 use App\Filament\Support\RevealOnceSecret;
-use App\Providers\OAuthServiceProvider;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\CheckboxList;
@@ -99,7 +99,7 @@ class AccessTokens extends Page implements HasTable
                 TextColumn::make('scopes')
                     ->label('Access')
                     ->badge()
-                    ->formatStateUsing(fn (string $state): string => OAuthServiceProvider::scopeLabel($state))
+                    ->formatStateUsing(fn (string $state): string => ApiScopes::label($state))
                     ->placeholder('None'),
                 TextColumn::make('status')->label('Status')->badge(),
                 TextColumn::make('created_at')->label('Created')->date(),

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\App\Clusters\AccountCluster\Pages;
 
+use App\Domains\Api\ApiScopes;
 use App\Domains\Api\Concerns\AuthorizesCredentials;
 use App\Domains\Api\Enums\AccessRefusal;
 use App\Domains\Api\Enums\CredentialKind;
@@ -14,7 +15,6 @@ use App\Domains\Auth\Enums\ClientOrigin;
 use App\Domains\Auth\Models\OAuthConnection;
 use App\Domains\User\Models\User;
 use App\Filament\App\Clusters\AccountCluster;
-use App\Providers\OAuthServiceProvider;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
@@ -80,7 +80,7 @@ class ConnectedApplications extends Page implements HasTable
                 TextColumn::make('oauth_client.name')
                     ->label('Application')
                     ->description(fn (OAuthConnection $record): ?string => $record->oauth_client?->isMcpClient() ? 'AI client · name not verified' : null),
-                TextColumn::make('scopes')->label('Allowed To')->badge()->formatStateUsing(fn (string $state): string => OAuthServiceProvider::scopeLabel($state))->placeholder('See Your Account Details'),
+                TextColumn::make('scopes')->label('Allowed To')->badge()->formatStateUsing(fn (string $state): string => ApiScopes::label($state))->placeholder('See Your Account Details'),
                 TextColumn::make('connected_at')->label('Connected')->date(),
                 TextColumn::make('last_used_at')->label('Last Used')->since()->dateTimeTooltip()->placeholder('Never'),
             ])

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
-use App\Domains\Auth\Enums\SystemPermission;
+use App\Domains\Api\ApiScopes;
 use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\Auth\Models\OAuthToken;
 use App\Domains\Auth\Passport\GrantableScopeRepository;
@@ -15,7 +15,6 @@ use Carbon\CarbonInterval;
 use Filament\Facades\Filament;
 use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
-use Laravel\Mcp\Server\Registrar;
 use Laravel\Passport\Bridge\AccessTokenRepository;
 use Laravel\Passport\Bridge\ScopeRepository;
 use Laravel\Passport\ClientRepository;
@@ -52,9 +51,7 @@ class OAuthServiceProvider extends ServiceProvider
         Passport::useClientModel(OAuthClient::class);
         Passport::useTokenModel(OAuthToken::class);
 
-        // MCP clients get only `mcp:use`, which no REST route accepts, so their tokens and REST tokens
-        // can't stand in for each other. It isn't offered for personal tokens or applications.
-        Passport::tokensCan([...self::scopes(), Registrar::OAUTH_SCOPE => "Use this application's tools from an AI client"]);
+        Passport::tokensCan(ApiScopes::all());
 
         // The consent screen is a public page, which renders in the app panel's context for its theme
         // and colors. Passport's routes don't carry the panel middleware, so the view sets it up.
@@ -70,28 +67,5 @@ class OAuthServiceProvider extends ServiceProvider
         Passport::refreshTokensExpireIn(CarbonInterval::days(30));
         // The longest a personal access token may last; each token chooses a shorter life.
         Passport::personalAccessTokensExpireIn(CarbonInterval::days(365));
-    }
-
-    /**
-     * One scope per API-relevant permission, named after it: a token can do what its scopes
-     * name, and no more than its user's permissions allow.
-     *
-     * @return array<string, string>
-     */
-    public static function scopes(): array
-    {
-        return collect(SystemPermission::cases())
-            ->filter(fn (SystemPermission $permission): bool => $permission->isApiRelevant())
-            ->mapWithKeys(fn (SystemPermission $permission): array => [$permission->value => $permission->description()])
-            ->all();
-    }
-
-    /**
-     * A scope's name in the interface: the permission it's named after ("View Users"), or "Use
-     * Tools" for the MCP scope.
-     */
-    public static function scopeLabel(string $scope): string
-    {
-        return $scope === Registrar::OAUTH_SCOPE ? 'Use Tools' : (SystemPermission::tryFrom($scope)?->getLabel() ?? $scope);
     }
 }
