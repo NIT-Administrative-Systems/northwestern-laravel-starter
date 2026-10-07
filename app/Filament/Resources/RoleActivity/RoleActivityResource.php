@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\RoleActivity;
 
-use App\Domains\User\Models\Audit;
+use App\Domains\Core\Models\Audit;
 use App\Filament\Resources\RoleActivity\Pages\ListRoleActivity;
 use App\Filament\Resources\RoleActivity\Tables\RoleActivityTable;
 use Filament\Resources\Resource;

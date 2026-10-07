@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Domains\User\Enums;
+namespace Tests\Unit\Domains\Core\Enums;
 
-use App\Domains\User\Enums\AuditEvent;
+use App\Domains\Core\Enums\AuditEvent;
 use Filament\Support\Icons\Heroicon;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;

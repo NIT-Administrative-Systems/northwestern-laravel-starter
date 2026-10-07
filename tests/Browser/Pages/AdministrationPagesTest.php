@@ -3,9 +3,9 @@
 declare(strict_types=1);
 
 use App\Domains\Auth\Models\Role;
+use App\Domains\Core\Models\Audit;
 use App\Domains\Support\Models\Announcement;
 use App\Domains\Support\Models\SupportTicket;
-use App\Domains\User\Models\Audit;
 use App\Domains\User\Models\User;
 use Northwestern\SysDev\Chassis\Testing\Browser\FilamentPages;
 

@@ -6,7 +6,7 @@ namespace Tests\Feature\Domains\User\Models\Concerns;
 
 use App\Domains\Auth\Enums\RoleModificationOrigin;
 use App\Domains\Auth\Models\Role;
-use App\Domains\User\Models\Audit;
+use App\Domains\Core\Models\Audit;
 use App\Domains\User\Models\Concerns\AuditsRoles;
 use App\Domains\User\Models\User;
 use Illuminate\Database\Events\QueryExecuted;

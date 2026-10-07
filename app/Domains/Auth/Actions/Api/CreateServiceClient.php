@@ -10,7 +10,7 @@ use App\Domains\Api\Enums\CredentialOperation;
 use App\Domains\Auth\Enums\AuthType;
 use App\Domains\Auth\Enums\ClientOrigin;
 use App\Domains\Auth\Models\OAuthClient;
-use App\Domains\User\Enums\AuditEvent;
+use App\Domains\Core\Enums\AuditEvent;
 use App\Domains\User\Models\User;
 use Carbon\CarbonInterface;
 use Illuminate\Auth\Access\AuthorizationException;

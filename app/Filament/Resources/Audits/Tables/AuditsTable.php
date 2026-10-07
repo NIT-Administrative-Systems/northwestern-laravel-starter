@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Audits\Tables;
 
-use App\Domains\User\Enums\AuditEvent;
-use App\Domains\User\Models\Audit;
+use App\Domains\Core\Enums\AuditEvent;
+use App\Domains\Core\Models\Audit;
 use App\Filament\Exports\AuditExporter;
 use Carbon\Carbon;
 use Filament\Actions\ExportAction;

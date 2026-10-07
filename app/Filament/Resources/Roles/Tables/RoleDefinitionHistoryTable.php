@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Roles\Tables;
 
+use App\Domains\Auth\Models\Concerns\AuditsPermissions;
 use App\Domains\Auth\Models\RoleType;
-use App\Domains\User\Enums\AuditEvent;
-use App\Domains\User\Models\Audit;
-use App\Domains\User\Models\Concerns\AuditsPermissions;
+use App\Domains\Core\Enums\AuditEvent;
+use App\Domains\Core\Models\Audit;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\Layout\Panel;
 use Filament\Tables\Columns\Layout\Split;

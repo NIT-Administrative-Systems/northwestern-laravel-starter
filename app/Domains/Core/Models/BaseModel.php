@@ -28,7 +28,7 @@ use ReflectionClass;
  * - Override `transformAudit()` to modify audit data before saving
  * - Add fields to `$auditExclude` to exclude them from audit logs
  *
- * @see \App\Domains\User\Models\Audit
+ * @see Audit
  */
 abstract class BaseModel extends Model implements Auditable
 {

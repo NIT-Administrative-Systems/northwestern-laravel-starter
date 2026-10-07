@@ -142,7 +142,8 @@ return [
     | university record-keeping requirements; check yours before setting one.
     | Impersonation logs are a small security record, also kept by default.
     | High-traffic APIs may prefer an observability tool (Sentry, Datadog)
-    | over long request-log retention.
+    | over long request-log retention. Exports count from when they finish, and
+    | their files are deleted with them.
     |
     */
 
@@ -152,5 +153,6 @@ return [
         'impersonation_logs' => env('IMPERSONATION_LOG_RETENTION_DAYS'),
         'login_challenges' => env('LOGIN_CHALLENGE_RETENTION_DAYS', 30),
         'api_request_logs' => env('API_REQUEST_LOG_RETENTION_DAYS', 90),
+        'exports' => env('EXPORT_RETENTION_DAYS', 7),
     ],
 ];

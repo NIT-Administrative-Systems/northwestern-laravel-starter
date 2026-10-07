@@ -51,19 +51,26 @@
             <file>app/Domains/Auth/Enums/RoleModificationOrigin.php</file>
             <file>app/Domains/Auth/Enums/RoleTypeEnum.php</file>
             <file>app/Domains/Auth/Enums/SystemRole.php</file>
-            <directory>app/Domains/Core/Enums</directory>
+            <file>app/Domains/Core/Enums/ExternalService.php</file>
             <directory>app/Domains/Support/Enums</directory>
             <file>app/Domains/User/Enums/Affiliation.php</file>
             <file>app/Domains/User/Enums/NetIdUpdateAction.php</file>
             <file>app/Domains/User/Enums/UserSegment.php</file>
 
             <!-- Models (casts, relationships, property declarations) -->
-            <directory>app/Domains/Auth/Models</directory>
+            <file>app/Domains/Auth/Models/ApiRequestLog.php</file>
+            <file>app/Domains/Auth/Models/LoginChallenge.php</file>
+            <file>app/Domains/Auth/Models/OAuthClient.php</file>
+            <file>app/Domains/Auth/Models/OAuthConnection.php</file>
+            <file>app/Domains/Auth/Models/OAuthToken.php</file>
+            <file>app/Domains/Auth/Models/Permission.php</file>
+            <file>app/Domains/Auth/Models/Role.php</file>
+            <file>app/Domains/Auth/Models/RoleType.php</file>
+            <file>app/Domains/Core/Models/Audit.php</file>
             <file>app/Domains/Core/Models/BaseModel.php</file>
+            <file>app/Domains/Core/Models/Export.php</file>
             <directory>app/Domains/Support/Models</directory>
             <file>app/Domains/User/Models/User.php</file>
-            <file>app/Domains/User/Models/Audit.php</file>
-            <file>app/Domains/User/Models/Export.php</file>
             <file>app/Domains/User/Models/ImpersonationLog.php</file>
             <file>app/Domains/User/Models/UserLoginRecord.php</file>
 

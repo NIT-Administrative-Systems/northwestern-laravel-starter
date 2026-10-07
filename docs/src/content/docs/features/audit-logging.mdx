@@ -180,7 +180,7 @@ protected array $auditExclude = [
 
 ## Creating Custom Audit Events
 
-For actions that don't fit standard CRUD operations, log custom audit events. Each one is a case of `App\Domains\User\Enums\AuditEvent`, which also says how it's shown: its label, icon and color in the audit tables, the record timeline and exports, and its place in the Event filter. Add a case for a new event:
+For actions that don't fit standard CRUD operations, log custom audit events. Each one is a case of `App\Domains\Core\Enums\AuditEvent`, which also says how it's shown: its label, icon and color in the audit tables, the record timeline and exports, and its place in the Event filter. Add a case for a new event:
 
 ```php
 case ReportExported = 'report_exported';

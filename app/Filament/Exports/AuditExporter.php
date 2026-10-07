@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Exports;
 
-use App\Domains\User\Enums\AuditEvent;
-use App\Domains\User\Models\Audit;
+use App\Domains\Core\Enums\AuditEvent;
+use App\Domains\Core\Models\Audit;
 use Filament\Actions\Exports\ExportColumn;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Str;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\User\Support;
 
-use App\Domains\User\Models\Audit;
+use App\Domains\Core\Models\Audit;
 use App\Domains\User\Models\User;
 use App\Domains\User\Models\UserLoginRecord;
 use App\Domains\User\QueryBuilders\UserBuilder;

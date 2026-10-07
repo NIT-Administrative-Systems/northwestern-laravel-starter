@@ -7,7 +7,7 @@ namespace Tests\Feature\Domains\Auth\Actions\Api;
 use App\Domains\Auth\Actions\Api\RevokeServiceClient;
 use App\Domains\Auth\Enums\CredentialStatus;
 use App\Domains\Auth\Enums\SystemPermission;
-use App\Domains\User\Models\Audit;
+use App\Domains\Core\Models\Audit;
 use App\Domains\User\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Laravel\Passport\Passport;

@@ -7,7 +7,7 @@ namespace Tests\Feature\Filament\Resources\Roles;
 use App\Domains\Auth\Enums\RoleTypeEnum;
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\Role;
-use App\Domains\User\Models\Audit;
+use App\Domains\Core\Models\Audit;
 use App\Domains\User\Models\User;
 use App\Filament\Resources\Roles\Pages\RoleDefinitionHistory;
 use App\Filament\Resources\Roles\Tables\RoleDefinitionHistoryTable;

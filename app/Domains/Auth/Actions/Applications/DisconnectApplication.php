@@ -8,7 +8,7 @@ use App\Domains\Api\CredentialAccess;
 use App\Domains\Api\Enums\CredentialKind;
 use App\Domains\Api\Enums\CredentialOperation;
 use App\Domains\Auth\Models\OAuthConnection;
-use App\Domains\User\Enums\AuditEvent;
+use App\Domains\Core\Enums\AuditEvent;
 use App\Domains\User\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;

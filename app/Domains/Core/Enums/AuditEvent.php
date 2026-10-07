@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Domains\User\Enums;
+namespace App\Domains\Core\Enums;
 
-use App\Domains\User\Models\Concerns\RecordsAuditEvents;
+use App\Domains\Core\Models\Concerns\RecordsAuditEvents;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasIcon;
 use Filament\Support\Contracts\HasLabel;

@@ -6,7 +6,7 @@ namespace Tests\Feature\Filament\Resources\Users\RelationManagers;
 
 use App\Domains\Auth\Enums\CredentialStatus;
 use App\Domains\Auth\Enums\SystemPermission;
-use App\Domains\User\Models\Audit;
+use App\Domains\Core\Models\Audit;
 use App\Domains\User\Models\User;
 use App\Filament\Resources\Users\Pages\ViewUser;
 use App\Filament\Resources\Users\RelationManagers\PersonalAccessTokensRelationManager;

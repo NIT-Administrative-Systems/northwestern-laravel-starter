@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\Domains\User\Models\Concerns;
+namespace Tests\Feature\Domains\Core\Models\Concerns;
 
-use App\Domains\User\Enums\AuditEvent;
-use App\Domains\User\Models\Audit;
-use App\Domains\User\Models\Concerns\RecordsAuditEvents;
+use App\Domains\Core\Enums\AuditEvent;
+use App\Domains\Core\Models\Audit;
+use App\Domains\Core\Models\Concerns\RecordsAuditEvents;
 use App\Domains\User\Models\User;
 use PHPUnit\Framework\Attributes\CoversTrait;
 use Tests\TestCase;

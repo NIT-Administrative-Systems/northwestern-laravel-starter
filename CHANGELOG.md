@@ -67,6 +67,8 @@ Version 3 removes the Bootstrap user interface. Every page now uses one stack, F
 
 ### Changed
 
+- `App\Domains\Api\ApiScopes` lists every OAuth scope and its label, in place of `OAuthServiceProvider::scopes()` and `scopeLabel()`. A test checks the OpenAPI schema's scopes against it.
+- The audit log and table exports moved out of the User domain: `Audit`, `Export`, `AuditEvent` and `RecordsAuditEvents` are in `App\Domains\Core`, and `AuditsPermissions`, which `Role` uses, is in `App\Domains\Auth\Models\Concerns`. Exports are kept for `EXPORT_RETENTION_DAYS` (7 by default, `null` keeps them) instead of a fixed 7 days.
 - The MCP connection lives in `app/Mcp`: its discovery and registration controllers, the scope on its 401 challenge, and `McpServiceProvider`, which binds the challenge and registers the registration and tool-call rate limits. `RefuseMcpTokens` and `RequireMcpAccess` are one middleware, `RequireTokenAudience`, used with `TokenAudience::Api` on the REST API and `TokenAudience::Mcp` on the MCP server.
 - Only the configured single sign-on provider's routes are registered. With both Online Passport and Entra ID configured, sign-in and logout already used Online Passport; the Entra ID routes are no longer registered alongside it.
 - `CreateSupportTicket` takes the person and the Contact Support form's fields and does the whole submission: it saves the ticket, sends it to the configured ticket system, records the result and falls back to email. `SupportTicketRepository` and `TicketSystemGatewayFactory` are gone; `SupportServiceProvider` chooses the ticket system from `SUPPORT_DRIVER`.

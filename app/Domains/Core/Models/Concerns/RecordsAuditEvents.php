@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Domains\User\Models\Concerns;
+namespace App\Domains\Core\Models\Concerns;
 
-use App\Domains\User\Enums\AuditEvent;
+use App\Domains\Core\Enums\AuditEvent;
 use Northwestern\SysDev\Chassis\Models\Concerns\RecordsCustomAudits;
 
 /**

@@ -7,8 +7,8 @@ namespace App\Filament\Resources\RoleActivity\Tables;
 use App\Domains\Auth\Enums\RoleModificationOrigin;
 use App\Domains\Auth\Enums\RoleTypeEnum;
 use App\Domains\Auth\Models\Role;
-use App\Domains\User\Enums\AuditEvent;
-use App\Domains\User\Models\Audit;
+use App\Domains\Core\Enums\AuditEvent;
+use App\Domains\Core\Models\Audit;
 use App\Domains\User\Models\User;
 use App\Domains\User\Support\UserOptionLabel;
 use App\Domains\User\Support\UserSearch;
@@ -277,7 +277,7 @@ class RoleActivityTable
     {
         $changedRoles = $record->getChangedRoles();
 
-        if (empty($changedRoles)) {
+        if ($changedRoles === []) {
             return '<span class="text-sm text-gray-400 dark:text-gray-500">—</span>';
         }
 

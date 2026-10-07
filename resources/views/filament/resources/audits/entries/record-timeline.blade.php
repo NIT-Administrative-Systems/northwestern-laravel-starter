@@ -1,6 +1,6 @@
 @php
-    use App\Domains\User\Enums\AuditEvent;
-    use App\Domains\User\Models\Audit;
+    use App\Domains\Core\Enums\AuditEvent;
+    use App\Domains\Core\Models\Audit;
     use App\Filament\Resources\Audits\AuditResource;
 
     $record = $getRecord();

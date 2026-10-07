@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Domains\Core\Exceptions\NoRollbackException;
-use App\Domains\User\Models\Audit;
+use App\Domains\Core\Models\Audit;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 

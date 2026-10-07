@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Audits\Schemas;
 
-use App\Domains\User\Enums\AuditEvent;
-use App\Domains\User\Models\Audit;
+use App\Domains\Core\Enums\AuditEvent;
+use App\Domains\Core\Models\Audit;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ViewEntry;
 use Filament\Schemas\Components\Grid;

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\Domains\User\Models\Concerns;
+namespace Tests\Feature\Domains\Auth\Models\Concerns;
 
 use App\Domains\Auth\Enums\SystemPermission;
+use App\Domains\Auth\Models\Concerns\AuditsPermissions;
 use App\Domains\Auth\Models\Role;
-use App\Domains\User\Models\Audit;
-use App\Domains\User\Models\Concerns\AuditsPermissions;
+use App\Domains\Core\Models\Audit;
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\CoversTrait;
