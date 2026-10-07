@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">
-    A Laravel starter kit for <a href="https://www.northwestern.edu">Northwestern University</a> applications. Northwestern sign-in, roles and permissions, auditing, an OAuth-secured API and the University's branding are ready before you write your first feature.
+    A Laravel starter kit for <a href="https://www.northwestern.edu">Northwestern University</a> applications, with Northwestern sign-in, roles and permissions, auditing, an OAuth-secured API and the University's branding built in.
 </p>
 
 <p align="center">
