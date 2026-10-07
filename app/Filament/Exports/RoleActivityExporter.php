@@ -38,9 +38,7 @@ class RoleActivityExporter extends BaseExporter
                         return null;
                     }
 
-                    $names = implode(', ', array_column($roles, 'name'));
-
-                    return $names;
+                    return implode(', ', array_column($roles, 'name'));
                 }),
 
             ExportColumn::make('changed_role_types')

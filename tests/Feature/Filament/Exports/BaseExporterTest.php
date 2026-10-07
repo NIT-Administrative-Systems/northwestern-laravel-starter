@@ -22,22 +22,20 @@ use Tests\TestCase;
 final class BaseExporterTest extends TestCase
 {
     /**
-     * @return array<string, array{mixed, mixed}>
+     * @return \Iterator<string, array{mixed, mixed}>
      */
-    public static function cells(): array
+    public static function cells(): \Iterator
     {
-        return [
-            'formula' => ['=HYPERLINK("https://evil.example","Click")', '\'=HYPERLINK("https://evil.example","Click")'],
-            'plus' => ['+1+1', "'+1+1"],
-            'minus' => ['-2+3', "'-2+3"],
-            'at sign' => ['@SUM(A1)', "'@SUM(A1)"],
-            'tab' => ["\t=1", "'\t=1"],
-            'carriage return' => ["\r=1", "'\r=1"],
-            'plain text' => ['Willie Wildcat', 'Willie Wildcat'],
-            'formula later in the text' => ['a=b', 'a=b'],
-            'number' => [-5, -5],
-            'null' => [null, null],
-        ];
+        yield 'formula' => ['=HYPERLINK("https://evil.example","Click")', '\'=HYPERLINK("https://evil.example","Click")'];
+        yield 'plus' => ['+1+1', "'+1+1"];
+        yield 'minus' => ['-2+3', "'-2+3"];
+        yield 'at sign' => ['@SUM(A1)', "'@SUM(A1)"];
+        yield 'tab' => ["\t=1", "'\t=1"];
+        yield 'carriage return' => ["\r=1", "'\r=1"];
+        yield 'plain text' => ['Willie Wildcat', 'Willie Wildcat'];
+        yield 'formula later in the text' => ['a=b', 'a=b'];
+        yield 'number' => [-5, -5];
+        yield 'null' => [null, null];
     }
 
     #[DataProvider('cells')]
