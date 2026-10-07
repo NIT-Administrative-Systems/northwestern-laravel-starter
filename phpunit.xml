@@ -86,7 +86,6 @@
             <directory>app/Domains/Support/Contracts</directory>
 
             <!-- Value Objects (constants, readonly data containers) -->
-            <directory>app/Domains/Auth/ValueObjects</directory>
             <file>app/Domains/User/Data/UserPreferences.php</file>
             <file>app/Domains/Support/Gateways/CreationResult.php</file>
 

@@ -41,7 +41,7 @@ class Announcements extends Page
             ->visibleTo($user)
             // Live first (no end, or an end still to come), then by start, newest first.
             ->orderByRaw('CASE WHEN ends_at IS NULL OR ends_at > ? THEN 0 ELSE 1 END', [now()])
-            ->orderByDesc('starts_at')
+            ->latest('starts_at')
             ->orderByDesc('id')
             ->paginate(self::PER_PAGE);
     }

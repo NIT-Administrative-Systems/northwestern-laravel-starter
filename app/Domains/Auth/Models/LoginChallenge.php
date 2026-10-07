@@ -4,11 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domains\Auth\Models;
 
-use App\Domains\Auth\Actions\Local\AuthenticateWithLoginCode;
-use App\Domains\Auth\Actions\Local\IssueLoginChallenge;
-use App\Domains\Auth\Actions\Local\RequestLoginCode;
-use App\Domains\Auth\Actions\Local\VerifyLoginChallengeCode;
 use App\Domains\Auth\Jobs\SendLoginCodeEmailJob;
+use App\Domains\Auth\LoginCodes;
 use App\Domains\Core\Models\BaseModel;
 use Carbon\CarbonImmutable;
 use Northwestern\SysDev\Chassis\Models\Concerns\PrunesAfterRetentionPeriod;
@@ -16,10 +13,7 @@ use Northwestern\SysDev\Chassis\Models\Concerns\PrunesAfterRetentionPeriod;
 /**
  * Represents the OTP challenge state for a local user authentication attempt.
  *
- * @see RequestLoginCode
- * @see AuthenticateWithLoginCode
- * @see IssueLoginChallenge
- * @see VerifyLoginChallengeCode
+ * @see LoginCodes
  * @see SendLoginCodeEmailJob
  */
 class LoginChallenge extends BaseModel

@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users\Actions;
 
-use App\Domains\Auth\Actions\Local\IssueLoginChallenge;
+use App\Domains\Auth\Enums\SignInMethod;
 use App\Domains\Auth\Enums\SystemPermission;
+use App\Domains\Auth\LoginCodes;
+use App\Domains\Auth\SignIn;
 use App\Domains\User\Models\User;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
@@ -27,13 +29,13 @@ class SendLoginCodeAction extends Action
             ->label('Send Verification Code')
             ->color('info')
             ->outlined()
-            ->visible(fn (User $record) => $record->is_local_user && config('local-auth.enabled'))
+            ->visible(fn (User $record) => $record->is_local_user && resolve(SignIn::class)->offers(SignInMethod::EmailCode))
             ->icon(Heroicon::OutlinedPaperAirplane)
             ->requiresConfirmation()
             ->modalDescription('Sends a new verification code to their email address.')
             ->action(function (User $record) {
                 try {
-                    resolve(IssueLoginChallenge::class)($record->email, request()->ip(), request()->userAgent());
+                    resolve(LoginCodes::class)->issueFor($record, request());
 
                     Notification::make()
                         ->success()

@@ -6,7 +6,9 @@ namespace Database\Seeders\Sample;
 
 use App\Domains\Auth\Actions\Api\CreateServiceClient;
 use App\Domains\Auth\Enums\RoleTypeEnum;
+use App\Domains\Auth\Enums\SignInMethod;
 use App\Domains\Auth\Models\Role;
+use App\Domains\Auth\SignIn;
 use App\Domains\User\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\App;
@@ -43,7 +45,7 @@ class DemoUserSeeder extends Seeder
         $this->genericUser();
         $this->systemAdmin();
 
-        if (config('local-auth.enabled')) {
+        if (resolve(SignIn::class)->offers(SignInMethod::EmailCode)) {
             $this->localUser();
         }
 

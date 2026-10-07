@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Domains\Auth\Http\Controllers;
 
+use App\Domains\Auth\Enums\SignInMethod;
+use App\Domains\Auth\SignIn;
 use App\Domains\Core\Enums\ExternalService;
 use App\Domains\Core\Exceptions\ServiceDownError;
 use App\Domains\User\Actions\Directory\FindOrUpdateUserFromDirectory;
-use App\Domains\User\Actions\RecordLogin;
 use App\Domains\User\Exceptions\BadDirectoryEntry;
 use App\Domains\User\Models\User;
 use App\Http\Controllers\Controller;
@@ -17,8 +18,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Session;
 use Northwestern\SysDev\SOA\Auth\Strategy\WebSSOStrategy;
 use Northwestern\SysDev\SOA\Auth\WebSSOAuthentication;
 
@@ -35,7 +34,7 @@ class WebSSOController extends Controller
     protected string $redirectTo = '/';
 
     public function __construct(
-        protected RecordLogin $recordLogin,
+        protected SignIn $signIn,
     ) {
         $this->login_route_name = 'login-websso';
         $this->logout_return_to_route = 'filament.app.auth.login';
@@ -64,34 +63,22 @@ class WebSSOController extends Controller
         );
     }
 
-    /**
-     * @param  User  $user
-     */
-    protected function authenticated(Request $request, $user): void
+    protected function authenticated(Request $request, User $user): RedirectResponse
     {
-        Session::regenerate();
-        Session::regenerateToken();
-
-        ($this->recordLogin)($user, $request);
-
-        // Return a redirect here if you have a use for that functionality.
+        return $this->signIn->complete($user, $request, SignInMethod::Sso);
     }
 
     public function oauthLogout(?string $postLogoutRedirectUri = null): Application|RedirectResponse|Redirector
     {
+        // CI has no identity provider to send people to.
         if (App::environment('ci')) {
-            Auth::logout();
-            Session::invalidate();
-            Session::regenerateToken();
+            $this->signIn->endSession();
 
             return redirect()->route('filament.app.auth.login');
         }
 
-        $response = $this->webSSOAuthOauthLogout(route('filament.app.auth.login'));
-        Session::invalidate();
-        Session::regenerateToken();
-
-        return $response;
+        // The trait ends the session before sending the person to Entra ID's sign-out.
+        return $this->webSSOAuthOauthLogout(route('filament.app.auth.login'));
     }
 
     /**
@@ -99,9 +86,7 @@ class WebSSOController extends Controller
      */
     public function logout(WebSSOStrategy $ssoStrategy): RedirectResponse
     {
-        Auth::logout();
-        Session::invalidate();
-        Session::regenerateToken();
+        $this->signIn->endSession();
 
         return $ssoStrategy->logout('filament.app.auth.login');
     }

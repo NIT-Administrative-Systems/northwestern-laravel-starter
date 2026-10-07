@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Filament\App\Pages\Auth;
 
 use App\Domains\Auth\Enums\AuthType;
+use App\Domains\Auth\Enums\SignInMethod;
+use App\Domains\Auth\SignIn;
 use App\Domains\User\Models\User;
 use App\Filament\App\Pages\Concerns\HasSiteHeader;
 use Database\Seeders\Sample\DemoUserSeeder;
@@ -20,13 +22,12 @@ use Filament\Schemas\Schema;
 use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 
 /**
- * Lists the sign-in methods this application has configured: Northwestern single
- * sign-on (WebSSO, or Entra ID when WebSSO is not configured) and email login codes.
+ * Lists the sign-in methods this application offers ({@see SignIn::methods()}): Northwestern
+ * single sign-on through the configured provider, and email login codes.
  *
  * When single sign-on is the only method, guests go straight to it, except in CI,
  * where the page always renders so end-to-end tests can use email login codes.
@@ -50,18 +51,21 @@ class Login extends SimplePage
             return;
         }
 
-        $ssoUrl = $this->ssoUrl();
+        $signIn = resolve(SignIn::class);
+        $ssoUrl = $signIn->url(SignInMethod::Sso);
 
-        if (! $this->localAuthEnabled() && ! $this->signInAsAvailable() && ! App::environment('ci') && $ssoUrl !== null) {
+        if ($ssoUrl !== null && $signIn->methods() === [SignInMethod::Sso] && ! App::environment('ci')) {
             $this->redirect($ssoUrl);
         }
     }
 
     public function content(Schema $schema): Schema
     {
-        $ssoUrl = $this->ssoUrl();
-        $localAuthEnabled = $this->localAuthEnabled();
-        $signInAs = $this->signInAsActions();
+        $signIn = resolve(SignIn::class);
+        $ssoUrl = $signIn->url(SignInMethod::Sso);
+        $emailUrl = $signIn->url(SignInMethod::EmailCode);
+        $localAuthEnabled = $emailUrl !== null;
+        $signInAs = $this->signInAsActions($signIn);
 
         return $schema
             ->components([
@@ -88,7 +92,7 @@ class Login extends SimplePage
                             ->icon(Heroicon::OutlinedEnvelope)
                             ->color('gray')
                             ->outlined()
-                            ->url(fn (): ?string => Route::has('filament.app.auth.login-code') ? route('filament.app.auth.login-code') : null)
+                            ->url($emailUrl)
                             ->extraAttributes(['data-testid' => 'email-login']),
                     ])->fullWidth(),
                     Text::make('For approved external partners without a NetID.')
@@ -132,19 +136,14 @@ class Login extends SimplePage
             ]);
     }
 
-    private function signInAsAvailable(): bool
-    {
-        return Route::has('filament.app.auth.login-as');
-    }
-
     /**
      * One menu item per seeded demo user that exists: the user's name, with their highest role as a badge.
      *
      * @return list<Action>
      */
-    private function signInAsActions(): array
+    private function signInAsActions(SignIn $signIn): array
     {
-        if (! $this->signInAsAvailable()) {
+        if (! $signIn->offers(SignInMethod::SignInAs)) {
             return [];
         }
 
@@ -172,25 +171,5 @@ class Login extends SimplePage
         $role = $user->non_default_roles->first()?->name;
 
         return $role ?? ($user->is_local_user ? 'Local Account' : 'Northwestern User');
-    }
-
-    private function localAuthEnabled(): bool
-    {
-        return (bool) config('local-auth.enabled');
-    }
-
-    private function ssoUrl(): ?string
-    {
-        $webssoConfigured = filled(config('nusoa.sso.apigeeApiKey'))
-            || config('nusoa.sso.strategy') === 'forgerock-direct';
-
-        $entraConfigured = filled(config('services.northwestern-azure.client_id'))
-            && filled(config('services.northwestern-azure.client_secret'));
-
-        return match (true) {
-            $webssoConfigured => route('login-websso'),
-            $entraConfigured => route('login-oauth-redirect'),
-            default => null,
-        };
     }
 }
