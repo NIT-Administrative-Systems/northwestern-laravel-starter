@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domains\Auth\Actions\Api;
 
 use App\Domains\Auth\Models\OAuthClient;
+use App\Domains\User\Enums\AuditEvent;
 use App\Domains\User\Models\User;
 
 /**
@@ -16,10 +17,10 @@ use App\Domains\User\Models\User;
 readonly class AuditServiceClientChange
 {
     /**
-     * @param  'service_client_created'|'service_client_revoked'|'service_client_ip_restrictions_updated'  $event
+     * @param  AuditEvent::ServiceClientCreated|AuditEvent::ServiceClientRevoked|AuditEvent::ServiceClientIpRestrictionsUpdated  $event
      * @param  array<string, mixed>  $old
      */
-    public function __invoke(OAuthClient $client, string $event, array $old = []): void
+    public function __invoke(OAuthClient $client, AuditEvent $event, array $old = []): void
     {
         $apiUser = $client->owner;
 
@@ -27,7 +28,7 @@ readonly class AuditServiceClientChange
             return;
         }
 
-        $apiUser->recordCustomAudit($event, [
+        $apiUser->recordAuditEvent($event, [
             'client_id' => $client->getKey(),
             'name' => $client->name,
             'secret_expires_at' => $client->secret_expires_at?->toIso8601String(),

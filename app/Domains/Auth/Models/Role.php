@@ -6,6 +6,7 @@ namespace App\Domains\Auth\Models;
 
 use App\Domains\Auth\Enums\RoleTypeEnum;
 use App\Domains\User\Models\Concerns\AuditsPermissions;
+use App\Domains\User\Models\Concerns\RecordsAuditEvents;
 use App\Domains\User\Models\User;
 use Database\Factories\Domains\Auth\Models\RoleFactory;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -24,7 +25,7 @@ use Spatie\Permission\Models\Role as SpatieRole;
 class Role extends SpatieRole implements Auditable
 {
     /** @use HasFactory<RoleFactory> */
-    use AuditableConcern, AuditsPermissions, HasFactory, SoftDeletes;
+    use AuditableConcern, AuditsPermissions, HasFactory, RecordsAuditEvents, SoftDeletes;
 
     /**
      * Override the create method to return the custom Role model.

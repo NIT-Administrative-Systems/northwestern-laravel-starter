@@ -17,6 +17,7 @@ use App\Domains\User\Data\UserPreferences;
 use App\Domains\User\Enums\Affiliation;
 use App\Domains\User\Models\Concerns\AuditsRoles;
 use App\Domains\User\Models\Concerns\HandlesImpersonation;
+use App\Domains\User\Models\Concerns\RecordsAuditEvents;
 use App\Domains\User\Models\Concerns\TracksPermissionSources;
 use App\Domains\User\QueryBuilders\UserBuilder;
 use App\Http\Middleware\EnvironmentLockdown;
@@ -40,7 +41,6 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\Contracts\OAuthenticatable;
 use Laravel\Passport\HasApiTokens;
 use Northwestern\SysDev\Chassis\Models\Concerns\Auditable as AuditableConcern;
-use Northwestern\SysDev\Chassis\Models\Concerns\RecordsCustomAudits;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\Permission\Traits\HasRoles;
 
@@ -61,7 +61,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable implements Auditable, FilamentUser, HasAvatar, HasName, OAuthenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use AuditableConcern, HandlesImpersonation, HasApiTokens, HasFactory, Notifiable, RecordsCustomAudits, SoftDeletes, TracksPermissionSources;
+    use AuditableConcern, HandlesImpersonation, HasApiTokens, HasFactory, Notifiable, RecordsAuditEvents, SoftDeletes, TracksPermissionSources;
 
     use AuditsRoles, HasRoles {
         HasRoles::assignRole as private;

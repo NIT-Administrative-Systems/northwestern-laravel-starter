@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Exports;
 
+use App\Domains\User\Enums\AuditEvent;
 use App\Domains\User\Models\Audit;
 use Filament\Actions\Exports\ExportColumn;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -25,7 +26,7 @@ class AuditExporter extends BaseExporter
 
             ExportColumn::make('event')
                 ->label('Event')
-                ->formatStateUsing(fn (string $state) => Str::of($state)->replace('_', ' ')->title()->toString()),
+                ->formatStateUsing(fn (string $state): string => AuditEvent::labelFor($state)),
 
             ExportColumn::make('auditable_type')
                 ->label('Record Type')

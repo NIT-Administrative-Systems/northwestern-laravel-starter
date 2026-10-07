@@ -9,6 +9,7 @@ use App\Domains\Api\Enums\CredentialKind;
 use App\Domains\Api\Enums\CredentialOperation;
 use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\Auth\Models\OAuthConnection;
+use App\Domains\User\Enums\AuditEvent;
 use App\Domains\User\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
@@ -52,7 +53,7 @@ readonly class RevokeOAuthApplication
 
             $client->forceFill(['revoked' => true])->save();
 
-            $revokedBy?->recordCustomAudit($client->isMcpClient() ? 'mcp_client_revoked' : 'application_revoked', [
+            $revokedBy?->recordAuditEvent($client->isMcpClient() ? AuditEvent::McpClientRevoked : AuditEvent::ApplicationRevoked, [
                 'client_id' => $client->getKey(),
                 'name' => $client->name,
                 'connections_removed' => $connectionsRemoved,

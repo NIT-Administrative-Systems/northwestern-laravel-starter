@@ -6,10 +6,9 @@ namespace App\Domains\User\Models\Concerns;
 
 use App\Domains\Auth\Enums\RoleModificationOrigin;
 use App\Domains\Auth\Models\Role;
+use App\Domains\User\Enums\AuditEvent;
 use App\Domains\User\Models\User;
 use Illuminate\Support\Collection as BaseCollection;
-use Illuminate\Support\Facades\Event;
-use OwenIt\Auditing\Events\AuditCustom;
 
 /**
  * @mixin User
@@ -48,7 +47,7 @@ trait AuditsRoles
 
         $this->assignRole($roles);
 
-        $this->auditRoleChange('role_assigned', $oldRoles, $origin, $context);
+        $this->auditRoleChange(AuditEvent::RoleAssigned, $oldRoles, $origin, $context);
     }
 
     /**
@@ -79,7 +78,7 @@ trait AuditsRoles
 
         $this->removeRole($roles);
 
-        $this->auditRoleChange('role_removed', $oldRoles, $origin, $context);
+        $this->auditRoleChange(AuditEvent::RoleRemoved, $oldRoles, $origin, $context);
     }
 
     /**
@@ -89,7 +88,7 @@ trait AuditsRoles
      * appended as tags (e.g., "reason: promoted"). The diff between old and new
      * values uses an identical structure for clean visual comparison.
      *
-     * @param  'role_assigned'|'role_removed'  $event  The specific audit event type
+     * @param  AuditEvent::RoleAssigned|AuditEvent::RoleRemoved  $event  The specific audit event type
      * @param  list<RoleData>  $oldRoles  The collection of roles before modification
      * @param  RoleModificationOrigin  $origin  The source/reason for this role change
      * @param  array<string, mixed>  $context  Additional contextual information
@@ -98,7 +97,7 @@ trait AuditsRoles
      * @see removeRoleWithAudit()
      */
     private function auditRoleChange(
-        string $event,
+        AuditEvent $event,
         array $oldRoles,
         RoleModificationOrigin $origin,
         array $context = []
@@ -109,27 +108,7 @@ trait AuditsRoles
             ? $this->mapRolesToArray($freshModel->roles)
             : [];
 
-        $auditData = [
-            'auditEvent' => $event,
-            'isCustomEvent' => true,
-            'auditCustomOld' => [
-                'roles' => $oldRoles,
-            ],
-            'auditCustomNew' => [
-                'roles' => $newRoles,
-            ],
-        ];
-
-        foreach ($auditData as $key => $value) {
-            $this->{$key} = $value;
-        }
-
-        $this->auditCustomTags = [$origin->value];
-        $this->auditCustomContext = filled($context) ? $context : null;
-
-        Event::dispatch(new AuditCustom($this));
-
-        unset($this->auditCustomTags, $this->auditCustomContext);
+        $this->recordAuditEvent($event, new: ['roles' => $newRoles], old: ['roles' => $oldRoles], tags: [$origin->value], context: $context);
     }
 
     /**

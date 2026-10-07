@@ -10,6 +10,7 @@ use App\Domains\Api\Enums\CredentialOperation;
 use App\Domains\Auth\Enums\AuthType;
 use App\Domains\Auth\Enums\ClientOrigin;
 use App\Domains\Auth\Models\OAuthClient;
+use App\Domains\User\Enums\AuditEvent;
 use App\Domains\User\Models\User;
 use Carbon\CarbonInterface;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -73,7 +74,7 @@ readonly class CreateServiceClient
                 'rotated_by_user_id' => $rotatedFrom instanceof OAuthClient ? $createdBy?->getKey() : null,
             ])->save();
 
-            ($this->auditChange)($client, 'service_client_created');
+            ($this->auditChange)($client, AuditEvent::ServiceClientCreated);
 
             return [$secret, $client];
         });

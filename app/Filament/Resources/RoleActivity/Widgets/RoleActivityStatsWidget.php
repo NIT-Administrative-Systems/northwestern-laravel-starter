@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\RoleActivity\Widgets;
 
+use App\Domains\User\Enums\AuditEvent;
 use App\Domains\User\Models\Audit;
 use Carbon\Carbon;
 use Filament\Support\Icons\Heroicon;
@@ -26,10 +27,10 @@ class RoleActivityStatsWidget extends BaseWidget
         $stats = Audit::query()
             ->roleActivity()
             ->toBase()
-            ->selectRaw("count(*) filter (where event = 'role_assigned') as assignments")
-            ->selectRaw("count(*) filter (where event = 'role_removed') as removals")
-            ->selectRaw("count(*) filter (where event = 'role_assigned' and created_at >= ?) as recent_assignments", [$recentSince])
-            ->selectRaw("count(*) filter (where event = 'role_removed' and created_at >= ?) as recent_removals", [$recentSince])
+            ->selectRaw('count(*) filter (where event = ?) as assignments', [AuditEvent::RoleAssigned->value])
+            ->selectRaw('count(*) filter (where event = ?) as removals', [AuditEvent::RoleRemoved->value])
+            ->selectRaw('count(*) filter (where event = ? and created_at >= ?) as recent_assignments', [AuditEvent::RoleAssigned->value, $recentSince])
+            ->selectRaw('count(*) filter (where event = ? and created_at >= ?) as recent_removals', [AuditEvent::RoleRemoved->value, $recentSince])
             ->selectRaw('max(created_at) as last_activity')
             ->first();
 

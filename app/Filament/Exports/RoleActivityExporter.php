@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Filament\Exports;
 
 use App\Domains\Auth\Enums\RoleModificationOrigin;
+use App\Domains\User\Enums\AuditEvent;
 use App\Domains\User\Models\Audit;
 use Filament\Actions\Exports\ExportColumn;
-use Illuminate\Support\Str;
 
 class RoleActivityExporter extends BaseExporter
 {
@@ -18,11 +18,7 @@ class RoleActivityExporter extends BaseExporter
         return [
             ExportColumn::make('event')
                 ->label('Event')
-                ->formatStateUsing(fn (string $state) => match ($state) {
-                    'role_assigned' => 'Role Assigned',
-                    'role_removed' => 'Role Removed',
-                    default => Str::of($state)->replace('_', ' ')->title()->toString(),
-                }),
+                ->formatStateUsing(fn (string $state): string => AuditEvent::labelFor($state)),
 
             ExportColumn::make('auditable.username')
                 ->label('NetID'),

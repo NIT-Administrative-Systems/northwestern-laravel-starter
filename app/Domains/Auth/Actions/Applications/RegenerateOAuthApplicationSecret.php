@@ -8,6 +8,7 @@ use App\Domains\Api\CredentialAccess;
 use App\Domains\Api\Enums\CredentialKind;
 use App\Domains\Api\Enums\CredentialOperation;
 use App\Domains\Auth\Models\OAuthClient;
+use App\Domains\User\Enums\AuditEvent;
 use App\Domains\User\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use InvalidArgumentException;
@@ -47,7 +48,7 @@ readonly class RegenerateOAuthApplicationSecret
         /** @var non-empty-string $secret */
         $secret = $client->plainSecret;
 
-        $regeneratedBy->recordCustomAudit('application_secret_regenerated', ['client_id' => $client->getKey(), 'name' => $client->name]);
+        $regeneratedBy->recordAuditEvent(AuditEvent::ApplicationSecretRegenerated, ['client_id' => $client->getKey(), 'name' => $client->name]);
 
         return $secret;
     }

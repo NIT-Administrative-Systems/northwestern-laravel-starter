@@ -76,7 +76,7 @@ The **Core** domain contains foundational functionality that applies across the 
 
 **Responsibilities:**
 
-- `BaseModel`, which models extend. Model concerns shared with other applications, such as `PrunesAfterRetentionPeriod` for records that expire and `RecordsCustomAudits` for audit events a model's own changes don't capture, come from [Chassis](/reference/chassis/)
+- `BaseModel`, which models extend. Model concerns shared with other applications, such as `PrunesAfterRetentionPeriod` for records that expire and `RecordsCustomAudits` for audit events a model's own changes don't capture (which the starter's `RecordsAuditEvents` builds on), come from [Chassis](/reference/chassis/)
 - The typed preferences base class (`Data/Preferences`), which `UserPreferences` extends
 - The `ExternalService` enum
 - Configuration validators (`Services/ConfigValidation/`)
