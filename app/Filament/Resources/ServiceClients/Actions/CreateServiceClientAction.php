@@ -52,6 +52,7 @@ class CreateServiceClientAction extends Action
                             name: $configuration['name'],
                             secretExpiresAt: $configuration['secret_expires_at'],
                             allowedIps: $configuration['allowed_ips'],
+                            createdBy: $this->administrator(),
                         );
 
                         ServiceClientSchemas::storeCredentials(ServiceClientSchemas::SESSION_KEY_CREATE, $client, $secret);
@@ -62,5 +63,11 @@ class CreateServiceClientAction extends Action
             ->modalSubmitAction(fn (Action $action) => ServiceClientSchemas::copyCredentialsSubmitButton($action))
             ->action(fn () => ServiceClientSchemas::clearCredentials(ServiceClientSchemas::SESSION_KEY_CREATE))
             ->successNotificationTitle('Service Client Created');
+    }
+
+    private function administrator(): User
+    {
+        /** @var User */
+        return auth()->user();
     }
 }

@@ -9,6 +9,7 @@ use App\Domains\Auth\Enums\CredentialStatus;
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Models\OAuthConnection;
 use App\Domains\Auth\Models\OAuthToken;
+use App\Domains\User\Models\Audit;
 use App\Domains\User\Models\User;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\Concerns\IssuesPersonalAccessTokens;
@@ -31,7 +32,7 @@ final class RevokeIneligibleCredentialsCommandTest extends TestCase
         [, $keptToken] = $this->personalAccessToken($kept);
 
         $this->artisan(RevokeIneligibleCredentialsCommand::class)
-            ->expectsOutputToContain('Revoked the credentials of 0 deactivated account(s), 1 personal access token(s)')
+            ->expectsOutputToContain('Revoked 1 personal access token(s), 0 connection(s) and 0 service client(s)')
             ->assertSuccessful();
 
         $this->assertSame(CredentialStatus::Revoked, $lostToken->fresh()?->status);
@@ -53,7 +54,7 @@ final class RevokeIneligibleCredentialsCommandTest extends TestCase
         $keptToken = $this->mcpToken();
 
         $this->artisan(RevokeIneligibleCredentialsCommand::class)
-            ->expectsOutputToContain('1 MCP client connection(s)')
+            ->expectsOutputToContain('0 personal access token(s), 1 connection(s)')
             ->assertSuccessful();
 
         $this->assertSame([$kept->id], OAuthConnection::query()->pluck('user_id')->all());
@@ -68,9 +69,39 @@ final class RevokeIneligibleCredentialsCommandTest extends TestCase
         $inactive->forceFill(['netid_inactive' => true])->saveQuietly();
 
         $this->artisan(RevokeIneligibleCredentialsCommand::class)
-            ->expectsOutputToContain('Revoked the credentials of 1 deactivated account(s)')
+            ->expectsOutputToContain('Revoked 1 personal access token(s)')
             ->assertSuccessful();
 
         $this->assertSame(CredentialStatus::Revoked, $token->fresh()?->status);
+        // Revoked through the action, so the person's history says so.
+        $this->assertSame($inactive->getKey(), Audit::query()->where('event', 'personal_access_token_revoked')->sole()->auditable_id);
+    }
+
+    // The serviceClients() scope hides a deleted API user's clients; the sweep must not.
+    public function test_it_revokes_the_service_clients_of_a_deleted_api_user(): void
+    {
+        $apiUser = User::factory()->api()->create();
+        [, $client] = $this->serviceClientToken($apiUser);
+        $apiUser->deleteQuietly();
+
+        $this->artisan(RevokeIneligibleCredentialsCommand::class)
+            ->expectsOutputToContain('and 1 service client(s)')
+            ->assertSuccessful();
+
+        $this->assertSame(CredentialStatus::Revoked, $client->fresh()?->status);
+    }
+
+    // A feature that is off may be turned back on, so its credentials wait rather than being revoked.
+    public function test_turning_a_feature_off_revokes_nothing(): void
+    {
+        $holder = User::factory()->create();
+        [, $token] = $this->personalAccessToken($holder);
+        config(['api.enabled' => false]);
+
+        $this->artisan(RevokeIneligibleCredentialsCommand::class)
+            ->expectsOutputToContain('Revoked 0 personal access token(s), 0 connection(s) and 0 service client(s)')
+            ->assertSuccessful();
+
+        $this->assertSame(CredentialStatus::Active, $token->fresh()?->status);
     }
 }

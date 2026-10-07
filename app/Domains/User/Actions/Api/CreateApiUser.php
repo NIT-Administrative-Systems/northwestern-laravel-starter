@@ -32,6 +32,7 @@ readonly class CreateApiUser
      * @param  string|null  $description  Optional description of the API user's purpose
      * @param  string|null  $email  Optional contact email for secret expiration notifications
      * @param  list<non-empty-string>|null  $allowedIps  Optional IP addresses or CIDR ranges the client may call from
+     * @param  User|null  $createdBy  The administrator; null for a seeder
      * @return array{0: User, 1: non-empty-string, 2: OAuthClient} The user, the client's plaintext secret, and the client
      */
     public function __invoke(
@@ -42,8 +43,9 @@ readonly class CreateApiUser
         ?string $description = null,
         ?string $email = null,
         ?array $allowedIps = null,
+        ?User $createdBy = null,
     ): array {
-        return DB::transaction(function () use ($username, $firstName, $clientName, $secretExpiresAt, $description, $email, $allowedIps): array {
+        return DB::transaction(function () use ($username, $firstName, $clientName, $secretExpiresAt, $description, $email, $allowedIps, $createdBy): array {
             $user = User::create([
                 'username' => strtolower($username),
                 'primary_affiliation' => Affiliation::Other,
@@ -54,7 +56,8 @@ readonly class CreateApiUser
                 'description' => $description,
             ]);
 
-            [$secret, $client] = ($this->createServiceClient)($user, $clientName, $secretExpiresAt, $allowedIps);
+            // Refused here, after the user exists, the transaction undoes the user too.
+            [$secret, $client] = ($this->createServiceClient)($user, $clientName, $secretExpiresAt, $allowedIps, createdBy: $createdBy);
 
             return [$user, $secret, $client];
         });

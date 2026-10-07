@@ -4,7 +4,12 @@ declare(strict_types=1);
 
 namespace App\Domains\Auth\Actions\Api;
 
+use App\Domains\Api\CredentialAccess;
+use App\Domains\Api\Enums\CredentialKind;
+use App\Domains\Api\Enums\CredentialOperation;
 use App\Domains\Auth\Models\OAuthClient;
+use App\Domains\User\Models\User;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
 use Laravel\Passport\Passport;
 
@@ -16,11 +21,20 @@ readonly class RevokeServiceClient
 {
     public function __construct(
         private AuditServiceClientChange $auditChange,
+        private CredentialAccess $credentials,
     ) {
     }
 
-    public function __invoke(OAuthClient $client): void
+    /**
+     * @param  User|null  $revokedBy  The administrator; null when the system revokes it
+     *
+     * @throws AuthorizationException
+     */
+    public function __invoke(OAuthClient $client, ?User $revokedBy = null): void
     {
+        $owner = $client->owner;
+        $this->credentials->decide($revokedBy, CredentialOperation::Revoke, CredentialKind::ServiceClient, $owner instanceof User ? $owner : null)->authorize();
+
         DB::transaction(function () use ($client): void {
             Passport::token()->newQuery()
                 ->where('client_id', $client->getKey())

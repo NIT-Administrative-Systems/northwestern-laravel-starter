@@ -20,7 +20,7 @@ use Spatie\Health\Http\Controllers\HealthCheckJsonResultsController;
 | accessible resources.
 */
 
-Route::middleware([EnsureFeatureEnabled::class . ':api.enabled'])->group(function () {
+Route::middleware([EnsureFeatureEnabled::class . ':api.enabled,404'])->group(function () {
     //
 });
 
@@ -36,7 +36,7 @@ Route::middleware([EnsureFeatureEnabled::class . ':api.enabled'])->group(functio
 */
 
 Route::middleware([
-    EnsureFeatureEnabled::class . ':api.enabled',
+    EnsureFeatureEnabled::class . ':api.enabled,404',
     LogsApiRequests::class,
     AuthenticatePassportToken::class,
     RefuseMcpTokens::class,

@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Domains\Auth\Http\Middleware;
 
-use App\Domains\Auth\Enums\SystemPermission;
+use App\Domains\Api\CredentialAccess;
+use App\Domains\Api\Enums\CredentialKind;
+use App\Domains\Api\Enums\CredentialOperation;
 use App\Domains\Auth\Models\OAuthClient;
 use App\Domains\Auth\Models\OAuthConnection;
 use App\Domains\Auth\Models\OAuthToken;
@@ -59,17 +61,17 @@ class AuthenticatePassportToken extends AuthenticatesPassportTokens
     }
 
     /**
-     * A deleted or deactivated account is refused, and a personal access token stops working
-     * as soon as its owner loses the permission to hold one.
+     * Whether the token's holder may still use it, as {@see CredentialAccess} decides: a deleted
+     * or deactivated account, or a holder who lost the permission the credential needs, is
+     * refused at once, before the hourly sweep revokes it.
      */
     protected function isEligible(Authenticatable $user): bool
     {
-        if (! $user instanceof User || $user->trashed() || $user->netid_inactive === true) {
-            return false;
-        }
+        $client = OAuthClient::query()->find(Context::get(ApiRequestContext::OAUTH_CLIENT_ID));
 
-        return Context::get(ApiRequestContext::OAUTH_GRANT_TYPE) !== OAuthGrantType::PersonalAccess->value
-            || $user->can(SystemPermission::CreatePersonalAccessTokens);
+        return $user instanceof User
+            && $client instanceof OAuthClient
+            && resolve(CredentialAccess::class)->decide($user, CredentialOperation::Use, CredentialKind::of($client), $user)->allowed;
     }
 
     protected function authenticated(Request $request, Client $client, ?Authenticatable $user): void

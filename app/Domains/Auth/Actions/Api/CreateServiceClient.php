@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Domains\Auth\Actions\Api;
 
+use App\Domains\Api\CredentialAccess;
+use App\Domains\Api\Enums\CredentialKind;
+use App\Domains\Api\Enums\CredentialOperation;
 use App\Domains\Auth\Enums\AuthType;
 use App\Domains\Auth\Enums\ClientOrigin;
 use App\Domains\Auth\Models\OAuthClient;
@@ -24,13 +27,17 @@ readonly class CreateServiceClient
     public function __construct(
         private ClientRepository $clients,
         private AuditServiceClientChange $auditChange,
+        private CredentialAccess $credentials,
     ) {
     }
 
     /**
      * @param  non-empty-string  $name  What the client is for, e.g. "Production sync"
      * @param  list<non-empty-string>|null  $allowedIps  IP addresses or CIDR ranges the client may call from
+     * @param  User|null  $createdBy  The administrator, recorded as the rotator when it replaces a client; null for a seeder
      * @return array{0: non-empty-string, 1: OAuthClient} The plaintext secret, shown once, and the client
+     *
+     * @throws AuthorizationException
      */
     public function __invoke(
         User $apiUser,
@@ -38,22 +45,19 @@ readonly class CreateServiceClient
         CarbonInterface $secretExpiresAt,
         ?array $allowedIps = null,
         ?OAuthClient $rotatedFrom = null,
-        ?User $rotatedBy = null,
+        ?User $createdBy = null,
     ): array {
         if ($apiUser->auth_type !== AuthType::API) {
             throw new InvalidArgumentException('Service clients can only belong to API users.');
         }
 
-        // A secret outlives the session, so it is never issued while impersonating, as with personal access tokens. This covers rotation and new API users too.
-        if (resolve('impersonate')->isImpersonating()) {
-            throw new AuthorizationException('Service clients cannot be created or rotated while impersonating.');
-        }
+        $this->credentials->decide($createdBy, CredentialOperation::Issue, CredentialKind::ServiceClient, $apiUser)->authorize();
 
         if ($secretExpiresAt->isPast() || $secretExpiresAt->isAfter(now()->addYear()->addDay())) {
             throw new InvalidArgumentException('A client secret must expire within one year.');
         }
 
-        return DB::transaction(function () use ($apiUser, $name, $secretExpiresAt, $allowedIps, $rotatedFrom, $rotatedBy): array {
+        return DB::transaction(function () use ($apiUser, $name, $secretExpiresAt, $allowedIps, $rotatedFrom, $createdBy): array {
             /** @var OAuthClient $client */
             $client = $this->clients->createClientCredentialsGrantClient($name);
 
@@ -66,7 +70,7 @@ readonly class CreateServiceClient
                 'secret_expires_at' => $secretExpiresAt,
                 'allowed_ips' => $allowedIps === [] ? null : $allowedIps,
                 'rotated_from_client_id' => $rotatedFrom?->getKey(),
-                'rotated_by_user_id' => $rotatedBy?->getKey(),
+                'rotated_by_user_id' => $rotatedFrom instanceof OAuthClient ? $createdBy?->getKey() : null,
             ])->save();
 
             ($this->auditChange)($client, 'service_client_created');

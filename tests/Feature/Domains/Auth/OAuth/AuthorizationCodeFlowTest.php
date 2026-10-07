@@ -9,14 +9,16 @@ use App\Domains\Auth\Actions\Applications\RegisterOAuthApplication;
 use App\Domains\Auth\Actions\Applications\RevokeOAuthApplication;
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Http\Controllers\SwitchOAuthAccountController;
-use App\Domains\Auth\Http\Middleware\RefuseOAuthConsentWhileImpersonating;
+use App\Domains\Auth\Http\Middleware\AuthorizeOAuthConsent;
 use App\Domains\Auth\Listeners\RecordOAuthConnection;
 use App\Domains\Auth\Models\OAuthConnection;
 use App\Domains\Auth\Notifications\ApplicationConnectedNotification;
+use App\Domains\Auth\Passport\GrantableScopeRepository;
 use App\Domains\User\Models\User;
 use App\Providers\OAuthServiceProvider;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Str;
 use Laravel\Passport\Events\AccessTokenCreated;
 use Mockery;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -30,7 +32,8 @@ use Tests\TestCase;
  */
 #[CoversClass(OAuthServiceProvider::class)]
 #[CoversClass(RecordOAuthConnection::class)]
-#[CoversClass(RefuseOAuthConsentWhileImpersonating::class)]
+#[CoversClass(AuthorizeOAuthConsent::class)]
+#[CoversClass(GrantableScopeRepository::class)]
 #[CoversClass(SwitchOAuthAccountController::class)]
 final class AuthorizationCodeFlowTest extends TestCase
 {
@@ -40,6 +43,7 @@ final class AuthorizationCodeFlowTest extends TestCase
     {
         Notification::fake();
         $user = User::factory()->create(['first_name' => 'Willie']);
+        $user->givePermissionTo(SystemPermission::ViewUsers);
         $client = $this->registerApplication();
         $this->actingAs($user);
 
@@ -153,6 +157,69 @@ final class AuthorizationCodeFlowTest extends TestCase
         $tokens = $this->exchange($client, $this->approve($client), $verifier)->assertOk();
         $this->assertSame([], OAuthConnection::query()->sole()->scopes);
         $this->assertNotEmpty($tokens->json('access_token'));
+    }
+
+    // A person can't give an application more than they hold, whatever it's allowed to ask for.
+    public function test_a_person_grants_only_the_scopes_they_hold(): void
+    {
+        $this->actingAs(User::factory()->affiliate()->create());
+        $client = $this->registerApplication(['view-users']);
+
+        [$consent, $verifier] = $this->requestAuthorization($client);
+        $consent->assertOk()->assertDontSee(SystemPermission::ViewUsers->description());
+
+        $this->exchange($client, $this->approve($client), $verifier)->assertOk();
+        $this->assertSame([], OAuthConnection::query()->sole()->scopes);
+    }
+
+    // Connected applications follow api.enabled, as MCP clients follow mcp.enabled.
+    public function test_consent_answers_404_while_the_api_is_off(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $client = $this->registerApplication();
+        config(['api.enabled' => false]);
+
+        [$consent] = $this->requestAuthorization($client);
+
+        $consent->assertNotFound();
+    }
+
+    // Passport approves the request it kept in the session, so a client_id posted with the form decides nothing.
+    public function test_approving_is_decided_on_the_client_passport_approves(): void
+    {
+        config(['mcp.enabled' => true]);
+        $person = User::factory()->create();
+        $person->givePermissionTo(SystemPermission::UseMcp);
+        $this->actingAs($person);
+        $mcpClient = $this->registerMcpClient();
+        $application = $this->registerApplication();
+
+        [$consent] = $this->requestAuthorization($mcpClient, ['mcp:use']);
+        $consent->assertOk();
+        $person->revokePermissionTo(SystemPermission::UseMcp);
+
+        $this->post('/oauth/authorize', ['client_id' => $application->getKey(), 'auth_token' => session('authToken')])
+            ->assertForbidden();
+        $this->assertSame(0, OAuthConnection::query()->count());
+    }
+
+    // With no client to decide on, impersonating is still refused.
+    public function test_approving_while_impersonating_is_refused_whatever_client_is_posted(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $client = $this->registerApplication(scopes: []);
+        [$consent] = $this->requestAuthorization($client, []);
+        $consent->assertOk();
+
+        $impersonate = Mockery::mock();
+        $impersonate->shouldReceive('isImpersonating')->andReturn(true);
+        $impersonate->shouldReceive('getImpersonatorId')->andReturn(null);
+        $this->app->instance('impersonate', $impersonate);
+        session()->forget('authRequest');
+
+        $this->post('/oauth/authorize', ['client_id' => (string) Str::uuid(), 'auth_token' => session('authToken')])
+            ->assertForbidden();
+        $this->assertSame(0, OAuthConnection::query()->count());
     }
 
     public function test_a_signed_out_person_signs_in_first_and_returns_to_the_consent_screen(): void

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Domains\Auth\Actions\Personal;
 
+use App\Domains\Api\CredentialAccess;
+use App\Domains\Api\Enums\CredentialKind;
 use App\Domains\Auth\Actions\Personal\CreatePersonalAccessToken;
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\Auth\Enums\TokenExpiration;
@@ -58,7 +60,7 @@ final class CreatePersonalAccessTokenTest extends TestCase
     {
         $user = $this->holder();
 
-        $this->assertSame([], CreatePersonalAccessToken::scopesFor($user));
+        $this->assertSame([], resolve(CredentialAccess::class)->grantableScopes($user, CredentialKind::PersonalAccessToken));
 
         $this->expectException(InvalidArgumentException::class);
         $this->create($user, ['view-users'], TokenExpiration::OneMonth);
