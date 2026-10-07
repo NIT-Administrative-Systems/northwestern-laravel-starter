@@ -7,7 +7,7 @@ namespace App\Filament\Resources\Users\RelationManagers;
 use App\Domains\Auth\Enums\AuthType;
 use App\Domains\Auth\Enums\SystemPermission;
 use App\Domains\User\Models\User;
-use App\Filament\Resources\ApiRequestLogs\Tables\ApiRequestLogsTable;
+use App\Filament\Clusters\ApiCluster\Resources\ApiRequestLogs\Tables\ApiRequestLogsTable;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Support\Icons\Heroicon;

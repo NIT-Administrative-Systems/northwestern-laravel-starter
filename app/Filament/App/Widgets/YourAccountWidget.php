@@ -6,7 +6,7 @@ namespace App\Filament\App\Widgets;
 
 use App\Domains\User\Models\User;
 use App\Filament\App\Clusters\AccountCluster\Pages\Profile;
-use App\Filament\App\Pages\ContactSupport;
+use App\Filament\App\Starter\Pages\ContactSupport;
 use App\Providers\Filament\AppPanelProvider;
 use Filament\Widgets\Widget;
 

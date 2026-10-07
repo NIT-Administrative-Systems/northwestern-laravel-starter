@@ -8,9 +8,9 @@ use App\Domains\Auth\Enums\SignInMethod;
 use App\Domains\Auth\Http\Controllers\SignInAsController;
 use App\Domains\Auth\SignIn;
 use App\Filament\App\Clusters\AccountCluster\Pages\Profile;
-use App\Filament\App\Pages\Auth\EmailCodeLogin;
-use App\Filament\App\Pages\Auth\Login;
-use App\Filament\App\Pages\EnvironmentLockdown as EnvironmentLockdownPage;
+use App\Filament\App\Starter\Pages\Auth\EmailCodeLogin;
+use App\Filament\App\Starter\Pages\Auth\Login;
+use App\Filament\App\Starter\Pages\EnvironmentLockdown as EnvironmentLockdownPage;
 use App\Http\Middleware\EnvironmentLockdown;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
@@ -117,6 +117,7 @@ class AppPanelProvider extends PanelProvider
             ])
             ->discoverResources(in: app_path('Filament/App/Resources'), for: 'App\Filament\App\Resources')
             ->discoverPages(in: app_path('Filament/App/Pages'), for: 'App\Filament\App\Pages')
+            ->discoverPages(in: app_path('Filament/App/Starter/Pages'), for: 'App\Filament\App\Starter\Pages')
             ->discoverClusters(in: app_path('Filament/App/Clusters'), for: 'App\Filament\App\Clusters')
             // Filament's dashboard renders the widgets in Filament/App/Widgets; replace it with your own page if you need more.
             ->pages([
