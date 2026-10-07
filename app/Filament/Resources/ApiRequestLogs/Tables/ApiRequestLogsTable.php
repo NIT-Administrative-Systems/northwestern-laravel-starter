@@ -12,7 +12,6 @@ use Filament\Actions\ExportAction;
 use Filament\Actions\ViewAction;
 use Filament\Support\Enums\FontFamily;
 use Filament\Support\Enums\FontWeight;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\PaginationMode;
 use Filament\Tables\Filters\Filter;
@@ -232,9 +231,6 @@ class ApiRequestLogsTable
             ])
             ->toolbarActions([
                 ExportAction::make()
-                    ->label('Export')
-                    ->icon(Heroicon::OutlinedArrowDownTray)
-                    ->color('gray')
                     ->exporter(ApiRequestLogExporter::class)
                     ->hidden($isRelationManager),
             ])

@@ -86,6 +86,8 @@ Version 3 removes the Bootstrap user interface. Every page now uses one stack, F
 
 ### Fixed
 
+- The user and role exports neutralize spreadsheet formulas, as the other exports already did: a name or description starting with `=`, `+`, `-`, `@`, a tab or a carriage return gets a leading apostrophe, so it can't run as a formula in Excel or Google Sheets. Every exporter now extends `App\Filament\Exports\BaseExporter`, which does this for every text cell and writes the completion notice, so a new exporter is safe without remembering to. `ExportAction`'s label, icon and color are set once in `FilamentServiceProvider`.
+- A user's Audit Logs, Role History and Login Records tabs, and Sign-In Records, check their permission through the Gate, so Manage All opens them, as it does every other page. They checked the permission directly, which skips `Gate::before`.
 - Setting `LOGIN_CHALLENGE_RETENTION_DAYS` or `API_REQUEST_LOG_RETENTION_DAYS` to `null` now keeps records, as documented. The settings were cast to an integer, so `null` became `0` and pruning deleted every record.
 - Accessibility: table cells that link to a record show a placeholder instead of an empty link, table placeholders and the platform overview's heatmap labels meet color contrast, and the heatmap cells no longer carry labels axe rejects.
 - Login codes sent by an administrator, or read on another device, can be entered. Every login code email links to the code step for its code; before, only a code requested in the same browser session worked.

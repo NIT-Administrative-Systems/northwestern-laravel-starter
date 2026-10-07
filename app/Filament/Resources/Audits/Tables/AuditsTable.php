@@ -266,9 +266,6 @@ class AuditsTable
             ])
             ->toolbarActions([
                 ExportAction::make()
-                    ->label('Export')
-                    ->icon(Heroicon::OutlinedArrowDownTray)
-                    ->color('gray')
                     ->exporter(AuditExporter::class),
             ])
             ->emptyStateHeading('No Audit Logs Yet')

@@ -11,7 +11,6 @@ use Filament\Actions\Action;
 use Filament\Actions\ExportAction;
 use Filament\Actions\ViewAction;
 use Filament\Support\Enums\FontFamily;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -81,9 +80,6 @@ class UserLoginRecordsTable
             ])
             ->toolbarActions([
                 ExportAction::make()
-                    ->label('Export')
-                    ->icon(Heroicon::OutlinedArrowDownTray)
-                    ->color('gray')
                     ->exporter(UserLoginRecordExporter::class)
                     ->hidden($isRelationManager),
             ])

@@ -6,11 +6,8 @@ namespace App\Filament\Exports;
 
 use App\Domains\User\Models\User;
 use Filament\Actions\Exports\ExportColumn;
-use Filament\Actions\Exports\Exporter;
-use Filament\Actions\Exports\Models\Export;
-use Illuminate\Support\Str;
 
-class UserExporter extends Exporter
+class UserExporter extends BaseExporter
 {
     protected static ?string $model = User::class;
 
@@ -88,15 +85,8 @@ class UserExporter extends Exporter
         ];
     }
 
-    public static function getCompletedNotificationBody(Export $export): string
+    protected static function recordNoun(): string
     {
-        $count = number_format($export->successful_rows);
-        $body = sprintf('Exported %s %s.', $count, Str::plural('user', $export->successful_rows));
-
-        if (($failedRowsCount = $export->getFailedRowsCount()) !== 0) {
-            $body .= sprintf(' %s %s failed.', number_format($failedRowsCount), Str::plural('row', $failedRowsCount));
-        }
-
-        return $body;
+        return 'user';
     }
 }

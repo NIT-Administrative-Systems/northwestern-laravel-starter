@@ -49,7 +49,7 @@ class UserLoginRecordResource extends Resource
 
     public static function canAccess(): bool
     {
-        return auth()->user()->hasPermissionTo(SystemPermission::ViewLoginRecords);
+        return (bool) auth()->user()?->can(SystemPermission::ViewLoginRecords);
     }
 
     public static function table(Table $table): Table

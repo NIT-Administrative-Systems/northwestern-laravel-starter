@@ -7,11 +7,9 @@ namespace App\Filament\Exports;
 use App\Domains\Auth\Enums\RoleModificationOrigin;
 use App\Domains\User\Models\Audit;
 use Filament\Actions\Exports\ExportColumn;
-use Filament\Actions\Exports\Exporter;
-use Filament\Actions\Exports\Models\Export;
 use Illuminate\Support\Str;
 
-class RoleActivityExporter extends Exporter
+class RoleActivityExporter extends BaseExporter
 {
     protected static ?string $model = Audit::class;
 
@@ -27,12 +25,10 @@ class RoleActivityExporter extends Exporter
                 }),
 
             ExportColumn::make('auditable.username')
-                ->label('NetID')
-                ->formatStateUsing(fn (?string $state) => self::sanitizeCsvFormula($state)),
+                ->label('NetID'),
 
             ExportColumn::make('auditable.clerical_name')
-                ->label('Name')
-                ->formatStateUsing(fn (?string $state) => self::sanitizeCsvFormula($state)),
+                ->label('Name'),
 
             ExportColumn::make('changed_role_names')
                 ->label('Role Name')
@@ -42,9 +38,7 @@ class RoleActivityExporter extends Exporter
                         return null;
                     }
 
-                    $names = implode(', ', array_column($roles, 'name'));
-
-                    return self::sanitizeCsvFormula($names);
+                    return implode(', ', array_column($roles, 'name'));
                 }),
 
             ExportColumn::make('changed_role_types')
@@ -72,40 +66,21 @@ class RoleActivityExporter extends Exporter
                 }),
 
             ExportColumn::make('user.username')
-                ->label('Performed by NetID')
-                ->formatStateUsing(fn (?string $state) => self::sanitizeCsvFormula($state)),
+                ->label('Performed by NetID'),
 
             ExportColumn::make('user.clerical_name')
-                ->label('Performed by Name')
-                ->formatStateUsing(fn (?string $state) => self::sanitizeCsvFormula($state)),
+                ->label('Performed by Name'),
 
             ExportColumn::make('impersonator.username')
-                ->label('Impersonator')
-                ->formatStateUsing(fn (?string $state) => self::sanitizeCsvFormula($state)),
+                ->label('Impersonator'),
 
             ExportColumn::make('created_at')
                 ->label('Date'),
         ];
     }
 
-    private static function sanitizeCsvFormula(?string $value): ?string
+    protected static function recordNoun(): string
     {
-        if ($value === null) {
-            return null;
-        }
-
-        return preg_match('/^[=+\-@\t\r]/', $value) ? "'" . $value : $value;
-    }
-
-    public static function getCompletedNotificationBody(Export $export): string
-    {
-        $count = number_format($export->successful_rows);
-        $body = sprintf('Exported %s role activity %s.', $count, Str::plural('record', $export->successful_rows));
-
-        if (($failedRowsCount = $export->getFailedRowsCount()) !== 0) {
-            $body .= sprintf(' %s %s failed.', number_format($failedRowsCount), Str::plural('row', $failedRowsCount));
-        }
-
-        return $body;
+        return 'role activity record';
     }
 }
