@@ -48,7 +48,7 @@
             {{-- A client's name is only a claim; where it sends the person is the part they can check. --}}
             <p class="mt-5 text-sm text-gray-700">
                 {{ $redirectTarget->isLoopback ? 'Approving returns you to an app on this computer at' : 'Approving returns you to' }}
-                <span class="break-all font-mono text-gray-950"><bdi>{{ $redirectTarget->display }}</bdi></span>.
+                <span class="wrap-anywhere font-mono text-gray-950"><bdi>{{ $redirectTarget->display }}</bdi></span>.
             </p>
 
             @if ($redirectTarget->punycode !== null)
@@ -59,7 +59,7 @@
                     <x-slot name="description">
                         <strong>Check this address.</strong> It uses international characters, which can imitate another
                         site's name. Its plain form is <span
-                              class="break-all font-mono"><bdi>{{ $redirectTarget->punycode }}</bdi></span>.
+                              class="wrap-anywhere font-mono"><bdi>{{ $redirectTarget->punycode }}</bdi></span>.
                     </x-slot>
                 </x-filament::callout>
             @endif
