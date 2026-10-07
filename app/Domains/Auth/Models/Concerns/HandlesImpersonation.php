@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Domains\User\Models\Concerns;
+namespace App\Domains\Auth\Models\Concerns;
 
 use App\Domains\Access\Enums\SystemPermission;
 use App\Domains\Auth\Enums\AuthType;

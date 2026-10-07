@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Domains\User\Listeners;
+namespace App\Domains\Auth\Listeners;
 
-use App\Domains\User\Models\ImpersonationLog;
+use App\Domains\Auth\Models\ImpersonationLog;
 use Lab404\Impersonate\Events\TakeImpersonation;
 
 /**

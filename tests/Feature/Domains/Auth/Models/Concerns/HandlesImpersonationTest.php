@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\Domains\User\Models\Concerns;
+namespace Tests\Feature\Domains\Auth\Models\Concerns;
 
 use App\Domains\Access\Enums\RoleModificationOrigin;
 use App\Domains\Access\Enums\SystemPermission;
 use App\Domains\Access\Models\Role;
-use App\Domains\User\Models\Concerns\HandlesImpersonation;
+use App\Domains\Auth\Models\Concerns\HandlesImpersonation;
 use App\Domains\User\Models\User;
 use Mockery;
 use PHPUnit\Framework\Attributes\CoversTrait;

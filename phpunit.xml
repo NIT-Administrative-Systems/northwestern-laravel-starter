@@ -71,7 +71,7 @@
             <file>app/Domains/Core/Models/Export.php</file>
             <directory>app/Domains/Support/Models</directory>
             <file>app/Domains/User/Models/User.php</file>
-            <file>app/Domains/User/Models/ImpersonationLog.php</file>
+            <file>app/Domains/Auth/Models/ImpersonationLog.php</file>
             <file>app/Domains/User/Models/UserLoginRecord.php</file>
 
             <!-- Seeders -->

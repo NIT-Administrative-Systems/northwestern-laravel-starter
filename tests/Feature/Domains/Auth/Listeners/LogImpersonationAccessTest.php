@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\Domains\User\Listeners;
+namespace Tests\Feature\Domains\Auth\Listeners;
 
-use App\Domains\User\Listeners\LogImpersonationAccess;
-use App\Domains\User\Models\ImpersonationLog;
+use App\Domains\Auth\Listeners\LogImpersonationAccess;
+use App\Domains\Auth\Models\ImpersonationLog;
 use App\Domains\User\Models\User;
 use Lab404\Impersonate\Events\TakeImpersonation;
 use PHPUnit\Framework\Attributes\CoversClass;

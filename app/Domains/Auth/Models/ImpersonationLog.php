@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Domains\User\Models;
+namespace App\Domains\Auth\Models;
 
 use App\Domains\Core\Models\BaseModel;
+use App\Domains\User\Models\User;
 use Database\Factories\Domains\User\Models\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

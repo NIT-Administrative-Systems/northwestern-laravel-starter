@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Database\Factories\Domains\User\Models;
+namespace Database\Factories\Domains\Auth\Models;
 
-use App\Domains\User\Models\ImpersonationLog;
+use App\Domains\Auth\Models\ImpersonationLog;
 use App\Domains\User\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
