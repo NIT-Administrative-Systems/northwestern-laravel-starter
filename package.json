@@ -8,27 +8,27 @@
         "typecheck": "tsc --noEmit -p tsconfig.json"
     },
     "dependencies": {
-        "@pierre/diffs": "^1.5.1",
-        "@sentry/browser": "^11.1.0"
+        "@pierre/diffs": "^1.6.2",
+        "@sentry/browser": "^11.10.0"
     },
     "devDependencies": {
         "@prettier/plugin-xml": "^3.4.2",
         "@sentry/vite-plugin": "^5.4.0",
-        "@shufo/prettier-plugin-blade": "^1.16.2",
+        "@shufo/prettier-plugin-blade": "^1.16.3",
         "@tailwindcss/vite": "^4.3.3",
         "@types/alpinejs": "^3.17.0",
-        "@types/node": "^26.6.3",
-        "autoprefixer": "^10.6.1",
-        "concurrently": "^10.0.5",
+        "@types/node": "^26.6.6",
+        "autoprefixer": "^10.6.2",
+        "concurrently": "^10.0.6",
         "laravel-vite-plugin": "^3.2.0",
-        "playwright": "^1.63.0",
-        "prettier": "^3.9.9",
-        "prettier-plugin-astro": "^1.1.0",
+        "playwright": "^1.64.1",
+        "prettier": "^3.9.10",
+        "prettier-plugin-astro": "^1.1.2",
         "prettier-plugin-organize-imports": "^4.3.0",
-        "prettier-plugin-packagejson": "^3.0.2",
+        "prettier-plugin-packagejson": "^3.0.3",
         "tailwindcss": "^4.3.3",
         "typescript": "^7.0.2",
-        "vite": "^8.3.1"
+        "vite": "^8.3.5"
     },
     "engines": {
         "node": ">= 26.0.0",
