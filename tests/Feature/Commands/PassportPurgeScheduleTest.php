@@ -53,6 +53,9 @@ final class PassportPurgeScheduleTest extends TestCase
 
         $token = OAuthToken::query()->where('client_id', $client->getKey())->sole();
         $token->forceFill(['revoked' => true, 'expires_at' => now()->subDays(32)])->save();
+        // Its 30-day refresh token expired two days ago. Passport keeps an access token while its
+        // refresh token is live.
+        Passport::refreshToken()->newQuery()->where('access_token_id', $token->getKey())->update(['expires_at' => now()->subDays(2)]);
 
         $this->runScheduledPurge();
 
