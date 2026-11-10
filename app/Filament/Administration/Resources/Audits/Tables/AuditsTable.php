@@ -101,7 +101,7 @@ class AuditsTable
                     ->searchable(query:
                         /** @phpstan-ignore-next-line  */
                         fn (Builder $query, string $search): Builder => $query->orWhereHas('user', fn (Builder $q) => $q->searchByName($search))
-                        /** @phpstan-ignore-next-line  */
+                            /** @phpstan-ignore-next-line  */
                             ->orWhereHas('impersonator', fn (Builder $q) => $q->searchByName($search)))
                     ->formatStateUsing(fn ($state, $record) => $record->user->full_name ?? '')
                     ->placeholder('—')
