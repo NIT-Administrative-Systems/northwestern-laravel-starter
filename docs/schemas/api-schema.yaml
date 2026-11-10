@@ -1,4 +1,4 @@
-openapi: 3.0.0
+openapi: 3.1.0
 info:
   title: 'Northwestern Laravel Starter API'
   description: 'The API endpoints the Northwestern Laravel Starter ships. Applications add their own beside them.'
@@ -31,6 +31,51 @@ paths:
 components:
   schemas:
     Permission:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 17
+        name:
+          type: string
+          description: 'Machine-friendly permission name.'
+          example: manage-users
+        label:
+          type: string
+          description: 'Human readable permission label.'
+          example: 'Manage Users'
+        description:
+          type:
+            - string
+            - 'null'
+          example: 'Allows creating, editing, and disabling user accounts.'
+        scope:
+          type: string
+          description: "Whether this permission applies system-wide or only to the authenticated user's context."
+          enum:
+            - system-wide
+            - personal
+          example: system-wide
+        system_managed:
+          type: boolean
+          example: false
+        api_relevant:
+          type: boolean
+          description: 'Whether this permission impacts API access patterns.'
+          example: true
+        created_at:
+          type:
+            - string
+            - 'null'
+          format: date-time
+          example: '2024-02-10T16:22:00Z'
+        updated_at:
+          type:
+            - string
+            - 'null'
+          format: date-time
+          example: '2024-04-02T19:43:12Z'
       required:
         - id
         - name
@@ -38,69 +83,25 @@ components:
         - scope
         - system_managed
         - api_relevant
-      properties:
-        id:
-          type: integer
-          format: int64
-          example: 17
-        name:
-          description: 'Machine-friendly permission name.'
-          type: string
-          example: manage-users
-        label:
-          description: 'Human readable permission label.'
-          type: string
-          example: 'Manage Users'
-        description:
-          type: string
-          example: 'Allows creating, editing, and disabling user accounts.'
-          nullable: true
-        scope:
-          description: "Whether this permission applies system-wide or only to the authenticated user's context."
-          type: string
-          example: system-wide
-          enum:
-            - system-wide
-            - personal
-        system_managed:
-          type: boolean
-          example: false
-        api_relevant:
-          description: 'Whether this permission impacts API access patterns.'
-          type: boolean
-          example: true
-        created_at:
-          type: string
-          format: date-time
-          example: '2024-02-10T16:22:00Z'
-          nullable: true
-        updated_at:
-          type: string
-          format: date-time
-          example: '2024-04-02T19:43:12Z'
-          nullable: true
-      type: object
     RoleType:
-      required:
-        - slug
-        - label
+      type: object
       properties:
         slug:
           type: string
-          example: api-integration
           enum:
             - system-managed
             - application-admin
             - application-role
             - api-integration
+          example: api-integration
         label:
           type: string
           example: 'API Integration'
-      type: object
-    Role:
       required:
-        - id
-        - name
+        - slug
+        - label
+    Role:
+      type: object
       properties:
         id:
           type: integer
@@ -116,39 +117,40 @@ components:
           oneOf:
             -
               $ref: '#/components/schemas/RoleType'
-          nullable: true
+              description: 'Included when the role_type relationship is loaded.'
+            -
+              type: 'null'
           description: 'Included when the role_type relationship is loaded.'
         created_at:
-          type: string
+          type:
+            - string
+            - 'null'
           format: date-time
           example: '2025-01-15T18:00:00Z'
-          nullable: true
         updated_at:
-          type: string
+          type:
+            - string
+            - 'null'
           format: date-time
           example: '2025-04-21T12:05:23Z'
-          nullable: true
         permissions:
+          type:
+            - array
+            - 'null'
           description: 'Included when permissions are eager loaded.'
-          type: array
           items:
             $ref: '#/components/schemas/Permission'
-          nullable: true
         users_count:
+          type:
+            - integer
+            - 'null'
           description: 'Included when a user count aggregate is loaded.'
-          type: integer
           example: 18
-          nullable: true
-      type: object
-    User:
       required:
         - id
-        - username
-        - auth_type
-        - first_name
-        - last_name
-        - full_name
-        - email
+        - name
+    User:
+      type: object
       properties:
         id:
           type: integer
@@ -158,13 +160,13 @@ components:
           type: string
           example: abc123
         auth_type:
-          description: 'How the user authenticates to the application.'
           type: string
-          example: api
+          description: 'How the user authenticates to the application.'
           enum:
             - sso
             - local
             - api
+          example: api
         first_name:
           type: string
           example: NUIT
@@ -179,16 +181,17 @@ components:
           format: email
           example: nuit.api@example.edu
         primary_affiliation:
+          type:
+            - string
+            - 'null'
           description: 'Primary Northwestern affiliation for the user.'
-          type: string
-          example: not-matched
-          nullable: true
           enum:
             - student
             - faculty
             - staff
             - affiliate
             - not-matched
+          example: not-matched
         departments:
           type: array
           items:
@@ -203,28 +206,38 @@ components:
           example:
             - 'Systems Administrator'
         created_at:
-          type: string
+          type:
+            - string
+            - 'null'
           format: date-time
           example: '2023-11-06T15:20:00Z'
-          nullable: true
         updated_at:
-          type: string
+          type:
+            - string
+            - 'null'
           format: date-time
           example: '2024-04-09T18:45:10Z'
-          nullable: true
         roles:
-          type: array
+          type:
+            - array
+            - 'null'
           items:
             $ref: '#/components/schemas/Role'
-          nullable: true
-      type: object
-    UserResponse:
       required:
-        - data
+        - id
+        - username
+        - auth_type
+        - first_name
+        - last_name
+        - full_name
+        - email
+    UserResponse:
+      type: object
       properties:
         data:
           $ref: '#/components/schemas/User'
-      type: object
+      required:
+        - data
       example:
         data:
           id: 1
@@ -260,11 +273,7 @@ components:
                   created_at: '2025-11-06T15:20:00+00:00'
                   updated_at: '2025-11-06T15:20:00+00:00'
     PaginationLinks:
-      required:
-        - first
-        - last
-        - prev
-        - next
+      type: object
       properties:
         first:
           type: string
@@ -275,56 +284,57 @@ components:
           format: uri
           example: 'https://example.test/api/v1/records?page=1'
         prev:
-          type: string
+          type:
+            - string
+            - 'null'
           format: uri
           example: null
-          nullable: true
         next:
-          type: string
+          type:
+            - string
+            - 'null'
           format: uri
           example: null
-          nullable: true
-      type: object
-    PaginationLink:
       required:
-        - label
-        - page
-        - active
+        - first
+        - last
+        - prev
+        - next
+    PaginationLink:
+      type: object
       properties:
         url:
-          type: string
+          type:
+            - string
+            - 'null'
           format: uri
           example: 'https://example.test/api/v1/records?page=1'
-          nullable: true
         label:
           type: string
           example: '&laquo; Previous'
         page:
-          type: integer
+          type:
+            - integer
+            - 'null'
           example: null
-          nullable: true
         active:
           type: boolean
           example: false
-      type: object
-    PaginationMeta:
       required:
-        - current_page
-        - from
-        - last_page
-        - path
-        - per_page
-        - to
-        - total
-        - links
+        - label
+        - page
+        - active
+    PaginationMeta:
+      type: object
       properties:
         current_page:
           type: integer
           example: 1
         from:
-          type: integer
+          type:
+            - integer
+            - 'null'
           example: 1
-          nullable: true
         last_page:
           type: integer
           example: 1
@@ -336,9 +346,10 @@ components:
           type: integer
           example: 20
         to:
-          type: integer
+          type:
+            - integer
+            - 'null'
           example: 15
-          nullable: true
         total:
           type: integer
           example: 15
@@ -362,17 +373,20 @@ components:
               label: 'Next &raquo;'
               page: null
               active: false
-      type: object
-    ProblemDetails:
-      description: 'Standard RFC 9457 problem details envelope.'
       required:
-        - type
-        - title
-        - status
-        - instance
+        - current_page
+        - from
+        - last_page
+        - path
+        - per_page
+        - to
+        - total
+        - links
+    ProblemDetails:
+      type: object
+      description: 'Standard RFC 9457 problem details envelope.'
       properties:
         type:
-          description: 'RFC 9457 compliant problem details response builder.'
           type: string
           format: uri
           example: 'about:blank'
@@ -383,38 +397,45 @@ components:
           type: integer
           example: 401
         detail:
-          type: string
+          type:
+            - string
+            - 'null'
           example: 'Authentication failed'
-          nullable: true
         instance:
           type: string
           format: uri-reference
           example: /api/v1/me
         trace_id:
+          type:
+            - string
+            - 'null'
           description: 'Unique identifier for the API request (if available).'
-          type: string
           example: b4f5aa7a-1470-4d92-8d3c-98e7c7de9f5f
-          nullable: true
-      type: object
+      required:
+        - type
+        - title
+        - status
+        - instance
     ValidationProblemDetails:
+      description: 'RFC 9457 compliant problem details response builder.'
       allOf:
         -
           $ref: '#/components/schemas/ProblemDetails'
         -
+          type: object
           properties:
             errors:
-              description: 'Validation errors keyed by input field.'
               type: object
+              description: 'Validation errors keyed by input field.'
+              additionalProperties:
+                type: array
+                items:
+                  type: string
               example:
                 name:
                   - 'The name field is required.'
                 expires_at:
                   - 'The expires at must be at least 24 hours from now.'
-              additionalProperties:
-                type: array
-                items:
-                  type: string
-          type: object
   securitySchemes:
     oauth2:
       type: oauth2
