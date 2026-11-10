@@ -30,7 +30,7 @@ return [
     |
     */
 
-    'custom_schemes' => array_values(array_filter(array_map('trim', explode(',', (string) env('MCP_CUSTOM_SCHEMES', ''))))),
+    'custom_schemes' => array_values(array_filter(array_map(trim(...), explode(',', (string) env('MCP_CUSTOM_SCHEMES', ''))))),
 
     /*
     |--------------------------------------------------------------------------

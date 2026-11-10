@@ -16,7 +16,7 @@ final class PersonalAccessTokenExpirationNotificationTest extends TestCase
     public function test_it_names_the_token_and_links_to_the_account_area(): void
     {
         $user = User::factory()->make(['first_name' => 'Willie']);
-        $token = (new OAuthToken())->forceFill(['name' => 'Nightly export', 'expires_at' => now()->addDays(3)]);
+        $token = new OAuthToken()->forceFill(['name' => 'Nightly export', 'expires_at' => now()->addDays(3)]);
 
         $mail = new PersonalAccessTokenExpirationNotification($user, $token, 3);
 

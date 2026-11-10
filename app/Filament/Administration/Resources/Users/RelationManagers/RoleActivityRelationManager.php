@@ -38,12 +38,10 @@ class RoleActivityRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return RoleActivityTable::configure($table, true)
-            ->modifyQueryUsing(function (Builder $query) {
-                return Audit::query()
-                    ->roleActivity()
-                    ->where('auditable_id', $this->getOwnerRecord()->getKey())
-                    ->with(['user', 'impersonator', 'auditable']);
-            })
+            ->modifyQueryUsing(fn (Builder $query) => Audit::query()
+                ->roleActivity()
+                ->where('auditable_id', $this->getOwnerRecord()->getKey())
+                ->with(['user', 'impersonator', 'auditable']))
             ->defaultPaginationPageOption(10)
             ->emptyStateHeading('No Role Changes')
             ->emptyStateDescription('No roles have been assigned to or removed from this person.')

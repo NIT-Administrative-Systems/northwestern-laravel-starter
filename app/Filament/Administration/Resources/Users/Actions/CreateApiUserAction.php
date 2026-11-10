@@ -37,7 +37,7 @@ class CreateApiUserAction extends Action
         $secret = RevealOnceSecret::for('api_user:create');
 
         // Whether a service client may be issued to a new API user.
-        $this->authorize(fn (): bool => static::allowsCredential(CredentialOperation::Issue, CredentialKind::ServiceClient, (new User())->forceFill(['auth_type' => AuthType::API])))
+        $this->authorize(fn (): bool => static::allowsCredential(CredentialOperation::Issue, CredentialKind::ServiceClient, new User()->forceFill(['auth_type' => AuthType::API])))
             ->label('Add API User')
             ->icon(Heroicon::OutlinedKey)
             ->color('warning')
@@ -70,22 +70,20 @@ class CreateApiUserAction extends Action
                                             ->autocomplete(false)
                                             ->regex('/^[a-z-]+$/')
                                             ->rules([
-                                                function () use ($secret) {
-                                                    return function (string $attribute, $value, $fail) use ($secret) {
-                                                        // Skip validation if this run already created the user
-                                                        if ($secret->issued()) {
-                                                            return;
-                                                        }
+                                                fn () => function (string $attribute, $value, $fail) use ($secret) {
+                                                    // Skip validation if this run already created the user
+                                                    if ($secret->issued()) {
+                                                        return;
+                                                    }
 
-                                                        $prefixedUsername = sprintf(
-                                                            'api-%s',
-                                                            preg_replace('/^api-/', '', trim($value))
-                                                        );
+                                                    $prefixedUsername = sprintf(
+                                                        'api-%s',
+                                                        preg_replace('/^api-/', '', trim($value))
+                                                    );
 
-                                                        if (User::where('username', $prefixedUsername)->exists()) {
-                                                            $fail('This username is already taken.');
-                                                        }
-                                                    };
+                                                    if (User::where('username', $prefixedUsername)->exists()) {
+                                                        $fail('This username is already taken.');
+                                                    }
                                                 },
                                             ])
                                             ->validationMessages([

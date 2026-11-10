@@ -19,11 +19,9 @@ class RoleTypeSeeder extends IdempotentSeeder
     /** @return array<int, array<string, string>> */
     public function data(): array
     {
-        return collect(RoleTypeEnum::cases())->map(function (RoleTypeEnum $roleType): array {
-            return [
-                'slug' => $roleType->value,
-                'label' => $roleType->getLabel(),
-            ];
-        })->all();
+        return collect(RoleTypeEnum::cases())->map(fn (RoleTypeEnum $roleType): array => [
+            'slug' => $roleType->value,
+            'label' => $roleType->getLabel(),
+        ])->all();
     }
 }

@@ -3,15 +3,10 @@
 declare(strict_types=1);
 
 use Rector\Caching\ValueObject\Storage\FileCacheStorage;
-use Rector\CodeQuality\Rector\Class_\CompleteDynamicPropertiesRector;
 use Rector\Config\RectorConfig;
 use Rector\DeadCode\Rector\StaticCall\RemoveParentCallWithoutParentRector;
-use Rector\EarlyReturn\Rector\Return_\ReturnBinaryOrToEarlyReturnRector;
-use Rector\Php83\Rector\ClassMethod\AddOverrideAttributeToOverriddenMethodsRector;
-use Rector\Php85\Rector\Expression\NestedFuncCallsToPipeOperatorRector;
+use Rector\Php81\Rector\MethodCall\SpatieEnumMethodCallToEnumConstRector;
 use Rector\Php85\Rector\Property\AddOverrideAttributeToOverriddenPropertiesRector;
-use Rector\Php85\Rector\StmtsAwareInterface\SequentialAssignmentsToPipeOperatorRector;
-use Rector\PHPUnit;
 use Rector\Set\ValueObject\SetList;
 use Rector\TypeDeclaration\Rector\ArrowFunction\AddArrowFunctionReturnTypeRector;
 use Rector\TypeDeclaration\Rector\Closure\AddClosureVoidReturnTypeWhereNoReturnRector;
@@ -28,8 +23,8 @@ return RectorConfig::configure()
         __DIR__ . '/routes',
         __DIR__ . '/tests',
     ])
+    ->withPhpSets()
     ->withSets([
-        SetList::PHP_85,
         SetList::CODE_QUALITY,
         SetList::DEAD_CODE,
         SetList::EARLY_RETURN,
@@ -49,15 +44,13 @@ return RectorConfig::configure()
         __DIR__ . '/storage',
         __DIR__ . '/bootstrap/cache',
         AddClosureVoidReturnTypeWhereNoReturnRector::class,
-        ReturnBinaryOrToEarlyReturnRector::class,
         ClosureReturnTypeRector::class,
         AddArrowFunctionReturnTypeRector::class,
         RemoveParentCallWithoutParentRector::class,
-        CompleteDynamicPropertiesRector::class,
-        NestedFuncCallsToPipeOperatorRector::class,
-        SequentialAssignmentsToPipeOperatorRector::class,
-        AddOverrideAttributeToOverriddenMethodsRector::class,
         AddOverrideAttributeToOverriddenPropertiesRector::class,
+        // Rewrites spatie/enum calls such as Spatie Health's Status::ok() to Status::OK, a constant
+        // that class doesn't have: it is a spatie/enum class, not a native enum.
+        SpatieEnumMethodCallToEnumConstRector::class,
         // toArray() -> all() change breaks PHPStan type checking for Filament's HtmlString options
         RectorLaravel\Rector\MethodCall\ConvertEnumerableToArrayToAllRector::class => [
             __DIR__ . '/app/Filament/*/*',
@@ -105,18 +98,6 @@ return RectorConfig::configure()
         RectorLaravel\Rector\MethodCall\JsonCallToExplicitJsonCallRector::class,
         RectorLaravel\Rector\StaticCall\AssertWithClassStringToTypeHintedClosureRector::class,
         RectorLaravel\Rector\StaticCall\CarbonSetTestNowToTravelToRector::class,
-
-        // PHPUnit: annotations to attributes + provider conventions
-        PHPUnit\AnnotationsToAttributes\Rector\Class_\CoversAnnotationWithValueToAttributeRector::class,
-        PHPUnit\AnnotationsToAttributes\Rector\ClassMethod\DataProviderAnnotationToAttributeRector::class,
-        PHPUnit\PHPUnit110\Rector\Class_\NamedArgumentForDataProviderRector::class,
-        PHPUnit\PHPUnit70\Rector\Class_\RemoveDataProviderTestPrefixRector::class,
-        PHPUnit\PHPUnit100\Rector\Class_\PublicDataProviderClassMethodRector::class,
-        PHPUnit\PHPUnit100\Rector\Class_\StaticDataProviderClassMethodRector::class,
-
-        // PHPUnit: assertion modernizations + code quality
-        PHPUnit\PHPUnit80\Rector\MethodCall\SpecificAssertContainsRector::class,
-        PHPUnit\PHPUnit100\Rector\MethodCall\PropertyExistsWithoutAssertRector::class,
     ])
     ->withCache(
         cacheDirectory: sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'rector',

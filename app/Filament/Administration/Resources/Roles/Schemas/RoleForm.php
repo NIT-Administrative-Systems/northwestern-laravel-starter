@@ -27,9 +27,7 @@ class RoleForm
         $nonApiPermissions = [];
         $systemPermissions = [];
 
-        $permissionScopeBadgeHTML = collect(PermissionScope::cases())->mapWithKeys(function (PermissionScope $scope) {
-            return [$scope->value => $scope->getBadgeHTML()];
-        });
+        $permissionScopeBadgeHTML = collect(PermissionScope::cases())->mapWithKeys(fn (PermissionScope $scope) => [$scope->value => $scope->getBadgeHTML()]);
 
         foreach (Permission::all() as $permission) {
             $permissionData = [

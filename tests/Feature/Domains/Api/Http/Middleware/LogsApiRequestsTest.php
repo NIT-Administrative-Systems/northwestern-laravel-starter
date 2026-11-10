@@ -32,9 +32,7 @@ final class LogsApiRequestsTest extends TestCase
     {
         parent::setUp();
 
-        Route::middleware(LogsApiRequests::class)->get($this->endpoint, function () {
-            return response()->json(['success' => true]);
-        });
+        Route::middleware(LogsApiRequests::class)->get($this->endpoint, fn () => response()->json(['success' => true]));
 
         config()->set('api.request_logging.enabled', true);
         config()->set('api.request_logging.sampling.enabled', false);
@@ -118,9 +116,7 @@ final class LogsApiRequestsTest extends TestCase
         Context::add(ApiRequestContext::TRACE_ID, $traceId);
         Context::add(ApiRequestContext::FAILURE_REASON, ApiRequestFailure::IpDenied->value);
 
-        Route::middleware(LogsApiRequests::class)->get('/api/forbidden', function () {
-            return response()->json(['error' => 'Forbidden'], 403);
-        });
+        Route::middleware(LogsApiRequests::class)->get('/api/forbidden', fn () => response()->json(['error' => 'Forbidden'], 403));
 
         $this->getJson('/api/forbidden')->assertForbidden();
 
@@ -221,9 +217,7 @@ final class LogsApiRequestsTest extends TestCase
 
         $user = User::factory()->api()->create();
 
-        Route::middleware(LogsApiRequests::class)->get('/api/error', function () {
-            return response()->json(['error' => 'Not Found'], 404);
-        });
+        Route::middleware(LogsApiRequests::class)->get('/api/error', fn () => response()->json(['error' => 'Not Found'], 404));
 
         for ($i = 0; $i < 3; $i++) {
             Context::flush();
@@ -284,19 +278,15 @@ final class LogsApiRequestsTest extends TestCase
         $user = User::factory()->api()->create();
 
         // Create a route with middleware that sets context and forces a DB error
-        app()->bind('test.set.context.with.error', function () use ($user) {
-            return function ($request, $next) use ($user) {
-                Context::add(ApiRequestContext::USER_ID, $user->id);
-                Context::add(ApiRequestContext::TRACE_ID, 'invalid-trace-id-format-to-cause-error');
+        app()->bind('test.set.context.with.error', fn () => function ($request, $next) use ($user) {
+            Context::add(ApiRequestContext::USER_ID, $user->id);
+            Context::add(ApiRequestContext::TRACE_ID, 'invalid-trace-id-format-to-cause-error');
 
-                return $next($request);
-            };
+            return $next($request);
         });
 
         Route::middleware(['test.set.context.with.error', LogsApiRequests::class])
-            ->get('/api/db-error-test', function () {
-                return response()->json(['ok' => true]);
-            });
+            ->get('/api/db-error-test', fn () => response()->json(['ok' => true]));
 
         // Even if logging fails internally (caught by try/catch),
         // the request should still succeed
@@ -377,11 +367,9 @@ final class LogsApiRequestsTest extends TestCase
         Context::add(ApiRequestContext::USER_ID, $user->id);
         Context::add(ApiRequestContext::TRACE_ID, Str::uuid()->toString());
 
-        Route::middleware(LogsApiRequests::class)->get('/api/stream', function () {
-            return response()->stream(function () {
-                echo 'streaming data';
-            });
-        });
+        Route::middleware(LogsApiRequests::class)->get('/api/stream', fn () => response()->stream(function () {
+            echo 'streaming data';
+        }));
 
         $this->get('/api/stream')->assertOk();
 
@@ -395,10 +383,8 @@ final class LogsApiRequestsTest extends TestCase
         Context::add(ApiRequestContext::USER_ID, $user->id);
         Context::add(ApiRequestContext::TRACE_ID, Str::uuid()->toString());
 
-        Route::middleware(LogsApiRequests::class)->get('/api/sized', function () {
-            return response()->json(['data' => 'test'])
-                ->header('Content-Length', '1234');
-        });
+        Route::middleware(LogsApiRequests::class)->get('/api/sized', fn () => response()->json(['data' => 'test'])
+            ->header('Content-Length', '1234'));
 
         $this->getJson('/api/sized')->assertOk();
 
@@ -412,9 +398,7 @@ final class LogsApiRequestsTest extends TestCase
         Context::add(ApiRequestContext::USER_ID, $user->id);
         Context::add(ApiRequestContext::TRACE_ID, Str::uuid()->toString());
 
-        Route::middleware(LogsApiRequests::class)->post('/api/post-test', function () {
-            return response()->json(['ok' => true]);
-        });
+        Route::middleware(LogsApiRequests::class)->post('/api/post-test', fn () => response()->json(['ok' => true]));
 
         $this->postJson('/api/post-test', ['data' => 'test'], ['Content-Length' => '512'])
             ->assertOk();
@@ -429,9 +413,7 @@ final class LogsApiRequestsTest extends TestCase
         Context::add(ApiRequestContext::USER_ID, $user->id);
         Context::add(ApiRequestContext::TRACE_ID, Str::uuid()->toString());
 
-        Route::middleware(LogsApiRequests::class)->get('/api/no-body', function () {
-            return response()->json(['ok' => true]);
-        });
+        Route::middleware(LogsApiRequests::class)->get('/api/no-body', fn () => response()->json(['ok' => true]));
 
         $this->get('/api/no-body', ['Accept' => 'application/json'])->assertOk();
 

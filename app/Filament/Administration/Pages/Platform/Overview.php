@@ -596,9 +596,7 @@ class Overview extends Page
             ];
         }
 
-        usort($tasks, function (array $a, array $b): int {
-            return ($a['next_due_date'] ?? '') <=> ($b['next_due_date'] ?? '');
-        });
+        usort($tasks, fn (array $a, array $b): int => ($a['next_due_date'] ?? '') <=> ($b['next_due_date'] ?? ''));
 
         return $tasks;
     }

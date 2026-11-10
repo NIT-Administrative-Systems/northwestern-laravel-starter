@@ -27,9 +27,7 @@ class UsersTable
         return $table
             ->columns([
                 TextColumn::make('clerical_name')
-                    ->sortable(query: function (Builder $query, $direction) {
-                        return $query->orderBy('last_name', $direction)->orderBy('first_name', $direction);
-                    })
+                    ->sortable(query: fn (Builder $query, $direction) => $query->orderBy('last_name', $direction)->orderBy('first_name', $direction))
                     ->label('Name'),
                 TextColumn::make('first_name')
                     ->searchable()
@@ -117,9 +115,7 @@ class UsersTable
             // Roles are not searchable: each search term would add a roles subquery, and the Role
             // filter already matches roles exactly.
             ->modifyQueryUsing(fn (Builder $query) => $query->with('roles'))
-            ->defaultSort(function (Builder $query) {
-                return $query->orderBy('last_name')->orderBy('first_name');
-            })
+            ->defaultSort(fn (Builder $query) => $query->orderBy('last_name')->orderBy('first_name'))
             ->filters([
                 SelectFilter::make('primary_affiliation')
                     ->label('Primary Affiliation')

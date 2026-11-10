@@ -38,10 +38,8 @@ class AuditsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return AuditsTable::configure($table)
-            ->modifyQueryUsing(function (Builder $query) {
-                return Audit::query()
-                    ->where('user_id', $this->getOwnerRecord()->getKey())
-                    ->with('impersonator');
-            });
+            ->modifyQueryUsing(fn (Builder $query) => Audit::query()
+                ->where('user_id', $this->getOwnerRecord()->getKey())
+                ->with('impersonator'));
     }
 }

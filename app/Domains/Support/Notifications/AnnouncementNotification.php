@@ -59,7 +59,7 @@ class AnnouncementNotification extends Notification implements ShouldQueue
 
     public function toMail(User $notifiable): MailMessage
     {
-        return (new MailMessage())
+        return new MailMessage()
             // The same sign-off as the starter's own emails, rather than Laravel's "Regards," (two
             // trailing spaces are a Markdown line break).
             ->salutation("Thanks,  \n" . config('app.name'))

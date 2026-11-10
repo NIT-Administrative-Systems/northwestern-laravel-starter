@@ -122,17 +122,15 @@ class SupportTicketsTable
                             ->minDate(fn (callable $get) => $get('from'))
                             ->maxDate(Carbon::today()),
                     ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        return $query
-                            ->when(
-                                filled($data['from'] ?? null),
-                                fn (Builder $q) => $q->where('created_at', '>=', Carbon::parse($data['from'])->startOfDay())
-                            )
-                            ->when(
-                                filled($data['to'] ?? null),
-                                fn (Builder $q) => $q->where('created_at', '<=', Carbon::parse($data['to'])->endOfDay())
-                            );
-                    })
+                    ->query(fn (Builder $query, array $data): Builder => $query
+                        ->when(
+                            filled($data['from'] ?? null),
+                            fn (Builder $q) => $q->where('created_at', '>=', Carbon::parse($data['from'])->startOfDay())
+                        )
+                        ->when(
+                            filled($data['to'] ?? null),
+                            fn (Builder $q) => $q->where('created_at', '<=', Carbon::parse($data['to'])->endOfDay())
+                        ))
                     ->indicateUsing(function (array $data): array {
                         $indicators = [];
                         if (filled($data['from'] ?? null)) {

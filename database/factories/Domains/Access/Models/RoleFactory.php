@@ -62,12 +62,10 @@ class RoleFactory extends Factory
     {
         $name = fake()->unique()->slug() . '-' . $roleType->value;
 
-        return $this->state(function () use ($roleType, $name) {
-            return [
-                'name' => $name,
-                'role_type_id' => $this->getRoleType($roleType),
-            ];
-        });
+        return $this->state(fn () => [
+            'name' => $name,
+            'role_type_id' => $this->getRoleType($roleType),
+        ]);
     }
 
     protected function getRoleType(?RoleTypeEnum $type = null): int

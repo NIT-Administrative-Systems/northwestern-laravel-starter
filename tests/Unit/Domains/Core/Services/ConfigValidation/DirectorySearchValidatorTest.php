@@ -15,7 +15,7 @@ final class DirectorySearchValidatorTest extends TestCase
     {
         config(['nusoa.directorySearch.apiKey' => null]);
 
-        $this->assertTrue((new DirectorySearchValidator())->shouldRun());
+        $this->assertTrue(new DirectorySearchValidator()->shouldRun());
     }
 
     // Local environments seed their users without Directory Search, so a missing key isn't a failure there.
@@ -24,10 +24,10 @@ final class DirectorySearchValidatorTest extends TestCase
         $this->app->detectEnvironment(fn (): string => 'local');
 
         config(['nusoa.directorySearch.apiKey' => null]);
-        $this->assertFalse((new DirectorySearchValidator())->shouldRun());
+        $this->assertFalse(new DirectorySearchValidator()->shouldRun());
 
         config(['nusoa.directorySearch.apiKey' => 'test-api-key']);
-        $this->assertTrue((new DirectorySearchValidator())->shouldRun());
+        $this->assertTrue(new DirectorySearchValidator()->shouldRun());
     }
 
     public function test_passes_when_api_key_is_configured(): void

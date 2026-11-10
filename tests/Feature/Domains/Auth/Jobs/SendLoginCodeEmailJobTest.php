@@ -41,9 +41,7 @@ final class SendLoginCodeEmailJobTest extends TestCase
 
         $job->handle(resolve(LoginCodes::class));
 
-        Mail::assertSent(LoginCodeMail::class, function (LoginCodeMail $mail) use ($challenge) {
-            return $mail->hasTo($challenge->email);
-        });
+        Mail::assertSent(LoginCodeMail::class, fn (LoginCodeMail $mail) => $mail->hasTo($challenge->email));
 
         $this->assertTrue($challenge->fresh()->email_sent_at->eq(now()));
     }
@@ -57,7 +55,7 @@ final class SendLoginCodeEmailJobTest extends TestCase
             'expires_at' => now()->addMinutes(10),
         ]);
 
-        (new SendLoginCodeEmailJob($challenge->id, Crypt::encryptString('123456')))->handle(resolve(LoginCodes::class));
+        new SendLoginCodeEmailJob($challenge->id, Crypt::encryptString('123456'))->handle(resolve(LoginCodes::class));
 
         Mail::assertSent(LoginCodeMail::class, function (LoginCodeMail $mail) use ($challenge) {
             parse_str((string) parse_url($mail->signInUrl, PHP_URL_QUERY), $query);

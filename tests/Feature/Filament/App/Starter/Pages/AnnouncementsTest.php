@@ -50,7 +50,7 @@ final class AnnouncementsTest extends TestCase
     {
         Announcement::factory()->count(Announcements::PER_PAGE + 1)->create();
 
-        $this->assertCount(Announcements::PER_PAGE, (new Announcements())->getAnnouncements()->items());
+        $this->assertCount(Announcements::PER_PAGE, new Announcements()->getAnnouncements()->items());
     }
 
     public function test_it_says_when_there_are_none(): void

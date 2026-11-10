@@ -83,11 +83,9 @@ class AuditsTable
                     ->label('NetID')
                     ->fontFamily(FontFamily::Mono)
                     ->sortable()
-                    ->searchable(query: function (Builder $query, string $search): Builder {
-                        return $query
-                            ->orWhereRelation('user', 'username', 'ilike', "%{$search}%")
-                            ->orWhereRelation('impersonator', 'username', 'ilike', "%{$search}%");
-                    })
+                    ->searchable(query: fn (Builder $query, string $search): Builder => $query
+                        ->orWhereRelation('user', 'username', 'ilike', "%{$search}%")
+                        ->orWhereRelation('impersonator', 'username', 'ilike', "%{$search}%"))
                     ->formatStateUsing(fn ($state, $record) => $record->user->username ?? '')
                     // Rows link to the audit, so an empty cell would be a link with no text.
                     ->placeholder('System')
@@ -100,12 +98,11 @@ class AuditsTable
                 TextColumn::make('user.full_name')
                     ->label('Name')
                     ->sortable()
-                    ->searchable(query: function (Builder $query, string $search): Builder {
+                    ->searchable(query:
                         /** @phpstan-ignore-next-line  */
-                        return $query->orWhereHas('user', fn (Builder $q) => $q->searchByName($search))
-                            /** @phpstan-ignore-next-line  */
-                            ->orWhereHas('impersonator', fn (Builder $q) => $q->searchByName($search));
-                    })
+                        fn (Builder $query, string $search): Builder => $query->orWhereHas('user', fn (Builder $q) => $q->searchByName($search))
+                        /** @phpstan-ignore-next-line  */
+                            ->orWhereHas('impersonator', fn (Builder $q) => $q->searchByName($search)))
                     ->formatStateUsing(fn ($state, $record) => $record->user->full_name ?? '')
                     ->placeholder('—')
                     ->description(
@@ -181,17 +178,15 @@ class AuditsTable
                             ->minDate(fn (callable $get) => $get('from'))
                             ->maxDate(Carbon::today()),
                     ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        return $query
-                            ->when(
-                                filled($data['from'] ?? null),
-                                fn (Builder $q) => $q->where('created_at', '>=', \Illuminate\Support\Carbon::parse($data['from'])->startOfDay())
-                            )
-                            ->when(
-                                filled($data['to'] ?? null),
-                                fn (Builder $q) => $q->where('created_at', '<=', \Illuminate\Support\Carbon::parse($data['to'])->endOfDay())
-                            );
-                    })
+                    ->query(fn (Builder $query, array $data): Builder => $query
+                        ->when(
+                            filled($data['from'] ?? null),
+                            fn (Builder $q) => $q->where('created_at', '>=', \Illuminate\Support\Carbon::parse($data['from'])->startOfDay())
+                        )
+                        ->when(
+                            filled($data['to'] ?? null),
+                            fn (Builder $q) => $q->where('created_at', '<=', \Illuminate\Support\Carbon::parse($data['to'])->endOfDay())
+                        ))
                     ->indicateUsing(function (array $data): array {
                         $indicators = [];
                         if (filled($data['from'] ?? null)) {
@@ -293,11 +288,9 @@ class AuditsTable
                     ];
                 })
                 ->groupBy('domain')
-                ->map(function ($items) {
-                    return collect($items)->mapWithKeys(
-                        fn ($it) => [$it['full_class'] => $it['label']]
-                    )->all();
-                })
+                ->map(fn ($items) => collect($items)->mapWithKeys(
+                    fn ($it) => [$it['full_class'] => $it['label']]
+                )->all())
                 ->all();
         });
     }

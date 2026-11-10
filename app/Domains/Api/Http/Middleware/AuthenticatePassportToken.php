@@ -46,7 +46,7 @@ class AuthenticatePassportToken extends AuthenticatesPassportTokens
      */
     protected function clientOwner(Client $client): ?Authenticatable
     {
-        if ($client->getAttribute('owner_type') !== (new User())->getMorphClass()) {
+        if ($client->getAttribute('owner_type') !== new User()->getMorphClass()) {
             return null;
         }
 

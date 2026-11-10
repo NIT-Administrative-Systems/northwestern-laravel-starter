@@ -20,7 +20,7 @@ final class SSOValidatorTest extends TestCase
             'services.northwestern-azure.client_secret' => null,
         ]);
 
-        $this->assertTrue((new SSOValidator())->shouldRun());
+        $this->assertTrue(new SSOValidator()->shouldRun());
     }
 
     // SSO is optional locally, but a half-configured provider still runs so the missing variable is reported.
@@ -34,13 +34,13 @@ final class SSOValidatorTest extends TestCase
             'services.northwestern-azure.client_id' => null,
             'services.northwestern-azure.client_secret' => null,
         ]);
-        $this->assertFalse((new SSOValidator())->shouldRun());
+        $this->assertFalse(new SSOValidator()->shouldRun());
 
         config(['services.northwestern-azure.client_id' => 'test-client-id']);
-        $this->assertTrue((new SSOValidator())->shouldRun());
+        $this->assertTrue(new SSOValidator()->shouldRun());
 
         config(['services.northwestern-azure.client_id' => null, 'nusoa.sso.apigeeApiKey' => 'test-key']);
-        $this->assertTrue((new SSOValidator())->shouldRun());
+        $this->assertTrue(new SSOValidator()->shouldRun());
     }
 
     public function test_passes_when_entra_id_credentials_are_configured(): void

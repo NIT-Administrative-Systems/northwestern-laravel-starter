@@ -33,9 +33,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(ProblemDetailsRenderer::class, fn (): ProblemDetailsRenderer => new ProblemDetailsRenderer(
             exceptPaths: ['oauth/*', 'mcp', 'mcp/*', '.well-known/*'],
         ));
-        $this->app->bind(DbDumperFactory::class, function (): ConfigurableDbDumperFactory {
-            return new ConfigurableDbDumperFactory();
-        });
+        $this->app->bind(DbDumperFactory::class, fn (): ConfigurableDbDumperFactory => new ConfigurableDbDumperFactory());
         $this->app->singleton(
             OneTimeCodeGenerator::class,
             config('local-auth.use_fixed_code')
@@ -62,10 +60,11 @@ class AppServiceProvider extends ServiceProvider
     /** Register the custom user provider and configure the super-admin gate bypass. */
     public function configureAuthentication(): void
     {
-        Auth::provider('eager-load-eloquent', static function (Application $application, array $config): EagerLoadEloquentUserProvider {
+        Auth::provider(
+            'eager-load-eloquent',
             /** @phpstan-ignore-next-line  */
-            return new EagerLoadEloquentUserProvider($application['hash'], $config['model']);
-        });
+            static fn (Application $application, array $config): EagerLoadEloquentUserProvider => new EagerLoadEloquentUserProvider($application['hash'], $config['model'])
+        );
 
         /**
          * Users with the {@see SystemPermission::ManageAll} permission bypass all authorization checks.

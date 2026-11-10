@@ -28,23 +28,21 @@ readonly class CreateLocalUser
         ?string $description = null,
         bool $sendLoginLink = true,
     ): User {
-        $user = retry(3, function () use ($email, $firstName, $lastName, $title, $department, $description) {
-            return DB::transaction(function () use ($email, $firstName, $lastName, $title, $department, $description) {
-                $username = $this->generateUsername($email);
+        $user = retry(3, fn () => DB::transaction(function () use ($email, $firstName, $lastName, $title, $department, $description) {
+            $username = $this->generateUsername($email);
 
-                return User::create([
-                    'username' => $username,
-                    'auth_type' => AuthType::Local,
-                    'primary_affiliation' => Affiliation::Affiliate,
-                    'email' => strtolower($email),
-                    'first_name' => $firstName,
-                    'last_name' => $lastName,
-                    'job_titles' => [$title],
-                    'departments' => [$department],
-                    'description' => $description,
-                ]);
-            });
-        }, 0, fn (\Throwable $e) => $e instanceof UniqueConstraintViolationException);
+            return User::create([
+                'username' => $username,
+                'auth_type' => AuthType::Local,
+                'primary_affiliation' => Affiliation::Affiliate,
+                'email' => strtolower($email),
+                'first_name' => $firstName,
+                'last_name' => $lastName,
+                'job_titles' => [$title],
+                'departments' => [$department],
+                'description' => $description,
+            ]);
+        }), 0, fn (\Throwable $e) => $e instanceof UniqueConstraintViolationException);
 
         if ($sendLoginLink) {
             try {
