@@ -15,7 +15,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - A person's record in the administration panel is split into **Details**, **Access**, **Activity** and **API Credentials** pages, with API Credentials second for API users. Record pages lay out by their content's width rather than the screen's, and the Wildcard photo is a fixed 96 pixels.
 - Wizards that show a new secret show it in full with a **Copy** button, have no **Back** once it is issued, and end with **I've Saved It**.
 - A role's page lists the permissions it grants instead of a disabled form, the role form marks only personal permissions, and Delete on a role and on an announcement is in a menu. Role Activity shows whole role names as badges, with deleted roles struck through.
-- Applications' row actions are in a menu instead of a filled **Actions** button, list pages have no "List" breadcrumb, API chart headers keep paths and ranges on one line, and Scheduled Tasks on Overview is a list below `md`.
+- Applications' and Service Clients' row actions are in a menu instead of a filled **Actions** button, list pages have no "List" breadcrumb, API chart headers keep paths and ranges on one line, and Scheduled Tasks on Overview is a list below `md`.
 
 ### Fixed
 

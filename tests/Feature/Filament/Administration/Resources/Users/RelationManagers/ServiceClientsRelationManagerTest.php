@@ -58,6 +58,18 @@ final class ServiceClientsRelationManagerTest extends TestCase
             ->assertSee('Nightly sync');
     }
 
+    // A quiet menu, as on Applications, rather than a filled Actions button on every row.
+    public function test_a_clients_actions_are_in_an_icon_menu(): void
+    {
+        $this->client('Nightly sync');
+
+        $html = $this->relationManager()->html();
+
+        $this->assertStringContainsString('fi-ta-actions', $html);
+        $this->assertMatchesRegularExpression('/fi-icon-btn[^>]*aria-label="Actions"|aria-label="Actions"[^>]*fi-icon-btn/s', $html);
+        $this->assertDoesNotMatchRegularExpression('/<button[^>]*fi-btn[^>]*>\s*(<[^>]+>\s*)*Actions\s*</s', $html);
+    }
+
     // The secret is shown once, kept only encrypted in the session until the operator confirms.
     public function test_creating_a_client_shows_its_secret_once(): void
     {
