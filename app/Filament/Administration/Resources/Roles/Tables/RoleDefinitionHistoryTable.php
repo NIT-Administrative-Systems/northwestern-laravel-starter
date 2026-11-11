@@ -113,8 +113,8 @@ class RoleDefinitionHistoryTable
                     limitUntilToToday: true,
                 )
                     ->columnSpan(2),
-            ], layout: FiltersLayout::AboveContent)
-            ->filtersFormColumns(3)
+            ], layout: FiltersLayout::AboveContentCollapsible)
+            ->filtersFormColumns(['default' => 1, 'md' => 3])
             ->emptyStateHeading('No Changes Yet')
             ->emptyStateDescription('Changes to this role\'s name, type, and permissions will appear here.')
             ->emptyStateIcon('heroicon-o-clock');

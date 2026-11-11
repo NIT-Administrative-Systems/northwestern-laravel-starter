@@ -54,6 +54,11 @@ class AuditsTable
                     ->copyable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
+                TextColumn::make('created_at')
+                    ->label('Created')
+                    ->since()
+                    ->dateTimeTooltip()
+                    ->sortable(),
                 TextColumn::make('event')
                     ->badge()
                     ->formatStateUsing(fn (string $state): string => AuditEvent::labelFor($state))
@@ -72,13 +77,15 @@ class AuditsTable
                     ->label('Record ID')
                     ->numeric()
                     ->copyable()
-                    ->sortable(),
+                    ->sortable()
+                    ->visibleFrom('xl'),
                 TextColumn::make('url')
                     ->label('URL')
                     ->fontFamily(FontFamily::Mono)
                     ->formatStateUsing(fn ($state) => str_replace(config('app.url'), '', $state))
                     ->limit(50)
-                    ->searchable(isIndividual: true, isGlobal: false),
+                    ->searchable(isIndividual: true, isGlobal: false)
+                    ->visibleFrom('2xl'),
                 TextColumn::make('user.username')
                     ->label('NetID')
                     ->fontFamily(FontFamily::Mono)
@@ -104,6 +111,7 @@ class AuditsTable
                             /** @phpstan-ignore-next-line  */
                             ->orWhereHas('impersonator', fn (Builder $q) => $q->searchByName($search)))
                     ->formatStateUsing(fn ($state, $record) => $record->user->full_name ?? '')
+                    ->visibleFrom('xl')
                     ->placeholder('—')
                     ->description(
                         fn ($record) => $record->impersonator
@@ -124,11 +132,6 @@ class AuditsTable
                 TextColumn::make('tags')
                     ->searchable(isIndividual: true, isGlobal: false)
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('created_at')
-                    ->label('Created')
-                    ->since()
-                    ->dateTimeTooltip()
-                    ->sortable(),
             ])
             ->defaultSort('created_at', direction: 'desc')
             // Audits grow without bound; skip the full COUNT(*) the default paginator runs on every request.
@@ -231,8 +234,10 @@ class AuditsTable
                         return 'Ignored: ' . implode(', ', $labels);
                     }),
 
-            ], layout: FiltersLayout::AboveContent)
-            ->filtersFormColumns(4)
+            ], layout: FiltersLayout::AboveContentCollapsible)
+            ->filtersFormColumns(['default' => 1, 'md' => 2, 'xl' => 4])
+            // The newest audits arrive after the page does, rather than holding it up.
+            ->deferLoading()
             ->recordActions([
                 ViewAction::make(),
             ])

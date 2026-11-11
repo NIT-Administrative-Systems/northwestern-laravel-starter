@@ -14,6 +14,7 @@ use App\Domains\User\Support\UserOptionLabel;
 use App\Domains\User\Support\UserSearch;
 use App\Filament\Administration\Exports\RoleActivityExporter;
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\ExportAction;
 use Filament\Actions\ViewAction;
 use Filament\Support\Icons\Heroicon;
@@ -22,7 +23,6 @@ use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\HtmlString;
 use Northwestern\FilamentTheme\Filters\DateRangeFilter;
 
@@ -62,15 +62,33 @@ class RoleActivityTable
                         ? route('filament.administration.resources.users.view', ['record' => $record->auditable])
                         : null
                     )
-                    ->hidden($isRelationManager),
+                    ->hidden($isRelationManager)
+                    ->wrap(),
 
                 TextColumn::make('changed_roles')
                     ->label('Role')
-                    ->state(fn (Audit $record) => new HtmlString(self::formatChangedRoles($record))),
+                    ->state(fn (Audit $record): array => array_column($record->getChangedRoles(), 'name'))
+                    ->badge()
+                    ->color(fn (string $state, Audit $record): string => self::changedRole($record, $state)['color'])
+                    // No link of its own: the whole row already links to the audit, and a link can't sit inside another.
+                    ->formatStateUsing(fn (string $state, Audit $record): string|HtmlString => self::changedRole($record, $state)['exists']
+                        ? $state
+                        : new HtmlString('<s>' . e($state) . '</s><span class="sr-only"> (deleted)</span>'))
+                    ->tooltip(fn (Audit $record): ?string => collect($record->getChangedRoles())->contains(fn (array $role): bool => ! self::changedRole($record, $role['name'])['exists'])
+                        ? 'Struck-through roles have been deleted.'
+                        : null)
+                    ->limitList(2)
+                    ->expandableLimitedList()
+                    ->listWithLineBreaks()
+                    ->wrap()
+                    // Whole role names, wrapped inside the badge instead of widening the table.
+                    ->extraAttributes(['class' => 'max-w-48'])
+                    ->placeholder('None'),
 
                 TextColumn::make('tags')
                     ->label('Origin')
                     ->badge()
+                    ->visibleFrom('2xl')
                     ->formatStateUsing(function (?string $state): string {
                         if (! $state) {
                             return '—';
@@ -103,6 +121,7 @@ class RoleActivityTable
 
                 TextColumn::make('user.full_name')
                     ->label('Performed By')
+                    ->visibleFrom('xl')
                     ->state(fn (Audit $record): string => $record->user
                         ? $record->user->full_name
                         : 'System')
@@ -134,7 +153,9 @@ class RoleActivityTable
                     ->label('Date')
                     ->since()
                     ->dateTimeTooltip()
-                    ->sortable(),
+                    ->sortable()
+                    // Below xl, the event's tooltip gives the date.
+                    ->visibleFrom('xl'),
             ])
             ->recordClasses('transition-colors hover:bg-gray-50 dark:hover:bg-white/5')
             ->defaultSort('created_at', direction: 'desc')
@@ -239,21 +260,24 @@ class RoleActivityTable
                 )
                     ->columns(2)
                     ->columnSpan(2),
-            ], layout: FiltersLayout::AboveContent)
-            ->filtersFormColumns(3)
+            ], layout: FiltersLayout::AboveContentCollapsible)
+            ->filtersFormColumns(['default' => 1, 'md' => 2, 'xl' => 3])
+            ->deferLoading()
             ->recordActions([
-                ViewAction::make()
-                    ->label('View Audit')
-                    ->url(fn (Audit $record) => route('filament.administration.resources.audits.view', ['record' => $record])),
-                Action::make('view_user')
-                    ->label('View User')
-                    ->icon(Heroicon::OutlinedUser)
-                    ->url(
-                        fn (Audit $record) => $record->auditable
-                        ? route('filament.administration.resources.users.view', ['record' => $record->auditable])
-                        : null
-                    )
-                    ->hidden(fn (Audit $record) => ! $record->auditable),
+                ActionGroup::make([
+                    ViewAction::make()
+                        ->label('View Audit')
+                        ->url(fn (Audit $record) => route('filament.administration.resources.audits.view', ['record' => $record])),
+                    Action::make('view_user')
+                        ->label('View User')
+                        ->icon(Heroicon::OutlinedUser)
+                        ->url(
+                            fn (Audit $record) => $record->auditable
+                            ? route('filament.administration.resources.users.view', ['record' => $record->auditable])
+                            : null
+                        )
+                        ->hidden(fn (Audit $record) => ! $record->auditable),
+                ]),
             ])
             ->toolbarActions([
                 ExportAction::make()
@@ -265,61 +289,22 @@ class RoleActivityTable
     }
 
     /**
-     * Format the changed roles for display as HTML badges.
+     * Whether a role this audit changed still exists, and the color of its role type.
      *
-     * Each role is a Filament badge in its role type's color.
+     * @return array{exists: bool, color: string}
      */
-    private static function formatChangedRoles(Audit $record): string
+    private static function changedRole(Audit $record, string $name): array
     {
-        $changedRoles = $record->getChangedRoles();
-
-        if ($changedRoles === []) {
-            return '<span class="text-sm text-gray-400 dark:text-gray-500">—</span>';
-        }
-
         $existingRoleIds = once(fn () => Role::pluck('id')->all());
+        $role = collect($record->getChangedRoles())->firstWhere('name', $name);
 
-        $maxVisible = 3;
-        $count = count($changedRoles);
-        $visible = array_slice($changedRoles, 0, $maxVisible);
-        $remaining = $count - $maxVisible;
-
-        $parts = array_map(function (array $role) use ($existingRoleIds) {
-            $roleExists = in_array($role['id'], $existingRoleIds);
-            $roleType = collect(RoleTypeEnum::cases())
-                ->first(fn (RoleTypeEnum $case) => $case->getLabel() === $role['role_type']);
-
-            if (! $roleExists) {
-                $tooltip = e(json_encode(['content' => 'This role has been deleted.', 'theme' => 'light']));
-
-                return '<span x-tooltip="' . $tooltip . '">'
-                    . self::badge($role['name'], 'gray', 'line-through opacity-60')
-                    . '</span>';
-            }
-
-            // No link of its own: the whole row already links to the audit, and a link can't sit inside another.
-            return self::badge($role['name'], $roleType?->getColor() ?? 'gray');
-        }, $visible);
-
-        if ($remaining > 0) {
-            $overflowRoles = array_slice($changedRoles, $maxVisible);
-            $tooltip = implode(', ', array_column($overflowRoles, 'name'));
-            $parts[] = '<span x-tooltip="' . e(json_encode(['content' => $tooltip, 'theme' => 'light'])) . '">'
-                . self::badge('+' . $remaining . ' more', 'gray')
-                . '</span>';
+        if ($role === null || ! in_array($role['id'], $existingRoleIds)) {
+            return ['exists' => false, 'color' => 'gray'];
         }
 
-        return '<div class="flex flex-wrap items-center gap-1">' . implode('', $parts) . '</div>';
-    }
+        $roleType = collect(RoleTypeEnum::cases())
+            ->first(fn (RoleTypeEnum $case) => $case->getLabel() === $role['role_type']);
 
-    /**
-     * Filament's badge, for HTML the column builds itself.
-     */
-    private static function badge(string $label, string $color, string $class = ''): string
-    {
-        return Blade::render(
-            '<x-filament::badge :color="$color" size="sm" :class="$class">{{ $label }}</x-filament::badge>',
-            ['label' => $label, 'color' => $color, 'class' => $class],
-        );
+        return ['exists' => true, 'color' => $roleType?->getColor() ?? 'gray'];
     }
 }

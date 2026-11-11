@@ -15,6 +15,16 @@ class RoleActivityStatsWidget extends BaseWidget
 {
     protected ?string $pollingInterval = null;
 
+    /**
+     * One row at every width, so the table starts near the top of a phone's screen.
+     *
+     * @return int|array<string, int>
+     */
+    protected function getColumns(): int|array
+    {
+        return ['default' => 3];
+    }
+
     protected function getStats(): array
     {
         $recentSince = now()->subDays(7);

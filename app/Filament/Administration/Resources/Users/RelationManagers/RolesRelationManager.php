@@ -85,6 +85,7 @@ class RolesRelationManager extends RelationManager
             ->columns([
                 TextColumn::make('name')
                     ->label('Role')
+                    ->wrap()
                     ->searchable(),
                 TextColumn::make('role_type.slug')
                     ->label('Role Type')

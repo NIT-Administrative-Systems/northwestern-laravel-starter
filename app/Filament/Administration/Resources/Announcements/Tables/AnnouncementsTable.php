@@ -37,12 +37,14 @@ class AnnouncementsTable
                     ->label('Starts')
                     ->dateTime()
                     ->sortable()
-                    ->placeholder('Not published'),
+                    ->placeholder('Not published')
+                    ->visibleFrom('xl'),
                 TextColumn::make('ends_at')
                     ->label('Ends')
                     ->dateTime()
                     ->sortable()
-                    ->placeholder('No end'),
+                    ->placeholder('No end')
+                    ->visibleFrom('xl'),
                 TextColumn::make('updated_at')
                     ->label('Updated')
                     ->since()
