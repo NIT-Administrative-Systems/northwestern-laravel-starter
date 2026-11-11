@@ -13,9 +13,10 @@ use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
 /**
- * The announcement banner at the top of every app-panel page: the single most important live
- * announcement the person hasn't dismissed, with a count of the others. Dismissing one shows the
- * next in its place.
+ * The announcement banner at the top of every app panel page: the
+ * most important live announcement the person hasn't dismissed.
+ *
+ * It counts the others, and dismissing one shows the next in its place.
  */
 class AnnouncementBanner extends Component
 {
@@ -23,8 +24,10 @@ class AnnouncementBanner extends Component
     {
         $dismiss(Announcement::query()->findOrFail($announcementId), $this->user());
 
-        // The focused dismiss button goes with the banner. Move focus to the next banner's button,
-        // or, when none is left to dismiss, to the page heading, rather than back to the top of the page.
+        // The focused dismiss button leaves with the
+        // banner. Focus moves to the next banner's
+        // button or, with none left, to the page
+        // heading, not to the top of the page.
         $this->js(<<<'JS'
             const next = $wire.$el.querySelector('[data-testid="dismiss-announcement"]');
             const heading = document.querySelector('.fi-header-heading');

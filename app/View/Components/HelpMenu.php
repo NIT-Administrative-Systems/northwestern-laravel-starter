@@ -13,9 +13,8 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\View\Component;
 
 /**
- * The Help menu in both panels' top bars and in the header of public and error
- * pages. Each item shows only while it is available, and the menu is left out
- * when none is.
+ * The Help menu in both panels' top bars and the header of public and error pages.
+ * Each item shows only while it's available, and with none the menu is left out.
  */
 class HelpMenu extends Component
 {
@@ -25,9 +24,8 @@ class HelpMenu extends Component
     }
 
     /**
-     * Get the menu's items: Announcements and Contact Support for people signed in,
-     * the changelog while its routes exist, and `support.documentation_url` when it
-     * is set.
+     * Get the items: Announcements and Contact Support for people who are signed in,
+     * the changelog while its routes exist, and documentation when its URL is set.
      *
      * @return list<array{label: string, url: string, icon: Heroicon, external: bool}>
      */

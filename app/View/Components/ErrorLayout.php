@@ -31,9 +31,10 @@ class ErrorLayout extends Component
     }
 
     /**
-     * The next step for the status: sign in, reload the page the person came from, go back, or
-     * go to the home page. Maintenance (503) has none, since every page is down, and neither has
-     * a page without a status, such as database-paused, which reloads itself.
+     * Get the next step for the status: sign in, reload, go back, or go home.
+     *
+     * Maintenance (503) has none, since every page is down, and neither has a
+     * page without a status, such as database-paused, which reloads itself.
      *
      * @return array{label: string, url: string}|null
      */
@@ -49,8 +50,8 @@ class ErrorLayout extends Component
     }
 
     /**
-     * The page the person came from, when it is on this application, so the link never leads
-     * elsewhere; otherwise the home page.
+     * Get the page the person came from when it is on this application,
+     * so the link never leads elsewhere, and the home page otherwise.
      */
     private function previousUrl(): string
     {

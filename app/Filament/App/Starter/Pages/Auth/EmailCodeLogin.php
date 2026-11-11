@@ -27,11 +27,11 @@ use Livewire\Attributes\Locked;
 use Northwestern\SysDev\Chassis\Formatting\CountInWords;
 
 /**
- * Passwordless sign-in for local (non-NetID) users, in two steps on one page:
- * request a code by email, then enter it.
+ * Passwordless sign-in for local accounts without a NetID, in two
+ * steps on one page: request a code by email, then type it in.
  *
- * {@see LoginCodes} does the work and keeps progress in the session, so reloading the page
- * returns to the step the user was on.
+ * {@see LoginCodes} does the work and keeps progress in the session,
+ * so that reloading returns the person to the step they were on.
  *
  * @property-read Schema $form
  * @property-read Schema $codeForm
@@ -189,8 +189,9 @@ class EmailCodeLogin extends SimplePage
         $this->email = $loginCodes->pendingEmail();
         $this->codeForm->fill();
 
-        // The email form, and the button that had focus, are replaced by the code form. `autofocus`
-        // works once per page, so move focus to the code's first digit, which also names the new step.
+        // The code form replaces the email form and the button that had
+        // focus. `autofocus` works once per page, so focus moves to
+        // the code's first digit, which names the new step too.
         $this->js("document.querySelector('.fi-one-time-code-input-digit')?.focus()");
     }
 
@@ -262,8 +263,8 @@ class EmailCodeLogin extends SimplePage
     }
 
     /**
-     * Refuse with a 404 when email codes are off, including when they are turned
-     * off after the page loaded, since every step runs as its own request.
+     * Refuse with a 404 when email codes are off. Each step is a request of
+     * its own, so they might have been turned off since the page loaded.
      */
     private function refuseUnlessOffered(): void
     {

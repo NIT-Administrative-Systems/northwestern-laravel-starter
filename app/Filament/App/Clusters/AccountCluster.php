@@ -8,9 +8,11 @@ use Filament\Clusters\Cluster;
 use Filament\Pages\Enums\SubNavigationPosition;
 
 /**
- * The signed-in user's own area: their profile, preferences, personal access tokens and
- * connected applications. Reached from the user menu and the dashboard's Your Account
- * widget, not the sidebar, which is for the application's features.
+ * The signed-in person's own area: profile, preferences,
+ * personal access tokens and connected applications.
+ *
+ * People reach it from the user menu and the dashboard's Your Account
+ * widget, since the sidebar is for the application's own features.
  */
 class AccountCluster extends Cluster
 {

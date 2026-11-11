@@ -9,9 +9,10 @@ use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
 /**
- * The most important live announcement for signed-out visitors, under the header
- * on public pages and the sign-in pages. Visitors can't dismiss it, and the page
- * that lists announcements needs sign-in, so it shows in full until it ends.
+ * The most important live announcement, for visitors on public and sign-in pages.
+ *
+ * Visitors can't dismiss it or open the Announcements
+ * page, so it shows in full until its time is over.
  */
 class PublicAnnouncementBanner extends Component
 {

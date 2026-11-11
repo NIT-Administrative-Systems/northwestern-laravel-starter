@@ -43,11 +43,11 @@ use Illuminate\Support\HtmlString;
 use InvalidArgumentException;
 
 /**
- * A person's personal access tokens, for calling the API as themselves from their own code. Who
- * sees, creates and revokes them is decided by {@see CredentialAccess}.
+ * A person's personal access tokens, for calling the API as themselves from their
+ * own code. {@see CredentialAccess} decides who sees, creates and revokes them.
  *
- * A new token is shown once, through {@see RevealOnceSecret}. An
- * administrator impersonating the person sees the tokens but can't create or revoke them.
+ * A new token is shown once, through {@see RevealOnceSecret}. An administrator
+ * impersonating someone sees their tokens but can't create or revoke them.
  */
 class AccessTokens extends Page implements HasTable
 {
@@ -73,7 +73,7 @@ class AccessTokens extends Page implements HasTable
     public function content(Schema $schema): Schema
     {
         return $schema->components([
-            // No callout heading: Filament renders it as an <h4>, which would skip levels after the page's <h1>.
+            // No callout heading: Filament makes it an <h4>, skipping levels after the <h1>.
             Callout::make()
                 ->description(new HtmlString('<strong>You\'re impersonating this person.</strong> You can see their tokens, but you can\'t create or revoke them. To revoke one, use their page in Administration.'))
                 ->warning()

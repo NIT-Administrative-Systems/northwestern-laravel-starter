@@ -13,8 +13,8 @@ use Livewire\WithPagination;
 use Northwestern\SysDev\Chassis\Formatting\NorthwesternDateTime;
 
 /**
- * Every announcement the person's audience can see: live ones first, then past ones, dismissed
- * or not. Reached from the announcement banner and the Help menu.
+ * Every announcement the person's audience can see, live ones first, then
+ * past ones, dismissed or not. The banner and the Help menu link to it.
  */
 class Announcements extends Page
 {
@@ -46,8 +46,10 @@ class Announcements extends Page
     }
 
     /**
-     * Get when an announcement started and, when it has one, its end, in the person's
-     * timezone: "June 1 · Until 5 p.m. Monday, August 31" or "June 1 · Ended August 31".
+     * Get when an announcement started and, when it has
+     * one, its end, in the person's chosen timezone.
+     *
+     * "June 1 · Until 5 p.m. Monday, August 31" or "June 1 · Ended August 31"
      */
     public function dateline(Announcement $announcement): string
     {
