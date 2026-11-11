@@ -28,6 +28,9 @@ class NotifyAnnouncementAudience implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    /** An announcement deleted before this runs has nobody left to notify. */
+    public bool $deleteWhenMissingModels = true;
+
     public function __construct(
         public readonly Announcement $announcement,
     ) {

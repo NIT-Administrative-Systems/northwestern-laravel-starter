@@ -35,6 +35,20 @@ final class NotifyAnnouncementAudienceTest extends TestCase
         $this->assertInstanceOf(\Illuminate\Support\Carbon::class, $announcement->fresh()?->notified_at);
     }
 
+    // An announcement deleted before the queue reaches its job has nobody left to notify.
+    public function test_a_queued_run_for_a_deleted_announcement_is_dropped(): void
+    {
+        Notification::fake();
+        User::factory()->create();
+        $announcement = Announcement::factory()->create(['notify_audience' => true]);
+        $job = new NotifyAnnouncementAudience($announcement);
+        $announcement->delete();
+
+        dispatch($job);
+
+        Notification::assertNothingSent();
+    }
+
     public function test_a_targeted_announcement_notifies_only_its_audience(): void
     {
         Notification::fake();

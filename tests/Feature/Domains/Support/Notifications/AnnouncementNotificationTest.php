@@ -24,6 +24,19 @@ final class AnnouncementNotificationTest extends TestCase
         $this->assertSame(['database'], $notification->via(User::factory()->create(['email' => null])));
     }
 
+    // Each person's notification is its own queued job; none of them may fail for a deleted announcement.
+    public function test_a_queued_notification_for_a_deleted_announcement_is_dropped(): void
+    {
+        $user = User::factory()->create();
+        $announcement = Announcement::factory()->create();
+        $notification = new AnnouncementNotification($announcement);
+        $announcement->delete();
+
+        $user->notify($notification);
+
+        $this->assertSame(0, $user->notifications()->count());
+    }
+
     public function test_the_bell_and_the_email_link_to_the_announcement(): void
     {
         $announcement = Announcement::factory()->severity(AnnouncementSeverity::Warning)->create([

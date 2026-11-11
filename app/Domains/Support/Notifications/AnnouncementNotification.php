@@ -24,6 +24,9 @@ class AnnouncementNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
+    /** An announcement deleted before this is sent is no longer news. */
+    public bool $deleteWhenMissingModels = true;
+
     public function __construct(
         public readonly Announcement $announcement,
     ) {
