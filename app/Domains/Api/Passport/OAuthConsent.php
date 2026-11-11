@@ -18,14 +18,14 @@ use Northwestern\SysDev\Chassis\ValueObjects\OAuthRedirectTarget;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
- * Passport's consent screen: who may connect a client, which scopes the connection gets, and
- * what the screen shows the person before they approve.
+ * Passport's consent screen: who may connect a client, which scopes the
+ * token gets, and what the screen shows a person before they approve.
  *
- * - {@see AuthorizeOAuthConsent} asks {@see authorize()} on the screen and on its approve and
- *   deny endpoints.
- * - {@see GrantableScopeRepository} narrows the token to {@see grantableScopes()}, and the screen
- *   lists the same scopes, so it never promises more or less than the token carries.
- * - Passport's authorization view renders {@see screen()}.
+ * {@see AuthorizeOAuthConsent} asks {@see authorize()} on the consent screen
+ * and on its approve and deny endpoints. {@see GrantableScopeRepository}
+ * narrows the token to {@see grantableScopes()}, and the screen lists
+ * the same scopes, so it never promises more or less than the token
+ * carries. Passport's authorization view renders {@see screen()}.
  */
 final readonly class OAuthConsent
 {
@@ -36,10 +36,13 @@ final readonly class OAuthConsent
     }
 
     /**
-     * Whether `$person` may connect `$client`, as {@see CredentialAccess} decides for issuing the
-     * client's kind. An MCP client must ask for `mcp:use`: a token without it would be good for
-     * neither the MCP server nor the REST API. Without a client to decide on, as when Passport is
-     * about to answer an unknown one itself, impersonating is still refused.
+     * Authorize `$person` to connect `$client`, or throw.
+     *
+     * {@see CredentialAccess} decides, as when issuing a client of this kind.
+     * An MCP client must also ask for `mcp:use`, since a token without it
+     * would be good for neither the MCP server nor the REST API. Even
+     * without a client to decide on, as when Passport is about to
+     * answer an unknown one itself, impersonating is refused.
      *
      * @param  list<string>  $requestedScopes  The scopes the authorization request asks for
      *
@@ -60,8 +63,8 @@ final readonly class OAuthConsent
     }
 
     /**
-     * The scopes a token for `$client` carries when `$person` approves: those the client may have
-     * that the person may grant.
+     * Get the scopes a token for `$client` carries when `$person` approves
+     * it: the ones the client may have that the person may also grant.
      *
      * @return list<string>
      */
@@ -73,12 +76,13 @@ final readonly class OAuthConsent
     }
 
     /**
-     * What the screen shows, from what Passport passes its authorization view:
+     * Get what the consent screen shows, from what Passport passes its view.
      *
-     * - `scopes`: the requested scopes the token will carry;
-     * - `redirectTarget`: where approving sends the person;
-     * - `unverified`: the client registered itself, so its name is only its own claim;
-     * - `seesAccount`: the token can read the person's account details, which an MCP client's can't.
+     * Besides Passport's own values, `scopes` is the requested scopes the token
+     * will carry, and `redirectTarget` is where approving sends the person.
+     * `unverified` says the client registered itself, so its name is only
+     * its own claim. `seesAccount` says whether the token can read the
+     * person's account details, which an MCP client's token can't.
      *
      * @param  array{client: OAuthClient, user: User, scopes: list<Scope>, request: Request, authToken: string}  $parameters
      * @return array<string, mixed>
@@ -91,8 +95,8 @@ final readonly class OAuthConsent
         return [
             ...$parameters,
             'scopes' => array_values(array_filter($parameters['scopes'], fn (Scope $scope): bool => in_array($scope->id, $grantable, true))),
-            // Passport has already matched the redirect URI to one the client registered; without one,
-            // it uses the client's only registered URI.
+            // Passport has already matched the redirect URI to one the client
+            // registered; without one, it uses the only URI the client has.
             'redirectTarget' => OAuthRedirectTarget::from($request->string('redirect_uri')->toString() ?: $client->redirect_uris[0]),
             'unverified' => $client->isMcpClient(),
             'seesAccount' => CredentialKind::of($client) !== CredentialKind::McpClient,

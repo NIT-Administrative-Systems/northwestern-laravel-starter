@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Storage;
 use Northwestern\SysDev\SOA\DirectorySearch;
 
 /**
- * Retrieve a user's Northwestern Wildcard photo from the directory and store it in S3.
+ * Download a person's Wildcard photo from the directory and store it in S3.
  */
 class DownloadWildcardPhotoJob implements ShouldQueue
 {
@@ -26,7 +26,7 @@ class DownloadWildcardPhotoJob implements ShouldQueue
 
     public function handle(DirectorySearch $directorySearch): void
     {
-        // Non-Northwestern users don't have a Wildcard photo, so there's no action to take.
+        // Only Northwestern people have a Wildcard photo.
         if ($this->user->auth_type !== AuthType::SSO || ! config('platform.wildcard_photo_sync')) {
             return;
         }

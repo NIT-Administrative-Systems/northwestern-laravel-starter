@@ -8,12 +8,12 @@ use App\Domains\Support\Models\Announcement;
 use App\Domains\Support\Models\AnnouncementDismissal;
 use App\Domains\User\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Support\Carbon;
 
 /**
- * Hides an announcement from a person's banner. It stays on their Announcements page. Critical
- * announcements can't be dismissed, and an administrator impersonating someone can't dismiss
- * for them.
+ * Removes an announcement from a person's banner but not their Announcements page.
+ *
+ * Critical announcements can't be dismissed, and someone
+ * impersonating a person can't dismiss one for them.
  */
 readonly class DismissAnnouncement
 {
@@ -32,7 +32,7 @@ readonly class DismissAnnouncement
 
         AnnouncementDismissal::query()->firstOrCreate(
             ['announcement_id' => $announcement->getKey(), 'user_id' => $user->getKey()],
-            ['dismissed_at' => Carbon::now()],
+            ['dismissed_at' => now()],
         );
     }
 }

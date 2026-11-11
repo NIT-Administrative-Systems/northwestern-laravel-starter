@@ -60,8 +60,10 @@ final class AccessTokensTest extends TestCase
             ->assertCanNotSeeTableRecords([$theirs]);
     }
 
-    // The token is shown once: kept encrypted in the session for the copy step, then forgotten.
-    // Created and Expires show dates only, on the person's calendar rather than UTC's.
+    // The token is shown once: kept encrypted in the
+    // session for the copy step, then forgotten.
+    //
+    // Created and Expires show dates on the person's calendar, not UTC's.
     public function test_dates_are_in_the_persons_timezone(): void
     {
         $this->user->forceFill(['timezone' => 'America/Chicago'])->save();

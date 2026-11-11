@@ -11,10 +11,11 @@ use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Entities\ScopeEntityInterface;
 
 /**
- * Passport's scope repository, narrowed so a person can't give an application more than they
- * hold: an authorization code, and the token exchanged for it, carry only the requested scopes
- * in {@see OAuthConsent::grantableScopes()}, which the consent screen lists. Bound in place of
- * Passport's in OAuthServiceProvider.
+ * Passport's scope repository, narrowed so a person can't give an application
+ * more than they hold. OAuthServiceProvider binds it instead of Passport's.
+ *
+ * An authorization code, and the token exchanged for it, carry only the requested
+ * scopes in {@see OAuthConsent::grantableScopes()}, and the screen lists them.
  */
 class GrantableScopeRepository extends ScopeRepository
 {

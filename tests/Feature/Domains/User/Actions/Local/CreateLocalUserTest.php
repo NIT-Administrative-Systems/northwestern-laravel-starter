@@ -43,6 +43,17 @@ final class CreateLocalUserTest extends TestCase
         $this->assertEquals(['Engineering'], $user->departments);
     }
 
+    // The column's default is whatever the setting was when the migration ran.
+    public function test_new_local_users_get_the_default_timezone(): void
+    {
+        config(['platform.default_user_timezone' => 'America/New_York']);
+
+        $user = $this->action()(email: 'test@example.com', sendLoginLink: false);
+
+        $this->assertSame('America/New_York', $user->timezone);
+        $this->assertSame('America/New_York', $user->fresh()?->timezone);
+    }
+
     // People added to a role in bulk may come with an email address alone.
     public function test_only_the_email_is_required(): void
     {
@@ -180,7 +191,8 @@ final class CreateLocalUserTest extends TestCase
         $this->assertEquals('203.0.113.42', $loginChallenge->requested_ip);
     }
 
-    // The account is still created when its first code can't be sent, here because the email's hourly limit is used up.
+    // The account is still created when its first code can't be
+    // sent, here because the email's hourly limit is used up.
     public function test_returns_user_when_login_challenge_fails(): void
     {
         config(['local-auth.rate_limit_per_hour' => 1]);

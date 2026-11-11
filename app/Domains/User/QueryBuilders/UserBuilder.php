@@ -9,7 +9,7 @@ use App\Domains\User\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * Custom query builder for the {{@see User} model.
+ * The query builder for the {@see User} model.
  *
  * @template TModel of User
  *
@@ -58,25 +58,7 @@ class UserBuilder extends Builder
     }
 
     /**
-     * An exact, case-insensitive match. ilike would treat % and _ in the value as wildcards, so "a_b@example.com"
-     * would also find "axb@example.com", and "%@example.com" would find anyone at that domain. Both sides go through
-     * the database's lower(), since PHP lowercases some characters differently (İ, for one).
-     */
-    private function whereLowerEquals(string $column, string $value): static
-    {
-        $wrapped = $this->getQuery()->getGrammar()->wrap($this->qualifyColumn($column));
-
-        return $this->whereRaw("lower({$wrapped}) = lower(?)", [trim($value)]);
-    }
-
-    /**
-     * Add a case-insensitive search constraint for any combination of a user's name.
-     *
-     * Matches:
-     * - First name
-     * - Last name
-     * - "First Last"
-     * - "Last, First"
+     * Add a case-insensitive name search: first, last, "First Last" or "Last, First".
      */
     public function searchByName(string $term): static
     {
@@ -99,7 +81,7 @@ class UserBuilder extends Builder
     }
 
     /**
-     * Get the first SSO user matching the given email address, or null if none exist.
+     * Get the SSO user with the given email address, if there is one.
      */
     public function firstSsoByEmail(string $email): ?User
     {
@@ -109,7 +91,7 @@ class UserBuilder extends Builder
     }
 
     /**
-     * Get the first LOCAL user matching the given email address, or null if none exist.
+     * Get the local user with the given email address, if there is one.
      */
     public function firstLocalByEmail(string $email): ?User
     {
@@ -119,8 +101,7 @@ class UserBuilder extends Builder
     }
 
     /**
-     * Get the first user matching the given email address, checking SSO users first
-     * and then LOCAL users if no SSO user is found.
+     * Get the SSO user with the given email address, or else the local one.
      */
     public function firstByEmailSsoThenLocal(string $email): ?User
     {
@@ -129,11 +110,9 @@ class UserBuilder extends Builder
     }
 
     /**
-     * Get the first user matching the given email address (SSO first, then LOCAL), including
-     * deactivated users, who are returned still deactivated. If no existing user is found,
-     * return a new (unsaved) SSO user instance pre-populated with the normalized email address.
+     * Get the user with the given email address, SSO before local, or a new SSO user.
      *
-     * This method DOES NOT persist the new instance to the database.
+     * A deactivated user comes back still deactivated. The new user isn't saved.
      */
     public function firstExistingByEmailOrNewSso(string $email): User
     {
@@ -152,14 +131,10 @@ class UserBuilder extends Builder
     }
 
     /**
-     * Get the first SSO user matching the given NetID, including soft-deleted users.
+     * Get the SSO user with the given NetID, or a new SSO user that isn't saved.
      *
-     * A soft-deleted (deactivated) user is returned as it is, still deactivated: signing in or
-     * syncing from the directory never brings an account back, only an administrator's
-     * Reactivate does. If no existing user is found, a new (unsaved) SSO user instance is
-     * returned with the normalized NetID.
-     *
-     * This method DOES NOT persist the new instance to the database.
+     * A deactivated user comes back still deactivated: signing in or a directory
+     * sync never restores an account; only an administrator's Reactivate does.
      */
     public function firstExistingSsoByNetIdOrNew(string $netId): User
     {
@@ -174,5 +149,21 @@ class UserBuilder extends Builder
             'username' => $normalized,
             'auth_type' => AuthType::SSO,
         ]);
+    }
+
+    /**
+     * Add an exact, case-insensitive match on the column.
+     *
+     * ilike treats % and _ in the value as wildcards, so a_b@example.com would
+     * also find axb@example.com and %@example.com everyone at that domain.
+     *
+     * Both sides go through the database's lower(), because PHP
+     * lowercases some characters differently, İ among them.
+     */
+    private function whereLowerEquals(string $column, string $value): static
+    {
+        $wrapped = $this->getQuery()->getGrammar()->wrap($this->qualifyColumn($column));
+
+        return $this->whereRaw("lower({$wrapped}) = lower(?)", [trim($value)]);
     }
 }

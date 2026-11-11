@@ -1,8 +1,9 @@
 {{--
-    The application name after the wordmark in the panels' top bar, so the panels match
-    <x-site-header>. Registered on the TOPBAR_LOGO_AFTER render hook. Below sm the top bar has
-    room only for the wordmark, so the name shows at the top of the sidebar instead
-    (<x-sidebar-panel-name>).
+    The application name after the wordmark in the panels' top bar, matching
+    <x-site-header>, and registered on the TOPBAR_LOGO_AFTER render hook.
+
+    Below sm the top bar only has room for the wordmark, so the name
+    shows at the top of the sidebar, from <x-sidebar-panel-name>.
 --}}
 <span class="ms-3 hidden h-6 w-px shrink-0 bg-white/30 sm:block" aria-hidden="true"></span>
 

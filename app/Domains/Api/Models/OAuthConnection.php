@@ -14,9 +14,9 @@ use Illuminate\Support\Facades\DB;
 use Laravel\Passport\Passport;
 
 /**
- * A person's connection to an OAuth application. It is recorded when the application first
- * gets a token for them and removed when they disconnect it; the tokens themselves are
- * Passport's.
+ * A person's connection to an OAuth application. It's recorded when
+ * the application first gets a token for them, and removed when
+ * they disconnect it. The tokens themselves are Passport's.
  *
  * @property int $id
  * @property int $user_id
@@ -40,9 +40,21 @@ class OAuthConnection extends BaseModel
     /** @var list<string> */
     protected array $auditExclude = ['last_used_at'];
 
+    /** @return BelongsTo<OAuthClient, $this> */
+    public function oauth_client(): BelongsTo
+    {
+        return $this->belongsTo(OAuthClient::class, 'oauth_client_id');
+    }
+
+    /** @return BelongsTo<User, $this> */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
     /**
-     * Connections that still give the application access: it holds an access token that
-     * hasn't expired, or a refresh token that can get another.
+     * Scope the query to connections that still give the application access: it holds
+     * an access token that hasn't expired, or a refresh token that can get another.
      *
      * @param  Builder<static>  $query
      * @return Builder<static>
@@ -52,7 +64,7 @@ class OAuthConnection extends BaseModel
     {
         $tokens = Passport::token()->getTable();
         $refreshTokens = Passport::refreshToken()->getTable();
-        $now = Carbon::now();
+        $now = now();
 
         return $query->whereExists(fn ($token) => $token
             ->select(DB::raw(1))
@@ -68,17 +80,5 @@ class OAuthConnection extends BaseModel
                     ->whereColumn("{$refreshTokens}.access_token_id", "{$tokens}.id")
                     ->where("{$refreshTokens}.revoked", false)
                     ->where("{$refreshTokens}.expires_at", '>', $now))));
-    }
-
-    /** @return BelongsTo<OAuthClient, $this> */
-    public function oauth_client(): BelongsTo
-    {
-        return $this->belongsTo(OAuthClient::class, 'oauth_client_id');
-    }
-
-    /** @return BelongsTo<User, $this> */
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
     }
 }

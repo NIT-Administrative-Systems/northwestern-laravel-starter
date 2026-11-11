@@ -8,6 +8,7 @@ use App\Domains\Access\Enums\RoleModificationOrigin;
 use App\Domains\Access\Enums\SystemRole;
 use App\Domains\Access\Models\Role;
 use App\Domains\User\Models\User;
+use Mockery;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use Tests\TestCase;
 
@@ -21,6 +22,8 @@ final class EnvironmentLockdownTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        config(['platform.lockdown.enabled' => true]);
 
         $this->adminRole = Role::factory()->create(['name' => 'Admin']);
         $this->nuRole = Role::query()->where('name', SystemRole::NorthwesternUser->value)->firstOrFail();
@@ -62,10 +65,29 @@ final class EnvironmentLockdownTest extends TestCase
             ->assertRedirect('/');
     }
 
+    public function test_redirects_home_when_lockdown_is_off(): void
+    {
+        config(['platform.lockdown.enabled' => false]);
+
+        $this->actingAs(User::factory()->affiliate()->create())
+            ->get(route('filament.app.environment-lockdown'))
+            ->assertRedirect('/');
+    }
+
+    public function test_redirects_an_administrator_impersonating_someone_without_a_role_home(): void
+    {
+        $impersonate = Mockery::mock();
+        $impersonate->shouldReceive('isImpersonating')->andReturn(true);
+        $impersonate->shouldReceive('getImpersonatorId')->andReturn(null);
+        $this->app->instance('impersonate', $impersonate);
+
+        $this->actingAs(User::factory()->affiliate()->create())
+            ->get(route('filament.app.environment-lockdown'))
+            ->assertRedirect('/');
+    }
+
     public function test_lockdown_applies_to_app_panel_pages(): void
     {
-        config(['platform.lockdown.enabled' => true]);
-
         $this->actingAs(User::factory()->create())
             ->get('/app')
             ->assertRedirect(route('filament.app.environment-lockdown'));
@@ -73,8 +95,6 @@ final class EnvironmentLockdownTest extends TestCase
 
     public function test_lockdown_lets_users_with_a_non_default_role_into_the_app_panel(): void
     {
-        config(['platform.lockdown.enabled' => true]);
-
         $user = User::factory()->create();
         $user->assignRoleWithAudit($this->adminRole, RoleModificationOrigin::System);
 

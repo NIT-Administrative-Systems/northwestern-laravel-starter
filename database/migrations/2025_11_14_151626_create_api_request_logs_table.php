@@ -15,9 +15,10 @@ return new class extends Migration
             $table->id();
             $table->uuid('trace_id');
             $table->foreignId('user_id')->nullable();
-            // Who made the request: a person, or a client acting for itself (see ApiPrincipalType).
+            // Who made the request: a person, or a client
+            // acting for itself. See ApiPrincipalType.
             $table->string('principal_type')->nullable();
-            // Passport identifiers are strings: client IDs are UUIDs, token IDs are 80 characters.
+            // Passport's IDs are strings: client IDs are UUIDs, token IDs are 80 characters.
             $table->uuid('oauth_client_id')->nullable();
             $table->string('token_id', 100)->nullable();
             $table->string('grant_type')->nullable();

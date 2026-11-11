@@ -13,8 +13,10 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 /**
- * The consent screen, its approval and the tokens it leads to are tested through the whole flow
- * in AuthorizationCodeFlowTest and McpFlowTest; this is the scope rule they share.
+ * The consent screen, its approval and the tokens it leads to are tested
+ * through the whole flow in AuthorizationCodeFlowTest and McpFlowTest.
+ *
+ * This is the scope rule they share.
  */
 #[CoversClass(OAuthConsent::class)]
 final class OAuthConsentTest extends TestCase

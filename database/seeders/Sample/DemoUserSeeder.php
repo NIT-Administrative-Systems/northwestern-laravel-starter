@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders\Sample;
 
-use App\Domains\Access\Enums\RoleTypeEnum;
+use App\Domains\Access\Enums\SystemRole;
 use App\Domains\Access\Models\Role;
 use App\Domains\Api\Actions\ServiceClients\CreateServiceClient;
 use App\Domains\Auth\Enums\SignInMethod;
@@ -14,14 +14,17 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\App;
 
 /**
- * These users are used for end-to-end testing and can also be used for demos and impersonation during development.
- * As your application grows, you may want to seed additional users for specific roles or permissions.
+ * Seeds people for end-to-end tests, demos and impersonation during development.
+ *
+ * As your application grows, seed people for its roles and permissions here too.
  */
 class DemoUserSeeder extends Seeder
 {
     /**
-     * The users the sign-in page offers under "Sign in as" in local environments, in this order.
-     * Add the users you seed for specific roles here so developers and agents can sign in as them.
+     * The users the sign-in page offers to sign in as locally, in this order.
+     *
+     * Add the users you seed for specific roles here,
+     * so developers and agents can sign in as them.
      *
      * @var list<string>
      */
@@ -32,9 +35,11 @@ class DemoUserSeeder extends Seeder
     ];
 
     /**
-     * The demo API user's service client in the `local` environment, fixed so local scripts and
-     * agents can use the API across database rebuilds. Elsewhere the secret is random and
-     * never shown; rotate the client in Administration to get one.
+     * The demo API user's service client in the local environment. It's fixed,
+     * so local scripts and agents can call the API across database rebuilds.
+     *
+     * Elsewhere the secret is random and never shown, so
+     * rotate the client in Administration to get one.
      */
     public const string DEMO_CLIENT_ID = '019a0000-0000-7000-8000-000000000001';
 
@@ -97,7 +102,7 @@ class DemoUserSeeder extends Seeder
             ])
             ->createOne();
 
-        $user->roles()->attach(Role::whereHas('role_type', fn (\Illuminate\Contracts\Database\Query\Builder $query) => $query->where('slug', RoleTypeEnum::SystemManaged))->firstOrFail());
+        $user->roles()->attach(Role::query()->where('name', SystemRole::SuperAdministrator)->firstOrFail());
     }
 
     private function apiUser(): void

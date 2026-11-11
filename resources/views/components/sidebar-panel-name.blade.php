@@ -1,8 +1,13 @@
 {{--
-    The panel's name at the top of the sidebar, so a phone, where the top bar has no room for
-    it, still says which panel you are in. Registered on the SIDEBAR_NAV_START render hook.
+    The panel's name at the top of the sidebar,
+    so a phone, whose top bar has no room for
+    it, still says which panel you are in.
+
+    Registered on the SIDEBAR_NAV_START render hook.
 --}}
-@props(['name'])
+@props([
+    'name' => config('app.name'),
+])
 
 <div data-testid="sidebar-panel-name"
      {{ $attributes->class(['font-nu-heading text-nu-purple-100 px-2 text-sm font-bold dark:text-white']) }}

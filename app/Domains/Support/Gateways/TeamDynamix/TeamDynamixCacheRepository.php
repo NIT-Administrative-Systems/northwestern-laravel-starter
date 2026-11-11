@@ -12,11 +12,11 @@ use Northwestern\Sysdev\TeamDynamix\Laravel\TeamDynamixService;
 use Throwable;
 
 /**
- * Cached lookups for TeamDynamix metadata IDs (types, forms, statuses, etc.).
+ * Cached lookups of TeamDynamix IDs for ticket types, forms, statuses and so on.
  *
- * TDX requires numeric IDs for ticket creation parameters, but they are only
- * available by name through API list endpoints. This repository caches those
- * lookups for one week to avoid repeated API calls on ticket submission.
+ * Creating a ticket takes numeric IDs that TDX only
+ * lists by name, so each lookup is cached for a
+ * week instead of repeated for every ticket.
  *
  * @phpstan-type TdxRecord array{ID: positive-int, Name: non-empty-string, ...}
  *

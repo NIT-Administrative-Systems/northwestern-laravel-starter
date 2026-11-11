@@ -84,7 +84,7 @@ final class UserRoleAccessTest extends TestCase
         $this->assertFalse($user->canAccessPanel(Filament::getPanel(AppPanelProvider::ID)));
         $this->assertFalse($user->canAccessPanel(Filament::getPanel(AdministrationPanelProvider::ID)));
 
-        // A session that was signed in before the deactivation is refused on its next request.
+        // A session signed in before the deactivation is refused on its next request.
         $this->actingAs($user)->get('/app')->assertForbidden();
         $this->actingAs($user)->get('/administration')->assertForbidden();
     }

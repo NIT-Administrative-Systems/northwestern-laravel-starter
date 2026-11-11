@@ -11,11 +11,13 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 /**
- * "Not you? Switch account" on the OAuth consent screen: signs out of this application and
- * returns to sign-in, then back to the consent screen as whoever signs in.
+ * Handles "Not you? Switch account" on the consent screen: it signs the person out
+ * and returns to sign-in, then back to the consent screen as whoever signs in.
  *
- * It signs out of this application only. With single sign-on, the identity provider may
- * still be signed in and sign the same person straight back in.
+ * It signs the person out of this application only.
+ *
+ * With single sign-on, the identity provider may still be
+ * signed in, and sign the same person straight back in.
  */
 class SwitchOAuthAccountController
 {

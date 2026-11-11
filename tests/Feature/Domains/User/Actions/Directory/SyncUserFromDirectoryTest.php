@@ -22,7 +22,7 @@ final class SyncUserFromDirectoryTest extends TestCase
      * @param  array<string, mixed>  $expectedAttributes
      */
     #[DataProvider('directoryDataProvider')]
-    public function test_sync_user(array $directoryData, array $expectedAttributes): void
+    public function test_it_copies_the_directory_entry_onto_the_user(array $directoryData, array $expectedAttributes): void
     {
         $user = new User(['auth_type' => AuthType::SSO, 'username' => 'foo']);
         $user = $this->service()($user, $directoryData);

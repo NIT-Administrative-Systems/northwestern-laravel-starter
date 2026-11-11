@@ -9,9 +9,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Adds a stored generated `full_name` column on the users table and a pg_trgm
- * GIN index on it, so that ILIKE '%term%' searches against user names can use
- * an index instead of a sequential scan with per-row concatenation.
+ * Adds a generated full_name column to users and a pg_trgm GIN index on it. A name
+ * search with ILIKE '%term%' then uses the index instead of scanning every row.
  */
 return new class extends Migration
 {
@@ -21,11 +20,12 @@ return new class extends Migration
             return;
         }
 
-        // Expression intentionally matches the PHP accessor on the User model
-        // so values are identical regardless of which side computes them.
-        // Nullable because the source columns (first_name, last_name) are both
-        // nullable; PostgreSQL requires generated columns whose expression may
-        // be indeterminate on NULL inputs to permit NULL themselves.
+        // The expression matches the User model's accessor, so PHP and the database agree.
+        //
+        // It's nullable because first_name and last_name are.
+        //
+        // PostgreSQL requires a generated column that can be
+        // indeterminate on null inputs to allow null too.
         Schema::table('users', function (Blueprint $table) {
             $table->string('full_name')
                 ->storedAs("TRIM(COALESCE(first_name, '') || ' ' || COALESCE(last_name, ''))")

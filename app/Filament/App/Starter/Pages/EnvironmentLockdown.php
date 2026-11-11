@@ -17,8 +17,10 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\HtmlString;
 
 /**
- * Shown to signed-in users who have no role granting access to a locked-down
- * environment. {@see EnvironmentLockdownMiddleware} redirects them here.
+ * For signed-in people whose roles don't grant access to a locked-down
+ * environment. {@see EnvironmentLockdownMiddleware} sends them here.
+ *
+ * Anyone the middleware lets through goes home instead.
  */
 class EnvironmentLockdown extends SimplePage
 {
@@ -33,7 +35,7 @@ class EnvironmentLockdown extends SimplePage
         /** @var User $user */
         $user = auth()->user();
 
-        if ($user->non_default_roles->isNotEmpty()) {
+        if (! config('platform.lockdown.enabled') || $user->isImpersonated() || $user->non_default_roles->isNotEmpty()) {
             $this->redirect('/');
         }
     }
@@ -51,7 +53,7 @@ class EnvironmentLockdown extends SimplePage
                 Text::make(new HtmlString(
                     "This is the <strong>{$environment}</strong> environment of <strong>{$appName}</strong>, for development and testing."
                 )),
-                // No callout heading: Filament renders it as an <h4>, which would skip levels after the page's <h1>.
+                // No callout heading: Filament makes it an <h4>, skipping levels after the <h1>.
                 Callout::make()
                     ->description(new HtmlString(
                         '<strong>Why am I seeing this?</strong> Your account doesn\'t have a role that gives access here. '

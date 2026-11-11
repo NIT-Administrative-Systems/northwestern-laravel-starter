@@ -27,11 +27,11 @@ use Livewire\Attributes\Locked;
 use Northwestern\SysDev\Chassis\Formatting\CountInWords;
 
 /**
- * Passwordless sign-in for local (non-NetID) users, in two steps on one page:
- * request a code by email, then enter it.
+ * Passwordless sign-in for local accounts without a NetID, in two
+ * steps on one page: request a code by email, then type it in.
  *
- * {@see LoginCodes} does the work and keeps progress in the session, so reloading the page
- * returns to the step the user was on.
+ * {@see LoginCodes} does the work and keeps progress in the session,
+ * so that reloading returns the person to the step they were on.
  *
  * @property-read Schema $form
  * @property-read Schema $codeForm
@@ -54,7 +54,7 @@ class EmailCodeLogin extends SimplePage
 
     public function mount(): void
     {
-        abort_unless(resolve(SignIn::class)->offers(SignInMethod::EmailCode), 404);
+        $this->refuseUnlessOffered();
 
         if (Filament::auth()->check()) {
             $this->redirect('/');
@@ -174,7 +174,7 @@ class EmailCodeLogin extends SimplePage
 
     public function requestCode(): void
     {
-        abort_unless(resolve(SignIn::class)->offers(SignInMethod::EmailCode), 404);
+        $this->refuseUnlessOffered();
 
         $loginCodes = resolve(LoginCodes::class);
 
@@ -189,15 +189,15 @@ class EmailCodeLogin extends SimplePage
         $this->email = $loginCodes->pendingEmail();
         $this->codeForm->fill();
 
-        // The email form, and the button that had focus, are replaced by the code form. `autofocus`
-        // works once per page, so move focus to the code's first digit, which also names the new step.
+        // The code form replaces the email form and the button that had
+        // focus. `autofocus` works once per page, so focus moves to
+        // the code's first digit, which names the new step too.
         $this->js("document.querySelector('.fi-one-time-code-input-digit')?.focus()");
     }
 
     public function verifyCode(): RedirectResponse
     {
-        $signIn = resolve(SignIn::class);
-        abort_unless($signIn->offers(SignInMethod::EmailCode), 404);
+        $this->refuseUnlessOffered();
 
         $code = (string) $this->codeForm->getState()['code'];
 
@@ -207,11 +207,13 @@ class EmailCodeLogin extends SimplePage
             throw ValidationException::withMessages(['codeData.code' => $e->errors()['code'] ?? []]);
         }
 
-        return $signIn->complete($user, request(), SignInMethod::EmailCode);
+        return resolve(SignIn::class)->complete($user, request(), SignInMethod::EmailCode);
     }
 
     public function resendCode(): void
     {
+        $this->refuseUnlessOffered();
+
         $loginCodes = resolve(LoginCodes::class);
 
         if ($loginCodes->pendingEmail() === null) {
@@ -258,5 +260,14 @@ class EmailCodeLogin extends SimplePage
         $this->codeForm->fill();
 
         $this->js("document.querySelector('input[type=\"email\"]')?.focus()");
+    }
+
+    /**
+     * Refuse with a 404 when email codes are off. Each step is a request of
+     * its own, so they might have been turned off since the page loaded.
+     */
+    private function refuseUnlessOffered(): void
+    {
+        abort_unless(resolve(SignIn::class)->offers(SignInMethod::EmailCode), 404);
     }
 }

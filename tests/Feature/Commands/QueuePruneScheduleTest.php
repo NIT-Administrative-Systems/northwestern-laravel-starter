@@ -10,8 +10,9 @@ use PHPUnit\Framework\Attributes\CoversNothing;
 use Tests\TestCase;
 
 /**
- * The daily `queue:prune-failed` and `queue:prune-batches` in routes/console.php, which keep
- * the queue's own tables for `platform.retention.failed_jobs` and `job_batches` days.
+ * The daily `queue:prune-failed` and `queue:prune-batches` jobs in
+ * routes/console.php. They keep the queue's own tables for the
+ * `platform.retention.failed_jobs` and `job_batches` days.
  */
 #[CoversNothing]
 final class QueuePruneScheduleTest extends TestCase

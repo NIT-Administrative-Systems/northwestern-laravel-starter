@@ -1,6 +1,7 @@
 {{--
-    The page guests see at `/`. Replace this content with your application's own;
-    signed-in users never see it, because HomeController redirects them.
+    The page guests see at `/`. Replace it with your
+    application's own. Signed-in people never see
+    it, because HomeController redirects them.
 --}}
 @php
     use App\Providers\Filament\AppPanelProvider;

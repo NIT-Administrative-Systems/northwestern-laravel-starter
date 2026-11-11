@@ -24,7 +24,7 @@ final class MailGatewayTest extends TestCase
         config(['support.mail.reference_prefix' => 'TEST']);
     }
 
-    public function test_create_queues_team_notification_and_user_confirmation(): void
+    public function test_it_queues_the_team_email_and_the_requesters_confirmation(): void
     {
         Mail::fake();
 
@@ -38,7 +38,7 @@ final class MailGatewayTest extends TestCase
         Mail::assertQueued(SupportTicketConfirmation::class, fn (SupportTicketConfirmation $mailable) => $mailable->hasTo($ticket->requester_email));
     }
 
-    public function test_create_returns_successful_result(): void
+    public function test_a_sent_ticket_is_a_successful_result(): void
     {
         Mail::fake();
 
@@ -53,7 +53,7 @@ final class MailGatewayTest extends TestCase
         $this->assertNotNull($result->ticketNumber);
     }
 
-    public function test_create_generates_reference_with_configured_prefix(): void
+    public function test_the_reference_is_the_prefix_and_the_ticket_id(): void
     {
         Mail::fake();
 
@@ -65,7 +65,7 @@ final class MailGatewayTest extends TestCase
         $this->assertSame(sprintf('TEST-%d', $ticket->id), $result->ticketNumber);
     }
 
-    public function test_create_generates_reference_with_custom_prefix(): void
+    public function test_the_prefix_comes_from_configuration(): void
     {
         Mail::fake();
         config(['support.mail.reference_prefix' => 'REQ']);
@@ -78,7 +78,7 @@ final class MailGatewayTest extends TestCase
         $this->assertSame(sprintf('REQ-%d', $ticket->id), $result->ticketNumber);
     }
 
-    public function test_create_returns_error_result_on_mail_failure(): void
+    public function test_a_mail_failure_is_a_failed_result(): void
     {
         Mail::shouldReceive('to')
             ->andThrow(new \Exception('SMTP connection refused'));

@@ -123,7 +123,7 @@ final class CreateSupportTicketTest extends TestCase
     }
 
     /**
-     * Stands in for the configured ticket system, as an application's own gateway would.
+     * Stands in for the configured ticket system, as an application's gateway would.
      */
     private function useTicketSystem(CreationResult $result): void
     {

@@ -11,7 +11,7 @@ use Tests\TestCase;
 
 final class ForceDetachRoleCommandTest extends TestCase
 {
-    public function test_fails_when_user_not_found(): void
+    public function test_it_fails_for_an_unknown_user(): void
     {
         $this->artisan('role:force-detach', [
             'user' => 'nonexistent-user',
@@ -23,7 +23,7 @@ final class ForceDetachRoleCommandTest extends TestCase
             ->assertFailed();
     }
 
-    public function test_fails_when_role_not_found(): void
+    public function test_it_fails_for_an_unknown_role(): void
     {
         $user = User::factory()->create();
 
@@ -37,7 +37,7 @@ final class ForceDetachRoleCommandTest extends TestCase
             ->assertFailed();
     }
 
-    public function test_fails_when_user_does_not_have_the_role(): void
+    public function test_it_fails_when_the_user_does_not_have_the_role(): void
     {
         $user = User::factory()->create();
         $role = Role::factory()->create();
@@ -52,7 +52,7 @@ final class ForceDetachRoleCommandTest extends TestCase
             ->assertFailed();
     }
 
-    public function test_cancellation_exits_successfully_without_detaching(): void
+    public function test_cancelling_leaves_the_role_attached(): void
     {
         $user = User::factory()->create();
         $role = Role::factory()->create();
@@ -70,7 +70,7 @@ final class ForceDetachRoleCommandTest extends TestCase
         $this->assertTrue($user->fresh()->hasRole($role));
     }
 
-    public function test_detaches_role_when_confirmed_interactively(): void
+    public function test_it_detaches_the_role_once_confirmed(): void
     {
         $user = User::factory()->create();
         $role = Role::factory()->create();
@@ -88,7 +88,7 @@ final class ForceDetachRoleCommandTest extends TestCase
         $this->assertFalse($user->fresh()->hasRole($role));
     }
 
-    public function test_force_flag_skips_confirmation(): void
+    public function test_force_skips_the_confirmation(): void
     {
         $user = User::factory()->create();
         $role = Role::factory()->create();
@@ -106,7 +106,23 @@ final class ForceDetachRoleCommandTest extends TestCase
         $this->assertFalse($user->fresh()->hasRole($role));
     }
 
-    public function test_force_flag_requires_reason_option(): void
+    public function test_it_finds_a_user_whatever_case_their_netid_is_typed_in(): void
+    {
+        $user = User::factory()->create(['username' => 'abc123']);
+        $role = Role::factory()->create();
+        $user->assignRoleWithAudit($role, RoleModificationOrigin::System);
+
+        $this->artisan('role:force-detach', [
+            'user' => 'ABC123',
+            'role' => $role->name,
+            '--reason' => 'Emergency detach',
+            '--force' => true,
+        ])->assertSuccessful();
+
+        $this->assertFalse($user->fresh()->hasRole($role));
+    }
+
+    public function test_force_needs_a_reason(): void
     {
         $user = User::factory()->create();
         $role = Role::factory()->create();
@@ -123,7 +139,7 @@ final class ForceDetachRoleCommandTest extends TestCase
         $this->assertTrue($user->fresh()->hasRole($role));
     }
 
-    public function test_finds_user_by_id(): void
+    public function test_it_finds_a_user_by_id(): void
     {
         $user = User::factory()->create();
         $role = Role::factory()->create();
@@ -140,7 +156,7 @@ final class ForceDetachRoleCommandTest extends TestCase
         $this->assertFalse($user->fresh()->hasRole($role));
     }
 
-    public function test_detaches_assignment_locked_role(): void
+    public function test_it_detaches_an_assignment_locked_role(): void
     {
         $user = User::factory()->create();
         $role = Role::factory()->assignmentLocked()->create();

@@ -8,14 +8,16 @@ use App\Domains\Access\Enums\SystemPermission;
 use Laravel\Mcp\Server\Registrar;
 
 /**
- * Every OAuth scope the application issues, and how each is named in the interface.
+ * Every OAuth scope the application issues, and its name in the interface.
  *
- * The REST API has one scope per API-relevant permission, named after it: a token can do what
- * its scopes name, and no more than its user's permissions allow. MCP clients get only
- * `mcp:use`, which no REST route accepts, so their tokens and REST tokens can't stand in for
- * each other. Mark a permission API-relevant ({@see SystemPermission::isApiRelevant()}) to add a
- * scope, and add it to the OpenAPI security schemes in BaseApiController, which
- * ApiScopesTest checks against this list.
+ * The REST API has one scope per API-relevant permission, named after it: a token
+ * can do what its scopes name, and no more than its user's permissions allow.
+ *
+ * MCP clients get only `mcp:use`, which no REST route accepts, so
+ * their tokens and REST tokens can't stand in for each other.
+ *
+ * To add a scope, mark its permission API-relevant and list it in the security
+ * schemes of BaseApiController. ApiScopesTest checks them against this list.
  */
 final class ApiScopes
 {
@@ -43,8 +45,8 @@ final class ApiScopes
     }
 
     /**
-     * A scope's name in the interface: the permission it's named after ("View Users"), or "Use
-     * Tools" for the MCP scope.
+     * Get the label of a scope for the interface: the permission it's
+     * named after ("View Users"), or "Use Tools" for the MCP scope.
      */
     public static function label(string $scope): string
     {

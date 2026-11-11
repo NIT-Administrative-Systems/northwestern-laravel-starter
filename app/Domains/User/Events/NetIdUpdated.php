@@ -12,10 +12,9 @@ use Illuminate\Queue\SerializesModels;
 use InvalidArgumentException;
 
 /**
- * Fired when a message is delivered to the NetID update webhook.
+ * Dispatched for each message the NetID update webhook receives.
  *
- * The webhook sends URL-encoded form data in the format of:
- * `netid=abc123&action=deactivate`
+ * The payload is form data, such as `netid=abc123&action=deactivate`.
  *
  * @see NetIdUpdateController
  */

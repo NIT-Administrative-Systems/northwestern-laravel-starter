@@ -9,9 +9,8 @@ return [
     | Production Application URL
     |--------------------------------------------------------------------------
     |
-    | This value is the absolute, stable URL of the live, production environment.
-    | It is used by non-production environments (staging, QA) for redirects,
-    | email links, and general information about the application's true home.
+    | The address of the production environment. Other environments link to it,
+    | such as the lockdown page, which sends people to the real application.
     |
     */
 
@@ -22,15 +21,21 @@ return [
     | Date / Time Display Format
     |--------------------------------------------------------------------------
     |
-    | This value defines the default format used when displaying dates and
-    | timestamps throughout the application. You may customize this to
-    | any valid PHP `date()` format.
+    | How dates and times are shown across the application, in PHP's `date()` format.
     |
     */
 
     'datetime_display_format' => 'M j, Y g:i A',
 
-    // Default timezone assigned to users.
+    /*
+    |--------------------------------------------------------------------------
+    | Default Time Zone
+    |--------------------------------------------------------------------------
+    |
+    | The time zone a new account starts with, until the person changes it.
+    |
+    */
+
     'default_user_timezone' => env('DEFAULT_USER_TIMEZONE', 'America/Chicago'),
 
     /*
@@ -38,19 +43,12 @@ return [
     | Stakeholder Accounts
     |--------------------------------------------------------------------------
     |
-    | These configuration values define special application stakeholders such as
-    | Super Administrators. They are primarily used during seeding (see the
-    | StakeholderSeeder) to automatically provision and assign roles for known
-    | NetIDs in a given environment.
-    |
-    | `SUPER_ADMIN_NETIDS` should be a comma-separated list of NetIDs.
-    |
-    | If managing environment variables is inconvenient for your workflow, you may
-    | alternatively hard-code an array of NetIDs in this file and bypass the env()
-    | lookup entirely. Only users listed here will receive stakeholder roles during
-    | seeding.
+    | NetIDs that StakeholderSeeder gives the Super Administrator role on
+    | every deploy. Set SUPER_ADMIN_NETIDS to a comma-separated list,
+    | or write the array here instead of reading the environment.
     |
     */
+
     'stakeholders' => [
         'super_admins' => env('SUPER_ADMIN_NETIDS', ''),
     ],
@@ -60,11 +58,10 @@ return [
     | Wildcard Photo Sync
     |--------------------------------------------------------------------------
     |
-    | When enabled, the application will attempt to store user Wildcard photos
-    | in the object storage and sync them with the user record. This is not
-    | always necessary, as the application may not require this feature.
+    | Downloads each person's Wildcard photo into object
+    | storage and keeps it with their account. Leave
+    | it off when the application shows no photos.
     |
-    | Supported: bool
     */
 
     'wildcard_photo_sync' => env('WILDCARD_PHOTO_SYNC_ENABLED', false),
@@ -74,28 +71,22 @@ return [
     | Environment Lockdown
     |--------------------------------------------------------------------------
     |
-    | When enabled, users without **non-default roles** cannot access the
-    | application and are instead shown a lockdown page. This is useful for
-    | staging/demo environments to prevent unauthorized access from users who
-    | discover the application URL.
+    | When enabled, only people who hold a role beyond the default one may use
+    | the application. Everyone else sees the lockdown page, which keeps a
+    | staging or demo environment private from people who find its URL.
     |
-    | This rule specifically focuses on users who only possess the default
-    | system role (e.g., "Northwestern User") and have not been granted
-    | specific application privileges.
-    |
-    | By default, lockdown is enabled for non-production environments and
-    | disabled for production, local development, CI, and tests.
-    |
-    | Users with impersonation active or any non-default role bypass the lockdown.
+    | It is on by default except in production, local development, CI and tests.
+    | Anyone impersonating passes through, and so do the routes named below,
+    | which sign people in and out, impersonate, or show the lockdown page.
     |
     */
+
     'lockdown' => [
         'enabled' => env('ENVIRONMENT_LOCKDOWN_ENABLED', match (env('APP_ENV')) {
             'production', 'local', 'testing', 'ci' => false,
             default => true,
         }),
 
-        // Named routes that bypass lockdown (e.g. auth, impersonation, the lockdown page itself).
         'exempted_routes' => [
             // Authentication
             'login-oauth-redirect',
@@ -120,12 +111,11 @@ return [
     | Mail Capture URL
     |--------------------------------------------------------------------------
     |
-    | When set, the administration panel's Developer Tools group links to the
-    | MailPit server (or similar) that captures outgoing mail. The link is
-    | shown to users who can view Telescope.
+    | Links the Developer Tools group in Administration to the server that captures
+    | outgoing mail, such as Mailpit. Only people who may view Telescope see it.
     |
-    | Supported: string|null
     */
+
     'mail-capture' => [
         'url' => env('MAIL_CAPTURE_URL'),
     ],
@@ -135,20 +125,20 @@ return [
     | Data Retention
     |--------------------------------------------------------------------------
     |
-    | Days to keep each kind of record before the scheduled model:prune deletes
-    | it. Null keeps records forever.
+    | Days to keep each kind of record before model:prune deletes it; null keeps it.
     |
-    | Audits are kept by default because they often back FERPA, HIPAA or
-    | university record-keeping requirements; check yours before setting one.
-    | Impersonation logs are a small security record, also kept by default.
-    | High-traffic APIs may prefer an observability tool (Sentry, Datadog)
-    | over long request-log retention. Exports count from when they finish, and
-    | their files are deleted with them.
+    | Audits are kept by default because they often back FERPA, HIPAA or university
+    | record-keeping requirements, so check yours before you set a limit on them.
+    | Impersonation logs, a small security record, are kept by default as well.
+    |
+    | A busy API may prefer an observability tool such as Sentry to keeping
+    | its request logs for long. Exports count from when they finish, and
+    | the export files are deleted along with them when they're pruned.
     |
     | Notifications are the bell in each panel's top bar. Failed jobs and job
     | batches are the queue's own tables, pruned by queue:prune-failed and
-    | queue:prune-batches. Imports take their failed rows with them. Support
-    | tickets are kept by default, since they record what people asked for.
+    | queue:prune-batches. Imports take their failed rows with them, and
+    | support tickets are kept by default as a record of what's asked.
     |
     */
 
@@ -172,16 +162,17 @@ return [
     | Account Lifecycle
     |--------------------------------------------------------------------------
     |
-    | Days a local (email-code) account may go without a sign-in before the
-    | daily users:deactivate-inactive-local deactivates it. A new account gets
-    | the same time for its first sign-in. Null never deactivates them.
+    | Days a local account may go without a sign-in before it is deactivated by
+    | the daily users:deactivate-inactive-local. A new account gets the same
+    | time for its first sign-in. Null leaves every local account active.
     |
     | The last sign-in comes from the sign-in records, so keep the
-    | login_records retention above at least this long.
+    | login_records retention at least as long as this setting.
     |
     */
 
     'accounts' => [
         'local_inactivity_days' => env('LOCAL_ACCOUNT_INACTIVITY_DAYS'),
     ],
+
 ];

@@ -3,7 +3,6 @@
     use Filament\Support\Icons\Heroicon;
 
     $announcements = $this->getAnnouncements();
-    $timezone = auth()->user()->timezone ?: config('app.timezone');
 @endphp
 
 <x-filament-panels::page>
@@ -23,15 +22,7 @@
                         </x-slot>
 
                         <x-slot name="description">
-                            <time datetime="{{ $announcement->starts_at?->toIso8601String() }}">
-                                {{ $announcement->starts_at?->timezone($timezone)->format('F j, Y') }}
-                            </time>
-                            @if ($live && $announcement->ends_at)
-                                · Until
-                                {{ \Northwestern\SysDev\Chassis\Formatting\NorthwesternDateTime::format($announcement->ends_at, $timezone, withZone: false) }}
-                            @elseif (!$live)
-                                · Ended {{ $announcement->ends_at?->timezone($timezone)->format('F j, Y') }}
-                            @endif
+                            {{ $this->dateline($announcement) }}
                         </x-slot>
 
                         @if ($live)

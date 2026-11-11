@@ -19,8 +19,8 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 
 /**
- * Read-only: a NetID user's details belong to the Northwestern Directory, and an email
- * user's to the administrator who created the account.
+ * Read-only: a NetID user's details come from the Northwestern Directory,
+ * and an email user's from the administrator who created the account.
  */
 class Profile extends Page
 {

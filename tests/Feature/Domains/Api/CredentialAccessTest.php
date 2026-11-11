@@ -20,7 +20,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 /**
- * Every rule for who may do what with an API credential, at the one interface that answers.
+ * Every rule for who may do what with an API credential, where it's decided.
  */
 #[CoversClass(CredentialAccess::class)]
 #[CoversClass(AccessDecision::class)]
@@ -197,7 +197,8 @@ final class CredentialAccessTest extends TestCase
         $this->assertAllowed($holder, CredentialOperation::Use, CredentialKind::PersonalAccessToken, $holder);
     }
 
-    // A seeder or sweep acts as no one. Impersonating means a caller forgot to pass the person, so it fails closed.
+    // A seeder or sweep acts as no one. Impersonating means a
+    // caller forgot to pass the person, so it fails closed.
     public function test_the_system_may_do_anything_except_while_someone_is_impersonating(): void
     {
         config(['api.enabled' => false]);

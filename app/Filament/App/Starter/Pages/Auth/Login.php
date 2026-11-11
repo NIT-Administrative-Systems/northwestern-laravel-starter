@@ -26,14 +26,14 @@ use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 
 /**
- * Lists the sign-in methods this application offers ({@see SignIn::methods()}): Northwestern
- * single sign-on through the configured provider, and email login codes.
+ * Lists the sign-in methods this application offers ({@see SignIn::methods()}):
+ * Northwestern single sign-on through the configured provider or email codes.
  *
  * When single sign-on is the only method, guests go straight to it, except in CI,
  * where the page always renders so end-to-end tests can use email login codes.
  *
- * In the local environment it also offers "Sign in as" for the seeded demo users, so a
- * local environment works without SSO, email or any credentials.
+ * In the local environment it also offers "Sign in as" for the seeded demo
+ * users, so local development works without SSO, email or credentials.
  */
 class Login extends SimplePage
 {
@@ -60,7 +60,7 @@ class Login extends SimplePage
     }
 
     /**
-     * The card names the application; on phones the header shows its name only in a second row.
+     * The card names the application; phones show it only in the header's lower row.
      */
     public function getHeading(): string
     {
@@ -106,7 +106,7 @@ class Login extends SimplePage
                     ])->fullWidth(),
                     Text::make('For approved external partners without a NetID.')
                         ->extraAttributes(['class' => 'nu-sign-in-hint']),
-                    // Tells testers why there is no NetID button; production keeps its configuration to itself.
+                    // Tells testers why there's no NetID button; production keeps that to itself.
                     Text::make('NetID sign-in isn\'t set up in this environment.')
                         ->extraAttributes(['class' => 'nu-sign-in-hint', 'data-testid' => 'netid-not-set-up'])
                         ->visible($ssoUrl === null && ! App::isProduction()),
@@ -117,7 +117,7 @@ class Login extends SimplePage
                     ->visible($signInAs !== [] && ($ssoUrl !== null || $localAuthEnabled)),
 
                 Group::make([
-                    // One button however many users an application seeds, so it stays secondary to the real methods.
+                    // One button however many users are seeded, keeping it below the real methods.
                     Actions::make([
                         ActionGroup::make($signInAs)
                             ->label('Sign In As…')
@@ -133,7 +133,7 @@ class Login extends SimplePage
                         ->extraAttributes(['class' => 'nu-sign-in-hint']),
                 ])->dense()->visible($signInAs !== []),
 
-                // No callout heading: Filament renders it as an <h4>, which would skip levels after the page's <h1>.
+                // No callout heading: Filament makes it an <h4>, skipping levels after the <h1>.
                 Callout::make()
                     ->description(new HtmlString(
                         '<strong>No sign-in methods are set up.</strong> Configure NetID sign-in or email codes so people can sign in.'
@@ -150,7 +150,7 @@ class Login extends SimplePage
     }
 
     /**
-     * One menu item per seeded demo user that exists: the user's name, with their highest role as a badge.
+     * Get a menu item for each seeded demo user, badged with their highest role.
      *
      * @return list<Action>
      */

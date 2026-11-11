@@ -11,12 +11,12 @@ use Illuminate\Mail\Mailable;
 use Northwestern\SysDev\Chassis\Formatting\NorthwesternDateTime;
 
 /**
- * User-facing confirmation email sent after a support ticket is submitted.
+ * The requester's confirmation that their support request arrived.
  *
- * Contains the reference number, subject, submission time, the user's own details,
- * and next-step expectations.
- * Excludes any internal details (fallback warnings, error messages, etc.).
- * Sent by the {@see MailGateway} for both primary and fallback submissions.
+ * It has the reference, subject, submission time and what they sent,
+ * and no internal details, such as the fallback warning or errors.
+ *
+ * @see MailGateway
  */
 class SupportTicketConfirmation extends Mailable implements ShouldQueue
 {

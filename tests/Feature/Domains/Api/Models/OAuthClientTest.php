@@ -37,7 +37,8 @@ final class OAuthClientTest extends TestCase
         $this->assertSame(CredentialStatus::Revoked, $client->fresh()?->status);
     }
 
-    // Passport treats a revoked client as gone, so an expired secret stops the client everywhere.
+    // Passport treats a revoked client as gone, so an
+    // expired secret stops the client everywhere.
     public function test_passport_refuses_a_client_whose_secret_has_expired(): void
     {
         $client = $this->client();

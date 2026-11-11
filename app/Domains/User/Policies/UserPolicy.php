@@ -12,8 +12,10 @@ use App\Domains\Auth\Enums\AuthType;
 use App\Domains\User\Models\User;
 
 /**
- * Who may see and edit people in Administration. Someone who manages API access without View
- * Users sees only API users, whose service clients {@see CredentialAccess} lets them manage.
+ * Who may see and edit people in Administration.
+ *
+ * Someone who manages API access but lacks View Users sees only API
+ * users, whose service clients CredentialAccess lets them manage.
  */
 class UserPolicy
 {

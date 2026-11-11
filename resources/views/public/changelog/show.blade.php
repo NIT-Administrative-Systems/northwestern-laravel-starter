@@ -13,8 +13,9 @@
                 </h1>
             </div>
 
-            {{-- The device's share sheet where there is one (phones, Safari); elsewhere it copies the link,
-                 shown in a tooltip and announced to screen readers through the status region. --}}
+            {{-- The device's share sheet where there is one (phones,
+                 Safari). Elsewhere it copies the link, shown in a
+                 tooltip and announced through the live region. --}}
             <div x-data="{
                 url: {{ Js::from(route('support.changelog.show', $entry)) }},
                 title: {{ Js::from($entry->title ?? $entry->slug) }},
@@ -50,7 +51,7 @@
             </div>
         </div>
 
-        {{-- Section headings ("Changes", "Fixes") sit below the title, with bullets that show. --}}
+        {{-- Section headings rank below the title, and list bullets are visible. --}}
         <div
              class="fi-prose [--prose-marker-color:var(--color-gray-400)]! [&_h2]:text-base! [&_h2]:font-semibold! [&_h2]:text-gray-600! mt-6 [&_h2]:uppercase [&_h2]:tracking-wide">
             {{ $entry->bodyHtml(topHeadingLevel: 2) }}

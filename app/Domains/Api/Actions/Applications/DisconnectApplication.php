@@ -15,9 +15,10 @@ use Illuminate\Support\Facades\DB;
 use Northwestern\SysDev\Chassis\Passport\AccessRevoker;
 
 /**
- * Disconnects an application from a person's account: revokes the access tokens, refresh
- * tokens and authorization codes it holds for them, and removes the connection. Other
- * people's connections to the same application are untouched.
+ * Disconnects an application from a person's account: revokes every token
+ * and authorization code it holds for them, and removes the connection.
+ *
+ * Other people's connections to the same application are untouched.
  */
 readonly class DisconnectApplication
 {

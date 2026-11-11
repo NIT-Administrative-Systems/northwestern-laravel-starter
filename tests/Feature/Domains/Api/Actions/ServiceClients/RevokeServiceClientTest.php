@@ -37,7 +37,7 @@ final class RevokeServiceClientTest extends TestCase
         $this->assertSame($client->getKey(), Audit::query()->where('event', 'service_client_revoked')->sole()->new_values['client_id']);
     }
 
-    // Deleting an API user revokes its clients after the user is deleted; the audit still goes on it.
+    // Deleting an API user revokes its clients afterward; the audit still goes on it.
     public function test_revoking_a_deleted_api_users_client_is_audited_on_the_api_user(): void
     {
         $apiUser = User::factory()->api()->create();

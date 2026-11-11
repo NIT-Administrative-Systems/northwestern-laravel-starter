@@ -4,45 +4,48 @@ declare(strict_types=1);
 
 return [
 
-    /**
-     * Custom: the path to the directory where `psql` and `pg_dump` live.
-     *
-     * If left null, we'll try to guess it.
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | PostgreSQL Tools
+    |--------------------------------------------------------------------------
+    |
+    | Where `psql` and `pg_dump` are. Left empty, Chassis looks for Herd's copies.
+    |
+    */
+
     'pg_bin_directory' => env('PG_BIN_DIRECTORY'),
 
     /*
-     * The name of the disk on which the snapshots are stored.
-     */
+    |--------------------------------------------------------------------------
+    | Storage
+    |--------------------------------------------------------------------------
+    |
+    | The disk snapshots are stored on, and the database connection they are
+    | taken from, where null means the application's default connection.
+    |
+    | Where dumps are written while a snapshot is made, and whether they're gzipped.
+    |
+    */
+
     'disk' => 'snapshots',
 
-    /*
-     * The connection to be used to create snapshots. Set this to null
-     * to use the default configured in `config/databases.php`
-     */
     'default_connection' => null,
 
-    /*
-     * The directory where temporary files will be stored.
-     */
     'temporary_directory_path' => storage_path('app/laravel-db-snapshots/temp'),
 
-    /*
-     * Create dump files that are gzipped
-     */
     'compress' => false,
 
     /*
-     * Only these tables will be included in the snapshot. Set to `null` to include all tables.
-     *
-     * Default: `null`
-     */
+    |--------------------------------------------------------------------------
+    | Tables
+    |--------------------------------------------------------------------------
+    |
+    | Snapshot only these tables, or every table except these; null means all.
+    |
+    */
+
     'tables' => null,
 
-    /*
-     * All tables will be included in the snapshot expect this tables. Set to `null` to include all tables.
-     *
-     * Default: `null`
-     */
     'exclude' => null,
+
 ];

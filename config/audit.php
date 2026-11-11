@@ -4,6 +4,15 @@ declare(strict_types=1);
 
 return [
 
+    /*
+    |--------------------------------------------------------------------------
+    | Enable Auditing
+    |--------------------------------------------------------------------------
+    |
+    | Turns auditing on or off for every model.
+    |
+    */
+
     'enabled' => env('AUDITING_ENABLED', true),
 
     /*
@@ -43,6 +52,7 @@ return [
     | Define the IP Address, User Agent and URL resolver implementations.
     |
     */
+
     'resolvers' => [
         'ip_address' => OwenIt\Auditing\Resolvers\IpAddressResolver::class,
         'user_agent' => OwenIt\Auditing\Resolvers\UserAgentResolver::class,
@@ -78,11 +88,11 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Global exclude
+    | Global Exclude
     |--------------------------------------------------------------------------
     |
-    | Have something you always want to exclude by default? - add it here.
-    | Note that this is overwritten (not merged) with local exclude
+    | Attributes left out of every model's audits. A model's own `$auditExclude`
+    | replaces this list instead of adding to it, so repeat the ones it needs.
     |
     */
 
@@ -93,13 +103,8 @@ return [
     | Empty Values
     |--------------------------------------------------------------------------
     |
-    | Should Audit records be stored when the recorded old_values & new_values
-    | are both empty?
-    |
-    | Some events may be empty on purpose. Use allowed_empty_values to exclude
-    | those from the empty values check. For example when auditing
-    | model retrieved events which will never have new and old values.
-    |
+    | Whether to store an audit whose old and new values are both empty. Events named
+    | in `allowed_empty_values`, such as `retrieved`, are stored even when empty.
     |
     */
 
@@ -113,12 +118,11 @@ return [
     | Allowed Array Values
     |--------------------------------------------------------------------------
     |
-    | Should the array values be audited?
+    | Whether array values are audited. They are left out by default, since
+    | storing large arrays would slow auditing down and fill the table.
     |
-    | By default, array values are not allowed. This is to prevent performance
-    | issues when storing large amounts of data. You can override this by
-    | setting allow_array_values to true.
     */
+
     'allowed_array_values' => false,
 
     /*
@@ -137,8 +141,7 @@ return [
     | Audit Threshold
     |--------------------------------------------------------------------------
     |
-    | Specify a threshold for the amount of Audit records a model can have.
-    | Zero means no limit.
+    | The most audits a model may keep, where zero means no limit.
     |
     */
 
@@ -192,9 +195,10 @@ return [
     | Audit Console
     |--------------------------------------------------------------------------
     |
-    | Whether console events should be audited (eg. php artisan db:seed).
+    | Whether console events, such as a db:seed, are audited.
     |
     */
 
     'console' => false,
+
 ];

@@ -16,17 +16,20 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 
 /**
- * Notifies an announcement's audience, once: the signed-in people it's for who can use the app
- * panel. Claims the announcement before sending, so a second dispatch sends nothing.
+ * Notifies an announcement's audience, once.
+ *
+ * It claims the announcement first, so a second dispatch sends nothing.
  */
 class NotifyAnnouncementAudience implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    /** An announcement deleted before this runs has nobody left to notify. */
+    public bool $deleteWhenMissingModels = true;
 
     public function __construct(
         public readonly Announcement $announcement,
@@ -35,15 +38,18 @@ class NotifyAnnouncementAudience implements ShouldQueue
 
     public function handle(): void
     {
-        // Claim and fan out together: a run that fails partway gives up its claim, so the next
-        // run can notify the audience. The notifications are queued after the commit, so a failed
-        // run sends none, and a second run waits on the claim's row lock and then finds it taken.
+        // Claim and fan out together: a run that fails partway gives
+        // up its claim, so the next run can notify the audience.
+        //
+        // The notifications are queued after the commit, so
+        // a failed run sends none, and a second run waits
+        // on the claim's row lock, then finds it taken.
         DB::transaction(function (): void {
             $claimed = Announcement::query()
                 ->whereKey($this->announcement->getKey())
                 ->where('notify_audience', true)
                 ->whereNull('notified_at')
-                ->update(['notified_at' => Carbon::now()]);
+                ->update(['notified_at' => now()]);
 
             if ($claimed === 0) {
                 return;
@@ -56,8 +62,8 @@ class NotifyAnnouncementAudience implements ShouldQueue
     }
 
     /**
-     * The people an announcement is for: everyone who can use the app panel, or, for a targeted
-     * one, those holding one of its roles or having one of its affiliations.
+     * The people an announcement is for: everyone who can use the app panel,
+     * or for a targeted one, those with one of its roles or affiliations.
      *
      * @return Builder<User>
      */

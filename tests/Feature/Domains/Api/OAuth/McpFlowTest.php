@@ -17,6 +17,7 @@ use App\Mcp\Http\Controllers\RegisterClientController;
 use App\Mcp\Http\Middleware\AddScopeToChallenge;
 use App\Mcp\McpServiceProvider;
 use App\Mcp\Servers\AppServer;
+use Illuminate\Support\Facades\Auth;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\Concerns\IssuesPersonalAccessTokens;
 use Tests\Concerns\IssuesServiceClientTokens;
@@ -25,8 +26,8 @@ use Tests\Fixtures\Mcp\EchoServer;
 use Tests\TestCase;
 
 /**
- * An MCP client connecting the way Claude, VS Code and Cursor do: from the server's 401, through
- * discovery, self-registration and consent, to calling a tool.
+ * An MCP client connecting as Claude, VS Code and Cursor do: from the server's
+ * 401, through discovery, self-registration and consent, to calling a tool.
  */
 #[CoversClass(AddScopeToChallenge::class)]
 #[CoversClass(OAuthDiscoveryController::class)]
@@ -146,7 +147,7 @@ final class McpFlowTest extends TestCase
         $this->actingAs($user);
         $client = $this->registerMcpClient();
 
-        // Consent now refuses such a request, so pass it by to get the token one would have had.
+        // Consent now refuses this request, so skip it to get the token it once gave.
         $this->withoutMiddleware(AuthorizeOAuthConsent::class);
         [, $verifier] = $this->requestAuthorization($client, []);
         $token = (string) $this->exchangeAuthorizationCode($client, $this->approveAuthorization($client), $verifier)->assertOk()->json('access_token');
@@ -189,8 +190,9 @@ final class McpFlowTest extends TestCase
         }
     }
 
-    // Losing the permission ends access at once: the token stops working, so the client signs in
-    // again and the consent screen refuses it. oauth:revoke-ineligible then disconnects it.
+    // Losing the permission ends access at once: the token stops
+    // working and the consent screen refuses the client's next
+    // sign-in. oauth:revoke-ineligible then disconnects it.
     public function test_only_people_with_the_use_mcp_permission_connect_and_keep_using_a_client(): void
     {
         $this->actingAs(User::factory()->create());
@@ -234,6 +236,22 @@ final class McpFlowTest extends TestCase
         $call()->assertOk();
         $call()->assertTooManyRequests();
         $this->sendMcpMessage($token, 'tools/list')->assertOk();
+    }
+
+    public function test_one_persons_tool_calls_leave_another_persons_limit_alone(): void
+    {
+        config(['mcp.rate_limits.tool_calls_per_minute' => 1]);
+        $this->actingAs($this->mcpUser());
+        $firstToken = $this->issueMcpToken();
+        $this->actingAs($this->mcpUser());
+        $secondToken = $this->issueMcpToken();
+        // An MCP client carries only its token, never a session.
+        Auth::forgetGuards();
+        $call = fn (string $token) => $this->sendMcpMessage($token, 'tools/call', ['name' => 'echo', 'arguments' => ['text' => 'hello']]);
+
+        $call($firstToken)->assertOk();
+        $call($secondToken)->assertOk();
+        $call($firstToken)->assertTooManyRequests();
     }
 
     /**

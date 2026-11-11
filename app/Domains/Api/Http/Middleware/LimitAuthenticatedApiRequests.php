@@ -11,12 +11,15 @@ use Illuminate\Support\Facades\RateLimiter;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Limits authenticated API requests per client (client credentials) or per user (every other
- * token), after {@see AuthenticatePassportToken} has identified who made the request.
+ * Limits authenticated API requests per client for a client
+ * credentials token, and per user for every other token.
  *
- * This is its own middleware rather than `throttle:<limiter>` because Laravel's middleware
- * priority runs every `ThrottleRequests` before authentication, when no one is identified yet.
- * The per-IP `throttle:api` limit keeps running there, ahead of authentication.
+ * It runs after {@see AuthenticatePassportToken}, which identifies who is calling.
+ *
+ * It is its own middleware rather than `throttle:<limiter>` because Laravel's
+ * middleware priority runs every `ThrottleRequests` before authentication,
+ * when no one is identified yet. The per-IP `throttle:api` limit keeps
+ * running in that position, ahead of authentication, as it should.
  */
 class LimitAuthenticatedApiRequests
 {

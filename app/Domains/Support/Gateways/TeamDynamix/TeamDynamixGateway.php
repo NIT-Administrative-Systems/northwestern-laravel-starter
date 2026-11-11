@@ -15,11 +15,9 @@ use Northwestern\Sysdev\TeamDynamix\Api\Entity\Ticket\TicketResponse;
 use Northwestern\Sysdev\TeamDynamix\Laravel\TeamDynamixService;
 
 /**
- * Submits support tickets to TeamDynamix via the TDX REST API.
+ * Submits the ticket to TeamDynamix through its REST API.
  *
- * Resolves metadata IDs (type, form, status, priority, service, etc.) through the
- * {@see TeamDynamixCacheRepository} and creates the ticket with a 3-attempt
- * retry.
+ * It gets the metadata IDs from TeamDynamixCacheRepository.
  */
 class TeamDynamixGateway implements TicketSystemGateway
 {
@@ -31,11 +29,10 @@ class TeamDynamixGateway implements TicketSystemGateway
     }
 
     /**
-     * Submit the ticket to TeamDynamix with automatic retry.
+     * Submit the ticket, trying three times.
      *
-     * On success, {@see CreationResult::$ticketNumber} contains the TDX ticket identifier.
-     * On failure after 3 attempts, the exception is captured in Sentry and returned
-     * as a {@see CreationResult} with {@see CreationResult::$creationError} set.
+     * The ticket number is the TeamDynamix ticket's ID. A third
+     * failure is reported and comes back as a failed result.
      */
     public function create(SupportTicket $ticket): CreationResult
     {
@@ -62,9 +59,9 @@ class TeamDynamixGateway implements TicketSystemGateway
     }
 
     /**
-     * Resolve TDX metadata IDs and create the ticket.
+     * Resolve the metadata IDs and create the ticket.
      *
-     * @throws TdxLookupFailedException If any metadata lookup fails.
+     * @throws TdxLookupFailedException
      */
     private function lookupAndCreate(SupportTicket $ticket): TicketResponse
     {
@@ -91,11 +88,11 @@ class TeamDynamixGateway implements TicketSystemGateway
     }
 
     /**
-     * Resolve the TDX assignee group ID from configuration.
+     * Get the TeamDynamix group the ticket is assigned to.
      *
      * @return positive-int
      *
-     * @throws InvalidArgumentException If the group ID is missing or not a positive integer.
+     * @throws InvalidArgumentException
      */
     private function resolveAssigneeGroupId(): int
     {

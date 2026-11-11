@@ -16,11 +16,14 @@ it('signs out from either panel and shuts the panels', function (string $panel) 
     $page->navigate('/administration')->assertPathIs('/app/login');
 })->with(['the app panel' => '/app', 'the administration panel' => '/administration']);
 
-// A page left open until the session expired still signs out, instead of showing Page Expired.
+// A page left open until the session expired still
+// signs out, rather than showing Page Expired.
 it('signs out from a page whose session expired', function (bool $sendsFetchMetadata) {
-    // Laravel skips CSRF verification in tests: check requests as a deployed application does.
-    // Laravel accepts a same-origin request by its Sec-Fetch-Site header alone; a browser that
-    // doesn't send it, or doesn't over plain HTTP, has only the page's token to offer.
+    // Laravel skips CSRF checks in tests, so check requests as a deployed app does.
+    //
+    // Laravel accepts a same-origin request by its Sec-Fetch-Site
+    // header alone; a browser that doesn't send it, or doesn't
+    // over plain HTTP, has only the page's token to offer.
     $this->app->bind(PreventRequestForgery::class, fn ($app) => new class($app, $app['encrypter'], $sendsFetchMetadata) extends PreventRequestForgery
     {
         public function __construct($app, $encrypter, private readonly bool $sendsFetchMetadata)

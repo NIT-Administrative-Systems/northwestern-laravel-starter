@@ -8,8 +8,10 @@ use Illuminate\Http\JsonResponse;
 use Laravel\Mcp\Server\Registrar;
 
 /**
- * The OAuth discovery documents an MCP client reads to connect: where the MCP server's
- * authorization comes from (RFC 9728), and that authorization server's endpoints (RFC 8414).
+ * The OAuth discovery documents an MCP client reads to
+ * connect: which authorization server the MCP server
+ * uses (RFC 9728), and its endpoints (RFC 8414).
+ *
  * A client starts from the `WWW-Authenticate` header on the server's 401 response.
  */
 class OAuthDiscoveryController

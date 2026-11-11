@@ -13,8 +13,9 @@ use App\Domains\User\Models\User;
 use Illuminate\Auth\AuthenticationException;
 
 /**
- * Asks {@see CredentialAccess} about the signed-in person, for pages, resources, relation
- * managers and actions that show or hide what someone may do with a credential:
+ * Asks {@see CredentialAccess} about the signed-in person, for
+ * the pages, resources, relation managers and actions that
+ * show or hide what a person may do with a credential:
  *
  * ```php
  * public static function canAccess(): bool
@@ -25,8 +26,8 @@ use Illuminate\Auth\AuthenticationException;
  * Action::make('revoke')->visible(fn (OAuthToken $record) => $this->allowsCredential(CredentialOperation::Revoke, CredentialKind::PersonalAccessToken, $this->getOwnerRecord()));
  * ```
  *
- * Pass the holder as {@see CredentialAccess::decide()} takes it. With nobody signed in the
- * answer is no, never the system's.
+ * Pass the holder as {@see CredentialAccess::decide()} takes it.
+ * With nobody signed in, the answer is no, never the system's.
  */
 trait AuthorizesCredentials
 {
@@ -47,7 +48,7 @@ trait AuthorizesCredentials
     }
 
     /**
-     * The signed-in person, to pass to an action as the person acting.
+     * Get the signed-in person, to pass to an action as the person acting.
      *
      * @throws AuthenticationException
      */

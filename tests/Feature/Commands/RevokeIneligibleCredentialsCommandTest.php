@@ -77,7 +77,7 @@ final class RevokeIneligibleCredentialsCommandTest extends TestCase
         $this->assertSame($inactive->getKey(), Audit::query()->where('event', 'personal_access_token_revoked')->sole()->auditable_id);
     }
 
-    // The serviceClients() scope hides a deleted API user's clients; the sweep must not.
+    // The sweep finds the clients of a deleted API user, which serviceClients() hides.
     public function test_it_revokes_the_service_clients_of_a_deleted_api_user(): void
     {
         $apiUser = User::factory()->api()->create();
@@ -91,7 +91,7 @@ final class RevokeIneligibleCredentialsCommandTest extends TestCase
         $this->assertSame(CredentialStatus::Revoked, $client->fresh()?->status);
     }
 
-    // A feature that is off may be turned back on, so its credentials wait rather than being revoked.
+    // A feature that is off may be turned back on, so its credentials wait instead.
     public function test_turning_a_feature_off_revokes_nothing(): void
     {
         $holder = User::factory()->create();

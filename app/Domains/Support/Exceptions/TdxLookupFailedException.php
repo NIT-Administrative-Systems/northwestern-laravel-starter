@@ -7,8 +7,7 @@ namespace App\Domains\Support\Exceptions;
 use RuntimeException;
 
 /**
- * Thrown when a TeamDynamix metadata lookup (type, form, status, etc.) fails
- * to find a matching record by name.
+ * Thrown when no TeamDynamix ticket type, form or status has the configured name.
  */
 class TdxLookupFailedException extends RuntimeException
 {

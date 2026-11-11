@@ -1,13 +1,18 @@
 {{--
-    The body every error page shares: the status code, a heading, one sentence in the slot, and
-    the next step for that status (see ErrorLayout::action()). The `help` slot adds centered text
-    under the sentence, such as who to contact, and `details` adds wider content below it, such as
-    the 500 page's report form.
+    The body every error page shares: the status code, a heading, one sentence in
+    the slot, plus the next step for that status, from ErrorLayout::action().
 
-    Client errors (401, 403, 404 and so on) render on the public layout, so the header keeps the
-    Help menu and Sign In or the user menu. Pages passing :navigation="false" use the bare error
-    layout, which renders without Filament, auth or the database. The app theme and errors.css
-    both compile this view, so the page and its button look the same on either layout.
+    The `help` slot adds centered text under the sentence, such as who to contact,
+    and `details` adds wider content below, such as the 500 page's report form.
+
+    Client errors (401, 403, 404 and so on) render on the public layout,
+    so the header keeps the Help menu, and Sign In or the user menu.
+
+    Pages passing :navigation="false" use the bare error layout,
+    which can render without Filament, auth or the database.
+
+    The app theme and errors.css both compile this view, so
+    the page and its button look alike on either layout.
 --}}
 <x-dynamic-component :component="$navigation ? 'layouts.public' : 'layouts.error'"
                      :title="$title"
@@ -26,7 +31,7 @@
             {{ $help ?? '' }}
 
             @if ($action)
-                {{-- Sized and colored like Filament's large primary button, which the bare layout doesn't load. --}}
+                {{-- Like Filament's large primary button, which the bare layout doesn't load. --}}
                 <a class="bg-nu-purple-100 hover:bg-nu-purple-120 focus-visible:outline-nu-purple-100 pointer-coarse:min-h-11 mt-10 inline-flex items-center justify-center px-3.5 py-2.5 text-sm font-medium text-white transition focus-visible:outline-2 focus-visible:outline-offset-2"
                    data-testid="error-action"
                    href="{{ $action['url'] }}">

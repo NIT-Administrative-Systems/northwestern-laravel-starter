@@ -3,21 +3,18 @@
 @import "../../../../vendor/northwestern-sysdev/northwestern-filament-theme/dist/theme.css";
 @import "../../../../vendor/northwestern-sysdev/northwestern-filament-theme/dist/tailwind-tokens.css";
 
-@source '../../../../app/Filament/App/**/*';
-@source '../../../../resources/views/filament/app/**/*';
-@source '../../../../resources/views/components/**/*';
-@source '../../../../resources/views/public/**/*';
-@source '../../../../resources/views/errors/**/*';
-@source '../../../../resources/views/vendor/pagination/tailwind.blade.php';
+/* Tailwind finds classes in tracked files but skips vendor/, which git ignores. */
 @source '../../../../vendor/filament/**/*';
 
-/* The app panel's simple pages show the environment badge in <x-site-header>, not above the card. */
+/* Simple pages show the environment badge in <x-site-header>, not above the card. */
 .fi-simple-layout .nu-env-indicator-simple {
     display: none;
 }
 
-/* One focus ring on the purple header, the top bar and the footer: the footer's 3px white outline,
-   set 2px off the control. The theme's purple outline would vanish against the header. */
+/* One focus ring on the purple header, top bar and footer:
+   the footer's 3px white outline, 2px off the control.
+
+   The theme's purple outline would vanish against the purple. */
 :is(.nu-site-header, .fi-topbar) :is(a, button):focus-visible,
 .nu-site-header .nu-lockup:focus-visible /* outranks the lockup component's own 2px outline */ {
     outline: 3px solid var(--color-white);
@@ -25,8 +22,8 @@
     box-shadow: none;
 }
 
-/* Phones: 44px (2.75rem) tap targets for the header's controls, and for the sign-in actions and
-   the code step's links on the simple pages. */
+/* Phones: 44px (2.75rem) tap targets for the header's controls, and for
+   the sign-in actions and the code step's links on the simple pages. */
 @media (pointer: coarse) {
     .nu-site-header :is(button, .fi-btn) {
         min-width: 2.75rem;
@@ -43,30 +40,30 @@
         min-height: 2.75rem;
     }
 
-    /* Filament pins a link's label to the baseline, which sits at the top of the taller link. */
+    /* Filament pins a link's label to the baseline, at the top of the taller link. */
     .fi-simple-main .fi-link > .fi-link-label {
         align-self: center;
     }
 }
 
-/* The simple pages are light only, like the public layout (see AppPanelProvider), so the lockdown
-   page's theme switcher would do nothing. It has a dropdown list of its own; hide the list, or its
-   border stays behind. */
+/* Pages with the site header are light only, so the theme switcher does nothing.
+
+   It has a dropdown list of its own: hide the list, or its border stays behind. */
 .fi-body:has(.nu-site-header) .fi-dropdown-list:has(> .fi-theme-switcher) {
     display: none;
 }
 
-/* The app panel's simple pages (sign-in, lockdown): a Northwestern Purple accent on the card. */
+/* Sign-in and lockdown: a Northwestern Purple accent on the card. */
 .fi-simple-main {
     border-top: 4px solid var(--nu-purple-100);
 }
 
-/* Filament runs the card edge to edge on phones; keep a gutter so it reads as a card there too. */
+/* Filament runs the card edge to edge on phones. A gutter keeps it a card there. */
 .fi-simple-main-ctn {
     padding-inline: 1rem;
 }
 
-/* Local "Sign in as" menu: its trigger spans the card like the sign-in buttons above it. */
+/* The local "Sign in as" menu's trigger spans the card like the buttons above. */
 .nu-sign-in-as .fi-dropdown,
 .nu-sign-in-as .fi-dropdown-trigger,
 .nu-sign-in-as .fi-btn {
@@ -77,7 +74,7 @@
 .nu-sign-in-hint {
     display: block;
     color: var(--gray-500);
-    font-size: 0.8125rem;
+    font-size: var(--nu-text-sm);
     text-align: center;
 }
 
@@ -87,7 +84,7 @@
     align-items: center;
     gap: 0.75rem;
     color: var(--gray-500);
-    font-size: 0.75rem;
+    font-size: var(--nu-text-xs);
     letter-spacing: 0.06em;
     text-transform: uppercase;
 }
@@ -97,16 +94,6 @@
     flex: 1;
     border-top: 1px solid var(--gray-200);
     content: "";
-}
-
-.dark .nu-sign-in-hint,
-.dark .nu-sign-in-divider {
-    color: var(--gray-400);
-}
-
-.dark .nu-sign-in-divider::before,
-.dark .nu-sign-in-divider::after {
-    border-top-color: var(--gray-700);
 }
 
 /* Login code boxes fill the card, however many digits local-auth.code.digits sets. */

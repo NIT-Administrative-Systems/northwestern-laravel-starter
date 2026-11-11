@@ -11,11 +11,9 @@ use Laravel\Passport\Passport;
 use Northwestern\SysDev\Chassis\Console\Commands\RebuildDatabaseCommand as BaseRebuildDatabaseCommand;
 
 /**
- * Rebuilds the database from scratch with fresh migrations and seeders.
- *
- * This command is intended for local development to quickly reset the
- * database to a known state. It clears caches, runs migrations, seeds
- * the database, and regenerates IDE helper files.
+ * Rebuilds the database from scratch with fresh migrations and
+ * seeders, for local development: it clears caches, runs the
+ * migrations, seeds, and regenerates the IDE helper files.
  */
 class RebuildDatabaseCommand extends BaseRebuildDatabaseCommand
 {
@@ -29,7 +27,8 @@ class RebuildDatabaseCommand extends BaseRebuildDatabaseCommand
     protected function appendSteps(): array
     {
         return [
-            // Passport signs access tokens with these; deployed environments set PASSPORT_PRIVATE_KEY and PASSPORT_PUBLIC_KEY.
+            // Passport signs access tokens with these keys. Deployed environments
+            // set them in PASSPORT_PRIVATE_KEY and PASSPORT_PUBLIC_KEY instead.
             'Generating OAuth signing keys' => fn () => file_exists(Passport::keyPath('oauth-private.key')) || $this->callSilently('passport:keys') === self::SUCCESS,
             'Seeding demo data' => fn () => $this->callSilently('db:seed', ['--class' => 'DemoSeeder', '--force' => true]),
             'Generating IDE helpers' => fn () => $this->callSilently('ide-helper:models', ['-N' => true]),

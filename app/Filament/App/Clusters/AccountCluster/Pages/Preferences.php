@@ -29,8 +29,8 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\HtmlString;
 
 /**
- * The user's timezone and {@see UserPreferences}. An administrator impersonating the user
- * sees them read-only: saving is refused, so impersonation never changes someone's settings.
+ * The person's timezone and {@see UserPreferences}, which an
+ * administrator impersonating them can see but not save.
  *
  * @property-read Schema $form
  */
@@ -100,7 +100,7 @@ class Preferences extends Page
     {
         return $schema
             ->components([
-                // No callout heading: Filament renders it as an <h4>, which would skip levels after the page's <h1>.
+                // No callout heading: Filament makes it an <h4>, skipping levels after the <h1>.
                 Callout::make()
                     ->description(new HtmlString('<strong>You\'re impersonating this person.</strong> You can see their preferences, but you can\'t change them.'))
                     ->warning()
@@ -135,8 +135,8 @@ class Preferences extends Page
     }
 
     /**
-     * Timezone identifiers grouped by region: "America" => ["America/Chicago" => "Chicago (America)"].
-     * The label repeats the region because the selected value is shown without its group.
+     * Get the timezone identifiers grouped by region. Each label repeats its
+     * region, because the select shows the chosen value without its group.
      *
      * @return array<string, array<string, string>>
      */
@@ -166,7 +166,6 @@ class Preferences extends Page
 
     private function user(): User
     {
-        /** @var User */
-        return auth()->user();
+        return static::actingUser();
     }
 }

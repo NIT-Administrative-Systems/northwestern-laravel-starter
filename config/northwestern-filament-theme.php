@@ -9,9 +9,9 @@ return [
     | Unit Lockup
     |--------------------------------------------------------------------------
     |
-    | This value is the unit lockup shown as the brand logo of every panel. It
-    | may be a full URL or a path within the public directory. If null, the
-    | Department Templates 4.0 wordmark is used.
+    | The unit lockup shown as every panel's logo, as a full
+    | URL or a path in the public directory. Without one,
+    | the Department Templates 4.0 wordmark is shown.
     |
     */
 
@@ -22,12 +22,10 @@ return [
     | Unit Information
     |--------------------------------------------------------------------------
     |
-    | These values describe the unit responsible for this application.
-    | The Web Style Guide requires its address, phone, fax (if any)
-    | and email to appear in the footer of every page it serves.
+    | The unit responsible for this application, whose address, phone, fax (if any)
+    | and email the Web Style Guide requires in the footer of each of its pages.
     |
-    | A null value falls back to Information Technology's details. An
-    | empty string hides that field.
+    | Null shows Information Technology's details; an empty string hides the field.
     |
     */
 

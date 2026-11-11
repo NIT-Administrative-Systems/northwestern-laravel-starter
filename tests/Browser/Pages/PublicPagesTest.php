@@ -12,8 +12,10 @@ use Northwestern\SysDev\Chassis\Testing\Browser\ErrorPages;
 use Tests\Browser\Layout;
 
 /*
- * Every page a guest can reach works and passes axe, in light and dark mode and at a phone's
- * width. Add your application's public pages to the dataset.
+ * Every page a guest can reach works and passes axe,
+ * in light and dark mode and at a phone's width.
+ *
+ * Add your application's public pages to the dataset.
  */
 
 dataset('public pages', [
@@ -68,7 +70,8 @@ it('is healthy with the impersonation banner, in each theme and on a phone', fun
 });
 
 it('is healthy with a unit lockup in the header', function () {
-    // Any image in public/ stands in for a unit's lockup; an outside host would make the test depend on it.
+    // Any image in public/ stands in for a unit's lockup;
+    // an outside host would make the test depend on it.
     config(['northwestern-filament-theme.lockup' => 'images/default-profile-photo.svg']);
 
     expect(visit('/')->assertVisible('@site-header-lockup'))->toBeHealthyInEachTheme();

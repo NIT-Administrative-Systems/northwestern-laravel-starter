@@ -9,9 +9,10 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Stops other sites from showing the OAuth consent screen in a frame, where they could trick a
- * person into pressing Approve (clickjacking). Applied to Passport's routes; acts on the
- * authorization screen and its approve and deny responses, including their error pages.
+ * Stops other sites showing the OAuth consent screen in a frame, where
+ * they could trick a person into pressing Approve (clickjacking). It
+ * applies to Passport's routes, and acts on the consent screen and
+ * its approve and deny responses, including their error pages.
  */
 class DenyFramingOfConsent
 {

@@ -7,7 +7,6 @@ namespace Database\Factories\Domains\Api\Models;
 use App\Domains\Api\Models\ApiRequestLog;
 use App\Domains\User\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Arr;
 use Northwestern\SysDev\Chassis\Enums\ApiPrincipalType;
 use Northwestern\SysDev\Chassis\Enums\ApiRequestFailure;
 use Northwestern\SysDev\Chassis\Enums\OAuthGrantType;
@@ -24,9 +23,7 @@ class ApiRequestLogFactory extends Factory
      */
     public function definition(): array
     {
-        $failureReason = fake()->boolean(70)
-            ? null
-            : Arr::random(ApiRequestFailure::cases());
+        $failureReason = fake()->boolean(70) ? null : fake()->randomElement(ApiRequestFailure::cases());
 
         return [
             'trace_id' => fake()->uuid(),
@@ -41,7 +38,7 @@ class ApiRequestLogFactory extends Factory
                 '/api/v1/users/123/profile',
                 '/api/v2/reports/summary',
             ]),
-            'route_name' => fake()->slug(nbWords: random_int(0, 3)),
+            'route_name' => fake()->slug(nbWords: fake()->numberBetween(0, 3)),
             'request_bytes' => fake()->boolean(60) ? fake()->numberBetween(0, 2000) : null,
             'response_bytes' => fake()->boolean(80) ? fake()->numberBetween(100, 5000) : null,
             'ip_address' => fake()->ipv4(),
@@ -53,7 +50,7 @@ class ApiRequestLogFactory extends Factory
         ];
     }
 
-    public function successful(string $oauthClientId): self
+    public function successful(string $oauthClientId): static
     {
         return $this->state(fn (array $attributes) => [
             'oauth_client_id' => $oauthClientId,
@@ -62,13 +59,13 @@ class ApiRequestLogFactory extends Factory
         ]);
     }
 
-    public function failed(?ApiRequestFailure $reason = null): self
+    public function failed(?ApiRequestFailure $reason = null): static
     {
         return $this->state(fn (array $attributes) => [
             'principal_type' => null,
             'grant_type' => null,
             'status_code' => 401,
-            'failure_reason' => $reason ?? Arr::random(ApiRequestFailure::cases()),
+            'failure_reason' => $reason ?? fake()->randomElement(ApiRequestFailure::cases()),
         ]);
     }
 }

@@ -14,7 +14,7 @@ use PHPUnit\Framework\TestCase;
 final class TokenExpirationTest extends TestCase
 {
     #[DataProvider('labelProvider')]
-    public function test_get_label(TokenExpiration $enum, string $expected): void
+    public function test_each_lifetime_has_a_label(TokenExpiration $enum, string $expected): void
     {
         $this->assertSame($expected, $enum->getLabel());
     }
@@ -32,7 +32,7 @@ final class TokenExpirationTest extends TestCase
     }
 
     #[DataProvider('expiresAtProvider')]
-    public function test_expires_at_adds_correct_days(TokenExpiration $enum, int $expectedDays): void
+    public function test_a_lifetime_expires_its_number_of_days_after_the_start(TokenExpiration $enum, int $expectedDays): void
     {
         $from = Carbon::parse('2026-01-01 00:00:00');
         $expected = Carbon::parse('2026-01-01 00:00:00')->addDays($expectedDays);
@@ -67,7 +67,7 @@ final class TokenExpirationTest extends TestCase
         $this->assertSame([], TokenExpiration::forPersonalAccessTokens(7));
     }
 
-    public function test_expires_at_defaults_to_now_when_no_from_date(): void
+    public function test_a_lifetime_counts_from_now_by_default(): void
     {
         Carbon::setTestNow(Carbon::parse('2026-06-15 12:00:00'));
 

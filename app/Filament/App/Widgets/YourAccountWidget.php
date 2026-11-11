@@ -11,15 +11,16 @@ use App\Providers\Filament\AppPanelProvider;
 use Filament\Widgets\Widget;
 
 /**
- * The signed-in user's account on the app panel's dashboard: a greeting (welcome back, after
- * the first sign-in), the roles they hold beyond the default Northwestern User role, a link to
- * their Account area, and where to get help. Replace or delete it as the application grows its own dashboard.
+ * The signed-in person's account on the app panel's dashboard: a greeting, their
+ * roles beyond Northwestern User, a link to Account, and where to go for help.
+ *
+ * Replace or delete it as the application grows its own dashboard.
  */
 class YourAccountWidget extends Widget
 {
     protected static ?int $sort = -10;
 
-    // Render with the page: it is one query, and a greeting that pops in after load looks broken.
+    // Render with the page: it is one query, and a greeting that pops in looks broken.
     protected static bool $isLazy = false;
 
     protected int|string|array $columnSpan = 'full';

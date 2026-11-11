@@ -29,8 +29,10 @@ class LogsApiRequests extends LogsPassportRequests
     }
 
     /**
-     * MCP requests also record the JSON-RPC method, the tool called and how it ended, which the
-     * HTTP status doesn't show: a failed tool call still answers 200. Never its arguments or results.
+     * Get the JSON-RPC method, tool and outcome of an MCP request.
+     *
+     * The HTTP status doesn't show how a tool call ended, because a failed call
+     * still answers 200. The tool's arguments and results are never recorded.
      *
      * @return array<string, mixed>
      */
@@ -51,25 +53,6 @@ class LogsApiRequests extends LogsPassportRequests
             'mcp_tool' => $method === 'tools/call' && is_string($tool) ? Str::limit($tool, 255, '') : null,
             'mcp_outcome' => $this->mcpOutcome($response),
         ];
-    }
-
-    /**
-     * `ok`, `error` for a JSON-RPC error, or `tool_error` for a tool that reported failure. Null
-     * for anything that isn't a JSON-RPC response, such as a 401 or a streamed reply.
-     */
-    private function mcpOutcome(Response $response): ?string
-    {
-        $body = $response instanceof StreamedResponse ? null : json_decode((string) $response->getContent(), true);
-
-        if (! is_array($body) || ! array_key_exists('jsonrpc', $body)) {
-            return null;
-        }
-
-        if (array_key_exists('error', $body)) {
-            return 'error';
-        }
-
-        return is_array($body['result'] ?? null) && ($body['result']['isError'] ?? false) === true ? 'tool_error' : 'ok';
     }
 
     protected function persistLog(array $data): void
@@ -95,5 +78,26 @@ class LogsApiRequests extends LogsPassportRequests
             'mcp_tool' => $data['mcp_tool'],
             'mcp_outcome' => $data['mcp_outcome'],
         ]);
+    }
+
+    /**
+     * Get how an MCP request ended: `ok`, `error` or `tool_error`.
+     *
+     * `error` is a JSON-RPC error and `tool_error` a tool that reported failure.
+     * Null means the response isn't JSON-RPC, like a 401 or a streamed reply.
+     */
+    private function mcpOutcome(Response $response): ?string
+    {
+        $body = $response instanceof StreamedResponse ? null : json_decode((string) $response->getContent(), true);
+
+        if (! is_array($body) || ! array_key_exists('jsonrpc', $body)) {
+            return null;
+        }
+
+        if (array_key_exists('error', $body)) {
+            return 'error';
+        }
+
+        return is_array($body['result'] ?? null) && ($body['result']['isError'] ?? false) === true ? 'tool_error' : 'ok';
     }
 }

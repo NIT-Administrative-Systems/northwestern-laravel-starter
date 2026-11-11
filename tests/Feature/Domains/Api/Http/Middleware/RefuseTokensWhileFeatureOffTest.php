@@ -41,7 +41,7 @@ final class RefuseTokensWhileFeatureOffTest extends TestCase
             ->assertJsonMissingPath('access_token');
     }
 
-    // A confidential client may send its ID as the HTTP Basic username instead of in the body.
+    // A confidential client may send its ID as the HTTP Basic username instead.
     public function test_a_client_identified_by_basic_auth_is_refused_too(): void
     {
         [$secret, $client] = resolve(CreateServiceClient::class)(User::factory()->api()->create(), 'Sync', now()->addMonth());
@@ -53,7 +53,8 @@ final class RefuseTokensWhileFeatureOffTest extends TestCase
             ->assertJsonPath('error', 'unauthorized_client');
     }
 
-    // An MCP client follows mcp.enabled: while MCP is off it can't refresh, whatever the API does.
+    // An MCP client follows mcp.enabled: while MCP is
+    // off it can't refresh, whatever the API does.
     public function test_an_mcp_client_cannot_refresh_while_mcp_is_off(): void
     {
         [, $client] = resolve(RegisterOAuthApplication::class)('Claude', ['http://localhost/cb'], false, [], origin: ClientOrigin::Dynamic);
@@ -64,7 +65,8 @@ final class RefuseTokensWhileFeatureOffTest extends TestCase
             ->assertJsonPath('error_description', 'MCP clients are turned off.');
     }
 
-    // Passport ignores a client_id in the query string, so naming an enabled client there changes nothing.
+    // Passport ignores a client_id in the query string,
+    // so naming an enabled client there does nothing.
     public function test_a_client_named_in_the_query_string_is_ignored(): void
     {
         [$secret, $client] = resolve(CreateServiceClient::class)(User::factory()->api()->create(), 'Sync', now()->addMonth());

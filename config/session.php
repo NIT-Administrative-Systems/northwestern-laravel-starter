@@ -171,8 +171,8 @@ return [
     |
     */
 
-    // Secure by default; a local environment served over plain HTTP (a worktree or agent on another
-    // port) needs the cookie sent back over HTTP.
+    // Secure by default, but a local environment served over plain HTTP, such as a
+    // worktree on another port, needs the cookie to be sent back over HTTP too.
     'secure' => env('SESSION_SECURE_COOKIE', env('APP_ENV') !== 'local' || str_starts_with((string) env('APP_URL'), 'https://')),
 
     /*

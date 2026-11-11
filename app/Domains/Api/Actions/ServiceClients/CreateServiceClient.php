@@ -19,9 +19,10 @@ use InvalidArgumentException;
 use Laravel\Passport\ClientRepository;
 
 /**
- * Creates a client credentials client for an API user. The integration exchanges the
- * client's ID and secret at `/oauth/token` for short-lived access tokens, and acts as the
- * API user, with its roles.
+ * Creates a client credentials client for an API user. An
+ * integration exchanges the client's ID and secret at
+ * `/oauth/token` for short-lived access tokens, and
+ * acts as the API user, with that user's roles.
  */
 readonly class CreateServiceClient
 {

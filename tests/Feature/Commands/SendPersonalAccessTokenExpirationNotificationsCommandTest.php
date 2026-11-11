@@ -91,7 +91,7 @@ final class SendPersonalAccessTokenExpirationNotificationsCommandTest extends Te
         Mail::assertNothingQueued();
     }
 
-    // Turning off reminders to integration owners must not stop the ones people opted into.
+    // Turning off service client reminders mustn't stop the ones people opted into.
     public function test_it_runs_when_client_secret_reminders_are_off(): void
     {
         config(['api.client_secret_expiration_notifications.enabled' => false]);

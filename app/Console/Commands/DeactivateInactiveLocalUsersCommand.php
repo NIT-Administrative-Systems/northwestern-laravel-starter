@@ -11,13 +11,14 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 
 /**
- * Deactivates local (email-code) accounts nobody has signed in to for
- * `platform.accounts.local_inactivity_days` days. A new account gets the same time to be used
- * for the first time. Northwestern accounts are left to the NetID lifecycle, and API users have
- * their own credentials' expiry.
+ * Deactivates local (email-code) accounts nobody has signed in to for the number
+ * of days in `platform.accounts.local_inactivity_days`. A new account gets the
+ * same time to be used for the first time. Northwestern accounts are left to
+ * the NetID lifecycle, and API users have their own credentials' expiry.
  *
- * The last sign-in comes from the sign-in records, so keep `platform.retention.login_records`
- * at least as long as this, or someone who signed in before the oldest record looks inactive.
+ * The last sign-in comes from the sign-in records, so keep the retention
+ * of `platform.retention.login_records` at least as long as this, or
+ * someone who signed in before the oldest record looks inactive.
  */
 class DeactivateInactiveLocalUsersCommand extends Command
 {

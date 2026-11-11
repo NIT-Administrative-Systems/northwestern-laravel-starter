@@ -34,7 +34,7 @@ class SupportTicketFactory extends Factory
         ];
     }
 
-    public function failed(): self
+    public function failed(): static
     {
         return $this->state(fn () => [
             'post_error' => true,
@@ -45,7 +45,7 @@ class SupportTicketFactory extends Factory
         ]);
     }
 
-    public function failedCompletely(): self
+    public function failedCompletely(): static
     {
         return $this->state(fn () => [
             'post_error' => true,
@@ -56,7 +56,7 @@ class SupportTicketFactory extends Factory
         ]);
     }
 
-    public function teamDynamix(): self
+    public function teamDynamix(): static
     {
         return $this->state(fn () => [
             'ticketing_system' => TicketSystem::TeamDynamix,
@@ -64,7 +64,7 @@ class SupportTicketFactory extends Factory
         ]);
     }
 
-    public function pending(): self
+    public function pending(): static
     {
         return $this->state(fn () => [
             'ticketing_system' => null,

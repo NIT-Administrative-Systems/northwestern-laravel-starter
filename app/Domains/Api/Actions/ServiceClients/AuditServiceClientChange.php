@@ -9,9 +9,12 @@ use App\Domains\Core\Enums\AuditEvent;
 use App\Domains\User\Models\User;
 
 /**
- * Records a change to a service client as a custom audit event on the API user that owns it,
- * so the API user's audit history shows who created, rotated, restricted or revoked its
- * clients. The client itself isn't audited: its UUID key doesn't fit the audits table, and
+ * Records a change to a service client as a custom audit event on the
+ * API user that owns it, so the API user's audit history shows who
+ * created, rotated, restricted or revoked its service clients.
+ *
+ * The client itself isn't audited: its UUID
+ * key doesn't fit the audits table, and
  * its secret must never be recorded.
  */
 readonly class AuditServiceClientChange

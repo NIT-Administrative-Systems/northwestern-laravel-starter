@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Domains\Api\Models;
 
+use App\Domains\Api\Actions\ServiceClients\AuditServiceClientChange;
 use App\Domains\Api\Enums\ClientOrigin;
 use App\Domains\Api\Enums\CredentialStatus;
+use App\Domains\Api\Http\Middleware\AuthenticatePassportToken;
 use App\Domains\User\Models\User;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -17,20 +19,22 @@ use Illuminate\Support\Carbon;
 use Laravel\Passport\Client;
 
 /**
- * Passport's OAuth client, with the starter's columns: where the client came from, an IP
- * allowlist, a secret expiry, and rotation history.
+ * Passport's OAuth client, with the starter's own columns: where the client
+ * came from, an IP allowlist, a secret expiry, and its rotation history.
  *
- * The starter has three kinds, each with a scope here so callers don't rebuild the rule:
- * {@see serviceClients()}, {@see applications()} and {@see mcpClients()}. Passport also
- * keeps one personal access client, which issues personal access tokens.
+ * The starter has three kinds of client, each with its own scope here,
+ * so that callers don't rebuild the rule: {@see serviceClients()},
+ * {@see applications()} and {@see mcpClients()}. Passport keeps
+ * one personal access client to issue personal access tokens.
  *
- * A client whose secret has expired counts as revoked, so Passport refuses it at the token
- * endpoint and {@see \App\Domains\Api\Http\Middleware\AuthenticatePassportToken} refuses
- * the tokens it already holds. `revoked` in the database still records an explicit revoke.
+ * A client whose secret has expired counts as revoked, so Passport refuses it at
+ * the token endpoint, and {@see AuthenticatePassportToken} refuses the tokens
+ * it already holds. The `revoked` column still records an explicit revoke.
  *
- * The UUID key doesn't fit the audits table, so changes are audited as custom events on a user:
- * a service client's on its API user ({@see \App\Domains\Api\Actions\ServiceClients\AuditServiceClientChange}),
- * an application's or MCP client's on the administrator who made them.
+ * Its UUID key doesn't fit the audits table, so changes are recorded
+ * as custom audit events on a user: a service client's on its API
+ * user ({@see AuditServiceClientChange}), and an application's
+ * or MCP client's on the administrator who made the change.
  *
  * @property string $id
  * @property string $name
@@ -64,64 +68,6 @@ class OAuthClient extends Client
         'last_used_at' => 'datetime',
     ];
 
-    /**
-     * Clients that can still be used: not revoked, and with a secret that hasn't expired.
-     *
-     * @param  Builder<static>  $query
-     * @return Builder<static>
-     */
-    #[Scope]
-    protected function active(Builder $query, ?CarbonInterface $at = null): Builder
-    {
-        return $query
-            ->where('revoked', false)
-            ->where(fn (Builder $q) => $q->whereNull('secret_expires_at')->orWhere('secret_expires_at', '>', $at ?? Carbon::now()));
-    }
-
-    /**
-     * Service clients: client-credentials clients an administrator created for an API user.
-     *
-     * @param  Builder<static>  $query
-     * @return Builder<static>
-     */
-    #[Scope]
-    protected function serviceClients(Builder $query): Builder
-    {
-        return $query->where('origin', ClientOrigin::Administrator)->whereHasMorph('owner', [User::class]);
-    }
-
-    /**
-     * Applications an administrator registered for people to connect through the authorization code flow.
-     *
-     * @param  Builder<static>  $query
-     * @return Builder<static>
-     */
-    #[Scope]
-    protected function applications(Builder $query): Builder
-    {
-        return $query->where('origin', ClientOrigin::Administrator)->where('grant_types', 'like', '%"authorization_code"%');
-    }
-
-    /**
-     * MCP clients, which are the only clients that register themselves, through the MCP server's dynamic registration.
-     *
-     * @param  Builder<static>  $query
-     * @return Builder<static>
-     */
-    #[Scope]
-    protected function mcpClients(Builder $query): Builder
-    {
-        return $query->where('origin', ClientOrigin::Dynamic);
-    }
-
-    /**
-     * Whether this is an MCP client. It registered itself, so its name is whatever it claimed.
-     */
-    public function isMcpClient(): bool
-    {
-        return $this->origin === ClientOrigin::Dynamic;
-    }
-
     /** @return BelongsTo<self, $this> */
     public function rotated_from_client(): BelongsTo
     {
@@ -141,18 +87,57 @@ class OAuthClient extends Client
     }
 
     /**
-     * An administrator can mark an application first-party, such as the organization's own
-     * tool, so people aren't asked to approve it.
+     * Scope the query to clients that aren't revoked and whose secret hasn't expired.
      *
-     * @param  list<\Laravel\Passport\Scope>  $scopes
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
-    public function skipsAuthorization(\Illuminate\Contracts\Auth\Authenticatable $user, array $scopes): bool
+    #[Scope]
+    protected function active(Builder $query, ?CarbonInterface $at = null): Builder
     {
-        return $this->first_party;
+        return $query
+            ->where('revoked', false)
+            ->where(fn (Builder $q) => $q->whereNull('secret_expires_at')->orWhere('secret_expires_at', '>', $at ?? now()));
     }
 
     /**
-     * Whether the client is unusable, either revoked or past its secret expiry.
+     * Scope the query to the client credentials clients that belong to API users.
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
+    #[Scope]
+    protected function serviceClients(Builder $query): Builder
+    {
+        return $query->where('origin', ClientOrigin::Administrator)->whereHasMorph('owner', [User::class]);
+    }
+
+    /**
+     * Scope the query to applications an administrator registered for people to use.
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
+    #[Scope]
+    protected function applications(Builder $query): Builder
+    {
+        return $query->where('origin', ClientOrigin::Administrator)->where('grant_types', 'like', '%"authorization_code"%');
+    }
+
+    /**
+     * Scope the query to MCP clients, the only clients that register themselves.
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
+    #[Scope]
+    protected function mcpClients(Builder $query): Builder
+    {
+        return $query->where('origin', ClientOrigin::Dynamic);
+    }
+
+    /**
+     * Determine whether the client is unusable: revoked, or past its secret expiry.
      *
      * @return Attribute<bool, bool>
      */
@@ -174,6 +159,26 @@ class OAuthClient extends Client
                 default => CredentialStatus::Active,
             },
         )->withoutObjectCaching(); // An expiry passes without the model changing.
+    }
+
+    /**
+     * Determine whether this is an MCP client, which named itself when it registered.
+     */
+    public function isMcpClient(): bool
+    {
+        return $this->origin === ClientOrigin::Dynamic;
+    }
+
+    /**
+     * Determine whether people connect it without being asked to approve it.
+     *
+     * An administrator can mark an application first-party, such as a university tool.
+     *
+     * @param  list<\Laravel\Passport\Scope>  $scopes
+     */
+    public function skipsAuthorization(\Illuminate\Contracts\Auth\Authenticatable $user, array $scopes): bool
+    {
+        return $this->first_party;
     }
 
     private function secretExpired(): bool
