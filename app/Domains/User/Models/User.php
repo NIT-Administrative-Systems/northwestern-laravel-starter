@@ -116,6 +116,8 @@ class User extends Authenticatable implements Auditable, FilamentUser, HasAvatar
 
     /**
      * Deletes the user and revokes their credentials together, so neither happens without the other.
+     *
+     * @throws AuthorizationException While impersonating, or when a credential can't be revoked
      */
     public function delete(): ?bool
     {

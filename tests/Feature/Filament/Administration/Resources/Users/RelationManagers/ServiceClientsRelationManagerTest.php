@@ -104,9 +104,10 @@ final class ServiceClientsRelationManagerTest extends TestCase
         $this->assertSame($first->getKey(), $creation->identifier($firstTab->instance()));
         $this->assertSame($second->getKey(), $creation->identifier($secondTab->instance()));
 
+        // Finishing one run leaves the other's secret.
         $firstTab->callMountedTableAction();
 
-        $this->assertSame($second->getKey(), $creation->identifier($secondTab->instance()));
+        $this->assertSame($second->getKey(), RevealOnceSecret::for('service_client:create')->identifier($secondTab->instance()));
     }
 
     public function test_rotating_adds_a_replacement_and_keeps_the_client(): void

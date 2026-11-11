@@ -72,8 +72,10 @@ final class OAuthApplicationResourceTest extends TestCase
 
         $client = OAuthClient::query()->where('name', 'Student Portal')->sole();
         $registration = RevealOnceSecret::for('application:register');
-        $this->assertSame($client->getKey(), $registration->identifier($component->instance()));
-        $this->assertTrue(Hash::check((string) $registration->secret($component->instance()), (string) $client->secret));
+        $page = $component->instance();
+        $this->assertInstanceOf(ListOAuthApplications::class, $page);
+        $this->assertSame($client->getKey(), $registration->identifier($page));
+        $this->assertTrue(Hash::check((string) $registration->secret($page), (string) $client->secret));
 
         $component->callMountedAction();
         $this->assertSame([], preg_grep('/^reveal_once_secret:/', array_keys(Session::all())));
@@ -95,7 +97,9 @@ final class OAuthApplicationResourceTest extends TestCase
             ->goToNextWizardStep();
 
         $this->assertNotSame($before, $application->fresh()?->secret);
-        $this->assertSame($application->getKey(), RevealOnceSecret::for('application:regenerate')->identifier($regeneration->instance(), $application));
+        $page = $regeneration->instance();
+        $this->assertInstanceOf(ListOAuthApplications::class, $page);
+        $this->assertSame($application->getKey(), RevealOnceSecret::for('application:regenerate')->identifier($page, $application));
     }
 
     public function test_redirect_uris_must_be_https_or_loopback(): void

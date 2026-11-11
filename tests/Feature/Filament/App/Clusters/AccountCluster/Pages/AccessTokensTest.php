@@ -86,7 +86,9 @@ final class AccessTokensTest extends TestCase
         $this->assertSame(['view-users'], $token->scopes);
         $this->assertTrue($token->expires_at->isSameDay(now()->addDays(180)));
 
-        $shown = (string) RevealOnceSecret::for('personal_access_token:create')->secret($component->instance());
+        $page = $component->instance();
+        $this->assertInstanceOf(AccessTokens::class, $page);
+        $shown = (string) RevealOnceSecret::for('personal_access_token:create')->secret($page);
         $this->withToken($shown)->getJson('/api/v1/me')->assertOk();
 
         $component->callMountedAction();
@@ -106,7 +108,9 @@ final class AccessTokensTest extends TestCase
             ->goToNextWizardStep();
 
         $second = OAuthToken::query()->where('user_id', $this->user->getKey())->where('name', 'Second')->sole();
-        $this->assertSame($second->getKey(), RevealOnceSecret::for('personal_access_token:create')->identifier($component->instance()));
+        $page = $component->instance();
+        $this->assertInstanceOf(AccessTokens::class, $page);
+        $this->assertSame($second->getKey(), RevealOnceSecret::for('personal_access_token:create')->identifier($page));
     }
 
     public function test_a_person_can_only_choose_scopes_their_permissions_cover(): void

@@ -51,7 +51,9 @@ final class CreateApiUserActionTest extends TestCase
         $user = User::query()->where('username', 'api-reporting')->sole();
         $this->assertSame(AuthType::API, $user->auth_type);
         $client = OAuthClient::query()->whereMorphedTo('owner', $user)->sole();
-        $this->assertSame($client->getKey(), RevealOnceSecret::for('api_user:create')->identifier($component->instance()));
+        $page = $component->instance();
+        $this->assertInstanceOf(ListUsers::class, $page);
+        $this->assertSame($client->getKey(), RevealOnceSecret::for('api_user:create')->identifier($page));
 
         $component->callMountedAction()->assertRedirect();
 

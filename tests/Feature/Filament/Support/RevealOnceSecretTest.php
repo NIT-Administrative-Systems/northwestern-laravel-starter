@@ -104,20 +104,21 @@ final class RevealOnceSecretTest extends TestCase
     // A run that ended, or a component with no run mounted, has nothing to show or issue.
     public function test_without_a_run_nothing_is_issued_or_shown(): void
     {
-        $component = Livewire::test(AccessTokens::class);
+        $page = Livewire::test(AccessTokens::class)->instance();
+        $this->assertInstanceOf(AccessTokens::class, $page);
         $secret = RevealOnceSecret::for('test:fresh');
         $issued = false;
 
-        $secret->issueOnce($component->instance(), function () use (&$issued): array {
+        $secret->issueOnce($page, function () use (&$issued): array {
             $issued = true;
 
             return ['id' => 1, 'secret' => 'never'];
         });
-        $secret->forget($component->instance());
+        $secret->forget($page);
 
         $this->assertFalse($issued);
-        $this->assertFalse($secret->issued($component->instance()));
-        $this->assertNull($secret->secret($component->instance()));
+        $this->assertFalse($secret->issued($page));
+        $this->assertNull($secret->secret($page));
     }
 
     public function test_a_credential_without_a_secret_and_other_wizards_show_nothing(): void
@@ -137,10 +138,11 @@ final class RevealOnceSecretTest extends TestCase
      */
     private function mountWizard(): HasActions
     {
-        $component = Livewire::test(AccessTokens::class)->mountAction(TestAction::make('createToken')->table());
+        $page = Livewire::test(AccessTokens::class)->mountAction(TestAction::make('createToken')->table())->instance();
 
-        $this->assertIsString($component->instance()->mountedActions[0]['arguments'][RevealOnceSecret::RUN_ARGUMENT] ?? null);
+        $this->assertInstanceOf(AccessTokens::class, $page);
+        $this->assertIsString($page->mountedActions[0]['arguments'][RevealOnceSecret::RUN_ARGUMENT] ?? null);
 
-        return $component->instance();
+        return $page;
     }
 }
