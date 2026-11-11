@@ -172,6 +172,59 @@ final class HandlesImpersonationTest extends TestCase
         $this->assertTrue($impersonator->canImpersonateUser($target));
     }
 
+    public function test_nobody_may_impersonate_someone_holding_a_permission_through_a_role_they_lack(): void
+    {
+        $this->bindImpersonateService(false);
+
+        $impersonator = User::factory()->createOne();
+        $impersonatorRole = Role::factory()->createOne();
+        $impersonatorRole->givePermissionTo(SystemPermission::ManageImpersonation);
+        $impersonator->assignRoleWithAudit($impersonatorRole, RoleModificationOrigin::System);
+
+        $target = User::factory()->createOne();
+        $targetRole = Role::factory()->createOne();
+        $targetRole->givePermissionTo(SystemPermission::AssignRoles);
+        $target->assignRoleWithAudit($targetRole, RoleModificationOrigin::System);
+
+        $this->actingAs($impersonator);
+
+        $this->assertFalse($target->canBeImpersonated());
+        $this->assertFalse($impersonator->canImpersonateUser($target));
+    }
+
+    public function test_nobody_may_impersonate_someone_holding_a_direct_permission_they_lack(): void
+    {
+        $this->bindImpersonateService(false);
+
+        $impersonator = User::factory()->createOne();
+        $impersonator->givePermissionTo(SystemPermission::ManageImpersonation);
+
+        $target = User::factory()->createOne();
+        $target->givePermissionTo(SystemPermission::ViewAuditLogs);
+
+        $this->actingAs($impersonator);
+
+        $this->assertFalse($target->canBeImpersonated());
+    }
+
+    public function test_someone_may_impersonate_a_person_whose_permissions_they_all_hold(): void
+    {
+        $this->bindImpersonateService(false);
+
+        $impersonator = User::factory()->createOne();
+        $impersonatorRole = Role::factory()->createOne();
+        $impersonatorRole->givePermissionTo([SystemPermission::ManageImpersonation, SystemPermission::AssignRoles]);
+        $impersonator->assignRoleWithAudit($impersonatorRole, RoleModificationOrigin::System);
+
+        $target = User::factory()->createOne();
+        $target->givePermissionTo(SystemPermission::AssignRoles);
+
+        $this->actingAs($impersonator);
+
+        $this->assertTrue($target->canBeImpersonated());
+        $this->assertTrue($impersonator->canImpersonateUser($target));
+    }
+
     private function bindImpersonateService(bool $isImpersonating): void
     {
         $impersonate = Mockery::mock();

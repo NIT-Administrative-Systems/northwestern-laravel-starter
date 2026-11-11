@@ -48,10 +48,9 @@ trait HandlesImpersonation
             return false;
         }
 
-        // Only someone with Manage All may impersonate someone who has it.
         $impersonator = auth()->user();
 
-        return ! ($impersonator && $this->hasPermissionTo(SystemPermission::ManageAll) && ! $impersonator->hasPermissionTo(SystemPermission::ManageAll));
+        return ! $impersonator instanceof User || $impersonator->holdsEveryPermissionOf($this);
     }
 
     /**
@@ -60,5 +59,23 @@ trait HandlesImpersonation
     public function isImpersonated(): bool
     {
         return resolve('impersonate')->isImpersonating();
+    }
+
+    /**
+     * Determine whether this user holds every permission another user holds.
+     *
+     * Acting as someone with a permission the impersonator lacks would lend
+     * it to them: they could use it to give their own account a new role.
+     * Manage All passes every permission check, so it covers the rest.
+     */
+    private function holdsEveryPermissionOf(User $target): bool
+    {
+        if ($this->hasPermissionTo(SystemPermission::ManageAll)) {
+            return true;
+        }
+
+        return $target->getAllPermissions()->pluck('name')
+            ->diff($this->getAllPermissions()->pluck('name'))
+            ->isEmpty();
     }
 }
