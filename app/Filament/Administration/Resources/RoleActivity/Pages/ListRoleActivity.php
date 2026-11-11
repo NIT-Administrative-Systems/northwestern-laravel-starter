@@ -12,7 +12,7 @@ class ListRoleActivity extends ListRecords
 {
     protected static string $resource = RoleActivityResource::class;
 
-    protected ?string $heading = 'Role Activity';
+    protected static ?string $title = 'Role Activity';
 
     protected ?string $subheading = 'Every role assignment and removal.';
 

@@ -97,6 +97,12 @@ final class AuditResourceTest extends TestCase
         $this->assertEveryEmptyCellHasPlaceholder(Livewire::test(ListAudits::class)->loadTable(), $audit);
     }
 
+    public function test_each_page_is_titled_as_its_navigation_names_it(): void
+    {
+        $this->assertSame('Audit Logs', (new ListAudits())->getTitle());
+        $this->assertSame('Role Activity', (new ListRoleActivity())->getTitle());
+    }
+
     private function administrator(SystemPermission ...$permissions): User
     {
         $administrator = User::factory()->create();
