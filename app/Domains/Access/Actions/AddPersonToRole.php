@@ -100,6 +100,11 @@ readonly class AddPersonToRole
 
         $user = $this->findOrCreate($person, $firstName, $lastName);
 
+        // Nobody gives themselves a role, whatever they hold; the list can name them like anyone else.
+        if ($user->is($actor)) {
+            throw PersonNotAdded::yourself();
+        }
+
         if ($user->hasRole($role)) {
             throw PersonNotAdded::alreadyAssigned($person, $role);
         }

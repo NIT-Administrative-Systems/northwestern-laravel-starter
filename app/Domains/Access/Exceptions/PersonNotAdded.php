@@ -39,6 +39,11 @@ final class PersonNotAdded extends RuntimeException
         return new self("{$person} is an API user. Assign API users roles one at a time.");
     }
 
+    public static function yourself(): self
+    {
+        return new self('You can\'t add yourself to a role.');
+    }
+
     public static function alreadyAssigned(string $person, Role $role): self
     {
         return new self("{$person} already has the {$role->name} role.");

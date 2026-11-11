@@ -140,6 +140,15 @@ final class AddPersonToRoleTest extends TestCase
         $this->assertNotAdded('abc123', 'abc123 already has the Editors role.');
     }
 
+    public function test_nobody_adds_themselves_even_with_manage_all(): void
+    {
+        $this->administrator->givePermissionTo(SystemPermission::ManageAll);
+        $this->administrator->update(['email' => 'me@example.com']);
+
+        $this->assertNotAdded('me@example.com', 'You can\'t add yourself to a role.');
+        $this->assertFalse($this->administrator->fresh()?->hasRole($this->role));
+    }
+
     public function test_a_blank_entry_is_not_added(): void
     {
         $this->assertNotAdded('  ', 'There\'s no NetID or email address.');
