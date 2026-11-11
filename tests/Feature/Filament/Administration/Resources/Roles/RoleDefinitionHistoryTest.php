@@ -38,7 +38,7 @@ final class RoleDefinitionHistoryTest extends TestCase
         $this->role = Role::factory()->forRoleType(RoleTypeEnum::ApplicationRole)->create();
     }
 
-    public function test_history_page_renders_for_user_with_view_roles(): void
+    public function test_view_roles_opens_a_roles_definition_history(): void
     {
         $this->actingAs($this->admin);
 
@@ -46,7 +46,7 @@ final class RoleDefinitionHistoryTest extends TestCase
             ->assertSuccessful();
     }
 
-    public function test_history_page_denied_without_view_roles(): void
+    public function test_the_history_is_refused_without_view_roles(): void
     {
         $user = User::factory()->create();
         $user->givePermissionTo(SystemPermission::AccessAdministrationPanel);
@@ -57,7 +57,7 @@ final class RoleDefinitionHistoryTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_history_page_does_not_require_view_audit_logs(): void
+    public function test_the_history_needs_no_view_audit_logs(): void
     {
         // Admin has ViewRoles but NOT ViewAuditLogs — should still work
         $this->assertFalse($this->admin->hasPermissionTo(SystemPermission::ViewAuditLogs));
@@ -68,11 +68,10 @@ final class RoleDefinitionHistoryTest extends TestCase
             ->assertSuccessful();
     }
 
-    public function test_history_table_shows_role_audit_events(): void
+    public function test_the_history_lists_the_roles_creation(): void
     {
         $this->actingAs($this->admin);
 
-        // Create an audit record for this role
         $audit = Audit::create([
             'user_type' => User::class,
             'user_id' => $this->admin->id,
@@ -87,7 +86,7 @@ final class RoleDefinitionHistoryTest extends TestCase
             ->assertCanSeeTableRecords([$audit]);
     }
 
-    public function test_history_table_shows_updated_event(): void
+    public function test_the_history_lists_a_change_to_the_role(): void
     {
         $this->actingAs($this->admin);
 
@@ -105,7 +104,7 @@ final class RoleDefinitionHistoryTest extends TestCase
             ->assertCanSeeTableRecords([$audit]);
     }
 
-    public function test_history_table_shows_permissions_modified_event(): void
+    public function test_the_history_lists_a_change_to_its_permissions(): void
     {
         $this->actingAs($this->admin);
 
@@ -124,7 +123,7 @@ final class RoleDefinitionHistoryTest extends TestCase
             ->assertCanSeeTableRecords([$audit]);
     }
 
-    public function test_history_table_only_shows_audits_for_viewed_role(): void
+    public function test_the_history_lists_only_the_viewed_roles_changes(): void
     {
         $this->actingAs($this->admin);
 
@@ -144,7 +143,7 @@ final class RoleDefinitionHistoryTest extends TestCase
             ->assertCanNotSeeTableRecords([$otherAudit]);
     }
 
-    public function test_summarize_changes_for_created_event(): void
+    public function test_a_created_role_is_summarized_as_created(): void
     {
         $audit = new Audit();
         $audit->event = 'created';
@@ -157,7 +156,7 @@ final class RoleDefinitionHistoryTest extends TestCase
         $this->assertStringContainsString('Role Created', $result->toHtml());
     }
 
-    public function test_summarize_changes_for_deleted_event(): void
+    public function test_a_deleted_role_is_summarized_as_deleted(): void
     {
         $audit = new Audit();
         $audit->event = 'deleted';
@@ -169,7 +168,7 @@ final class RoleDefinitionHistoryTest extends TestCase
         $this->assertStringContainsString('Role Deleted', $result->toHtml());
     }
 
-    public function test_summarize_changes_for_restored_event(): void
+    public function test_a_restored_role_is_summarized_as_restored(): void
     {
         $audit = new Audit();
         $audit->event = 'restored';
@@ -181,7 +180,7 @@ final class RoleDefinitionHistoryTest extends TestCase
         $this->assertStringContainsString('Role Restored', $result->toHtml());
     }
 
-    public function test_summarize_changes_for_name_update(): void
+    public function test_a_rename_shows_the_old_and_new_name(): void
     {
         $audit = new Audit();
         $audit->event = 'updated';
@@ -196,7 +195,7 @@ final class RoleDefinitionHistoryTest extends TestCase
         $this->assertStringContainsString('<svg', $result->toHtml());
     }
 
-    public function test_summarize_changes_for_multiple_attribute_updates(): void
+    public function test_a_change_to_several_attributes_lists_each_one(): void
     {
         $audit = new Audit();
         $audit->event = 'updated';
@@ -209,7 +208,7 @@ final class RoleDefinitionHistoryTest extends TestCase
         $this->assertStringContainsString('Assignment Locked', $result->toHtml());
     }
 
-    public function test_summarize_changes_for_permissions_added(): void
+    public function test_added_permissions_are_listed(): void
     {
         $audit = new Audit();
         $audit->event = 'permissions_modified';
@@ -227,7 +226,7 @@ final class RoleDefinitionHistoryTest extends TestCase
         $this->assertStringNotContainsString('danger', $result->toHtml());
     }
 
-    public function test_summarize_changes_for_permissions_removed(): void
+    public function test_removed_permissions_are_listed(): void
     {
         $audit = new Audit();
         $audit->event = 'permissions_modified';
@@ -243,7 +242,7 @@ final class RoleDefinitionHistoryTest extends TestCase
         $this->assertStringNotContainsString('success', $result->toHtml());
     }
 
-    public function test_summarize_changes_for_permissions_added_and_removed(): void
+    public function test_permissions_added_and_removed_together_are_both_listed(): void
     {
         $audit = new Audit();
         $audit->event = 'permissions_modified';
@@ -262,7 +261,7 @@ final class RoleDefinitionHistoryTest extends TestCase
         $this->assertStringContainsString('danger', $result->toHtml());
     }
 
-    public function test_summarize_changes_for_role_type_change_resolves_label(): void
+    public function test_a_role_type_change_shows_the_types_labels(): void
     {
         $roleType = $this->role->role_type;
         $audit = new Audit();
@@ -275,7 +274,7 @@ final class RoleDefinitionHistoryTest extends TestCase
         $this->assertStringContainsString('Role Updated', $result->toHtml());
     }
 
-    public function test_history_table_empty_state_renders(): void
+    public function test_a_role_with_no_changes_shows_an_empty_history(): void
     {
         $this->actingAs($this->admin);
 
