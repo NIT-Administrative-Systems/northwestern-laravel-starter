@@ -36,27 +36,27 @@ class AnnouncementFactory extends Factory
         ];
     }
 
-    public function draft(): self
+    public function draft(): static
     {
         return $this->state(fn () => ['published_at' => null, 'starts_at' => null, 'ends_at' => null]);
     }
 
-    public function scheduled(): self
+    public function scheduled(): static
     {
         return $this->state(fn () => ['published_at' => now(), 'starts_at' => now()->addDay()]);
     }
 
-    public function ended(): self
+    public function ended(): static
     {
         return $this->state(fn () => ['published_at' => now()->subWeek(), 'starts_at' => now()->subWeek(), 'ends_at' => now()->subDay()]);
     }
 
-    public function severity(AnnouncementSeverity $severity): self
+    public function severity(AnnouncementSeverity $severity): static
     {
         return $this->state(fn () => ['severity' => $severity]);
     }
 
-    public function public(): self
+    public function public(): static
     {
         return $this->state(fn () => ['audience' => AnnouncementAudience::Public]);
     }
@@ -65,7 +65,7 @@ class AnnouncementFactory extends Factory
      * @param  list<Role>  $roles
      * @param  list<Affiliation>  $affiliations
      */
-    public function targeted(array $roles = [], array $affiliations = []): self
+    public function targeted(array $roles = [], array $affiliations = []): static
     {
         return $this->state(fn () => [
             'audience' => AnnouncementAudience::Targeted,

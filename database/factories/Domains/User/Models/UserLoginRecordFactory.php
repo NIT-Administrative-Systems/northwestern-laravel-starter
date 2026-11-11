@@ -27,11 +27,4 @@ class UserLoginRecordFactory extends Factory
             'user_agent' => fake()->userAgent(),
         ];
     }
-
-    public function useExistingLookups(): self
-    {
-        return $this->state(fn () => [
-            'user_id' => User::inRandomOrder()->value('id'),
-        ]);
-    }
 }
