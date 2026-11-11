@@ -123,8 +123,8 @@ class UsersTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            // Roles are not searchable: each search term would add a roles subquery, and the Role
-            // filter already matches roles exactly.
+            // Roles aren't searchable: each search term would add a subquery
+            // on roles, and the Role filter already matches roles exactly.
             ->modifyQueryUsing(fn (Builder $query) => $query->with('roles'))
             ->defaultSort(fn (Builder $query) => $query->orderBy('last_name')->orderBy('first_name'))
             ->filters([
@@ -161,8 +161,9 @@ class UsersTable
     }
 
     /**
-     * A person's roles, without the default role every NetID user has, which would push the
-     * roles that tell people apart off the row. Also used by a role's Assigned Users.
+     * A person's roles, leaving out the default role every NetID user has,
+     * which would push the roles that tell people apart off the row. The
+     * Assigned Users tab of a role uses it too, for the same reason.
      */
     public static function rolesColumn(): TextColumn
     {

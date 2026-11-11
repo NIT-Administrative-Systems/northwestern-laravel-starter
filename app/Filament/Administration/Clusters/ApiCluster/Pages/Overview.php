@@ -38,8 +38,9 @@ class Overview extends Page
     protected ?string $subheading = 'API configuration and usage statistics.';
 
     /**
-     * For whoever may see service clients, even while the API is off, and for request log
-     * readers while it's on. Filament checks a cluster's rule only for its navigation.
+     * For whoever may see service clients, even while the API is
+     * off, and for request log readers while it's on. Filament
+     * checks a cluster's own rule only for its navigation.
      */
     public static function canAccess(): bool
     {

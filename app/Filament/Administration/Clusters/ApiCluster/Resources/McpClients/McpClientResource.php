@@ -19,9 +19,10 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * The clients MCP clients registered for themselves. Their names are self-reported, so an
- * administrator can see who connected each one and revoke any that shouldn't be there.
- * `mcp:prune-clients` removes the ones nobody connects or uses.
+ * The MCP clients that registered themselves. Their names are self-reported, so an
+ * administrator can see who connected each one and revoke any that don't belong.
+ *
+ * The mcp:prune-clients command removes the ones nobody connects or uses.
  */
 class McpClientResource extends Resource
 {
@@ -44,8 +45,8 @@ class McpClientResource extends Resource
     protected static ?int $navigationSort = 4;
 
     /**
-     * The model has no policy: {@see self::canAccess()} decides here too, so Filament's strict
-     * authorization never looks for one.
+     * The model has no policy, so canAccess() decides here
+     * too and strict authorization never looks for one.
      */
     public static function canViewAny(): bool
     {

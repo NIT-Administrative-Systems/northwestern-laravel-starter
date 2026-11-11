@@ -30,7 +30,8 @@ class ApiRequestLogsTable
     public static function configure(Table $table, bool $isRelationManager = false): Table
     {
         return $table
-            // Refreshes only while Live is on, so the rows don't move while someone reads them.
+            // Refreshes only while Live is on, so the rows
+            // don't move while someone is reading them.
             ->poll(fn (HasTable $livewire): ?string => ($livewire->getTableFilterState('live')['isActive'] ?? false) ? '30s' : null)
             ->deferLoading()
             // A deleted API user's requests still show who made them.
@@ -167,7 +168,8 @@ class ApiRequestLogsTable
             ->defaultSort('created_at', 'desc')
             ->heading('API Requests')
             ->searchable(! $isRelationManager)
-            // The table can poll; skip the full COUNT(*) the default paginator runs on every refresh.
+            // The table can poll, so skip the COUNT(*) the
+            // default paginator runs on every refresh.
             ->paginationMode(PaginationMode::Simple)
             // Global search covers the user and endpoint. Hidden columns search individually.
             ->splitSearchTerms(false)

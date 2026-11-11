@@ -19,8 +19,9 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * External applications that people can connect to their account through the authorization
- * code flow. Administrators register them; dynamically registered clients aren't listed.
+ * External applications people connect to their account through
+ * the authorization code flow. Administrators register them.
+ * Clients that registered themselves aren't listed here.
  */
 class OAuthApplicationResource extends Resource
 {
@@ -43,8 +44,8 @@ class OAuthApplicationResource extends Resource
     protected static ?int $navigationSort = 3;
 
     /**
-     * The model has no policy: {@see self::canAccess()} decides here too, so Filament's strict
-     * authorization never looks for one.
+     * The model has no policy, so canAccess() decides here
+     * too and strict authorization never looks for one.
      */
     public static function canViewAny(): bool
     {

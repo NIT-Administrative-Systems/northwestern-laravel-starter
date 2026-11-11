@@ -98,7 +98,8 @@ class AnnouncementForm
                             ])
                             ->columns(2)
                             ->visible(fn (?Announcement $record): bool => $record instanceof Announcement && $record->status !== AnnouncementStatus::Draft)
-                            // An ended announcement can't be republished, only duplicated. Disabled fields aren't saved, so this also holds on the server.
+                            // An ended announcement can't be published again, only duplicated.
+                            // Disabled fields aren't saved, so this holds on the server too.
                             ->disabled(fn (?Announcement $record): bool => $record?->status === AnnouncementStatus::Ended),
                     ])->columnSpan(['xl' => 3]),
                     Section::make('Preview')

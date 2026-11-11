@@ -33,8 +33,8 @@ class AuditResource extends Resource
     protected static ?int $navigationSort = 3;
 
     /**
-     * Decided by the audit policy, named here so the audit log never falls back to Filament's
-     * default of letting every administrator in.
+     * The audit policy decides. It's named here so the audit log never falls
+     * back to Filament's own default, which lets every administrator in.
      */
     public static function canAccess(): bool
     {

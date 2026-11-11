@@ -21,9 +21,9 @@ use Illuminate\Support\Number;
 use Northwestern\SysDev\Chassis\Formatting\CountInWords;
 
 /**
- * Adds a pasted list of NetIDs and email addresses to a role, on a role's Assigned Users tab
- * (that role) or the Users list (a role chosen here). The work is queued; see
- * {@see AddPeopleToRole}.
+ * Adds a pasted list of NetIDs and email addresses to a role: the
+ * tab's own role on Assigned Users, or one chosen here on the
+ * Users list. AddPeopleToRole does the work on the queue.
  */
 class AddPeopleAction extends Action
 {
@@ -74,7 +74,8 @@ class AddPeopleAction extends Action
     }
 
     /**
-     * On a role's tab, whether people may be added to that role; on the Users list, whether
+     * Determine whether people may be added to the
+     * tab's role, or on the Users list, whether
      * there's any role they may be added to.
      */
     public static function authorizeFor(mixed $livewire): bool|Response

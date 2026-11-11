@@ -25,8 +25,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * An API user's service clients: the client credentials an integration uses to get access
- * tokens that act as the API user.
+ * An API user's service clients: the client credentials that an integration
+ * uses to get the access tokens that act as the API user it belongs to.
  */
 class ServiceClientsRelationManager extends RelationManager
 {

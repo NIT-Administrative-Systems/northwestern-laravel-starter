@@ -67,7 +67,7 @@ class RolesRelationManager extends RelationManager
             ])
             ->headerActions([
                 AttachAction::make()
-                    // Nobody can give themselves a role, so the action isn't offered on your own record.
+                    // Nobody can give themselves a role, so it isn't offered on your own record.
                     ->authorize(fn (): bool => ! $this->getOwnerRecord()->is(auth()->user()) && Gate::allows(SystemPermission::AssignRoles))
                     ->label('Assign Role')
                     ->color('primary')
@@ -157,9 +157,9 @@ class RolesRelationManager extends RelationManager
     }
 
     /**
-     * Get the roles this person may be given here, once per request, since the action's
-     * disabled state, tooltip and form all ask: assignable roles they don't have, of
-     * the kind that suits them, that the signed-in administrator may assign.
+     * Get the roles this person may be given: assignable ones they don't have, of
+     * the kind that suits them, that the signed-in administrator may assign. It
+     * runs once a request, as the action's state, tooltip and form all ask.
      *
      * @return Collection<int, Role>
      */

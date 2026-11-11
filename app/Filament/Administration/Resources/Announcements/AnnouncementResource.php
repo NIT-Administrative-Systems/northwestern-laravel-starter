@@ -21,8 +21,8 @@ use Filament\Tables\Table;
 use UnitEnum;
 
 /**
- * Announcements shown to the application's users in a banner and on their Announcements page.
- * Managed by people with `ManageAnnouncements` ({@see \App\Domains\Support\Policies\AnnouncementPolicy}).
+ * Announcements shown to the application's users in a banner and on their
+ * Announcements page. People with ManageAnnouncements manage them here.
  */
 class AnnouncementResource extends Resource
 {

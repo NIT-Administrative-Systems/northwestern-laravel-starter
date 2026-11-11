@@ -111,7 +111,8 @@ class OAuthApplicationsTable
     }
 
     /**
-     * Whether the signed-in administrator may do this to applications, which are decided as a whole.
+     * Determine whether the signed-in administrator may do this
+     * to applications, which are always decided as a whole.
      */
     private static function allows(CredentialOperation $operation): bool
     {

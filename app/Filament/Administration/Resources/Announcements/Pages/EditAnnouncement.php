@@ -23,8 +23,10 @@ use Illuminate\Support\Carbon;
 use Northwestern\SysDev\Chassis\Formatting\CountInWords;
 
 /**
- * Edits an announcement and moves it through its life: publish a draft, end a live one, show a
- * live one again to the people who dismissed it, or start over from a copy.
+ * Edits an announcement and moves it through its
+ * life: publish a draft, end a live one, show
+ * a live one again to people who dismissed
+ * it, or start over from a copy of it.
  *
  * @property-read Announcement $record
  */
