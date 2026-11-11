@@ -61,7 +61,7 @@
            x-on:click.stop
            target="_blank">
             <x-heroicon-m-arrow-top-right-on-square class="h-3.5 w-3.5" />
-            View full audit entry
+            View Full Audit Entry
         </a>
     @endif
 </div>

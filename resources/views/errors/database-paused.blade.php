@@ -7,7 +7,7 @@
         <div class="mt-8 flex items-center justify-center gap-3 text-gray-600" role="status">
             <span class="border-nu-purple-100 size-5 animate-spin rounded-full border-2 border-t-transparent motion-reduce:animate-none"
                   aria-hidden="true"></span>
-            Starting the database...
+            Starting the database…
         </div>
 
         <p class="mt-6 text-sm text-gray-500">

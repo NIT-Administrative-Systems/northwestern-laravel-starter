@@ -58,7 +58,7 @@
             <x-filament::icon-button data-testid="dismiss-announcement"
                                      :icon="Heroicon::XMark"
                                      color="gray"
-                                     label="Dismiss announcement"
+                                     label="Dismiss Announcement"
                                      wire:click="dismiss({{ $announcement->getKey() }})" />
         </x-slot>
     @endif
