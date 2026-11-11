@@ -8,17 +8,19 @@ use App\Domains\Core\Enums\AuditEvent;
 use Northwestern\SysDev\Chassis\Models\Concerns\RecordsCustomAudits;
 
 /**
- * Records an {@see AuditEvent} on an auditable model, for a change its own model events don't
- * capture, such as a role assigned or a credential revoked on a person's behalf. The audit's
- * user is whoever is signed in.
+ * Records an {@see AuditEvent} on an auditable model, for a change that its
+ * own model events miss, such as a role assigned or a credential revoked.
+ *
+ * The audit's user is whoever is signed in.
  *
  * ```php
  * $user->recordAuditEvent(AuditEvent::ApplicationDisconnected, new: ['client_id' => $client->getKey()]);
  * $user->recordAuditEvent(AuditEvent::RoleAssigned, new: $after, old: $before, tags: [$origin->value], context: ['reason' => 'promoted']);
  * ```
  *
- * Tags are stored with the audit; each context entry is added as a "key: value" tag. An event
- * with no values before or after isn't recorded, as owen-it skips empty audits.
+ * Tags are stored with the audit; each context entry is added
+ * as a "key: value" tag. An event with no values before or
+ * after isn't recorded, as owen-it skips empty audits.
  *
  * @phpstan-require-implements \OwenIt\Auditing\Contracts\Auditable
  */

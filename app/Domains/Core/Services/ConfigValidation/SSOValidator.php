@@ -13,12 +13,11 @@ use Northwestern\SysDev\Chassis\Contracts\ConfigValidator;
 /**
  * Validates SSO credentials based on the active authentication strategy.
  *
- * The starter supports two SSO providers: Microsoft Entra ID (OAuth2) and
- * Online Passport (agentless WebSSO via ForgeRock). This validator detects
- * which provider is active and checks the appropriate credentials.
+ * It checks the credentials of the provider in use: Microsoft Entra ID
+ * (OAuth 2) or Online Passport (agentless WebSSO through ForgeRock).
  *
- * SSO is optional locally, where "Sign in as" and email codes cover sign-in, so a
- * local environment with no SSO variables at all skips this check.
+ * SSO is optional locally, where sign-in-as and email codes do instead,
+ * so a local environment without any SSO variables skips the check.
  */
 #[ValidatesConfig(description: 'SSO Authentication')]
 class SSOValidator implements ConfigValidator
