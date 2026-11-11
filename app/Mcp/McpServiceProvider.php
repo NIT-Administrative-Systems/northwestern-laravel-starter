@@ -12,9 +12,11 @@ use Illuminate\Support\ServiceProvider;
 use Laravel\Mcp\Server\Middleware\AddWwwAuthenticateHeader;
 
 /**
- * Wires up the MCP connection: the scope on the server's 401 challenge and the rate limits on
- * registration and tool calls. Its routes are in `routes/ai.php`, and the tools a team builds in
- * `app/Mcp/Tools`, listed in {@see Servers\AppServer}.
+ * Wires up the MCP connection: the scope named in the server's 401
+ * challenge, and the rate limits on registration and tool calls.
+ *
+ * Its routes are in `routes/ai.php`, and the tools a team builds
+ * are in `app/Mcp/Tools`, listed in {@see Servers\AppServer}.
  */
 class McpServiceProvider extends ServiceProvider
 {
@@ -30,8 +32,8 @@ class McpServiceProvider extends ServiceProvider
         RateLimiter::for('mcp-registration', static fn (Request $request): Limit => Limit::perHour((int) config('mcp.rate_limits.registrations_per_hour'))
             ->by('mcp:registration:' . $request->ip()));
 
-        // Tool calls, per person. Other MCP messages (listing tools, pings) only count towards the
-        // API's per-IP limit.
+        // Limit tool calls per person. Other MCP messages like listing
+        // tools or pings only count toward the API's per-IP limit.
         RateLimiter::for('mcp-tool-calls', static fn (Request $request): Limit => $request->json('method') === 'tools/call'
             ? Limit::perMinute((int) config('mcp.rate_limits.tool_calls_per_minute'))->by('mcp:tool-calls:' . $request->user()?->getAuthIdentifier())
             : Limit::none());
