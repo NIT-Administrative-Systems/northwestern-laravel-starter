@@ -16,6 +16,7 @@ use App\Domains\User\Actions\Local\CreateLocalUser;
 use App\Domains\User\Enums\DirectorySearchType;
 use App\Domains\User\Exceptions\BadDirectoryEntry;
 use App\Domains\User\Models\User;
+use App\Domains\User\QueryBuilders\UserBuilder;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Support\Facades\Gate;
@@ -130,8 +131,16 @@ readonly class AddPersonToRole
             return $this->createLocalUser($person, $firstName, $lastName);
         }
 
-        // The directory lookup finds no one for an API user's username or email.
-        return $user ?? throw PersonNotAdded::apiUser($person);
+        if ($user instanceof User) {
+            return $user;
+        }
+
+        // The lookup returns no one for an API user's username or email, and for a person it couldn't find.
+        $isApiUser = User::query()->api()
+            ->where(fn (UserBuilder $query) => $query->whereUsernameEquals($person)->orWhere(fn (UserBuilder $email) => $email->whereEmailEquals($person)))
+            ->exists();
+
+        return $isApiUser ? throw PersonNotAdded::apiUser($person) : $this->createLocalUser($person, $firstName, $lastName);
     }
 
     /**

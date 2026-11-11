@@ -110,6 +110,15 @@ final class AddPersonToRoleTest extends TestCase
         $this->assertFalse(User::query()->whereEmailEquals('typo@u.northwestern.edu')->exists());
     }
 
+    // The directory answered, but with a record too incomplete to make an account from.
+    public function test_an_incomplete_directory_entry_is_not_added(): void
+    {
+        $this->directory['half123'] = ['uid' => 'half123'];
+
+        $this->assertNotAdded('half123', 'No one with the NetID or email address half123 is in the Northwestern Directory.');
+        $this->assertFalse(User::query()->whereUsernameEquals('half123')->exists());
+    }
+
     public function test_no_local_account_is_created_while_email_code_sign_in_is_off(): void
     {
         config(['local-auth.enabled' => false]);
