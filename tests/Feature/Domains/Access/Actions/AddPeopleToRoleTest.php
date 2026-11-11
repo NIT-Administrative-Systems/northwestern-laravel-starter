@@ -15,6 +15,7 @@ use Filament\Actions\Imports\Models\Import;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Bus\PendingBatch;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Queue;
 use InvalidArgumentException;
 use Northwestern\SysDev\SOA\DirectorySearch;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -80,7 +81,10 @@ final class AddPeopleToRoleTest extends TestCase
         config(['queue.default' => 'database']);
 
         resolve(AddPeopleToRole::class)($this->role, 'abc123 zzz999', $this->administrator);
-        $this->artisan('queue:work', ['--stop-when-empty' => true])->assertSuccessful();
+        // Run each job as a worker would, without a worker's timeout alarm outliving the test.
+        while ($job = Queue::connection('database')->pop()) {
+            $job->fire();
+        }
 
         $notification = $this->administrator->notifications()->sole();
         $this->assertSame('People Added to Editors', $notification->data['title']);
