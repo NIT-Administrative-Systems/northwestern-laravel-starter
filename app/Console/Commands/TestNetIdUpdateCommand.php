@@ -14,11 +14,12 @@ use Illuminate\Contracts\Console\PromptsForMissingInput;
 use function Laravel\Prompts\select;
 
 /**
- * Simulates webhooks for messages delivered to Northwestern Identity's **NetID Updates** topic.
+ * Simulates EventHub delivering a message on the **NetID Updates** topic.
  *
- * This command allows developers to test the NetID webhook integration without relying on
- * external Northwestern systems. It replicates the behavior of EventHub's delivery for
- * notifications by sending formatted webhook payloads to the application.
+ * Lets developers test the NetID webhook integration
+ * without relying on other Northwestern systems,
+ * by sending the application webhook payloads
+ * formatted as EventHub would deliver them.
  *
  * @see NetIdUpdateController
  * @see ProcessNetIdUpdate
@@ -46,7 +47,7 @@ class TestNetIdUpdateCommand extends Command implements PromptsForMissingInput
 
         if (! $action) {
             $valid = implode(', ', array_map(
-                static fn (NetIdUpdateAction $a) => $a->value,
+                static fn (NetIdUpdateAction $case) => $case->value,
                 NetIdUpdateAction::cases()
             ));
 
@@ -84,7 +85,7 @@ class TestNetIdUpdateCommand extends Command implements PromptsForMissingInput
             'action' => fn () => select(
                 'Select an action',
                 array_map(
-                    static fn (NetIdUpdateAction $a) => $a->value,
+                    static fn (NetIdUpdateAction $case) => $case->value,
                     NetIdUpdateAction::cases()
                 )
             ),

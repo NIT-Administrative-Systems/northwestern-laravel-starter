@@ -16,7 +16,8 @@ final class OAuthConnectionTest extends TestCase
 {
     use RunsAuthorizationCodeFlow;
 
-    // An application keeps access while it holds a refresh token, after its hour-long access token expires.
+    // An application keeps access while it holds a refresh
+    // token, after its hour-long access token expires.
     public function test_a_connection_is_live_while_its_refresh_token_works(): void
     {
         $user = User::factory()->create();

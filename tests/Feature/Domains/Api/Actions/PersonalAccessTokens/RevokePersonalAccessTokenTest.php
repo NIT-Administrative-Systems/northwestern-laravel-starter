@@ -58,7 +58,7 @@ final class RevokePersonalAccessTokenTest extends TestCase
         }
     }
 
-    // The sweep revokes with no one acting, and the person sees why in their audit history.
+    // The sweep revokes with no one acting; the person sees why in their audit log.
     public function test_the_system_revoking_a_token_is_audited_on_its_holder(): void
     {
         [$user, , $token] = $this->token();

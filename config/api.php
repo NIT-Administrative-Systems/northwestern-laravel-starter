@@ -6,23 +6,12 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | API Authentication & Configuration
-    |--------------------------------------------------------------------------
-    |
-    | Configure all settings related to API access, authentication, and usage.
-    | This includes a master switch, rate limiting, request logging parameters,
-    | and token management features like expiration notifications.
-    |
-    */
-
-    /*
-    |--------------------------------------------------------------------------
     | Enable API Access
     |--------------------------------------------------------------------------
     |
-    | A global toggle to enable or disable all API functionality. When set to
-    | false, all API routes will respond with a 503 response. This is useful
-    | for maintenance or temporary disabling the API layer.
+    | Turns the REST API on or off. While it is off, every API route answers 404, no
+    | credential can get a new token, and existing tokens are refused. Nothing is
+    | revoked, so every credential works again once the API is turned back on.
     |
     */
 
@@ -30,56 +19,39 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | API Authentication Realm
+    | Authentication Realm
     |--------------------------------------------------------------------------
-    | This value is used in the `WWW-Authenticate` header for protected API
-    | endpoints. It identifies the API "realm" so clients know which API
-    | is requesting bearer credentials.
+    |
+    | The realm named in the `WWW-Authenticate` header of the API's 401 responses.
+    | It reads APP_NAME directly, because this file loads before the app config.
     |
     */
 
-    // APP_NAME directly: config/api.php loads before the framework's app config, so config('app.name') is still empty here.
     'auth_realm' => env('APP_NAME', 'Laravel') . ' API',
 
     /*
     |--------------------------------------------------------------------------
-    | API Request Logging
+    | Request Logging
     |--------------------------------------------------------------------------
     |
-    | Enable lightweight logging for requests authenticated via access tokens.
-    | It's an internal record for troubleshooting to supplement external
-    | observability platforms.
+    | Records each request made with an access token, for troubleshooting
+    | in Administration alongside an observability tool. A busy API may
+    | turn it off or sample it, to keep its storage and writes down.
     |
-    | For high-throughput apps, consider disabling this feature or configure
-    | sampling to prevent high storage usage and minimize the I/O overhead.
+    | Requests slower than `slow_request_threshold_ms` are marked as
+    | slow. While sampling is on, only `rate` (0.0 to 1.0) of the
+    | successful requests are kept, though failures always are.
+    |
+    | Retention: see platform.retention.api_request_logs.
     |
     */
 
     'request_logging' => [
         'enabled' => env('API_REQUEST_LOGGING_ENABLED', true),
-
-        // Threshold (in milliseconds) used to categorize a request as "slow"
-        // for internal monitoring/display purposes.
         'slow_request_threshold_ms' => (int) env('API_REQUEST_LOGGING_SLOW_THRESHOLD_MS', 500),
-
-        // Retention: see platform.retention.api_request_logs.
-
-        /*
-        |--------------------------------------------------------------------------
-        | Request Sampling
-        |--------------------------------------------------------------------------
-        |
-        | When enabled, only a defined percentage of *successful* requests will be
-        | logged to conserve resources. Note that *failed requests and errors* are
-        | always logged, irrespective of this sampling setting.
-        |
-        */
 
         'sampling' => [
             'enabled' => env('API_REQUEST_LOGGING_SAMPLING_ENABLED', false),
-
-            // The sampling rate for successful requests (float between 0.0 and 1.0).
-            // Example: 0.1 logs 10% of successful requests.
             'rate' => (float) env('API_REQUEST_LOGGING_SAMPLE_RATE', 1.0),
         ],
     ],
@@ -89,11 +61,9 @@ return [
     | Client Secret Expiration Notifications
     |--------------------------------------------------------------------------
     |
-    | When to email an API user's contact address about a service client whose
-    | secret is about to expire, so the integration's owner can rotate it in
-    | time. A client stops working when its secret expires.
-    |
-    | 'intervals': Days before expiration to send notifications
+    | A service client stops working when its secret expires, so
+    | the contact address of its API user is emailed this many
+    | days before, giving the owner time to have it rotated.
     |
     */
 
@@ -107,13 +77,14 @@ return [
     | Personal Access Tokens
     |--------------------------------------------------------------------------
     |
-    | People who hold the Create Personal Access Tokens permission create these
-    | on the Account page to call the API as themselves. Each token chooses its
-    | lifetime, up to `max_lifetime_days`, and a person can hold at most
-    | `max_active` working tokens at once.
+    | People with the Create Personal Access Tokens permission create
+    | these on the Account page to call the API as themselves. Each
+    | one lasts up to `max_lifetime_days`, and a person may hold
+    | up to `max_active` that haven't expired or been revoked.
     |
-    | 'expiration_notifications': Days before a token expires to email its
-    | owner, unless they turned the reminders off on their Preferences page.
+    | Owners are emailed this many days before
+    | a token expires, unless they turn the
+    | reminders off in their preferences.
     |
     */
 

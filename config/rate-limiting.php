@@ -9,17 +9,15 @@ return [
     | API Rate Limiting
     |--------------------------------------------------------------------------
     |
-    | Two limits apply. `per_ip_per_minute` runs before authentication on every
-    | API route (throttleApi() in bootstrap/app.php) and on Passport's OAuth
-    | endpoints. `per_minute` runs after the token is authenticated, keyed by
-    | the client for client credentials and by the user for every other token.
+    | Two limits apply. `per_ip_per_minute` runs before authentication on
+    | every API route and on Passport's OAuth endpoints. `per_minute`
+    | runs once the token is authenticated, by client for a service
+    | client's token, and by user for every other kind of token.
     |
     */
 
     'api' => [
-        // Per client (client credentials) or per user (every other token), after authentication.
         'per_minute' => (int) env('RATE_LIMIT_API_PER_MINUTE', 1800),
-        // Per IP address, before authentication, for API and OAuth endpoints alike.
         'per_ip_per_minute' => (int) env('RATE_LIMIT_API_PER_IP_PER_MINUTE', 3600),
     ],
 
@@ -28,9 +26,10 @@ return [
     | Authentication Rate Limiting
     |--------------------------------------------------------------------------
     |
-    | Rate limits for the local login code authentication flow. These
-    | protect the code request and verification endpoints from brute
-    | force attacks, using layered limits per IP and per identifier.
+    | The limits on requesting and checking sign-in codes, by IP address and by
+    | email address or challenge, so codes can't be guessed by brute force.
+    |
+    | Impersonating someone has a limit of its own.
     |
     */
 
@@ -56,9 +55,8 @@ return [
     | Support Rate Limiting
     |--------------------------------------------------------------------------
     |
-    | Limits for the contact/support form submission endpoint. Uses a
-    | tiered approach (per-minute, per-hour, per-day) to allow short
-    | bursts while preventing sustained abuse over longer windows.
+    | Limits on the contact form, per minute, hour and day,
+    | which allow a short burst but stop a steady stream.
     |
     */
 

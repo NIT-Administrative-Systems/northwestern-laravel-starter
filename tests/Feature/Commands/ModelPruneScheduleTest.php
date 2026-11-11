@@ -13,8 +13,10 @@ use PHPUnit\Framework\Attributes\CoversNothing;
 use Tests\TestCase;
 
 /**
- * The daily `model:prune` of the domain models in routes/console.php. The scheduler can start
- * from any working directory, so the models it finds must not depend on it.
+ * The daily `model:prune` of the domain models in
+ * routes/console.php. The scheduler can start
+ * from any working directory, so the models
+ * it finds must not depend on which one.
  */
 #[CoversNothing]
 final class ModelPruneScheduleTest extends TestCase
@@ -40,8 +42,8 @@ final class ModelPruneScheduleTest extends TestCase
     }
 
     /**
-     * Define the schedule again from the current working directory and return the command line
-     * of the `model:prune` that searches paths.
+     * Define the schedule again from the current working directory and
+     * return the command of the `model:prune` that searches paths.
      */
     private function scheduledDomainPrune(): string
     {

@@ -6,11 +6,11 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Feature Toggle
+    | Enable the Contact Form
     |--------------------------------------------------------------------------
     |
-    | When disabled, no support routes are registered and no UI elements
-    | are rendered. Set to true in projects that want the contact form.
+    | Turns the contact form on. While it is off, the form and its routes don't
+    | exist, and nothing in the interface links to them or mentions support.
     |
     */
 
@@ -21,9 +21,8 @@ return [
     | Documentation Link
     |--------------------------------------------------------------------------
     |
-    | The user documentation for your application, linked from the Help menu
-    | in the header. The link is hidden while this is empty. It does not
-    | depend on the feature toggle above.
+    | The application's user documentation, linked from the Help menu. The link
+    | is hidden while this is empty, whether or not the contact form is on.
     |
     */
 
@@ -34,9 +33,8 @@ return [
     | Limited Support Warning
     |--------------------------------------------------------------------------
     |
-    | When true, displays a warning banner on the contact form indicating
-    | that support is limited in this environment. Defaults to true for
-    | all non-production environments when support is enabled.
+    | Shows a banner on the contact form saying that support is limited in this
+    | environment. It is on by default in every environment but production.
     |
     */
 
@@ -47,11 +45,9 @@ return [
     | Gateway Driver
     |--------------------------------------------------------------------------
     |
-    | The ticket system backend to use for creating support tickets.
-    | Supported: "mail", "team-dynamix"
-    |
-    | The gateway is resolved via the TicketSystemGateway interface. To use
-    | a custom gateway, rebind the interface in your AppServiceProvider.
+    | The system that receives support tickets: "mail" or "team-dynamix". It
+    | is resolved through the TicketSystemGateway interface, so bind your
+    | own gateway to it in a service provider to send them elsewhere.
     |
     */
 
@@ -62,18 +58,12 @@ return [
     | Mail Gateway
     |--------------------------------------------------------------------------
     |
-    | Configuration for the "mail" driver. When mail is the primary driver,
-    | tickets are delivered via email to the address below.
+    | Tickets sent by email go to this address. Each gets a reference such as
+    | "SUP-47" in its subject and in the confirmation the person receives,
+    | made from the prefix, while TeamDynamix numbers its own tickets.
     |
-    | The reference prefix is used to generate a human-readable ticket
-    | identifier (e.g., "SUP-47") that appears in the email subject line
-    | and confirmation sent to the user. This only applies when the mail
-    | gateway is active — external providers like TeamDynamix return their
-    | own native ticket references automatically.
-    |
-    | The mail gateway also serves as the automatic fallback when a
-    | non-mail primary driver fails, in which case the same prefix
-    | is used for the fallback reference.
+    | Mail is also the fallback when another driver fails, and
+    | the fallback ticket's reference uses the same prefix.
     |
     */
 
@@ -86,6 +76,10 @@ return [
     |--------------------------------------------------------------------------
     | TeamDynamix Gateway
     |--------------------------------------------------------------------------
+    |
+    | Where TeamDynamix tickets are filed and how they are classified. The API
+    | credentials TeamDynamix is called with are in config/team-dynamix.php.
+    |
     */
 
     'team-dynamix' => [

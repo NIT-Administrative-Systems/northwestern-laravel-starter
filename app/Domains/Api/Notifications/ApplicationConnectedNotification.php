@@ -16,9 +16,10 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 /**
- * Tells a person an application has connected to their account, so one they don't recognize
- * can be disconnected. Always shown in the app's notification bell; emailed too unless they
- * turned that off in their preferences.
+ * Tells a person an application connected to their account, so
+ * they can disconnect one they don't recognize. It's always
+ * shown in the app's notification bell, and emailed too
+ * unless they turned that off in their preferences.
  */
 class ApplicationConnectedNotification extends Notification implements ShouldQueue
 {
@@ -59,8 +60,8 @@ class ApplicationConnectedNotification extends Notification implements ShouldQue
     public function toMail(User $notifiable): MailMessage
     {
         return new MailMessage()
-            // The same sign-off as the starter's own emails, rather than Laravel's "Regards," (two
-            // trailing spaces are a Markdown line break).
+            // Sign off as the starter's own emails do, rather than with Laravel's
+            // "Regards,". The two trailing spaces make a Markdown line break.
             ->salutation("Thanks,  \n" . config('app.name'))
             ->subject("{$this->applicationName()} connected to your account")
             ->greeting('Hello ' . ($notifiable->first_name ?: $notifiable->full_name) . ',')

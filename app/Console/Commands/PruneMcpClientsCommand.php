@@ -13,10 +13,12 @@ use Illuminate\Support\Carbon;
 use Laravel\Passport\Passport;
 
 /**
- * Cleans up the clients MCP clients register for themselves, which anyone can create:
- * deletes one nobody connected soon after it registered, and revokes one nobody has used for
- * a long time. Connections are kept apart from token rows, so `passport:purge` never makes a
- * client look unused. Administrator-registered and service clients are never touched.
+ * Cleans up the clients that MCP clients register for themselves, which
+ * anyone can create: it deletes a client nobody connected soon after
+ * it registered, and revokes one nobody has used for a long time.
+ *
+ * Connections are kept apart from access tokens, so `passport:purge` never makes a
+ * client look unused. Clients registered by an administrator are never touched.
  */
 class PruneMcpClientsCommand extends Command
 {
@@ -28,7 +30,7 @@ class PruneMcpClientsCommand extends Command
     {
         $deleted = 0;
 
-        $unconnected = $this->dynamicClients()
+        $unconnected = OAuthClient::query()->mcpClients()
             ->where('created_at', '<', Carbon::now()->subHours((int) config('mcp.cleanup.unconnected_hours')))
             ->whereDoesntHave('connections');
 
@@ -41,7 +43,7 @@ class PruneMcpClientsCommand extends Command
         $revoked = 0;
         $cutoff = Carbon::now()->subDays((int) config('mcp.cleanup.unused_days'));
 
-        $unused = $this->dynamicClients()
+        $unused = OAuthClient::query()->mcpClients()
             ->where('revoked', false)
             ->where('created_at', '<', $cutoff)
             ->whereHas('connections')
@@ -57,13 +59,5 @@ class PruneMcpClientsCommand extends Command
         $this->components->info("Deleted {$deleted} unconnected and revoked {$revoked} unused MCP client(s).");
 
         return self::SUCCESS;
-    }
-
-    /**
-     * @return Builder<OAuthClient>
-     */
-    private function dynamicClients(): Builder
-    {
-        return OAuthClient::query()->mcpClients();
     }
 }

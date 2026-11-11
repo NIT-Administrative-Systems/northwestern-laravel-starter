@@ -16,11 +16,12 @@ use Illuminate\Support\Facades\DB;
 use Laravel\Passport\Passport;
 
 /**
- * Revokes an application for everyone: the client, every access and refresh token issued to
- * it, its unredeemed authorization codes, and everyone's connection to it.
+ * Revokes an application for everyone: the client, every access and refresh token
+ * issued to it, its unredeemed authorization codes, and every connection to it.
  *
- * An administrator's revoke is audited on them, with how many connections it removed. The
- * daily pruning of unused MCP clients revokes with no one to audit it on.
+ * An administrator's revoke is audited on them, with how
+ * many connections it removed. When the daily pruning
+ * revokes an unused MCP client, nobody is audited.
  */
 readonly class RevokeOAuthApplication
 {

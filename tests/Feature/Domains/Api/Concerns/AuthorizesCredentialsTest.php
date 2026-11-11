@@ -32,7 +32,7 @@ final class AuthorizesCredentialsTest extends TestCase
         $this->assertSame(AccessRefusal::MissingPermission, Surface::decision(CredentialOperation::Revoke, CredentialKind::PersonalAccessToken, $holder)->reason);
     }
 
-    // A null actor is the system, which may do anything; nobody signed in may do nothing.
+    // A null actor is the system and may do anything; nobody signed in may do nothing.
     public function test_nobody_signed_in_is_refused_not_treated_as_the_system(): void
     {
         $this->assertFalse(Surface::allows(CredentialOperation::Issue, CredentialKind::ServiceClient));

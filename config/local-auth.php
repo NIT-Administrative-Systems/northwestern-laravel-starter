@@ -6,54 +6,65 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Local User Authentication
+    | Local Sign-In
     |--------------------------------------------------------------------------
     |
-    | Enable passwordless authentication for external (non-Northwestern) users.
-    | When enabled, administrators can create local user accounts that can
-    | authenticate using a verification code sent via email.
-    |
-    | Use Case: External collaborators, clients, or partners who don't have
-    | Northwestern credentials but need to access specific features.
+    | Lets people without a NetID sign in with a code sent to their email, such as
+    | collaborators, clients and partners from outside Northwestern. Their local
+    | accounts are created by administrators or when people are added in bulk.
     |
     */
 
-    // Enable/disable local authentication system
     'enabled' => env('LOCAL_AUTH_ENABLED', true),
 
-    // Use a fixed, predictable verification code (e.g. "123456") instead of random codes.
-    // Useful for local development and CI where you need to repeatedly verify codes.
-    // Allowed only in the local, testing and ci environments: anywhere else the application
-    // refuses to boot.
+    /*
+    |--------------------------------------------------------------------------
+    | Fixed Code
+    |--------------------------------------------------------------------------
+    |
+    | Every code is 123456 instead of a random one, so the email flow can be
+    | tested again and again. It works only in the local, testing and ci
+    | environments, and anywhere else the application refuses to boot.
+    |
+    */
+
     'use_fixed_code' => (bool) env('LOCAL_AUTH_USE_FIXED_CODE', false),
 
-    // Maximum requests per email per hour (applies to both form submissions and code sends)
-    'rate_limit_per_hour' => env('LOCAL_AUTH_RATE_LIMIT_PER_HOUR', 10),
+    /*
+    |--------------------------------------------------------------------------
+    | Rate Limits
+    |--------------------------------------------------------------------------
+    |
+    | How many codes an email address may request in an hour, and how
+    | many one IP address may request across every email, so that
+    | one address can't use up the limits of many other people.
+    |
+    */
 
-    // Maximum login code requests per IP per hour (limits a single IP from exhausting
-    // multiple accounts' per-email rate limits)
+    'rate_limit_per_hour' => (int) env('LOCAL_AUTH_RATE_LIMIT_PER_HOUR', 10),
+
     'rate_limit_per_ip_per_hour' => (int) env('LOCAL_AUTH_RATE_LIMIT_PER_IP_PER_HOUR', 20),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Codes
+    |--------------------------------------------------------------------------
+    |
+    | A code's length and lifetime, the wrong guesses that lock it and for
+    | how long, the wrong codes an email may enter in a day across all
+    | of its codes, and the wait before the next code can be sent.
+    |
+    | Retention: see platform.retention.login_challenges.
+    |
+    */
+
     'code' => [
-        // Number of digits in the verification code
         'digits' => (int) env('LOCAL_AUTH_CODE_DIGITS', 6),
-
-        // Minutes before the code expires
         'expires_in_minutes' => (int) env('LOCAL_AUTH_CODE_EXPIRES_MINUTES', 10),
-
-        // Maximum failed attempts before lockout
         'max_attempts' => (int) env('LOCAL_AUTH_CODE_MAX_ATTEMPTS', 8),
-
-        // Minutes a challenge stays locked after max attempts
         'lock_minutes' => (int) env('LOCAL_AUTH_CODE_LOCK_MINUTES', 15),
-
-        // Incorrect codes an email may enter in a day, across all its codes; then it waits out the day
         'max_failed_per_day' => (int) env('LOCAL_AUTH_CODE_MAX_FAILED_PER_DAY', 20),
-
-        // Cooldown before resending another code
         'resend_cooldown_seconds' => (int) env('LOCAL_AUTH_CODE_RESEND_COOLDOWN', 30),
-
-        // Retention: see platform.retention.login_challenges.
     ],
 
 ];

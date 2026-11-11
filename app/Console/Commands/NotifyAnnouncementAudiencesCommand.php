@@ -9,9 +9,10 @@ use App\Domains\Support\Models\Announcement;
 use Illuminate\Console\Command;
 
 /**
- * Notifies the audiences of announcements that have started, whose authors asked for it.
- * Publishing notifies at once for an announcement that starts straight away; this catches
- * the ones scheduled to start later.
+ * Notifies the audiences of announcements that have started,
+ * when their authors asked for it. Publishing notifies at
+ * once for an announcement that starts straight away;
+ * this catches the ones scheduled to start later.
  */
 class NotifyAnnouncementAudiencesCommand extends Command
 {

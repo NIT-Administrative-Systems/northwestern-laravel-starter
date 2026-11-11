@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace App\Domains\Api\ValueObjects;
 
+use App\Domains\Api\CredentialAccess;
 use App\Domains\Api\Enums\AccessRefusal;
 use App\Domains\Api\Enums\CredentialKind;
 use Illuminate\Auth\Access\AuthorizationException;
 
 /**
- * What {@see \App\Domains\Api\CredentialAccess} decided, and why it refused. Callers act on
- * the reason the same way: a feature that is off is hidden and answers 404; anything else is
- * hidden or disabled and answers 403.
+ * What {@see CredentialAccess} decided, and why it refused. Callers act on
+ * the reason the same way: a feature that is off is hidden and answers
+ * 404; anything else is hidden or disabled and answers with a 403.
  */
 final readonly class AccessDecision
 {
@@ -34,7 +35,7 @@ final readonly class AccessDecision
     }
 
     /**
-     * Throws when refused: as a 404 when the feature is off, a 403 otherwise.
+     * Throw when refused: a 404 when the feature is off, and a 403 otherwise.
      *
      * @throws AuthorizationException
      */
@@ -50,7 +51,7 @@ final readonly class AccessDecision
     }
 
     /**
-     * Why it was refused, in a sentence; empty when allowed.
+     * Get why it was refused, in a sentence, or an empty string when allowed.
      */
     public function message(): string
     {

@@ -26,7 +26,7 @@ final class ApiRouteInspectorTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_has_protected_routes_returns_true_when_protected_api_route_exists(): void
+    public function test_it_finds_a_protected_api_route(): void
     {
         Route::get('web/dashboard', fn () => 'web');
         Route::get('api/unprotected/v1', fn () => 'public');
@@ -38,7 +38,7 @@ final class ApiRouteInspectorTest extends TestCase
         $this->assertTrue($inspector->hasProtectedRoutes());
     }
 
-    public function test_has_protected_routes_handles_mixed_routes(): void
+    public function test_it_finds_a_protected_route_among_unprotected_ones(): void
     {
         Route::get('web/public', fn () => 'web');
         Route::get('api/health', fn () => 'public');
@@ -51,7 +51,7 @@ final class ApiRouteInspectorTest extends TestCase
         $this->assertTrue($inspector->hasProtectedRoutes());
     }
 
-    public function test_has_protected_routes_returns_false_when_no_api_routes_exist(): void
+    public function test_routes_outside_the_api_do_not_count(): void
     {
         Route::get('web/dashboard', fn () => 'web');
         Route::get('app/profile', fn () => 'app');
@@ -61,7 +61,7 @@ final class ApiRouteInspectorTest extends TestCase
         $this->assertFalse($inspector->hasProtectedRoutes());
     }
 
-    public function test_has_protected_routes_returns_false_when_only_unprotected_api_routes_exist(): void
+    public function test_unprotected_api_routes_do_not_count(): void
     {
         Route::get('api/unprotected/v1/health', fn () => 'health');
         Route::get('api/public/v2/status', fn () => 'status');
@@ -71,7 +71,7 @@ final class ApiRouteInspectorTest extends TestCase
         $this->assertFalse($inspector->hasProtectedRoutes());
     }
 
-    public function test_has_protected_routes_handles_empty_routes(): void
+    public function test_no_routes_means_no_protected_routes(): void
     {
         $inspector = $this->inspector();
 

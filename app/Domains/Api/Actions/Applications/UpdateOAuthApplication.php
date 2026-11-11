@@ -14,10 +14,12 @@ use Illuminate\Auth\Access\AuthorizationException;
 use InvalidArgumentException;
 
 /**
- * Changes an application's details, redirect URIs and allowed scopes. Tokens already issued
- * keep their scopes; new authorizations can only request the scopes now allowed.
+ * Changes an application's details, redirect URIs and allowed
+ * scopes. Tokens already issued keep their scopes, but only
+ * the scopes now allowed can be requested from then on.
  *
- * The change is audited on the administrator who made it, with the values before and after.
+ * The change is audited on the administrator who
+ * made it, with the values before and after.
  */
 readonly class UpdateOAuthApplication
 {

@@ -17,9 +17,9 @@ use Laravel\Passport\ClientRepository;
 use RuntimeException;
 
 /**
- * Creates a personal access token: a person's own credential for calling the API from a
- * script, limited to scopes their permissions cover and to a lifetime they choose. Who may
- * create one is decided by {@see CredentialAccess}.
+ * Creates a personal access token: a person's own credential for calling the API
+ * from a script, limited to scopes their permissions cover and to a lifetime
+ * they choose. Who may create one is decided by {@see CredentialAccess}.
  */
 readonly class CreatePersonalAccessToken
 {
@@ -57,8 +57,9 @@ readonly class CreatePersonalAccessToken
         return DB::transaction(function () use ($user, $name, $scopes, $lifetime): array {
             $result = $user->createToken($name, array_values($scopes));
 
-            // Passport builds the token from the model registered in OAuthServiceProvider. Not an
-            // instanceof check: Rector misreads that one as always failing and deletes the code after it.
+            // Passport builds the token from the model OAuthServiceProvider
+            // registers. Not an instanceof check, because Rector misreads
+            // that one as always failing and deletes the code after it.
             /** @var OAuthToken|null $token */
             $token = $result->getToken();
 
@@ -66,8 +67,8 @@ readonly class CreatePersonalAccessToken
                 throw new RuntimeException('Passport did not return the token it created.');
             }
 
-            // The token is signed with Passport's single maximum lifetime; this shorter expiry is
-            // enforced by ExpiringAccessTokenRepository on every request.
+            // The token is signed with Passport's single maximum lifetime; this shorter
+            // expiry is enforced by ExpiringAccessTokenRepository on every request.
             $token->forceFill(['expires_at' => $lifetime->expiresAt()])->save();
 
             /** @var non-empty-string $accessToken */
@@ -78,8 +79,8 @@ readonly class CreatePersonalAccessToken
     }
 
     /**
-     * Passport issues personal access tokens through a personal access client. Create it the
-     * first time it's needed, so no environment has to run `passport:client --personal`.
+     * Create the personal access client that issues these tokens the first time
+     * it's needed, so no environment has to run `passport:client --personal`.
      */
     private function ensurePersonalAccessClient(): void
     {

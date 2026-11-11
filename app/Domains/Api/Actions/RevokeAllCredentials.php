@@ -14,10 +14,10 @@ use App\Domains\User\Models\User;
 use Northwestern\SysDev\Chassis\Passport\AccessRevoker;
 
 /**
- * Revokes everything a user can call the API with: their personal access tokens, the
- * applications and MCP clients they connected, and, for an API user, the service clients it
- * owns. Each is revoked through its own action, so each is audited. Used when an account is
- * deleted.
+ * Revokes everything a user can call the API with: their personal access tokens,
+ * the applications and MCP clients they connected, and, for an API user, the
+ * service clients it owns. Each is revoked through its own action, so each
+ * is audited. Deactivating an account or deleting it revokes them all.
  */
 readonly class RevokeAllCredentials
 {
@@ -42,7 +42,7 @@ readonly class RevokeAllCredentials
             ->where('revoked', false)
             ->each(fn (OAuthClient $client) => ($this->revokeServiceClient)($client, null));
 
-        // Anything left without a connection, such as a token issued before connections were recorded.
+        // Revoke the rest, such as a token issued before connections were recorded.
         $this->accessRevoker->revokeAll($user);
     }
 }

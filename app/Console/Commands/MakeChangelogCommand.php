@@ -26,13 +26,11 @@ use function Laravel\Prompts\text;
 #[AsCommand(name: 'make:changelog')]
 class MakeChangelogCommand extends Command
 {
-    /** @var string */
     protected $signature = 'make:changelog
         {slug? : URL-safe identifier for the entry (defaults to today\'s date)}
         {--date= : The authored date in YYYY-MM-DD format (defaults to today)}
         {--title= : Human-readable title for the entry}';
 
-    /** @var string */
     protected $description = 'Create a new changelog Markdown file in resources/changelogs/';
 
     public function handle(): int
@@ -164,8 +162,8 @@ class MakeChangelogCommand extends Command
     /**
      * Generate a human-readable title from a date-based slug.
      *
-     * If the slug looks like a date (YYYY-MM-DD), it's formatted as "Month YYYY Release".
-     * Otherwise, the slug is title-cased.
+     * If the slug looks like a date (YYYY-MM-DD), the title becomes
+     * "Month YYYY Release"; if not, it is the slug in title case.
      */
     private function generateDefaultTitle(string $slug): string
     {

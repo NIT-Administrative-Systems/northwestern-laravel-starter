@@ -14,15 +14,17 @@ use Northwestern\SysDev\Chassis\ValueObjects\ApiRequestContext;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Requires the request's token to carry an API scope, after {@see AuthenticatePassportToken}:
+ * Requires the request's token to carry an API scope, after
+ * {@see AuthenticatePassportToken} has authenticated it:
  *
  * ```php
  * Route::get('users', UserIndexController::class)->middleware(RequireApiScope::class . ':view-users');
  * ```
  *
- * A token acting for a person only reaches what its scopes name, whatever the person's
- * permissions; the person's permissions and the route's policy still apply on top. A service
- * client acts as its API user, whose roles are its ceiling, so it holds every scope.
+ * A token acting for a person can reach only what its scopes name,
+ * whatever their permissions; their permissions and the route's
+ * policy still apply on top. A service client acts as its API
+ * user, whose roles are its ceiling, so it has every scope.
  */
 class RequireApiScope
 {

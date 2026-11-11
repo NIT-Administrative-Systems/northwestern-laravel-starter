@@ -8,11 +8,10 @@ use App\Domains\Api\Http\Middleware\AuthenticatePassportToken;
 use Illuminate\Routing\Router;
 
 /**
- * Inspects the application's registered routes to determine whether any API endpoints
- * are protected by the {@see AuthenticatePassportToken} middleware.
+ * Inspects the registered routes to determine whether any API endpoint
+ * is protected by the {@see AuthenticatePassportToken} middleware.
  *
- * This is used by the **API Request Logging** dashboard to decide whether a warning
- * should be shown indicating that no protected API routes exist.
+ * API Requests uses it to decide whether to warn that no API routes are protected.
  */
 readonly class ApiRouteInspector
 {

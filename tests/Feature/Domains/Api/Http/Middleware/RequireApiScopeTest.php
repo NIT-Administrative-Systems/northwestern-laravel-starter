@@ -45,8 +45,8 @@ final class RequireApiScopeTest extends TestCase
         $this->withToken($unscoped)->getJson('/api/test/users')->assertForbidden();
     }
 
-    // The super-administrator shortcut in Gate::before grants every ability in the browser,
-    // including ones no permission covers. A token gets no such shortcut.
+    // Gate::before lets a super administrator do anything in the browser,
+    // even things no permission covers. A token gets no such shortcut.
     public function test_a_super_administrators_token_has_no_shortcut(): void
     {
         Gate::define('test-unrestricted-ability', fn (): bool => false);

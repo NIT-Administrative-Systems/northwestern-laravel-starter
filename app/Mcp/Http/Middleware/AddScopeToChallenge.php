@@ -11,10 +11,14 @@ use Laravel\Mcp\Server\Registrar;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Laravel MCP's `WWW-Authenticate` challenge on the MCP server's 401, plus the scope a client
- * should request (`scope="mcp:use"`), as the MCP specification asks. Bound in place of Laravel
- * MCP's middleware in {@see \App\Mcp\McpServiceProvider}. Laravel MCP runs it globally
- * and on the route; each run replaces the header before adding the scope, so it appears once.
+ * The `WWW-Authenticate` challenge on the MCP server's 401 plus the
+ * scope a client should request, as the MCP specification asks.
+ *
+ * Bound in place of Laravel MCP's middleware
+ * in {@see \App\Mcp\McpServiceProvider}.
+ *
+ * Laravel MCP runs it both globally and on the route; each run replaces
+ * the header before adding the scope, so the scope appears only once.
  */
 class AddScopeToChallenge extends AddWwwAuthenticateHeader
 {

@@ -46,7 +46,7 @@ final class LogsApiRequestsTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_logging_disabled_via_config_skips_all_logging(): void
+    public function test_nothing_is_logged_while_logging_is_off(): void
     {
         config()->set('api.request_logging.enabled', false);
 
@@ -59,9 +59,9 @@ final class LogsApiRequestsTest extends TestCase
         $this->assertDatabaseCount(ApiRequestLog::class, 0);
     }
 
-    public function test_unauthenticated_request_without_failure_reason_is_not_logged(): void
+    public function test_a_request_with_no_user_or_failure_is_not_logged(): void
     {
-        // No user_id or failure_reason in context
+        // Neither a user nor a failure reason is in the context.
         Context::add(ApiRequestContext::TRACE_ID, Str::uuid()->toString());
 
         $this->getJson($this->endpoint)->assertOk();
@@ -69,7 +69,7 @@ final class LogsApiRequestsTest extends TestCase
         $this->assertDatabaseCount(ApiRequestLog::class, 0);
     }
 
-    public function test_authenticated_successful_request_is_logged(): void
+    public function test_an_authenticated_request_is_logged(): void
     {
         $user = User::factory()->api()->create();
         $clientId = Str::uuid()->toString();
@@ -107,7 +107,7 @@ final class LogsApiRequestsTest extends TestCase
         $this->assertGreaterThan(0, $log->response_bytes);
     }
 
-    public function test_failed_request_with_failure_reason_is_logged(): void
+    public function test_a_request_that_failed_authentication_is_logged(): void
     {
         $user = User::factory()->api()->create();
         $traceId = Str::uuid()->toString();
@@ -128,7 +128,7 @@ final class LogsApiRequestsTest extends TestCase
         ]);
     }
 
-    public function test_route_name_is_captured_when_available(): void
+    public function test_it_records_the_route_name(): void
     {
         $user = User::factory()->api()->create();
         Context::add(ApiRequestContext::USER_ID, $user->id);
@@ -145,7 +145,7 @@ final class LogsApiRequestsTest extends TestCase
         ]);
     }
 
-    public function test_null_route_name_when_route_has_no_name(): void
+    public function test_an_unnamed_route_records_no_route_name(): void
     {
         $user = User::factory()->api()->create();
         Context::add(ApiRequestContext::USER_ID, $user->id);
@@ -157,7 +157,7 @@ final class LogsApiRequestsTest extends TestCase
         $this->assertNull($log->route_name);
     }
 
-    public function test_sampling_disabled_logs_all_successful_requests(): void
+    public function test_without_sampling_every_successful_request_is_logged(): void
     {
         config()->set('api.request_logging.sampling.enabled', false);
 
@@ -174,7 +174,7 @@ final class LogsApiRequestsTest extends TestCase
         $this->assertDatabaseCount(ApiRequestLog::class, 3);
     }
 
-    public function test_sampling_enabled_with_zero_rate_logs_no_successful_requests(): void
+    public function test_a_zero_sample_rate_logs_no_successful_requests(): void
     {
         config()->set('api.request_logging.sampling.enabled', true);
         config()->set('api.request_logging.sampling.rate', 0.0);
@@ -192,7 +192,7 @@ final class LogsApiRequestsTest extends TestCase
         $this->assertDatabaseCount(ApiRequestLog::class, 0);
     }
 
-    public function test_sampling_enabled_with_100_percent_logs_all_successful_requests(): void
+    public function test_a_full_sample_rate_logs_every_successful_request(): void
     {
         config()->set('api.request_logging.sampling.enabled', true);
         config()->set('api.request_logging.sampling.rate', 1.0);
@@ -210,7 +210,7 @@ final class LogsApiRequestsTest extends TestCase
         $this->assertDatabaseCount(ApiRequestLog::class, 3);
     }
 
-    public function test_sampling_always_logs_errors_regardless_of_sample_rate(): void
+    public function test_errors_are_logged_whatever_the_sample_rate(): void
     {
         config()->set('api.request_logging.sampling.enabled', true);
         config()->set('api.request_logging.sampling.rate', 0.0);
@@ -227,11 +227,11 @@ final class LogsApiRequestsTest extends TestCase
             $this->getJson('/api/error')->assertNotFound();
         }
 
-        // All 3 error requests should be logged despite 0% sampling
+        // Every error is logged, even at a sample rate of zero.
         $this->assertDatabaseCount(ApiRequestLog::class, 3);
     }
 
-    public function test_sampling_always_logs_failures_regardless_of_sample_rate(): void
+    public function test_failures_are_logged_whatever_the_sample_rate(): void
     {
         config()->set('api.request_logging.sampling.enabled', true);
         config()->set('api.request_logging.sampling.rate', 0.0);
@@ -247,11 +247,11 @@ final class LogsApiRequestsTest extends TestCase
             $this->getJson($this->endpoint)->assertOk();
         }
 
-        // All 3 requests with failure reasons should be logged despite 0% sampling
+        // Every failure is logged, even at a sample rate of zero.
         $this->assertDatabaseCount(ApiRequestLog::class, 3);
     }
 
-    public function test_sampling_with_50_percent_logs_approximately_half_of_successful_requests(): void
+    public function test_a_half_sample_rate_logs_about_half_of_successful_requests(): void
     {
         config()->set('api.request_logging.sampling.enabled', true);
         config()->set('api.request_logging.sampling.rate', 0.5);
@@ -268,16 +268,16 @@ final class LogsApiRequestsTest extends TestCase
 
         $logCount = ApiRequestLog::count();
 
-        // With 50% sampling, we expect roughly 15 logs (allow wide tolerance for randomness)
+        // About 15 are logged; the bounds are wide because sampling is random.
         $this->assertGreaterThan(3, $logCount, 'Expected at least ~10% of 30 requests to be logged');
         $this->assertLessThan(27, $logCount, 'Expected at most ~90% of 30 requests to be logged');
     }
 
-    public function test_database_exception_during_logging_does_not_break_request(): void
+    public function test_a_failure_to_log_does_not_break_the_request(): void
     {
         $user = User::factory()->api()->create();
 
-        // Create a route with middleware that sets context and forces a DB error
+        // A trace ID that isn't a UUID makes saving the log fail.
         app()->bind('test.set.context.with.error', fn () => function ($request, $next) use ($user) {
             Context::add(ApiRequestContext::USER_ID, $user->id);
             Context::add(ApiRequestContext::TRACE_ID, 'invalid-trace-id-format-to-cause-error');
@@ -288,12 +288,11 @@ final class LogsApiRequestsTest extends TestCase
         Route::middleware(['test.set.context.with.error', LogsApiRequests::class])
             ->get('/api/db-error-test', fn () => response()->json(['ok' => true]));
 
-        // Even if logging fails internally (caught by try/catch),
-        // the request should still succeed
+        // Logging fails, but the request still succeeds.
         $this->getJson('/api/db-error-test')->assertOk();
     }
 
-    public function test_client_ip_address_is_captured(): void
+    public function test_it_records_the_ip_address(): void
     {
         $user = User::factory()->api()->create();
         Context::add(ApiRequestContext::USER_ID, $user->id);
@@ -303,22 +302,20 @@ final class LogsApiRequestsTest extends TestCase
             ->assertOk();
 
         $log = ApiRequestLog::first();
-        // Laravel in test mode may still use 127.0.0.1 or the forwarded IP
+        // The forwarded address or 127.0.0.1, depending on the trusted proxies.
         $this->assertNotEmpty($log->ip_address);
     }
 
-    public function test_ip_address_defaults_to_unknown_when_unavailable(): void
+    public function test_every_log_has_an_ip_address(): void
     {
         $user = User::factory()->api()->create();
         Context::add(ApiRequestContext::USER_ID, $user->id);
         Context::add(ApiRequestContext::TRACE_ID, Str::uuid()->toString());
 
-        // In test environment, we'll always have an IP (127.0.0.1)
-        // but we can verify the logic handles null by checking the code path
         $this->getJson($this->endpoint)->assertOk();
 
         $log = ApiRequestLog::first();
-        // In tests, this will be 127.0.0.1, but the middleware code handles null → 'unknown'
+        // In tests this is 127.0.0.1; the middleware records a missing IP as 'unknown'.
         $this->assertNotNull($log->ip_address);
     }
 
@@ -361,7 +358,7 @@ final class LogsApiRequestsTest extends TestCase
         $this->assertSame(['ping', 'ping'], ApiRequestLog::query()->orderBy('id')->pluck('mcp_method')->all());
     }
 
-    public function test_streamed_response_does_not_capture_response_bytes(): void
+    public function test_a_streamed_response_records_no_response_size(): void
     {
         $user = User::factory()->api()->create();
         Context::add(ApiRequestContext::USER_ID, $user->id);
@@ -377,7 +374,7 @@ final class LogsApiRequestsTest extends TestCase
         $this->assertNull($log->response_bytes);
     }
 
-    public function test_response_bytes_calculated_from_content_length_header(): void
+    public function test_the_response_size_comes_from_its_content_length(): void
     {
         $user = User::factory()->api()->create();
         Context::add(ApiRequestContext::USER_ID, $user->id);
@@ -392,7 +389,7 @@ final class LogsApiRequestsTest extends TestCase
         $this->assertSame(1234, $log->response_bytes);
     }
 
-    public function test_request_bytes_captured_from_content_length_header(): void
+    public function test_the_request_size_comes_from_its_content_length(): void
     {
         $user = User::factory()->api()->create();
         Context::add(ApiRequestContext::USER_ID, $user->id);
@@ -407,7 +404,7 @@ final class LogsApiRequestsTest extends TestCase
         $this->assertSame(512, $log->request_bytes);
     }
 
-    public function test_request_bytes_is_null_when_content_length_is_absent(): void
+    public function test_a_request_without_a_content_length_records_no_size(): void
     {
         $user = User::factory()->api()->create();
         Context::add(ApiRequestContext::USER_ID, $user->id);
@@ -421,7 +418,7 @@ final class LogsApiRequestsTest extends TestCase
         $this->assertNull($log->request_bytes);
     }
 
-    public function test_duration_ms_is_calculated_and_stored(): void
+    public function test_it_records_how_long_the_request_took(): void
     {
         $user = User::factory()->api()->create();
         Context::add(ApiRequestContext::USER_ID, $user->id);
@@ -440,7 +437,7 @@ final class LogsApiRequestsTest extends TestCase
         $this->assertLessThan(1000, $log->duration_ms); // Should be less than 1 second
     }
 
-    public function test_all_context_values_are_captured_in_log(): void
+    public function test_it_records_everything_the_request_context_holds(): void
     {
         $user = User::factory()->api()->create();
         $clientId = Str::uuid()->toString();

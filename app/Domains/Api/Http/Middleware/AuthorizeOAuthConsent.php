@@ -19,15 +19,18 @@ use League\OAuth2\Server\RequestTypes\AuthorizationRequest;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Asks {@see OAuthConsent::authorize()} whether the signed-in person may connect the client, on
- * Passport's consent screen and its approve and deny endpoints: refused while impersonating, for
- * an MCP client without the Use MCP permission or that doesn't ask for `mcp:use`, for a
- * deactivated account, and with a 404 while the client's feature is off. Applied to Passport's
- * routes; a guest is left to Passport, which sends them to sign in.
+ * Asks {@see OAuthConsent::authorize()} whether the signed-in person may connect
+ * the client, on Passport's consent screen and its approve and deny endpoints.
+ * It refuses while they're impersonating, for a deactivated account, and for
+ * an MCP client if the person lacks Use MCP or the client doesn't ask for
+ * `mcp:use`. It answers 404 while the client's feature is turned off.
  *
- * The client and scopes are the ones Passport acts on: the screen's `client_id` and `scope` query
- * parameters, and on approve and deny the authorization request Passport kept in the session,
- * never values sent with the form.
+ * It applies to Passport's routes, and leaves a guest to Passport to sign in.
+ *
+ * The client and scopes are the ones Passport acts on: on the
+ * screen, its `client_id` and `scope` query parameters, and
+ * on approve and deny, the authorization request Passport
+ * kept in the session, never values sent with the form.
  */
 class AuthorizeOAuthConsent
 {
@@ -68,8 +71,8 @@ class AuthorizeOAuthConsent
     }
 
     /**
-     * The authorization request Passport stored when it showed the consent screen, unserialized
-     * as strictly as Passport does.
+     * Get the authorization request Passport stored when it showed the
+     * consent screen, unserialized as strictly as Passport does it.
      */
     private function sessionAuthRequest(Request $request): ?AuthorizationRequest
     {

@@ -9,10 +9,10 @@ return [
     | Enable the MCP Server
     |--------------------------------------------------------------------------
     |
-    | The MCP server at `/mcp` lets AI clients such as Claude and VS Code
-    | use the application's tools as the person who connects them.
-    | Off by default. When false, the server, its OAuth discovery
-    | documents and client registration all answer 404.
+    | The MCP server at `/mcp` lets AI clients such as Claude and VS Code use the
+    | application's tools as the person who connects them. It's off by default,
+    | and while it is off the server, its discovery documents and its client
+    | registration endpoint all answer 404, as though they didn't exist.
     |
     */
 
@@ -23,10 +23,9 @@ return [
     | Native Client Redirect Schemes
     |--------------------------------------------------------------------------
     |
-    | MCP clients register themselves. A client's redirect URIs must use
-    | HTTPS, or HTTP to the person's own computer. Desktop clients that
-    | return through their own URI scheme (RFC 8252) need it listed
-    | here. None by default: most clients don't need one.
+    | MCP clients register themselves. A redirect URI must use HTTPS, or HTTP to the
+    | person's own computer, and a desktop client that returns through its own URI
+    | scheme (RFC 8252) needs that scheme listed here, which most clients don't.
     |
     */
 
@@ -54,7 +53,7 @@ return [
     |
     | `mcp:prune-clients` runs daily. It deletes a self-registered client
     | nobody connected within `unconnected_hours` of registering, and
-    | revokes one nobody has used for `unused_days`.
+    | revokes one nobody has used for `unused_days` days or more.
     |
     */
 
@@ -68,8 +67,8 @@ return [
     | Laravel MCP
     |--------------------------------------------------------------------------
     |
-    | Read by laravel/mcp. `authorization_server` is the OAuth issuer shown in
-    | the discovery documents; null means this application's URL.
+    | Read by laravel/mcp. `authorization_server` is the OAuth issuer the
+    | discovery documents name; null means this application's own URL.
     |
     */
 

@@ -15,8 +15,9 @@ use Illuminate\Support\Facades\DB;
 use Laravel\Passport\Passport;
 
 /**
- * Revokes a service client and every access token it holds, so the integration loses
- * access at once rather than when its current token expires.
+ * Revokes a service client and every access token it
+ * holds, so the integration loses access at once
+ * rather than when its current token expires.
  */
 readonly class RevokeServiceClient
 {

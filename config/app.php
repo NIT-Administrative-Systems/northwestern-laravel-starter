@@ -6,11 +6,10 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Schedule Timezone
+    | Schedule Time Zone
     |--------------------------------------------------------------------------
     |
-    | Here you may specify the default timezone for your scheduled tasks.
-    | when this value is null, application timezone is used.
+    | The time zone scheduled tasks run in. Null uses the application's time zone.
     |
     */
 

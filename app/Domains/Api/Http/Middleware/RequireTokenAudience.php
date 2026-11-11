@@ -18,13 +18,17 @@ use Northwestern\SysDev\Chassis\ValueObjects\ApiRequestContext;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Keeps each token on its side of the application, after {@see AuthenticatePassportToken}. The
- * kind of client a token was issued to decides its side, not the scopes it carries: a token
- * issued to an MCP client works only on the MCP server, so a client connected for its tools
- * can't reach the REST API with it, whatever it asked for; and the MCP server admits only those
- * tokens, with `mcp:use`, so service client, personal access and application tokens can't call
- * tools. Whether the person may still use MCP was already decided when their token was
- * authenticated.
+ * Keeps each token on its own side of the application, after
+ * {@see AuthenticatePassportToken} has authenticated it.
+ * The kind of client the token was issued to decides
+ * which side it's on, not the scopes it carries.
+ *
+ * A token issued to an MCP client works only on the MCP server, so
+ * a client connected for its tools can't reach the REST API. The
+ * MCP server admits only those tokens, holding `mcp:use`, so
+ * service client, personal access and application tokens
+ * can't call tools. Whether the person may still use
+ * MCP is decided when the token is authenticated.
  *
  * ```php
  * Route::middleware([AuthenticatePassportToken::class, RequireTokenAudience::for(TokenAudience::Api)]);

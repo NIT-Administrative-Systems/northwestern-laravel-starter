@@ -14,10 +14,15 @@ use Laravel\Mcp\Server\Registrar;
 use Northwestern\SysDev\Chassis\Rules\OAuthRedirectUri;
 
 /**
- * OAuth dynamic client registration (RFC 7591) for MCP clients. Anyone may register, so a
- * client gets nothing until a person with the `UseMcp` permission approves it: it is public
- * (PKCE, no secret), may ask only for `mcp:use`, and its self-reported name is marked
- * unverified on the consent screen. `mcp:prune-clients` removes clients nobody connects.
+ * OAuth dynamic client registration (RFC 7591) for MCP clients.
+ *
+ * Anyone may register, so a client can do nothing until
+ * a person with the `UseMcp` permission approves it.
+ *
+ * A client is public (PKCE, no secret), may ask only for `mcp:use`, and
+ * has its self-reported name marked unverified on the consent screen.
+ *
+ * `mcp:prune-clients` removes clients nobody connects.
  */
 class RegisterClientController
 {

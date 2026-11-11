@@ -12,14 +12,17 @@ use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Refuses every grant at Passport's token endpoint for a client whose feature is off: a
- * service client or connected application while `api.enabled` is off, an MCP client while
- * `mcp.enabled` is off. A credential whose feature is off can't get or refresh a token; turning
- * the feature back on lets it continue, since nothing was revoked.
+ * Refuses every grant at Passport's token endpoint for a client
+ * whose feature is turned off: a service client or connected
+ * application while `api.enabled` is off, or an MCP client
+ * while `mcp.enabled` is off. Such a client can't get or
+ * refresh a token then, and turning the feature back
+ * on lets it continue, since nothing was revoked.
  *
- * The client comes from `client_id` in the body or the HTTP Basic username, as Passport reads
- * it. An unknown one is left to Passport. The refusal is the OAuth error for a client that may
- * not use the grant.
+ * The client comes from `client_id` in the body or from the
+ * HTTP Basic username, as Passport reads it. An unknown
+ * one is left to Passport. The refusal is the OAuth
+ * error for a client that may not use the grant.
  */
 class RefuseTokensWhileFeatureOff
 {
@@ -32,8 +35,8 @@ class RefuseTokensWhileFeatureOff
             return $next($request);
         }
 
-        // As League reads it: the body, then the HTTP Basic username. Never the query string, which
-        // League ignores, so a client named there can't stand in for the one that gets the token.
+        // Never the query string, which League ignores, so a client named
+        // there can't stand in for the client that receives the token.
         $clientId = (string) ($request->request->get('client_id') ?? $request->getUser() ?? '');
         $client = Str::isUuid($clientId) ? OAuthClient::query()->find($clientId) : null;
 

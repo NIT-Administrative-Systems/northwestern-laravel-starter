@@ -15,8 +15,10 @@ use InvalidArgumentException;
 use Laravel\Passport\ClientRepository;
 
 /**
- * Replaces a confidential application's client secret. The old secret stops working at once,
- * so the application must be updated with the new one. Audited on the administrator who did it.
+ * Replaces a confidential application's client secret. The old secret stops
+ * working at once, so the application must be updated with the new one.
+ *
+ * The change is audited on the administrator who made it.
  */
 readonly class RegenerateOAuthApplicationSecret
 {
