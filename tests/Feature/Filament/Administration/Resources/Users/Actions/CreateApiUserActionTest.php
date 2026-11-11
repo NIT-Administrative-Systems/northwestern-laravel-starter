@@ -58,6 +58,25 @@ final class CreateApiUserActionTest extends TestCase
         $this->assertSame([], preg_grep('/^reveal_once_secret:/', array_keys(Session::all())));
     }
 
+    // Usernames stay unique among deleted users too, so the rule must see them.
+    public function test_a_deleted_users_username_is_reported_as_taken(): void
+    {
+        User::factory()->api()->create(['username' => 'api-reporting'])->delete();
+
+        Livewire::test(ListUsers::class)
+            ->mountAction(TestAction::make('createApiUser'))
+            ->fillForm([
+                'first_name' => 'Reporting',
+                'username' => 'reporting',
+                'name' => 'Production',
+                'expiration' => TokenExpiration::ThreeMonths->value,
+            ])
+            ->goToNextWizardStep()
+            ->assertHasFormErrors(['username' => 'A deleted user has this username. Choose another.']);
+
+        $this->assertSame(1, User::withTrashed()->where('username', 'api-reporting')->count());
+    }
+
     public function test_it_is_hidden_without_manage_api_access(): void
     {
         $viewer = User::factory()->create();

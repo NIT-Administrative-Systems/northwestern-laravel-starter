@@ -82,7 +82,12 @@ class CreateApiUserAction extends Action
                                                         preg_replace('/^api-/', '', trim($value))
                                                     );
 
-                                                    if (User::where('username', $prefixedUsername)->exists()) {
+                                                    // Usernames are unique among deleted users too.
+                                                    $holder = User::withTrashed()->where('username', $prefixedUsername)->first();
+
+                                                    if ($holder?->trashed()) {
+                                                        $fail('A deleted user has this username. Choose another.');
+                                                    } elseif ($holder !== null) {
                                                         $fail('This username is already taken.');
                                                     }
                                                 },
