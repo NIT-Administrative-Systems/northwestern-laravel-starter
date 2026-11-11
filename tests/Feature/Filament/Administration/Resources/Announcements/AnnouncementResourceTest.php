@@ -134,6 +134,9 @@ final class AnnouncementResourceTest extends TestCase
             ->assertHasNoFormErrors();
         $this->assertSame('Corrected title', $announcement->fresh()?->title);
 
+        $editPage = $page()->instance();
+        $this->assertInstanceOf(EditAnnouncement::class, $editPage);
+        $this->assertStringStartsWith('It returns to the banner for the one person who dismissed it', (string) $editPage->getAction('showAgain')?->getModalDescription());
         $page()->callAction('showAgain')->assertNotified();
         $this->assertSame(0, $announcement->dismissals()->count());
 

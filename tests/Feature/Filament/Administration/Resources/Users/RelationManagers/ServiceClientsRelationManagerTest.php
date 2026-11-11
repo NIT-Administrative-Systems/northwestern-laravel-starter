@@ -16,6 +16,7 @@ use App\Filament\Support\RevealOnceSecret;
 use App\Providers\Filament\AdministrationPanelProvider;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
+use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
 use Livewire\Features\SupportTesting\Testable;
@@ -143,7 +144,8 @@ final class ServiceClientsRelationManagerTest extends TestCase
 
         $this->relationManager()
             ->callAction(TestAction::make('editServiceClientIpRestrictions')->table($client), ['allowed_ips' => ['192.0.2.0/24']])
-            ->assertHasNoFormErrors();
+            ->assertHasNoFormErrors()
+            ->assertNotified(Notification::make()->success()->title('IP Restrictions Updated')->body('The client is now restricted to one IP address.'));
 
         $this->assertSame(['192.0.2.0/24'], $client->fresh()?->allowed_ips);
     }

@@ -55,6 +55,6 @@ class UserLoginRecordExporter extends BaseExporter
 
     protected static function recordNoun(): string
     {
-        return 'login record';
+        return 'sign-in record';
     }
 }

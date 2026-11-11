@@ -88,7 +88,7 @@ final class AddPeopleToRoleTest extends TestCase
 
         $notification = $this->administrator->notifications()->sole();
         $this->assertSame('People Added to Editors', $notification->data['title']);
-        $this->assertSame('1 person added to the Editors role. 1 wasn\'t: download the list to see why.', $notification->data['body']);
+        $this->assertSame('One person added to the Editors role. One wasn\'t: download the list to see why.', $notification->data['body']);
     }
 
     // Each chunk is a queued job; the person who added them is notified when the batch finishes.

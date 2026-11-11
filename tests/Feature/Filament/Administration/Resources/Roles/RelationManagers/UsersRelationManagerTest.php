@@ -16,6 +16,7 @@ use App\Providers\Filament\AdministrationPanelProvider;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Select;
+use Filament\Notifications\Notification;
 use Illuminate\Http\UploadedFile;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
@@ -54,7 +55,7 @@ final class UsersRelationManagerTest extends TestCase
             ->assertActionVisible(TestAction::make('importPeople')->table())
             ->callAction(TestAction::make('addPeople')->table(), ['people' => "guest@example.com\nother@example.com"])
             ->assertHasNoFormErrors()
-            ->assertNotified('Adding People');
+            ->assertNotified(Notification::make()->success()->title('Adding People')->body('Adding two people to the Editors role. You\'ll get a notification when it\'s done.'));
 
         $this->assertSame(2, $role->users()->count());
     }

@@ -18,7 +18,7 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\HtmlString;
-use Illuminate\Support\Str;
+use Northwestern\SysDev\Chassis\Formatting\CountInWords;
 
 /**
  * @property-read Role $record
@@ -55,7 +55,7 @@ class EditRole extends EditRecord
                             return new HtmlString('Are you sure you want to delete this role? This action cannot be undone.');
                         }
 
-                        $userText = $userCount . ' ' . Str::plural('user', $userCount);
+                        $userText = CountInWords::of($userCount, 'user');
 
                         return new HtmlString(
                             "<span class=\"text-danger-600 dark:text-danger-400 font-medium\">This role is assigned to {$userText}.</span><br><br>" .

@@ -8,6 +8,7 @@ use Filament\Actions\Exports\Exporter;
 use Filament\Actions\Exports\Models\Export;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use Northwestern\SysDev\Chassis\Formatting\CountInWords;
 
 /**
  * The base for the application's exporters: declare the columns and what a row is, and every
@@ -54,11 +55,10 @@ abstract class BaseExporter extends Exporter
 
     public static function getCompletedNotificationBody(Export $export): string
     {
-        $exported = $export->successful_rows;
-        $body = sprintf('Exported %s %s.', number_format($exported), Str::plural(static::recordNoun(), $exported));
+        $body = 'Exported ' . CountInWords::of($export->successful_rows, static::recordNoun()) . '.';
 
         if (($failed = $export->getFailedRowsCount()) !== 0) {
-            $body .= sprintf(' %s %s failed.', number_format($failed), Str::plural('row', $failed));
+            $body .= ' ' . Str::ucfirst(CountInWords::of($failed, 'row')) . ' failed.';
         }
 
         return $body;

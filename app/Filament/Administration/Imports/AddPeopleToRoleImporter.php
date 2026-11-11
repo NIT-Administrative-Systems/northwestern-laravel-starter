@@ -17,6 +17,8 @@ use Filament\Actions\Imports\Models\Import;
 use Filament\Forms\Components\Select;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Number;
+use Illuminate\Support\Str;
+use Northwestern\SysDev\Chassis\Formatting\CountInWords;
 
 /**
  * Gives each person in an uploaded CSV, or a pasted list ({@see AddPeopleToRole}), the role in
@@ -102,11 +104,10 @@ class AddPeopleToRoleImporter extends Importer
 
     public static function getCompletedNotificationBody(Import $import): string
     {
-        $added = $import->successful_rows;
-        $body = Number::format($added) . ' ' . str('person')->plural($added) . ' added to the ' . (self::roleName($import) ?? 'role') . ' role.';
+        $body = Str::ucfirst(CountInWords::of($import->successful_rows, 'person')) . ' added to the ' . (self::roleName($import) ?? 'role') . ' role.';
 
         if ($notAdded = $import->getFailedRowsCount()) {
-            $body .= ' ' . Number::format($notAdded) . ' ' . ($notAdded === 1 ? 'wasn\'t' : 'weren\'t') . ': download the list to see why.';
+            $body .= ' ' . Str::ucfirst(Number::spell($notAdded, until: 10)) . ' ' . ($notAdded === 1 ? 'wasn\'t' : 'weren\'t') . ': download the list to see why.';
         }
 
         return $body;

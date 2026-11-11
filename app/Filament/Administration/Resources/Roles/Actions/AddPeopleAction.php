@@ -18,6 +18,7 @@ use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Support\Number;
+use Northwestern\SysDev\Chassis\Formatting\CountInWords;
 
 /**
  * Adds a pasted list of NetIDs and email addresses to a role, on a role's Assigned Users tab
@@ -67,7 +68,7 @@ class AddPeopleAction extends Action
                 Notification::make()
                     ->success()
                     ->title('Adding People')
-                    ->body('Adding ' . Number::format($import->total_rows) . ' ' . str('person')->plural($import->total_rows) . " to the {$role->name} role. You'll get a notification when it's done.")
+                    ->body('Adding ' . CountInWords::of($import->total_rows, 'person') . " to the {$role->name} role. You'll get a notification when it's done.")
                     ->send();
             });
     }
