@@ -237,9 +237,11 @@ class SlowestApiRequestsByEndpointChartWidget extends BaseApiRequestChartWidget
                         callback: function (value) {
                             const label = this.getLabelForValue(value) ?? '';
 
-                            const maxLength = 40;
-                            return label.length > maxLength
-                                ? label.slice(0, maxLength - 1) + '…'
+                            // A long path keeps its last two segments, which tell endpoints apart; the tooltip has it whole.
+                            const segments = label.split('/').filter(Boolean);
+
+                            return label.length > 24 && segments.length > 2
+                                ? '…/' + segments.slice(-2).join('/')
                                 : label;
                         },
                     },
