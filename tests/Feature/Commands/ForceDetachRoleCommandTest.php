@@ -106,6 +106,22 @@ final class ForceDetachRoleCommandTest extends TestCase
         $this->assertFalse($user->fresh()->hasRole($role));
     }
 
+    public function test_it_finds_a_user_whatever_case_their_netid_is_typed_in(): void
+    {
+        $user = User::factory()->create(['username' => 'abc123']);
+        $role = Role::factory()->create();
+        $user->assignRoleWithAudit($role, RoleModificationOrigin::System);
+
+        $this->artisan('role:force-detach', [
+            'user' => 'ABC123',
+            'role' => $role->name,
+            '--reason' => 'Emergency detach',
+            '--force' => true,
+        ])->assertSuccessful();
+
+        $this->assertFalse($user->fresh()->hasRole($role));
+    }
+
     public function test_force_needs_a_reason(): void
     {
         $user = User::factory()->create();
