@@ -43,6 +43,17 @@ final class CreateLocalUserTest extends TestCase
         $this->assertEquals(['Engineering'], $user->departments);
     }
 
+    // The column's default is whatever the setting was when the migration ran.
+    public function test_new_local_users_get_the_default_timezone(): void
+    {
+        config(['platform.default_user_timezone' => 'America/New_York']);
+
+        $user = $this->action()(email: 'test@example.com', sendLoginLink: false);
+
+        $this->assertSame('America/New_York', $user->timezone);
+        $this->assertSame('America/New_York', $user->fresh()?->timezone);
+    }
+
     // People added to a role in bulk may come with an email address alone.
     public function test_only_the_email_is_required(): void
     {

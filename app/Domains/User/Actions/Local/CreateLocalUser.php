@@ -42,6 +42,7 @@ readonly class CreateLocalUser
                 'job_titles' => filled($title) ? [$title] : [],
                 'departments' => filled($department) ? [$department] : [],
                 'description' => $description,
+                'timezone' => config('platform.default_user_timezone'),
             ]);
         }), 0, fn (\Throwable $e) => $e instanceof UniqueConstraintViolationException);
 

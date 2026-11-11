@@ -54,6 +54,7 @@ readonly class CreateApiUser
                 'first_name' => $firstName,
                 'last_name' => 'API',
                 'description' => $description,
+                'timezone' => config('platform.default_user_timezone'),
             ]);
 
             // Refused here, after the user exists, the transaction undoes the user too.
