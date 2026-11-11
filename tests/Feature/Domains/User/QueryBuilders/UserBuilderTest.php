@@ -7,6 +7,7 @@ namespace Tests\Feature\Domains\User\QueryBuilders;
 use App\Domains\Auth\Enums\AuthType;
 use App\Domains\User\Models\User;
 use App\Domains\User\QueryBuilders\UserBuilder;
+use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
@@ -76,8 +77,20 @@ final class UserBuilderTest extends TestCase
 
     public function test_where_email_equals_matches_non_ascii_case_insensitively(): void
     {
+        $user = User::factory()->create(['email' => 'école@example.com']);
+
+        $this->assertTrue($user->is(User::query()->whereEmailEquals('ÉCOLE@EXAMPLE.COM')->sole()));
+    }
+
+    public function test_where_email_equals_lowercases_in_the_database_not_in_php(): void
+    {
         // PHP's mb_strtolower turns İ into i plus a combining dot, where the database gives a plain i, so the value
-        // has to be lowercased by the database too.
+        // has to be lowercased by the database too. How the database lowercases İ depends on the platform's C
+        // library (macOS keeps the dot), so this runs only where the database gives a plain i, as CI's Linux does.
+        if (DB::scalar("select lower('İ')") !== 'i') {
+            $this->markTestSkipped("This database doesn't lowercase İ to a plain i.");
+        }
+
         $user = User::factory()->create(['email' => 'iİ@example.com']);
 
         $this->assertTrue($user->is(User::query()->whereEmailEquals('İİ@EXAMPLE.COM')->sole()));
