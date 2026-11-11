@@ -17,6 +17,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 
 /**
@@ -34,18 +35,23 @@ class NotifyAnnouncementAudience implements ShouldQueue
 
     public function handle(): void
     {
-        $claimed = Announcement::query()
-            ->whereKey($this->announcement->getKey())
-            ->where('notify_audience', true)
-            ->whereNull('notified_at')
-            ->update(['notified_at' => Carbon::now()]);
+        // Claim and fan out together: a run that fails partway gives up its claim, so the next
+        // run can notify the audience. The notifications are queued after the commit, so a failed
+        // run sends none, and a second run waits on the claim's row lock and then finds it taken.
+        DB::transaction(function (): void {
+            $claimed = Announcement::query()
+                ->whereKey($this->announcement->getKey())
+                ->where('notify_audience', true)
+                ->whereNull('notified_at')
+                ->update(['notified_at' => Carbon::now()]);
 
-        if ($claimed === 0) {
-            return;
-        }
+            if ($claimed === 0) {
+                return;
+            }
 
-        self::audience($this->announcement)->chunkById(500, function (Collection $people): void {
-            Notification::send($people, new AnnouncementNotification($this->announcement));
+            self::audience($this->announcement)->chunkById(500, function (Collection $people): void {
+                Notification::send($people, new AnnouncementNotification($this->announcement));
+            });
         });
     }
 
