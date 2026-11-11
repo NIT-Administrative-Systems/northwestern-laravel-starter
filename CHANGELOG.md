@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [v3.1.0] - 2026-11-10
+
 ### Changed
 
 - Updated PHP dependencies, including Laravel `13.42.0`, Filament `5.11.2`, Livewire `4.4.8`, Passport `13.11.0`, Chassis `1.5.2`, Pest `5.3.5`, PHPUnit `13.4.5`, PHPStan `2.3.5`, Larastan `3.14.0`, Rector `2.8.4`, and related transitive packages. Filament frontend assets were republished.
@@ -1001,7 +1003,8 @@ First stable release. For installation, configuration, and usage guides, visit t
 - **CI pipeline**: GitHub Actions workflow with PHP/Node setup, database provisioning, Pest and Cypress test execution; Dependabot configuration.
 - **Developer tooling**: `.editorconfig`, `.prettierrc`, `.nvmrc` (Node v24), custom stubs, Rector configuration.
 
-[Unreleased]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v3.0.0...HEAD
+[Unreleased]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v3.1.0...HEAD
+[v3.1.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v3.0.0...v3.1.0
 [v3.0.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.6.0...v3.0.0
 [v2.6.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.5.0...v2.6.0
 [v2.5.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.4.0...v2.5.0
