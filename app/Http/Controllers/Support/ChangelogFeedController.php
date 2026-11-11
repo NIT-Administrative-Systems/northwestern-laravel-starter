@@ -20,7 +20,7 @@ class ChangelogFeedController extends Controller
 
         return response()
             ->view('support.changelog.feed', [
-                'entries' => Changelog::limit($limit)->get(),
+                'entries' => Changelog::query()->limit($limit)->get(),
             ])
             ->header('Content-Type', 'application/rss+xml; charset=UTF-8');
     }

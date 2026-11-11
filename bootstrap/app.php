@@ -77,14 +77,12 @@ return Application::configure(basePath: dirname(__DIR__))
             return ! resolve(DatabasePausedDetector::class)->causedByPausedDatabase($e);
         });
 
-        $exceptions->reportable(function (Throwable $e) {
+        $exceptions->report(function (Throwable $e) {
             resolve(SentryExceptionHandler::class)->report($e);
         });
 
         // RFC 9457 Problem Details for API requests.
-        $exceptions->renderable(function (Throwable $e, Request $request) {
-            return app(ProblemDetailsRenderer::class)->render($e, $request);
-        });
+        $exceptions->render(fn (Throwable $e, Request $request) => resolve(ProblemDetailsRenderer::class)->render($e, $request));
 
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->wantsJson()
