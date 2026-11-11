@@ -64,7 +64,7 @@ class OAuthConnection extends BaseModel
     {
         $tokens = Passport::token()->getTable();
         $refreshTokens = Passport::refreshToken()->getTable();
-        $now = Carbon::now();
+        $now = now();
 
         return $query->whereExists(fn ($token) => $token
             ->select(DB::raw(1))

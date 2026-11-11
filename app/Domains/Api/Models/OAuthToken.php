@@ -59,7 +59,7 @@ class OAuthToken extends Token
     #[Scope]
     protected function active(Builder $query, ?CarbonInterface $at = null): Builder
     {
-        return $query->where('revoked', false)->where('expires_at', '>', $at ?? Carbon::now());
+        return $query->where('revoked', false)->where('expires_at', '>', $at ?? now());
     }
 
     /** @return Attribute<CredentialStatus, never> */

@@ -9,7 +9,6 @@ use App\Domains\Api\Models\OAuthConnection;
 use App\Domains\Api\Models\OAuthToken;
 use App\Domains\Api\Notifications\ApplicationConnectedNotification;
 use App\Domains\User\Models\User;
-use Illuminate\Support\Carbon;
 use Laravel\Passport\Events\AccessTokenCreated;
 
 /**
@@ -47,7 +46,7 @@ class RecordOAuthConnection
 
         $connection->forceFill([
             'scopes' => OAuthToken::query()->whereKey($event->tokenId)->value('scopes') ?? [],
-            'connected_at' => $connection->connected_at ?? Carbon::now(),
+            'connected_at' => $connection->connected_at ?? now(),
         ])->save();
 
         if ($isNew) {

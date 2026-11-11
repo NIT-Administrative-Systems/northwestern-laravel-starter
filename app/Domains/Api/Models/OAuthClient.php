@@ -97,7 +97,7 @@ class OAuthClient extends Client
     {
         return $query
             ->where('revoked', false)
-            ->where(fn (Builder $q) => $q->whereNull('secret_expires_at')->orWhere('secret_expires_at', '>', $at ?? Carbon::now()));
+            ->where(fn (Builder $q) => $q->whereNull('secret_expires_at')->orWhere('secret_expires_at', '>', $at ?? now()));
     }
 
     /**
