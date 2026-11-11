@@ -236,7 +236,7 @@ The bell picks up new notifications at its next poll. A Livewire component in th
 
 ## Simple Pages
 
-Simple pages (Filament's `SimplePage`) render a single card without the sidebar. The sign-in pages and the lockdown page are simple pages. The app panel renders `<x-site-header>` above every simple page's card, so they share the header of public and error pages.
+Simple pages (Filament's `SimplePage`) render a single card without the sidebar. The sign-in pages and the lockdown page are simple pages. The app panel renders `<x-site-header>` above every simple page's card, so they share the header of public and error pages. Pages that use `HasSiteHeader` are light only, like the public pages: the app panel renders `resources/views/filament/app/light-only.blade.php` in their `<head>`, which keeps Filament from switching them to dark mode, and the panel's other pages keep following each person's theme setting.
 
 <Steps>
 

@@ -39,6 +39,17 @@ it('is healthy at the email sign-in code step', function (bool $dark) {
     expect($page)->toBeHealthy();
 })->with(['light' => false, 'dark' => true]);
 
+// Every page before signing in is light; dark mode starts inside the panel.
+it('keeps the sign-in pages light in dark mode, also after navigating between them', function () {
+    $page = visit('/app/login')->inDarkMode();
+
+    expect($page->script("document.documentElement.classList.contains('dark')"))->toBeFalse();
+
+    $page->click('@email-login')->assertVisible('@email-input');
+
+    expect($page->script("document.documentElement.classList.contains('dark')"))->toBeFalse();
+});
+
 it('is healthy on a changelog entry', function () {
     $entry = Changelog::factory()->create(['body' => "### Changes\n\n- A change"]);
 

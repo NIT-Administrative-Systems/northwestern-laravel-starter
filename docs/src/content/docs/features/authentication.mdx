@@ -50,10 +50,10 @@ The Northwestern Laravel Starter provides a multi-method authentication system t
 
 ## Signing In
 
-Sign-in belongs to the [App panel](/building/app-panel/). Guests who open a page in any panel are sent to `/app/login`, which lists the sign-in methods this application has configured:
+Sign-in belongs to the [App panel](/building/app-panel/). Guests who open a page in any panel are sent to `/app/login`, headed "Sign In to" and the application's name, which lists the sign-in methods this application has configured:
 
 - **Sign In with NetID** appears when single sign-on is configured. It uses Online Passport (WebSSO) when that is configured, otherwise Entra ID.
-- **Sign In with Email** appears when `LOCAL_AUTH_ENABLED=true`.
+- **Sign In with Email** appears when `LOCAL_AUTH_ENABLED=true`. It is the secondary button beside NetID, and the primary one when it is the only method. Outside production, a note under it then says NetID sign-in isn't set up in that environment.
 - **Sign In As** appears in the `local` environment only. See [Signing In Locally](#signing-in-locally).
 - If none is available, the page explains that no sign-in methods are available.
 

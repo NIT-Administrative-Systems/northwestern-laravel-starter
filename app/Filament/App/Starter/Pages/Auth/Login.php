@@ -59,6 +59,14 @@ class Login extends SimplePage
         }
     }
 
+    /**
+     * The card names the application; on phones the header shows its name only in a second row.
+     */
+    public function getHeading(): string
+    {
+        return 'Sign In to ' . config('app.name');
+    }
+
     public function content(Schema $schema): Schema
     {
         $signIn = resolve(SignIn::class);
@@ -87,16 +95,21 @@ class Login extends SimplePage
 
                 Group::make([
                     Actions::make([
+                        // Secondary beside NetID sign-in, primary when it is the only way in.
                         Action::make('email')
                             ->label('Sign In with Email')
                             ->icon(Heroicon::OutlinedEnvelope)
-                            ->color('gray')
-                            ->outlined()
+                            ->color($ssoUrl !== null ? 'gray' : 'primary')
+                            ->outlined($ssoUrl !== null)
                             ->url($emailUrl)
                             ->extraAttributes(['data-testid' => 'email-login']),
                     ])->fullWidth(),
                     Text::make('For approved external partners without a NetID.')
                         ->extraAttributes(['class' => 'nu-sign-in-hint']),
+                    // Tells testers why there is no NetID button; production keeps its configuration to itself.
+                    Text::make('NetID sign-in isn\'t set up in this environment.')
+                        ->extraAttributes(['class' => 'nu-sign-in-hint', 'data-testid' => 'netid-not-set-up'])
+                        ->visible($ssoUrl === null && ! App::isProduction()),
                 ])->dense()->visible($localAuthEnabled),
 
                 Text::make('Development')
