@@ -27,7 +27,10 @@ class QueueValidator implements ConfigValidator
 
         if ($queueConnection === 'redis') {
             try {
-                return Redis::connection()->client()->ping();
+                // phpredis answers true or "+PONG", and predis a status reading "PONG".
+                $pong = Redis::connection()->client()->ping();
+
+                return $pong === true || in_array((string) $pong, ['PONG', '+PONG'], true);
             } catch (Throwable) {
                 return false;
             }
