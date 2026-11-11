@@ -16,8 +16,8 @@ The starter includes an API for programmatic access to your application. [Larave
 <Aside>
 If your application does not require an API, you can disable the entire feature set:
 
-```php
-// .env
+```bash
+# .env
 API_ENABLED=false
 ```
 
@@ -41,7 +41,7 @@ No endpoint creates credentials. Service clients and OAuth applications are regi
 
 Passport also serves `GET /oauth/authorize`, where a person approves an application on the consent screen, and `POST /oauth/token/refresh`, which refreshes the transient tokens Passport's own JavaScript uses and which the starter doesn't use. A refused request's `WWW-Authenticate` header names the realm `{APP_NAME} API` (`api.auth_realm`).
 
-The [API Specification](/api) documents the endpoints under `/api` and how to authenticate with each kind of credential.
+The [API Specification](/api) documents the endpoints under `/api` and how to authenticate with each kind of credential. It's an OpenAPI 3.1 document, `docs/schemas/api-schema.yaml`, that `composer openapi:generate:v1` builds from the `#[OA\...]` attributes in `app/` and Chassis. The command passes `-c cleanup.enabled=false`, so the pagination and validation-problem schemas stay in the document for your endpoints to reference even though no starter endpoint uses them yet.
 
 ## Core Concepts
 
@@ -51,6 +51,8 @@ An **API User** represents an integration: a machine actor, separate from the pe
 
 - **Never signs in** - API users have no way to sign in to either panel.
 - **Scoped authority** - They can only be assigned **API Integration** roles, so they are never granted permissions beyond what an integration needs.
+
+Administrators add one with **Add API User** on the Users list, which creates the API user and its first service client together. Its username starts with `api-` and can't repeat another account's, including a deleted one's. Deleting or deactivating an API user revokes its service clients at once, each recorded as **Service Client Revoked** in its audit history.
 
 ### Service Clients
 
@@ -72,7 +74,7 @@ Issue a separate client for each system that calls your API, even when they act 
 
     2. **Credential delivery**
 
-       The client ID and secret are displayed **once**. Copy and store the secret securely: it is stored hashed and cannot be retrieved later.
+       The client ID and secret are displayed **once**, in full, each with a **Copy** button. Copy and store the secret securely: it is stored hashed and cannot be retrieved later. Once the client is issued, the wizard has no **Back** button, and it closes with **I've Saved It**.
 
     3. **Getting an access token**
 
@@ -126,7 +128,7 @@ People who hold the **Create Personal Access Tokens** permission can call the AP
 - **Shown once** - The token is shown once, after it is created, and never stored in plain text.
 - **Reminders** - People are emailed 30, 14, 7, 3 and 1 days before a token expires (`api.personal_access_tokens.expiration_notifications.intervals`), unless they turn it off on their Preferences page.
 
-A token stops working as soon as its owner loses the permission, is deactivated or is deleted; `oauth:revoke-ineligible`, hourly in production, marks such tokens revoked. An administrator impersonating someone can see their tokens but can't create or revoke them. Administrators revoke a person's token, for example one that leaked, on the person's **Personal Access Tokens** tab in the administration panel, which records it in the person's audit history.
+A token stops working as soon as its owner loses the permission, is deactivated or is deleted. Deactivating or deleting an account revokes its tokens at once; for an owner who lost the permission, `oauth:revoke-ineligible`, hourly in production, marks them revoked. An administrator impersonating someone can see their tokens but can't create or revoke them. Administrators revoke a person's token, for example one that leaked, on the person's **Personal Access Tokens** tab in the administration panel, which records it in the person's audit history.
 
 Passport issues personal access tokens through a personal access client, which the starter creates the first time someone creates a token.
 
@@ -156,7 +158,7 @@ Administrators register applications under **API** → **Applications** in the a
 - **Confidential or public** - A confidential application, which has a server, gets a client secret, shown once. A public one, such as a desktop or browser application, has no secret and must use PKCE. Regenerate a confidential application's secret from its actions.
 - **First party** - Skips the consent screen, for applications your organization runs and trusts.
 
-Revoking an application removes everyone's access to it and every connection.
+Editing an application's allowed scopes doesn't change tokens already issued: they keep their scopes, and new authorizations can request only the scopes now allowed. Regenerating a confidential application's secret stops the old one at once. Revoking an application removes everyone's access to it and every connection. Each of these is recorded in the administrator's audit history. The actions behind them, in `App\Domains\Api\Actions\Applications`, refuse a client that isn't a connected application, such as a service client or an MCP client.
 
 ### The Flow
 
@@ -166,7 +168,7 @@ Revoking an application removes everyone's access to it and every connection.
 4. The application exchanges the code at `POST /oauth/token` (`grant_type=authorization_code`, with its `code_verifier`) for an access token that lasts one hour and a refresh token.
 5. It refreshes at `POST /oauth/token` (`grant_type=refresh_token`). Each refresh token can be used once and lasts 30 days, so a connection unused for 30 days expires.
 
-The consent screen offers, and the token carries, only the requested scopes the person holds themselves, so an application can never do more than the person who connected it. The consent screen asks again when an application requests scopes the person hasn't granted, or after its access tokens have expired. An administrator impersonating someone can't approve applications for them. A person sent to the consent screen by an application that was deleted or revoked sees an **Application Not Registered** page instead of Passport's JSON error. No other site can show the consent screen in a frame, so none can trick someone into pressing Approve.
+The consent screen offers, and the token carries, only the requested scopes the person holds themselves, so an application can never do more than the person who connected it. The consent screen asks again when an application requests scopes the person hasn't granted, or after its access tokens have expired. A deactivated account can't approve an application, and an administrator impersonating someone can't approve applications for them. A person sent to the consent screen by an application that was deleted or revoked sees an **Application Not Registered** page instead of Passport's JSON error. No other site can show the consent screen in a frame, so none can trick someone into pressing Approve.
 
 Who may approve, which scopes a connection gets and what the screen shows are decided in `App\Domains\Api\Passport\OAuthConsent`. Change the screen's wording in `resources/views/public/oauth/authorize.blade.php`, and what it decides in `OAuthConsent`.
 
@@ -204,8 +206,8 @@ You can adjust these intervals in the configuration:
 
 To disable them:
 
-```php
-// .env
+```bash
+# .env
 API_CLIENT_SECRET_EXPIRATION_NOTIFICATIONS_ENABLED=false
 ```
 
@@ -232,6 +234,8 @@ Requests to protected API endpoints are logged to the `api_request_logs` table f
 ### What Gets Logged
 
 The authenticated API routes and the MCP server are logged. Passport's `/oauth/*` endpoints, the public routes such as `/api/health`, and the MCP discovery and registration routes aren't.
+
+People with **View API Request Logs** read the log, with its charts, under **API** → **API Requests** in the administration panel, which is hidden while the API or request logging is off. The table loads after the page appears, and refreshes every 30 seconds only while its **Live** filter is on.
 
 Every log entry includes:
 
@@ -286,11 +290,10 @@ MCP requests also record their JSON-RPC method, tool and outcome; see [MCP Serve
 
 Sampling is off by default (`API_REQUEST_LOGGING_SAMPLING_ENABLED=false`, `API_REQUEST_LOGGING_SAMPLE_RATE=1.0`), so every request is logged. To reduce database load, turn on probabilistic sampling:
 
-```php
-// .env
-
+```bash
+# .env, to log 10% of successful requests
 API_REQUEST_LOGGING_SAMPLING_ENABLED=true
-API_REQUEST_LOGGING_SAMPLE_RATE=0.1 // Log 10% of requests
+API_REQUEST_LOGGING_SAMPLE_RATE=0.1
 ```
 
 :::tip[Failures are always logged]
@@ -299,13 +302,13 @@ Non-successful requests (`4xx`/`5xx`) are excluded from sampling and are **alway
 
 ### Production Considerations
 
-**This is a basic utility, not a replacement for full-scale observability solutions.**
+**Request logging is a basic utility, not a replacement for an observability service.**
 
 Database-based logging helps during local development to spot slow endpoints, and works well for low-traffic non-production environments.
 
 For production applications expecting high volume:
 
-- **Use a dedicated APM:** Tools like [New Relic](https://newrelic.com) or [Datadog](https://www.datadoghq.com) provide deeper insights and avoid database bloat.
+- **Use a dedicated APM:** Tools like [New Relic](https://newrelic.com) or [Datadog](https://www.datadoghq.com) show more and keep the database small.
 - **Adjust sampling:** If you keep this feature enabled in production, consider setting a very low sampling rate (or disabling it entirely) to avoid the database write overhead.
 
 ## Rate Limiting
@@ -334,15 +337,15 @@ Integrations call the API from servers, where CORS doesn't apply, so no browser 
 
 ## Authorization
 
-To handle granular access control for API users, the system leverages the existing role and permission structure.
+API users are authorized with the same roles and permissions as everyone else.
 
 ### API Integration Role Type
 
-API users can **ONLY** be assigned roles with a role type of **API Integration**. This prevents API users from receiving permissions that are not relevant to programmatic access.
+API users can **only** be assigned roles with a role type of **API Integration**, and only API users can be assigned those roles. `Role::suits()` decides, and `assignRoleWithAudit()` throws an `InvalidArgumentException` for a role that doesn't suit the user. This keeps permissions that aren't relevant to programmatic access away from API users.
 
 ### API-Relevant Permissions
 
-When creating/editing **API Integration** roles, only permissions marked as API-relevant are presented for assignment. These are determined by the `isApiRelevant()` method on the `SystemPermission`:
+When creating or editing an **API Integration** role, only permissions marked as API-relevant are offered. `SystemPermission::isApiRelevant()` marks them:
 
 ```php
 // app/Domains/Access/Enums/SystemPermission.php
@@ -355,7 +358,7 @@ public function isApiRelevant(): bool
 }
 ```
 
-Each API-relevant permission is also an OAuth scope of the same name (`view-users`), registered with Passport in `OAuthServiceProvider`. As you add new permissions to the system, ensure to update this method accordingly.
+Each API-relevant permission is also an OAuth scope of the same name (`view-users`). `App\Domains\Api\ApiScopes` lists them, with `mcp:use`, and `OAuthServiceProvider` registers them with Passport. When you add a permission an integration or a person's token should use, mark it here.
 
 ### Managing API Access
 
