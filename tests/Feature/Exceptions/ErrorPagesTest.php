@@ -40,16 +40,14 @@ final class ErrorPagesTest extends TestCase
     }
 
     /**
-     * @return array<string, array{int, string, string}>
+     * @return \Iterator<string, array{int, string, string}>
      */
-    public static function actions(): array
+    public static function actions(): \Iterator
     {
-        return [
-            'unauthorized' => [401, 'Sign In', '/app/login'],
-            'forbidden' => [403, 'Go to the Home Page', '/'],
-            'expired' => [419, 'Reload the Page', '/changelog-page'],
-            'too many requests' => [429, 'Go Back', '/changelog-page'],
-        ];
+        yield 'unauthorized' => [401, 'Sign In', '/app/login'];
+        yield 'forbidden' => [403, 'Go to the Home Page', '/'];
+        yield 'expired' => [419, 'Reload the Page', '/changelog-page'];
+        yield 'too many requests' => [429, 'Go Back', '/changelog-page'];
     }
 
     #[DataProvider('actions')]
@@ -69,8 +67,7 @@ final class ErrorPagesTest extends TestCase
     {
         Route::get('/__test/too-many', fn () => abort(429))->middleware('web');
 
-        $this->get('/__test/too-many', ['referer' => 'https://example.com/elsewhere'])
-            ->assertStatus(429)
+        $this->get('/__test/too-many', ['referer' => 'https://example.com/elsewhere'])->assertTooManyRequests()
             ->assertSee('href="' . url('/') . '"', escape: false)
             ->assertDontSee('example.com');
     }
