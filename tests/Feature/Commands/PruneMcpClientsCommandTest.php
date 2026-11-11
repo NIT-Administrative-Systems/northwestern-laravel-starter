@@ -63,6 +63,26 @@ final class PruneMcpClientsCommandTest extends TestCase
         $this->assertSame(CredentialStatus::Active, $recent?->fresh()?->status);
     }
 
+    // Revoking deletes the connections, which must not make it look never connected.
+    public function test_a_revoked_client_is_kept_on_the_next_run(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo(SystemPermission::UseMcp);
+        $this->actingAs($user);
+        $this->issueMcpToken();
+        $client = OAuthConnection::query()->sole()->oauth_client;
+
+        $this->travel(91)->days();
+        $this->artisan(PruneMcpClientsCommand::class)->assertSuccessful();
+        $this->travel(1)->days();
+
+        $this->artisan(PruneMcpClientsCommand::class)
+            ->expectsOutputToContain('Deleted 0 unconnected and revoked 0 unused MCP client(s).')
+            ->assertSuccessful();
+
+        $this->assertSame(CredentialStatus::Revoked, $client?->fresh()?->status);
+    }
+
     public function test_administrator_registered_applications_are_never_pruned(): void
     {
         $application = $this->registerApplication();
