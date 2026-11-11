@@ -78,6 +78,18 @@ final class SignInAsControllerTest extends TestCase
         $this->assertGuest();
     }
 
+    // Like every other sign-in method, it says the account is deactivated instead of not found.
+    public function test_a_deactivated_account_is_refused(): void
+    {
+        $this->seededAdmin()->delete();
+
+        $this->get('/app/login/as/nuit.admin')
+            ->assertForbidden()
+            ->assertSee('Account Deactivated');
+
+        $this->assertGuest();
+    }
+
     public function test_the_sign_in_page_offers_the_seeded_demo_users(): void
     {
         $this->seededAdmin();
