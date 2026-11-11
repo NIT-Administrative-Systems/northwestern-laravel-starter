@@ -23,7 +23,7 @@ final class FindOrUpdateUserFromDirectoryTest extends TestCase
 {
     use IssuesPersonalAccessTokens;
 
-    public function test_invoke(): void
+    public function test_a_lookup_records_a_failure_or_syncs_the_person(): void
     {
         $directoryApi = $this->createStub(DirectorySearch::class);
 
@@ -60,7 +60,7 @@ final class FindOrUpdateUserFromDirectoryTest extends TestCase
         $this->assertSame('Studie', $deactivated->fresh()?->first_name);
     }
 
-    // The directory's email belongs to a deactivated account, which is found rather than duplicated.
+    // The directory's email finds the deactivated account instead of duplicating it.
     public function test_a_deactivated_user_found_by_email_stays_deactivated(): void
     {
         $directoryApi = $this->createStub(DirectorySearch::class);
@@ -73,6 +73,51 @@ final class FindOrUpdateUserFromDirectoryTest extends TestCase
         $this->assertTrue($deactivated->is($user));
         $this->assertSoftDeleted($deactivated);
         $this->assertSame(1, User::withTrashed()->where('username', 'gone456')->count());
+    }
+
+    // Students are stored with their student address, so a search by
+    // their other address must find them by NetID and update them.
+    public function test_an_email_search_updates_the_person_whose_stored_email_is_different(): void
+    {
+        $directoryApi = $this->createStub(DirectorySearch::class);
+        $directoryApi->method('lookup')->willReturn(self::studentData('abc123'));
+        $existing = User::factory()->create(['username' => 'abc123', 'email' => 'former-address@northwestern.edu', 'first_name' => 'Stale']);
+
+        $user = $this->service(['directorySearch' => $directoryApi])('student-worker@northwestern.edu');
+
+        $existing->refresh();
+        $this->assertTrue($existing->is($user));
+        $this->assertSame('Studie', $existing->first_name);
+        $this->assertSame('StudieNU20XX@u.northwestern.edu', $existing->email);
+    }
+
+    public function test_a_failed_lookup_finds_a_deactivated_account_and_leaves_it_deactivated(): void
+    {
+        $deactivated = User::factory()->create(['username' => 'gone789']);
+        $deactivated->delete();
+
+        $directoryApi = $this->createStub(DirectorySearch::class);
+        $directoryApi->method('lookup')->willReturn(false);
+
+        $user = $this->service(['directorySearch' => $directoryApi])('gone789');
+
+        $this->assertTrue($deactivated->is($user));
+        $this->assertSoftDeleted($deactivated);
+    }
+
+    public function test_an_incomplete_entry_marks_a_deactivated_accounts_netid_inactive(): void
+    {
+        $deactivated = User::factory()->create(['username' => 'gone789', 'netid_inactive' => false]);
+        $deactivated->delete();
+
+        $directoryApi = $this->createStub(DirectorySearch::class);
+        $directoryApi->method('lookup')->willReturn(['uid' => 'gone789']);
+
+        $user = $this->service(['directorySearch' => $directoryApi])('gone789');
+
+        $this->assertTrue($deactivated->is($user));
+        $this->assertTrue($deactivated->fresh()?->netid_inactive);
+        $this->assertSoftDeleted($deactivated);
     }
 
     public function test_missing_affiliation_throws_exception(): void
@@ -134,7 +179,7 @@ final class FindOrUpdateUserFromDirectoryTest extends TestCase
         $this->service(['directorySearch' => $directoryApi])('no-email');
     }
 
-    public function test_returns_null_if_existing_user_is_api_type(): void
+    public function test_an_api_users_username_finds_no_one(): void
     {
         User::factory()->create([
             'username' => 'api-user',
@@ -146,7 +191,7 @@ final class FindOrUpdateUserFromDirectoryTest extends TestCase
         $this->assertNotInstanceOf(User::class, $result);
     }
 
-    public function test_catches_exception_during_immediate_job_dispatch(): void
+    public function test_a_failed_immediate_job_is_reported_and_the_user_still_returned(): void
     {
         config(['platform.wildcard_photo_sync' => true]);
 
@@ -197,7 +242,7 @@ final class FindOrUpdateUserFromDirectoryTest extends TestCase
         $this->assertEquals('existing@northwestern.edu', $user->email);
     }
 
-    public function test_missing_mail_field_but_has_student_email(): void
+    public function test_a_student_address_is_enough_without_the_mail_field(): void
     {
         $directoryApi = $this->createStub(DirectorySearch::class);
         User::factory()->create([
@@ -252,8 +297,10 @@ final class FindOrUpdateUserFromDirectoryTest extends TestCase
         $this->assertNotNull($user->directory_sync_last_failed_at);
     }
 
-    // lookup() answers false both when the NetID isn't found and when Directory Search can't be
-    // reached, so for someone with an account it proves nothing: they sign in as they were.
+    // lookup() answers false both for a NetID it doesn't
+    // know and when Directory Search can't be reached.
+    //
+    // That proves nothing about someone with an account, who signs in as before.
     public function test_a_failed_lookup_leaves_an_existing_person_active(): void
     {
         $user = User::factory()->create(['username' => 'abc123', 'auth_type' => AuthType::SSO, 'netid_inactive' => false, 'first_name' => 'Stored']);
@@ -287,7 +334,8 @@ final class FindOrUpdateUserFromDirectoryTest extends TestCase
         $this->assertTrue($user->fresh()->netid_inactive);
     }
 
-    // Nothing is known about them, so the caller treats it as an outage: sign-in retries, then shows the 503 page.
+    // Nothing is known about them, so the caller treats it as
+    // an outage: sign-in retries, then shows the 503 page.
     public function test_a_failed_lookup_for_someone_new_finds_no_one_and_creates_no_account(): void
     {
         $directoryApi = $this->createStub(DirectorySearch::class);
@@ -342,7 +390,7 @@ final class FindOrUpdateUserFromDirectoryTest extends TestCase
         $this->assertNotNull($user->directory_sync_last_failed_at);
     }
 
-    public function test_get_last_error(): void
+    public function test_it_passes_on_directory_searchs_last_error(): void
     {
         $directoryApi = $this->createStub(DirectorySearch::class);
         $directoryApi->method('getLastError')->willReturn('Foobar error');
@@ -425,7 +473,7 @@ final class FindOrUpdateUserFromDirectoryTest extends TestCase
         $this->assertEquals('abc123', $user->username);
     }
 
-    public function test_immediate_job_execution_continues_on_job_failure(): void
+    public function test_the_user_is_created_even_when_an_immediate_job_fails(): void
     {
         $directoryApi = $this->createStub(DirectorySearch::class);
         $directoryApi->method('lookup')->willReturn(self::studentData('abc123'));

@@ -17,14 +17,18 @@ return new class extends Migration
             $table->text('body');
             $table->string('severity');
 
-            // `everyone`, `targeted` (the roles and affiliations below) or `public` (signed-out visitors too).
-            // The audience lives in JSON columns rather than a pivot, so audits record it and deleting a role
-            // leaves nothing behind.
+            // everyone, targeted (the roles
+            // and affiliations below) or
+            // public, which includes
+            // signed-out visitors.
+            //
+            // The audience lives in JSON columns rather than a pivot, so
+            // it's audited and deleting a role leaves nothing behind.
             $table->string('audience');
             $table->json('role_ids')->nullable();
             $table->json('affiliations')->nullable();
 
-            // A draft has no published_at. A published announcement shows from starts_at until ends_at.
+            // A draft has no published_at; a published one shows from starts_at until ends_at.
             $table->timestamp('published_at')->nullable();
             $table->timestamp('starts_at')->nullable();
             $table->timestamp('ends_at')->nullable();

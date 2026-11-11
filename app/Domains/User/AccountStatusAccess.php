@@ -11,10 +11,15 @@ use App\Domains\User\Models\User;
 use Illuminate\Auth\Access\Response;
 
 /**
- * Who may deactivate or reactivate an account: someone with Edit Users, acting on someone else,
- * under their own name. It's decided here rather than in a policy because Manage All passes every
- * policy through Gate::before, and not even a super-administrator deactivates their own account or
- * changes one while impersonating. A null actor is the system, such as a scheduled sweep.
+ * Who may deactivate or reactivate an account:
+ * someone with Edit Users, acting on another
+ * person's account under their own name.
+ *
+ * It isn't a policy because Manage All passes every policy through
+ * Gate::before, and not even a super-administrator deactivates
+ * their own account or acts on another's while impersonating.
+ *
+ * A null actor is the system, such as a scheduled sweep.
  *
  * @see DeactivateUser
  * @see ReactivateUser

@@ -10,8 +10,11 @@ use App\Domains\User\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 
 /**
- * Restores an account {@see DeactivateUser} deactivated. The credentials it revoked stay revoked:
- * the person creates new ones, or an administrator issues new service clients.
+ * Restores a deactivated account. Revoked credentials
+ * stay revoked, so the person creates new ones or
+ * an administrator issues new service clients.
+ *
+ * @see DeactivateUser
  */
 readonly class ReactivateUser
 {

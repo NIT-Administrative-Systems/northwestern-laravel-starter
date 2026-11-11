@@ -24,11 +24,13 @@ use Illuminate\Support\HtmlString;
 use Spatie\LaravelMarkdown\MarkdownRenderer;
 
 /**
- * A message from the application's administrators, shown in a banner and on the Announcements
- * page to its audience while it's live.
+ * A message from the application's administrators, which its audience
+ * sees in a banner and on the Announcements page while it's live.
  *
- * A draft has no `published_at`. A published announcement is live from `starts_at` until
- * `ends_at`, if it has one; its status is worked out from those dates, with no scheduled jobs.
+ * A draft has no published_at. A published announcement is
+ * live from starts_at until its ends_at, if it has one.
+ *
+ * Its status is worked out from those dates, so no scheduled job changes it.
  *
  * @property int $id
  * @property string $title
@@ -89,7 +91,7 @@ class Announcement extends BaseModel
     protected function status(): Attribute
     {
         // Not cached: it changes with the dates, and with the time.
-        return Attribute::get(fn (): AnnouncementStatus => $this->statusAt(Carbon::now()))->withoutObjectCaching();
+        return Attribute::get(fn (): AnnouncementStatus => $this->statusAt(now()))->withoutObjectCaching();
     }
 
     public function isDismissible(): bool
@@ -98,8 +100,8 @@ class Announcement extends BaseModel
     }
 
     /**
-     * The body as HTML. Raw HTML in the Markdown is shown as text, never rendered, and unsafe
-     * links (`javascript:` and the like) are dropped.
+     * The body as HTML. Raw HTML in the Markdown shows as text and is never
+     * rendered, and unsafe links, such as javascript: ones, are dropped.
      */
     public function bodyHtml(): HtmlString
     {
@@ -143,7 +145,7 @@ class Announcement extends BaseModel
     #[Scope]
     protected function live(Builder $query, ?CarbonInterface $at = null): Builder
     {
-        $at ??= Carbon::now();
+        $at ??= now();
 
         return $query->whereNotNull('published_at')
             ->where('starts_at', '<=', $at)
@@ -151,8 +153,7 @@ class Announcement extends BaseModel
     }
 
     /**
-     * Published announcements that have started: live ones and ended ones, for the
-     * Announcements page.
+     * Started announcements, live or ended, for the Announcements page.
      *
      * @param  Builder<self>  $query
      * @return Builder<self>
@@ -160,11 +161,12 @@ class Announcement extends BaseModel
     #[Scope]
     protected function started(Builder $query, ?CarbonInterface $at = null): Builder
     {
-        return $query->whereNotNull('published_at')->where('starts_at', '<=', $at ?? Carbon::now());
+        return $query->whereNotNull('published_at')->where('starts_at', '<=', $at ?? now());
     }
 
     /**
-     * Announcements whose audience includes the person, or, with no person, signed-out visitors.
+     * Announcements for the person, or with no person, for signed-out visitors.
+     *
      * Super Administrators see every announcement.
      *
      * @param  Builder<self>  $query

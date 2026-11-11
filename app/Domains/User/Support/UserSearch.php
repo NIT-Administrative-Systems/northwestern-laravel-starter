@@ -94,8 +94,10 @@ class UserSearch
             $this->apply($userQuery, $search, $includeEmail);
         };
 
-        // whereHas() on a MorphTo constrains the parent model's builder rather than the user
-        // builder, so polymorphic relations must name the user type explicitly.
+        // whereHas() on a MorphTo constrains the
+        // parent's builder instead of the user
+        // builder, so a polymorphic relation
+        // names the user type explicitly.
         if ($query->getModel()->{$relation}() instanceof MorphTo) {
             $method = $boolean === 'or' ? 'orWhereHasMorph' : 'whereHasMorph';
 

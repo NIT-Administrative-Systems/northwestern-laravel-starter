@@ -10,7 +10,7 @@ use Filament\Support\Contracts\HasLabel;
 use Filament\Support\Icons\Heroicon;
 
 /**
- * Where an announcement is in its life, worked out from its dates rather than stored.
+ * Where an announcement is in its life, worked out from its dates, not stored.
  */
 enum AnnouncementStatus: string implements HasColor, HasIcon, HasLabel
 {

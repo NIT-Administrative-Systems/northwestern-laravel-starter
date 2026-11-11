@@ -8,13 +8,13 @@ use App\Domains\Support\Enums\AnnouncementStatus;
 use App\Domains\Support\Jobs\NotifyAnnouncementAudience;
 use App\Domains\Support\Models\Announcement;
 use Carbon\CarbonInterface;
-use Illuminate\Support\Carbon;
 use InvalidArgumentException;
 
 /**
- * Publishes a draft: it shows from `$startsAt` until `$endsAt`, if given. With `$notify`, its
- * audience is told once, as soon as it starts: now, or by `announcements:notify` for one
- * that starts later.
+ * Publishes a draft, which shows from $startsAt until $endsAt, if given.
+ *
+ * With $notify, its audience is told once, as soon as it starts: right
+ * away, or through announcements:notify for one that starts later.
  */
 readonly class PublishAnnouncement
 {
@@ -29,7 +29,7 @@ readonly class PublishAnnouncement
         }
 
         $announcement->forceFill([
-            'published_at' => Carbon::now(),
+            'published_at' => now(),
             'starts_at' => $startsAt,
             'ends_at' => $endsAt,
             'notify_audience' => $notify,

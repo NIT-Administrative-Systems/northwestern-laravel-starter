@@ -11,12 +11,13 @@ use App\Domains\User\Models\User;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Throwable;
 
 /**
- * Creates a new local user account for external (non-Northwestern) users.
+ * Creates a local account for someone outside Northwestern.
  *
- * Local users authenticate via one-time verification codes sent to their email. Only the email is
- * required: people added in bulk start with whatever the list gave for them.
+ * Local accounts sign in with a one-time code sent to their email. Only the email
+ * is required: people added in bulk start with whatever the list gave for them.
  */
 readonly class CreateLocalUser
 {
@@ -42,13 +43,14 @@ readonly class CreateLocalUser
                 'job_titles' => filled($title) ? [$title] : [],
                 'departments' => filled($department) ? [$department] : [],
                 'description' => $description,
+                'timezone' => config('platform.default_user_timezone'),
             ]);
-        }), 0, fn (\Throwable $e) => $e instanceof UniqueConstraintViolationException);
+        }), 0, fn (Throwable $e) => $e instanceof UniqueConstraintViolationException);
 
         if ($sendLoginLink) {
             try {
                 resolve(LoginCodes::class)->issueFor($user, request());
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 report($e);
             }
         }
@@ -57,18 +59,15 @@ readonly class CreateLocalUser
     }
 
     /**
-     * Generate a unique username from email address.
-     * Format: email-{random} to ensure uniqueness
+     * Generate an unused username: the email's local part and six random characters.
      */
     private function generateUsername(string $email): string
     {
-        $baseUsername = Str::before(strtolower($email), '@');
-        $baseUsername = Str::slug($baseUsername);
+        $baseUsername = Str::slug(Str::before(strtolower($email), '@'));
 
-        // Ensure uniqueness by appending random string
         do {
             $username = $baseUsername . '-' . Str::random(length: 6);
-        } while (User::where('username', $username)->exists());
+        } while (User::query()->where('username', $username)->exists());
 
         return $username;
     }

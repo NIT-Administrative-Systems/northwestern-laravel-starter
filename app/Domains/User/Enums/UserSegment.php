@@ -23,7 +23,7 @@ enum UserSegment: string implements HasColor, HasIcon, HasLabel
     public function getLabel(): string
     {
         return match ($this) {
-            // Auto-converts the string to a title. You can override one by adding a specific case.
+            // Auto-converts the value to a title. Override one by adding a specific case.
             default => Str::of($this->value)->replace('-', ' ')->title()->toString(),
         };
     }

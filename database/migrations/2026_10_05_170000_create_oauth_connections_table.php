@@ -8,9 +8,14 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * A person's connection to an OAuth application: recorded when the application first gets a
- * token for them, and removed when they disconnect it. It outlives Passport's token rows,
- * which `passport:purge` deletes, so the first connection date and the authorization survive.
+ * A person's connection to an OAuth application. It's
+ * recorded when the application first gets a token
+ * for them, and removed when they disconnect it.
+ *
+ * It outlives Passport's token rows,
+ * which passport:purge deletes, so
+ * the first connection date and
+ * the authorization survive.
  */
 return new class extends Migration
 {

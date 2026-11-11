@@ -8,8 +8,8 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * The starter's own columns on Passport's clients table, kept out of Passport's published
- * migration so that migration stays as Passport ships it.
+ * The starter's own columns on Passport's OAuth clients table, kept out of
+ * Passport's published migration so that it stays as Passport ships it.
  */
 return new class extends Migration
 {
@@ -17,8 +17,9 @@ return new class extends Migration
     {
         Schema::table('oauth_clients', function (Blueprint $table) {
             $table->string('origin')->default('administrator')->after('provider');
-            // OAuth applications: what they're for, who to contact, whether consent is skipped,
-            // and which scopes they may request (null allows every scope, as for service clients).
+            // OAuth applications' purpose, contact, whether consent
+            // is skipped, and the scopes they may request, where
+            // null allows every scope, as for service clients.
             $table->text('description')->nullable()->after('name');
             $table->string('contact_email')->nullable()->after('description');
             $table->boolean('first_party')->default(false)->after('origin');

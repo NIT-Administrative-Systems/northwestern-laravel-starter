@@ -10,16 +10,24 @@ use Illuminate\Support\Facades\DB;
 /**
  * Indexes the two audit queries the administration panel runs on every page load.
  *
- * - `created_at`: the Audit Logs table sorts by it by default. Without the index,
- *   PostgreSQL scans and sorts the whole table to return the first page.
- * - `audits_role_activity_index`: a partial index covering the {@see Audit::roleActivity()}
- *   scope used by the Role Activity table and its stats widget. The predicate must stay
- *   in sync with that scope's event list, or the planner stops using the index. The
- *   included columns let counts, stats, and user searches run as index-only scans.
+ * The Audit Logs table sorts by created_at.
  *
- * Both indexes are built concurrently so the migration does not block audit writes,
- * which happen on every audited model save. Concurrent builds cannot run inside a
- * transaction.
+ * Without an index, PostgreSQL scans and sorts
+ * the whole table to return the first page.
+ *
+ * audits_role_activity_index is a partial index for
+ * the Audit::roleActivity() scope, which the Role
+ * Activity table and its stats widget both use.
+ *
+ * Its predicate must match the scope's event list, or the planner stops using it.
+ *
+ * Its included columns let counts, stats and
+ * user searches run as index-only scans.
+ *
+ * Both are built concurrently, so the migration doesn't block the audit write that
+ * every audited save makes. A concurrent build can't run inside a transaction.
+ *
+ * @see Audit::roleActivity()
  */
 return new class extends Migration
 {

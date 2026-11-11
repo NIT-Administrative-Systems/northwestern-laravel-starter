@@ -84,9 +84,12 @@ final class UserBuilderTest extends TestCase
 
     public function test_where_email_equals_lowercases_in_the_database_not_in_php(): void
     {
-        // PHP's mb_strtolower turns İ into i plus a combining dot, where the database gives a plain i, so the value
-        // has to be lowercased by the database too. How the database lowercases İ depends on the platform's C
-        // library (macOS keeps the dot), so this runs only where the database gives a plain i, as CI's Linux does.
+        // PHP's mb_strtolower turns İ into i with a combining dot, while the
+        // database gives a plain i, so the database lowercases the value.
+        //
+        // The database's lowercase İ depends on the platform's
+        // C library, and macOS keeps the dot, so this runs
+        // only where it's a plain i, as on CI's Linux.
         if (DB::scalar("select lower('İ')") !== 'i') {
             $this->markTestSkipped("This database doesn't lowercase İ to a plain i.");
         }
@@ -117,7 +120,7 @@ final class UserBuilderTest extends TestCase
 
     public function test_where_email_equals_works_alongside_a_join(): void
     {
-        // The column is qualified, so a query that joins another table with an email column isn't ambiguous.
+        // The column is qualified, so a join with another email column isn't ambiguous.
         $user = User::factory()->create(['email' => 'joined@example.com']);
 
         $found = User::query()

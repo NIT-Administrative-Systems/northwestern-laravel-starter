@@ -162,10 +162,6 @@ readonly class AddPersonToRole
             throw PersonNotAdded::notInDirectory($person);
         }
 
-        if (User::query()->onlyTrashed()->whereEmailEquals($person)->exists()) {
-            throw PersonNotAdded::deactivated($person);
-        }
-
         if (! $this->signIn->offers(SignInMethod::EmailCode)) {
             throw PersonNotAdded::noLocalAccounts($person);
         }

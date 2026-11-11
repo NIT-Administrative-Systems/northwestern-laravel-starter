@@ -14,7 +14,7 @@ use Tests\TestCase;
 #[CoversClass(SupportTicketConfirmation::class)]
 final class SupportTicketConfirmationTest extends TestCase
 {
-    public function test_build_sets_subject_markdown_and_view_data(): void
+    public function test_the_confirmation_has_the_reference_subject_and_details(): void
     {
         $user = User::factory()->affiliate()->create([
             'first_name' => 'Pat',
@@ -49,7 +49,7 @@ final class SupportTicketConfirmationTest extends TestCase
         $this->assertStringNotContainsString('by email', $html);
     }
 
-    public function test_build_greets_by_full_name_when_first_name_is_missing(): void
+    public function test_it_greets_by_full_name_without_a_first_name(): void
     {
         $user = User::factory()->affiliate()->create([
             'first_name' => null,

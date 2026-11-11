@@ -37,8 +37,10 @@ final class TeamDynamixGatewayTest extends TestCase
         ]);
     }
 
-    // The gateway creates tickets in the SDK's default ticketing application. The SDK's own config reads
-    // its name with config() instead of env(), so it only comes from the environment through ours.
+    // The gateway creates tickets in the SDK's default
+    // ticketing application. The SDK's config reads
+    // its name with config(), not env(), so only
+    // ours can take it from the environment.
     public function test_the_ticketing_application_names_come_from_the_environment(): void
     {
         $_ENV['TDX_TICKET_APP_NAME'] = $_SERVER['TDX_TICKET_APP_NAME'] = 'NU Tickets';

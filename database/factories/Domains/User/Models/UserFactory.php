@@ -40,10 +40,7 @@ class UserFactory extends Factory
         ];
     }
 
-    /**
-     * @return static
-     */
-    public function configure()
+    public function configure(): static
     {
         return $this->afterCreating(function (User $user) {
             if ($user->auth_type === AuthType::SSO) {
@@ -53,21 +50,7 @@ class UserFactory extends Factory
         });
     }
 
-    /**
-     * Faker's `unique()` method is only unique in the context of the current instance. This means that the uniqueness
-     * is not guaranteed across different instances of the Faker generator and could result in a unique constraint
-     * violation at the database level.
-     */
-    private function generateUniqueUsername(): string
-    {
-        do {
-            $username = fake()->unique()->userName();
-        } while (User::whereUsername($username)->exists());
-
-        return $username;
-    }
-
-    public function affiliate(): self
+    public function affiliate(): static
     {
         return $this->state(fn () => [
             'auth_type' => AuthType::Local,
@@ -80,21 +63,21 @@ class UserFactory extends Factory
         ]);
     }
 
-    public function faculty(): self
+    public function faculty(): static
     {
         return $this->state(fn () => [
             'primary_affiliation' => Affiliation::Faculty,
         ]);
     }
 
-    public function staff(): self
+    public function staff(): static
     {
         return $this->state(fn () => [
             'primary_affiliation' => Affiliation::Staff,
         ]);
     }
 
-    public function api(): self
+    public function api(): static
     {
         return $this->state(fn () => [
             'auth_type' => AuthType::API,
@@ -111,7 +94,7 @@ class UserFactory extends Factory
         ]);
     }
 
-    public function student(): self
+    public function student(): static
     {
         return $this->state(fn () => [
             'email' => sprintf('%s.%s@u.northwestern.edu', fake()->userName(), fake()->year()),
@@ -119,5 +102,18 @@ class UserFactory extends Factory
             'job_titles' => [],
             'departments' => [],
         ]);
+    }
+
+    /**
+     * Faker's unique() is unique only within one Faker instance, so
+     * a username can still exist in the database; check for it.
+     */
+    private function generateUniqueUsername(): string
+    {
+        do {
+            $username = fake()->unique()->userName();
+        } while (User::query()->where('username', $username)->exists());
+
+        return $username;
     }
 }

@@ -12,12 +12,15 @@ use App\Domains\Support\Models\SupportTicket;
 use App\Domains\User\Models\User;
 
 /**
- * Submits a person's support request: saves it as their ticket, sends it to the configured
- * ticket system ({@see TicketSystemGateway}, chosen by `support.driver` in SupportServiceProvider)
- * and records the result on the ticket.
+ * Submits a person's support request. It saves it as their ticket, sends it
+ * to the configured ticket system and records the result on the ticket.
  *
- * If a ticket system other than mail fails, the request is emailed to the support team instead
- * ({@see MailGateway}, marked as a fallback), so it's never silently lost.
+ * SupportServiceProvider picks the ticket system from support.driver.
+ *
+ * When a ticket system other than mail fails, the request goes
+ * to the support team by email instead, so it's never lost.
+ *
+ * @see MailGateway
  */
 class CreateSupportTicket
 {
@@ -28,8 +31,8 @@ class CreateSupportTicket
     }
 
     /**
-     * The ticket records which system took it, its number there, and any error. If the
-     * fallback email was sent, {@see SupportTicket::$fallback_sent_at} is set.
+     * The ticket records which system took it, its number there and any
+     * error, and fallback_sent_at when the fallback email went out.
      *
      * @param  array<string, mixed>  $request  The Contact Support form's fields
      */

@@ -8,8 +8,8 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * The starter's own columns on Passport's access tokens table, kept out of Passport's
- * published migration so that migration stays as Passport ships it.
+ * The starter's own columns on Passport's access tokens table, kept out of
+ * Passport's published migration so that it stays as Passport ships it.
  */
 return new class extends Migration
 {

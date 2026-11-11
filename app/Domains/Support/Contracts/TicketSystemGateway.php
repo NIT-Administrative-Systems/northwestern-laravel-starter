@@ -8,21 +8,15 @@ use App\Domains\Support\Gateways\CreationResult;
 use App\Domains\Support\Models\SupportTicket;
 
 /**
- * Contract for ticket system integrations.
+ * Sends a support ticket to a ticket system or by email.
  *
- * Each implementation is responsible for submitting a support ticket to an
- * external system (or email) and returning a structured result indicating
- * success or failure. Implementations must never throw — errors should be
- * captured and returned via {@see CreationResult::$creationError}.
+ * An implementation never throws: it returns a CreationResult saying
+ * whether the ticket was created, with the error when it wasn't.
  */
 interface TicketSystemGateway
 {
     /**
-     * Submit the given support ticket to the external system.
-     *
-     * @return CreationResult The outcome of the submission attempt, including
-     *                        the external ticket number on success or an error
-     *                        message on failure.
+     * Submit the ticket and report what happened.
      */
     public function create(SupportTicket $ticket): CreationResult;
 }

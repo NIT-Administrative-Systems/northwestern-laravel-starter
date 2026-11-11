@@ -35,6 +35,20 @@ final class NotifyAnnouncementAudienceTest extends TestCase
         $this->assertInstanceOf(\Illuminate\Support\Carbon::class, $announcement->fresh()?->notified_at);
     }
 
+    // An announcement deleted before the queue reaches its job has nobody to notify.
+    public function test_a_queued_run_for_a_deleted_announcement_is_dropped(): void
+    {
+        Notification::fake();
+        User::factory()->create();
+        $announcement = Announcement::factory()->create(['notify_audience' => true]);
+        $job = new NotifyAnnouncementAudience($announcement);
+        $announcement->delete();
+
+        dispatch($job);
+
+        Notification::assertNothingSent();
+    }
+
     public function test_a_targeted_announcement_notifies_only_its_audience(): void
     {
         Notification::fake();
@@ -51,8 +65,11 @@ final class NotifyAnnouncementAudienceTest extends TestCase
         Notification::assertNotSentTo($staff, AnnouncementNotification::class);
     }
 
-    // The banner asks which announcements a person sees (Announcement::visibleTo); this job asks which people an
-    // announcement is for. The two queries run in opposite directions, so this pins their matching rule together.
+    // The banner asks which announcements
+    // a person sees, and this job which
+    // people an announcement is for.
+    //
+    // The queries run in opposite directions, so this pins their rule together.
     public function test_it_notifies_exactly_the_people_who_see_the_announcement(): void
     {
         [$coordinators, $advisors] = Role::factory()->count(2)->create()->all();
@@ -82,7 +99,7 @@ final class NotifyAnnouncementAudienceTest extends TestCase
         }
     }
 
-    // A run that fails partway gives up its claim, so the next run notifies the audience.
+    // A run that fails partway gives up its claim, so the next run notifies them.
     public function test_a_failed_run_can_be_retried(): void
     {
         $person = User::factory()->create();
@@ -113,5 +130,5 @@ final class NotifyAnnouncementAudienceTest extends TestCase
         Notification::assertNothingSent();
     }
 
-    // Publishing notifies straight away; the command catches announcements scheduled for later.
+    // Publishing notifies at once; the command catches announcements scheduled later.
 }

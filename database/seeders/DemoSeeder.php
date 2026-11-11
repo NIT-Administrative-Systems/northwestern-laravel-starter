@@ -8,17 +8,18 @@ use Database\Seeders\Sample\DemoUserSeeder;
 use Illuminate\Database\Seeder;
 
 /**
- * This is a seeder intended for a sample data set used for development, testing, and demos.
+ * Sample data for local development, tests and demos.
  *
- * You CANNOT make assumptions about any of this data existing during development. This is only our
- * sample data set, and the production values may differ!
+ * Don't rely on any of it existing: it's only a
+ * sample, and production's data will differ.
  */
 class DemoSeeder extends Seeder
 {
     public function run(): void
     {
-        // StakeholderSeeder isn't called here: it looks people up in Directory Search, and local
-        // environments get their administrator from DemoUserSeeder. Deployments run it on their own.
+        // StakeholderSeeder isn't called here, as it looks people up in Directory Search.
+        //
+        // Local environments get an administrator from DemoUserSeeder instead.
         $this->call(DemoUserSeeder::class);
 
         // Add additional seeders here as needed

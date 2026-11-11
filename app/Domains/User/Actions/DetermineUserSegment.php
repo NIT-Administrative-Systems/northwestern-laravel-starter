@@ -11,18 +11,13 @@ use App\Domains\User\Models\User;
 use App\Domains\User\Models\UserLoginRecord;
 
 /**
- * Determines the user segment at login time for historical metrics.
+ * Determines a person's segment as they sign in, for the sign-in metrics.
  *
- * This action classifies users into segments when they log in, storing the segment
- * in the UserLoginRecord. This is crucial because user roles and permissions can
- * change over time, but we want to know what segment they were in at each login.
+ * The sign-in record keeps it because roles change, and counting last
+ * month's administrator sign-ins by today's roles would be wrong.
  *
- * **Why This Matters:**
- * - User roles can change (promoted to admin, demoted, etc.)
- * - Historical login metrics should reflect the user's segment at that moment
- * - Enables accurate reporting on "how many admin logins this month?"
- *
- * Expand this logic as your application grows to capture more relevant metrics.
+ * Add segments as your application grows and
+ * needs to count other kinds of sign-in.
  *
  * @see UserLoginRecord
  * @see UserSegment

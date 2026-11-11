@@ -6,12 +6,14 @@ namespace App\Domains\Support\Actions\Announcements;
 
 use App\Domains\Support\Enums\AnnouncementStatus;
 use App\Domains\Support\Models\Announcement;
-use Illuminate\Support\Carbon;
 use InvalidArgumentException;
 
 /**
- * Ends a live announcement now. It leaves the banner and stays on the Announcements page as a
- * past announcement. An ended announcement can't be published again; duplicate it instead.
+ * Ends a live announcement now. It leaves
+ * the banner at once and stays on the
+ * Announcements page as a past one.
+ *
+ * An ended announcement can't be published again; duplicate it instead.
  */
 readonly class EndAnnouncement
 {
@@ -21,6 +23,6 @@ readonly class EndAnnouncement
             throw new InvalidArgumentException('Only a live announcement can be ended.');
         }
 
-        $announcement->forceFill(['ends_at' => Carbon::now()])->save();
+        $announcement->forceFill(['ends_at' => now()])->save();
     }
 }

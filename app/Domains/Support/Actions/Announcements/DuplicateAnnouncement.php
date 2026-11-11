@@ -8,8 +8,8 @@ use App\Domains\Support\Models\Announcement;
 use App\Domains\User\Models\User;
 
 /**
- * Copies an announcement's content and audience into a new draft, for announcing something
- * again or ending one early and starting over.
+ * Copies an announcement's content and audience into a new draft, for
+ * announcing something again or ending one early and starting over.
  */
 readonly class DuplicateAnnouncement
 {

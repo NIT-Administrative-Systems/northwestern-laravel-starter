@@ -14,12 +14,12 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Processes **NetID Update** events received from Northwestern's Identity system.
+ * Handles NetID Update events from Northwestern's identity system.
  *
- * When a NetID is deactivated, deprovisioned, or put on security hold, this listener:
- * - Removes all role assignments except the default {@see SystemRole::NorthwesternUser} role
- * - Marks the user's NetID as inactive
- * - Signs them out everywhere, since they can no longer sign in with that NetID
+ * When a NetID is deactivated, deprovisioned or put on security hold, this
+ * removes every role but Northwestern User and marks the NetID inactive.
+ *
+ * It also signs the person out everywhere, as they can no longer sign in with it.
  */
 class ProcessNetIdUpdate implements ShouldQueue
 {
@@ -31,7 +31,9 @@ class ProcessNetIdUpdate implements ShouldQueue
     public function handle(NetIdUpdated $event): void
     {
         DB::transaction(function () use ($event) {
+            // A deactivated account too, so reactivating it doesn't bring back the roles.
             $user = User::query()
+                ->withTrashed()
                 ->sso()
                 ->lockForUpdate()
                 ->with('roles')

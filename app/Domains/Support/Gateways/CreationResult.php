@@ -8,11 +8,12 @@ use App\Domains\Support\Contracts\TicketSystemGateway;
 use App\Domains\Support\Enums\TicketSystem;
 
 /**
- * Immutable value object representing the outcome of a gateway submission.
+ * What happened when a gateway submitted a ticket.
  *
- * Returned by every {@see TicketSystemGateway} implementation. When {@see $creationError}
- * is true, {@see $ticketNumber} will be null and {@see $errorMessage} will contain
- * a human-readable description of the failure.
+ * Every TicketSystemGateway returns one. When creationError is true,
+ * ticketNumber is null and errorMessage explains what went wrong.
+ *
+ * @see TicketSystemGateway
  */
 readonly class CreationResult
 {

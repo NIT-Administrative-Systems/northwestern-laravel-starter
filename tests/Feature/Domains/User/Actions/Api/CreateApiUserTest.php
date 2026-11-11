@@ -41,6 +41,16 @@ final class CreateApiUserTest extends TestCase
         $this->assertTrue(Hash::check($secret, $client->secret));
     }
 
+    // The column's default is whatever the setting was when the migration ran.
+    public function test_new_api_users_get_the_default_timezone(): void
+    {
+        config(['platform.default_user_timezone' => 'America/New_York']);
+
+        [$user] = resolve(CreateApiUser::class)(username: 'api-reporting', firstName: 'Reporting', clientName: 'Production Server', secretExpiresAt: now()->addDays(90));
+
+        $this->assertSame('America/New_York', $user->fresh()?->timezone);
+    }
+
     public function test_optional_details_can_be_left_out(): void
     {
         [$user, , $client] = resolve(CreateApiUser::class)(
@@ -55,7 +65,7 @@ final class CreateApiUserTest extends TestCase
         $this->assertNull($client->allowed_ips);
     }
 
-    // The first client is refused after the user exists, so the transaction takes the user back.
+    // Refusing the client after the user exists rolls the user back too.
     public function test_a_refused_creator_leaves_no_api_user_behind(): void
     {
         try {

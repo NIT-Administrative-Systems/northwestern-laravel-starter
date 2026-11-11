@@ -21,11 +21,10 @@ use Northwestern\SysDev\Chassis\Seeding\IdempotentSeeder;
 use Symfony\Component\Finder\Finder;
 
 /**
- * Syncs markdown changelog files from `resources/changelogs/` into the database.
+ * Syncs the Markdown files in resources/changelogs into the database.
  *
- * Each Markdown file must contain YAML front matter with at least `slug` and `date` fields.
- * The seeder creates new records, updates existing ones, and soft-deletes records whose
- * corresponding files have been removed.
+ * Each file needs front matter with at least a slug and a date. The seeder
+ * creates and updates entries and soft-deletes any whose file is gone.
  *
  * @see Changelog
  */
@@ -51,15 +50,15 @@ class ChangelogSeeder extends IdempotentSeeder
     {
         parent::run();
 
-        // In local/testing, backdate created_at so entries display realistic
-        // dates instead of all showing today's date after a fresh seed.
+        // Locally and in tests, entries are backdated to their own
+        // date rather than all showing the day of a fresh seed.
         if (App::environment('local', 'ci', 'testing')) {
             Changelog::query()->update(['created_at' => DB::raw('authored_at')]);
         }
     }
 
     /**
-     * Scan changelog markdown files and return seed data.
+     * Read the changelog files and return the data to seed.
      *
      * @return array<int, array{slug: string, title: string|null, authored_at: Carbon, body: string}>
      *

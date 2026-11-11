@@ -25,10 +25,9 @@ class RoleFactory extends Factory
 
     public function definition(): array
     {
-        /** @phpstan-ignore-next-line  */
         return [
             'name' => fake()->unique()->slug(),
-            'role_type_id' => $this->getRoleType(),
+            'role_type_id' => $this->roleTypeId(),
         ];
     }
 
@@ -40,7 +39,7 @@ class RoleFactory extends Factory
         return $this->afterCreating(function (Role $role) use ($permissions) {
             foreach ($permissions as $permission) {
                 $role->givePermissionTo(
-                    Permission::whereName($permission)->firstOrFail()
+                    Permission::query()->where('name', $permission)->firstOrFail()
                 );
             }
         });
@@ -60,19 +59,16 @@ class RoleFactory extends Factory
 
     public function forRoleType(RoleTypeEnum $roleType): static
     {
-        $name = fake()->unique()->slug() . '-' . $roleType->value;
-
         return $this->state(fn () => [
-            'name' => $name,
-            'role_type_id' => $this->getRoleType($roleType),
+            'name' => fake()->unique()->slug() . '-' . $roleType->value,
+            'role_type_id' => $this->roleTypeId($roleType),
         ]);
     }
 
-    protected function getRoleType(?RoleTypeEnum $type = null): int
+    protected function roleTypeId(?RoleTypeEnum $type = null): int
     {
         if (! $this->roleTypes) {
-            /** @phpstan-ignore-next-line */
-            $this->roleTypes = RoleType::all()->pluck('id', 'slug.value')->all();
+            $this->roleTypes = RoleType::query()->pluck('id', 'slug')->all();
         }
 
         if (! $type instanceof RoleTypeEnum) {

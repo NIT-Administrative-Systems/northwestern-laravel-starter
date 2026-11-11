@@ -15,11 +15,10 @@ use Illuminate\Support\HtmlString;
 use Northwestern\SysDev\Chassis\Models\Concerns\PrunesAfterRetentionPeriod;
 
 /**
- * A user-submitted support ticket persisted as a local submission record.
+ * The application's record of a support request someone submitted.
  *
- * This model represents the platform's record of a support request — not the
- * external ticket itself. The {@see $ticketing_system} and {@see $ticket_number}
- * fields reflect which gateway handled the submission and the reference it returned.
+ * It isn't the ticket itself: ticketing_system and ticket_number say
+ * which system took the request, and the reference it gave back.
  *
  * Kept forever unless `platform.retention.support_tickets` sets a number of days.
  */
@@ -47,8 +46,10 @@ class SupportTicket extends BaseModel
     }
 
     /**
-     * The details as HTML, for the emails, TeamDynamix and Administration: the text as typed,
-     * escaped, with its line breaks. People type plain text, so no HTML they enter renders.
+     * The details as HTML for the emails, TeamDynamix and Administration.
+     *
+     * It's the text as typed, escaped and with its line breaks.
+     * People type plain text, so no HTML they enter renders.
      */
     public function detailsHtml(): HtmlString
     {
