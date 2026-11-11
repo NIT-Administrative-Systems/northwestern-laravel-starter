@@ -5,8 +5,15 @@ declare(strict_types=1);
 namespace Tests\Feature\Filament\Support;
 
 use App\Domains\Access\Models\Role;
+use App\Domains\Api\Models\ApiRequestLog;
+use App\Domains\Core\Models\Audit;
+use App\Domains\Support\Models\SupportTicket;
 use App\Domains\User\Models\User;
+use App\Domains\User\Models\UserLoginRecord;
+use App\Filament\Administration\Exports\ApiRequestLogExporter;
+use App\Filament\Administration\Exports\AuditExporter;
 use App\Filament\Administration\Exports\RoleExporter;
+use App\Filament\Administration\Exports\SupportTicketExporter;
 use App\Filament\Administration\Exports\UserExporter;
 use App\Filament\Administration\Exports\UserLoginRecordExporter;
 use App\Filament\Support\BaseExporter;
@@ -58,6 +65,29 @@ final class BaseExporterTest extends TestCase
 
         $this->assertSame(['\'=HYPERLINK("https://evil.example")', 'Wildcat'], $userRow);
         $this->assertSame(["'+cmd|calc"], $roleRow);
+    }
+
+    // An export reads each row's person on its own, so the relation must find them.
+    public function test_exports_name_people_who_have_since_been_deactivated(): void
+    {
+        $person = User::factory()->create(['username' => 'wil123', 'first_name' => 'Willie', 'last_name' => 'Wildcat']);
+        $audit = Audit::query()->forceCreate([
+            'event' => 'updated',
+            'auditable_type' => $person->getMorphClass(),
+            'auditable_id' => $person->getKey(),
+            'user_type' => $person->getMorphClass(),
+            'user_id' => $person->getKey(),
+            'impersonator_user_id' => $person->getKey(),
+        ]);
+        $signIn = UserLoginRecord::factory()->for($person)->create();
+        $request = ApiRequestLog::factory()->create(['user_id' => $person->getKey()]);
+        $ticket = SupportTicket::factory()->for($person)->create();
+        $person->delete();
+
+        $this->assertSame(['wil123', 'Willie Wildcat', 'wil123'], (new AuditExporter(new Export(), ['user.username' => 'Username', 'user.full_name' => 'Name', 'impersonator.username' => 'Impersonator'], []))($audit->fresh()));
+        $this->assertSame(['wil123', 'Willie Wildcat'], (new UserLoginRecordExporter(new Export(), ['user.username' => 'Username', 'user.full_name' => 'Name'], []))($signIn->fresh()));
+        $this->assertSame(['wil123'], (new ApiRequestLogExporter(new Export(), ['user.username' => 'Username'], []))($request->fresh()));
+        $this->assertSame(['Willie Wildcat', 'wil123'], (new SupportTicketExporter(new Export(), ['user.full_name' => 'Name', 'user.username' => 'Username'], []))($ticket->fresh()));
     }
 
     public function test_the_completion_message_names_the_rows_and_any_failures(): void

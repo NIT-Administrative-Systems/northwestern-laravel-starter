@@ -15,29 +15,25 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class UserLoginRecordsTable
 {
     public static function configure(Table $table, bool $isRelationManager = false): Table
     {
         return $table
-            // A deactivated person's sign-ins still show who they were.
-            ->modifyQueryUsing(fn (Builder $query) => $query->with(['user' => fn (Relation $user) => $user->withoutGlobalScope(SoftDeletingScope::class)]))
             ->columns([
                 TextColumn::make('user.clerical_name')
                     ->label('Name')
                     ->wrap()
                     ->searchable(query:
                         /** @phpstan-ignore-next-line  */
-                        fn (Builder $query, string $search): Builder => $query->orWhereHas('user', fn (Builder $q) => $q->withoutGlobalScope(SoftDeletingScope::class)->searchByName($search)))
+                        fn (Builder $query, string $search): Builder => $query->orWhereHas('user', fn (Builder $q) => $q->searchByName($search)))
                     ->hidden($isRelationManager),
                 TextColumn::make('user.username')
                     ->label('Username')
                     ->fontFamily(FontFamily::Mono)
                     ->sortable()
-                    ->searchable(query: fn (Builder $query, string $search): Builder => $query->orWhereHas('user', fn (Builder $q) => $q->withoutGlobalScope(SoftDeletingScope::class)->where('username', 'ilike', "%{$search}%")))
+                    ->searchable(query: fn (Builder $query, string $search): Builder => $query->orWhereHas('user', fn (Builder $q) => $q->where('username', 'ilike', "%{$search}%")))
                     ->hidden($isRelationManager),
                 TextColumn::make('logged_in_at')
                     ->label('Signed In')

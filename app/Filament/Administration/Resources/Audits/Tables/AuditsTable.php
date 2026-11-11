@@ -8,7 +8,6 @@ use App\Domains\Core\Enums\AuditEvent;
 use App\Domains\Core\Models\Audit;
 use App\Filament\Administration\Exports\AuditExporter;
 use Carbon\Carbon;
-use Closure;
 use Filament\Actions\ExportAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
@@ -23,7 +22,6 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Str;
 
 class AuditsTable
@@ -42,7 +40,7 @@ class AuditsTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->with(self::people()))
+            ->modifyQueryUsing(fn (Builder $query) => $query->with(['user', 'impersonator']))
             ->columns([
                 TextColumn::make('trace_id')
                     ->placeholder('—')
@@ -252,20 +250,6 @@ class AuditsTable
             ->emptyStateHeading('No Audit Logs Yet')
             ->emptyStateDescription('Changes to records appear here.')
             ->emptyStateIcon('heroicon-o-clipboard-document-list');
-    }
-
-    /**
-     * Load who made each change and who impersonated them, including deactivated
-     * people, so a change by someone since deactivated still shows as theirs.
-     *
-     * @return array<string, Closure>
-     */
-    public static function people(): array
-    {
-        return [
-            'user' => fn (Relation $user) => $user->withoutGlobalScope(SoftDeletingScope::class),
-            'impersonator' => fn (Relation $impersonator) => $impersonator->withoutGlobalScope(SoftDeletingScope::class),
-        ];
     }
 
     /**
