@@ -78,15 +78,16 @@ class OAuthApplicationResource extends Resource
                     ->fontFamily(FontFamily::Mono)
                     ->copyable()
                     ->limit(13)
-                    ->tooltip(fn (OAuthClient $record): string => $record->id),
+                    ->tooltip(fn (OAuthClient $record): string => $record->id)
+                    ->visibleFrom('xl'),
                 TextColumn::make('redirect_uris')
                     ->label('Redirects To')
                     ->formatStateUsing(fn (string $state): string => parse_url($state, PHP_URL_HOST) ?: $state)
                     ->badge()
                     ->color('gray'),
-                TextColumn::make('scopes')->label('Allowed Scopes')->badge()->placeholder('None'),
-                IconColumn::make('first_party')->label('First-Party')->boolean(),
-                TextColumn::make('connections_count')->label('Connections')->numeric(),
+                TextColumn::make('scopes')->label('Allowed Scopes')->badge()->placeholder('None')->visibleFrom('xl'),
+                IconColumn::make('first_party')->label('First-Party')->boolean()->visibleFrom('2xl'),
+                TextColumn::make('connections_count')->label('Connections')->numeric()->visibleFrom('xl'),
                 TextColumn::make('status')->badge(),
                 TextColumn::make('created_at')->label('Registered')->date()->toggleable(isToggledHiddenByDefault: true),
             ])
@@ -125,7 +126,8 @@ class OAuthApplicationResource extends Resource
                                 )),
                             Wizard\Step::make('Copy Secret')->schema(OAuthApplicationSchemas::credentialsStep($secret)),
                         ])
-                        ->modalSubmitActionLabel('I\'ve copied the secret')
+                        ->modifyWizardUsing($secret->hideBackOnceIssued())
+                        ->modalSubmitAction($secret->savedAction())
                         ->action(fn () => $secret->forget())
                         ->visible(fn (OAuthClient $record): bool => $record->confidential() && $record->status === CredentialStatus::Active && self::allows(CredentialOperation::Modify)),
                     Action::make('revoke')
@@ -139,7 +141,7 @@ class OAuthApplicationResource extends Resource
                         ->action(fn (OAuthClient $record, RevokeOAuthApplication $revoke) => $revoke($record, static::actingUser()))
                         ->successNotificationTitle('Application Revoked')
                         ->visible(fn (OAuthClient $record): bool => $record->status === CredentialStatus::Active && self::allows(CredentialOperation::Revoke)),
-                ])->label('Actions')->button(),
+                ]),
             ])
             ->emptyStateHeading('No Applications Registered')
             ->emptyStateDescription('Register an application so people can connect it to their account.');

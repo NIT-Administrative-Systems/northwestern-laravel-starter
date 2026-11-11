@@ -9,14 +9,12 @@ use App\Domains\Api\Enums\TokenExpiration;
 use App\Domains\Api\Models\OAuthClient;
 use App\Filament\Support\RevealOnceSecret;
 use Carbon\CarbonInterface;
-use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\ViewEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Wizard;
-use Filament\Support\Enums\IconPosition;
 use Filament\Support\Enums\IconSize;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\HtmlString;
@@ -129,16 +127,6 @@ class ServiceClientSchemas
                         ->dehydrated(false),
                 ]),
         ];
-    }
-
-    public static function copyCredentialsSubmitButton(Action $action): Action
-    {
-        return $action
-            ->label('I\'ve copied the secret')
-            ->icon(Heroicon::OutlinedCheckCircle)
-            ->iconPosition(IconPosition::After)
-            ->color('success')
-            ->outlined();
     }
 
     /**

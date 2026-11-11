@@ -5,12 +5,18 @@ declare(strict_types=1);
 namespace App\Filament\Support;
 
 use Closure;
-use Filament\Infolists\Components\CodeEntry;
+use Filament\Actions\Action;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Wizard;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\FontFamily;
+use Filament\Support\Enums\IconPosition;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Session;
-use Phiki\Grammar\Grammar;
+use Illuminate\Support\HtmlString;
 
 /**
  * A wizard that issues a credential and shows its secret once: a step that creates it, then a
@@ -26,6 +32,8 @@ use Phiki\Grammar\Grammar;
  *
  * Action::make('createClient')
  *     ->mountUsing($secret->mountFresh())
+ *     ->modifyWizardUsing($secret->hideBackOnceIssued())
+ *     ->modalSubmitAction($secret->savedAction())
  *     ->steps([
  *         Step::make('Configure')->afterValidation(fn (array $state) => $secret->issueOnce(function () use ($state): array {
  *             [$plain, $client] = $createClient($state);
@@ -130,7 +138,32 @@ final readonly class RevealOnceSecret
         Session::forget($this->sessionKey);
     }
 
-    public function identifierEntry(string $name, string $label): CodeEntry
+    /**
+     * For the wizard's `modifyWizardUsing()`: once the credential is issued, going back would only
+     * show a form for one that already exists.
+     */
+    public function hideBackOnceIssued(): Closure
+    {
+        return fn (Wizard $wizard): Wizard => $wizard->previousAction(
+            // The wizard renders its Back button even when hidden, so the class takes it off the page.
+            fn (Action $action): Action => $action
+                ->hidden(fn (): bool => $this->issued())
+                ->extraAttributes(fn (): array => $this->issued() ? ['class' => 'hidden'] : []),
+        );
+    }
+
+    /**
+     * For the wizard's `modalSubmitAction()`: the last button confirms the secret was saved.
+     */
+    public function savedAction(): Closure
+    {
+        return fn (Action $action): Action => $action
+            ->label('I\'ve Saved It')
+            ->icon(Heroicon::OutlinedCheckCircle)
+            ->iconPosition(IconPosition::After);
+    }
+
+    public function identifierEntry(string $name, string $label): TextEntry
     {
         return $this->entry($name, $label, fn (?Model $record): ?string => $this->identifier($record));
     }
@@ -138,23 +171,42 @@ final readonly class RevealOnceSecret
     /**
      * Shown only when the credential has a secret.
      */
-    public function secretEntry(string $name, string $label): CodeEntry
+    public function secretEntry(string $name, string $label): TextEntry
     {
         return $this->entry($name, $label, fn (?Model $record): ?string => $this->secret($record))
             ->visible(fn (?Model $record): bool => $this->secret($record) !== null);
     }
 
     /**
+     * The value in full, wrapped rather than scrolled, with a Copy button under it.
+     *
      * @param  Closure(?Model): ?string  $state
      */
-    private function entry(string $name, string $label, Closure $state): CodeEntry
+    private function entry(string $name, string $label, Closure $state): TextEntry
     {
-        return CodeEntry::make($name)
+        return TextEntry::make($name)
             ->label($label)
-            ->grammar(Grammar::Txt)
             ->state(fn (?Model $record): ?string => $state($record))
-            ->dehydrated(false)
-            ->copyable();
+            ->fontFamily(FontFamily::Mono)
+            ->extraAttributes(['class' => 'break-all'])
+            ->belowContent(fn (?Model $record): HtmlString => self::copyButton((string) $state($record), $label))
+            ->dehydrated(false);
+    }
+
+    private static function copyButton(string $value, string $label): HtmlString
+    {
+        return new HtmlString(Blade::render(<<<'BLADE'
+            <div x-data="{ copied: false }">
+                <x-filament::button color="gray"
+                                    size="sm"
+                                    :icon="\Filament\Support\Icons\Heroicon::OutlinedClipboardDocument"
+                                    x-on:click="window.navigator.clipboard.writeText(@js($value)).then(() => { copied = true; setTimeout(() => copied = false, 2000) })">
+                    <span x-text="copied ? 'Copied' : 'Copy'">Copy</span>
+                    <span class="sr-only">{{ $label }}</span>
+                </x-filament::button>
+                <span class="sr-only" aria-live="polite" x-text="copied ? @js($label . ' copied') : ''"></span>
+            </div>
+            BLADE, ['value' => $value, 'label' => $label]));
     }
 
     /**

@@ -68,7 +68,8 @@ class ListOAuthApplications extends ListRecords
                         })),
                     Wizard\Step::make('Credentials')->schema(OAuthApplicationSchemas::credentialsStep($secret)),
                 ])
-                ->modalSubmitActionLabel('Done')
+                ->modifyWizardUsing($secret->hideBackOnceIssued())
+                ->modalSubmitAction($secret->savedAction())
                 ->action(fn () => $secret->forget())
                 ->successNotificationTitle('Application Registered'),
         ];
