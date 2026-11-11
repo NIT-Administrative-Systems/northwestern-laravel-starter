@@ -4,16 +4,18 @@ declare(strict_types=1);
 
 namespace App\Filament\Administration\Resources\Roles\Pages;
 
+use App\Domains\Access\Actions\SyncRolePermissions;
 use App\Domains\Access\Enums\RoleModificationOrigin;
-use App\Domains\Access\Enums\SystemPermission;
 use App\Domains\Access\Models\Role;
 use App\Domains\User\Models\User;
 use App\Filament\Administration\Resources\Roles\RoleResource;
+use App\Filament\Administration\Resources\Roles\Schemas\RoleForm;
 use BackedEnum;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
@@ -28,6 +30,9 @@ class EditRole extends EditRecord
     protected static ?string $navigationLabel = 'Details';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedInformationCircle;
+
+    /** @var list<string> The permissions chosen in the lists the form showed. */
+    protected array $chosenPermissions = [];
 
     public function mount(int|string $record): void
     {
@@ -71,28 +76,13 @@ class EditRole extends EditRecord
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        $data['guard_name'] = 'web';
+        $this->chosenPermissions = array_values(Arr::flatten(Arr::only($data, RoleForm::PERMISSION_LISTS)));
 
-        return $data;
+        return [...Arr::except($data, RoleForm::PERMISSION_LISTS), 'guard_name' => 'web'];
     }
 
     protected function afterSave(): void
     {
-        $apiPermissions = $this->data['api_permissions'] ?? [];
-        $regularPermissions = $this->data['regular_permissions'] ?? [];
-
-        if (auth()->user()->hasPermissionTo(SystemPermission::ManageAll)) {
-            $systemPermissions = $this->data['system_permissions'] ?? [];
-        } else {
-            // Preserve existing system permissions the user cannot manage
-            $systemPermissions = $this->record->permissions
-                ->filter(fn ($p) => SystemPermission::tryFrom($p->name)?->isSystemManaged())
-                ->pluck('name')
-                ->toArray();
-        }
-
-        $allPermissions = array_merge($apiPermissions, $regularPermissions, $systemPermissions);
-
-        $this->record->syncPermissionsWithAudit($allPermissions);
+        resolve(SyncRolePermissions::class)($this->record, $this->chosenPermissions, auth()->user());
     }
 }

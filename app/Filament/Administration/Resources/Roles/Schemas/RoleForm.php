@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Administration\Resources\Roles\Schemas;
 
+use App\Domains\Access\Actions\SyncRolePermissions;
 use App\Domains\Access\Enums\PermissionScope;
 use App\Domains\Access\Enums\RoleTypeEnum;
 use App\Domains\Access\Enums\SystemPermission;
@@ -21,6 +22,13 @@ use Illuminate\Support\HtmlString;
 
 class RoleForm
 {
+    /**
+     * The permission lists. Only the lists visible for the chosen role type are validated and
+     * saved, and {@see SyncRolePermissions} keeps only what that type allows and the editor may
+     * grant.
+     */
+    public const array PERMISSION_LISTS = ['api_permissions', 'regular_permissions', 'system_permissions'];
+
     public static function configure(Schema $schema): Schema
     {
         $apiPermissions = [];
@@ -104,19 +112,9 @@ class RoleForm
 
                 Section::make('Permissions')
                     ->icon(Heroicon::OutlinedShieldCheck)
-                    ->description(function ($get, $record) {
-                        $roleTypeId = $get('role_type_id');
-                        if (! $roleTypeId) {
-                            return 'What people with this role can do.';
-                        }
-
-                        $roleType = $record->role_type ?? once(fn () => RoleType::find($roleTypeId));
-                        if ($roleType?->slug === RoleTypeEnum::ApiIntegration) {
-                            return 'Choose the data an API integration needs. Permissions for the interface aren\'t available to API roles.';
-                        }
-
-                        return 'What people with this role can do.';
-                    })
+                    ->description(fn ($get) => self::isApiRoleType($get('role_type_id'))
+                        ? 'Choose the data an API integration needs. Permissions for the interface aren\'t available to API roles.'
+                        : 'What people with this role can do.')
                     ->collapsible()
                     ->schema(array_filter([
                         // For ApiIntegration roles, only show API permissions
@@ -138,16 +136,7 @@ class RoleForm
                                     $component->state(array_intersect($existingPermissions, $apiOptions));
                                 }
                             })
-                            ->visible(function ($get, $record) {
-                                $roleTypeId = $get('role_type_id');
-                                if (! $roleTypeId) {
-                                    return false;
-                                }
-                                $roleType = $record->role_type ?? once(fn () => RoleType::find($roleTypeId));
-
-                                return $roleType?->slug === RoleTypeEnum::ApiIntegration;
-                            })
-                            ->dehydrated(false)
+                            ->visible(fn ($get): bool => self::isApiRoleType($get('role_type_id')))
                             ->columnSpanFull() : null,
 
                         // For non-API roles, show regular permissions
@@ -169,16 +158,7 @@ class RoleForm
                                     $component->state(array_intersect($existingPermissions, $regularOptions));
                                 }
                             })
-                            ->visible(function ($get, $record) {
-                                $roleTypeId = $get('role_type_id');
-                                if (! $roleTypeId) {
-                                    return true;
-                                }
-                                $roleType = $record->role_type ?? once(fn () => RoleType::find($roleTypeId));
-
-                                return $roleType?->slug !== RoleTypeEnum::ApiIntegration;
-                            })
-                            ->dehydrated(false)
+                            ->visible(fn ($get): bool => ! self::isApiRoleType($get('role_type_id')))
                             ->columnSpanFull() : null,
 
                         // System Permissions - only visible to users with ManageAll and hidden for API roles
@@ -199,19 +179,7 @@ class RoleForm
                             ->descriptions(collect($systemPermissions)->mapWithKeys(fn ($data, $value) => [
                                 $value => $data['description'],
                             ])->toArray())
-                            ->visible(function ($get, $record) {
-                                if (! auth()->user()->hasPermissionTo(SystemPermission::ManageAll)) {
-                                    return false;
-                                }
-
-                                $roleTypeId = $get('role_type_id');
-                                if (! $roleTypeId) {
-                                    return true;
-                                }
-                                $roleType = $record->role_type ?? once(fn () => RoleType::find($roleTypeId));
-
-                                return $roleType?->slug !== RoleTypeEnum::ApiIntegration;
-                            })
+                            ->visible(fn ($get): bool => auth()->user()->hasPermissionTo(SystemPermission::ManageAll) && ! self::isApiRoleType($get('role_type_id')))
                             ->columns()
                             ->gridDirection('row')
                             ->afterStateHydrated(function (CheckboxList $component, $record) use ($systemPermissions) {
@@ -221,10 +189,21 @@ class RoleForm
                                     $component->state(array_intersect($existingPermissions, $systemOptions));
                                 }
                             })
-                            ->dehydrated(false)
                             ->columnSpanFull() : null,
                     ]))
                     ->columnSpanFull(),
             ]);
+    }
+
+    /**
+     * Whether the role type chosen in the form, not the one saved, is API Integration.
+     */
+    private static function isApiRoleType(mixed $roleTypeId): bool
+    {
+        if (blank($roleTypeId)) {
+            return false;
+        }
+
+        return once(fn (): ?RoleType => RoleType::query()->find($roleTypeId))?->slug === RoleTypeEnum::ApiIntegration;
     }
 }

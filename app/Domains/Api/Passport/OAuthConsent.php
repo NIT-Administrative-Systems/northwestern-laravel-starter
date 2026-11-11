@@ -12,6 +12,7 @@ use App\Domains\Api\Models\OAuthClient;
 use App\Domains\User\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
+use Laravel\Mcp\Server\Registrar;
 use Laravel\Passport\Scope;
 use Northwestern\SysDev\Chassis\ValueObjects\OAuthRedirectTarget;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -36,15 +37,23 @@ final readonly class OAuthConsent
 
     /**
      * Whether `$person` may connect `$client`, as {@see CredentialAccess} decides for issuing the
-     * client's kind. Without a client to decide on, as when Passport is about to answer an unknown
-     * one itself, impersonating is still refused.
+     * client's kind. An MCP client must ask for `mcp:use`: a token without it would be good for
+     * neither the MCP server nor the REST API. Without a client to decide on, as when Passport is
+     * about to answer an unknown one itself, impersonating is still refused.
+     *
+     * @param  list<string>  $requestedScopes  The scopes the authorization request asks for
      *
      * @throws AuthorizationException|HttpException
      */
-    public function authorize(User $person, ?OAuthClient $client): void
+    public function authorize(User $person, ?OAuthClient $client, array $requestedScopes = []): void
     {
         if ($client instanceof OAuthClient) {
-            $this->credentials->decide($person, CredentialOperation::Issue, CredentialKind::of($client), $person)->authorize();
+            $kind = CredentialKind::of($client);
+            $this->credentials->decide($person, CredentialOperation::Issue, $kind, $person)->authorize();
+
+            if ($kind === CredentialKind::McpClient && ! in_array(Registrar::OAUTH_SCOPE, $requestedScopes, true)) {
+                throw new AuthorizationException('This AI client didn\'t ask to use this application\'s tools, so it can\'t connect.');
+            }
         } elseif (resolve('impersonate')->isImpersonating()) {
             throw new AuthorizationException("Applications can't be connected while impersonating someone.");
         }

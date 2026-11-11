@@ -29,7 +29,7 @@ class SendLoginCodeAction extends Action
             ->label('Send Verification Code')
             ->color('info')
             ->outlined()
-            ->visible(fn (User $record) => $record->is_local_user && resolve(SignIn::class)->offers(SignInMethod::EmailCode))
+            ->visible(fn (User $record) => $record->is_local_user && ! $record->trashed() && resolve(SignIn::class)->offers(SignInMethod::EmailCode))
             ->icon(Heroicon::OutlinedPaperAirplane)
             ->requiresConfirmation()
             ->modalDescription('Sends a new verification code to their email address.')

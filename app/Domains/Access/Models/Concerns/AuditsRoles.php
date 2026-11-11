@@ -8,7 +8,9 @@ use App\Domains\Access\Enums\RoleModificationOrigin;
 use App\Domains\Access\Models\Role;
 use App\Domains\Core\Enums\AuditEvent;
 use App\Domains\User\Models\User;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection as BaseCollection;
+use InvalidArgumentException;
 
 /**
  * @mixin User
@@ -34,6 +36,8 @@ trait AuditsRoles
      * @param  RoleModificationOrigin  $origin  The source/reason for this role change
      * @param  array<string, mixed>  $context  Additional contextual information
      *
+     * @throws InvalidArgumentException When a role doesn't suit the user: see {@see Role::suits()}
+     *
      * @see auditRoleChange() for the audit event structure
      * @see removeRoleWithAudit() for the inverse operation
      */
@@ -42,6 +46,12 @@ trait AuditsRoles
         RoleModificationOrigin $origin,
         array $context = []
     ): void {
+        $assigned = $roles instanceof BaseCollection ? $roles : collect(Arr::wrap($roles));
+
+        if ($assigned->contains(fn (Role $role): bool => ! $role->suits($this))) {
+            throw new InvalidArgumentException('An API Integration role can only be given to an API user, and other roles only to people.');
+        }
+
         $this->loadMissing('roles.role_type');
         $oldRoles = $this->mapRolesToArray($this->roles);
 

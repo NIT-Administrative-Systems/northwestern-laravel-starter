@@ -34,6 +34,11 @@ class AppServiceProvider extends ServiceProvider
             exceptPaths: ['oauth/*', 'mcp', 'mcp/*', '.well-known/*'],
         ));
         $this->app->bind(DbDumperFactory::class, fn (): ConfigurableDbDumperFactory => new ConfigurableDbDumperFactory());
+        if (config('local-auth.use_fixed_code')) {
+            // Fails the deployment at once, rather than on the first sign-in code.
+            FixedNumericOneTimeCodeGenerator::ensureAllowed();
+        }
+
         $this->app->singleton(
             OneTimeCodeGenerator::class,
             config('local-auth.use_fixed_code')

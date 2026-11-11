@@ -58,6 +58,7 @@ class AppPanelProvider extends PanelProvider
             ])
             ->id(self::ID)
             ->path(self::ID)
+            ->strictAuthorization()
             ->login(Login::class)
             ->routes(function (): void {
                 $signIn = resolve(SignIn::class);

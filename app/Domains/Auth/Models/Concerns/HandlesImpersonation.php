@@ -46,7 +46,8 @@ trait HandlesImpersonation
      */
     public function canBeImpersonated(): bool
     {
-        if ($this->auth_type === AuthType::API) {
+        // API users have no session, and a deleted or deactivated person can't use the panels.
+        if ($this->auth_type === AuthType::API || $this->isInactive()) {
             return false;
         }
 

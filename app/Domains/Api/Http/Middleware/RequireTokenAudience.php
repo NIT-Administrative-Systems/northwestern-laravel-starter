@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Domains\Api\Http\Middleware;
 
+use App\Domains\Api\Enums\CredentialKind;
 use App\Domains\Api\Enums\TokenAudience;
+use App\Domains\Api\Models\OAuthClient;
 use Closure;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
@@ -16,11 +18,13 @@ use Northwestern\SysDev\Chassis\ValueObjects\ApiRequestContext;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Keeps each token on its side of the application, after {@see AuthenticatePassportToken}. A
- * token issued to an MCP client carries `mcp:use` and works only on the MCP server, so a client
- * connected for its tools can't reach the REST API with it; and the MCP server admits only
- * those tokens, so service client, personal access and application tokens can't call tools.
- * Whether the person may still use MCP was already decided when their token was authenticated.
+ * Keeps each token on its side of the application, after {@see AuthenticatePassportToken}. The
+ * kind of client a token was issued to decides its side, not the scopes it carries: a token
+ * issued to an MCP client works only on the MCP server, so a client connected for its tools
+ * can't reach the REST API with it, whatever it asked for; and the MCP server admits only those
+ * tokens, with `mcp:use`, so service client, personal access and application tokens can't call
+ * tools. Whether the person may still use MCP was already decided when their token was
+ * authenticated.
  *
  * ```php
  * Route::middleware([AuthenticatePassportToken::class, RequireTokenAudience::for(TokenAudience::Api)]);
@@ -40,14 +44,17 @@ class RequireTokenAudience
      */
     public function handle(Request $request, Closure $next, string $audience): Response
     {
+        $client = OAuthClient::query()->find(Context::get(ApiRequestContext::OAUTH_CLIENT_ID));
+        $isMcpClient = $client instanceof OAuthClient && CredentialKind::of($client) === CredentialKind::McpClient;
         $scopes = Context::get(ApiRequestContext::OAUTH_SCOPES);
-        $isMcpToken = is_array($scopes) && in_array(Registrar::OAUTH_SCOPE, $scopes, true);
 
         match (TokenAudience::from($audience)) {
-            TokenAudience::Api => $isMcpToken
+            TokenAudience::Api => $isMcpClient
                 ? throw new AuthorizationException('MCP tokens can only be used with the MCP server.')
                 : null,
-            TokenAudience::Mcp => $isMcpToken && Context::get(ApiRequestContext::PRINCIPAL_TYPE) === ApiPrincipalType::User->value
+            TokenAudience::Mcp => $isMcpClient
+                && is_array($scopes) && in_array(Registrar::OAUTH_SCOPE, $scopes, true)
+                && Context::get(ApiRequestContext::PRINCIPAL_TYPE) === ApiPrincipalType::User->value
                 ? null
                 : throw new MissingScopeException(Registrar::OAUTH_SCOPE),
         };

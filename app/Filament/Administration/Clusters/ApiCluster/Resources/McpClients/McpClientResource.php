@@ -46,6 +46,15 @@ class McpClientResource extends Resource
 
     protected static ?int $navigationSort = 4;
 
+    /**
+     * The model has no policy: {@see self::canAccess()} decides here too, so Filament's strict
+     * authorization never looks for one.
+     */
+    public static function canViewAny(): bool
+    {
+        return static::canAccess();
+    }
+
     public static function canAccess(): bool
     {
         return static::allowsCredential(CredentialOperation::See, CredentialKind::McpClient);

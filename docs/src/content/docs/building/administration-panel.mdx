@@ -109,7 +109,7 @@ Links to Telescope, to the RustFS console when `S3_CONSOLE_URL` is set, and to M
 ## Adding a Tool
 
 1. **Generate it for this panel.** Filament's generators target the app panel unless you pass `--panel=administration`, for example `php artisan make:filament-resource Course --panel=administration`.
-2. **Gate it.** Give the model a policy whose `viewAny` checks a permission, or give a page a `canAccess()`. Add a `SystemPermission` case for a new kind of access and grant it through a role.
+2. **Gate it.** Give the model a policy whose `viewAny` checks a permission, or give a page a `canAccess()`. Add a `SystemPermission` case for a new kind of access and grant it through a role. Both panels use Filament's strict authorization, so a resource whose model has no policy, or a policy without an ability a page or table asks for (`view` for a table's rows, say), throws instead of letting everyone in. A resource that `canAccess()` alone decides overrides `canViewAny()` to return it, as the MCP client and application resources do.
 3. **Place it.** Set its `$navigationGroup` to an `AdministrationNavGroup` case, or add a case for a new group.
 
 <Aside type="caution" title="A cluster's rule only hides its navigation">
