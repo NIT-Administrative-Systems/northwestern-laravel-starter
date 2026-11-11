@@ -38,8 +38,8 @@ final class RequireApiScopeTest extends TestCase
         $user = User::factory()->create();
         $user->givePermissionTo(SystemPermission::ViewUsers);
 
-        [$scoped] = $this->personalAccessToken($user, ['view-users']);
-        [$unscoped] = $this->personalAccessToken($user);
+        [$scoped] = $this->issuePersonalAccessToken($user, ['view-users']);
+        [$unscoped] = $this->issuePersonalAccessToken($user);
 
         $this->withToken($scoped)->getJson('/api/test/users')->assertOk()->assertJsonPath('can_view_users', true);
         $this->withToken($unscoped)->getJson('/api/test/users')->assertForbidden();
@@ -57,8 +57,8 @@ final class RequireApiScopeTest extends TestCase
         $superAdmin->roles()->attach(Role::query()->where('name', SystemRole::SuperAdministrator)->sole());
         $this->assertTrue($superAdmin->can('test-unrestricted-ability'));
 
-        [$scoped] = $this->personalAccessToken($superAdmin, ['view-users']);
-        [$unscoped] = $this->personalAccessToken($superAdmin);
+        [$scoped] = $this->issuePersonalAccessToken($superAdmin, ['view-users']);
+        [$unscoped] = $this->issuePersonalAccessToken($superAdmin);
 
         $this->withToken($scoped)->getJson('/api/test/ability')->assertOk()->assertJsonPath('allowed', false);
         $this->withToken($unscoped)->getJson('/api/test/users')->assertForbidden();
@@ -67,7 +67,7 @@ final class RequireApiScopeTest extends TestCase
     // A service client acts as its API user, whose roles are its ceiling.
     public function test_a_service_client_holds_every_scope(): void
     {
-        [$token] = $this->serviceClientToken(User::factory()->api()->create());
+        [$token] = $this->issueServiceClientToken(User::factory()->api()->create());
 
         $this->withToken($token)->getJson('/api/test/users')->assertOk();
     }

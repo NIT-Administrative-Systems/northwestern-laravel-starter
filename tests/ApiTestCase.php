@@ -38,7 +38,7 @@ abstract class ApiTestCase extends TestCase
             ])
             ->createOne();
 
-        [$this->accessToken, $this->serviceClient] = $this->serviceClientToken($this->apiUser);
+        [$this->accessToken, $this->serviceClient] = $this->issueServiceClientToken($this->apiUser);
     }
 
     /**

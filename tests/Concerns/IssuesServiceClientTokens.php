@@ -20,7 +20,7 @@ trait IssuesServiceClientTokens
     /**
      * @return array{0: string, 1: OAuthClient} The access token and the client
      */
-    protected function serviceClientToken(User $apiUser): array
+    protected function issueServiceClientToken(User $apiUser): array
     {
         [$secret, $client] = resolve(CreateServiceClient::class)($apiUser, 'Test client', now()->addMonth());
 

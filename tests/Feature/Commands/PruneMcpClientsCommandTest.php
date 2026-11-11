@@ -46,11 +46,11 @@ final class PruneMcpClientsCommandTest extends TestCase
         $user = User::factory()->create();
         $user->givePermissionTo(SystemPermission::UseMcp);
         $this->actingAs($user);
-        $this->mcpToken();
+        $this->issueMcpToken();
         $unused = OAuthConnection::query()->sole()->oauth_client;
 
         $this->travel(60)->days();
-        $this->mcpToken();
+        $this->issueMcpToken();
         $recent = OAuthConnection::query()->latest('id')->first()?->oauth_client;
 
         $this->travel(31)->days();

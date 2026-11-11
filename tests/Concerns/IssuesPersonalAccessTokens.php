@@ -20,7 +20,7 @@ trait IssuesPersonalAccessTokens
      * @param  list<string>  $scopes
      * @return array{0: string, 1: OAuthToken} The bearer token and its record
      */
-    protected function personalAccessToken(User $user, array $scopes = []): array
+    protected function issuePersonalAccessToken(User $user, array $scopes = []): array
     {
         if (! $user->hasPermissionTo(SystemPermission::CreatePersonalAccessTokens)) {
             $user->givePermissionTo(SystemPermission::CreatePersonalAccessTokens);

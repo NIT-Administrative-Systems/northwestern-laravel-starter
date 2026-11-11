@@ -54,20 +54,20 @@ trait RunsAuthorizationCodeFlow
     /**
      * Approve the consent screen the last request showed, and return the code.
      */
-    protected function approve(OAuthClient $client): string
+    protected function approveAuthorization(OAuthClient $client): string
     {
         $response = $this->post('/oauth/authorize', [
             'client_id' => $client->getKey(),
             'auth_token' => session('authToken'),
         ]);
 
-        return $this->codeFrom($response);
+        return $this->authorizationCodeFrom($response);
     }
 
     /**
      * @param  TestResponse<\Symfony\Component\HttpFoundation\Response>  $response
      */
-    protected function codeFrom(TestResponse $response): string
+    protected function authorizationCodeFrom(TestResponse $response): string
     {
         $response->assertRedirect();
         parse_str((string) parse_url((string) $response->headers->get('Location'), PHP_URL_QUERY), $query);
@@ -90,12 +90,12 @@ trait RunsAuthorizationCodeFlow
     /**
      * Connect a new MCP client as the signed-in person and return its access token.
      */
-    protected function mcpToken(): string
+    protected function issueMcpToken(): string
     {
         $client = $this->registerMcpClient();
         [, $verifier] = $this->requestAuthorization($client, ['mcp:use']);
 
-        return (string) $this->exchange($client, $this->approve($client), $verifier)->assertOk()->json('access_token');
+        return (string) $this->exchangeAuthorizationCode($client, $this->approveAuthorization($client), $verifier)->assertOk()->json('access_token');
     }
 
     /**
@@ -104,7 +104,7 @@ trait RunsAuthorizationCodeFlow
      * @param  array<string, mixed>  $params
      * @return TestResponse<\Symfony\Component\HttpFoundation\Response>
      */
-    protected function mcp(?string $token, string $method, array $params = []): TestResponse
+    protected function sendMcpMessage(?string $token, string $method, array $params = []): TestResponse
     {
         $headers = ['Accept' => 'application/json, text/event-stream', 'MCP-Protocol-Version' => '2025-06-18'];
 
@@ -118,7 +118,7 @@ trait RunsAuthorizationCodeFlow
     /**
      * @return TestResponse<\Symfony\Component\HttpFoundation\Response>
      */
-    protected function exchange(OAuthClient $client, string $code, string $verifier): TestResponse
+    protected function exchangeAuthorizationCode(OAuthClient $client, string $code, string $verifier): TestResponse
     {
         return $this->postJson('/oauth/token', [
             'grant_type' => 'authorization_code',
