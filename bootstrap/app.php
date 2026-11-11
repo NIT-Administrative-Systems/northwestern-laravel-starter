@@ -53,7 +53,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 return ProblemDetails::serviceUnavailable(detail: 'The database is starting up. Try again shortly.', retryAfter: 30);
             }
 
-            return response()->view('errors.database-paused', [], 500);
+            return response()->view('errors.database-paused', [], 503, ['Retry-After' => '30']);
         });
 
         // An OAuth consent screen approved or denied after its session expired, or
