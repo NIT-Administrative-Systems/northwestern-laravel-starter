@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+### Changed
+
+- Tables in both panels become labelled cards below `sm`, keep their filters, sort and search in the session, and show a neutral inbox icon when empty. Administration tables show their secondary columns from `lg`, `xl` or `2xl`, so none overflows its container at 1440 pixels and each keeps its main columns at 1024. Audit Logs, API Requests and Support Tickets show when a row happened second, Support Tickets shows Status before Subject, and Users and a role's Assigned Users leave out the Northwestern User role and show two roles with the rest behind **Show more**.
+- Audit Logs, Sign-In Records, API Requests and Role Activity load their rows after the page appears, and their filters fold away above the table. API Requests refreshes every 30 seconds only while its **Live** filter is on, instead of every 10 seconds always.
+- `/administration` opens on Overview, which now extends Filament's `Dashboard`; someone without `ManageAll` starts on the first page in their sidebar. `WelcomeWidget` and its view are removed. The API cluster opens on its overview, now labelled **API Overview**.
+- The administration panel's user menu has **Back to {app name}** and **Account**, and its top bar has the Help menu. Both panels show their name at the top of the sidebar, collapse the sidebar on a desktop, warn before leaving unsaved changes, and save in a database transaction. `<x-panel-brand>` shows the application name from `sm` up.
+- A person's record in the administration panel is split into **Details**, **Access**, **Activity** and **API Credentials** pages, with API Credentials second for API users. Record pages lay out by their content's width rather than the screen's, and the Wildcard photo is a fixed 96 pixels.
+- Wizards that show a new secret show it in full with a **Copy** button, have no **Back** once it is issued, and end with **I've Saved It**.
+- A role's page lists the permissions it grants instead of a disabled form, the role form marks only personal permissions, and Delete on a role and on an announcement is in a menu. Role Activity shows whole role names as badges, with deleted roles struck through.
+- Applications' row actions are in a menu instead of a filled **Actions** button, list pages have no "List" breadcrumb, API chart headers keep paths and ranges on one line, and Scheduled Tasks on Overview is a list below `md`.
+
+### Fixed
+
+- Impersonating someone from their administration page opened that page as them, usually a 403. It now opens the app panel; leaving impersonation still returns to their page.
+
 ### Security
 
 - `UserBuilder::whereEmailEquals()` and `whereUsernameEquals()` match exactly, comparing `lower(column) = lower(?)` instead of using `ilike`, which treated `%` and `_` in the value as wildcards. A sign-in code request for `%@example.com` reached the first local account at that domain, and a lookup for `a_b@example.com` could find `axb@example.com`.

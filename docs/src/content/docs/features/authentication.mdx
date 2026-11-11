@@ -408,9 +408,9 @@ All rate limiters are defined in `config/rate-limiting.php`.
 
 ## Impersonating Users
 
-Users with the `ManageImpersonation` permission can sign in as another user to see the application as they do. The **Impersonate** button on a user's page in the administration panel posts to `/impersonate/take/{id}`. API users can't be impersonated, and only a user with `ManageAll` can impersonate another user who has it.
+Users with the `ManageImpersonation` permission can sign in as another user to see the application as they do. The **Impersonate** button on a user's page in the administration panel posts to `/impersonate/take/{id}` and opens the app panel as that person, since the page you came from is usually one they can't open. API users can't be impersonated, and only a user with `ManageAll` can impersonate another user who has it.
 
-While impersonating, both panels show the theme's impersonation banner, whose leave button posts to `/impersonate/leave` and returns to the original account. Both routes are in `routes/auth.php` and share the [impersonation rate limit](#impersonation).
+While impersonating, both panels show the theme's impersonation banner, whose leave button posts to `/impersonate/leave` and returns to the original account, on the page where impersonation started. Both routes are in `routes/auth.php` and share the [impersonation rate limit](#impersonation).
 
 Each start is recorded in the impersonation log, which is kept forever unless `IMPERSONATION_LOG_RETENTION_DAYS` is set. See [Audit Logging](/features/audit-logging/#what-gets-audited).
 
