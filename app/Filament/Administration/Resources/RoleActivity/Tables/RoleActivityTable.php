@@ -174,22 +174,26 @@ class RoleActivityTable
                     ->options(
                         fn () => Role::withTrashed()
                             ->orderBy('name')
-                            ->pluck('name', 'name')
+                            ->pluck('name', 'id')
                             ->all()
                     )
                     ->searchable()
                     ->preload()
                     ->query(function (Builder $query, array $data): Builder {
-                        $value = $data['value'] ?? null;
+                        $roleId = $data['value'] ?? null;
 
-                        if (blank($value)) {
+                        if (blank($roleId)) {
                             return $query;
                         }
 
-                        return $query->where(function (Builder $q) use ($value) {
-                            $q->where('old_values', 'like', '%"name":"' . $value . '"%')
-                                ->orWhere('new_values', 'like', '%"name":"' . $value . '"%');
-                        });
+                        // An audit lists every role the person had before and after the change,
+                        // so the role that changed is the one in only one of the two lists.
+                        $role = json_encode(['roles' => [['id' => (int) $roleId]]]);
+
+                        return $query->whereRaw(
+                            'coalesce(old_values::jsonb @> ?::jsonb, false) <> coalesce(new_values::jsonb @> ?::jsonb, false)',
+                            [$role, $role],
+                        );
                     }),
 
                 SelectFilter::make('auditable_id')
