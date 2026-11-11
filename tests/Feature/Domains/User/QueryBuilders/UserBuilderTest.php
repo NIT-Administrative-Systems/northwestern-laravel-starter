@@ -67,6 +67,55 @@ final class UserBuilderTest extends TestCase
         $this->assertTrue($user->is($found));
     }
 
+    public function test_where_email_equals_ignores_surrounding_whitespace(): void
+    {
+        $user = User::factory()->create(['email' => 'test@example.com']);
+
+        $this->assertTrue($user->is(User::query()->whereEmailEquals('  test@example.com ')->sole()));
+    }
+
+    public function test_where_email_equals_matches_non_ascii_case_insensitively(): void
+    {
+        // PHP's mb_strtolower turns İ into i plus a combining dot, where the database gives a plain i, so the value
+        // has to be lowercased by the database too.
+        $user = User::factory()->create(['email' => 'iİ@example.com']);
+
+        $this->assertTrue($user->is(User::query()->whereEmailEquals('İİ@EXAMPLE.COM')->sole()));
+    }
+
+    public function test_where_email_equals_treats_wildcards_as_literals(): void
+    {
+        User::factory()->create(['email' => 'axb@example.com']);
+        $underscored = User::factory()->create(['email' => 'a_b@example.com']);
+
+        $this->assertFalse(User::query()->whereEmailEquals('%@example.com')->exists());
+        $this->assertFalse(User::query()->whereEmailEquals('a%')->exists());
+        $this->assertTrue($underscored->is(User::query()->whereEmailEquals('a_b@example.com')->sole()));
+    }
+
+    public function test_where_username_equals_treats_wildcards_as_literals(): void
+    {
+        User::factory()->create(['username' => 'jdoe']);
+
+        $this->assertFalse(User::query()->whereUsernameEquals('jd%')->exists());
+        $this->assertFalse(User::query()->whereUsernameEquals('j_oe')->exists());
+        $this->assertFalse(User::query()->whereUsernameEquals('%')->exists());
+    }
+
+    public function test_where_email_equals_works_alongside_a_join(): void
+    {
+        // The column is qualified, so a query that joins another table with an email column isn't ambiguous.
+        $user = User::factory()->create(['email' => 'joined@example.com']);
+
+        $found = User::query()
+            ->select('users.*')
+            ->leftJoin('users as other', 'other.id', '=', 'users.id')
+            ->whereEmailEquals('joined@example.com')
+            ->sole();
+
+        $this->assertTrue($user->is($found));
+    }
+
     public function test_search_by_name_matches_various_formats(): void
     {
         User::factory()->create([
