@@ -98,7 +98,7 @@ it('is healthy on the page for an application that is no longer registered', fun
     expect($page->assertSee('Application Not Registered'))->toBeHealthyInEachTheme();
 });
 
-// Signed in as an administrator, who sees every page, with the long values that break a layout.
+// An administrator sees every page, here with values long enough to wrap.
 it('fits every app panel page and its tables at :dataset pixels', function (int $width) {
     $user = $this->signInAsSuperAdministrator();
     $user->forceFill([

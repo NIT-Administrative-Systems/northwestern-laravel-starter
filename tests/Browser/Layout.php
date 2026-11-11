@@ -9,15 +9,15 @@ use Pest\Browser\Api\AwaitableWebpage;
 use Pest\Browser\Api\PendingAwaitablePage;
 
 /**
- * Layout rules Chassis's health checks leave out: nothing pushes the page wider than the
- * screen, nothing in the header overlaps, tables and their badges fit their containers,
- * and on a touch screen every control is at least 44 pixels tall.
+ * Layout rules that Chassis's health checks leave out: nothing pushes the
+ * page wider than the screen, nothing in the header overlaps, tables and
+ * badges fit their containers, and touch controls are 44 pixels tall.
  */
 final class Layout
 {
     /**
-     * Visit a path in a browser this many pixels wide. Below 1024 pixels it is a touch
-     * screen, and below 768 a phone.
+     * Visit a path in a browser this many pixels wide. Below 1024 pixels
+     * it has a touch screen, and below 768 pixels it acts as a phone.
      */
     public static function visit(string $path, int $width): PendingAwaitablePage
     {
@@ -34,14 +34,15 @@ final class Layout
     }
 
     /**
-     * Everything wrong with the page's layout at its current width; empty when it fits.
-     * With `$tapTargets`, a touch screen's controls must also be 44 pixels tall.
+     * Get everything wrong with the page's layout at its current width.
+     *
+     * With `$tapTargets`, a touch screen's controls must be 44px tall too.
      *
      * @return list<string>
      */
     public static function problems(AwaitableWebpage|PendingAwaitablePage $page, bool $tapTargets = false): array
     {
-        // Tables that load their rows after the page appears are measured once the rows are in.
+        // A table that loads its rows after the page appears is measured with them.
         Health::waitUntil($page, "() => document.querySelector('.fi-ta-content-loading') === null");
 
         /** @var list<string> */
@@ -93,7 +94,7 @@ final class Layout
                     const controls = 'button, summary, select, textarea, [role="button"], a.fi-btn, a.fi-link, input:not([type="hidden"], [type="checkbox"], [type="radio"])';
 
                     for (const control of [...document.querySelectorAll(controls)].filter(shown)) {
-                        // A field's box is its wrapper, which can be taller than the input inside it.
+                        // A field's box is its wrapper, which can be taller than its input.
                         const height = Math.round((control.closest('.fi-input-wrp') ?? control).getBoundingClientRect().height);
 
                         if (height < 44 && ! control.closest('.sr-only')) {

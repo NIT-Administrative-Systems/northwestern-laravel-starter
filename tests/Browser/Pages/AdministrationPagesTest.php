@@ -102,7 +102,7 @@ it('is healthy on the consent screen for a self-registered MCP client', function
     expect($page->assertSee('Unverified AI client.'))->toBeHealthyInEachTheme();
 });
 
-// Long values are the ones that break a layout: names, emails, job titles and role names.
+// Long names, emails, job titles and role names are what break a layout.
 it('fits every administration page and its tables at :dataset pixels', function (int $width) {
     $person = User::factory()->create([
         'first_name' => 'Maximiliana Alexandrina Josephine',
