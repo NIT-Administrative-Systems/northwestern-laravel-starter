@@ -7,11 +7,10 @@ import {
 } from "@sentry/browser";
 
 /**
- * Starts the Sentry browser SDK from the JSON config that the `<x-sentry-browser />`
- * component renders into the page.
+ * Starts the Sentry browser SDK with the config `<x-sentry-browser />` renders.
  *
- * Sentry v11 collects user info, cookies, HTTP headers, and request/response bodies unless
- * `dataCollection` is set, so keep the v10 defaults.
+ * Sentry v11 collects user info, cookies, HTTP headers, and request and response
+ * bodies unless `dataCollection` limits them, so this keeps the v10 defaults.
  */
 const dataCollection = {
     userInfo: false,

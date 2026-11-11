@@ -3,17 +3,18 @@
 @import "../../../../vendor/northwestern-sysdev/northwestern-filament-theme/dist/theme.css";
 @import "../../../../vendor/northwestern-sysdev/northwestern-filament-theme/dist/tailwind-tokens.css";
 
-/* Tailwind finds classes in every tracked file, but skips vendor/ because git ignores it. */
+/* Tailwind finds classes in tracked files but skips vendor/, which git ignores. */
 @source '../../../../vendor/filament/**/*';
 
-/* The simple pages show the environment badge in <x-site-header>, not above the card. */
+/* Simple pages show the environment badge in <x-site-header>, not above the card. */
 .fi-simple-layout .nu-env-indicator-simple {
     display: none;
 }
 
-/* One focus ring on the purple header, the top bar and the footer: the footer's
-   3px white outline, set 2px off the control. The theme's purple outline would
-   vanish against the purple header. */
+/* One focus ring on the purple header, top bar and footer:
+   the footer's 3px white outline, 2px off the control.
+
+   The theme's purple outline would vanish against the purple. */
 :is(.nu-site-header, .fi-topbar) :is(a, button):focus-visible,
 .nu-site-header .nu-lockup:focus-visible /* outranks the lockup component's own 2px outline */ {
     outline: 3px solid var(--color-white);
@@ -21,8 +22,8 @@
     box-shadow: none;
 }
 
-/* Phones: 44px (2.75rem) tap targets for the header's controls, and for the
-   sign-in actions and the code step's links on the simple pages. */
+/* Phones: 44px (2.75rem) tap targets for the header's controls, and for
+   the sign-in actions and the code step's links on the simple pages. */
 @media (pointer: coarse) {
     .nu-site-header :is(button, .fi-btn) {
         min-width: 2.75rem;
@@ -40,14 +41,14 @@
     }
 }
 
-/* Pages with the site header are light only, so the user menu's theme switcher
-   would do nothing there. It has a dropdown list of its own: hide the list, or
-   its border stays behind. */
+/* Pages with the site header are light only, so the theme switcher does nothing.
+
+   It has a dropdown list of its own: hide the list, or its border stays behind. */
 .fi-body:has(.nu-site-header) .fi-dropdown-list:has(> .fi-theme-switcher) {
     display: none;
 }
 
-/* The app panel's simple pages (sign-in, lockdown): a Northwestern Purple accent on the card. */
+/* Sign-in and lockdown: a Northwestern Purple accent on the card. */
 .fi-simple-main {
     border-top: 4px solid var(--nu-purple-100);
 }
@@ -57,7 +58,7 @@
     padding-inline: 1rem;
 }
 
-/* Local "Sign in as" menu: its trigger spans the card like the sign-in buttons above it. */
+/* The local "Sign in as" menu's trigger spans the card like the buttons above. */
 .nu-sign-in-as .fi-dropdown,
 .nu-sign-in-as .fi-dropdown-trigger,
 .nu-sign-in-as .fi-btn {
