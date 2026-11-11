@@ -6,7 +6,6 @@ namespace App\Http\Controllers\Support;
 
 use App\Domains\Support\Models\Changelog;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 /**
@@ -14,7 +13,7 @@ use Illuminate\Http\Response;
  */
 class ChangelogFeedController extends Controller
 {
-    public function __invoke(Request $request): Response
+    public function __invoke(): Response
     {
         /** @var int $limit */
         $limit = config('changelog.feed.limit', 20);

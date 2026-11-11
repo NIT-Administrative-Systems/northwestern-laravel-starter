@@ -32,7 +32,6 @@ trait HandlesImpersonation
     public function canImpersonateUser(User $target): bool
     {
         return $this->isNot($target)
-            && ! resolve('impersonate')->isImpersonating()
             && $this->canImpersonate()
             && $target->canBeImpersonated();
     }
