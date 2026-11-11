@@ -139,7 +139,7 @@ class MyTest extends TestCase
         ]);
 
 
-        $this->send(
+        $this->sendEventHubMessage(
             queue: 'etidentity.ldap.netid.term',
             message: 'netid=abc123&action=deactivate',
         );
