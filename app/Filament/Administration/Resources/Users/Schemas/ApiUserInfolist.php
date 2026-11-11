@@ -28,15 +28,16 @@ class ApiUserInfolist
         return $schema->components([
             Grid::make([
                 'default' => 1,
-                'lg' => 2,
+                '@3xl' => 2,
             ])
+                ->gridContainer()
                 ->columnSpanFull()
                 ->schema([
                     Section::make('User Overview')
                         ->icon(Heroicon::OutlinedIdentification)
                         ->columnSpan([
                             'default' => 1,
-                            'lg' => 1,
+                            '@3xl' => 1,
                         ])
                         ->schema([
                             TextEntry::make('full_name')
@@ -97,25 +98,22 @@ class ApiUserInfolist
                         ->icon(Heroicon::OutlinedShieldCheck)
                         ->columnSpan([
                             'default' => 1,
-                            'lg' => 1,
+                            '@3xl' => 1,
                         ])
                         ->schema([
                             TextEntry::make('auth_type')
                                 ->label('Authentication Type')
-                                ->inlineLabel()
                                 ->badge(),
 
                             Group::make([
                                 TextEntry::make('active_clients_count')
                                     ->label('Active Service Clients')
-                                    ->inlineLabel()
                                     ->getStateUsing(fn (User $record) => number_format(OAuthClient::query()->whereMorphedTo('owner', $record)->active()->count())),
 
                                 TextEntry::make('last_api_request_at')
                                     ->label('Last API Request')
                                     ->tooltip('The most recent request from any of its service clients')
                                     ->placeholder('Never')
-                                    ->inlineLabel()
                                     ->dateTime()
                                     ->since()
                                     ->dateTimeTooltip()
@@ -125,7 +123,6 @@ class ApiUserInfolist
 
                             TextEntry::make('created_at')
                                 ->label('Created')
-                                ->inlineLabel()
                                 ->dateTime(),
                         ]),
                 ]),

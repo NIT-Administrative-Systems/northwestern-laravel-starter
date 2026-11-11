@@ -9,17 +9,15 @@ use App\Domains\Auth\Enums\AuthType;
 use App\Domains\User\Models\User;
 use App\Filament\Administration\Navigation\AdministrationNavGroup;
 use App\Filament\Administration\Resources\Users\Pages\ListUsers;
+use App\Filament\Administration\Resources\Users\Pages\ManageUserAccess;
+use App\Filament\Administration\Resources\Users\Pages\ManageUserActivity;
+use App\Filament\Administration\Resources\Users\Pages\ManageUserApiCredentials;
 use App\Filament\Administration\Resources\Users\Pages\ViewUser;
-use App\Filament\Administration\Resources\Users\RelationManagers\ApiRequestLogsRelationManager;
-use App\Filament\Administration\Resources\Users\RelationManagers\AuditsRelationManager;
-use App\Filament\Administration\Resources\Users\RelationManagers\ConnectedApplicationsRelationManager;
-use App\Filament\Administration\Resources\Users\RelationManagers\LoginRecordsRelationManager;
-use App\Filament\Administration\Resources\Users\RelationManagers\PersonalAccessTokensRelationManager;
-use App\Filament\Administration\Resources\Users\RelationManagers\RoleActivityRelationManager;
-use App\Filament\Administration\Resources\Users\RelationManagers\RolesRelationManager;
-use App\Filament\Administration\Resources\Users\RelationManagers\ServiceClientsRelationManager;
 use App\Filament\Administration\Resources\Users\Tables\UsersTable;
 use BackedEnum;
+use Filament\Navigation\NavigationItem;
+use Filament\Pages\Enums\SubNavigationPosition;
+use Filament\Resources\Pages\Page;
 use Filament\Resources\Pages\PageRegistration;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
@@ -49,24 +47,29 @@ class UserResource extends Resource
 
     protected static ?string $description = 'Manage users, their roles, and authentication settings.';
 
+    protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
+
     public static function table(Table $table): Table
     {
         return UsersTable::configure($table);
     }
 
-    /** @return array<int, class-string> */
-    public static function getRelations(): array
+    /**
+     * Details, then a page for each group of the person's relations. An API user's credentials
+     * are what an administrator opens it for, so they come first.
+     *
+     * @return array<NavigationItem>
+     */
+    public static function getRecordSubNavigation(Page $page): array
     {
-        return [
-            RolesRelationManager::class,
-            RoleActivityRelationManager::class,
-            AuditsRelationManager::class,
-            LoginRecordsRelationManager::class,
-            PersonalAccessTokensRelationManager::class,
-            ConnectedApplicationsRelationManager::class,
-            ServiceClientsRelationManager::class,
-            ApiRequestLogsRelationManager::class,
-        ];
+        assert(method_exists($page, 'getRecord'));
+
+        /** @var User $record */
+        $record = $page->getRecord();
+
+        return $page->generateNavigationItems($record->auth_type === AuthType::API
+            ? [ViewUser::class, ManageUserApiCredentials::class, ManageUserAccess::class, ManageUserActivity::class]
+            : [ViewUser::class, ManageUserAccess::class, ManageUserActivity::class, ManageUserApiCredentials::class]);
     }
 
     /** @return array<string, PageRegistration> */
@@ -75,6 +78,9 @@ class UserResource extends Resource
         return [
             'index' => ListUsers::route('/'),
             'view' => ViewUser::route('/{record}'),
+            'access' => ManageUserAccess::route('/{record}/access'),
+            'activity' => ManageUserActivity::route('/{record}/activity'),
+            'api-credentials' => ManageUserApiCredentials::route('/{record}/api-credentials'),
         ];
     }
 

@@ -63,14 +63,15 @@ class AuditInfolist
 
                 Grid::make([
                     'default' => 1,
-                    'lg' => 3,
+                    '@4xl' => 3,
                 ])
+                    ->gridContainer()
                     ->columnSpanFull()
                     ->schema([
                         Grid::make(1)
                             ->columnSpan([
                                 'default' => 1,
-                                'lg' => 2,
+                                '@4xl' => 2,
                             ])
                             ->schema([
                                 Section::make('Details')
@@ -118,7 +119,7 @@ class AuditInfolist
                         Grid::make(1)
                             ->columnSpan([
                                 'default' => 1,
-                                'lg' => 1,
+                                '@4xl' => 1,
                             ])
                             ->schema([
                                 Section::make('Metadata')

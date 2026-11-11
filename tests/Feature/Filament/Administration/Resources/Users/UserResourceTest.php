@@ -42,8 +42,8 @@ final class UserResourceTest extends TestCase
             ->assertCanSeeTableRecords([$apiUser])
             ->assertCanNotSeeTableRecords([$person]);
 
-        $this->get(UserResource::getUrl('view', ['record' => $apiUser]))->assertOk();
-        $this->get(UserResource::getUrl('view', ['record' => $person]))->assertNotFound();
+        $this->get(UserResource::getUrl('view', ['record' => $apiUser], panel: AdministrationPanelProvider::ID))->assertOk();
+        $this->get(UserResource::getUrl('view', ['record' => $person], panel: AdministrationPanelProvider::ID))->assertNotFound();
     }
 
     public function test_view_users_sees_everyone(): void
@@ -74,5 +74,53 @@ final class UserResourceTest extends TestCase
 
         $this->assertFalse(AuditsRelationManager::canViewForRecord($person, ViewUser::class));
         $this->assertFalse(UserLoginRecordResource::canAccess());
+    }
+
+    public function test_a_persons_record_splits_into_access_activity_and_api_credentials(): void
+    {
+        $superAdministrator = User::factory()->affiliate()->create();
+        $superAdministrator->givePermissionTo(SystemPermission::AccessAdministrationPanel, SystemPermission::ManageAll);
+        $person = User::factory()->create();
+        $this->actingAs($superAdministrator);
+
+        $this->get(UserResource::getUrl('view', ['record' => $person], panel: AdministrationPanelProvider::ID))
+            ->assertOk()
+            ->assertSeeInOrder(['Details', 'Access', 'Activity', 'API Credentials'])
+            ->assertDontSee('Role History');
+
+        $this->get(UserResource::getUrl('access', ['record' => $person], panel: AdministrationPanelProvider::ID))
+            ->assertOk()
+            ->assertSee('Roles')
+            ->assertSee('Role History');
+
+        $this->get(UserResource::getUrl('activity', ['record' => $person], panel: AdministrationPanelProvider::ID))
+            ->assertOk()
+            ->assertSee('Audit Logs')
+            ->assertSee('Sign-In Records');
+
+        $this->get(UserResource::getUrl('api-credentials', ['record' => $person], panel: AdministrationPanelProvider::ID))
+            ->assertOk()
+            ->assertSee('Personal Access Tokens')
+            ->assertSee('Connected Applications');
+    }
+
+    // An administrator opens an API user's record for its credentials, and it has no activity of its own.
+    public function test_an_api_users_record_puts_its_credentials_first_and_has_no_activity_page(): void
+    {
+        config(['api.enabled' => true]);
+        $superAdministrator = User::factory()->affiliate()->create();
+        $superAdministrator->givePermissionTo(SystemPermission::AccessAdministrationPanel, SystemPermission::ManageAll);
+        $apiUser = User::factory()->api()->create();
+        $this->actingAs($superAdministrator);
+
+        $this->get(UserResource::getUrl('view', ['record' => $apiUser], panel: AdministrationPanelProvider::ID))
+            ->assertOk()
+            ->assertSeeInOrder(['Details', 'API Credentials', 'Access'])
+            ->assertDontSee(UserResource::getUrl('activity', ['record' => $apiUser], panel: AdministrationPanelProvider::ID));
+
+        $this->get(UserResource::getUrl('activity', ['record' => $apiUser], panel: AdministrationPanelProvider::ID))->assertForbidden();
+        $this->get(UserResource::getUrl('api-credentials', ['record' => $apiUser], panel: AdministrationPanelProvider::ID))
+            ->assertOk()
+            ->assertSee('Service Clients');
     }
 }
