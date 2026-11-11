@@ -43,15 +43,17 @@ readonly class AddPersonToRole
         private CreateLocalUser $createLocalUser,
         private SignIn $signIn,
     ) {
+        //
     }
 
     /**
      * Decide whether `$actor` may add people to `$role` in bulk. It both creates
      * accounts and gives the role, so it takes Create Users and Assign Roles.
      *
-     * Assignment-locked roles are refused even with Manage All, as
-     * they're given one person at a time. API Integration roles
-     * are for API users, whom a NetID or email never finds.
+     * Assignment-locked roles are refused even with
+     * Manage All, because only code assigns them.
+     *
+     * API Integration roles are for API users, whom a NetID or email never finds.
      */
     public function decide(Role $role, User $actor): Response
     {

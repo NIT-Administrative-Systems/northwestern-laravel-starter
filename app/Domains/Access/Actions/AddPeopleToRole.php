@@ -33,6 +33,7 @@ readonly class AddPeopleToRole
         private AddPersonToRole $addPersonToRole,
         private ImportDispatcher $importDispatcher,
     ) {
+        //
     }
 
     /**

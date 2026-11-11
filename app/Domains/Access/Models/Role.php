@@ -27,19 +27,6 @@ class Role extends SpatieRole implements Auditable
     /** @use HasFactory<RoleFactory> */
     use AuditableConcern, AuditsPermissions, HasFactory, RecordsAuditEvents, SoftDeletes;
 
-    /**
-     * Override the create method to return the custom Role model.
-     *
-     * @param  array<string, mixed>  $attributes
-     */
-    public static function create(array $attributes = []): static
-    {
-        /** @var static $role */
-        $role = parent::create($attributes);
-
-        return $role;
-    }
-
     /** @return BelongsToMany<User, $this> */
     public function users(): BelongsToMany
     {
@@ -53,6 +40,29 @@ class Role extends SpatieRole implements Auditable
     }
 
     /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
+    #[Scope]
+    protected function assignable(Builder $query): Builder
+    {
+        return $query->where('assignment_locked', false);
+    }
+
+    /**
+     * Create a role, typed as this model rather than Spatie's.
+     *
+     * @param  array<string, mixed>  $attributes
+     */
+    public static function create(array $attributes = []): static
+    {
+        /** @var static $role */
+        $role = parent::create($attributes);
+
+        return $role;
+    }
+
+    /**
      * Determine whether the role is system-managed, which nobody may edit.
      */
     public function isSystemManagedType(): bool
@@ -61,8 +71,8 @@ class Role extends SpatieRole implements Auditable
     }
 
     /**
-     * Whether this role suits `$user`: an API Integration role
-     * only an API user, and every other role only a person.
+     * Determine whether this role suits `$user`: an API Integration
+     * role only an API user, and every other role only a person.
      */
     public function suits(User $user): bool
     {
@@ -70,21 +80,11 @@ class Role extends SpatieRole implements Auditable
     }
 
     /**
-     * Determine if this role has assignment locking enabled.
+     * Determine whether only code may give or take the role, never the panel.
      */
     public function isAssignmentLocked(): bool
     {
         return $this->assignment_locked === true;
-    }
-
-    /**
-     * @param  Builder<static>  $query
-     * @return Builder<static>
-     */
-    #[Scope]
-    protected function assignable(Builder $query): Builder
-    {
-        return $query->where('assignment_locked', false);
     }
 
     /**
