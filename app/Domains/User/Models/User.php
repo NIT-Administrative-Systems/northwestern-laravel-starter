@@ -271,8 +271,26 @@ class User extends Authenticatable implements Auditable, FilamentUser, HasAvatar
         return 'users';
     }
 
+    /**
+     * Whether the account is deleted or its NetID deactivated. Read from the raw attributes: a user
+     * built in memory, or selected with fewer columns, may not have them, and the application
+     * refuses access to attributes that weren't retrieved.
+     */
+    public function isInactive(): bool
+    {
+        $attributes = $this->getAttributes();
+
+        return ($attributes['deleted_at'] ?? null) !== null || (bool) ($attributes['netid_inactive'] ?? false);
+    }
+
     public function canAccessPanel(Panel $panel): bool
     {
+        // A deactivated or deleted person keeps no panel, so a session signed in before the change
+        // is refused on its next request.
+        if ($this->isInactive()) {
+            return false;
+        }
+
         /**
          * The exception from the unhandled case is desirable: if someone adds a new panel but doesn't put it
          * here, they'll get the "unknown case" exception.

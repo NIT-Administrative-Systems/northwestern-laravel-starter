@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 use Illuminate\Support\Timebox;
 use Illuminate\Validation\ValidationException;
+use InvalidArgumentException;
 use Northwestern\SysDev\Chassis\Formatting\CountInWords;
 
 /**
@@ -61,6 +62,9 @@ final readonly class LoginCodes
     private const int MIN_VERIFY_TIME_MS = 500;
 
     private const int MAX_USER_AGENT_LENGTH = 512;
+
+    /** How long, in seconds, an email's rejected codes count against `local-auth.code.max_failed_per_day`. */
+    private const int FAILURES_WINDOW_SECONDS = 86400;
 
     private const string REJECTED = 'That code didn\'t work. Check it and try again.';
 
@@ -144,6 +148,15 @@ final readonly class LoginCodes
             throw ValidationException::withMessages(['code' => self::REJECTED]);
         }
 
+        // Every pending sign-in has an email, a decoy's included, so an unknown email reaches this limit too.
+        $failuresKey = 'login-code:failed:' . $this->pendingEmail();
+
+        if (RateLimiter::tooManyAttempts($failuresKey, (int) config('local-auth.code.max_failed_per_day', 20))) {
+            throw ValidationException::withMessages([
+                'code' => 'Too many incorrect codes. Try again in ' . CountInWords::of((int) ceil(RateLimiter::availableIn($failuresKey) / 3600), 'hour') . '.',
+            ]);
+        }
+
         $minimumTimeMs = self::MIN_VERIFY_TIME_MS + random_int(0, 50);
         $challenge = $this->timebox->call(function (Timebox $timebox) use ($challengeId, $code, $request): LoginChallenge|ValidationException {
             $timebox->dontReturnEarly();
@@ -153,6 +166,8 @@ final readonly class LoginCodes
         }, $minimumTimeMs * 1000);
 
         if ($challenge instanceof ValidationException) {
+            RateLimiter::hit($failuresKey, self::FAILURES_WINDOW_SECONDS);
+
             throw $challenge;
         }
 
@@ -172,9 +187,14 @@ final readonly class LoginCodes
      * and counts against the person's hourly limit, so nobody can flood their inbox.
      *
      * @throws ValidationException Keyed by `email` when the person's hourly limit is reached
+     * @throws InvalidArgumentException When the person's account is deleted
      */
     public function issueFor(User $user, Request $request): LoginChallenge
     {
+        if ($user->trashed()) {
+            throw new InvalidArgumentException('A deleted person can\'t be sent a code.');
+        }
+
         $email = $this->normalize((string) $user->email);
         $key = "login-code:{$email}";
 
@@ -305,14 +325,22 @@ final readonly class LoginCodes
     }
 
     /**
-     * Creates a challenge with only its code's hash, counts it against the email's hourly limit,
-     * and queues the email once the challenge is committed.
+     * Creates a challenge with only its code's hash, ends the email's earlier open challenges,
+     * counts it against the email's hourly limit, and queues the email once the challenge is
+     * committed.
      */
     private function issue(string $email, Request $request): LoginChallenge
     {
         return DB::transaction(function () use ($email, $request): LoginChallenge {
             $code = ($this->generateCode)((int) config('local-auth.code.digits', 6));
             $userAgent = $request->userAgent();
+
+            // Only the newest code works, so earlier ones can't be guessed at alongside it.
+            LoginChallenge::query()
+                ->where('email', $email)
+                ->whereNull('consumed_at')
+                ->where('expires_at', '>=', CarbonImmutable::now())
+                ->update(['expires_at' => CarbonImmutable::now()->subSecond()]);
 
             $challenge = LoginChallenge::create([
                 'email' => $email,

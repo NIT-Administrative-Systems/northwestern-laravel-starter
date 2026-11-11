@@ -6,6 +6,7 @@ namespace Tests\Feature\Domains\User\Policies;
 
 use App\Domains\Access\Enums\SystemPermission;
 use App\Domains\User\Models\User;
+use App\Domains\User\Models\UserLoginRecord;
 use App\Domains\User\Policies\UserLoginRecordPolicy;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
@@ -26,6 +27,18 @@ final class UserLoginRecordPolicyTest extends TestCase
         $user->givePermissionTo(SystemPermission::ViewLoginRecords);
 
         $this->assertTrue($this->policy()->viewAny($user));
+    }
+
+    public function test_view_follows_view_any(): void
+    {
+        $user = User::factory()->create();
+        $record = UserLoginRecord::factory()->create();
+
+        $this->assertFalse($this->policy()->view($user, $record));
+
+        $user->givePermissionTo(SystemPermission::ViewLoginRecords);
+
+        $this->assertTrue($this->policy()->view($user, $record));
     }
 
     protected function policy(): UserLoginRecordPolicy

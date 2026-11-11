@@ -10,6 +10,7 @@ use App\Filament\Administration\Resources\RoleActivity\Tables\RoleActivityTable;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Gate;
 
 class RoleActivityResource extends Resource
 {
@@ -18,6 +19,14 @@ class RoleActivityResource extends Resource
     protected static ?string $slug = 'roles/activity';
 
     protected static ?string $navigationLabel = 'Role Activity';
+
+    /**
+     * Role activity is part of the audit log, so the audit policy decides who sees it.
+     */
+    public static function canAccess(): bool
+    {
+        return Gate::allows('viewAny', Audit::class);
+    }
 
     public static function shouldRegisterNavigation(): bool
     {
