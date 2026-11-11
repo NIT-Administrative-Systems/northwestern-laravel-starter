@@ -89,12 +89,14 @@ runs:
       shell: bash
       run: pnpm install --frozen-lockfile --prefer-offline
 
-    # Playwright recommends downloading browsers on each run: restoring a cache takes as long, and
-    # the system libraries --with-deps installs can't be cached.
+    # Playwright recommends downloading browsers on each run: restoring a cache takes as long. The
+    # runner image already has every library Chromium needs, and --with-deps would only add fonts
+    # for scripts the pages don't use, through apt mirrors that have stalled this job for minutes.
+    # If an image ever lacks a library, Chromium fails to launch and Playwright names it.
     - name: 🎭 Install Playwright Chromium
       if: ${{ inputs['install-playwright'] == 'true' }}
       shell: bash
-      run: pnpm exec playwright install --with-deps chromium
+      run: pnpm exec playwright install chromium
 
     - name: 📷 Composer Dependencies Cache
       if: ${{ inputs.docs-only != 'true' }}
