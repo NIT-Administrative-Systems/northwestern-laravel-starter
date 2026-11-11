@@ -14,6 +14,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - `users:deactivate-inactive-local` deactivates local accounts nobody has signed in to for `LOCAL_ACCOUNT_INACTIVITY_DAYS` days, daily when that's set. It's off by default.
 - Retention periods for the framework's own tables under `platform.retention`: notifications (`NOTIFICATION_RETENTION_DAYS`, 90), imports and their failed rows (`IMPORT_RETENTION_DAYS` and `FAILED_IMPORT_ROW_RETENTION_DAYS`, 30), support tickets (`SUPPORT_TICKET_RETENTION_DAYS`, kept by default), failed jobs (`FAILED_JOB_RETENTION_DAYS`, 30) and job batches (`JOB_BATCH_RETENTION_DAYS`, 30). The scheduler runs `queue:prune-failed` and `queue:prune-batches` daily for the queue tables, and `User::notifications()` uses a prunable `DatabaseNotification` model.
 
+### Changed
+
+- Signing in no longer reactivates a deactivated account. `UserBuilder::firstExistingSsoByNetIdOrNew()` finds a soft-deleted NetID user without restoring it, so a NetID sign-in or directory sync leaves them deactivated, and `SignIn::complete()` refuses a deactivated account for every sign-in method with an **Account Deactivated** page. Only **Reactivate** brings an account back; **Add Northwestern User** and adding people in bulk leave it deactivated too.
+
 ### Security
 
 - `UserBuilder::whereEmailEquals()` and `whereUsernameEquals()` match exactly, comparing `lower(column) = lower(?)` instead of using `ilike`, which treated `%` and `_` in the value as wildcards. A sign-in code request for `%@example.com` reached the first local account at that domain, and a lookup for `a_b@example.com` could find `axb@example.com`.

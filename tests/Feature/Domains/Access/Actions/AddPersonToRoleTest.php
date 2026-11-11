@@ -125,6 +125,18 @@ final class AddPersonToRoleTest extends TestCase
         $this->assertSame(1, User::withTrashed()->whereEmailEquals('gone@example.com')->count());
     }
 
+    // Only Reactivate brings an account back, so a deactivated NetID is listed rather than restored.
+    public function test_a_deactivated_netid_user_is_not_restored(): void
+    {
+        $this->inDirectory('abc123');
+        $deactivated = User::factory()->create(['username' => 'abc123']);
+        $deactivated->delete();
+
+        $this->assertNotAdded('abc123', 'The account for abc123 is deactivated. Reactivate it on their page in Administration first.');
+        $this->assertSoftDeleted($deactivated);
+        $this->assertFalse($deactivated->fresh()?->hasRole($this->role));
+    }
+
     public function test_an_api_user_is_not_added(): void
     {
         User::factory()->api()->create(['username' => 'integration']);

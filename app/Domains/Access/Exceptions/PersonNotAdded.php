@@ -29,9 +29,9 @@ final class PersonNotAdded extends RuntimeException
         return new self("{$email} isn't in the Northwestern Directory, and email-code sign-in is off, so there's no local account to create.");
     }
 
-    public static function deactivated(string $email): self
+    public static function deactivated(string $person): self
     {
-        return new self("The account for {$email} is deactivated. Reactivate it on their page in Administration first.");
+        return new self("The account for {$person} is deactivated. Reactivate it on their page in Administration first.");
     }
 
     public static function apiUser(string $person): self

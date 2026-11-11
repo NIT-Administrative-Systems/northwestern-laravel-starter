@@ -268,7 +268,7 @@ Each person goes through `App\Domains\Access\Actions\AddPersonToRole`:
 - Any other email address that matches no one becomes a local account that signs in with an [emailed code](/features/authentication/#passwordless-verification-codes), when email-code sign-in is on. No code is sent; they request one when they first sign in.
 - The role is given with `assignRoleWithAudit()` and the `BulkAssignment` origin, so it shows in Role Activity like any other assignment.
 
-The list becomes a Filament import, processed on the queue in chunks of 25 as the administrator who started it. When it finishes, they get a notification saying how many people were added, with a download of everyone who wasn't and why: they already had the role, weren't in the directory, are an API user, have a deactivated local account, or are the administrator, since nobody adds themselves to a role.
+The list becomes a Filament import, processed on the queue in chunks of 25 as the administrator who started it. When it finishes, they get a notification saying how many people were added, with a download of everyone who wasn't and why: they already had the role, weren't in the directory, are an API user, have a deactivated account (only **Reactivate** on their page brings it back), or are the administrator, since nobody adds themselves to a role.
 
 Adding people in bulk needs both `AssignRoles` and `CreateUsers`. It isn't offered for assignment-locked roles, even to super administrators, or for API Integration roles, whose users a NetID or email address never finds. Pasted lists start from `App\Domains\Access\Actions\AddPeopleToRole`, and uploaded files from Filament's `ImportAction`; both use `App\Filament\Administration\Imports\AddPeopleToRoleImporter`.
 

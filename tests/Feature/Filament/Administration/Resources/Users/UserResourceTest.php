@@ -17,7 +17,9 @@ use App\Providers\Filament\AdministrationPanelProvider;
 use Filament\Facades\Filament;
 use Filament\Tables\Filters\TrashedFilter;
 use Livewire\Livewire;
+use Northwestern\SysDev\SOA\DirectorySearch;
 use PHPUnit\Framework\Attributes\CoversNothing;
+use Tests\Feature\Domains\User\Actions\Directory\FindOrUpdateUserFromDirectoryTest;
 use Tests\TestCase;
 
 #[CoversNothing]
@@ -129,5 +131,26 @@ final class UserResourceTest extends TestCase
             ->filterTable(TrashedFilter::class, false)
             ->assertCanSeeTableRecords([$deactivated])
             ->assertCanNotSeeTableRecords([$person]);
+    }
+
+    // Looking someone up never reactivates them; the administrator is sent to their page to do it.
+    public function test_adding_a_deactivated_northwestern_user_says_so_and_leaves_them_deactivated(): void
+    {
+        config(['platform.wildcard_photo_sync' => false, 'nusoa.directorySearch.apiKey' => 'key']);
+        $directorySearch = $this->createStub(DirectorySearch::class);
+        $directorySearch->method('lookup')->willReturn(FindOrUpdateUserFromDirectoryTest::studentData('gone123'));
+        $this->app->instance(DirectorySearch::class, $directorySearch);
+        $administrator = User::factory()->affiliate()->create();
+        $administrator->givePermissionTo(SystemPermission::AccessAdministrationPanel, SystemPermission::ViewUsers, SystemPermission::CreateUsers);
+        $deactivated = User::factory()->create(['username' => 'gone123']);
+        $deactivated->delete();
+        $this->actingAs($administrator);
+
+        Livewire::test(ListUsers::class)
+            ->callAction('create-nu-user', ['netid' => 'gone123'])
+            ->assertNotified('Account Deactivated')
+            ->assertRedirect(UserResource::getUrl('view', ['record' => $deactivated]));
+
+        $this->assertSoftDeleted($deactivated);
     }
 }

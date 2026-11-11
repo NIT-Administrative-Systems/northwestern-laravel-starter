@@ -100,6 +100,11 @@ readonly class AddPersonToRole
 
         $user = $this->findOrCreate($person, $firstName, $lastName);
 
+        // Only Reactivate brings a deactivated account back, so its history says who did and why.
+        if ($user->trashed()) {
+            throw PersonNotAdded::deactivated($person);
+        }
+
         // Nobody gives themselves a role, whatever they hold; the list can name them like anyone else.
         if ($user->is($actor)) {
             throw PersonNotAdded::yourself();

@@ -296,6 +296,8 @@ An administrator with `EditUsers` deactivates someone with **Deactivate** on the
 
 **Reactivate** (`ReactivateUser`) restores the account and records **Account Reactivated**. The credentials revoked with it stay revoked.
 
+Only **Reactivate** brings an account back. A deactivated person who signs in, with a NetID or any other method, is refused by `SignIn::complete()` and sees a page saying their account is deactivated and to contact the team that supports the application. Looking them up in the Northwestern Directory, whether at sign-in, from **Add Northwestern User** or the directory sync on their page, updates their details and leaves them deactivated. **Add Northwestern User** sends you to their page to reactivate them, and [adding people in bulk](/features/authorization/#adding-people-in-bulk) lists them as not added.
+
 Nobody deactivates or reactivates their own account, and nobody does either while impersonating, super administrators included. `App\Domains\User\AccountStatusAccess` decides both.
 
 When EventHub reports a NetID deactivated, deprovisioned or on security hold, `ProcessNetIdUpdate` ends that person's sessions the same way. See [EventHub](/northwestern-integrations/eventhub/).
