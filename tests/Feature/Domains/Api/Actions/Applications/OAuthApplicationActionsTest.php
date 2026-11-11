@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Hash;
 use InvalidArgumentException;
 use Mockery;
 use PHPUnit\Framework\Attributes\CoversClass;
+use Tests\Concerns\IssuesServiceClientTokens;
 use Tests\Concerns\RunsAuthorizationCodeFlow;
 use Tests\TestCase;
 
@@ -31,7 +32,7 @@ use Tests\TestCase;
 #[CoversClass(DisconnectApplication::class)]
 final class OAuthApplicationActionsTest extends TestCase
 {
-    use RunsAuthorizationCodeFlow;
+    use IssuesServiceClientTokens, RunsAuthorizationCodeFlow;
 
     public function test_a_confidential_application_gets_a_secret_and_a_public_one_does_not(): void
     {
@@ -233,6 +234,29 @@ final class OAuthApplicationActionsTest extends TestCase
                 $this->fail('A revoked application was changed.');
             } catch (InvalidArgumentException) {
                 $this->assertSame('Portal', $client->fresh()?->name);
+            }
+        }
+    }
+
+    // A service client, MCP client or personal access client is changed only through its own actions.
+    public function test_only_a_connected_application_is_changed_as_one(): void
+    {
+        config(['mcp.enabled' => true]);
+        [, $serviceClient] = $this->serviceClientToken(User::factory()->api()->create());
+        $mcpClient = $this->registerMcpClient();
+
+        foreach ([$serviceClient, $mcpClient] as $client) {
+            foreach ([
+                fn () => resolve(UpdateOAuthApplication::class)($client, 'Renamed', ['https://new.example.edu/cb'], [], false, null, null, $this->administrator()),
+                fn () => resolve(RegenerateOAuthApplicationSecret::class)($client, $this->administrator()),
+            ] as $refused) {
+                try {
+                    $refused();
+                    $this->fail('A client that is not a connected application was changed as one.');
+                } catch (InvalidArgumentException $e) {
+                    $this->assertSame('Only a connected application can be changed here.', $e->getMessage());
+                    $this->assertNotSame('Renamed', $client->fresh()?->name);
+                }
             }
         }
     }

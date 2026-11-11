@@ -30,10 +30,15 @@ readonly class RegenerateOAuthApplicationSecret
      * @return non-empty-string The new secret, shown once
      *
      * @throws AuthorizationException
+     * @throws InvalidArgumentException When the client isn't a connected application, or can't be changed
      */
     public function __invoke(OAuthClient $client, User $regeneratedBy): string
     {
         $this->credentials->decide($regeneratedBy, CredentialOperation::Modify, CredentialKind::ConnectedApplication, null)->authorize();
+
+        if (CredentialKind::of($client) !== CredentialKind::ConnectedApplication) {
+            throw new InvalidArgumentException('Only a connected application can be changed here.');
+        }
 
         if (! $client->confidential()) {
             throw new InvalidArgumentException('A public application has no client secret.');
