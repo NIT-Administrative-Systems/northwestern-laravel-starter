@@ -118,7 +118,6 @@ return [
         'livewire*',
         'nova-api*',
         'pulse*',
-        'auth/login/verify/*',
     ],
 
     'ignore_commands' => [

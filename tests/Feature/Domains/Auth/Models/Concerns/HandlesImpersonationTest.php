@@ -102,6 +102,19 @@ final class HandlesImpersonationTest extends TestCase
         $this->assertTrue($user->canImpersonateUser($target));
     }
 
+    public function test_a_deleted_person_cannot_be_impersonated(): void
+    {
+        $this->bindImpersonateService(false);
+
+        $user = User::factory()->createOne();
+        $user->givePermissionTo(SystemPermission::ManageImpersonation);
+        $target = User::factory()->affiliate()->createOne();
+        $target->delete();
+
+        $this->assertFalse($target->canBeImpersonated());
+        $this->assertFalse($user->canImpersonateUser($target));
+    }
+
     public function test_can_be_impersonated_returns_false_when_target_has_manage_all_and_impersonator_does_not(): void
     {
         $this->bindImpersonateService(false);

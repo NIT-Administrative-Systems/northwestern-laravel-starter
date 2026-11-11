@@ -14,6 +14,7 @@ use App\Filament\Administration\Resources\Users\Pages\ListUsers;
 use App\Providers\Filament\AdministrationPanelProvider;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\Select;
 use Illuminate\Http\UploadedFile;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
@@ -110,9 +111,86 @@ final class UsersRelationManagerTest extends TestCase
             ->assertActionHidden('importPeople');
     }
 
+    public function test_a_role_is_assigned_to_someone_else(): void
+    {
+        $role = Role::factory()->forRoleType(RoleTypeEnum::ApplicationRole)->create();
+        $person = User::factory()->create();
+
+        $this->assign($role, $person)->assertHasNoTableActionErrors();
+
+        $this->assertTrue($person->fresh()->hasRole($role));
+    }
+
+    public function test_an_interface_role_cannot_be_assigned_to_an_api_user(): void
+    {
+        $role = Role::factory()->forRoleType(RoleTypeEnum::ApplicationAdmin)->create();
+        $apiUser = User::factory()->api()->create();
+
+        // The search never offers an API user for this role, so the ID is sent by hand.
+        $this->assign($role, $apiUser)->assertNotified('User Not Assigned');
+
+        $this->assertFalse($apiUser->fresh()->hasRole($role));
+    }
+
+    public function test_an_api_integration_role_cannot_be_assigned_to_a_person(): void
+    {
+        $role = Role::factory()->forRoleType(RoleTypeEnum::ApiIntegration)->create();
+        $person = User::factory()->create();
+
+        $this->assign($role, $person)->assertNotified('User Not Assigned');
+
+        $this->assertFalse($person->fresh()->hasRole($role));
+    }
+
+    public function test_you_cannot_assign_a_role_to_yourself(): void
+    {
+        $role = Role::factory()->forRoleType(RoleTypeEnum::ApplicationRole)->create();
+
+        $this->assertNotContains($this->administrator->id, array_keys($this->search($role, $this->administrator->username)));
+
+        $this->assign($role, $this->administrator)->assertForbidden();
+
+        $this->assertFalse($this->administrator->fresh()->hasRole($role));
+    }
+
+    public function test_a_super_administrator_cannot_assign_a_role_to_themselves_either(): void
+    {
+        $this->administrator->givePermissionTo(SystemPermission::ManageAll);
+        $role = Role::factory()->forRoleType(RoleTypeEnum::ApplicationRole)->create();
+
+        $this->assign($role, $this->administrator)->assertForbidden();
+
+        $this->assertFalse($this->administrator->fresh()->hasRole($role));
+    }
+
     /** @return Testable<UsersRelationManager> */
     private function usersOf(Role $role): Testable
     {
         return Livewire::test(UsersRelationManager::class, ['ownerRecord' => $role, 'pageClass' => ViewRole::class]);
+    }
+
+    /**
+     * @return Testable<UsersRelationManager>
+     */
+    private function assign(Role $role, User $user): Testable
+    {
+        return Livewire::test(UsersRelationManager::class, ['ownerRecord' => $role, 'pageClass' => ViewRole::class])
+            ->mountTableAction('attach')
+            ->setTableActionData(['recordId' => $user->id])
+            ->callMountedTableAction();
+    }
+
+    /**
+     * @return array<int|string, string>
+     */
+    private function search(Role $role, string $search): array
+    {
+        $component = Livewire::test(UsersRelationManager::class, ['ownerRecord' => $role, 'pageClass' => ViewRole::class])
+            ->mountTableAction('attach');
+
+        $this->assertInstanceOf(UsersRelationManager::class, $relationManager = $component->instance());
+        $this->assertInstanceOf(Select::class, $select = $relationManager->getMountedTableActionForm()?->getComponent('recordId'));
+
+        return $select->getSearchResults($search);
     }
 }

@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Support\Timebox;
 use Illuminate\Validation\ValidationException;
+use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
@@ -323,6 +324,75 @@ final class LoginCodesTest extends TestCase
         $this->codes()->issueFor($user, $this->request());
 
         $this->assertRejected('email', 'Too many sign-in attempts', fn () => $this->codes()->issueFor($user, $this->request()));
+    }
+
+    public function test_a_deleted_person_cannot_be_sent_a_code(): void
+    {
+        $user = User::factory()->affiliate()->create(['email' => 'partner@example.com']);
+        $user->delete();
+
+        try {
+            $this->codes()->issueFor($user, $this->request());
+            $this->fail('A deleted person was sent a code.');
+        } catch (InvalidArgumentException $e) {
+            $this->assertSame('A deleted person can\'t be sent a code.', $e->getMessage());
+        }
+
+        $this->assertSame(0, LoginChallenge::query()->count());
+        Queue::assertNothingPushed();
+    }
+
+    // Only the latest code works, so an older email's code can't be guessed at alongside it.
+    public function test_a_new_code_voids_the_earlier_ones(): void
+    {
+        $this->codes = ['111111', '222222'];
+        $user = User::factory()->affiliate()->create(['email' => 'test@example.com']);
+        $this->codes()->request('test@example.com', $this->request());
+        $first = LoginChallenge::query()->sole();
+
+        $this->codes()->issueFor($user, $this->request());
+
+        $this->assertFalse($first->fresh()->isActive());
+        $this->assertRejected('code', 'That code didn\'t work', fn () => $this->codes()->verify('111111', $this->request()));
+
+        $this->codes()->startFromLink($this->linkToken(LoginChallenge::query()->latest('id')->firstOrFail()));
+        $this->assertTrue($this->codes()->verify('222222', $this->request())->is($user));
+    }
+
+    public function test_wrong_codes_are_limited_per_email_across_challenges(): void
+    {
+        config(['local-auth.code.max_failed_per_day' => 3]);
+        $this->codes = ['111111', '222222'];
+        $user = User::factory()->affiliate()->create(['email' => 'test@example.com']);
+        $this->codes()->request('test@example.com', $this->request());
+
+        foreach (range(1, 2) as $attempt) {
+            $this->assertRejected('code', 'That code didn\'t work', fn () => $this->codes()->verify('000000', $this->request()));
+        }
+
+        // A new code doesn't start the count again.
+        $this->travel(31)->seconds();
+        $this->codes()->resend($this->request());
+        $this->assertRejected('code', 'That code didn\'t work', fn () => $this->codes()->verify('000000', $this->request()));
+        $this->assertRejected('code', 'Too many incorrect codes. Try again in 24 hours.', fn () => $this->codes()->verify('222222', $this->request()));
+
+        $this->travel(1)->day();
+        $this->codes()->startFromLink($this->linkToken(LoginChallenge::query()->latest('id')->firstOrFail()));
+        LoginChallenge::query()->latest('id')->firstOrFail()->update(['expires_at' => now()->addMinute()]);
+        $this->assertTrue($this->codes()->verify('222222', $this->request())->is($user));
+    }
+
+    // Counted for an email without an account too, so the limit doesn't tell the two apart.
+    public function test_wrong_codes_for_an_unknown_email_reach_the_same_limit(): void
+    {
+        config(['local-auth.code.max_failed_per_day' => 2]);
+        $this->codes()->request('missing@example.com', $this->request());
+
+        foreach (range(1, 2) as $attempt) {
+            $this->assertRejected('code', 'That code didn\'t work', fn () => $this->codes()->verify('000000', $this->request()));
+        }
+
+        $this->assertRejected('code', 'Too many incorrect codes', fn () => $this->codes()->verify('000000', $this->request()));
     }
 
     // A code sent by an administrator, or read on another device, has no sign-in pending in this browser.

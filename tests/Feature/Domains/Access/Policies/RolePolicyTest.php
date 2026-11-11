@@ -30,6 +30,18 @@ final class RolePolicyTest extends TestCase
         $this->assertTrue($this->policy()->viewAny($user));
     }
 
+    public function test_view_follows_view_any(): void
+    {
+        $user = User::factory()->create();
+        $role = Role::factory()->forRoleType(RoleTypeEnum::ApplicationRole)->create();
+
+        $this->assertFalse($this->policy()->view($user, $role));
+
+        $user->givePermissionTo(SystemPermission::ViewRoles);
+
+        $this->assertTrue($this->policy()->view($user, $role));
+    }
+
     public function test_create_denies_user_without_permission(): void
     {
         $user = User::factory()->create();
@@ -112,6 +124,25 @@ final class RolePolicyTest extends TestCase
         $role = Role::factory()->forRoleType(RoleTypeEnum::ApplicationRole)->create();
 
         $this->assertTrue($this->policy()->attachUser($user, $role));
+    }
+
+    public function test_attach_user_denies_assigning_a_role_to_yourself(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo(SystemPermission::AssignRoles);
+        $role = Role::factory()->forRoleType(RoleTypeEnum::ApplicationRole)->create();
+
+        $this->assertFalse($this->policy()->attachUser($user, $role, $user));
+        $this->assertTrue($this->policy()->attachUser($user, $role, User::factory()->create()));
+    }
+
+    public function test_detach_user_lets_you_remove_your_own_role(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo(SystemPermission::AssignRoles);
+        $role = Role::factory()->forRoleType(RoleTypeEnum::ApplicationRole)->create();
+
+        $this->assertTrue($this->policy()->detachUser($user, $role));
     }
 
     public function test_attach_user_denies_system_managed_without_manage_all(): void

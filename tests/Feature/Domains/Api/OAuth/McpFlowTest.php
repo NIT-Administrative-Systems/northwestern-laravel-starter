@@ -139,6 +139,40 @@ final class McpFlowTest extends TestCase
         $this->withToken($personal)->getJson('/api/v1/me')->assertOk();
     }
 
+    // The client's kind decides where its token works, not the scopes it carries.
+    public function test_an_mcp_clients_token_without_the_mcp_scope_is_refused_on_the_rest_api(): void
+    {
+        $user = $this->mcpUser([SystemPermission::ViewUsers]);
+        $this->actingAs($user);
+        $client = $this->registerMcpClient();
+
+        // Consent now refuses such a request, so pass it by to get the token one would have had.
+        $this->withoutMiddleware(AuthorizeOAuthConsent::class);
+        [, $verifier] = $this->requestAuthorization($client, []);
+        $token = (string) $this->exchange($client, $this->approve($client), $verifier)->assertOk()->json('access_token');
+
+        $this->withToken($token)->getJson('/api/v1/me')
+            ->assertForbidden()
+            ->assertJsonPath('detail', 'MCP tokens can only be used with the MCP server.');
+        $this->mcp($token, 'tools/list')->assertForbidden();
+    }
+
+    public function test_consent_refuses_an_mcp_client_that_does_not_ask_for_the_mcp_scope(): void
+    {
+        $this->actingAs($this->mcpUser());
+        $client = $this->registerMcpClient();
+
+        [$consent] = $this->requestAuthorization($client, []);
+        $consent->assertForbidden();
+
+        // Nor can approving a request without it.
+        $this->requestAuthorization($client, ['mcp:use'])[0]->assertOk();
+        $authRequest = unserialize((string) session('authRequest'));
+        $authRequest->setScopes([]);
+        session(['authRequest' => serialize($authRequest)]);
+        $this->post('/oauth/authorize', ['client_id' => $client->getKey(), 'auth_token' => session('authToken')])->assertForbidden();
+    }
+
     public function test_service_client_personal_and_application_tokens_are_refused_on_the_mcp_server(): void
     {
         $user = $this->mcpUser([SystemPermission::ViewUsers, SystemPermission::CreatePersonalAccessTokens]);

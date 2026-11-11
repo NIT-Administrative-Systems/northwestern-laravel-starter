@@ -20,7 +20,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ### Security
 
+- The audit log and role activity need View Audit Logs again. `AuditPolicy` stayed in `App\Domains\User\Policies` when `Audit` moved to `App\Domains\Core\Models` in v3.0.0, so Laravel no longer found it and every administrator could read them. It is now `App\Domains\Core\Policies\AuditPolicy`, and `AuditResource` and `RoleActivityResource` ask it in `canAccess()`.
+- Role editors without Manage All can no longer grant system-managed permissions, Manage All included. Creating and editing a role read the permission lists from the raw form data, where a list the form hid was never validated. `SyncRolePermissions` now builds the set from the lists shown for the role's type, keeping only what that type allows and the editor may grant.
+- A session signed in before a NetID was deactivated or an account deleted stops working: `User::canAccessPanel()` refuses both panels to an inactive or deleted account, so its next request is refused.
+- An MCP client's token is refused on the REST API whatever scopes it carries. `RequireTokenAudience` decides a token's side by the kind of client it was issued to instead of by the `mcp:use` scope, so a client that asked for no scope could read the API. The consent screen also refuses an MCP client that doesn't ask for `mcp:use`.
+- The fixed sign-in code (`LOCAL_AUTH_USE_FIXED_CODE`) works only in the `local`, `testing` and `ci` environments, where before it was refused only in `production`, `develop` and `qa`, and the application refuses to boot with it turned on anywhere else.
+- Telescope no longer records `client_secret`, `refresh_token`, `code`, `code_verifier` or `secret` request parameters outside the `local` environment. The unused `auth/login/verify/*` path is gone from `telescope.ignore_paths`.
+- Sign-in codes are limited per email across all its codes: 20 incorrect codes a day by default (`LOCAL_AUTH_CODE_MAX_FAILED_PER_DAY`), counted for emails without an account too. A new code ends the email's earlier open codes, so only the latest works.
+- Nobody can give themselves a role, from the role's Assigned Users tab or their own user record. `RolePolicy::attachUser()` takes the person being assigned, and both relation managers refuse it on the server for everyone, Super Administrators included.
 - `UserBuilder::whereEmailEquals()` and `whereUsernameEquals()` match exactly, comparing `lower(column) = lower(?)` instead of using `ilike`, which treated `%` and `_` in the value as wildcards. A sign-in code request for `%@example.com` reached the first local account at that domain, and a lookup for `a_b@example.com` could find `axb@example.com`.
+
+### Fixed
+
+- A Directory Search outage no longer deactivates people. laravel-soa's `lookup()` returns `false` both for a NetID it doesn't find and when the service can't be reached, and `FindOrUpdateUserFromDirectory` marked the NetID inactive either way, after which `oauth:revoke-ineligible` revoked the person's credentials. Someone who already has an account now signs in with their stored details when the lookup fails, and only an incomplete directory entry or EventHub deactivates them. Someone signing in for the first time whose lookup fails gets the retries and the 503 page instead of an error, and no account.
+- Changing a role's type drops the permissions the new type doesn't show. The form's lists followed the saved type instead of the one chosen, and saving kept a hidden list's permissions.
+- Deleted people are no longer offered Send Verification Code or Impersonate, and `LoginCodes::issueFor()` refuses a deleted account. Impersonating a deactivated or deleted person is refused too.
+- `UpdateOAuthApplication` and `RegenerateOAuthApplicationSecret` throw an `InvalidArgumentException` for a client that isn't a connected application.
+- The support ticket and API request logs have policies (`SupportTicketPolicy`, `ApiRequestLogPolicy`), and `RolePolicy` and `UserLoginRecordPolicy` have `view()`, which Filament's strict authorization asks for.
+
+### Changed
+
+- Both panels use Filament's strict authorization (`->strictAuthorization()`): a resource whose model has no policy, or a policy without an ability a page asks for, throws instead of allowing it. The MCP client, application and API request resources, whose `canAccess()` decides, return it from `canViewAny()` too.
+- `assignRoleWithAudit()` throws an `InvalidArgumentException` when a role doesn't suit the user: an API Integration role for anyone but an API user, or any other role for an API user. Both relation managers and seeders share the rule (`Role::suits()`). `RoleFactory`'s default role type is never API Integration.
 
 ## [v3.1.0] - 2026-11-10
 

@@ -7,14 +7,20 @@ namespace Tests\Feature\Domains\Auth\Http\Controllers;
 use App\Domains\Access\Enums\SystemPermission;
 use App\Domains\Auth\Enums\AuthType;
 use App\Domains\Auth\Http\Controllers\WebSSOController;
+use App\Domains\Core\Exceptions\ServiceDownError;
+use App\Domains\User\Actions\Directory\FindOrUpdateUserFromDirectory;
 use App\Domains\User\Actions\Lifecycle\DeactivateUser;
 use App\Domains\User\Actions\Lifecycle\ReactivateUser;
+use App\Domains\User\Exceptions\BadDirectoryEntry;
 use App\Domains\User\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Sleep;
 use Northwestern\SysDev\SOA\Auth\Strategy\WebSSOStrategy;
 use Northwestern\SysDev\SOA\DirectorySearch;
 use PHPUnit\Framework\Attributes\CoversNothing;
+use ReflectionMethod;
 use Tests\Feature\Domains\User\Actions\Directory\FindOrUpdateUserFromDirectoryTest;
 use Tests\TestCase;
 
@@ -74,5 +80,39 @@ final class WebSSOControllerTest extends TestCase
         $this->get('/auth/websso/login')->assertRedirect();
 
         $this->assertTrue($person->is(Auth::guard('web')->user()));
+    }
+
+    public function test_a_new_person_whose_directory_lookup_fails_gets_the_503_page_after_three_tries(): void
+    {
+        Sleep::fake();
+        $directoryApi = $this->createMock(DirectorySearch::class);
+        $directoryApi->expects($this->exactly(3))->method('lookup')->willReturn(false);
+        $directoryApi->method('getLastError')->willReturn('Verify connectivity to https://directory.example from the server: cURL error 28');
+
+        try {
+            $this->findUserByNetId($directoryApi, 'new123');
+            $this->fail('A failed lookup for someone new signed them in.');
+        } catch (ServiceDownError $e) {
+            $this->assertSame(503, $e->render(Request::create('/auth/azure-ad/callback', 'POST'))->getStatusCode());
+        }
+
+        $this->assertFalse(User::query()->where('username', 'new123')->exists());
+    }
+
+    public function test_an_incomplete_entry_for_a_new_person_is_not_retried(): void
+    {
+        $directoryApi = $this->createMock(DirectorySearch::class);
+        $directoryApi->expects($this->once())->method('lookup')->willReturn(['uid' => 'new123']);
+
+        $this->expectException(BadDirectoryEntry::class);
+
+        $this->findUserByNetId($directoryApi, 'new123');
+    }
+
+    private function findUserByNetId(DirectorySearch $directoryApi, string $netId): mixed
+    {
+        $finder = resolve(FindOrUpdateUserFromDirectory::class, ['directorySearch' => $directoryApi]);
+
+        return new ReflectionMethod(WebSSOController::class, 'findUserByNetID')->invoke(resolve(WebSSOController::class), $finder, $netId);
     }
 }

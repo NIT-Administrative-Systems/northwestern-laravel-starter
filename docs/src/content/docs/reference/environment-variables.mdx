@@ -126,7 +126,7 @@ These configure [passwordless verification codes](/features/authentication/#pass
 | Variable                                | Default | Description                                                                                    |
 | --------------------------------------- | ------- | ---------------------------------------------------------------------------------------------- |
 | `LOCAL_AUTH_ENABLED`                    | `true`  | Allow sign-in with a code sent by email                                                        |
-| `LOCAL_AUTH_USE_FIXED_CODE`             | `false` | Issue a predictable code (`123456` for six digits). Throws in `production`, `develop` and `qa` |
+| `LOCAL_AUTH_USE_FIXED_CODE`             | `false` | Issue a predictable code (`123456` for six digits). Only in `local`, `testing` and `ci`: anywhere else the application refuses to boot |
 | `LOCAL_AUTH_RATE_LIMIT_PER_HOUR`        | `10`    | Code requests per email address per hour                                                       |
 | `LOCAL_AUTH_RATE_LIMIT_PER_IP_PER_HOUR` | `20`    | Code requests per IP address per hour                                                          |
 | `LOCAL_AUTH_CODE_DIGITS`                | `6`     | Digits in a code                                                                               |
@@ -134,6 +134,7 @@ These configure [passwordless verification codes](/features/authentication/#pass
 | `LOCAL_AUTH_CODE_MAX_ATTEMPTS`          | `8`     | Failed attempts before the challenge locks                                                     |
 | `LOCAL_AUTH_CODE_LOCK_MINUTES`          | `15`    | Minutes a locked challenge stays locked                                                        |
 | `LOCAL_ACCOUNT_INACTIVITY_DAYS`         | `null`  | Deactivate local accounts nobody has signed in to for this many days. `null` never does. See [Expiring Local Accounts](/features/authentication/#expiring-local-accounts) |
+| `LOCAL_AUTH_CODE_MAX_FAILED_PER_DAY`    | `20`    | Incorrect codes an email may enter in a day, across all its codes                              |
 | `LOCAL_AUTH_CODE_RESEND_COOLDOWN`       | `30`    | Seconds before another code can be sent                                                        |
 
 ## API
