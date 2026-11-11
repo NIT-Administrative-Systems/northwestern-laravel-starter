@@ -47,6 +47,9 @@ return [
         // Minutes a challenge stays locked after max attempts
         'lock_minutes' => (int) env('LOCAL_AUTH_CODE_LOCK_MINUTES', 15),
 
+        // Incorrect codes an email may enter in a day, across all its codes; then it waits out the day
+        'max_failed_per_day' => (int) env('LOCAL_AUTH_CODE_MAX_FAILED_PER_DAY', 20),
+
         // Cooldown before resending another code
         'resend_cooldown_seconds' => (int) env('LOCAL_AUTH_CODE_RESEND_COOLDOWN', 30),
 
