@@ -2,7 +2,7 @@
 # New support request
 
 @if ($fallbackMode)
-> **The ticketing system didn't create this ticket.** This email is the fallback, and Sentry has the error.
+> **The ticketing system didn't create this ticket.** This email is the fallback, and the error was reported.
 @endif
 
 <x-mail::panel>
