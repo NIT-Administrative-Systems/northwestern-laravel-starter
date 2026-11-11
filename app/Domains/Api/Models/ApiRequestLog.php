@@ -28,11 +28,6 @@ class ApiRequestLog extends Model
         'created_at' => 'datetime',
     ];
 
-    protected function retentionConfigKey(): string
-    {
-        return 'platform.retention.api_request_logs';
-    }
-
     /**
      * @return BelongsTo<User, $this>
      */
@@ -47,5 +42,10 @@ class ApiRequestLog extends Model
     public function oauth_client(): BelongsTo
     {
         return $this->belongsTo(OAuthClient::class, 'oauth_client_id');
+    }
+
+    protected function retentionConfigKey(): string
+    {
+        return 'platform.retention.api_request_logs';
     }
 }

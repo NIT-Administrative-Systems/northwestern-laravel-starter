@@ -53,25 +53,6 @@ class LogsApiRequests extends LogsPassportRequests
         ];
     }
 
-    /**
-     * `ok`, `error` for a JSON-RPC error, or `tool_error` for a tool that reported failure. Null
-     * for anything that isn't a JSON-RPC response, such as a 401 or a streamed reply.
-     */
-    private function mcpOutcome(Response $response): ?string
-    {
-        $body = $response instanceof StreamedResponse ? null : json_decode((string) $response->getContent(), true);
-
-        if (! is_array($body) || ! array_key_exists('jsonrpc', $body)) {
-            return null;
-        }
-
-        if (array_key_exists('error', $body)) {
-            return 'error';
-        }
-
-        return is_array($body['result'] ?? null) && ($body['result']['isError'] ?? false) === true ? 'tool_error' : 'ok';
-    }
-
     protected function persistLog(array $data): void
     {
         ApiRequestLog::create([
@@ -95,5 +76,24 @@ class LogsApiRequests extends LogsPassportRequests
             'mcp_tool' => $data['mcp_tool'],
             'mcp_outcome' => $data['mcp_outcome'],
         ]);
+    }
+
+    /**
+     * `ok`, `error` for a JSON-RPC error, or `tool_error` for a tool that reported failure. Null
+     * for anything that isn't a JSON-RPC response, such as a 401 or a streamed reply.
+     */
+    private function mcpOutcome(Response $response): ?string
+    {
+        $body = $response instanceof StreamedResponse ? null : json_decode((string) $response->getContent(), true);
+
+        if (! is_array($body) || ! array_key_exists('jsonrpc', $body)) {
+            return null;
+        }
+
+        if (array_key_exists('error', $body)) {
+            return 'error';
+        }
+
+        return is_array($body['result'] ?? null) && ($body['result']['isError'] ?? false) === true ? 'tool_error' : 'ok';
     }
 }

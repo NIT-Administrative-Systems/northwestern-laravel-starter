@@ -64,6 +64,24 @@ class OAuthClient extends Client
         'last_used_at' => 'datetime',
     ];
 
+    /** @return BelongsTo<self, $this> */
+    public function rotated_from_client(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'rotated_from_client_id');
+    }
+
+    /** @return BelongsTo<User, $this> */
+    public function rotated_by_user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'rotated_by_user_id');
+    }
+
+    /** @return HasMany<OAuthConnection, $this> */
+    public function connections(): HasMany
+    {
+        return $this->hasMany(OAuthConnection::class, 'oauth_client_id');
+    }
+
     /**
      * Clients that can still be used: not revoked, and with a secret that hasn't expired.
      *
@@ -115,43 +133,6 @@ class OAuthClient extends Client
     }
 
     /**
-     * Whether this is an MCP client. It registered itself, so its name is whatever it claimed.
-     */
-    public function isMcpClient(): bool
-    {
-        return $this->origin === ClientOrigin::Dynamic;
-    }
-
-    /** @return BelongsTo<self, $this> */
-    public function rotated_from_client(): BelongsTo
-    {
-        return $this->belongsTo(self::class, 'rotated_from_client_id');
-    }
-
-    /** @return BelongsTo<User, $this> */
-    public function rotated_by_user(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'rotated_by_user_id');
-    }
-
-    /** @return HasMany<OAuthConnection, $this> */
-    public function connections(): HasMany
-    {
-        return $this->hasMany(OAuthConnection::class, 'oauth_client_id');
-    }
-
-    /**
-     * An administrator can mark an application first-party, such as the organization's own
-     * tool, so people aren't asked to approve it.
-     *
-     * @param  list<\Laravel\Passport\Scope>  $scopes
-     */
-    public function skipsAuthorization(\Illuminate\Contracts\Auth\Authenticatable $user, array $scopes): bool
-    {
-        return $this->first_party;
-    }
-
-    /**
      * Whether the client is unusable, either revoked or past its secret expiry.
      *
      * @return Attribute<bool, bool>
@@ -174,6 +155,25 @@ class OAuthClient extends Client
                 default => CredentialStatus::Active,
             },
         )->withoutObjectCaching(); // An expiry passes without the model changing.
+    }
+
+    /**
+     * Whether this is an MCP client. It registered itself, so its name is whatever it claimed.
+     */
+    public function isMcpClient(): bool
+    {
+        return $this->origin === ClientOrigin::Dynamic;
+    }
+
+    /**
+     * An administrator can mark an application first-party, such as the organization's own
+     * tool, so people aren't asked to approve it.
+     *
+     * @param  list<\Laravel\Passport\Scope>  $scopes
+     */
+    public function skipsAuthorization(\Illuminate\Contracts\Auth\Authenticatable $user, array $scopes): bool
+    {
+        return $this->first_party;
     }
 
     private function secretExpired(): bool

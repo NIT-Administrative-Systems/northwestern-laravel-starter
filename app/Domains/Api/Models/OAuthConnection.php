@@ -40,6 +40,18 @@ class OAuthConnection extends BaseModel
     /** @var list<string> */
     protected array $auditExclude = ['last_used_at'];
 
+    /** @return BelongsTo<OAuthClient, $this> */
+    public function oauth_client(): BelongsTo
+    {
+        return $this->belongsTo(OAuthClient::class, 'oauth_client_id');
+    }
+
+    /** @return BelongsTo<User, $this> */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
     /**
      * Connections that still give the application access: it holds an access token that
      * hasn't expired, or a refresh token that can get another.
@@ -68,17 +80,5 @@ class OAuthConnection extends BaseModel
                     ->whereColumn("{$refreshTokens}.access_token_id", "{$tokens}.id")
                     ->where("{$refreshTokens}.revoked", false)
                     ->where("{$refreshTokens}.expires_at", '>', $now))));
-    }
-
-    /** @return BelongsTo<OAuthClient, $this> */
-    public function oauth_client(): BelongsTo
-    {
-        return $this->belongsTo(OAuthClient::class, 'oauth_client_id');
-    }
-
-    /** @return BelongsTo<User, $this> */
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
     }
 }
