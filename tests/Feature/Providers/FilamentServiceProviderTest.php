@@ -11,7 +11,7 @@ use PHPUnit\Framework\Attributes\CoversNothing;
 use Tests\TestCase;
 
 /**
- * Defaults FilamentServiceProvider gives every panel. The provider is outside the coverage gate.
+ * Defaults the provider gives every panel. It's outside the coverage gate.
  */
 #[CoversNothing]
 final class FilamentServiceProviderTest extends TestCase

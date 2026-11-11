@@ -11,8 +11,10 @@ use App\Domains\User\Models\User;
 use Northwestern\SysDev\Chassis\Testing\Browser\FilamentPages;
 
 /*
- * Every administration page works and passes axe for a super administrator. Pages are found
- * from the panel; pages that need a record are checked below, each with a record made for it.
+ * Every administration page works and passes axe for a super administrator.
+ *
+ * Pages are found from the panel, and pages that need a
+ * record are checked below, each with its own record.
  */
 
 beforeEach(fn () => $this->signInAsSuperAdministrator());
@@ -37,7 +39,7 @@ it("is healthy on the administration panel's dashboard on a phone", function () 
     expect(visit('/administration'))->toBeHealthyOnMobile();
 });
 
-// Pest calls each closure in the test, after sign-in, so every page gets its own record.
+// Pest calls each closure in the test, after sign-in, so every page gets a record.
 it('is healthy on record pages', function (string $path) {
     expect(visit($path))->toBeHealthyInEachTheme();
 })->with([
@@ -75,8 +77,8 @@ it('is healthy on an audit record', function () {
     $user->forceFill(['first_name' => 'Accessibility'])->save();
     $audit = Audit::query()->latest('id')->firstOrFail();
 
-    // The @pierre/diffs viewer renders syntax colors on its change backgrounds inside a shadow
-    // DOM, and none of its themes meet color contrast there.
+    // The @pierre/diffs viewer renders syntax colors on its change backgrounds
+    // inside a shadow DOM, and none of its themes meet color contrast there.
     expect(visit("/administration/audits/{$audit->getKey()}"))->toBeHealthyInEachTheme(exclude: ['diffs-container']);
 });
 

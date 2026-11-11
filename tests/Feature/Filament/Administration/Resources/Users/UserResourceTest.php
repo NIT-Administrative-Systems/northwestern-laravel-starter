@@ -88,7 +88,7 @@ final class UserResourceTest extends TestCase
         Livewire::test(ListUsers::class)->assertCanSeeTableRecords([$apiUser, $person]);
     }
 
-    // Manage All grants every permission through Gate::before, which a direct permission check skips.
+    // Manage All works through Gate::before, which a direct permission check skips.
     public function test_manage_all_opens_the_history_tabs_and_sign_in_records(): void
     {
         $superAdministrator = User::factory()->affiliate()->create();
@@ -135,7 +135,7 @@ final class UserResourceTest extends TestCase
             ->assertSee('Connected Applications');
     }
 
-    // An administrator opens an API user's record for its credentials, and it has no activity of its own.
+    // An API user's record is for its credentials; it has no activity of its own.
     public function test_an_api_users_record_puts_its_credentials_first_and_has_no_activity_page(): void
     {
         config(['api.enabled' => true]);
@@ -209,7 +209,8 @@ final class UserResourceTest extends TestCase
             ->assertCanNotSeeTableRecords([$person]);
     }
 
-    // Looking someone up never reactivates them; the administrator is sent to their page to do it.
+    // Looking someone up never reactivates them;
+    // it sends you to their page to do that.
     public function test_adding_a_deactivated_northwestern_user_says_so_and_leaves_them_deactivated(): void
     {
         config(['platform.wildcard_photo_sync' => false, 'nusoa.directorySearch.apiKey' => 'key']);

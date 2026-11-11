@@ -11,9 +11,11 @@ use Livewire\Component;
 use Livewire\Features\SupportTesting\Testable;
 
 /**
- * A table whose rows link somewhere wraps every cell in the link, so a cell left empty
- * becomes a link with no text. Columns hidden by default count, since anyone can show
- * them, but a column the table leaves out altogether doesn't.
+ * A table whose rows link somewhere wraps every cell in the
+ * link, so a cell left empty becomes a link with no text.
+ *
+ * Columns hidden by default count, since anyone can
+ * show them. Columns the table leaves out don't.
  */
 trait AssertsLinkedRows
 {

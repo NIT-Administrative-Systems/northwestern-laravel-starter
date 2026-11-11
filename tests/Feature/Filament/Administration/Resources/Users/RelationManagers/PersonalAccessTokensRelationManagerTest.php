@@ -46,7 +46,8 @@ final class PersonalAccessTokensRelationManagerTest extends TestCase
         $this->assertFalse(PersonalAccessTokensRelationManager::canViewForRecord($person, ViewUser::class));
     }
 
-    // For a leaked token: the administrator revokes it, and the person's audit history says so.
+    // For a leaked token: the administrator revokes
+    // it, and the person's audit history says so.
     public function test_an_administrator_revokes_a_persons_token(): void
     {
         $person = User::factory()->create();

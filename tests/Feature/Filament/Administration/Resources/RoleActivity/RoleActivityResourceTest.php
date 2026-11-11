@@ -29,7 +29,7 @@ final class RoleActivityResourceTest extends TestCase
         Filament::setCurrentPanel(AdministrationPanelProvider::ID);
     }
 
-    // Each audit lists every role the person had before and after, not only the one that changed.
+    // An audit lists the person's roles before and after, not just the changed one.
     public function test_the_role_filter_finds_changes_to_that_role_only(): void
     {
         $faculty = Role::factory()->create(['name' => 'Faculty/Staff']);

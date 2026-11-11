@@ -35,7 +35,8 @@ final class McpClientResourceTest extends TestCase
         $this->actingAs($admin);
     }
 
-    // While MCP is off administrators can still see and revoke the clients, to shut it down cleanly.
+    // While MCP is off, administrators can still see
+    // and revoke clients, to shut it down cleanly.
     public function test_it_needs_manage_api_access_and_stays_open_while_mcp_is_off(): void
     {
         $this->assertTrue(McpClientResource::canAccess());
@@ -47,12 +48,12 @@ final class McpClientResourceTest extends TestCase
         $this->assertFalse(McpClientResource::canAccess());
     }
 
-    // MCP Clients sits in the API cluster, which must still show in the sidebar when only MCP is on.
+    // The API cluster holds MCP Clients, so it must show when only MCP is on.
     public function test_it_is_in_the_sidebar_when_only_mcp_is_on(): void
     {
         config(['api.enabled' => false]);
 
-        // The panel's home sends someone without the overview to the first page they can open.
+        // The panel's home sends someone without the overview to their first page.
         $this->followingRedirects()
             ->get('/administration')
             ->assertOk()

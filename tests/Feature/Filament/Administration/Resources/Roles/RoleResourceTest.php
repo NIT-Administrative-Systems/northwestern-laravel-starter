@@ -48,7 +48,7 @@ final class RoleResourceTest extends TestCase
 
         Livewire::test(CreateRole::class)
             ->fillForm(['name' => 'Escalated', 'role_type_id' => $this->roleType(RoleTypeEnum::ApplicationRole)->id])
-            // Hidden for this role type, and for anyone without Manage All, so the form never validates it.
+            // Hidden for this role type and without Manage All, so it's never validated.
             ->set('data.api_permissions', [SystemPermission::ManageAll->value])
             ->set('data.system_permissions', [SystemPermission::ManageAll->value])
             ->call('create')

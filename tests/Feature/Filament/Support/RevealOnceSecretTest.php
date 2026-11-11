@@ -18,9 +18,11 @@ use PHPUnit\Framework\Attributes\CoversNothing;
 use Tests\TestCase;
 
 /**
- * The wizards' show-once rules, at the one interface every credential wizard uses. It's under
- * app/Filament, outside the coverage gate, so these tests hold it. Each run is a credential
- * wizard mounted on a page, which is what gives it its own key.
+ * The wizards' show-once rules, at the one interface every credential wizard uses.
+ * It's outside the coverage gate, under app/Filament, so these tests cover it.
+ *
+ * Each run is a credential wizard mounted on a
+ * page, which is what gives it its own key.
  */
 #[CoversNothing]
 final class RevealOnceSecretTest extends TestCase
@@ -57,7 +59,7 @@ final class RevealOnceSecretTest extends TestCase
         $this->assertSame(7, $secret->get($run, 'user_id'));
     }
 
-    // Two runs at once, as in two browser tabs: each issues its own and sees only its own.
+    // Two runs at once, as in two browser tabs: each issues and sees only its own.
     public function test_each_run_keeps_its_own_secret(): void
     {
         $first = $this->mountWizard();
@@ -101,7 +103,7 @@ final class RevealOnceSecretTest extends TestCase
         $this->assertNull($secret->identifier($run));
     }
 
-    // A run that ended, or a component with no run mounted, has nothing to show or issue.
+    // An ended run, or a component with no run mounted, has nothing to show or issue.
     public function test_without_a_run_nothing_is_issued_or_shown(): void
     {
         $page = Livewire::test(AccessTokens::class)->instance();

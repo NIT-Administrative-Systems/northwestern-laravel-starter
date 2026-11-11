@@ -16,8 +16,9 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 /**
- * Exporters are under app/Filament, outside the coverage gate, so this keeps CSV injection out
- * of every export.
+ * Exporters are under app/Filament, outside
+ * the coverage gate, so this test keeps
+ * CSV injection out of every export.
  */
 #[CoversNothing]
 final class BaseExporterTest extends TestCase
