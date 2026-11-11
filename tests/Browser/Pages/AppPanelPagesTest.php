@@ -32,8 +32,7 @@ it('is healthy on every app panel page', function (bool $dark) {
 })->with(['light' => false, 'dark' => true]);
 
 it('is healthy on the lockdown page', function () {
-    // Without the Wildcard photo: its route is behind lockdown too, so it would break.
-    config(['platform.lockdown.enabled' => true, 'platform.wildcard_photo_sync' => false]);
+    config(['platform.lockdown.enabled' => true]);
 
     expect(visit('/app/access-restricted')->assertSee('Access Restricted'))->toBeHealthyInEachTheme();
 });
