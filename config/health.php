@@ -3,11 +3,17 @@
 declare(strict_types=1);
 
 return [
+
     /*
-     * A result store is responsible for saving the results of the checks. The
-     * `EloquentHealthResultStore` will save results in the database. You
-     * can use multiple stores at the same time.
-     */
+    |--------------------------------------------------------------------------
+    | Result Stores
+    |--------------------------------------------------------------------------
+    |
+    | Where check results are stored. The database store keeps five days of
+    | history; the results can be kept in more than one store at a time.
+    |
+    */
+
     'result_stores' => [
         Spatie\Health\ResultStores\EloquentHealthResultStore::class => [
             'connection' => env('HEALTH_DB_CONNECTION', env('DB_CONNECTION')),
@@ -17,32 +23,25 @@ return [
     ],
 
     /*
-     * You can get notified when specific events occur. Out of the box you can use 'mail' and 'slack'.
-     * For Slack you need to install laravel/slack-notification-channel.
-     */
+    |--------------------------------------------------------------------------
+    | Notifications
+    |--------------------------------------------------------------------------
+    |
+    | Emails HEALTH_NOTIFICATION_EMAIL when checks start failing, at most once
+    | an hour, so a failing check doesn't send a message every minute. Slack
+    | works as well once laravel/slack-notification-channel is installed.
+    |
+    */
+
     'notifications' => [
-        /*
-         * Notifications will only get sent if this option is set to `true`.
-         */
         'enabled' => (bool) env('HEALTH_NOTIFICATIONS_ENABLED', false),
 
         'notifications' => [
             Spatie\Health\Notifications\CheckFailedNotification::class => ['mail'],
         ],
 
-        /*
-         * Here you can specify the notifiable to which the notifications should be sent. The default
-         * notifiable will use the variables specified in this config file.
-         */
         'notifiable' => Spatie\Health\Notifications\Notifiable::class,
 
-        /*
-         * When checks start failing, you could potentially end up getting
-         * a notification every minute.
-         *
-         * With this setting, notifications are throttled. By default, you'll
-         * only get one notification per hour.
-         */
         'throttle_notifications_for_minutes' => 60,
         'throttle_notifications_key' => 'health:latestNotificationSentAt:',
 
@@ -57,60 +56,68 @@ return [
     ],
 
     /*
-     * The starter doesn't use Oh Dear, but Spatie's JSON results controller behind /api/health
-     * reads always_send_fresh_results from this block, so the endpoint runs the checks on
-     * every request instead of returning the last stored results.
-     */
+    |--------------------------------------------------------------------------
+    | Fresh Results
+    |--------------------------------------------------------------------------
+    |
+    | The starter doesn't use Oh Dear, but the JSON results controller behind
+    | /api/health reads `always_send_fresh_results` from here, so it runs
+    | the checks on each request rather than return the last results.
+    |
+    */
+
     'oh_dear_endpoint' => [
         'enabled' => false,
-
-        /*
-         * When this option is enabled, the checks will run before sending a response.
-         * Otherwise, we'll send the results from the last time the checks have run.
-         */
         'always_send_fresh_results' => true,
     ],
 
     /*
-     * You can specify a heartbeat URL for the Schedule check.
-     * This URL will be pinged if the Schedule check is successful.
-     * This way you can get notified if the schedule fails to run.
-     */
+    |--------------------------------------------------------------------------
+    | Schedule Heartbeat
+    |--------------------------------------------------------------------------
+    |
+    | A URL the Schedule check pings when it passes, so a monitor can alert you
+    | when the scheduler stops running, since the pings stop arriving there.
+    |
+    */
+
     'schedule' => [
         'heartbeat_url' => env('SCHEDULE_HEARTBEAT_URL'),
     ],
 
     /*
-     * You can set a theme for the local results page
-     *
-     * - light: light mode
-     * - dark: dark mode
-     */
+    |--------------------------------------------------------------------------
+    | Display
+    |--------------------------------------------------------------------------
+    |
+    | The local results page's theme, "light" or "dark", and whether Horizon
+    | hides the finished HealthQueueJob runs in its list of silenced jobs.
+    |
+    */
+
     'theme' => 'light',
 
-    /*
-     * When enabled, completed `HealthQueueJob`s will be displayed
-     * in Horizon's silenced jobs screen.
-     */
     'silence_health_queue_job' => true,
 
     /*
-     * The response code to use for HealthCheckJsonResultsController when a health
-     * check has failed
-     */
+    |--------------------------------------------------------------------------
+    | Health Endpoint
+    |--------------------------------------------------------------------------
+    |
+    | What /api/health answers when a check fails, and the
+    | X-Secret-Token every request to it must carry. It
+    | refuses every request until the token is set.
+    |
+    | Spatie counts a skipped check as a failure by default. HealthServiceProvider
+    | skips the database, queue and Redis checks where they don't apply, and a
+    | check skipped that way mustn't turn /api/health into a 503 response.
+    |
+    */
+
     'json_results_failure_status' => 503,
 
-    /*
-     * You can specify a secret token that needs to be sent in the X-Secret-Token for secured access.
-     */
     'secret_token' => env('HEALTH_SECRET_TOKEN'),
 
-    /*
-     * Spatie treats a conditionally skipped check as a failure by default. The starter skips the
-     * database, queue and Redis checks where they don't apply (see HealthServiceProvider), so a
-     * skipped check must not turn /api/health into a 503.
-     *
-     * @link https://spatie.be/docs/laravel-health/v1/basic-usage/conditionally-running-or-modifying-checks
-     */
     'treat_skipped_as_failure' => false,
+
 ];

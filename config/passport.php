@@ -17,10 +17,19 @@ return [
 
     'guard' => 'web',
 
-    // Passport's OAuth endpoints share the API's per-IP limit. No other site may frame the consent screen.
-    // No token is issued or refreshed for a credential whose feature is off. Whether someone may connect
-    // a client is decided by App\Domains\Api\Passport\OAuthConsent. A person sent to consent by a deleted
-    // or revoked client sees a page instead of Passport's JSON.
+    /*
+    |--------------------------------------------------------------------------
+    | Middleware
+    |--------------------------------------------------------------------------
+    |
+    | Passport's OAuth endpoints share the API's per-IP limit, and no other site may
+    | frame the consent screen. No token is issued or refreshed for a credential
+    | whose feature is off, and OAuthConsent decides who may connect a client.
+    |
+    | A person sent to consent by a deleted or revoked client sees a page, not JSON.
+    |
+    */
+
     'middleware' => [
         'throttle:api',
         App\Domains\Api\Http\Middleware\DenyFramingOfConsent::class,

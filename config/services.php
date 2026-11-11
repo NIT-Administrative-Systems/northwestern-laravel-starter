@@ -19,8 +19,8 @@ return [
     'northwestern-azure' => [
         'client_id' => env('AZURE_CLIENT_ID'),
         'client_secret' => env('AZURE_CLIENT_SECRET'),
-        // Socialite requires the key to exist. laravel-soa leaves it unused and builds the callback URL
-        // from the login-oauth-callback route.
+        // Socialite requires the key, but laravel-soa doesn't use it: it
+        // builds the callback URL from the login-oauth-callback route.
         'redirect' => null,
     ],
 
@@ -28,8 +28,8 @@ return [
         'key' => env('AWS_ACCESS_KEY_ID'),
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
 
-        // This is DIFFERENT from our normal AWS region.
-        // Don't lose it during Laravel upgrades, or you'll break all the emails.
+        // This is a different region from the rest of AWS. Keep
+        // it through Laravel upgrades, or every email breaks.
         'region' => env('AWS_SES_EMAIL_REGION', 'us-east-1'),
     ],
 

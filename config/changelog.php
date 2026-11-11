@@ -9,10 +9,8 @@ return [
     | Enable Changelog
     |--------------------------------------------------------------------------
     |
-    | A global toggle for the user-facing changelog feature. When disabled,
-    | changelog routes will not be registered, and the navigation item
-    | will be hidden. Changelog entries can still be seeded regardless
-    | of this setting.
+    | Turns on the changelog page and its navigation item. Entries
+    | can be seeded whether or not the changelog is turned on.
     |
     */
 
@@ -23,20 +21,14 @@ return [
     | Jira Integration
     |--------------------------------------------------------------------------
     |
-    | When both values are configured, Jira issue references wrapped in
-    | backticks (e.g. `GSTS-1234`) will automatically be converted into
-    | clickable links pointing to the Jira issue in the browser.
-    |
-    | Only references matching the configured identifier are linked;
-    | other project prefixes are left as-is.
+    | A Jira issue key wrapped in backticks, such as `GSTS-1234`,
+    | becomes a link to the issue when both of these are set.
+    | Only keys that start with the identifier are linked.
     |
     */
 
     'jira' => [
-        // Base URL of your Jira instance
         'url' => env('JIRA_URL', 'https://nuitadminsystems.atlassian.net'),
-
-        // Jira project key used to match issue references (e.g. "GSTS")
         'identifier' => env('JIRA_ISSUE_IDENTIFIER'),
     ],
 
@@ -45,8 +37,7 @@ return [
     | Pagination
     |--------------------------------------------------------------------------
     |
-    | Controls how many changelog entries are displayed per page on the
-    | public changelog index.
+    | How many entries each page of the changelog shows.
     |
     */
 
@@ -59,12 +50,11 @@ return [
     | RSS Feed
     |--------------------------------------------------------------------------
     |
-    | Settings for the RSS feed available at `/support/changelog/feed.rss`
+    | How many entries the feed at `/support/changelog/feed.rss` includes.
     |
     */
 
     'feed' => [
-        // Maximum number of entries included in the RSS feed
         'limit' => 20,
     ],
 
