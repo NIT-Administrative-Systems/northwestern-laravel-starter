@@ -46,7 +46,7 @@ readonly class CredentialAccess
     public function decide(?User $actor, CredentialOperation $operation, CredentialKind $kind, ?User $holder): AccessDecision
     {
         if (! $actor instanceof User) {
-            return $this->changes($operation) && $this->impersonating()
+            return $this->isChange($operation) && $this->isImpersonating()
                 ? AccessDecision::refuse(AccessRefusal::Impersonating, $kind)
                 : AccessDecision::allow($kind);
         }
@@ -61,13 +61,13 @@ readonly class CredentialAccess
             return AccessDecision::refuse(AccessRefusal::FeatureOff, $kind);
         }
 
-        if ($this->changes($operation) && $this->impersonating()) {
+        if ($this->isChange($operation) && $this->isImpersonating()) {
             return AccessDecision::refuse(AccessRefusal::Impersonating, $kind);
         }
 
         return $administering
-            ? $this->administer($actor, $operation, $kind, $holder)
-            : $this->hold($actor, $operation, $kind);
+            ? $this->decideForAdministrator($actor, $operation, $kind, $holder)
+            : $this->decideForHolder($actor, $operation, $kind);
     }
 
     /**
@@ -119,7 +119,7 @@ readonly class CredentialAccess
         return false;
     }
 
-    private function administer(User $administrator, CredentialOperation $operation, CredentialKind $kind, ?User $holder): AccessDecision
+    private function decideForAdministrator(User $administrator, CredentialOperation $operation, CredentialKind $kind, ?User $holder): AccessDecision
     {
         if (! $this->holds($administrator, SystemPermission::ManageApiAccess)) {
             return AccessDecision::refuse(AccessRefusal::MissingPermission, $kind);
@@ -136,7 +136,7 @@ readonly class CredentialAccess
         return AccessDecision::allow($kind);
     }
 
-    private function hold(User $holder, CredentialOperation $operation, CredentialKind $kind): AccessDecision
+    private function decideForHolder(User $holder, CredentialOperation $operation, CredentialKind $kind): AccessDecision
     {
         if ($this->isWrongAccountType($holder, $kind)) {
             return AccessDecision::refuse(AccessRefusal::WrongAccountType, $kind);
@@ -159,12 +159,12 @@ readonly class CredentialAccess
         return AccessDecision::allow($kind);
     }
 
-    private function changes(CredentialOperation $operation): bool
+    private function isChange(CredentialOperation $operation): bool
     {
         return in_array($operation, [CredentialOperation::Issue, CredentialOperation::Modify, CredentialOperation::Revoke], true);
     }
 
-    private function impersonating(): bool
+    private function isImpersonating(): bool
     {
         return resolve('impersonate')->isImpersonating();
     }

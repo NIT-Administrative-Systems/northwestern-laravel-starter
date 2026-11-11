@@ -48,6 +48,6 @@ enum TokenExpiration: int implements HasLabel
      */
     public function expiresAt(?Carbon $from = null): Carbon
     {
-        return ($from ?? Carbon::now())->addDays($this->value);
+        return ($from ?? now())->addDays($this->value);
     }
 }
