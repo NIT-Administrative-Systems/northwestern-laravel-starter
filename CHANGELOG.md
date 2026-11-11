@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+### Changed
+
+- Every error page shares one body on both layouts: "Error" and the status code, the title, the message, and one button for the next step. 401 offers **Sign In**, 419 **Reload the Page** and 429 **Go Back**, both to the previous page on this application; 503 and database-paused have none, and the others offer **Go to the Home Page**, written as two words as the university's style guide asks. The 500 and database-paused pages use `<x-error-layout>` too, and the 500 page no longer shows an empty message box for an exception without a message. `<x-error-layout>` takes the status as `code`, and `help` and `details` slots for extra content.
+- The sign-in, email code and lockdown pages stay light in dark mode, like the public and error pages, so every page before signing in is light and dark mode starts inside the panels. The lockdown page's user menu hides its theme switcher, as public pages do.
+- The sign-in card is headed "Sign In to" and the application's name. When email is the only sign-in method, **Sign In with Email** is the primary button, and outside production a note says NetID sign-in isn't set up in that environment.
+- The site header keeps the application name on its own row below the `lg` breakpoint, so it no longer shrinks to a few letters on tablets, and on phones shows the environment badge at the end of that row with a short label. From `lg` up its content lines up with the footer. The header's **Sign In** button is the medium size.
+- On touch screens, the header's controls, the sign-in pages' buttons and links (including **Resend Code**, **Use a Different Email** and **Back to Sign-In Options**) and the changelog's buttons are at least 44px tall.
+- The public and error layouts share one look: a white background (the public layout was gray), a 36px page title, and a skip link and `<main id="main">` on the error layout. `resources/css/errors.css` defines the type step the environment badge uses, so the badge is the same size on both.
+- The purple header and the panels' top bar use the footer's focus ring, a 3px white outline set 2px off the control, in both panel themes and `errors.css`.
+- The changelog's **RSS Feed** links to the feed, with a separate **Copy** button for its URL. Section headings in entries are smaller than entry titles, list bullets are darker, and the last entry has no rule under it.
+- `.env.example` lists the `NU_UNIT_*` settings and `NU_LOCKUP`.
+
 ### Security
 
 - `UserBuilder::whereEmailEquals()` and `whereUsernameEquals()` match exactly, comparing `lower(column) = lower(?)` instead of using `ilike`, which treated `%` and `_` in the value as wildcards. A sign-in code request for `%@example.com` reached the first local account at that domain, and a lookup for `a_b@example.com` could find `axb@example.com`.
