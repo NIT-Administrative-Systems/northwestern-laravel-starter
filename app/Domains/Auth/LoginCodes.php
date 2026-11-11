@@ -72,7 +72,7 @@ final readonly class LoginCodes
     /** How long, in seconds, an email's rejected codes count towards the daily limit. */
     private const int FAILURES_WINDOW_SECONDS = 86400;
 
-    private const string REJECTED = 'That code didn\'t work. Check it and try again.';
+    private const string REJECTED_CODE_MESSAGE = 'That code didn\'t work. Check it and try again.';
 
     public function __construct(
         private Timebox $timebox,
@@ -155,7 +155,7 @@ final readonly class LoginCodes
         $this->enforceVerifyLimits($challengeId, $request);
 
         if ($challengeId === null) {
-            throw ValidationException::withMessages(['code' => self::REJECTED]);
+            throw ValidationException::withMessages(['code' => self::REJECTED_CODE_MESSAGE]);
         }
 
         // A decoy has an email too, so an unknown email reaches this limit as well.
@@ -181,7 +181,7 @@ final readonly class LoginCodes
             throw $challenge;
         }
 
-        $user = User::firstLocalByEmail($challenge->email) ?? throw ValidationException::withMessages(['code' => self::REJECTED]);
+        $user = User::firstLocalByEmail($challenge->email) ?? throw ValidationException::withMessages(['code' => self::REJECTED_CODE_MESSAGE]);
 
         if (! $user->email_verified_at) {
             $user->forceFill(['email_verified_at' => now()])->save();
@@ -209,7 +209,7 @@ final readonly class LoginCodes
         $key = "login-code:{$email}";
 
         if (RateLimiter::tooManyAttempts($key, (int) config('local-auth.rate_limit_per_hour'))) {
-            throw ValidationException::withMessages(['email' => $this->tooManySignInAttempts($key)]);
+            throw ValidationException::withMessages(['email' => $this->tooManySignInAttemptsMessage($key)]);
         }
 
         return $this->issue($email, $request);
@@ -325,7 +325,7 @@ final readonly class LoginCodes
 
         foreach ($perHour as $key => $maxAttempts) {
             if (RateLimiter::tooManyAttempts($key, $maxAttempts)) {
-                return $this->tooManySignInAttempts($key);
+                return $this->tooManySignInAttemptsMessage($key);
             }
         }
 
@@ -414,7 +414,7 @@ final readonly class LoginCodes
         $challenge = ctype_digit($challengeId) ? LoginChallenge::query()->lockForUpdate()->find($challengeId) : null;
 
         if (! $challenge instanceof LoginChallenge) {
-            return ValidationException::withMessages(['code' => self::REJECTED]);
+            return ValidationException::withMessages(['code' => self::REJECTED_CODE_MESSAGE]);
         }
 
         if ($challenge->isLocked()) {
@@ -426,7 +426,7 @@ final readonly class LoginCodes
         $now = CarbonImmutable::now();
 
         if (! $challenge->isActive($now)) {
-            return ValidationException::withMessages(['code' => self::REJECTED]);
+            return ValidationException::withMessages(['code' => self::REJECTED_CODE_MESSAGE]);
         }
 
         if (! Hash::check($code, $challenge->code_hash)) {
@@ -436,7 +436,7 @@ final readonly class LoginCodes
                 $challenge->update(['locked_until' => $now->addMinutes((int) config('local-auth.code.lock_minutes', 15))]);
             }
 
-            return ValidationException::withMessages(['code' => self::REJECTED]);
+            return ValidationException::withMessages(['code' => self::REJECTED_CODE_MESSAGE]);
         }
 
         $userAgent = $request->userAgent();
@@ -470,7 +470,7 @@ final readonly class LoginCodes
         }
     }
 
-    private function tooManySignInAttempts(string $key): string
+    private function tooManySignInAttemptsMessage(string $key): string
     {
         $minutes = (int) ceil(RateLimiter::availableIn($key) / 60);
 
