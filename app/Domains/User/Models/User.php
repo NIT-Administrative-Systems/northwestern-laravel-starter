@@ -16,6 +16,7 @@ use App\Domains\Auth\Enums\AuthType;
 use App\Domains\Auth\Models\Concerns\HandlesImpersonation;
 use App\Domains\Auth\Models\LoginChallenge;
 use App\Domains\Core\Models\Concerns\RecordsAuditEvents;
+use App\Domains\Core\Models\DatabaseNotification;
 use App\Domains\Support\Models\SupportTicket;
 use App\Domains\User\Data\UserPreferences;
 use App\Domains\User\Enums\Affiliation;
@@ -34,6 +35,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -158,6 +160,16 @@ class User extends Authenticatable implements Auditable, FilamentUser, HasAvatar
     public function support_tickets(): HasMany
     {
         return $this->hasMany(SupportTicket::class);
+    }
+
+    /**
+     * The starter's notification model, so notifications are pruned after their retention period.
+     *
+     * @return MorphMany<DatabaseNotification, $this>
+     */
+    public function notifications(): MorphMany
+    {
+        return $this->morphMany(DatabaseNotification::class, 'notifiable')->latest();
     }
 
     /**

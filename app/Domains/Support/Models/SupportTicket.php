@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\HtmlString;
+use Northwestern\SysDev\Chassis\Models\Concerns\PrunesAfterRetentionPeriod;
 
 /**
  * A user-submitted support ticket persisted as a local submission record.
@@ -19,11 +20,13 @@ use Illuminate\Support\HtmlString;
  * This model represents the platform's record of a support request — not the
  * external ticket itself. The {@see $ticketing_system} and {@see $ticket_number}
  * fields reflect which gateway handled the submission and the reference it returned.
+ *
+ * Kept forever unless `platform.retention.support_tickets` sets a number of days.
  */
 class SupportTicket extends BaseModel
 {
     /** @use HasFactory<SupportTicketFactory> */
-    use HasFactory, SoftDeletes;
+    use HasFactory, PrunesAfterRetentionPeriod, SoftDeletes;
 
     protected $casts = [
         'ticketing_system' => TicketSystem::class,
@@ -31,6 +34,11 @@ class SupportTicket extends BaseModel
         'fallback_sent_at' => 'datetime',
         'post_error' => 'boolean',
     ];
+
+    protected function retentionConfigKey(): string
+    {
+        return 'platform.retention.support_tickets';
+    }
 
     /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo

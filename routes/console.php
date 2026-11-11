@@ -9,6 +9,8 @@ use App\Console\Commands\RevokeIneligibleCredentialsCommand;
 use App\Console\Commands\SendClientSecretExpirationNotificationsCommand;
 use App\Console\Commands\SendPersonalAccessTokenExpirationNotificationsCommand;
 use Illuminate\Database\Console\PruneCommand;
+use Illuminate\Queue\Console\PruneBatchesCommand;
+use Illuminate\Queue\Console\PruneFailedJobsCommand;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Schedule;
 use Laravel\Passport\Console\PurgeCommand;
@@ -80,6 +82,17 @@ Schedule::command(PurgeCommand::class, ['--expired', '--hours' => 24 * 31])->dai
 
 // Self-registered MCP clients nobody connected, or nobody uses any more.
 Schedule::command(PruneMcpClientsCommand::class)->daily();
+
+// The queue's own tables, which model:prune doesn't reach. Their retention is in days, like the
+// others under platform.retention; null keeps them.
+if (filled($failedJobDays = config('platform.retention.failed_jobs'))) {
+    Schedule::command(PruneFailedJobsCommand::class, ['--hours' => 24 * (int) $failedJobDays])->daily();
+}
+
+if (filled($jobBatchDays = config('platform.retention.job_batches'))) {
+    $jobBatchHours = 24 * (int) $jobBatchDays;
+    Schedule::command(PruneBatchesCommand::class, ['--hours' => $jobBatchHours, '--unfinished' => $jobBatchHours, '--cancelled' => $jobBatchHours])->daily();
+}
 
 // Local accounts nobody has signed in to for platform.accounts.local_inactivity_days days.
 if (filled(config('platform.accounts.local_inactivity_days'))) {
