@@ -33,7 +33,7 @@ final class SendClientSecretExpirationNotificationsCommandTest extends TestCase
         $this->travelTo(Carbon::create(2025, 10, 20, 10, 0, 0, 'UTC'));
     }
 
-    public function test_command_exits_successfully_when_notifications_are_disabled(): void
+    public function test_it_does_nothing_when_disabled(): void
     {
         config(['api.client_secret_expiration_notifications.enabled' => false]);
 
@@ -42,7 +42,7 @@ final class SendClientSecretExpirationNotificationsCommandTest extends TestCase
             ->assertSuccessful();
     }
 
-    public function test_command_handles_no_expiring_secrets_gracefully(): void
+    public function test_it_reports_when_no_secrets_expire_soon(): void
     {
         $this->artisan(SendClientSecretExpirationNotificationsCommand::class)
             ->expectsOutputToContain('Checking for client secrets expiring in: 7, 30 days')
@@ -52,7 +52,7 @@ final class SendClientSecretExpirationNotificationsCommandTest extends TestCase
             ->assertSuccessful();
     }
 
-    public function test_command_sends_notifications_for_expiring_secrets(): void
+    public function test_it_emails_the_owners_of_secrets_that_expire_soon(): void
     {
         $inSevenDays = $this->client('user1@test.com', now()->addDays(7)->endOfDay());
         $inThirtyDays = $this->client('user2@test.com', now()->addDays(30)->startOfDay());
@@ -74,7 +74,7 @@ final class SendClientSecretExpirationNotificationsCommandTest extends TestCase
         $this->assertInstanceOf(Carbon::class, $inThirtyDays->fresh()?->secret_expiration_notified_at);
     }
 
-    public function test_command_ignores_clients_notified_within_24_hours(): void
+    public function test_a_client_notified_in_the_last_day_is_not_emailed_again(): void
     {
         $this->client('recent@test.com', now()->addDays(7)->endOfDay(), notifiedAt: now()->subHour());
         $this->client('process@test.com', now()->addDays(7)->endOfDay(), notifiedAt: now()->subHours(25));
@@ -87,7 +87,7 @@ final class SendClientSecretExpirationNotificationsCommandTest extends TestCase
         Mail::assertQueued(ClientSecretExpirationNotification::class, 1);
     }
 
-    public function test_command_handles_exceptions_during_notification(): void
+    public function test_a_failed_email_is_reported_and_the_command_fails(): void
     {
         $failing = $this->client('failing@test.com', now()->addDays(7)->endOfDay(), name: 'Failing Client');
 
@@ -101,7 +101,7 @@ final class SendClientSecretExpirationNotificationsCommandTest extends TestCase
         $this->assertNull($failing->fresh()?->secret_expiration_notified_at);
     }
 
-    public function test_command_skips_system_addresses_missing_addresses_and_revoked_clients(): void
+    public function test_it_skips_system_addresses_missing_addresses_and_revoked_clients(): void
     {
         $this->client('valid@test.com', now()->addDays(7)->endOfDay());
         $this->client('system@example.com', now()->addDays(7)->endOfDay());
@@ -126,7 +126,7 @@ final class SendClientSecretExpirationNotificationsCommandTest extends TestCase
     }
 
     // Nobody is warned about a client that already doesn't work while the API is off.
-    public function test_command_skips_clients_while_the_api_is_off(): void
+    public function test_nobody_is_warned_while_the_api_is_off(): void
     {
         $this->client('user1@test.com', now()->addDays(7)->endOfDay());
         config(['api.enabled' => false]);

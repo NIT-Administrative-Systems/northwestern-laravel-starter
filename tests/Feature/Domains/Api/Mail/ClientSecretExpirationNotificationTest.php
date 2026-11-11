@@ -14,14 +14,14 @@ use Tests\TestCase;
 #[CoversClass(ClientSecretExpirationNotification::class)]
 final class ClientSecretExpirationNotificationTest extends TestCase
 {
-    public function test_envelope_has_correct_subject(): void
+    public function test_the_subject_says_when_the_secret_expires(): void
     {
         $mailable = new ClientSecretExpirationNotification(User::factory()->make(), new OAuthClient(), 5);
 
         $this->assertSame('A service client secret expires in five days', $mailable->envelope()->subject);
     }
 
-    public function test_content_has_correct_view_and_data(): void
+    public function test_it_passes_the_client_and_its_expiry_to_the_view(): void
     {
         $user = User::factory()->make();
         $expirationDate = now()->addDays(5);
