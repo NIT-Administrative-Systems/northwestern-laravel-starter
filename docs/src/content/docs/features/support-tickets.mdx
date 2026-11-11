@@ -158,11 +158,13 @@ The `fallback_sent_at` timestamp on the ticket is only set when the fallback suc
 
 ## Filament Admin Panel
 
-The `SupportTicketResource` provides a **read-only** view of all submitted tickets in the administration panel, under the **Platform** navigation group. It requires the `ViewSupportTickets` permission and is only visible when `SUPPORT_ENABLED=true`.
+The `SupportTicketResource` provides a **read-only** view of all submitted tickets in the administration panel, under the **Platform** navigation group. It requires the `ViewSupportTickets` permission and is only visible when `SUPPORT_ENABLED=true`. `SupportTicketPolicy` answers `viewAny` and `view` with the same permission, which the panel's strict authorization asks for.
 
 The resource displays a red badge on the navigation item showing the count of tickets where `post_error = true`, giving administrators immediate visibility into failed submissions.
 
 Tickets are globally searchable by subject, ticket number, requester email, and submitter name/username.
+
+Tickets are kept forever by default, since they record what people asked for. Set `SUPPORT_TICKET_RETENTION_DAYS` to a number of days and the daily `model:prune` deletes older ones; see [Data Retention](/getting-started/initial-customization/#7-data-retention).
 
 ---
 
@@ -190,7 +192,7 @@ Adding a new gateway requires three steps: add an enum case, implement the inter
 
 1. **Add a case to `TicketSystem`**
 
-   ```php ins={8,15,24}
+   ```php ins={7,14,23}
    // app/Domains/Support/Enums/TicketSystem.php
 
    enum TicketSystem: string implements HasLabel
@@ -290,11 +292,11 @@ Adding a new gateway requires three steps: add an enum case, implement the inter
 
 </Steps>
 
-The factory resolves gateways through the enum, so no additional wiring is needed. The automatic email fallback, admin panel, and submission recording all work with your new driver.
+`SupportServiceProvider` binds the gateway the enum names, so no additional wiring is needed. The automatic email fallback, admin panel, and submission recording all work with your new driver.
 
 ### Alternative: Rebinding the Interface
 
-If you need a completely custom gateway that doesn't fit the enum-driven pattern, you can bypass the factory entirely by rebinding the `TicketSystemGateway` interface in `AppServiceProvider::boot()`:
+If you need a completely custom gateway that doesn't fit the enum-driven pattern, you can bypass the enum entirely by rebinding the `TicketSystemGateway` interface in `AppServiceProvider::boot()`:
 
 ```php
 // app/Providers/AppServiceProvider.php
@@ -354,6 +356,9 @@ The `support:contact` limiter is defined in `RateLimitingServiceProvider`, with 
     </Property>
     <Property name="SUPPORT_REFERENCE_PREFIX" default="SUP">
         Reference prefix for mail gateway (e.g. `SUP-47`)
+    </Property>
+    <Property name="SUPPORT_TICKET_RETENTION_DAYS" default="null (kept)">
+        Days to keep submitted tickets before pruning
     </Property>
     <PropertyGroup title="TeamDynamix" />
     <Property name="TDX_API_BASE_URL" required>

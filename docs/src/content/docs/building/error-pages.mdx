@@ -18,6 +18,8 @@ Error pages live in `resources/views/errors/`. Laravel renders `{status}.blade.p
 
 Every page shares one body, so a 404 and a 500 look the same.
 
+Two more pages render for an exception rather than a status. `errors.account-deactivated` (403) is what `AccountDeactivated` renders when a deactivated account tries to sign in, and `errors.unknown-oauth-client` (400) is what a person sees when a deleted or revoked application sends them to the consent screen. Both use the public layout.
+
 ## Client Errors on the Public Layout
 
 `<x-error-layout>` (`App\View\Components\ErrorLayout`) renders `resources/views/errors/layout.blade.php`: "Error" and the status from `code`, so people can quote it, a heading from `title`, the slot as the message, and one button for the next step. By default it renders on the public layout, so the header keeps the Help menu and **Sign In** or the user menu, and the page uses the app panel's theme.
@@ -86,7 +88,7 @@ The user and permission lookups are wrapped in `rescue()`: if the database is do
 
 ## The Database-Paused Page
 
-Non-production environments on Aurora Serverless v2 can scale the database to zero. The first request after a pause can time out while the database wakes up. `bootstrap/app.php` uses chassis's `DatabasePausedDetector` to recognize that PostgreSQL connection timeout and renders `errors.database-paused` with status 500 in place of the 500 page.
+Non-production environments on Aurora Serverless v2 can scale the database to zero. The first request after a pause can time out while the database wakes up. `bootstrap/app.php` uses Chassis's `DatabasePausedDetector` to recognize that PostgreSQL connection timeout and renders `errors.database-paused` with status 500 in place of the 500 page.
 
 The page names the environment (`APP_ENV`), explains that its database is starting, and reloads itself after 30 seconds. Requests to `api/*`, `oauth/*` and the MCP server, and other requests that expect JSON, get a Problem Details 503 response with `Retry-After: 30` instead; Livewire requests still get the page. Outside production these timeouts aren't reported to Sentry.
 
