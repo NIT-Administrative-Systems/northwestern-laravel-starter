@@ -25,13 +25,15 @@ Routes that use it run in the app panel's context through the `panel:app` middle
 </x-layouts.public>
 ```
 
-The layout is **light only**, as the university's Department Templates are. It loads Livewire and Filament's support scripts, which bring Alpine features such as tooltips, but not the panel core, which would apply each user's panel theme, including dark mode.
+The layout is **light only**, as the university's Department Templates are, with a white background like the [error layout](/building/error-pages/#the-error-layout). Page titles use `text-4xl` (36px), as the error pages do; only the landing page's heading is larger. It loads Livewire and Filament's support scripts, which bring Alpine features such as tooltips, but not the panel core, which would apply each user's panel theme, including dark mode.
 
 ## The Site Header
 
 `<x-site-header>` (`resources/views/components/site-header.blade.php`) matches the panels' top bar: the Northwestern wordmark, then the application name linking to `/`, then whatever the page puts in its slot. The public layout puts the Help menu there, then **Sign In** for guests or the user menu for signed-in users.
 
-The sign-in pages, the lockdown page and the error pages use the same header, so every page names the application. Outside production it shows the environment badge: top right on larger screens, centered below the header on phones.
+The sign-in pages, the lockdown page and the error pages use the same header, so every page names the application. Below the `lg` breakpoint the application name moves to a second row, so the controls beside the wordmark never cut it short. From `lg` up, the header's content lines up with the footer's 70rem container. Outside production it shows the environment badge: top right from the `sm` breakpoint, and on phones at the end of the name row with a short label such as "Staging".
+
+On touch screens (`pointer: coarse`) the header's controls are at least 44px (2.75rem) tall, as are the sign-in pages' buttons and links.
 
 Error pages render it, so it must work without Filament, auth or the database. It always shows the wordmark: a unit lockup set in `NU_LOCKUP` replaces the logo in the panels' top bar only.
 

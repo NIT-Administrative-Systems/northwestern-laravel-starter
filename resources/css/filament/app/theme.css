@@ -16,9 +16,38 @@
     display: none;
 }
 
-/* The theme outlines focused buttons in Northwestern Purple, which vanishes on the purple site header. */
-.nu-site-header .fi-btn:focus-visible {
-    outline-color: var(--color-white);
+/* One focus ring on the purple header, the top bar and the footer: the footer's 3px white outline,
+   set 2px off the control. The theme's purple outline would vanish against the header. */
+:is(.nu-site-header, .fi-topbar) :is(a, button):focus-visible {
+    outline: 3px solid var(--color-white);
+    outline-offset: 2px;
+    box-shadow: none;
+}
+
+/* Phones: 44px (2.75rem) tap targets for the header's controls, and for the sign-in actions and
+   the code step's links on the simple pages. */
+@media (pointer: coarse) {
+    .nu-site-header :is(button, .fi-btn) {
+        min-width: 2.75rem;
+        min-height: 2.75rem;
+        justify-content: center;
+    }
+
+    .fi-simple-main :is(.fi-btn, .fi-link) {
+        min-height: 2.75rem;
+    }
+
+    /* Filament pins a link's label to the baseline, which sits at the top of the taller link. */
+    .fi-simple-main .fi-link > .fi-link-label {
+        align-self: center;
+    }
+}
+
+/* The simple pages are light only, like the public layout (see AppPanelProvider), so the lockdown
+   page's theme switcher would do nothing. It has a dropdown list of its own; hide the list, or its
+   border stays behind. */
+.fi-body:has(.nu-site-header) .fi-dropdown-list:has(> .fi-theme-switcher) {
+    display: none;
 }
 
 /* The app panel's simple pages (sign-in, lockdown): a Northwestern Purple accent on the card. */

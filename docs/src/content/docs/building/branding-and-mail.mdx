@@ -19,6 +19,12 @@ The theme sets the panels' Filament colors (`primary` is Northwestern Purple) an
 
 The panels' top bar shows the Northwestern wordmark. To show your unit's lockup instead, set `NU_LOCKUP` to a full URL or a path in `public/`. The lockup replaces the logo in the panels only: `<x-site-header>`, on public, sign-in and error pages, always shows the wordmark, and the footer shows the "Northwestern University" wordmark.
 
+## Light Pages Before Signing In
+
+Every page a visitor sees before signing in is light: the public and error layouts, and the app panel's simple pages (sign-in, the email code step and the lockdown page), whatever the browser's theme. Department Templates 4.0 has no dark mode. Dark mode starts inside the panels, which follow each person's theme setting. The app panel keeps its simple pages light with a short script, `resources/views/filament/app/light-only.blade.php`, that it renders on every page using `HasSiteHeader`; see [Simple Pages](/building/app-panel/#simple-pages).
+
+The purple header and the footer share one keyboard focus ring, a 3px white outline set 2px off the control. The app and administration themes and `resources/css/errors.css` set it on `<x-site-header>` and the panels' top bar, matching the theme's footer.
+
 ## The Footer
 
 The university's Web Style Guide requires every page to show the responsible unit's contact details and a set of university links. The theme's footer renders both:
@@ -49,7 +55,7 @@ Its content is set in `config/northwestern-filament-theme.php`:
 ],
 ```
 
-A `null` unit field falls back to Information Technology's details, and an empty string hides that field. Set the `NU_UNIT_*` values when you set up the project; see [Your Unit's Details](/getting-started/initial-customization/#6-your-units-details). The config file lists the social networks the footer has icons for.
+A `null` unit field falls back to Information Technology's details, and an empty string hides that field. `.env.example` lists every `NU_UNIT_*` setting and `NU_LOCKUP` as `null`; replace them with your unit's values when you set up the project; see [Your Unit's Details](/getting-started/initial-customization/#6-your-units-details). The config file lists the social networks the footer has icons for.
 
 ## Email
 

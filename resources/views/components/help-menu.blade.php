@@ -54,7 +54,8 @@
                           placement="bottom-end"
                           teleport>
         <x-slot name="trigger">
-            <button class="flex h-9 items-center gap-1.5 rounded-lg px-2 text-sm font-medium text-white outline-none transition hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white sm:px-3"
+            {{-- Its focus ring is the header's, set in the panel themes. --}}
+            <button class="flex h-9 items-center gap-1.5 rounded-lg px-2 text-sm font-medium text-white transition hover:bg-white/10 sm:px-3"
                     data-testid="help-menu-trigger"
                     type="button"
                     aria-label="Help">
