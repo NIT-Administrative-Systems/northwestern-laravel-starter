@@ -389,10 +389,8 @@ class UserBuilder extends Builder
 
     public function whereEmailEquals(string $email): self
     {
-        $normalized = strtolower(trim($email));
-
-
-        return $this->where('email', 'ilike', $normalized);
+        // An exact match: ilike would treat % and _ in the email as wildcards.
+        return $this->whereRaw('lower(email) = lower(?)', [trim($email)]);
     }
 }
 ```
