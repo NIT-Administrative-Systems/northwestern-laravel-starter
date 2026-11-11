@@ -75,6 +75,22 @@ final class FindOrUpdateUserFromDirectoryTest extends TestCase
         $this->assertSame(1, User::withTrashed()->where('username', 'gone456')->count());
     }
 
+    // A student is stored with their student address, so a search by their other address
+    // must still find them by NetID and bring their details up to date.
+    public function test_an_email_search_updates_the_person_whose_stored_email_is_different(): void
+    {
+        $directoryApi = $this->createStub(DirectorySearch::class);
+        $directoryApi->method('lookup')->willReturn(self::studentData('abc123'));
+        $existing = User::factory()->create(['username' => 'abc123', 'email' => 'former-address@northwestern.edu', 'first_name' => 'Stale']);
+
+        $user = $this->service(['directorySearch' => $directoryApi])('student-worker@northwestern.edu');
+
+        $existing->refresh();
+        $this->assertTrue($existing->is($user));
+        $this->assertSame('Studie', $existing->first_name);
+        $this->assertSame('StudieNU20XX@u.northwestern.edu', $existing->email);
+    }
+
     public function test_a_failed_lookup_finds_a_deactivated_account_and_leaves_it_deactivated(): void
     {
         $deactivated = User::factory()->create(['username' => 'gone789']);

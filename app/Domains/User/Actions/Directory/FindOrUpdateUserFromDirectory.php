@@ -197,9 +197,13 @@ readonly class FindOrUpdateUserFromDirectory
      */
     private function syncAndPersistUser(array $directoryData, DirectorySearchType $searchType): User
     {
-        $user = ($searchType === DirectorySearchType::Email)
-            ? User::firstExistingByEmailOrNewSso($directoryData['mail'])
-            : User::firstExistingSsoByNetIdOrNew($directoryData['uid']);
+        // The NetID is who someone is. A student is stored with their student address, and
+        // anyone's address can change, so an email search looks for the NetID first.
+        $user = User::firstExistingSsoByNetIdOrNew((string) Arr::get($directoryData, 'uid', ''));
+
+        if (! $user->exists && $searchType === DirectorySearchType::Email) {
+            $user = User::firstExistingByEmailOrNewSso($directoryData['mail']);
+        }
 
         $user = ($this->directorySync)($user, $directoryData);
 
