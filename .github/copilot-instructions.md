@@ -6,7 +6,14 @@
 - **Strict typing**: Start files with `declare(strict_types=1)`;. Use typed properties, scalar/union/DTO types, and return types everywhere. Favor constructor property promotion and `readonly` when stable immutability is intentional.
 - **PHP language features**: Use named arguments, match expressions, nullsafe operator (?->), and attributes over DocBlock annotations. Prefer enums for constrained sets and value objects for domain primitives.
 - **Naming**: Classes/interfaces/traits/enum cases in `PascalCase`, methods/variables in `camelCase`, configuration keys in `snake_case`, and class constants in `UPPER_SNAKE_CASE`.
-- **DocBlocks**: Only add DocBlocks when types need extra context (e.g., collections with generics, third-party payloads). Use `@comment` for attribute/accessor documentation that should be picked up by code generators. Document _why_ a decision is made, not obvious logic.
+- **Comments and DocBlocks**: A comment says what the code can't: why this approach, which constraint forces it, what would break without it. Don't restate the code or narrate its history. Write comments in Laravel's tapered style, as in `Illuminate\Auth\SessionGuard`: a comment of up to 80 characters stays on one line, and a longer one is a paragraph whose first line is at most 80 characters and each following line two to four characters shorter. Get the shape from word choice and line breaks, never from padding, abbreviations or bent grammar. The taper applies to `//` comments, docblock prose, config banner text, Blade `{{-- --}}` comments and TypeScript and CSS comments; PHPDoc tags are exempt. A method docblock opens with a third-person summary ("Determine whether…", "Get the…"). Add a DocBlock only for what the signature can't say: generics, array shapes, a `@throws` callers must handle. Use `@comment` for accessor documentation that code generators read.
+
+    ```php
+    // If we've already retrieved the user for the current request we can just
+    // return it back immediately. We do not want to fetch the user data on
+    // every call to this method because that would be tremendously slow.
+    ```
+
 - **Dependencies**: Prefer dependency injection over manually resolving classes out of the container when possible. Use Laravel contracts when binding abstractions for easier testing.
 
 ## Architectural conventions
@@ -113,7 +120,7 @@ Put each page where it belongs:
 **Key patterns:**
 
 ```php
-// Generators target the default (app) panel; add --panel=administration for back-office resources
+// Generators target the app panel; pass --panel=administration for back office.
 php artisan make:filament-resource User --generate --model-namespace=App\\Domains\\User\\Models
 
 // Relation managers must specify full model path
