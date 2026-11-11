@@ -33,7 +33,8 @@ readonly class RevokeServiceClient
      */
     public function __invoke(OAuthClient $client, ?User $revokedBy = null): void
     {
-        $owner = $client->owner;
+        // Deleted too: deleting an API user revokes its clients after the user is deleted.
+        $owner = $client->owner_type === null ? null : $client->owner()->withTrashed()->first();
         $this->credentials->decide($revokedBy, CredentialOperation::Revoke, CredentialKind::ServiceClient, $owner instanceof User ? $owner : null)->authorize();
 
         DB::transaction(function () use ($client): void {

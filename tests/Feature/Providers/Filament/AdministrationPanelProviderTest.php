@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Providers\Filament;
 
+use App\Domains\Access\Enums\RoleTypeEnum;
 use App\Domains\Access\Enums\SystemRole;
 use App\Domains\Access\Models\Role;
 use App\Domains\Api\Models\ApiRequestLog;
@@ -53,7 +54,8 @@ final class AdministrationPanelProviderTest extends TestCase
         $ticket = SupportTicket::factory()->create(['user_id' => $superAdministrator->id]);
         $announcement = Announcement::factory()->create();
         $person = User::factory()->affiliate()->create();
-        $role = Role::factory()->create();
+        // A System Managed role has no edit page, so the role is a type that does.
+        $role = Role::factory()->forRoleType(RoleTypeEnum::ApplicationRole)->create();
         $person->roles()->attach($role);
         $audit = Audit::query()->latest('id')->firstOrFail();
 

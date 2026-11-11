@@ -6,6 +6,7 @@ namespace App\Filament\Administration\Clusters\ApiCluster\Resources\OAuthApplica
 
 use App\Domains\Api\ApiScopes;
 use App\Filament\Support\RevealOnceSecret;
+use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
@@ -78,7 +79,7 @@ class OAuthApplicationSchemas
                     TextEntry::make('public_client')
                         ->hiddenLabel()
                         ->state('This is a public application: it has no secret and must use PKCE.')
-                        ->visible(fn (): bool => $secret->issued() && $secret->secret() === null),
+                        ->visible(fn (HasActions $livewire): bool => $secret->issued($livewire) && $secret->secret($livewire) === null),
                     TextEntry::make('endpoints')
                         ->label('Endpoints')
                         ->state(new HtmlString('Authorize: <code>' . e(url('/oauth/authorize')) . '</code><br>Token: <code>' . e(url('/oauth/token')) . '</code>')),

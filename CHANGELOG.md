@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+### Fixed
+
+- The daily `model:prune` of `app/Domains/*/Models` found no models when the scheduler started outside the project root, because it globbed the path against the working directory. It now passes the pattern to `--path`, which `model:prune` resolves from the project root.
+- API, OAuth and MCP clients, and other requests that expect JSON, got the HTML Database Paused page with a 500 while the database woke up. They now get a Problem Details 503 response with `Retry-After: 30`; browser and Livewire requests keep the page.
+- A credential wizard open in two browser tabs mixed up their secrets: the second run issued nothing and showed the first run's credential. `RevealOnceSecret` gives each run its own key when the action mounts, kept in the mounted action's arguments, and its methods take the Livewire component (`$secret->issueOnce($livewire, ...)`, `$secret->forget($livewire)`).
+- **Add API User** failed with a 500 when a deleted user held the username. The username check includes deleted users and says when a deleted user has the name.
+- Columns and entries shown with `->date()` used UTC's calendar, so a token created at 9 p.m. in Chicago showed the next day. They use the person's timezone, as `->dateTime()` does.
+- Signing out from a page whose session had expired showed Page Expired in browsers that don't send `Sec-Fetch-Site`. The sign-out route no longer checks the CSRF token.
+- Deleting an API user revoked its service clients without a `service_client_revoked` audit, because the revocation read the owner without deleted users. It now records the audit on the deleted API user.
+- An announcement's audience was never notified if the notification job failed partway, because the job had already marked it notified. The claim and the fan-out now run in one transaction, so a failed run can be retried.
+- Deleting a user while impersonating soft-deleted them and left their credentials active, because the revocation is refused while impersonating. The delete is refused while impersonating, and the delete and the revocation run in one transaction.
+- The Component Gallery told developers to delete `app/Filament/App/Pages/ComponentGallery.php`; the page is `app/Filament/App/Starter/Pages/ComponentGallery.php`.
+
 ### Security
 
 - The audit log and role activity need View Audit Logs again. `AuditPolicy` stayed in `App\Domains\User\Policies` when `Audit` moved to `App\Domains\Core\Models` in v3.0.0, so Laravel no longer found it and every administrator could read them. It is now `App\Domains\Core\Policies\AuditPolicy`, and `AuditResource` and `RoleActivityResource` ask it in `canAccess()`.
