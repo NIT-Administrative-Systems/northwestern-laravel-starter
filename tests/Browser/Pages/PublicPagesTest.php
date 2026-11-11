@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 use Lab404\Impersonate\Services\ImpersonateManager;
 use Mockery\MockInterface;
 use Northwestern\SysDev\Chassis\Testing\Browser\ErrorPages;
+use Tests\Browser\Layout;
 
 /*
  * Every page a guest can reach works and passes axe, in light and dark mode and at a phone's
@@ -96,4 +97,31 @@ it('is healthy on the account deactivated page', function () {
     expect(visit('/account-deactivated')->assertSee('Account Deactivated'))
         ->toBeHealthyInEachTheme()
         ->toBeHealthyOnMobile();
+});
+
+it('fits a 320 pixel phone, with controls a finger can tap', function () {
+    User::factory()->affiliate()->create(['email' => 'partner@example.com']);
+    Changelog::factory()->create();
+    $paths = [
+        '/',
+        '/app/login',
+        '/app/login/email',
+        '/support/changelog',
+        ...array_map(ErrorPages::path(...), [401, 402, 403, 404, 419, 429, 500, 503]),
+    ];
+
+    $page = Layout::visit('/', width: 320);
+    $problems = [];
+
+    foreach ($paths as $path) {
+        $problems[$path] = Layout::problems($page->navigate($path), tapTargets: true);
+    }
+
+    $page->navigate('/app/login/email')
+        ->type('@email-input', 'partner@example.com')
+        ->click('@continue-button')
+        ->assertVisible('@code-input');
+    $problems['the code step'] = Layout::problems($page, tapTargets: true);
+
+    expect(array_filter($problems))->toBe([]);
 });

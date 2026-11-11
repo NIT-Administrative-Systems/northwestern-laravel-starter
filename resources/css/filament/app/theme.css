@@ -38,6 +38,11 @@
         min-height: 2.75rem;
     }
 
+    /* The email field on the email sign-in step. */
+    .fi-simple-main .fi-input-wrp {
+        min-height: 2.75rem;
+    }
+
     /* Filament pins a link's label to the baseline, which sits at the top of the taller link. */
     .fi-simple-main .fi-link > .fi-link-label {
         align-self: center;
