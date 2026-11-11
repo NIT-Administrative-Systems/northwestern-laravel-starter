@@ -23,7 +23,7 @@ final class SSOValidatorTest extends TestCase
         $this->assertTrue(new SSOValidator()->shouldRun());
     }
 
-    // SSO is optional locally, but a half-configured provider still runs so the missing variable is reported.
+    // Optional locally, but a half-set-up provider says what's missing.
     public function test_is_skipped_locally_only_when_no_provider_is_configured(): void
     {
         $this->app->detectEnvironment(fn (): string => 'local');

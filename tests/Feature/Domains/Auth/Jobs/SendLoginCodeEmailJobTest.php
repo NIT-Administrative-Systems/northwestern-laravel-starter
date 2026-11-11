@@ -46,7 +46,8 @@ final class SendLoginCodeEmailJobTest extends TestCase
         $this->assertTrue($challenge->fresh()->email_sent_at->eq(now()));
     }
 
-    // The link lets a code issued outside the sign-in page (by an administrator, say) be entered.
+    // The link lets a code issued outside the sign-in
+    // page (by an administrator, say) be entered.
     public function test_email_links_to_the_code_step_for_its_challenge(): void
     {
         $challenge = LoginChallenge::create([
@@ -90,7 +91,7 @@ final class SendLoginCodeEmailJobTest extends TestCase
         $this->assertTrue($challenge->fresh()->email_sent_at->eq(now()));
     }
 
-    // A queue backlog can deliver a code after a newer one replaced it, or after it expired.
+    // A backlog can deliver a code after a newer one replaced it, or after it expired.
     public function test_a_code_that_can_no_longer_be_used_is_not_sent(): void
     {
         $challenges = [

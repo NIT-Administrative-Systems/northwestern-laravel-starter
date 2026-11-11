@@ -10,8 +10,8 @@ use App\Domains\User\Models\User;
 use Illuminate\Foundation\Testing\TestCase;
 
 /**
- * Creates a service client for an API user and exchanges it at `/oauth/token`, as an
- * integration would.
+ * Creates an API user's service client and exchanges
+ * it at `/oauth/token`, as an integration would.
  *
  * @mixin TestCase
  */

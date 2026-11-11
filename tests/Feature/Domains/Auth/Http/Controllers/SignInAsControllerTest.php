@@ -16,8 +16,9 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 /**
- * The route is registered while the application boots, so each test boots in the environment it
- * needs: `local` by default, or the one its data provider names.
+ * The route is registered at boot, so each test boots in its own environment.
+ *
+ * That's `local` unless the test's data provider names another.
  */
 #[CoversClass(SignInAsController::class)]
 #[CoversClass(AppPanelProvider::class)]
@@ -27,7 +28,7 @@ final class SignInAsControllerTest extends TestCase
     {
         $variables = ['APP_ENV' => $this->providedData()[0] ?? 'local', 'APP_URL' => $this->providedData()[1] ?? null];
 
-        // CI turns the fixed sign-in code on, and the application refuses to boot with it outside local, testing and ci.
+        // CI turns the fixed code on, and the application won't boot with it elsewhere.
         if (! in_array($variables['APP_ENV'], ['local', 'testing', 'ci'], true)) {
             $variables['LOCAL_AUTH_USE_FIXED_CODE'] = 'false';
         }
@@ -78,7 +79,7 @@ final class SignInAsControllerTest extends TestCase
         $this->assertGuest();
     }
 
-    // Like every other sign-in method, it says the account is deactivated instead of not found.
+    // As with every sign-in method, it says the account is deactivated, not missing.
     public function test_a_deactivated_account_is_refused(): void
     {
         $this->seededAdmin()->delete();
@@ -102,7 +103,7 @@ final class SignInAsControllerTest extends TestCase
             ->assertSee('Only in local environments.');
     }
 
-    // With no SSO and no email codes, the page would otherwise say no sign-in methods are available.
+    // Without SSO or email codes, the page would say no sign-in methods are set up.
     public function test_it_replaces_the_no_sign_in_methods_callout(): void
     {
         config(['local-auth.enabled' => false]);
@@ -120,8 +121,9 @@ final class SignInAsControllerTest extends TestCase
         yield 'local at http://localhost:8060' => ['local', 'http://localhost:8060'];
     }
 
-    // Worktrees and agents serve over plain HTTP on any port; forced HTTPS and secure-only session
-    // cookies would send them to an address that doesn't exist and drop the session.
+    // Worktrees serve plain HTTP on any port, where forced HTTPS sends people nowhere.
+    //
+    // Secure-only session cookies would also drop the session.
     #[DataProvider('localOverPlainHttp')]
     public function test_it_works_over_plain_http_locally(string $environment, string $appUrl): void
     {

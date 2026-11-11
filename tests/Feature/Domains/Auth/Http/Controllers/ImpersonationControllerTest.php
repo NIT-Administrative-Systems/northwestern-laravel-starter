@@ -138,8 +138,8 @@ final class ImpersonationControllerTest extends TestCase
         $this->assertSame($referer, session('impersonation.return_url'));
     }
 
-    // The Impersonate button is on the administrator's view of the user, which the person being
-    // impersonated usually can't open.
+    // The Impersonate button is on the administrator's view of
+    // the person, which they usually can't open themselves.
     public function test_impersonating_from_the_users_page_lands_somewhere_the_person_can_see(): void
     {
         $this->authorizedUser->givePermissionTo(SystemPermission::AccessAdministrationPanel, SystemPermission::ViewUsers);

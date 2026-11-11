@@ -27,7 +27,7 @@ final class ChangelogControllerTest extends TestCase
         $response->assertViewIs('public.changelog.index');
         $response->assertSee('RSS Feed');
         $response->assertSee('Showing');
-        // The published pagination view labels Previous and Next as plain text, with a role on the disabled one.
+        // Previous and Next are text, and a disabled one has a role.
         $response->assertSee('<span role="link" aria-disabled="true" aria-label="Previous">', escape: false);
         $response->assertSee('aria-label="Next"', escape: false);
         $response->assertDontSee('aria-label="&amp;laquo;', escape: false);
@@ -53,7 +53,7 @@ final class ChangelogControllerTest extends TestCase
             ->assertSee('February update');
     }
 
-    // Entries are written with ### headings; they follow the page's own headings without skipping a level.
+    // Entries use ### headings, which follow the page's own without skipping a level.
     public function test_entry_headings_follow_the_page_headings(): void
     {
         $entry = Changelog::factory()->create(['body' => "### Changes\n\n#### Detail\n\n- A change"]);

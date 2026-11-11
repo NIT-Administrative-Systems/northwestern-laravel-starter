@@ -39,7 +39,8 @@ final class OAuthServiceProviderTest extends TestCase
         $this->assertSame(365, (int) CarbonInterval::instance(Passport::personalAccessTokensExpireIn())->totalDays);
     }
 
-    // Integrations call from servers; a browser origin must be allowed explicitly (config/cors.php).
+    // Integrations call from servers; a browser origin
+    // must be allowed explicitly (config/cors.php).
     public function test_the_api_allows_no_browser_origin_by_default(): void
     {
         $this->options('/api/v1/me', [], [

@@ -11,8 +11,8 @@ use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
 
 /**
- * Drives the OAuth authorization code flow with PKCE as a public application would: the
- * authorization request, the consent screen, approval, and the code exchange.
+ * Drives the OAuth authorization code flow with PKCE as a public application does:
+ * the authorization request, the consent screen, approval and the code exchange.
  *
  * @mixin TestCase
  */
@@ -52,7 +52,7 @@ trait RunsAuthorizationCodeFlow
     }
 
     /**
-     * Approve the consent screen the last authorization request showed. Returns the code.
+     * Approve the consent screen the last request showed, and return the code.
      */
     protected function approve(OAuthClient $client): string
     {
@@ -76,7 +76,7 @@ trait RunsAuthorizationCodeFlow
     }
 
     /**
-     * Register an MCP client the way one registers itself, at the dynamic registration endpoint.
+     * Register an MCP client at the registration endpoint, as one registers itself.
      */
     protected function registerMcpClient(string $name = 'Claude Code'): OAuthClient
     {

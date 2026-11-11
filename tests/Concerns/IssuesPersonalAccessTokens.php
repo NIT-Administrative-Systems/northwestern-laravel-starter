@@ -11,8 +11,8 @@ use App\Domains\Api\Models\OAuthToken;
 use App\Domains\User\Models\User;
 
 /**
- * Gives a person the permission to hold personal access tokens and creates one, as the
- * Account page would.
+ * Gives a person the permission to hold personal access
+ * tokens and creates one, as the Account page would.
  */
 trait IssuesPersonalAccessTokens
 {
