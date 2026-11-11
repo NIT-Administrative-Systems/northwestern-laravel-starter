@@ -32,10 +32,13 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\HtmlString;
 
 /**
- * The applications a person has allowed to act for them, one row per application, with what
- * each can do and a way to disconnect it. Applications show while the API is on and MCP clients
- * while MCP is on; an administrator impersonating the person sees the list but can't disconnect
- * anything, as {@see \App\Domains\Api\CredentialAccess} decides.
+ * The applications a person has allowed to act for them, one row per
+ * application, with what each can do and a way to disconnect it.
+ *
+ * Applications show while the API is on, and MCP clients while MCP is on. An
+ * administrator impersonating someone sees them but can't disconnect any.
+ *
+ * {@see \App\Domains\Api\CredentialAccess} decides who sees and disconnects them.
  */
 class ConnectedApplications extends Page implements HasTable
 {
@@ -61,7 +64,7 @@ class ConnectedApplications extends Page implements HasTable
     public function content(Schema $schema): Schema
     {
         return $schema->components([
-            // No callout heading: Filament renders it as an <h4>, which would skip levels after the page's <h1>.
+            // No callout heading: Filament makes it an <h4>, skipping levels after the <h1>.
             Callout::make()
                 ->description(new HtmlString('<strong>You\'re impersonating this person.</strong> You can see their connected applications, but you can\'t disconnect them. To disconnect one, use their page in Administration.'))
                 ->warning()
@@ -124,8 +127,8 @@ class ConnectedApplications extends Page implements HasTable
     }
 
     /**
-     * The person's live connections, of the kinds they may see: applications while the API is
-     * on, MCP clients while MCP is on.
+     * Get the live connections the person may see: applications
+     * while the API is on, and MCP clients while MCP is on.
      *
      * @return Builder<OAuthConnection>
      */
@@ -145,7 +148,8 @@ class ConnectedApplications extends Page implements HasTable
     }
 
     /**
-     * Whether the person may disconnect what they see; refused for everything while impersonating.
+     * Determine whether the person may disconnect
+     * what they see, never while impersonated.
      */
     private function disconnecting(): AccessDecision
     {

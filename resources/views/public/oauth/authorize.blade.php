@@ -1,8 +1,11 @@
 {{--
-    The OAuth consent screen. Passport renders it (see OAuthServiceProvider) when an external
-    application asks to act for the signed-in person, and posts the answer to its own approve
-    and deny endpoints, which return to the application's registered redirect URI. Passport keeps
-    the authorization request, with the application's state, in the session.
+    The OAuth consent screen. Passport renders it (see OAuthServiceProvider)
+    when an outside application asks to act as the person who's signed in.
+
+    It posts the answer to Passport's approve and deny endpoints,
+    which return to the application's registered redirect URI.
+
+    Passport keeps the authorization request, with its state, in the session.
 
     What it shows is decided in App\Domains\Api\Passport\OAuthConsent::screen().
 
@@ -43,7 +46,7 @@
                 <p class="mt-3 text-sm text-gray-600">{{ $client->description }}</p>
             @endif
 
-            {{-- A client's name is only a claim; where it sends the person is the part they can check. --}}
+            {{-- The client's name is a claim; where it sends people is the part they can check. --}}
             <p class="mt-5 text-sm text-gray-700">
                 {{ $redirectTarget->isLoopback ? 'Approving returns you to an app on this computer at' : 'Approving returns you to' }}
                 <span class="wrap-anywhere font-mono text-gray-950"><bdi>{{ $redirectTarget->display }}</bdi></span>.

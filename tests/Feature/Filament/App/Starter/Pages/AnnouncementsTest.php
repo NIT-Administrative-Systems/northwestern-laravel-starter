@@ -10,6 +10,7 @@ use App\Domains\User\Enums\Affiliation;
 use App\Domains\User\Models\User;
 use App\Filament\App\Starter\Pages\Announcements;
 use App\Providers\Filament\AppPanelProvider;
+use Carbon\Carbon;
 use Filament\Facades\Filament;
 use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\CoversNothing;
@@ -51,6 +52,29 @@ final class AnnouncementsTest extends TestCase
         Announcement::factory()->count(Announcements::PER_PAGE + 1)->create();
 
         $this->assertCount(Announcements::PER_PAGE, new Announcements()->getAnnouncements()->items());
+    }
+
+    public function test_dates_leave_out_the_year_only_when_it_is_this_year(): void
+    {
+        $this->travelTo(Carbon::parse('2026-06-15 17:00'));
+        $this->user->update(['timezone' => 'America/Chicago']);
+
+        Announcement::factory()->create([
+            'title' => 'Summer hours',
+            'starts_at' => Carbon::parse('2026-06-01 14:00'),
+            'ends_at' => Carbon::parse('2026-08-31 22:00'),
+        ]);
+        Announcement::factory()->create([
+            'title' => 'Winter break',
+            'published_at' => Carbon::parse('2025-12-01 15:00'),
+            'starts_at' => Carbon::parse('2025-12-19 15:00'),
+            'ends_at' => Carbon::parse('2026-01-05 15:00'),
+        ]);
+
+        Livewire::test(Announcements::class)
+            ->assertSee('June 1 · Until 5 p.m. Monday, August 31')
+            ->assertSee('December 19, 2025 · Ended January 5')
+            ->assertDontSee('June 1, 2026');
     }
 
     public function test_it_says_when_there_are_none(): void

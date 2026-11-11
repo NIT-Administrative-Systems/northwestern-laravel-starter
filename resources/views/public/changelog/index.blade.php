@@ -3,8 +3,10 @@
         <div class="flex flex-wrap items-center justify-between gap-4">
             <h1 class="font-nu-heading text-nu-purple-100 text-4xl font-bold">Changelog</h1>
 
-            {{-- The feed opens in the browser or a feed reader; Copy puts its address on the clipboard for
-                 readers that ask for one. The tooltip shows the result; the status region announces it. --}}
+            {{-- The feed opens in the browser or a feed reader, and Copy puts
+                 its address on the clipboard for readers that ask for it.
+
+                 The tooltip shows the result, and the status region announces it. --}}
             <div class="flex items-center gap-2" x-data="{
                 status: '',
                 copy() {
@@ -65,7 +67,7 @@
                                 </a>
                             </h2>
 
-                            {{-- Section headings ("Changes", "Fixes") sit below the entry's title, with bullets that show. --}}
+                            {{-- Section headings rank below the entry's title, and list bullets are visible. --}}
                             <div
                                  class="fi-prose [--prose-marker-color:var(--color-gray-400)]! [&_h3]:text-base! [&_h3]:font-semibold! [&_h3]:text-gray-600! mt-4 [&_h3]:uppercase [&_h3]:tracking-wide">
                                 {{ $entry->bodyHtml(topHeadingLevel: 3) }}

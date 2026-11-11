@@ -1,9 +1,12 @@
 {{--
     The layout for error pages, including the 500 and database-paused pages.
 
-    It must render when nothing else works: no Filament, no auth and no database. Keep
-    anything that could query the database out of it, and guard it in the pages that
-    need it. It is light-only, like the public layout.
+    It must render when nothing else works: no Filament, no auth, no database.
+
+    Keep anything that could query the database out
+    of it, and guard it in the pages needing it.
+
+    It is light only, like the public layout.
 --}}
 @props([
     'title' => 'Error',

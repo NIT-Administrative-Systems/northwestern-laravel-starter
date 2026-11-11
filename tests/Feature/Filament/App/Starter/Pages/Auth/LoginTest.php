@@ -135,7 +135,8 @@ final class LoginTest extends TestCase
         ]);
     }
 
-    // On phones the header shows the application's name only in a second row, so the card names it too.
+    // On phones the application's name is only in the
+    // header's second row, so the card has it too.
     public function test_page_has_the_site_header_and_a_heading_naming_the_application(): void
     {
         $this->configureEntra();
@@ -151,7 +152,8 @@ final class LoginTest extends TestCase
             ->assertSee('https://www.northwestern.edu/', escape: false);
     }
 
-    // With single sign-on alone the page redirects to it, so email alone is the one-method case that renders.
+    // With single sign-on alone the page redirects there,
+    // so email alone is the one-method case to render.
     public function test_the_or_divider_only_shows_with_both_methods(): void
     {
         config(['local-auth.enabled' => true]);

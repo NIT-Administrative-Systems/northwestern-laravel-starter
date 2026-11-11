@@ -153,7 +153,7 @@ final class EmailCodeLoginTest extends TestCase
             ->assertRedirect(url('/app/some-page'));
     }
 
-    // Codes sent by an administrator, or read on another device, have no challenge in this session.
+    // A code an administrator sent, or one read elsewhere, has no challenge here.
     public function test_the_email_link_lets_a_code_issued_elsewhere_sign_the_user_in(): void
     {
         $user = User::factory()->affiliate()->create(['email' => 'test@example.com']);
@@ -244,6 +244,19 @@ final class EmailCodeLoginTest extends TestCase
         $this->assertSame(0, LoginChallenge::count());
     }
 
+    public function test_resend_sends_nothing_once_email_codes_are_turned_off(): void
+    {
+        User::factory()->affiliate()->create(['email' => 'test@example.com']);
+        $this->startFlow('test@example.com');
+        $component = Livewire::test(EmailCodeLogin::class);
+
+        config(['local-auth.enabled' => false]);
+
+        $component->call('resendCode')->assertNotFound();
+
+        $this->assertSame(1, LoginChallenge::count());
+    }
+
     public function test_resend_without_a_pending_sign_in_returns_to_the_first_step(): void
     {
         Livewire::test(EmailCodeLogin::class)
@@ -281,7 +294,7 @@ final class EmailCodeLoginTest extends TestCase
     }
 
     /**
-     * Requests a code for `$email`, as the email step does: code 123456 for an account, a decoy otherwise.
+     * Request a code as the email step does: 123456 for an account, a decoy otherwise.
      */
     private function startFlow(string $email): void
     {

@@ -11,11 +11,11 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\View\Component;
 
 /**
- * Loads the Sentry browser SDK with this application's DSN, routed through the
- * `sentry.tunnel` route so ad blockers don't drop reports. Renders nothing when
- * no DSN is configured.
+ * Loads the Sentry browser SDK with this application's DSN,
+ * sent through the `sentry.tunnel` route so ad blockers
+ * don't drop reports. Renders nothing without a DSN.
  *
- * Both panels add it through a render hook; the public layout includes it directly.
+ * Both panels add it through a render hook, and the public layout includes it.
  */
 class SentryBrowser extends Component
 {
@@ -36,7 +36,7 @@ class SentryBrowser extends Component
      */
     private function config(): array
     {
-        // Error pages render this when the database may be down, so a failed user lookup means no user context.
+        // Error pages may render this with the database down, and then send no user.
         $user = rescue(fn () => auth()->user(), null, report: false);
 
         return [

@@ -25,8 +25,8 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\HtmlString;
 
 /**
- * Sends a support request to the configured ticket system, falling back to email.
- * Available when `support.enabled` is on.
+ * Sends a support request to the configured ticket system,
+ * falling back to email, while `support.enabled` is on.
  *
  * @property-read Schema $form
  */
@@ -77,7 +77,7 @@ class ContactSupport extends Page
     {
         return $schema
             ->components([
-                // No callout heading: Filament renders it as an <h4>, which would skip levels after the page's <h1>.
+                // No callout heading: Filament makes it an <h4>, skipping levels after the <h1>.
                 Callout::make()
                     ->description(new HtmlString(
                         '<strong>Limited support.</strong> Support for this environment is limited, and this form may send an email instead of creating a ticket. '
@@ -147,8 +147,8 @@ class ContactSupport extends Page
     }
 
     /**
-     * Apply the `support:contact` limiter from RateLimitingServiceProvider by hand: Livewire
-     * actions don't pass through route middleware.
+     * Apply the `support:contact` limiter here;
+     * Livewire actions skip route middleware.
      */
     private function tooManyRequests(): bool
     {

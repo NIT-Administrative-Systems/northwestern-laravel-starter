@@ -3,16 +3,11 @@
 @import "../../../../vendor/northwestern-sysdev/northwestern-filament-theme/dist/theme.css";
 @import "../../../../vendor/northwestern-sysdev/northwestern-filament-theme/dist/tailwind-tokens.css";
 
-@source '../../../../app/Filament/**/*';
-@source '../../../../resources/views/filament/**/*';
-@source '../../../../resources/views/components/panel-brand.blade.php';
-@source '../../../../resources/views/components/help-menu.blade.php';
-@source '../../../../resources/views/components/sidebar-panel-name.blade.php';
-@source '../../../../resources/views/components/announcement-banner.blade.php';
+/* Tailwind finds classes in tracked files but skips vendor/, which git ignores. */
 @source '../../../../vendor/filament/**/*';
 
-/* One focus ring on the purple top bar and the footer, as in the app panel: the footer's 3px white
-   outline, set 2px off the control. The theme's purple outline would vanish against the top bar. */
+/* One focus ring on the purple top bar and the footer, as in the app
+   panel: the footer's 3px white outline, set 2px off the control. */
 .fi-topbar :is(a, button):focus-visible {
     outline: 3px solid var(--color-white);
     outline-offset: 2px;

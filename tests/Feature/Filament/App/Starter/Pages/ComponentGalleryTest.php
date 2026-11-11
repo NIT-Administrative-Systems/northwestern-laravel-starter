@@ -43,7 +43,7 @@ final class ComponentGalleryTest extends TestCase
             ->assertSee("Delete <code>{$file}</code>", escape: false);
     }
 
-    // The app panel's dashboard is Filament's own, so the sidebar is the gallery's only way in.
+    // The sidebar is the gallery's only way in: the dashboard is Filament's own.
     public function test_the_sidebar_links_to_the_gallery_outside_production(): void
     {
         $this->actingAs(User::factory()->create())

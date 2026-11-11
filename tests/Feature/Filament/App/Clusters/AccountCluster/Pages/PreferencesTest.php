@@ -24,7 +24,7 @@ final class PreferencesTest extends TestCase
         Filament::setCurrentPanel(AppPanelProvider::ID);
     }
 
-    public function test_it_renders(): void
+    public function test_a_signed_in_person_can_open_it(): void
     {
         $this->actingAs(User::factory()->create())
             ->get('/app/account/preferences')

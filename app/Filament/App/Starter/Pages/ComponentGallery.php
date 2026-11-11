@@ -34,9 +34,12 @@ use Filament\Tables\Table;
 use Illuminate\Support\HtmlString;
 
 /**
- * Starter placeholder: Filament's common components in the Northwestern theme, with
- * sample content, so you can see what you are building with. In the sidebar outside
- * production; canAccess() refuses it, and hides its navigation item, in production.
+ * Starter placeholder: Filament's common components
+ * in the Northwestern theme with sample content,
+ * so you can see what you are building with.
+ *
+ * It is in the sidebar outside production; in production,
+ * canAccess() refuses it and hides its navigation item.
  *
  * Delete this page when you no longer need it.
  *
@@ -114,7 +117,7 @@ class ComponentGallery extends Page implements HasTable
     {
         return $schema
             ->components([
-                // No callout heading: Filament renders it as an <h4>, which would skip levels after the page's <h1>.
+                // No callout heading: Filament makes it an <h4>, skipping levels after the <h1>.
                 Callout::make()
                     ->description(new HtmlString(
                         '<strong>Starter placeholder.</strong> Sample content showing Filament\'s components in the Northwestern theme. '
@@ -148,9 +151,12 @@ class ComponentGallery extends Page implements HasTable
                         ]),
                     ]),
 
-                // Filament renders callout headings as <h4>, so callouts with a heading sit under an <h3>:
-                // the uncontained sections below. Directly under a page or a top-level section, leave the
-                // heading out and lead the description with bold text instead.
+                // Filament renders callout headings as <h4>, so
+                // callouts with a heading sit under an <h3>,
+                // as with the uncontained sections below.
+                //
+                // Directly under a page or a top-level section, leave the
+                // heading out and open the description with bold text.
                 Section::make('Callouts')
                     ->schema([
                         Section::make('With a Heading')

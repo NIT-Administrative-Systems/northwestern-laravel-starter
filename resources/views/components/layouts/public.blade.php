@@ -1,13 +1,14 @@
 {{--
-    The layout for pages outside the panels, such as the landing page and the changelog.
+    The layout for pages outside the panels, such as the landing page and changelog.
 
-    Routes using it run in the app panel's context (the `panel:app` middleware), so the
-    page loads the app panel's theme and colors and can use Filament's Blade components.
-    It is light-only: Department Templates 4.0 has no dark mode.
+    Routes using it run in the app panel's context (the `panel:app` middleware),
+    so pages get its theme and colors and can use Filament's Blade components.
+
+    It is light only: Department Templates 4.0 has no dark mode.
 --}}
 @props([
     'title' => null,
-    // Announcements for signed-out visitors, under the header. Error pages turn it off.
+    // Announcements for signed-out visitors, under the header. Error pages omit it.
     'announcements' => true,
 ])
 
@@ -19,9 +20,10 @@
     $appName = config('app.name');
     $appPanel = Filament::getPanel(AppPanelProvider::ID);
 
-    // Error pages render on this layout too, from wherever the error happened (an administration
-    // page, or an unknown URL), so the app panel's theme is selected here, and a failing user
-    // lookup leaves the page signed out rather than failing it.
+    // Error pages render on this layout too, from wherever the error happened (an
+    // administration page or an unknown URL), so the app panel is chosen here.
+    //
+    // A failing user lookup leaves the page signed out rather than failing it.
     Filament::setCurrentPanel($appPanel);
     Filament::bootCurrentPanel();
     $user = rescue(fn() => auth()->user(), null, report: false);
@@ -57,25 +59,20 @@
     {{ filament()->getSerifFontHtml() }}
 
     <style>
-        /* As Filament's panel layout sets them. Without the mono and serif variables, `font-mono`
-           and `font-serif` resolve to nothing and fall back to the body font. */
+        /* As Filament's panel layout sets them. Without the mono and serif
+           variables, `font-mono` and `font-serif` resolve to nothing and fall
+           back to the body font. */
         :root {
             --font-family: '{!! filament()->getFontFamily() !!}';
             --mono-font-family: '{!! filament()->getMonoFontFamily() !!}';
             --serif-font-family: '{!! filament()->getSerifFontFamily() !!}';
-        }
-
-        /* These pages are light-only, so the user menu's theme switcher would do nothing here.
-           It has a dropdown list of its own; hide the list, or its border stays behind. */
-        .fi-dropdown-list:has(> .fi-theme-switcher) {
-            display: none !important;
         }
     </style>
 
     <x-sentry-browser />
 </head>
 
-{{-- White, like the error layout: important, because the theme's unlayered `body.fi-body` sets a gray background. --}}
+{{-- White like the error layout; important beats the theme's gray `body.fi-body`. --}}
 <body class="fi-body bg-white! flex min-h-screen flex-col text-gray-950 antialiased">
     <a class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:bg-white focus:px-4 focus:py-2"
        href="#main">
@@ -108,10 +105,10 @@
 
     <x-northwestern-filament-theme::footer />
 
-    {{-- Livewire's scripts bring Alpine, which Filament's components need. Livewire only injects them
-         automatically on pages that render a Livewire component, and these pages render none. --}}
+    {{-- Livewire's scripts bring Alpine, which Filament's components need. Livewire adds
+         them on its own only to pages with a Livewire component, and these have none. --}}
     @livewireScripts
-    {{-- Without the panel core, which would apply the user's panel theme (including dark mode). --}}
+    {{-- Without the panel core, which would apply the person's theme and dark mode. --}}
     @filamentScripts
 </body>
 
