@@ -62,6 +62,15 @@ class Role extends SpatieRole implements Auditable
     }
 
     /**
+     * Whether this role suits `$user`: an API Integration role only an API user, and every other
+     * role only a person.
+     */
+    public function suits(User $user): bool
+    {
+        return ($this->role_type?->slug === RoleTypeEnum::ApiIntegration) === $user->is_api_user;
+    }
+
+    /**
      * Determine if this role has assignment locking enabled.
      */
     public function isAssignmentLocked(): bool

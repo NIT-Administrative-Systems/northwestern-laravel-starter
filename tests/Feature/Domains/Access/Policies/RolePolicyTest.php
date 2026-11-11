@@ -114,6 +114,25 @@ final class RolePolicyTest extends TestCase
         $this->assertTrue($this->policy()->attachUser($user, $role));
     }
 
+    public function test_attach_user_denies_assigning_a_role_to_yourself(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo(SystemPermission::AssignRoles);
+        $role = Role::factory()->forRoleType(RoleTypeEnum::ApplicationRole)->create();
+
+        $this->assertFalse($this->policy()->attachUser($user, $role, $user));
+        $this->assertTrue($this->policy()->attachUser($user, $role, User::factory()->create()));
+    }
+
+    public function test_detach_user_lets_you_remove_your_own_role(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo(SystemPermission::AssignRoles);
+        $role = Role::factory()->forRoleType(RoleTypeEnum::ApplicationRole)->create();
+
+        $this->assertTrue($this->policy()->detachUser($user, $role));
+    }
+
     public function test_attach_user_denies_system_managed_without_manage_all(): void
     {
         $user = User::factory()->create();
