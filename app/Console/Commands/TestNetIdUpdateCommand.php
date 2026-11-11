@@ -46,7 +46,7 @@ class TestNetIdUpdateCommand extends Command implements PromptsForMissingInput
 
         if (! $action) {
             $valid = implode(', ', array_map(
-                static fn (NetIdUpdateAction $a) => $a->value,
+                static fn (NetIdUpdateAction $case) => $case->value,
                 NetIdUpdateAction::cases()
             ));
 
@@ -84,7 +84,7 @@ class TestNetIdUpdateCommand extends Command implements PromptsForMissingInput
             'action' => fn () => select(
                 'Select an action',
                 array_map(
-                    static fn (NetIdUpdateAction $a) => $a->value,
+                    static fn (NetIdUpdateAction $case) => $case->value,
                     NetIdUpdateAction::cases()
                 )
             ),

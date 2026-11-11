@@ -28,7 +28,7 @@ class PruneMcpClientsCommand extends Command
     {
         $deleted = 0;
 
-        $unconnected = $this->dynamicClients()
+        $unconnected = OAuthClient::query()->mcpClients()
             ->where('created_at', '<', Carbon::now()->subHours((int) config('mcp.cleanup.unconnected_hours')))
             ->whereDoesntHave('connections');
 
@@ -41,7 +41,7 @@ class PruneMcpClientsCommand extends Command
         $revoked = 0;
         $cutoff = Carbon::now()->subDays((int) config('mcp.cleanup.unused_days'));
 
-        $unused = $this->dynamicClients()
+        $unused = OAuthClient::query()->mcpClients()
             ->where('revoked', false)
             ->where('created_at', '<', $cutoff)
             ->whereHas('connections')
@@ -57,13 +57,5 @@ class PruneMcpClientsCommand extends Command
         $this->components->info("Deleted {$deleted} unconnected and revoked {$revoked} unused MCP client(s).");
 
         return self::SUCCESS;
-    }
-
-    /**
-     * @return Builder<OAuthClient>
-     */
-    private function dynamicClients(): Builder
-    {
-        return OAuthClient::query()->mcpClients();
     }
 }
