@@ -60,7 +60,9 @@ use Spatie\Health\Models\HealthCheckResultHistoryItem;
 
 Schedule::command(TelescopePruneCommand::class)->daily();
 Schedule::command(CleanTemporaryS3FilesCommand::class)->daily();
-Schedule::command(PruneCommand::class, ['--path' => glob('app/Domains/*/Models')])->daily();
+// model:prune resolves --path from the project root and Symfony's Finder expands the wildcard, so
+// the scheduler can start from any working directory.
+Schedule::command(PruneCommand::class, ['--path' => 'app/Domains/*/Models'])->daily();
 Schedule::command(PruneCommand::class, ['--model' => [HealthCheckResultHistoryItem::class]])->daily();
 
 if (config('api.client_secret_expiration_notifications.enabled')) {
