@@ -17,8 +17,7 @@ use Spatie\Health\Http\Controllers\HealthCheckJsonResultsController;
 |--------------------------------------------------------------------------
 | Public API Routes
 |--------------------------------------------------------------------------
-| Endpoints that do not require API authentication. Useful for publicly
-| accessible resources.
+| Endpoints that need no authentication, for anything that's public.
 */
 
 Route::middleware([EnsureFeatureEnabled::class . ':api.enabled,404'])->group(function () {
@@ -29,11 +28,14 @@ Route::middleware([EnsureFeatureEnabled::class . ':api.enabled,404'])->group(fun
 |--------------------------------------------------------------------------
 | Protected API Routes
 |--------------------------------------------------------------------------
-| Endpoints that require a Passport access token, fully logged through the API
-| request logging middleware and rate limited per client or user once the token is
-| known. Credentials are never created here: service clients are created in
-| Administration and personal access tokens on the Account page. Tokens issued
-| to MCP clients are refused: they work only on the MCP server (routes/ai.php).
+| Endpoints that need a Passport access token. Every request is logged,
+| and it's rate limited per client or user once the token is known.
+|
+| Nothing here creates credentials: Administration creates service
+| clients, and the Account page creates personal access tokens.
+|
+| Tokens issued to MCP clients are refused; they
+| work only on the MCP server (routes/ai.php).
 */
 
 Route::middleware([
@@ -52,9 +54,8 @@ Route::middleware([
 |--------------------------------------------------------------------------
 | Health Check Routes
 |--------------------------------------------------------------------------
-| Protected by a secret token (X-Secret-Token header) rather than Bearer
-| token authentication. The endpoint refuses every request until
-| HEALTH_SECRET_TOKEN is set.
+| Protected by a secret in the X-Secret-Token header, not a bearer token.
+| The endpoint refuses every request until HEALTH_SECRET_TOKEN is set.
 */
 
 Route::middleware([RequireSecretToken::class . ':health.secret_token'])->group(function () {
@@ -69,7 +70,7 @@ Route::middleware([RequireSecretToken::class . ':health.secret_token'])->group(f
 */
 
 Route::middleware(['eventhub_hmac'])->prefix('eventhub')->group(function () {
-    // Uncomment the following route if your project is subscribed to the `etidentity.ldap.netid.term` topic.
+    // Uncomment this if the application subscribes to `etidentity.ldap.netid.term`.
     // Route::post('netid-update', App\Domains\User\Http\Controllers\Webhooks\NetIdUpdateController::class)->eventHubWebhook('etidentity.ldap.netid.term')->name('netid-update');
 });
 
@@ -77,8 +78,7 @@ Route::middleware(['eventhub_hmac'])->prefix('eventhub')->group(function () {
 |--------------------------------------------------------------------------
 | Mock API Routes
 |--------------------------------------------------------------------------
-| Local-only mock implementations of external services used for integration
-| testing and offline development.
+| Local stand-ins for outside services, for integration tests and offline work.
 */
 
 // Route::prefix('mock')->withoutMiddleware(ThrottleRequests::class.':api')->group(function () {

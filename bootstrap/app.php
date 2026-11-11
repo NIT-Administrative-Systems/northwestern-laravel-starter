@@ -38,12 +38,12 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->throttleApi();
 
-        // Adds cors.open_paths, for the MCP server and the OAuth endpoints its clients call.
+        // Adds `cors.open_paths`, for the MCP server and the OAuth endpoints it uses.
         $middleware->replace(FrameworkHandleCors::class, HandleCors::class);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        // A paused database is starting up. People get a page that reloads itself; API, OAuth and
-        // MCP clients get Problem Details with Retry-After. Livewire shows the page in its modal.
+        // A paused database is starting up. People get a page that reloads itself, which
+        // Livewire shows in its modal; API, OAuth and MCP clients get Problem Details.
         $exceptions->render(function (Throwable $e, Request $request): ?SymfonyResponse {
             if (! resolve(DatabasePausedDetector::class)->causedByPausedDatabase($e)) {
                 return null;
@@ -56,16 +56,19 @@ return Application::configure(basePath: dirname(__DIR__))
             return response()->view('errors.database-paused', [], 500);
         });
 
-        // An OAuth consent screen approved or denied after its session expired, or in another tab:
-        // the request is gone, so there is no application to return to.
+        // An OAuth consent screen approved or denied after its session expired, or
+        // in another tab, has no request left and no application to return to.
+        //
         // Mapped before Laravel turns authorization exceptions into a 403.
         $exceptions->map(InvalidAuthTokenException::class, fn (InvalidAuthTokenException $e): HttpException => new HttpException(419, 'This authorization request has expired.', $e));
 
-        // A person sent to the OAuth consent screen by a deleted or revoked client, such as an MCP
-        // client that kept its client ID (DetectUnknownOAuthClient in config/passport.php).
+        // Someone sent to the consent screen by a deleted or revoked
+        // client, such as an MCP client that kept its client ID.
+        //
+        // See DetectUnknownOAuthClient in config/passport.php.
         $exceptions->render(fn (UnknownOAuthClientException $e): Response => response()->view('errors.unknown-oauth-client', status: $e->getStatusCode()));
 
-        // Skip reporting database timeout noise in non-production environments - these are common when RDS is waking up
+        // Below production, a database waking up is expected, not worth reporting.
         $exceptions->report(function (Throwable $e): bool {
             if (app()->environment('production')) {
                 return true;
@@ -78,7 +81,7 @@ return Application::configure(basePath: dirname(__DIR__))
             resolve(SentryExceptionHandler::class)->report($e);
         });
 
-        // RFC 9457 Problem Details for API routes
+        // RFC 9457 Problem Details for API requests.
         $exceptions->renderable(function (Throwable $e, Request $request) {
             return app(ProblemDetailsRenderer::class)->render($e, $request);
         });
