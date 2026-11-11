@@ -1,10 +1,13 @@
 {{--
-    The footer of every markdown email: the responsible unit's contact details, the
-    Accessibility and Privacy Statement links the university requires, and the copyright.
-    Rendered as Markdown for HTML mail and as plain text for the text part.
+    The footer of every Markdown email.
 
-    Unit details resolve through the filament theme's FooterConfig, the same as the
-    page footer: config/northwestern-filament-theme.php, then the built-in defaults.
+    It has the unit's contact details, the Accessibility and Privacy
+    Statement links the university requires, and a copyright line.
+
+    It renders as Markdown for HTML mail and as plain text for the text part.
+
+    The unit's details come from the theme's FooterConfig, as the page footer's
+    do: config/northwestern-filament-theme.php, then the built-in defaults.
 --}}
 @props(['plain' => false])
 
