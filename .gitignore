@@ -32,6 +32,7 @@ yarn-error.log
 clover.xml
 coverage/
 docs/.astro/
+/storage/phpstan
 /storage/pint.cache
 /.php-cs-fixer.cache
 /.phpstorm.meta.php
