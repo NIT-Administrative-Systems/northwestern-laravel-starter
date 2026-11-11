@@ -12,6 +12,7 @@ use App\Domains\Support\Models\Announcement;
 use App\Domains\User\Models\User;
 use App\Filament\Administration\Resources\Announcements\AnnouncementResource;
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Toggle;
@@ -114,7 +115,10 @@ class EditAnnouncement extends EditRecord
                     Notification::make()->title('Copied to a New Draft')->success()->send();
                     $this->redirect(AnnouncementResource::getUrl('edit', ['record' => $copy]));
                 }),
-            DeleteAction::make(),
+            // In a menu, so End Now is the page's only red button.
+            ActionGroup::make([
+                DeleteAction::make(),
+            ]),
         ];
     }
 }

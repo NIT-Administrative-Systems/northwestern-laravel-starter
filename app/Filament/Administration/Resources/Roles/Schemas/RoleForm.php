@@ -27,7 +27,8 @@ class RoleForm
         $nonApiPermissions = [];
         $systemPermissions = [];
 
-        $permissionScopeBadgeHTML = collect(PermissionScope::cases())->mapWithKeys(fn (PermissionScope $scope) => [$scope->value => $scope->getBadgeHTML()]);
+        // Only the exception is marked: a permission without a badge is system-wide.
+        $permissionScopeBadgeHTML = collect(PermissionScope::cases())->mapWithKeys(fn (PermissionScope $scope) => [$scope->value => $scope === PermissionScope::Personal ? $scope->getBadgeHTML() : '']);
 
         foreach (Permission::all() as $permission) {
             $permissionData = [
