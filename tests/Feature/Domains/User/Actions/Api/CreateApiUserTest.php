@@ -65,7 +65,7 @@ final class CreateApiUserTest extends TestCase
         $this->assertNull($client->allowed_ips);
     }
 
-    // The first client is refused after the user exists, so the transaction takes the user back.
+    // Refusing the client after the user exists rolls the user back too.
     public function test_a_refused_creator_leaves_no_api_user_behind(): void
     {
         try {

@@ -191,7 +191,8 @@ final class CreateLocalUserTest extends TestCase
         $this->assertEquals('203.0.113.42', $loginChallenge->requested_ip);
     }
 
-    // The account is still created when its first code can't be sent, here because the email's hourly limit is used up.
+    // The account is still created when its first code can't be
+    // sent, here because the email's hourly limit is used up.
     public function test_returns_user_when_login_challenge_fails(): void
     {
         config(['local-auth.rate_limit_per_hour' => 1]);

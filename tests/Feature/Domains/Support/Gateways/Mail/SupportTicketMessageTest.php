@@ -13,7 +13,7 @@ use Tests\TestCase;
 #[CoversClass(SupportTicketMessage::class)]
 final class SupportTicketMessageTest extends TestCase
 {
-    public function test_build_sets_subject_markdown_and_view_data_for_primary_email(): void
+    public function test_the_team_email_has_the_ticket_and_requester_details(): void
     {
         config(['app.env' => 'testing']);
 
@@ -46,7 +46,7 @@ final class SupportTicketMessageTest extends TestCase
         $this->assertFalse($mailable->viewData['fallbackMode']);
     }
 
-    public function test_build_sets_fallback_mode_in_view_data_when_fallback_email_is_sent(): void
+    public function test_the_fallback_email_says_it_is_the_fallback(): void
     {
         $user = User::factory()->affiliate()->create();
         $ticket = SupportTicket::factory()->for($user)->pending()->create();
@@ -56,7 +56,8 @@ final class SupportTicketMessageTest extends TestCase
         $this->assertTrue($mailable->viewData['fallbackMode']);
     }
 
-    // A local account's username is generated from its email address; only a NetID is a NetID.
+    // A local account's username comes from its
+    // email address; only a NetID is a NetID.
     public function test_a_local_accounts_username_is_not_labelled_as_a_netid(): void
     {
         $local = SupportTicket::factory()->for(User::factory()->affiliate()->create())->pending()->create();
@@ -70,7 +71,7 @@ final class SupportTicketMessageTest extends TestCase
         $this->assertStringContainsString('>NetID</strong>', $northwesternHtml);
     }
 
-    // People type plain text: neither HTML nor Markdown in it should render in the team's email.
+    // People type plain text: no HTML or Markdown in it renders in the team's email.
     public function test_details_render_as_the_text_that_was_typed(): void
     {
         $ticket = SupportTicket::factory()->for(User::factory()->create())->pending()->create([

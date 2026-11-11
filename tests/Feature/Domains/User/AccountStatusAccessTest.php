@@ -30,7 +30,7 @@ final class AccountStatusAccessTest extends TestCase
         $this->assertSame('You don\'t have permission to change the status of accounts.', $decision->message());
     }
 
-    // Manage All passes every policy through Gate::before; this is decided here so it doesn't.
+    // Manage All passes every policy through Gate::before, so this isn't a policy.
     public function test_not_even_a_super_administrator_changes_their_own_account(): void
     {
         $superAdministrator = User::factory()->affiliate()->create();

@@ -56,7 +56,7 @@ final class ProcessNetIdUpdateTest extends TestCase
         $this->assertTrue($user->hasRole(SystemRole::NorthwesternUser));
     }
 
-    // Reactivating the account later must not bring back roles its NetID lost meanwhile.
+    // Reactivating the account later must not restore roles its NetID lost meanwhile.
     public function test_it_deactivates_the_netid_of_a_deactivated_account(): void
     {
         $user = User::factory()->create(['username' => 'abc123', 'auth_type' => AuthType::SSO, 'netid_inactive' => false]);
@@ -239,7 +239,7 @@ final class ProcessNetIdUpdateTest extends TestCase
         $this->assertFalse($user->netid_inactive);
     }
 
-    // They can't sign in with that NetID again, so they're signed out of the sessions they have.
+    // They can't sign in with that NetID again, so their open sessions are ended.
     public function test_it_signs_the_person_out_everywhere(): void
     {
         config(['session.driver' => 'database']);

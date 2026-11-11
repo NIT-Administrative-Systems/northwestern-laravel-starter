@@ -121,7 +121,7 @@ final class AnnouncementTest extends TestCase
         $this->assertSame('Nobody', Announcement::factory()->targeted()->make()->audienceSummary());
     }
 
-    // The announcements table summarizes every row, so role names are looked up once, not per row.
+    // The table summarizes each row's audience, so role names are looked up once.
     public function test_summaries_look_up_role_names_once(): void
     {
         $roles = Role::factory()->count(2)->create();
