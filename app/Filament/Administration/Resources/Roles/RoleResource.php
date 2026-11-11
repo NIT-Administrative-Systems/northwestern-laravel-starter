@@ -110,7 +110,7 @@ class RoleResource extends Resource
             'Type' => $record->role_type->slug->getLabel(),
         ];
 
-        if (property_exists($record, 'users_count') && $record->users_count !== null) {
+        if ($record->users_count !== null) {
             $details['Users'] = $record->users_count . ' assigned';
         }
 
