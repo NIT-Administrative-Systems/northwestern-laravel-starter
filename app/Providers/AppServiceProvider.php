@@ -66,7 +66,7 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Register the eager-loading user provider, and let Manage All past every gate.
      */
-    public function configureAuthentication(): void
+    protected function configureAuthentication(): void
     {
         Auth::provider(
             'eager-load-eloquent',
@@ -88,7 +88,7 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Refuse destructive database commands, such as `migrate:fresh`, in production.
      */
-    public function configureCommands(): void
+    protected function configureCommands(): void
     {
         DB::prohibitDestructiveCommands(App::isProduction());
     }
@@ -96,7 +96,7 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Force HTTPS URLs in deployed environments.
      */
-    public function configureRoutes(): void
+    protected function configureRoutes(): void
     {
         // Deployed environments are always HTTPS behind their proxy. Locally,
         // follow APP_URL, so a plain-HTTP server on any port keeps working.
@@ -110,7 +110,7 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Show whole HTTP client error bodies locally; refuse unfaked requests in tests.
      */
-    public function configureRequests(): void
+    protected function configureRequests(): void
     {
         if (App::environment(['local', 'ci', 'testing'])) {
             RequestException::dontTruncate();
