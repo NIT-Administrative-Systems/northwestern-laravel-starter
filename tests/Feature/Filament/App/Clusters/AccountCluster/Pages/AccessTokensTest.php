@@ -12,6 +12,7 @@ use App\Domains\User\Models\User;
 use App\Filament\App\Clusters\AccountCluster\Pages\AccessTokens;
 use App\Filament\Support\RevealOnceSecret;
 use App\Providers\Filament\AppPanelProvider;
+use Carbon\CarbonImmutable;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Session;
@@ -60,6 +61,19 @@ final class AccessTokensTest extends TestCase
     }
 
     // The token is shown once: kept encrypted in the session for the copy step, then forgotten.
+    // Created and Expires show dates only, on the person's calendar rather than UTC's.
+    public function test_dates_are_in_the_persons_timezone(): void
+    {
+        $this->user->forceFill(['timezone' => 'America/Chicago'])->save();
+        // 9 p.m. on November 9 in Chicago.
+        $this->travelTo(CarbonImmutable::parse('2026-11-10 03:00:00', 'UTC'));
+        $this->personalAccessToken($this->user);
+
+        Livewire::test(AccessTokens::class)
+            ->assertSee('Nov 9, 2026')
+            ->assertDontSee('Nov 10, 2026');
+    }
+
     public function test_creating_a_token_shows_it_once(): void
     {
         $component = Livewire::test(AccessTokens::class)
