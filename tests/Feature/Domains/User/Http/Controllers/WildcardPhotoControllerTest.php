@@ -53,6 +53,16 @@ final class WildcardPhotoControllerTest extends TestCase
         $response->assertHeader('Cache-Control', 'max-age=1800, private');
     }
 
+    // A deactivated person's page in Administration still shows their photo.
+    public function test_a_deactivated_persons_photo_is_still_found(): void
+    {
+        $this->user->delete();
+
+        $this->actingAs(User::factory()->create())
+            ->get(route('users.wildcard-photo', $this->user))
+            ->assertRedirect(asset('images/default-profile-photo.svg'));
+    }
+
     public function test_returns_default_photo_when_user_has_no_photo(): void
     {
         $response = $this->actingAs($this->user)

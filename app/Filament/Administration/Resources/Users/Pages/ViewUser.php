@@ -6,6 +6,8 @@ namespace App\Filament\Administration\Resources\Users\Pages;
 
 use App\Domains\Auth\Enums\AuthType;
 use App\Domains\User\Models\User;
+use App\Filament\Administration\Resources\Users\Actions\DeactivateUserAction;
+use App\Filament\Administration\Resources\Users\Actions\ReactivateUserAction;
 use App\Filament\Administration\Resources\Users\Actions\SendLoginCodeAction;
 use App\Filament\Administration\Resources\Users\Schemas\ApiUserInfolist;
 use App\Filament\Administration\Resources\Users\Schemas\LocalUserInfolist;
@@ -47,6 +49,8 @@ class ViewUser extends ViewRecord
                 ->label('Impersonate')
                 ->icon(Heroicon::OutlinedEye)
                 ->url(fn (User $user): string => route('impersonate', [$user])),
+            DeactivateUserAction::make(),
+            ReactivateUserAction::make(),
         ];
     }
 }

@@ -68,7 +68,10 @@
             <file>app/Domains/Access/Models/RoleType.php</file>
             <file>app/Domains/Core/Models/Audit.php</file>
             <file>app/Domains/Core/Models/BaseModel.php</file>
+            <file>app/Domains/Core/Models/DatabaseNotification.php</file>
             <file>app/Domains/Core/Models/Export.php</file>
+            <file>app/Domains/Core/Models/FailedImportRow.php</file>
+            <file>app/Domains/Core/Models/Import.php</file>
             <directory>app/Domains/Support/Models</directory>
             <file>app/Domains/User/Models/User.php</file>
             <file>app/Domains/Auth/Models/ImpersonationLog.php</file>

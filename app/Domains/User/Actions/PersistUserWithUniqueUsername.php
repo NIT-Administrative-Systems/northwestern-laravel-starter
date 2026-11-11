@@ -37,7 +37,7 @@ final class PersistUserWithUniqueUsername
                 return $user;
             });
         } catch (UniqueConstraintViolationException) {
-            return User::query()
+            return User::withTrashed()
                 ->where('auth_type', $user->auth_type)
                 ->where('username', $user->username)
                 ->firstOrFail();

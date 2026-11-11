@@ -292,6 +292,33 @@ LOCAL_AUTH_CODE_RESEND_COOLDOWN=30
 
 ---
 
+## Deactivating Accounts
+
+An administrator with `EditUsers` deactivates someone with **Deactivate** on their page in Administration. `App\Domains\User\Actions\Lifecycle\DeactivateUser`:
+
+- soft-deletes the account, so it can't sign in and drops out of the Users list (the **Trashed** filter finds it),
+- revokes their personal access tokens, connected applications and service clients with `RevokeAllCredentials`,
+- signs them out everywhere with `App\Domains\Auth\Actions\EndSessions`, which deletes their rows from the `sessions` table and cycles their remember token, and
+- records an **Account Deactivated** audit event.
+
+**Reactivate** (`ReactivateUser`) restores the account and records **Account Reactivated**. The credentials revoked with it stay revoked.
+
+Only **Reactivate** brings an account back. A deactivated person who signs in, with a NetID or any other method, is refused by `SignIn::complete()` and sees a page saying their account is deactivated and to contact the team that supports the application. Looking them up in the Northwestern Directory, whether at sign-in, from **Add Northwestern User** or the directory sync on their page, updates their details and leaves them deactivated. **Add Northwestern User** sends you to their page to reactivate them, and [adding people in bulk](/features/authorization/#adding-people-in-bulk) lists them as not added.
+
+Nobody deactivates or reactivates their own account, and nobody does either while impersonating, super administrators included. `App\Domains\User\AccountStatusAccess` decides both.
+
+When EventHub reports a NetID deactivated, deprovisioned or on security hold, `ProcessNetIdUpdate` ends that person's sessions the same way. See [EventHub](/northwestern-integrations/eventhub/).
+
+### Expiring Local Accounts
+
+Set `LOCAL_ACCOUNT_INACTIVITY_DAYS` to deactivate local accounts nobody has signed in to for that many days. The daily `users:deactivate-inactive-local` command finds them from the sign-in records, and gives a new account the same time for its first sign-in. Northwestern accounts are left to the NetID lifecycle. It's off by default.
+
+<Aside type="caution" title="Keep sign-in records long enough">
+The last sign-in comes from the sign-in records, so keep `LOGIN_RECORD_RETENTION_DAYS` at least as long as `LOCAL_ACCOUNT_INACTIVITY_DAYS`. Otherwise someone whose last sign-in was pruned looks inactive.
+</Aside>
+
+---
+
 ## API Authentication
 
 Integrations authenticate as API users through OAuth service clients issued by Laravel Passport.

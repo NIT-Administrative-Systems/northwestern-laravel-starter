@@ -30,6 +30,9 @@ enum AuditEvent: string implements HasColor, HasIcon, HasLabel
     case RoleRemoved = 'role_removed';
     case PermissionsModified = 'permissions_modified';
 
+    case AccountDeactivated = 'account_deactivated';
+    case AccountReactivated = 'account_reactivated';
+
     case ServiceClientCreated = 'service_client_created';
     case ServiceClientIpRestrictionsUpdated = 'service_client_ip_restrictions_updated';
     case ServiceClientRevoked = 'service_client_revoked';
@@ -53,8 +56,8 @@ enum AuditEvent: string implements HasColor, HasIcon, HasLabel
     public function getColor(): string
     {
         return match ($this) {
-            self::Created, self::Restored, self::RoleAssigned, self::ServiceClientCreated, self::ApplicationRegistered => 'success',
-            self::Deleted, self::RoleRemoved, self::ServiceClientRevoked, self::ApplicationRevoked, self::ApplicationDisconnected, self::McpClientRevoked, self::PersonalAccessTokenRevoked => 'danger',
+            self::Created, self::Restored, self::AccountReactivated, self::RoleAssigned, self::ServiceClientCreated, self::ApplicationRegistered => 'success',
+            self::Deleted, self::AccountDeactivated, self::RoleRemoved, self::ServiceClientRevoked, self::ApplicationRevoked, self::ApplicationDisconnected, self::McpClientRevoked, self::PersonalAccessTokenRevoked => 'danger',
             self::Updated, self::PermissionsModified, self::ServiceClientIpRestrictionsUpdated, self::ApplicationUpdated, self::ApplicationSecretRegenerated => 'warning',
         };
     }
@@ -69,6 +72,8 @@ enum AuditEvent: string implements HasColor, HasIcon, HasLabel
             self::RoleAssigned => Heroicon::OutlinedUserPlus,
             self::RoleRemoved => Heroicon::OutlinedUserMinus,
             self::PermissionsModified => Heroicon::OutlinedShieldCheck,
+            self::AccountDeactivated => Heroicon::OutlinedPauseCircle,
+            self::AccountReactivated => Heroicon::OutlinedPlayCircle,
             self::ServiceClientCreated => Heroicon::OutlinedKey,
             self::ServiceClientIpRestrictionsUpdated => Heroicon::OutlinedGlobeAlt,
             self::ApplicationRegistered => Heroicon::OutlinedSquaresPlus,

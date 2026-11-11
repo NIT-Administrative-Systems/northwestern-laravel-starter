@@ -7,6 +7,7 @@ namespace App\Domains\Auth;
 use App\Domains\Auth\Enums\AuthType;
 use App\Domains\Auth\Enums\SignInMethod;
 use App\Domains\Auth\Enums\SsoProvider;
+use App\Domains\Auth\Exceptions\AccountDeactivated;
 use App\Domains\User\Actions\RecordLogin;
 use App\Domains\User\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -75,9 +76,20 @@ final readonly class SignIn
      * Signs `$user` in once their method has verified them: a new session and CSRF token, so a
      * session fixed before sign-in is worthless, a login record, and the page they asked for or `/`,
      * where HomeController decides where signed-in people go.
+     *
+     * A deactivated account is refused, however it signed in, until an administrator reactivates it.
+     *
+     * @throws AccountDeactivated
      */
     public function complete(User $user, Request $request, SignInMethod $method): RedirectResponse
     {
+        // Single sign-on has signed them in by now; a deactivated account doesn't stay signed in.
+        if ($user->trashed()) {
+            $this->endSession();
+
+            throw new AccountDeactivated();
+        }
+
         Auth::guard('web')->login($user, remember: $method->remembers());
         Session::regenerate();
         Session::regenerateToken();

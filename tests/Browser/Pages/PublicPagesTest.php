@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Domains\Auth\Exceptions\AccountDeactivated;
 use App\Domains\Support\Models\Changelog;
 use App\Domains\User\Models\User;
 use Illuminate\Support\Facades\Route;
@@ -86,4 +87,13 @@ it('is healthy on the database-paused page', function () {
     Route::get('/database-paused', fn () => response()->view('errors.database-paused', [], 500))->middleware('web');
 
     expect(visit('/database-paused'))->toBeHealthyInEachTheme();
+});
+
+// Shown when a deactivated account signs in, by any method.
+it('is healthy on the account deactivated page', function () {
+    Route::get('/account-deactivated', fn () => throw new AccountDeactivated())->middleware('web');
+
+    expect(visit('/account-deactivated')->assertSee('Account Deactivated'))
+        ->toBeHealthyInEachTheme()
+        ->toBeHealthyOnMobile();
 });

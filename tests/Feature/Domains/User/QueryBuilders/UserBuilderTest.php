@@ -215,7 +215,8 @@ final class UserBuilderTest extends TestCase
         $this->assertEquals(AuthType::SSO, $result->auth_type);
     }
 
-    public function test_first_existing_sso_by_netid_or_new_restores_trashed_user(): void
+    // Signing in or syncing never undoes a deactivation; only Reactivate does.
+    public function test_first_existing_sso_by_netid_or_new_finds_a_trashed_user_without_restoring_it(): void
     {
         $trashed = User::factory()->create([
             'username' => 'trashed_user',
@@ -229,7 +230,8 @@ final class UserBuilderTest extends TestCase
 
         $this->assertTrue($result->exists);
         $this->assertEquals($trashed->id, $result->id);
-        $this->assertFalse($result->trashed());
+        $this->assertTrue($result->trashed());
+        $this->assertSoftDeleted($trashed);
     }
 
     public function test_first_existing_sso_by_netid_or_new_returns_new_instance(): void

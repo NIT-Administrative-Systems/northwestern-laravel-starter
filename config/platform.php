@@ -145,6 +145,11 @@ return [
     | over long request-log retention. Exports count from when they finish, and
     | their files are deleted with them.
     |
+    | Notifications are the bell in each panel's top bar. Failed jobs and job
+    | batches are the queue's own tables, pruned by queue:prune-failed and
+    | queue:prune-batches. Imports take their failed rows with them. Support
+    | tickets are kept by default, since they record what people asked for.
+    |
     */
 
     'retention' => [
@@ -154,5 +159,29 @@ return [
         'login_challenges' => env('LOGIN_CHALLENGE_RETENTION_DAYS', 30),
         'api_request_logs' => env('API_REQUEST_LOG_RETENTION_DAYS', 90),
         'exports' => env('EXPORT_RETENTION_DAYS', 7),
+        'notifications' => env('NOTIFICATION_RETENTION_DAYS', 90),
+        'failed_jobs' => env('FAILED_JOB_RETENTION_DAYS', 30),
+        'job_batches' => env('JOB_BATCH_RETENTION_DAYS', 30),
+        'imports' => env('IMPORT_RETENTION_DAYS', 30),
+        'failed_import_rows' => env('FAILED_IMPORT_ROW_RETENTION_DAYS', 30),
+        'support_tickets' => env('SUPPORT_TICKET_RETENTION_DAYS'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Account Lifecycle
+    |--------------------------------------------------------------------------
+    |
+    | Days a local (email-code) account may go without a sign-in before the
+    | daily users:deactivate-inactive-local deactivates it. A new account gets
+    | the same time for its first sign-in. Null never deactivates them.
+    |
+    | The last sign-in comes from the sign-in records, so keep the
+    | login_records retention above at least this long.
+    |
+    */
+
+    'accounts' => [
+        'local_inactivity_days' => env('LOCAL_ACCOUNT_INACTIVITY_DAYS'),
     ],
 ];

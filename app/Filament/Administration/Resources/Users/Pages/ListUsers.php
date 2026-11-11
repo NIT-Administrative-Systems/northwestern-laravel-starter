@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Administration\Resources\Users\Pages;
 
+use App\Filament\Administration\Resources\Roles\Actions\AddPeopleAction;
+use App\Filament\Administration\Resources\Roles\Actions\ImportPeopleAction;
 use App\Filament\Administration\Resources\Users\Actions\CreateApiUserAction;
 use App\Filament\Administration\Resources\Users\Actions\CreateLocalUserAction;
 use App\Filament\Administration\Resources\Users\Actions\CreateNorthwesternUserAction;
@@ -26,6 +28,14 @@ class ListUsers extends ListRecords
             ])
                 ->label('Add User')
                 ->icon(Heroicon::OutlinedUserPlus)
+                ->button(),
+            ActionGroup::make([
+                AddPeopleAction::make(),
+                ImportPeopleAction::make(),
+            ])
+                ->label('Add People to a Role')
+                ->icon(Heroicon::OutlinedUserGroup)
+                ->outlined()
                 ->button(),
         ];
     }
