@@ -6,7 +6,7 @@ The API endpoints the Northwestern Laravel Starter ships. Applications add their
 
 Information
 
-* OpenAPI version: `3.0.0`
+* OpenAPI version: `3.1.0`
 
 ## Operations
 

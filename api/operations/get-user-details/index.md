@@ -59,7 +59,7 @@ Media typeapplication/json
 > >
 > > string
 > >
-> > **auth\_type**
+> > **auth_type**
 > >
 > > required
 > >
@@ -69,19 +69,19 @@ Media typeapplication/json
 > >
 > > Allowed values: sso local api
 > >
-> > **first\_name**
+> > **first_name**
 > >
 > > required
 > >
 > > string
 > >
-> > **last\_name**
+> > **last_name**
 > >
 > > required
 > >
 > > string
 > >
-> > **full\_name**
+> > **full_name**
 > >
 > > required
 > >
@@ -93,13 +93,11 @@ Media typeapplication/json
 > >
 > > string format: email
 > >
-> > **primary\_affiliation**
+> > **primary_affiliation**
 > >
 > > Primary Northwestern affiliation for the user.
 > >
-> > string
-> >
-> > nullable
+> > string | null
 > >
 > > Allowed values: student faculty staff affiliate not-matched
 > >
@@ -107,27 +105,21 @@ Media typeapplication/json
 > >
 > > Array\<string>
 > >
-> > **job\_titles**
+> > **job_titles**
 > >
 > > Array\<string>
 > >
-> > **created\_at**
+> > **created_at**
 > >
-> > string format: date-time
+> > string | null format: date-time
 > >
-> > nullable
+> > **updated_at**
 > >
-> > **updated\_at**
-> >
-> > string format: date-time
-> >
-> > nullable
+> > string | null format: date-time
 > >
 > > **roles**
 > >
-> > Array\<object>
-> >
-> > nullable
+> > Array\<object> | null
 > >
 > > > object
 > > >
@@ -143,15 +135,17 @@ Media typeapplication/json
 > > >
 > > > string
 > > >
-> > > **assignment\_locked**
+> > > **assignment_locked**
 > > >
 > > > boolean
 > > >
-> > > **role\_type**
+> > > **role_type**
 > > >
 > > > One of:
 > > >
 > > > **object**
+> > >
+> > > Included when the role_type relationship is loaded.
 > > >
 > > > > object
 > > > >
@@ -169,25 +163,23 @@ Media typeapplication/json
 > > > >
 > > > > string
 > > >
-> > > **created\_at**
+> > > **null**
 > > >
-> > > string format: date-time
+> > > null
 > > >
-> > > nullable
+> > > **created_at**
 > > >
-> > > **updated\_at**
+> > > string | null format: date-time
 > > >
-> > > string format: date-time
+> > > **updated_at**
 > > >
-> > > nullable
+> > > string | null format: date-time
 > > >
 > > > **permissions**
 > > >
 > > > Included when permissions are eager loaded.
 > > >
-> > > Array\<object>
-> > >
-> > > nullable
+> > > Array\<object> | null
 > > >
 > > > > object
 > > > >
@@ -215,9 +207,7 @@ Media typeapplication/json
 > > > >
 > > > > **description**
 > > > >
-> > > > string
-> > > >
-> > > > nullable
+> > > > string | null
 > > > >
 > > > > **scope**
 > > > >
@@ -229,13 +219,13 @@ Media typeapplication/json
 > > > >
 > > > > Allowed values: system-wide personal
 > > > >
-> > > > **system\_managed**
+> > > > **system_managed**
 > > > >
 > > > > required
 > > > >
 > > > > boolean
 > > > >
-> > > > **api\_relevant**
+> > > > **api_relevant**
 > > > >
 > > > > required
 > > > >
@@ -243,27 +233,21 @@ Media typeapplication/json
 > > > >
 > > > > boolean
 > > > >
-> > > > **created\_at**
+> > > > **created_at**
 > > > >
-> > > > string format: date-time
+> > > > string | null format: date-time
 > > > >
-> > > > nullable
+> > > > **updated_at**
 > > > >
-> > > > **updated\_at**
-> > > >
-> > > > string format: date-time
-> > > >
-> > > > nullable
+> > > > string | null format: date-time
 > > >
-> > > **users\_count**
+> > > **users_count**
 > > >
 > > > Included when a user count aggregate is loaded.
 > > >
-> > > integer
-> > >
-> > > nullable
+> > > integer | null
 
-##### Example
+#### Example
 
 ```json
 {
@@ -323,8 +307,6 @@ Standard RFC 9457 problem details envelope.
 >
 > required
 >
-> RFC 9457 compliant problem details response builder.
->
 > string format: uri
 >
 > **title**
@@ -341,9 +323,7 @@ Standard RFC 9457 problem details envelope.
 >
 > **detail**
 >
-> string
->
-> nullable
+> string | null
 >
 > **instance**
 >
@@ -351,15 +331,13 @@ Standard RFC 9457 problem details envelope.
 >
 > string format: uri-reference
 >
-> **trace\_id**
+> **trace_id**
 >
 > Unique identifier for the API request (if available).
 >
-> string
->
-> nullable
+> string | null
 
-##### Example
+#### Example
 
 ```json
 {
