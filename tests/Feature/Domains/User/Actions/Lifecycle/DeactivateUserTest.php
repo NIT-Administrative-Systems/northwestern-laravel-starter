@@ -77,7 +77,7 @@ final class DeactivateUserTest extends TestCase
         $administrator = $this->administrator();
 
         $this->expectException(AuthorizationException::class);
-        $this->expectExceptionMessage('You can\'t change the status of your own account.');
+        $this->expectExceptionMessageIsOrContains('You can\'t change the status of your own account.');
 
         try {
             resolve(DeactivateUser::class)($administrator, $administrator);

@@ -23,7 +23,7 @@ class DeactivateUserAction extends Action
     {
         parent::setUp();
 
-        $this->authorize(fn (User $record): Response => resolve(AccountStatusAccess::class)->decide(self::actor(), $record))
+        $this->authorize(fn (User $record): Response => resolve(AccountStatusAccess::class)->decide($this->actor(), $record))
             ->visible(fn (User $record): bool => ! $record->trashed())
             ->label('Deactivate')
             ->icon(Heroicon::OutlinedPauseCircle)
@@ -33,11 +33,11 @@ class DeactivateUserAction extends Action
             ->modalHeading('Deactivate Account')
             ->modalDescription('They\'re signed out everywhere and can\'t sign in, and their personal access tokens, connected applications and service clients are revoked. Their account and history are kept, and you can reactivate it later.')
             ->modalSubmitActionLabel('Deactivate')
-            ->action(fn (User $record, DeactivateUser $deactivate) => $deactivate($record, self::actor()))
+            ->action(fn (User $record, DeactivateUser $deactivate) => $deactivate($record, $this->actor()))
             ->successNotificationTitle('Account Deactivated');
     }
 
-    private static function actor(): User
+    private function actor(): User
     {
         /** @var User */
         return Filament::auth()->user();

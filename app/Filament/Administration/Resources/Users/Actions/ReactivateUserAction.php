@@ -23,7 +23,7 @@ class ReactivateUserAction extends Action
     {
         parent::setUp();
 
-        $this->authorize(fn (User $record): Response => resolve(AccountStatusAccess::class)->decide(self::actor(), $record))
+        $this->authorize(fn (User $record): Response => resolve(AccountStatusAccess::class)->decide($this->actor(), $record))
             ->visible(fn (User $record): bool => $record->trashed())
             ->label('Reactivate')
             ->icon(Heroicon::OutlinedPlayCircle)
@@ -33,11 +33,11 @@ class ReactivateUserAction extends Action
             ->modalHeading('Reactivate Account')
             ->modalDescription('They can sign in again. Credentials revoked when the account was deactivated stay revoked.')
             ->modalSubmitActionLabel('Reactivate')
-            ->action(fn (User $record, ReactivateUser $reactivate) => $reactivate($record, self::actor()))
+            ->action(fn (User $record, ReactivateUser $reactivate) => $reactivate($record, $this->actor()))
             ->successNotificationTitle('Account Reactivated');
     }
 
-    private static function actor(): User
+    private function actor(): User
     {
         /** @var User */
         return Filament::auth()->user();

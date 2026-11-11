@@ -89,7 +89,7 @@ class AddPeopleToRoleImporter extends Importer
                 lastName: $this->string('last_name'),
             );
         } catch (PersonNotAdded|AuthorizationException $exception) {
-            throw new RowImportFailedException($exception->getMessage());
+            throw new RowImportFailedException($exception->getMessage(), $exception->getCode(), $exception);
         }
 
         return null;

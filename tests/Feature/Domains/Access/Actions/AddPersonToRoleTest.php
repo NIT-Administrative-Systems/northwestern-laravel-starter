@@ -92,7 +92,7 @@ final class AddPersonToRoleTest extends TestCase
 
     public function test_a_local_account_can_start_without_a_name(): void
     {
-        $user = $this->add('nameless@example.com', firstName: '', lastName: null);
+        $user = $this->add('nameless@example.com', firstName: '');
 
         $this->assertNull($user->first_name);
         $this->assertSame([], $user->job_titles);
