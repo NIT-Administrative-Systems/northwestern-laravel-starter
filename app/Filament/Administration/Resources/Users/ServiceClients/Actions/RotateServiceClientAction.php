@@ -59,7 +59,7 @@ HTML))
                             ]),
                         ServiceClientSchemas::clientConfigurationSection(),
                     ])
-                    ->afterValidation(fn (array $state, RotateServiceClient $rotateServiceClient, OAuthClient $record) => $secret->issueOnce(function () use ($state, $rotateServiceClient, $record): array {
+                    ->afterValidation(fn (array $state, RotateServiceClient $rotateServiceClient, OAuthClient $record, ServiceClientsRelationManager $livewire) => $secret->issueOnce($livewire, function () use ($state, $rotateServiceClient, $record): array {
                         $configuration = ServiceClientSchemas::normalizeConfigurationState($state);
 
                         [$plain, $replacement] = $rotateServiceClient(
@@ -77,10 +77,10 @@ HTML))
             ])
             ->modifyWizardUsing($secret->hideBackOnceIssued())
             ->modalSubmitAction($secret->savedAction())
-            ->action(fn () => $secret->forget())
+            ->action(fn (ServiceClientsRelationManager $livewire) => $secret->forget($livewire))
             ->successNotificationTitle('Replacement Service Client Created')
             // An active client, or the one whose rotation is in progress, so the wizard can finish even if
             // the client changed state meanwhile.
-            ->visible(fn (OAuthClient $record): bool => ServiceClientSchemas::isMutable($record) || $secret->isFor($record));
+            ->visible(fn (OAuthClient $record, ServiceClientsRelationManager $livewire): bool => ServiceClientSchemas::isMutable($record) || $secret->isFor($livewire, $record));
     }
 }

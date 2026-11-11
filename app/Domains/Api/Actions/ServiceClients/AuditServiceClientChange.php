@@ -22,7 +22,8 @@ readonly class AuditServiceClientChange
      */
     public function __invoke(OAuthClient $client, AuditEvent $event, array $old = []): void
     {
-        $apiUser = $client->owner;
+        // Deleted too: deleting an API user revokes its clients after the user is deleted.
+        $apiUser = $client->owner_type === null ? null : $client->owner()->withTrashed()->first();
 
         if (! $apiUser instanceof User) {
             return;

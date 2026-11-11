@@ -17,6 +17,7 @@ use App\Providers\Filament\AdministrationPanelProvider;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Session;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\CoversNothing;
@@ -84,31 +85,41 @@ final class ServiceClientsRelationManagerTest extends TestCase
 
         $this->assertSame('Production sync', $client->name);
         $this->assertSame(['10.0.0.0/8'], $client->allowed_ips);
-        $this->assertSame($client->getKey(), $creation->identifier());
-        $this->assertTrue(Hash::check((string) $creation->secret(), (string) $client->secret));
+        $this->assertSame($client->getKey(), $creation->identifier($component->instance()));
+        $this->assertTrue(Hash::check((string) $creation->secret($component->instance()), (string) $client->secret));
 
         $component->callMountedTableAction();
 
-        $this->assertFalse($creation->issued());
+        $this->assertSame([], preg_grep('/^reveal_once_secret:/', array_keys(Session::all())));
     }
 
-    // Only the final submit clears the secret, so an abandoned run must not leak into the next one.
-    public function test_an_abandoned_create_does_not_carry_over_to_another_api_user(): void
+    // Each run keeps its own secret: one abandoned or still open in another browser tab neither
+    // stops the next from issuing its client nor shows it that run's client.
+    public function test_wizards_open_in_two_tabs_each_create_and_show_their_own_client(): void
     {
-        $this->relationManager()
-            ->mountTableAction('createServiceClient')
-            ->fillForm(['name' => 'Abandoned', 'expiration' => TokenExpiration::ThreeMonths->value])
-            ->goToNextWizardStep();
-
         $otherApiUser = User::factory()->api()->create();
-        $this->relationManager($otherApiUser)
+        $creation = RevealOnceSecret::for('service_client:create');
+
+        $firstTab = $this->relationManager()
             ->mountTableAction('createServiceClient')
-            ->fillForm(['name' => 'Second', 'expiration' => TokenExpiration::ThreeMonths->value])
+            ->fillForm(['name' => 'First tab', 'expiration' => TokenExpiration::ThreeMonths->value]);
+
+        $secondTab = $this->relationManager($otherApiUser)
+            ->mountTableAction('createServiceClient')
+            ->fillForm(['name' => 'Second tab', 'expiration' => TokenExpiration::ThreeMonths->value])
             ->goToNextWizardStep();
 
-        $client = OAuthClient::query()->whereMorphedTo('owner', $otherApiUser)->sole();
-        $this->assertSame('Second', $client->name);
-        $this->assertSame($client->getKey(), RevealOnceSecret::for('service_client:create')->identifier());
+        $firstTab->goToNextWizardStep();
+
+        $first = OAuthClient::query()->whereMorphedTo('owner', $this->apiUser)->sole();
+        $second = OAuthClient::query()->whereMorphedTo('owner', $otherApiUser)->sole();
+        $this->assertSame($first->getKey(), $creation->identifier($firstTab->instance()));
+        $this->assertSame($second->getKey(), $creation->identifier($secondTab->instance()));
+
+        // Finishing one run leaves the other's secret.
+        $firstTab->callMountedTableAction();
+
+        $this->assertSame($second->getKey(), RevealOnceSecret::for('service_client:create')->identifier($secondTab->instance()));
     }
 
     public function test_rotating_adds_a_replacement_and_keeps_the_client(): void

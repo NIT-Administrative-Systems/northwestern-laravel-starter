@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Tests\Feature\Domains\Api\Actions\ServiceClients;
 
 use App\Domains\Access\Enums\SystemPermission;
+use App\Domains\Api\Actions\ServiceClients\AuditServiceClientChange;
 use App\Domains\Api\Actions\ServiceClients\RevokeServiceClient;
 use App\Domains\Api\Enums\CredentialStatus;
+use App\Domains\Core\Enums\AuditEvent;
 use App\Domains\Core\Models\Audit;
 use App\Domains\User\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -16,6 +18,7 @@ use Tests\Concerns\IssuesServiceClientTokens;
 use Tests\TestCase;
 
 #[CoversClass(RevokeServiceClient::class)]
+#[CoversClass(AuditServiceClientChange::class)]
 final class RevokeServiceClientTest extends TestCase
 {
     use IssuesServiceClientTokens;
@@ -32,6 +35,20 @@ final class RevokeServiceClientTest extends TestCase
         $this->assertSame(0, Passport::token()->newQuery()->where('client_id', $client->getKey())->where('revoked', false)->count());
         $this->withToken($token)->getJson('/api/v1/me')->assertUnauthorized();
         $this->assertSame($client->getKey(), Audit::query()->where('event', 'service_client_revoked')->sole()->new_values['client_id']);
+    }
+
+    // Deleting an API user revokes its clients after the user is deleted; the audit still goes on it.
+    public function test_revoking_a_deleted_api_users_client_is_audited_on_the_api_user(): void
+    {
+        $apiUser = User::factory()->api()->create();
+        [, $client] = $this->serviceClientToken($apiUser);
+
+        $apiUser->delete();
+
+        $this->assertSame(CredentialStatus::Revoked, $client->fresh()?->status);
+        $audit = Audit::query()->where('event', AuditEvent::ServiceClientRevoked->value)->sole();
+        $this->assertSame($apiUser->getKey(), $audit->auditable_id);
+        $this->assertSame($client->getKey(), $audit->new_values['client_id']);
     }
 
     public function test_an_administrator_needs_manage_api_access(): void

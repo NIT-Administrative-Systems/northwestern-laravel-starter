@@ -20,6 +20,7 @@ use App\Filament\Support\RevealOnceSecret;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
+use Filament\Actions\Contracts\HasActions;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Wizard;
 use Filament\Support\Enums\FontFamily;
@@ -129,7 +130,8 @@ class OAuthApplicationResource extends Resource
                         ->steps([
                             Wizard\Step::make('Regenerate')
                                 ->description('The current secret stops working immediately. Update the application with the new one.')
-                                ->afterValidation(fn (OAuthClient $record, RegenerateOAuthApplicationSecret $regenerate) => $secret->issueOnce(
+                                ->afterValidation(fn (OAuthClient $record, RegenerateOAuthApplicationSecret $regenerate, HasActions $livewire) => $secret->issueOnce(
+                                    $livewire,
                                     fn (): array => ['id' => $record->getKey(), 'secret' => $regenerate($record, static::actingUser())],
                                     scope: $record,
                                 )),
@@ -137,7 +139,7 @@ class OAuthApplicationResource extends Resource
                         ])
                         ->modifyWizardUsing($secret->hideBackOnceIssued())
                         ->modalSubmitAction($secret->savedAction())
-                        ->action(fn () => $secret->forget())
+                        ->action(fn (HasActions $livewire) => $secret->forget($livewire))
                         ->visible(fn (OAuthClient $record): bool => $record->confidential() && $record->status === CredentialStatus::Active && self::allows(CredentialOperation::Modify)),
                     Action::make('revoke')
                         ->label('Revoke')

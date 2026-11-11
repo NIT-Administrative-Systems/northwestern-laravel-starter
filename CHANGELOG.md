@@ -16,10 +16,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - Wizards that show a new secret show it in full with a **Copy** button, have no **Back** once it is issued, and end with **I've Saved It**.
 - A role's page lists the permissions it grants instead of a disabled form, the role form marks only personal permissions, and Delete on a role and on an announcement is in a menu. Role Activity shows whole role names as badges, with deleted roles struck through.
 - Applications' and Service Clients' row actions are in a menu instead of a filled **Actions** button, list pages have no "List" breadcrumb, API chart headers keep paths and ranges on one line, and Scheduled Tasks on Overview is a list below `md`.
+- Both panels use Filament's strict authorization (`->strictAuthorization()`): a resource whose model has no policy, or a policy without an ability a page asks for, throws instead of allowing it. The MCP client, application and API request resources, whose `canAccess()` decides, return it from `canViewAny()` too.
+- `assignRoleWithAudit()` throws an `InvalidArgumentException` when a role doesn't suit the user: an API Integration role for anyone but an API user, or any other role for an API user. Both relation managers and seeders share the rule (`Role::suits()`). `RoleFactory`'s default role type is never API Integration.
 
 ### Fixed
 
 - Impersonating someone from their administration page opened that page as them, usually a 403. It now opens the app panel; leaving impersonation still returns to their page.
+- The daily `model:prune` of `app/Domains/*/Models` found no models when the scheduler started outside the project root, because it globbed the path against the working directory. It now passes the pattern to `--path`, which `model:prune` resolves from the project root.
+- API, OAuth and MCP clients, and other requests that expect JSON, got the HTML Database Paused page with a 500 while the database woke up. They now get a Problem Details 503 response with `Retry-After: 30`; browser and Livewire requests keep the page.
+- A credential wizard open in two browser tabs mixed up their secrets: the second run issued nothing and showed the first run's credential. `RevealOnceSecret` gives each run its own key when the action mounts, kept in the mounted action's arguments, and its methods take the Livewire component (`$secret->issueOnce($livewire, ...)`, `$secret->forget($livewire)`).
+- **Add API User** failed with a 500 when a deleted user held the username. The username check includes deleted users and says when a deleted user has the name.
+- Columns and entries shown with `->date()` used UTC's calendar, so a token created at 9 p.m. in Chicago showed the next day. They use the person's timezone, as `->dateTime()` does.
+- Signing out from a page whose session had expired showed Page Expired in browsers that don't send `Sec-Fetch-Site`. The sign-out route no longer checks the CSRF token.
+- Deleting an API user revoked its service clients without a `service_client_revoked` audit, because the revocation read the owner without deleted users. It now records the audit on the deleted API user.
+- An announcement's audience was never notified if the notification job failed partway, because the job had already marked it notified. The claim and the fan-out now run in one transaction, so a failed run can be retried.
+- Deleting a user while impersonating soft-deleted them and left their credentials active, because the revocation is refused while impersonating. The delete is refused while impersonating, and the delete and the revocation run in one transaction.
+- The Component Gallery told developers to delete `app/Filament/App/Pages/ComponentGallery.php`; the page is `app/Filament/App/Starter/Pages/ComponentGallery.php`.
+- A Directory Search outage no longer deactivates people. laravel-soa's `lookup()` returns `false` both for a NetID it doesn't find and when the service can't be reached, and `FindOrUpdateUserFromDirectory` marked the NetID inactive either way, after which `oauth:revoke-ineligible` revoked the person's credentials. Someone who already has an account now signs in with their stored details when the lookup fails, and only an incomplete directory entry or EventHub deactivates them. Someone signing in for the first time whose lookup fails gets the retries and the 503 page instead of an error, and no account.
+- Changing a role's type drops the permissions the new type doesn't show. The form's lists followed the saved type instead of the one chosen, and saving kept a hidden list's permissions.
+- Deleted people are no longer offered Send Verification Code or Impersonate, and `LoginCodes::issueFor()` refuses a deleted account. Impersonating a deactivated or deleted person is refused too.
+- `UpdateOAuthApplication` and `RegenerateOAuthApplicationSecret` throw an `InvalidArgumentException` for a client that isn't a connected application.
+- The support ticket and API request logs have policies (`SupportTicketPolicy`, `ApiRequestLogPolicy`), and `RolePolicy` and `UserLoginRecordPolicy` have `view()`, which Filament's strict authorization asks for.
 
 ### Security
 
@@ -32,19 +49,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - Sign-in codes are limited per email across all its codes: 20 incorrect codes a day by default (`LOCAL_AUTH_CODE_MAX_FAILED_PER_DAY`), counted for emails without an account too. A new code ends the email's earlier open codes, so only the latest works.
 - Nobody can give themselves a role, from the role's Assigned Users tab or their own user record. `RolePolicy::attachUser()` takes the person being assigned, and both relation managers refuse it on the server for everyone, Super Administrators included.
 - `UserBuilder::whereEmailEquals()` and `whereUsernameEquals()` match exactly, comparing `lower(column) = lower(?)` instead of using `ilike`, which treated `%` and `_` in the value as wildcards. A sign-in code request for `%@example.com` reached the first local account at that domain, and a lookup for `a_b@example.com` could find `axb@example.com`.
-
-### Fixed
-
-- A Directory Search outage no longer deactivates people. laravel-soa's `lookup()` returns `false` both for a NetID it doesn't find and when the service can't be reached, and `FindOrUpdateUserFromDirectory` marked the NetID inactive either way, after which `oauth:revoke-ineligible` revoked the person's credentials. Someone who already has an account now signs in with their stored details when the lookup fails, and only an incomplete directory entry or EventHub deactivates them. Someone signing in for the first time whose lookup fails gets the retries and the 503 page instead of an error, and no account.
-- Changing a role's type drops the permissions the new type doesn't show. The form's lists followed the saved type instead of the one chosen, and saving kept a hidden list's permissions.
-- Deleted people are no longer offered Send Verification Code or Impersonate, and `LoginCodes::issueFor()` refuses a deleted account. Impersonating a deactivated or deleted person is refused too.
-- `UpdateOAuthApplication` and `RegenerateOAuthApplicationSecret` throw an `InvalidArgumentException` for a client that isn't a connected application.
-- The support ticket and API request logs have policies (`SupportTicketPolicy`, `ApiRequestLogPolicy`), and `RolePolicy` and `UserLoginRecordPolicy` have `view()`, which Filament's strict authorization asks for.
-
-### Changed
-
-- Both panels use Filament's strict authorization (`->strictAuthorization()`): a resource whose model has no policy, or a policy without an ability a page asks for, throws instead of allowing it. The MCP client, application and API request resources, whose `canAccess()` decides, return it from `canViewAny()` too.
-- `assignRoleWithAudit()` throws an `InvalidArgumentException` when a role doesn't suit the user: an API Integration role for anyone but an API user, or any other role for an API user. Both relation managers and seeders share the rule (`Role::suits()`). `RoleFactory`'s default role type is never API Integration.
 
 ## [v3.1.0] - 2026-11-10
 

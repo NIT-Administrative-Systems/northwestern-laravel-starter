@@ -164,7 +164,7 @@ class AccessTokens extends Page implements HasTable
                             ->required()
                             ->selectablePlaceholder(false),
                     ])
-                    ->afterValidation(fn (array $state, CreatePersonalAccessToken $create) => $secret->issueOnce(function () use ($state, $create): array {
+                    ->afterValidation(fn (array $state, CreatePersonalAccessToken $create) => $secret->issueOnce($this, function () use ($state, $create): array {
                         try {
                             [$accessToken, $token] = $create(
                                 $this->user(),
@@ -188,7 +188,7 @@ class AccessTokens extends Page implements HasTable
             ])
             ->modifyWizardUsing($secret->hideBackOnceIssued())
             ->modalSubmitAction($secret->savedAction())
-            ->action(fn () => $secret->forget())
+            ->action(fn () => $secret->forget($this))
             ->successNotificationTitle('Token Created');
     }
 
