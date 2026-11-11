@@ -92,7 +92,13 @@ class CreateNorthwesternUserAction extends Action
 
                     $wasJustCreated = $user->created_at?->gt(now()->subSeconds(30)) ?? false;
 
-                    if ($wasJustCreated) {
+                    if ($user->trashed()) {
+                        Notification::make()
+                            ->title('Account Deactivated')
+                            ->body("{$user->full_name} has a deactivated account. Reactivate it on this page to let them sign in.")
+                            ->warning()
+                            ->send();
+                    } elseif ($wasJustCreated) {
                         Notification::make()
                             ->title('User Created')
                             ->body("{$user->full_name} was added.")

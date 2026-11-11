@@ -293,10 +293,18 @@ The scheduler runs `model:prune` daily, which deletes records older than their r
 | Login code challenges | `LOGIN_CHALLENGE_RETENTION_DAYS` | `30` |
 | API request logs | `API_REQUEST_LOG_RETENTION_DAYS` | `90` |
 | Table exports and their files, from when they finish | `EXPORT_RETENTION_DAYS` | `7` |
+| Notifications, read or not | `NOTIFICATION_RETENTION_DAYS` | `90` |
+| Imports, with their failed rows | `IMPORT_RETENTION_DAYS` | `30` |
+| Failed import rows | `FAILED_IMPORT_ROW_RETENTION_DAYS` | `30` |
+| Support tickets | `SUPPORT_TICKET_RETENTION_DAYS` | `null` (kept) |
+| Failed queue jobs | `FAILED_JOB_RETENTION_DAYS` | `30` |
+| Job batches, finished or not | `JOB_BATCH_RETENTION_DAYS` | `30` |
 
 <Aside type="caution" title="Check your record-keeping requirements first">
 Audit logs often back FERPA, HIPAA or university record-keeping requirements, so the starter keeps them unless you set a period.
 </Aside>
+
+`model:prune` doesn't reach the queue's own tables, so the scheduler runs `queue:prune-failed` and `queue:prune-batches` daily for failed jobs and job batches, with their periods converted to hours. Setting either to `null` leaves its table alone.
 
 A few records are cleaned up on fixed schedules of their own: OAuth tokens and codes 31 days after they expire, and unused self-registered MCP clients. See [Cleanup and Revocation](/features/api-operations/#cleanup-and-revocation).
 

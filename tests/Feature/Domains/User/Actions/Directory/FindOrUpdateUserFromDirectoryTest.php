@@ -45,6 +45,36 @@ final class FindOrUpdateUserFromDirectoryTest extends TestCase
         $this->assertEquals(Affiliation::Student, $activeUser->primary_affiliation);
     }
 
+    // Only an administrator's Reactivate brings a deactivated account back.
+    public function test_a_deactivated_user_is_synced_but_stays_deactivated(): void
+    {
+        $directoryApi = $this->createStub(DirectorySearch::class);
+        $directoryApi->method('lookup')->willReturn(self::studentData('gone123'));
+        $deactivated = User::factory()->create(['username' => 'gone123']);
+        $deactivated->delete();
+
+        $user = $this->service(['directorySearch' => $directoryApi])('gone123');
+
+        $this->assertTrue($deactivated->is($user));
+        $this->assertSoftDeleted($deactivated);
+        $this->assertSame('Studie', $deactivated->fresh()?->first_name);
+    }
+
+    // The directory's email belongs to a deactivated account, which is found rather than duplicated.
+    public function test_a_deactivated_user_found_by_email_stays_deactivated(): void
+    {
+        $directoryApi = $this->createStub(DirectorySearch::class);
+        $directoryApi->method('lookup')->willReturn(self::studentData('gone456'));
+        $deactivated = User::factory()->create(['username' => 'gone456', 'email' => 'student-worker@northwestern.edu']);
+        $deactivated->delete();
+
+        $user = $this->service(['directorySearch' => $directoryApi])('student-worker@northwestern.edu');
+
+        $this->assertTrue($deactivated->is($user));
+        $this->assertSoftDeleted($deactivated);
+        $this->assertSame(1, User::withTrashed()->where('username', 'gone456')->count());
+    }
+
     public function test_missing_affiliation_throws_exception(): void
     {
         $directoryApi = $this->createStub(DirectorySearch::class);

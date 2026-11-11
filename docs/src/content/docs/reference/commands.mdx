@@ -403,6 +403,14 @@ php artisan role:force-detach jdoe "Super Administrator" --reason="Offboarding"
 2. Shows the user, role, assignment lock and reason, and asks for confirmation
 3. Detaches the role with an audit record (origin `System`) that includes the reason
 
+### `users:deactivate-inactive-local`
+
+Deactivate local accounts nobody has signed in to for `LOCAL_ACCOUNT_INACTIVITY_DAYS` days, as an administrator's **Deactivate** would. A new account gets the same time for its first sign-in. Does nothing while the setting is `null`, the default. See [Expiring Local Accounts](/features/authentication/#expiring-local-accounts).
+
+```bash
+php artisan users:deactivate-inactive-local
+```
+
 ---
 
 ## Maintenance Commands
@@ -673,6 +681,9 @@ php artisan ide-helper:meta
 | `announcements:notify`                             | Every five minutes in production, weekdays at noon elsewhere | Notifies the audiences of [announcements](/features/announcements/) that have started, when their authors asked; publishing notifies at once for one that starts straight away            |
 | `oauth:revoke-ineligible`                          | Hourly in production, weekdays at noon elsewhere             | Revokes the credentials their holders can no longer use: deleted and deactivated accounts, and people who lost `CreatePersonalAccessTokens` or `UseMcp` |
 | `mcp:prune-clients`                                | Daily                                                        | Deletes self-registered [MCP clients](/features/mcp/) nobody connected within a day, and revokes those nobody has used for 90 days                                                        |
+| `queue:prune-failed --hours=720`                   | Daily                                                        | Deletes failed jobs older than `FAILED_JOB_RETENTION_DAYS` (30); not scheduled when it's `null` |
+| `queue:prune-batches --hours=720 --unfinished=720 --cancelled=720` | Daily                                        | Deletes job batches older than `JOB_BATCH_RETENTION_DAYS` (30), finished or not; not scheduled when it's `null` |
+| `users:deactivate-inactive-local`                  | Daily, when `LOCAL_ACCOUNT_INACTIVITY_DAYS` is set           | Deactivates local accounts nobody has signed in to for that many days |
 | `passport:purge --expired --hours=744`             | Daily                                                        | Deletes OAuth tokens and codes, revoked or not, once they expired more than 31 days ago: longer than the 30-day refresh token lifetime                                                    |
 | `health:schedule-check-heartbeat`                  | Every minute                                                 | Records the heartbeat the Schedule health check reads, in every environment                                                                                                               |
 | `health:queue-check-heartbeat`                     | Every five minutes, production only                          | Dispatches the job the Queue health check waits for                                                                                                                                       |

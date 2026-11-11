@@ -15,16 +15,17 @@ use Illuminate\Support\Str;
 /**
  * Creates a new local user account for external (non-Northwestern) users.
  *
- * Local users authenticate via one-time verification codes sent to their email.
+ * Local users authenticate via one-time verification codes sent to their email. Only the email is
+ * required: people added in bulk start with whatever the list gave for them.
  */
 readonly class CreateLocalUser
 {
     public function __invoke(
         string $email,
-        string $firstName,
-        string $lastName,
-        string $title,
-        string $department,
+        ?string $firstName = null,
+        ?string $lastName = null,
+        ?string $title = null,
+        ?string $department = null,
         ?string $description = null,
         bool $sendLoginLink = true,
     ): User {
@@ -38,8 +39,8 @@ readonly class CreateLocalUser
                 'email' => strtolower($email),
                 'first_name' => $firstName,
                 'last_name' => $lastName,
-                'job_titles' => [$title],
-                'departments' => [$department],
+                'job_titles' => filled($title) ? [$title] : [],
+                'departments' => filled($department) ? [$department] : [],
                 'description' => $description,
             ]);
         }), 0, fn (\Throwable $e) => $e instanceof UniqueConstraintViolationException);

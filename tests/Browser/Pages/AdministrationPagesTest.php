@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Domains\Access\Enums\RoleTypeEnum;
 use App\Domains\Access\Models\Role;
 use App\Domains\Core\Models\Audit;
 use App\Domains\Support\Models\Announcement;
@@ -46,11 +47,27 @@ it('is healthy on record pages', function (string $path) {
     "a NetID user's API credentials" => fn () => '/administration/users/' . User::factory()->create()->getKey() . '/api-credentials',
     'an API user' => fn () => '/administration/users/' . User::factory()->api()->create()->getKey(),
     "an API user's credentials" => fn () => '/administration/users/' . User::factory()->api()->create()->getKey() . '/api-credentials',
+    'a deactivated user' => fn () => '/administration/users/' . tap(User::factory()->create())->delete()->getKey(),
     'a role' => fn () => '/administration/roles/' . Role::factory()->create()->getKey(),
     "a role's edit page" => fn () => '/administration/roles/' . Role::factory()->create()->getKey() . '/edit',
     "a role's history" => fn () => '/administration/roles/' . Role::factory()->create()->getKey() . '/history',
     "an announcement's edit page" => fn () => '/administration/announcements/' . Announcement::factory()->create()->getKey() . '/edit',
     'a support ticket' => fn () => '/administration/support-tickets/' . SupportTicket::factory()->create()->getKey(),
+]);
+
+// The modals that add people to a role and deactivate an account.
+it('is healthy with its action modals open', function (string $path, string $menu, string $action, string $content) {
+    $page = visit($path);
+
+    if ($menu !== '') {
+        $page->click($menu);
+    }
+
+    expect($page->click($action)->assertSee($content))->toBeHealthyInEachTheme();
+})->with([
+    'pasting people on a role' => fn () => ['/administration/roles/' . Role::factory()->forRoleType(RoleTypeEnum::ApplicationRole)->create()->getKey(), 'Add People', 'Paste NetIDs or Emails', 'NetIDs or Email Addresses'],
+    'uploading people on the Users list' => fn () => ['/administration/users', 'Add People to a Role', 'Upload a CSV File', 'Add People from a CSV File'],
+    'deactivating an account' => fn () => ['/administration/users/' . User::factory()->create()->getKey(), '', 'Deactivate', 'Deactivate Account'],
 ]);
 
 it('is healthy on an audit record', function () {

@@ -129,9 +129,9 @@ class UserBuilder extends Builder
     }
 
     /**
-     * Get the first user matching the given email address (SSO first, then LOCAL).
-     * If no existing user is found, return a new (unsaved) SSO user instance
-     * pre-populated with the normalized email address.
+     * Get the first user matching the given email address (SSO first, then LOCAL), including
+     * deactivated users, who are returned still deactivated. If no existing user is found,
+     * return a new (unsaved) SSO user instance pre-populated with the normalized email address.
      *
      * This method DOES NOT persist the new instance to the database.
      */
@@ -139,7 +139,7 @@ class UserBuilder extends Builder
     {
         $normalized = strtolower(trim($email));
 
-        $existing = $this->firstByEmailSsoThenLocal($normalized);
+        $existing = $this->withTrashed()->firstByEmailSsoThenLocal($normalized);
 
         if ($existing instanceof User) {
             return $existing;
@@ -154,8 +154,10 @@ class UserBuilder extends Builder
     /**
      * Get the first SSO user matching the given NetID, including soft-deleted users.
      *
-     * If a soft-deleted user is found, it will be restored. If no existing user is found,
-     * a new (unsaved) SSO user instance is returned with the normalized NetID.
+     * A soft-deleted (deactivated) user is returned as it is, still deactivated: signing in or
+     * syncing from the directory never brings an account back, only an administrator's
+     * Reactivate does. If no existing user is found, a new (unsaved) SSO user instance is
+     * returned with the normalized NetID.
      *
      * This method DOES NOT persist the new instance to the database.
      */
@@ -167,10 +169,6 @@ class UserBuilder extends Builder
             ->sso()
             ->whereUsernameEquals($normalized)
             ->first();
-
-        if ($user && $user->trashed()) {
-            $user->restore();
-        }
 
         return $user ?: $this->getModel()->newInstance([
             'username' => $normalized,

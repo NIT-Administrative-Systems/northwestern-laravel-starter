@@ -13,7 +13,10 @@ use App\Domains\User\Models\User;
 use App\Domains\User\QueryBuilders\UserBuilder;
 use App\Domains\User\Support\UserOptionLabel;
 use App\Domains\User\Support\UserSearch;
+use App\Filament\Administration\Resources\Roles\Actions\AddPeopleAction;
+use App\Filament\Administration\Resources\Roles\Actions\ImportPeopleAction;
 use App\Filament\Administration\Resources\Users\Tables\UsersTable;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\AttachAction;
 use Filament\Actions\DetachAction;
 use Filament\Forms\Components\Select;
@@ -195,6 +198,15 @@ class UsersRelationManager extends RelationManager
                         $user->assignRoleWithAudit($role, RoleModificationOrigin::UiAction);
                     })
                     ->successNotificationTitle('User Assigned'),
+                ActionGroup::make([
+                    AddPeopleAction::make(),
+                    ImportPeopleAction::make(),
+                ])
+                    ->label('Add People')
+                    ->icon(Heroicon::OutlinedUserGroup)
+                    ->color('primary')
+                    ->outlined()
+                    ->button(),
             ])
             ->recordUrl(fn (User $record) => route('filament.administration.resources.users.view', ['record' => $record]))
             ->recordActions([

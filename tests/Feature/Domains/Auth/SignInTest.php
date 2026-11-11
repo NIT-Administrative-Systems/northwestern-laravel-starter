@@ -7,6 +7,7 @@ namespace Tests\Feature\Domains\Auth;
 use App\Domains\Auth\Enums\AuthType;
 use App\Domains\Auth\Enums\SignInMethod;
 use App\Domains\Auth\Enums\SsoProvider;
+use App\Domains\Auth\Exceptions\AccountDeactivated;
 use App\Domains\Auth\SignIn;
 use App\Domains\User\Models\User;
 use Illuminate\Auth\SessionGuard;
@@ -21,6 +22,7 @@ use Tests\TestCase;
 #[CoversClass(SignIn::class)]
 #[CoversClass(SsoProvider::class)]
 #[CoversClass(SignInMethod::class)]
+#[CoversClass(AccountDeactivated::class)]
 final class SignInTest extends TestCase
 {
     protected function setUp(): void
@@ -120,6 +122,26 @@ final class SignInTest extends TestCase
         $this->assertNotSame($token, session()->token());
         $this->assertSame(1, $user->login_records()->count());
         $this->assertSame(url('/app/some-page'), $response->getTargetUrl());
+    }
+
+    // Single sign-on has already signed them in when it calls complete(), so they're signed out again.
+    public function test_a_deactivated_account_is_refused_and_signed_out(): void
+    {
+        $user = User::factory()->create();
+        $user->delete();
+        Auth::guard('web')->login($user);
+
+        try {
+            $this->signIn()->complete($user, $this->request(), SignInMethod::Sso);
+            $this->fail('The deactivated account was signed in.');
+        } catch (AccountDeactivated $exception) {
+            $this->assertSame(403, $exception->getStatusCode());
+            $this->assertStringContainsString('Account Deactivated', (string) $exception->render()->getContent());
+        }
+
+        $this->assertGuest('web');
+        $this->assertSoftDeleted($user);
+        $this->assertSame(0, $user->login_records()->count());
     }
 
     public function test_without_a_page_to_return_to_people_land_on_home(): void
