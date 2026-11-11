@@ -17,14 +17,15 @@ use Northwestern\SysDev\Chassis\Http\Middleware\EnsureFeatureEnabled;
 |--------------------------------------------------------------------------
 | MCP Server
 |--------------------------------------------------------------------------
-| The MCP server, the OAuth discovery documents an MCP client reads to connect,
-| and the registration endpoint it registers itself at. All answer 404 while
-| `mcp.enabled` is off. Loaded by laravel/mcp.
+| The MCP server, the OAuth discovery documents a client reads to connect, and the
+| endpoint it registers itself at. Each answers 404 while `mcp.enabled` is off.
 |
-| A client connects as a person: it registers, the person approves it on the
-| consent screen (with the UseMcp permission), and its token carries only
-| `mcp:use`, which the REST API refuses. The connection's wiring (the challenge's
-| scope and the rate limits) is in App\Mcp\McpServiceProvider.
+| A client connects as a person: it registers, the person approves
+| it on the consent screen with the UseMcp permission, and its
+| token carries only `mcp:use`, which the REST API refuses.
+|
+| App\Mcp\McpServiceProvider wires up the rest:
+| the challenge's scope and the rate limits.
 */
 
 Route::middleware([EnsureFeatureEnabled::class . ':mcp.enabled,404', 'throttle:api'])->group(function () {

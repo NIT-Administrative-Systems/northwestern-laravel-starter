@@ -63,7 +63,7 @@ The starter ships with two system-managed roles, created by `RoleSeeder`:
 | Role                    | Permissions     | Assignment Locked | Assigned When                                               |
 | ----------------------- | --------------- | :---------------: | ----------------------------------------------------------- |
 | **Super Administrator** | All permissions |        No         | `StakeholderSeeder` runs for NetIDs in `SUPER_ADMIN_NETIDS` |
-| **Northwestern User**   | None by default |        Yes        | Automatically on first SSO login                            |
+| **Northwestern User**   | None by default |        Yes        | Automatically when a NetID account is created               |
 
 The **Northwestern User** role serves as a baseline. It confirms the user has authenticated via SSO but grants no application-specific permissions. Add permissions to this role in `RoleSeeder` if your application needs default access for all Northwestern users:
 
@@ -164,11 +164,11 @@ Permissions are defined as cases in `SystemPermission`, the **single source of t
 | `CreatePersonalAccessTokens` | Create personal access tokens on the Account page                                                           |       —        |      —       |
 | `UseMcp`                     | Connect AI clients to the [MCP server](/features/mcp/)                                                      |       —        |      —       |
 | `ViewAuditLogs`              | View audit trail entries                                                                                    |      Yes       |      —       |
-| `ViewLoginRecords`           | View login analytics                                                                                        |      Yes       |      —       |
+| `ViewLoginRecords`           | View sign-in records and their charts                                                                       |      Yes       |      —       |
 | `ViewSupportTickets`         | View support ticket submissions                                                                             |      Yes       |      —       |
 | `ManageAnnouncements`        | Write, publish and end [announcements](/features/announcements/)                                            |       —        |      —       |
 
-**System Managed** permissions are security-sensitive and can only be included in system-managed roles or by users with `ManageAll`. They appear in a separate "Sensitive Permissions" section in the role form.
+**System Managed** permissions are security-sensitive and can only be included in system-managed roles or by users with `ManageAll`. They appear in a separate **System-Managed Permissions** list in the role form, which only users with `ManageAll` see.
 
 **API Relevant** permissions are the only ones shown when editing an API Integration role.
 
@@ -262,9 +262,17 @@ The `ManageAll` permission triggers a `Gate::before()` hook that short-circuits 
 
 ---
 
+## Policies
+
+Each model the panels show has a policy in its domain's `Policies` folder, which Laravel finds by name: `RolePolicy`, `UserPolicy`, `UserLoginRecordPolicy`, `AnnouncementPolicy`, `SupportTicketPolicy`, `ApiRequestLogPolicy`, and `App\Domains\Core\Policies\AuditPolicy` for the audit log and Role Activity.
+
+Both panels use Filament's strict authorization (`->strictAuthorization()` in each panel provider). A resource whose model has no policy, or whose policy lacks a method a page asks for (`viewAny()`, `view()`, `create()` and so on), throws an exception instead of allowing the page. Give a new resource's model a policy with every method its pages use. When something else decides, override both `canAccess()` and `canViewAny()` on the resource, as the application and MCP client resources do to ask [`CredentialAccess`](/features/api/).
+
+---
+
 ## Adding People in Bulk
 
-A role's **Assigned Users** tab and the **Users** list have an **Add People** menu. **Paste NetIDs or Emails** takes a list separated by commas, spaces or line breaks; **Upload a CSV File** takes a file with a NetID or email column, and optional first and last name columns, mapped in Filament's import modal. On the Users list you choose the role. Either way, up to 1,000 people at a time.
+A role's **Assigned Users** tab has an **Add People** menu, and the **Users** list has the same menu as **Add People to a Role**. **Paste NetIDs or Emails** takes a list separated by commas, spaces or line breaks; **Upload a CSV File** takes a file with a NetID or email column, and optional first and last name columns, mapped in Filament's import modal. On the Users list you choose the role. Either way, up to 1,000 people at a time.
 
 Each person goes through `App\Domains\Access\Actions\AddPersonToRole`:
 
@@ -272,7 +280,7 @@ Each person goes through `App\Domains\Access\Actions\AddPersonToRole`:
 - Any other email address that matches no one becomes a local account that signs in with an [emailed code](/features/authentication/#passwordless-verification-codes), when email-code sign-in is on. No code is sent; they request one when they first sign in.
 - The role is given with `assignRoleWithAudit()` and the `BulkAssignment` origin, so it shows in Role Activity like any other assignment.
 
-The list becomes a Filament import, processed on the queue in chunks of 25 as the administrator who started it. When it finishes, they get a notification saying how many people were added, with a download of everyone who wasn't and why: they already had the role, weren't in the directory, are an API user, have a deactivated account (only **Reactivate** on their page brings it back), or are the administrator, since nobody adds themselves to a role.
+The list becomes a Filament import, processed on the queue in chunks of 25 as the administrator who started it. When it finishes, they get a notification saying how many people were added, with a download of everyone who wasn't and why: they already had the role, weren't in the directory, are an API user, have a deactivated account (only **Reactivate** on their page brings it back), or are the administrator, since nobody adds themselves to a role. The download works until the failed rows are pruned, after `FAILED_IMPORT_ROW_RETENTION_DAYS` (30 days by default).
 
 Adding people in bulk needs both `AssignRoles` and `CreateUsers`. It isn't offered for assignment-locked roles, even to super administrators, or for API Integration roles, whose users a NetID or email address never finds. Pasted lists start from `App\Domains\Access\Actions\AddPeopleToRole`, and uploaded files from Filament's `ImportAction`; both use `App\Filament\Administration\Imports\AddPeopleToRoleImporter`.
 
@@ -317,7 +325,7 @@ The `RoleModificationOrigin` tracks **why** a role change occurred:
 | ------------------- | ---------------- | ------------------------------------------------------- |
 | `UiAction`          | An administrator | Admin assigns/removes a role in Filament                |
 | `BulkAssignment`    | An administrator | Admin adds a pasted list or a CSV of people to a role   |
-| `SsoProvisioning`   | The application  | Northwestern User role assigned on first SSO login      |
+| `SsoProvisioning`   | The application  | Northwestern User role given to a new NetID account     |
 | `NetIdStatusChange` | The application  | Roles stripped when a NetID is deactivated via EventHub |
 | `RemovedByDeletion` | The application  | Roles removed from users when a role is deleted         |
 | `System`            | The application  | Programmatic changes (seeders, Artisan commands)        |

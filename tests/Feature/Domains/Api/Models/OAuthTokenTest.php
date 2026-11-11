@@ -25,15 +25,15 @@ final class OAuthTokenTest extends TestCase
 
     public function test_the_personal_scope_excludes_service_client_tokens(): void
     {
-        [, $personal] = $this->personalAccessToken(User::factory()->create());
-        $this->serviceClientToken(User::factory()->api()->create());
+        [, $personal] = $this->issuePersonalAccessToken(User::factory()->create());
+        $this->issueServiceClientToken(User::factory()->api()->create());
 
         $this->assertSame([$personal->getKey()], OAuthToken::query()->personal()->pluck('id')->all());
     }
 
     public function test_status_follows_revocation_and_expiry(): void
     {
-        [, $token] = $this->personalAccessToken(User::factory()->create());
+        [, $token] = $this->issuePersonalAccessToken(User::factory()->create());
         $this->assertSame(CredentialStatus::Active, $token->status);
         $this->assertSame([$token->getKey()], OAuthToken::query()->personal()->active()->pluck('id')->all());
 

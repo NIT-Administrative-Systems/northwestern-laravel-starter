@@ -8,7 +8,7 @@ use App\Domains\Auth\Contracts\OneTimeCodeGenerator;
 use InvalidArgumentException;
 
 /**
- * Generates a random, numeric, fixed-length one-time verification code for local sign-in challenges.
+ * Generates a random numeric one-time code of a fixed length for email sign-in.
  *
  * @see \App\Domains\Auth\LoginCodes
  */

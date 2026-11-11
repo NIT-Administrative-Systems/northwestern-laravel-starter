@@ -51,7 +51,7 @@ final class PersonalAccessTokensRelationManagerTest extends TestCase
     public function test_an_administrator_revokes_a_persons_token(): void
     {
         $person = User::factory()->create();
-        [, $token] = $this->personalAccessToken($person);
+        [, $token] = $this->issuePersonalAccessToken($person);
 
         Livewire::test(PersonalAccessTokensRelationManager::class, ['ownerRecord' => $person, 'pageClass' => ViewUser::class])
             ->assertCanSeeTableRecords([$token])
@@ -65,7 +65,7 @@ final class PersonalAccessTokensRelationManagerTest extends TestCase
     public function test_an_administrator_still_revokes_while_the_api_is_off(): void
     {
         $person = User::factory()->create();
-        [, $token] = $this->personalAccessToken($person);
+        [, $token] = $this->issuePersonalAccessToken($person);
         config(['api.enabled' => false]);
 
         $this->assertTrue(PersonalAccessTokensRelationManager::canViewForRecord($person, ViewUser::class));
@@ -79,7 +79,7 @@ final class PersonalAccessTokensRelationManagerTest extends TestCase
     public function test_revoke_is_hidden_while_impersonating(): void
     {
         $person = User::factory()->create();
-        [, $token] = $this->personalAccessToken($person);
+        [, $token] = $this->issuePersonalAccessToken($person);
         $this->impersonating();
 
         Livewire::test(PersonalAccessTokensRelationManager::class, ['ownerRecord' => $person, 'pageClass' => ViewUser::class])

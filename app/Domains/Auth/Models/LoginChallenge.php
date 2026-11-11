@@ -11,7 +11,7 @@ use Carbon\CarbonImmutable;
 use Northwestern\SysDev\Chassis\Models\Concerns\PrunesAfterRetentionPeriod;
 
 /**
- * Represents the OTP challenge state for a local user authentication attempt.
+ * A sign-in code sent by email: its hash, its expiry and the attempts made on it.
  *
  * @see LoginCodes
  * @see SendLoginCodeEmailJob
@@ -32,11 +32,6 @@ class LoginChallenge extends BaseModel
 
     /** @var list<string> */
     protected array $auditExclude = ['code_hash'];
-
-    protected function retentionConfigKey(): string
-    {
-        return 'platform.retention.login_challenges';
-    }
 
     public function isExpired(?CarbonImmutable $now = null): bool
     {
@@ -62,5 +57,10 @@ class LoginChallenge extends BaseModel
         $now ??= CarbonImmutable::now();
 
         return ! $this->isConsumed() && ! $this->isExpired($now) && ! $this->isLocked($now);
+    }
+
+    protected function retentionConfigKey(): string
+    {
+        return 'platform.retention.login_challenges';
     }
 }

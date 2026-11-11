@@ -65,10 +65,10 @@ class Audit extends BaseModel
     }
 
     /**
-     * Scope to role activity audit records (role assigned and role removed events for Users).
+     * Scope the query to role activity: roles assigned to and removed from users.
      *
-     * Backed by the partial `audits_role_activity_index`, whose predicate repeats this
-     * event list. Change both together.
+     * The partial `audits_role_activity_index` repeats these
+     * events in its predicate, so change the two together.
      *
      * @param  Builder<self>  $query
      * @return Builder<self>
@@ -84,7 +84,7 @@ class Audit extends BaseModel
     /**
      * Derive the specific role(s) that changed by diffing old_values and new_values.
      *
-     * Each entry includes id, name, and role_type as captured at the time of the change.
+     * Each has the role's id, name and role_type as they were when it changed.
      *
      * @return list<RoleData>
      */

@@ -25,7 +25,7 @@ final class RevokeAllCredentialsTest extends TestCase
     public function test_it_revokes_a_persons_tokens(): void
     {
         $person = User::factory()->create();
-        [, $token] = $this->personalAccessToken($person);
+        [, $token] = $this->issuePersonalAccessToken($person);
 
         resolve(RevokeAllCredentials::class)($person);
 
@@ -35,7 +35,7 @@ final class RevokeAllCredentialsTest extends TestCase
     public function test_it_revokes_an_api_users_clients(): void
     {
         $apiUser = User::factory()->api()->create();
-        [, $client] = $this->serviceClientToken($apiUser);
+        [, $client] = $this->issueServiceClientToken($apiUser);
 
         resolve(RevokeAllCredentials::class)($apiUser);
 
@@ -45,9 +45,9 @@ final class RevokeAllCredentialsTest extends TestCase
     public function test_deleting_a_user_revokes_everything(): void
     {
         $person = User::factory()->create();
-        [, $token] = $this->personalAccessToken($person);
+        [, $token] = $this->issuePersonalAccessToken($person);
         $apiUser = User::factory()->api()->create();
-        [, $client] = $this->serviceClientToken($apiUser);
+        [, $client] = $this->issueServiceClientToken($apiUser);
 
         $person->delete();
         $apiUser->delete();
@@ -60,7 +60,7 @@ final class RevokeAllCredentialsTest extends TestCase
     public function test_deleting_a_user_while_impersonating_is_refused(): void
     {
         $person = User::factory()->create();
-        [, $token] = $this->personalAccessToken($person);
+        [, $token] = $this->issuePersonalAccessToken($person);
         $this->impersonating(true);
 
         try {
@@ -78,7 +78,7 @@ final class RevokeAllCredentialsTest extends TestCase
     public function test_a_user_whose_credentials_cannot_be_revoked_is_not_deleted(): void
     {
         $person = User::factory()->create();
-        [, $token] = $this->personalAccessToken($person);
+        [, $token] = $this->issuePersonalAccessToken($person);
         // Impersonation starts between the delete and the revocation, so revoking is refused.
         $this->impersonating(false, true);
 
@@ -98,7 +98,7 @@ final class RevokeAllCredentialsTest extends TestCase
         $client = $this->registerApplication(scopes: []);
         $this->actingAs($person);
         [, $verifier] = $this->requestAuthorization($client, []);
-        $this->exchange($client, $this->approve($client), $verifier)->assertOk();
+        $this->exchangeAuthorizationCode($client, $this->approveAuthorization($client), $verifier)->assertOk();
 
         resolve(RevokeAllCredentials::class)($person);
 

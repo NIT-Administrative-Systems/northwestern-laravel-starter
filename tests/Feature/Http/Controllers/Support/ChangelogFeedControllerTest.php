@@ -20,7 +20,7 @@ final class ChangelogFeedControllerTest extends TestCase
         Route::get('/support/changelog/feed.rss', ChangelogFeedController::class)->name('support.changelog.feed');
     }
 
-    public function test_feed_returns_rss_response_with_limited_entries(): void
+    public function test_the_feed_is_rss_with_the_latest_entries(): void
     {
         config(['changelog.feed.limit' => 2]);
 

@@ -46,7 +46,7 @@ final class AuditEventTest extends TestCase
         }
     }
 
-    // An audit can carry an event the enum doesn't name, such as one recorded before it existed.
+    // An audit can carry an event the enum doesn't name, like one older than the enum.
     public function test_it_describes_an_event_it_does_not_name(): void
     {
         $this->assertSame('Report Exported', AuditEvent::labelFor('report_exported'));

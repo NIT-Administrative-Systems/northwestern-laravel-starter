@@ -12,21 +12,12 @@ use OwenIt\Auditing\Contracts\Auditable;
 use ReflectionClass;
 
 /**
- * Base model with automatic audit logging.
+ * The model the others extend, so that creating, updating and deleting a record
+ * is audited: who did it, when, what changed, and from which IP and browser.
  *
- * All models extending this class will automatically log create, update, and delete
- * operations to the `audits` table for complete audit trail of all data changes.
+ * Add a column to `$auditExclude` to leave it out of audits.
  *
- * Audit logs capture:
- * - The user who made the change
- * - When the change occurred
- * - What changed (old and new values)
- * - The IP address and user agent
- * - Additional context (e.g., Livewire component name)
- *
- * To customize auditing behavior:
- * - Override `transformAudit()` to modify audit data before saving
- * - Add fields to `$auditExclude` to exclude them from audit logs
+ * Override `transformAudit()` to change what's recorded.
  *
  * @see Audit
  */

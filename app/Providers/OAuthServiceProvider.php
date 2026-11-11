@@ -25,9 +25,8 @@ use Northwestern\SysDev\Chassis\Passport\OAuthClientRepository;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Laravel Passport, which issues the credentials for the application's API: client
- * credentials for service integrations, and personal access and authorization code
- * tokens for people.
+ * Laravel Passport issues the API's credentials: client credentials for service
+ * integrations, and personal access and authorization code tokens for people.
  */
 class OAuthServiceProvider extends ServiceProvider
 {
@@ -36,10 +35,11 @@ class OAuthServiceProvider extends ServiceProvider
         // Passport registers its routes when it boots, so grants are switched off here.
         Passport::$deviceCodeGrantEnabled = false;
 
-        // Personal access tokens get their own expiry, shorter than Passport's single lifetime.
+        // Personal access tokens get their own expiry,
+        // shorter than Passport's single lifetime.
         $this->app->bind(AccessTokenRepository::class, ExpiringAccessTokenRepository::class);
 
-        // Client IDs are UUIDs; a malformed one is an unknown client, not a database error.
+        // A malformed client ID is an unknown client, not a database error: they're UUIDs.
         $this->app->bind(ClientRepository::class, OAuthClientRepository::class);
 
         // A person can't give an application a scope they don't hold themselves.
@@ -53,8 +53,9 @@ class OAuthServiceProvider extends ServiceProvider
 
         Passport::tokensCan(ApiScopes::all());
 
-        // The consent screen is a public page, which renders in the app panel's context for its theme
-        // and colors. Passport's routes don't carry the panel middleware, so the view sets it up.
+        // The consent screen is a public page, which renders in the app
+        // panel's context for its theme and colors. Passport's routes
+        // don't carry the panel middleware, so the view sets it up.
         Passport::authorizationView(function (array $parameters): Response {
             Filament::setCurrentPanel(Filament::getPanel(AppPanelProvider::ID));
             Filament::bootCurrentPanel();

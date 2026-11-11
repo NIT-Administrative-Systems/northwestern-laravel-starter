@@ -8,13 +8,15 @@ use PHPUnit\Framework\Attributes\CoversNothing;
 use Tests\TestCase;
 
 /**
- * The JSON health endpoint in routes/api.php, behind Chassis's RequireSecretToken: closed until
- * HEALTH_SECRET_TOKEN is set, then open only to requests that send it.
+ * The JSON health endpoint in routes/api.php, behind Chassis's RequireSecretToken.
+ *
+ * It's closed until HEALTH_SECRET_TOKEN is set, then opens to requests sending it.
  */
 #[CoversNothing]
 final class HealthEndpointTest extends TestCase
 {
-    // .env.example ships HEALTH_SECRET_TOKEN empty, and Spatie's middleware treats that as "no check".
+    // .env.example ships HEALTH_SECRET_TOKEN empty, and
+    // Spatie's middleware treats that as "no check".
     public function test_the_endpoint_is_closed_until_a_token_is_set(): void
     {
         config(['health.secret_token' => null]);
@@ -37,7 +39,8 @@ final class HealthEndpointTest extends TestCase
 
         $response = $this->getJson('/api/health', ['X-Secret-Token' => 'expected-token']);
 
-        // Spatie's controller answers 200 or 503 depending on the stored results; either way it sends no-store.
+        // Spatie's controller answers 200 or 503 depending on
+        // the stored results; either way it sends no-store.
         $this->assertContains($response->status(), [200, 503]);
         $this->assertStringContainsString('no-store', (string) $response->headers->get('Cache-Control'));
     }

@@ -29,9 +29,10 @@ abstract class TestCase extends BaseTestCase
     }
 
     /**
-     * Sign and verify Passport tokens with a key pair generated for this test process. It is
-     * set in the environment before the application boots, so every part of Passport uses it
-     * and local key files in storage/ are never read.
+     * Sign and verify Passport tokens with a key pair made for this test process.
+     *
+     * It's set in the environment before the application boots, so all
+     * of Passport uses it and never reads the key files in storage/.
      */
     private function usePassportKeys(): void
     {

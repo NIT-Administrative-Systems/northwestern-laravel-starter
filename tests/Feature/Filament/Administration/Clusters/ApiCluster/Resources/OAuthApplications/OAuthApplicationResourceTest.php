@@ -49,7 +49,7 @@ final class OAuthApplicationResourceTest extends TestCase
     public function test_it_lists_applications_and_not_service_clients(): void
     {
         $application = $this->registerApplication();
-        [, $serviceClient] = $this->serviceClientToken(User::factory()->api()->create());
+        [, $serviceClient] = $this->issueServiceClientToken(User::factory()->api()->create());
 
         Livewire::test(ListOAuthApplications::class)
             ->assertCanSeeTableRecords([$application])

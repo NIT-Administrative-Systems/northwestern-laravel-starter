@@ -53,7 +53,7 @@ final class McpFlowTest extends TestCase
     {
         $user = $this->mcpUser();
 
-        $this->mcp(null, 'initialize')
+        $this->sendMcpMessage(null, 'initialize')
             ->assertUnauthorized()
             ->assertHeader('WWW-Authenticate', 'Bearer realm="mcp", resource_metadata="' . url('/.well-known/oauth-protected-resource/mcp') . '", scope="mcp:use"')
             // MCP clients expect the protocol's errors, not the REST API's Problem Details.
@@ -84,9 +84,9 @@ final class McpFlowTest extends TestCase
             ->assertSee("Use this application's tools from an AI client")
             ->assertDontSee('See your account details');
 
-        $token = $this->exchange($client, $this->approve($client), $verifier)->assertOk()->json('access_token');
+        $token = $this->exchangeAuthorizationCode($client, $this->approveAuthorization($client), $verifier)->assertOk()->json('access_token');
 
-        $this->mcp($token, 'tools/call', ['name' => 'echo', 'arguments' => ['text' => 'hello']])
+        $this->sendMcpMessage($token, 'tools/call', ['name' => 'echo', 'arguments' => ['text' => 'hello']])
             ->assertOk()
             ->assertJsonPath('result.isError', false)
             ->assertJsonPath('result.structuredContent', ['text' => 'hello', 'person' => $user->full_name]);
@@ -129,9 +129,9 @@ final class McpFlowTest extends TestCase
     public function test_an_mcp_token_is_refused_on_the_rest_api(): void
     {
         $user = $this->mcpUser([SystemPermission::CreatePersonalAccessTokens]);
-        [$personal] = $this->personalAccessToken($user);
+        [$personal] = $this->issuePersonalAccessToken($user);
         $this->actingAs($user);
-        $token = $this->mcpToken();
+        $token = $this->issueMcpToken();
 
         $this->withToken($token)->getJson('/api/v1/me')
             ->assertForbidden()
@@ -149,12 +149,12 @@ final class McpFlowTest extends TestCase
         // Consent now refuses such a request, so pass it by to get the token one would have had.
         $this->withoutMiddleware(AuthorizeOAuthConsent::class);
         [, $verifier] = $this->requestAuthorization($client, []);
-        $token = (string) $this->exchange($client, $this->approve($client), $verifier)->assertOk()->json('access_token');
+        $token = (string) $this->exchangeAuthorizationCode($client, $this->approveAuthorization($client), $verifier)->assertOk()->json('access_token');
 
         $this->withToken($token)->getJson('/api/v1/me')
             ->assertForbidden()
             ->assertJsonPath('detail', 'MCP tokens can only be used with the MCP server.');
-        $this->mcp($token, 'tools/list')->assertForbidden();
+        $this->sendMcpMessage($token, 'tools/list')->assertForbidden();
     }
 
     public function test_consent_refuses_an_mcp_client_that_does_not_ask_for_the_mcp_scope(): void
@@ -176,16 +176,16 @@ final class McpFlowTest extends TestCase
     public function test_service_client_personal_and_application_tokens_are_refused_on_the_mcp_server(): void
     {
         $user = $this->mcpUser([SystemPermission::ViewUsers, SystemPermission::CreatePersonalAccessTokens]);
-        [$personal] = $this->personalAccessToken($user, ['view-users']);
-        [$service] = $this->serviceClientToken(User::factory()->api()->create());
+        [$personal] = $this->issuePersonalAccessToken($user, ['view-users']);
+        [$service] = $this->issueServiceClientToken(User::factory()->api()->create());
 
         $this->actingAs($user);
         $application = $this->registerApplication();
         [, $verifier] = $this->requestAuthorization($application);
-        $delegated = $this->exchange($application, $this->approve($application), $verifier)->json('access_token');
+        $delegated = $this->exchangeAuthorizationCode($application, $this->approveAuthorization($application), $verifier)->json('access_token');
 
         foreach ([$personal, $service, $delegated] as $token) {
-            $this->mcp($token, 'tools/list')->assertForbidden();
+            $this->sendMcpMessage($token, 'tools/list')->assertForbidden();
         }
     }
 
@@ -200,12 +200,12 @@ final class McpFlowTest extends TestCase
 
         $user = $this->mcpUser();
         $this->actingAs($user);
-        $token = $this->mcpToken();
-        $this->mcp($token, 'tools/list')->assertOk();
+        $token = $this->issueMcpToken();
+        $this->sendMcpMessage($token, 'tools/list')->assertOk();
 
         $user->revokePermissionTo(SystemPermission::UseMcp);
 
-        $this->mcp($token, 'tools/list')->assertUnauthorized();
+        $this->sendMcpMessage($token, 'tools/list')->assertUnauthorized();
     }
 
     public function test_everything_answers_404_while_mcp_is_disabled(): void
@@ -218,7 +218,7 @@ final class McpFlowTest extends TestCase
         $this->getJson('/.well-known/oauth-protected-resource/mcp')->assertNotFound();
         $this->getJson('/.well-known/oauth-authorization-server')->assertNotFound();
         $this->postJson('/oauth/register', ['redirect_uris' => [self::REDIRECT_URI]])->assertNotFound();
-        $this->mcp(null, 'initialize')->assertNotFound();
+        $this->sendMcpMessage(null, 'initialize')->assertNotFound();
         [$consent] = $this->requestAuthorization($client, ['mcp:use']);
         $consent->assertNotFound();
     }
@@ -228,12 +228,12 @@ final class McpFlowTest extends TestCase
     {
         config(['mcp.rate_limits.tool_calls_per_minute' => 1]);
         $this->actingAs($this->mcpUser());
-        $token = $this->mcpToken();
-        $call = fn () => $this->mcp($token, 'tools/call', ['name' => 'echo', 'arguments' => ['text' => 'hello']]);
+        $token = $this->issueMcpToken();
+        $call = fn () => $this->sendMcpMessage($token, 'tools/call', ['name' => 'echo', 'arguments' => ['text' => 'hello']]);
 
         $call()->assertOk();
         $call()->assertTooManyRequests();
-        $this->mcp($token, 'tools/list')->assertOk();
+        $this->sendMcpMessage($token, 'tools/list')->assertOk();
     }
 
     /**

@@ -11,12 +11,12 @@ use Illuminate\Support\ServiceProvider;
 use InvalidArgumentException;
 
 /**
- * Chooses the ticket system support requests go to: the {@see TicketSystemGateway} for the
- * `support.driver` config value, as {@see TicketSystem::gatewayClass()} maps it.
+ * Binds the {@see TicketSystemGateway} that support requests go to: the
+ * one {@see TicketSystem::gatewayClass()} maps `support.driver` to.
  *
- * When support is disabled ({@see config('support.enabled')}), nothing is bound and the support
- * system is inert. An application can bind its own {@see TicketSystemGateway} in a provider's
- * `boot()` to send requests somewhere else.
+ * With `support.enabled` off, nothing is bound and support does nothing.
+ *
+ * Bind your own {@see TicketSystemGateway} in a provider's `boot()` to replace it.
  */
 class SupportServiceProvider extends ServiceProvider
 {

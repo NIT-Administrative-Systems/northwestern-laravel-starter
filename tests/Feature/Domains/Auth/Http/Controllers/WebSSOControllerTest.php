@@ -27,8 +27,8 @@ use Tests\TestCase;
 #[CoversNothing]
 final class WebSSOControllerTest extends TestCase
 {
-    // Socialite throws when services.northwestern-azure has no `redirect` key, even though
-    // laravel-soa builds the callback URL from the route instead of reading it.
+    // Socialite throws if services.northwestern-azure has no `redirect` key,
+    // though laravel-soa builds the callback URL from the route instead.
     public function test_entra_sign_in_redirects_to_microsoft_with_the_callback_route(): void
     {
         config([
@@ -36,7 +36,7 @@ final class WebSSOControllerTest extends TestCase
             'services.northwestern-azure.client_secret' => 'test-client-secret',
         ]);
 
-        // routes/auth.php only registers the Entra routes when credentials are set at boot.
+        // routes/auth.php registers the Entra ID routes only with credentials set at boot.
         Route::middleware('web')->group(function (): void {
             Route::get('auth/azure-ad/redirect', [WebSSOController::class, 'oauthRedirect']);
             Route::post('auth/azure-ad/callback', [WebSSOController::class, 'oauthCallback'])->name('login-oauth-callback');
@@ -49,7 +49,8 @@ final class WebSSOControllerTest extends TestCase
         $this->assertStringContainsString('redirect_uri=' . urlencode(url('/auth/azure-ad/callback')), $location);
     }
 
-    // Signing in looks the NetID up and syncs it, which once restored a deactivated account.
+    // Signing in looks the NetID up and syncs it,
+    // which once restored deactivated people.
     public function test_a_deactivated_netid_user_is_refused_until_an_administrator_reactivates_them(): void
     {
         config(['platform.wildcard_photo_sync' => false]);

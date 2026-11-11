@@ -50,8 +50,8 @@ final class AdministrationPanelProviderTest extends TestCase
 
         $this->registerMcpClient();
         $this->registerApplication();
-        $this->serviceClientToken($apiUser = User::factory()->api()->create());
-        $this->personalAccessToken($superAdministrator);
+        $this->issueServiceClientToken($apiUser = User::factory()->api()->create());
+        $this->issuePersonalAccessToken($superAdministrator);
         ApiRequestLog::factory()->create(['user_id' => $superAdministrator->id]);
         UserLoginRecord::factory()->create(['user_id' => $superAdministrator->id]);
         $ticket = SupportTicket::factory()->create(['user_id' => $superAdministrator->id]);

@@ -44,14 +44,14 @@ class RolePolicy
     }
 
     /**
-     * Permission check for assigning this role to users, or to `$assignee` when one is named:
-     * nobody may give themselves a role.
+     * Determine whether the user may give this role to
+     * people, or to `$assignee` when one is named.
      *
-     * System Managed roles return false here — super admins gain access
-     * via Gate::before(), consistent with how all other policies work.
-     * Does NOT check assignment_locked — that's enforced outside the gate
-     * so it cannot be bypassed by super admins. The relation managers refuse
-     * self-assignment outside the gate too, for the same reason.
+     * Nobody may give themselves a role. System-managed roles are refused
+     * here, so only Manage All, through Gate::before(), can assign one.
+     *
+     * Assignment locks and self-assignment are refused outside
+     * the gate as well, where Manage All can't bypass them.
      */
     public function attachUser(User $user, Role $role, ?User $assignee = null): bool
     {
@@ -63,7 +63,7 @@ class RolePolicy
     }
 
     /**
-     * Permission check for removing this role from users. People may remove their own roles.
+     * Determine whether the user may take this role from people, themselves included.
      */
     public function detachUser(User $user, Role $role): bool
     {

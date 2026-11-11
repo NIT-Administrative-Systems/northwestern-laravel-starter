@@ -18,7 +18,7 @@ final class DirectorySearchValidatorTest extends TestCase
         $this->assertTrue(new DirectorySearchValidator()->shouldRun());
     }
 
-    // Local environments seed their users without Directory Search, so a missing key isn't a failure there.
+    // Local environments seed users without Directory Search, so no key is fine.
     public function test_is_skipped_locally_only_when_no_key_is_set(): void
     {
         $this->app->detectEnvironment(fn (): string => 'local');

@@ -14,14 +14,17 @@ use ReflectionNamedType;
 use ReflectionParameter;
 
 /**
- * Typed settings stored in a JSON column. Each preference is a promoted constructor property
- * with a default, so adding one is a single line: no migration, no backfill.
+ * Typed settings stored in a JSON column.
  *
- * Reading is forgiving, because the JSON outlives the code: a key with no matching property is
- * dropped, and a missing or wrongly typed value falls back to its default. Writing stores every
- * property, so the column always reflects what the code means.
+ * Each preference is a promoted constructor property with a default,
+ * so adding one is a single line, with no migration or backfill.
  *
- * Cast a column with the subclass itself: `'preferences' => UserPreferences::class`.
+ * Reading is forgiving, since the JSON outlives the code: a key with no property
+ * is dropped, and a missing or wrongly typed value falls back to its default.
+ *
+ * Writing stores every property, so the column always says what the code means.
+ *
+ * Cast a column with the subclass: `'preferences' => UserPreferences::class`.
  */
 abstract readonly class Preferences implements Castable
 {
@@ -51,7 +54,7 @@ abstract readonly class Preferences implements Castable
     }
 
     /**
-     * A copy with some preferences changed. Changes go through the same coercion as stored values.
+     * Get a copy with some preferences changed, coerced the same as stored values.
      *
      * @param  array<string, mixed>  $changes
      */
@@ -104,7 +107,7 @@ abstract readonly class Preferences implements Castable
                     default => throw new InvalidArgumentException("{$key} must be a {$this->class} or an array."),
                 };
 
-                // As an object, so no preferences is `{}` rather than `[]`; list values stay lists.
+                // As an object, so no preferences is `{}`, not `[]`; lists stay lists.
                 return json_encode((object) $preferences->toArray(), JSON_THROW_ON_ERROR);
             }
         };

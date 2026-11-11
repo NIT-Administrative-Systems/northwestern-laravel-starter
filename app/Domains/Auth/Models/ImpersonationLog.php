@@ -6,30 +6,20 @@ namespace App\Domains\Auth\Models;
 
 use App\Domains\Core\Models\BaseModel;
 use App\Domains\User\Models\User;
-use Database\Factories\Domains\User\Models\UserFactory;
+use Database\Factories\Domains\Auth\Models\ImpersonationLogFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Northwestern\SysDev\Chassis\Models\Concerns\PrunesAfterRetentionPeriod;
 
 /**
- * Impersonation audit log model.
- *
- * Records all user impersonation events for security and auditing purposes.
- * Each log entry captures:
- * - Who initiated the impersonation (impersonator)
- * - Who was impersonated (target user)
- * - When the impersonation started and ended
- * - The IP address where the impersonation occurred
- *
- * This provides a complete audit trail of all impersonation sessions,
- * which is critical for security compliance and troubleshooting.
+ * Who impersonated whom, and when: one entry each time impersonation starts.
  *
  * @see \App\Domains\Auth\Actions\Impersonation\StartImpersonation
  * @see \App\Domains\Auth\Actions\Impersonation\StopImpersonation
  */
 class ImpersonationLog extends BaseModel
 {
-    /** @use HasFactory<UserFactory> */
+    /** @use HasFactory<ImpersonationLogFactory> */
     use HasFactory, PrunesAfterRetentionPeriod;
 
     protected $table = 'user_impersonation_logs';

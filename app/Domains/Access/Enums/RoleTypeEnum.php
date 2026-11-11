@@ -21,7 +21,7 @@ enum RoleTypeEnum: string implements HasColor, HasIcon, HasLabel
     {
         return match ($this) {
             self::ApiIntegration => 'API Integration',
-            // Auto-converts the string to a title. You can override one by adding a specific case.
+            // The others are their value in title case; add a case to name one differently.
             default => Str::of($this->value)->replace('-', ' ')->title()->toString(),
         };
     }

@@ -37,8 +37,8 @@ class ImpersonationController extends Controller
             guardName: $guardName,
         );
 
-        // The page the administrator came from is usually one the person being impersonated
-        // can't open, so start them in the app panel; the stored URL is for leaving.
+        // Start in the app panel: the administrator's page is usually
+        // one the person can't open. The stored URL is for leaving.
         if ($redirectTo === '/') {
             return redirect()->to(Filament::getPanel(AppPanelProvider::ID)->getUrl());
         }
