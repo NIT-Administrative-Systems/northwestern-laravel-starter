@@ -41,16 +41,26 @@ final class WildcardPhotoControllerTest extends TestCase
             ->once()
             ->andReturn(true);
 
-        Storage::shouldReceive('temporaryUrl')
-            ->withArgs(fn ($path, $expiration): bool => is_string($path) && $expiration instanceof \DateTimeInterface)
-            ->once()
-            ->andReturn(self::TEMPORARY_URL);
+        Storage::disk('s3')->buildTemporaryUrlsUsing(fn (): string => 'https://example.com/temporary-url');
 
         $response = $this->actingAs($this->user)
             ->get(route('users.wildcard-photo', $this->user));
 
         $response->assertRedirect(self::TEMPORARY_URL);
         $response->assertHeader('Cache-Control', 'max-age=1800, private');
+    }
+
+    // The photo job writes to the s3 disk whatever the default disk is.
+    public function test_the_link_is_signed_on_the_disk_the_photo_is_stored_on(): void
+    {
+        config(['filesystems.default' => 'local']);
+        Storage::fake('local')->buildTemporaryUrlsUsing(fn (string $path): string => "https://local.example/{$path}");
+        Storage::disk('s3')->buildTemporaryUrlsUsing(fn (string $path): string => "https://s3.example/{$path}");
+        $this->user->update(['wildcard_photo_s3_key' => self::WILDCARD_PHOTO_KEY]);
+
+        $this->actingAs($this->user)
+            ->get(route('users.wildcard-photo', $this->user))
+            ->assertRedirect('https://s3.example/' . self::WILDCARD_PHOTO_KEY);
     }
 
     // A deactivated person's page in Administration still shows their photo.

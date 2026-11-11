@@ -21,7 +21,7 @@ class WildcardPhotoController extends Controller
     public function show(User $user): RedirectResponse
     {
         $imageUrl = filled($user->wildcard_photo_s3_key) && Gate::allows('view', $user)
-            ? Storage::temporaryUrl(
+            ? Storage::disk('s3')->temporaryUrl(
                 path: $user->wildcard_photo_s3_key,
                 expiration: now()->addMinutes(30)
             )
