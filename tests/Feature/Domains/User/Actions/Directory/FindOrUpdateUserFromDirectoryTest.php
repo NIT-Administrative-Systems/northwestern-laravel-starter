@@ -75,6 +75,35 @@ final class FindOrUpdateUserFromDirectoryTest extends TestCase
         $this->assertSame(1, User::withTrashed()->where('username', 'gone456')->count());
     }
 
+    public function test_a_failed_lookup_finds_a_deactivated_account_and_leaves_it_deactivated(): void
+    {
+        $deactivated = User::factory()->create(['username' => 'gone789']);
+        $deactivated->delete();
+
+        $directoryApi = $this->createStub(DirectorySearch::class);
+        $directoryApi->method('lookup')->willReturn(false);
+
+        $user = $this->service(['directorySearch' => $directoryApi])('gone789');
+
+        $this->assertTrue($deactivated->is($user));
+        $this->assertSoftDeleted($deactivated);
+    }
+
+    public function test_an_incomplete_entry_marks_a_deactivated_accounts_netid_inactive(): void
+    {
+        $deactivated = User::factory()->create(['username' => 'gone789', 'netid_inactive' => false]);
+        $deactivated->delete();
+
+        $directoryApi = $this->createStub(DirectorySearch::class);
+        $directoryApi->method('lookup')->willReturn(['uid' => 'gone789']);
+
+        $user = $this->service(['directorySearch' => $directoryApi])('gone789');
+
+        $this->assertTrue($deactivated->is($user));
+        $this->assertTrue($deactivated->fresh()?->netid_inactive);
+        $this->assertSoftDeleted($deactivated);
+    }
+
     public function test_missing_affiliation_throws_exception(): void
     {
         $directoryApi = $this->createStub(DirectorySearch::class);

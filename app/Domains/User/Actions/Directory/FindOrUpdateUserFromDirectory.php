@@ -120,12 +120,14 @@ readonly class FindOrUpdateUserFromDirectory
         // Selecting the query (rather than `return match`) keeps the match line
         // attributable by the coverage driver; see php-code-coverage#1257.
         $query = match ($searchType) {
-            DirectorySearchType::Email => User::whereEmailEquals($searchValue),
-            DirectorySearchType::NetId => User::whereUsernameEquals($searchValue),
-            DirectorySearchType::EmployeeId => User::where('employee_id', $searchValue),
+            DirectorySearchType::Email => User::withTrashed()->whereEmailEquals($searchValue),
+            DirectorySearchType::NetId => User::withTrashed()->whereUsernameEquals($searchValue),
+            DirectorySearchType::EmployeeId => User::withTrashed()->where('employee_id', $searchValue),
         };
 
-        return $query->first();
+        // An active account comes before a deactivated one with the same email: PostgreSQL
+        // sorts nulls first when descending.
+        return $query->orderByDesc('deleted_at')->first();
     }
 
     /**
