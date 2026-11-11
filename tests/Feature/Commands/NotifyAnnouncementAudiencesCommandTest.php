@@ -23,7 +23,7 @@ final class NotifyAnnouncementAudiencesCommandTest extends TestCase
         Announcement::factory()->create();
 
         $this->artisan(NotifyAnnouncementAudiencesCommand::class)
-            ->expectsOutputToContain('Queued notifications for 1 announcement(s).')
+            ->expectsOutputToContain('Queued notifications for 1 announcement.')
             ->assertSuccessful();
 
         Queue::assertPushed(NotifyAnnouncementAudience::class, fn (NotifyAnnouncementAudience $job): bool => $job->announcement->is($started));

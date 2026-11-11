@@ -10,6 +10,7 @@ use App\Domains\User\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 /**
  * Deactivates local (email-code) accounts nobody has signed in to for the number
@@ -54,7 +55,7 @@ class DeactivateInactiveLocalUsersCommand extends Command
             $deactivated++;
         }
 
-        $this->components->info("Deactivated {$deactivated} local account(s) with no sign-in for {$days} days.");
+        $this->components->info("Deactivated {$deactivated} local " . Str::plural('account', $deactivated) . " with no sign-in for {$days} days.");
 
         return self::SUCCESS;
     }

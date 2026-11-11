@@ -104,6 +104,25 @@ final class RoleDefinitionHistoryTest extends TestCase
             ->assertCanSeeTableRecords([$audit]);
     }
 
+    public function test_an_entry_with_no_changes_links_to_the_full_audit_entry(): void
+    {
+        $this->actingAs($this->admin);
+
+        Audit::create([
+            'user_type' => User::class,
+            'user_id' => $this->admin->id,
+            'event' => 'updated',
+            'auditable_type' => Role::class,
+            'auditable_id' => $this->role->getKey(),
+            'old_values' => [],
+            'new_values' => [],
+        ]);
+
+        Livewire::test(RoleDefinitionHistory::class, ['record' => $this->role->getKey()])
+            ->assertSee('No changes recorded.')
+            ->assertSee('View Full Audit Entry');
+    }
+
     public function test_the_history_lists_a_change_to_its_permissions(): void
     {
         $this->actingAs($this->admin);

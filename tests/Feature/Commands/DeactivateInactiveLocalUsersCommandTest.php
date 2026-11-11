@@ -26,7 +26,7 @@ final class DeactivateInactiveLocalUsersCommandTest extends TestCase
         $northwestern = User::factory()->create(['created_at' => now()->subDays(200)]);
 
         $this->artisan(DeactivateInactiveLocalUsersCommand::class)
-            ->expectsOutputToContain('Deactivated 2 local account(s) with no sign-in for 90 days.')
+            ->expectsOutputToContain('Deactivated 2 local accounts with no sign-in for 90 days.')
             ->assertSuccessful();
 
         $this->assertSoftDeleted($lapsed);
