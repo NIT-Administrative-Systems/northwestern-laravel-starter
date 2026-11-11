@@ -89,7 +89,7 @@ final class NetIdUpdateControllerTest extends TestCase
     {
         User::factory()->create(['username' => 'abc123', 'auth_type' => AuthType::SSO])->delete();
 
-        $this->send('etidentity.ldap.netid.term', 'netid=abc123&action=deactivate')->assertAccepted();
+        $this->sendEventHubMessage('etidentity.ldap.netid.term', 'netid=abc123&action=deactivate')->assertAccepted();
 
         Event::assertDispatched(NetIdUpdated::class);
     }
