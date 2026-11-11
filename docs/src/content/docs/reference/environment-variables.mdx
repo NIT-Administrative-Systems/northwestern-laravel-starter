@@ -133,6 +133,7 @@ These configure [passwordless verification codes](/features/authentication/#pass
 | `LOCAL_AUTH_CODE_EXPIRES_MINUTES`       | `10`    | Minutes before a code expires                                                                  |
 | `LOCAL_AUTH_CODE_MAX_ATTEMPTS`          | `8`     | Failed attempts before the challenge locks                                                     |
 | `LOCAL_AUTH_CODE_LOCK_MINUTES`          | `15`    | Minutes a locked challenge stays locked                                                        |
+| `LOCAL_ACCOUNT_INACTIVITY_DAYS`         | `null`  | Deactivate local accounts nobody has signed in to for this many days. `null` never does. See [Expiring Local Accounts](/features/authentication/#expiring-local-accounts) |
 | `LOCAL_AUTH_CODE_RESEND_COOLDOWN`       | `30`    | Seconds before another code can be sent                                                        |
 
 ## API
@@ -253,6 +254,12 @@ Days to keep each kind of record before the daily `model:prune` deletes it. `nul
 | `IMPERSONATION_LOG_RETENTION_DAYS` | `null` (kept forever) | Impersonation logs                 |
 | `LOGIN_CHALLENGE_RETENTION_DAYS`   | `30`                  | Email verification code challenges |
 | `API_REQUEST_LOG_RETENTION_DAYS`   | `90`                  | API request logs                   |
+| `NOTIFICATION_RETENTION_DAYS`      | `90`                  | Notifications, read or not         |
+| `IMPORT_RETENTION_DAYS`            | `30`                  | Imports, with their failed rows    |
+| `FAILED_IMPORT_ROW_RETENTION_DAYS` | `30`                  | Failed import rows                 |
+| `SUPPORT_TICKET_RETENTION_DAYS`    | `null` (kept forever) | Support tickets                    |
+| `FAILED_JOB_RETENTION_DAYS`        | `30`                  | Failed queue jobs, pruned by `queue:prune-failed` |
+| `JOB_BATCH_RETENTION_DAYS`         | `30`                  | Job batches, pruned by `queue:prune-batches` |
 
 ## Environment lockdown
 

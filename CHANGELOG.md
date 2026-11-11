@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+### Added
+
+- An **Add People** menu on a role's Assigned Users tab and on the Users list gives a role to a pasted list of NetIDs and email addresses, or the people in a CSV file through a Filament importer, up to 1,000 at a time. NetIDs and Northwestern addresses are looked up with `FindOrUpdateUserFromDirectory`; any other address that matches no one becomes a local account. The list is processed on the queue in chunks, each role is given with `assignRoleWithAudit()` and a new `BulkAssignment` origin, and the administrator gets a notification with a download of everyone who wasn't added and why. It needs `AssignRoles` and `CreateUsers`, and isn't offered for assignment-locked or API Integration roles. `CreateLocalUser` now needs only an email address.
+- **Deactivate** and **Reactivate** on a person's page in Administration. Deactivating soft-deletes the account, revokes its credentials with `RevokeAllCredentials` and ends its sessions; reactivating restores it and leaves the credentials revoked. Both need `EditUsers`, refuse your own account and impersonation even for Manage All, and are audited as **Account Deactivated** and **Account Reactivated**.
+- `App\Domains\Auth\Actions\EndSessions` signs a person out everywhere: it deletes their rows from the `sessions` table and cycles their remember token. Deactivating an account and a NetID deactivation from EventHub both call it.
+- `users:deactivate-inactive-local` deactivates local accounts nobody has signed in to for `LOCAL_ACCOUNT_INACTIVITY_DAYS` days, daily when that's set. It's off by default.
+- Retention periods for the framework's own tables under `platform.retention`: notifications (`NOTIFICATION_RETENTION_DAYS`, 90), imports and their failed rows (`IMPORT_RETENTION_DAYS` and `FAILED_IMPORT_ROW_RETENTION_DAYS`, 30), support tickets (`SUPPORT_TICKET_RETENTION_DAYS`, kept by default), failed jobs (`FAILED_JOB_RETENTION_DAYS`, 30) and job batches (`JOB_BATCH_RETENTION_DAYS`, 30). The scheduler runs `queue:prune-failed` and `queue:prune-batches` daily for the queue tables, and `User::notifications()` uses a prunable `DatabaseNotification` model.
+
 ### Security
 
 - `UserBuilder::whereEmailEquals()` and `whereUsernameEquals()` match exactly, comparing `lower(column) = lower(?)` instead of using `ilike`, which treated `%` and `_` in the value as wildcards. A sign-in code request for `%@example.com` reached the first local account at that domain, and a lookup for `a_b@example.com` could find `axb@example.com`.

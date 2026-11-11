@@ -42,6 +42,10 @@ The sidebar groups the tools with the `App\Filament\Administration\Navigation\Ad
 - **Add Local User** creates a person who signs in with an email verification code. Needs `CreateUsers`. See [Creating Local Users](/features/authentication/#creating-local-users).
 - **Create API User** creates an API user with its first service client. Needs `ManageApiAccess`, with the API on. See [API System](/features/api/).
 
+**Add People to a Role** gives a role to a pasted list of NetIDs and email addresses, or the people in a CSV file, creating the accounts that don't exist yet. Needs `AssignRoles` and `CreateUsers`. See [Adding People in Bulk](/features/authorization/#adding-people-in-bulk).
+
+The **Trashed** filter finds deactivated accounts.
+
 A person's page shows their details and these tabs, each only when it applies to them and the viewer holds its permission:
 
 | Tab                              | Shows                                                                       | Needs                                                   |
@@ -59,9 +63,11 @@ These tabs stay while the API or MCP is off, so an administrator can still revok
 
 The **Impersonate** button signs you in as the person. See [Impersonating Users](/features/authentication/#impersonating-users).
 
+**Deactivate** signs the person out everywhere, revokes their credentials and keeps them from signing in; **Reactivate** lets them sign in again. Both need `EditUsers`. See [Deactivating Accounts](/features/authentication/#deactivating-accounts).
+
 ## Roles
 
-**Roles** lists every role with its type and how many people hold it. A role's page shows its permissions and an **Assigned Users** tab for assigning and removing people. Its **Definition History** page shows every change to its definition, with what changed. Creating, editing and deleting roles need `EditRoles` and `DeleteRoles`. See [Authorization](/features/authorization/).
+**Roles** lists every role with its type and how many people hold it. A role's page shows its permissions and an **Assigned Users** tab for assigning and removing people, one at a time or [in bulk](/features/authorization/#adding-people-in-bulk). Its **Definition History** page shows every change to its definition, with what changed. Creating, editing and deleting roles need `EditRoles` and `DeleteRoles`. See [Authorization](/features/authorization/).
 
 The **Role Activity** button on the Roles page lists role assignments and removals across everyone, with where each came from. It needs `ViewAuditLogs`.
 
