@@ -99,8 +99,8 @@ final class AuditResourceTest extends TestCase
 
     public function test_each_page_is_titled_as_its_navigation_names_it(): void
     {
-        $this->assertSame('Audit Logs', (new ListAudits())->getTitle());
-        $this->assertSame('Role Activity', (new ListRoleActivity())->getTitle());
+        $this->assertSame('Audit Logs', new ListAudits()->getTitle());
+        $this->assertSame('Role Activity', new ListRoleActivity()->getTitle());
     }
 
     private function administrator(SystemPermission ...$permissions): User
