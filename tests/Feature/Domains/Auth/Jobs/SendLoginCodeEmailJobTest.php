@@ -89,4 +89,28 @@ final class SendLoginCodeEmailJobTest extends TestCase
         Mail::assertNothingSent();
         $this->assertTrue($challenge->fresh()->email_sent_at->eq(now()));
     }
+
+    // A queue backlog can deliver a code after a newer one replaced it, or after it expired.
+    public function test_a_code_that_can_no_longer_be_used_is_not_sent(): void
+    {
+        $challenges = [
+            'expired' => ['expires_at' => now()->subSecond()],
+            'used' => ['expires_at' => now()->addMinutes(10), 'consumed_at' => now()],
+            'locked' => ['expires_at' => now()->addMinutes(10), 'locked_until' => now()->addMinutes(15)],
+        ];
+
+        foreach ($challenges as $state => $attributes) {
+            $challenge = LoginChallenge::create([
+                'email' => "{$state}@example.com",
+                'code_hash' => Hash::make('123456'),
+                ...$attributes,
+            ]);
+
+            new SendLoginCodeEmailJob($challenge->id, Crypt::encryptString('123456'))->handle(resolve(LoginCodes::class));
+
+            $this->assertNull($challenge->fresh()->email_sent_at, "The {$state} code was sent.");
+        }
+
+        Mail::assertNothingSent();
+    }
 }
