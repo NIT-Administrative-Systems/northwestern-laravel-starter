@@ -6,6 +6,8 @@ use App\Domains\Auth\Exceptions\AccountDeactivated;
 use App\Domains\Support\Models\Changelog;
 use App\Domains\User\Models\User;
 use Illuminate\Support\Facades\Route;
+use Lab404\Impersonate\Services\ImpersonateManager;
+use Mockery\MockInterface;
 use Northwestern\SysDev\Chassis\Testing\Browser\ErrorPages;
 
 /*
@@ -39,6 +41,37 @@ it('is healthy at the email sign-in code step', function (bool $dark) {
 
     expect($page)->toBeHealthy();
 })->with(['light' => false, 'dark' => true]);
+
+// Every page before signing in is light; dark mode starts inside the panel.
+it('keeps the sign-in pages light in dark mode, also after navigating between them', function () {
+    $page = visit('/app/login')->inDarkMode();
+
+    expect($page->script("document.documentElement.classList.contains('dark')"))->toBeFalse();
+
+    $page->click('@email-login')->assertVisible('@email-input');
+
+    expect($page->script("document.documentElement.classList.contains('dark')"))->toBeFalse();
+});
+
+it('is healthy with the impersonation banner, in each theme and on a phone', function () {
+    $this->signInAsNorthwesternUser();
+    // A browser test can't seed the session, so the manager reports an impersonation.
+    $this->partialMock(ImpersonateManager::class, function (MockInterface $mock): void {
+        $mock->shouldReceive('getCurrentAuthGuardName')->andReturn('web');
+        $mock->shouldReceive('isImpersonating')->andReturn(true);
+    });
+
+    expect(visit('/this-page-does-not-exist')->assertSee('Leave Impersonation'))
+        ->toBeHealthyInEachTheme()
+        ->toBeHealthyOnMobile();
+});
+
+it('is healthy with a unit lockup in the header', function () {
+    // Any image in public/ stands in for a unit's lockup; an outside host would make the test depend on it.
+    config(['northwestern-filament-theme.lockup' => 'images/default-profile-photo.svg']);
+
+    expect(visit('/')->assertVisible('@site-header-lockup'))->toBeHealthyInEachTheme();
+});
 
 it('is healthy on a changelog entry', function () {
     $entry = Changelog::factory()->create(['body' => "### Changes\n\n- A change"]);

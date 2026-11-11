@@ -9,3 +9,16 @@
 @source '../views/errors/**/*';
 @source '../views/components/layouts/error.blade.php';
 @source '../views/components/site-header.blade.php';
+
+/* The theme sets its type scale in the panels' CSS, not in the tokens imported here. The environment
+   badge's text uses this step, so without it the badge renders larger than on the public layout. */
+:root {
+    --nu-text-sm: 0.8125rem;
+}
+
+/* The header's focus ring, as in the panel themes: the footer's 3px white outline, set 2px off the control. */
+.nu-site-header :is(a, button):focus-visible,
+.nu-site-header .nu-lockup:focus-visible /* outranks the lockup component's own 2px outline */ {
+    outline: 3px solid var(--color-white);
+    outline-offset: 2px;
+}

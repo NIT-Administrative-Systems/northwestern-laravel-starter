@@ -8,7 +8,7 @@
             <div>
                 <time class="text-sm font-semibold text-gray-500"
                       datetime="{{ $entry->created_at->toDateString() }}">{{ $entry->created_at->format('F j, Y') }}</time>
-                <h1 class="font-nu-heading text-nu-purple-100 mt-2 text-3xl font-bold">
+                <h1 class="font-nu-heading text-nu-purple-100 mt-2 text-4xl font-bold">
                     {{ $entry->title ?? $entry->slug }}
                 </h1>
             </div>
@@ -36,7 +36,8 @@
                     this.$tooltip(message, { timeout: 2000 });
                 },
             }">
-                <x-filament::button color="gray"
+                <x-filament::button class="pointer-coarse:min-h-11"
+                                    color="gray"
                                     outlined
                                     size="sm"
                                     icon="heroicon-m-share"
@@ -49,7 +50,9 @@
             </div>
         </div>
 
-        <div class="fi-prose mt-6">
+        {{-- Section headings ("Changes", "Fixes") sit below the title, with bullets that show. --}}
+        <div
+             class="fi-prose [--prose-marker-color:var(--color-gray-400)]! [&_h2]:text-base! [&_h2]:font-semibold! [&_h2]:text-gray-600! mt-6 [&_h2]:uppercase [&_h2]:tracking-wide">
             {{ $entry->bodyHtml(topHeadingLevel: 2) }}
         </div>
     </div>

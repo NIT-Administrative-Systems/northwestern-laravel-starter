@@ -135,16 +135,15 @@ final class LoginTest extends TestCase
         ]);
     }
 
-    // The site header names the application, so the card's heading is a plain "Sign in"; the browser tab keeps the name.
-    public function test_page_has_the_site_header_and_a_plain_heading(): void
+    // On phones the header shows the application's name only in a second row, so the card names it too.
+    public function test_page_has_the_site_header_and_a_heading_naming_the_application(): void
     {
         $this->configureEntra();
         config(['local-auth.enabled' => true]);
 
         $this->get('/app/login')
             ->assertOk()
-            ->assertSeeInOrder(['<h1 class="fi-simple-header-heading">', 'Sign In', '</h1>'], escape: false)
-            ->assertDontSee('Sign in to')
+            ->assertSeeInOrder(['<h1 class="fi-simple-header-heading">', 'Sign In to ' . e(config('app.name')), '</h1>'], escape: false)
             ->assertSeeInOrder(['<title>', 'Sign In', ' - ', e(config('app.name')), '</title>'], escape: false)
             ->assertSee('For students, faculty, staff, and affiliates.')
             ->assertSee('For approved external partners without a NetID.')
@@ -161,5 +160,51 @@ final class LoginTest extends TestCase
             ->assertOk()
             ->assertSee('Sign In with Email')
             ->assertDontSee('nu-sign-in-divider', escape: false);
+    }
+
+    public function test_email_is_secondary_beside_netid_sign_in(): void
+    {
+        $this->configureEntra();
+        config(['local-auth.enabled' => true]);
+
+        $response = $this->get('/app/login')->assertOk();
+        $button = $this->emailButton((string) $response->getContent());
+
+        $this->assertStringContainsString('fi-outlined', $button);
+        $this->assertStringNotContainsString('fi-color-primary', $button);
+        $response->assertDontSee('data-testid="netid-not-set-up"', escape: false);
+    }
+
+    public function test_email_is_primary_and_explained_when_it_is_the_only_method(): void
+    {
+        config(['local-auth.enabled' => true]);
+
+        $response = $this->get('/app/login')->assertOk();
+        $button = $this->emailButton((string) $response->getContent());
+
+        $this->assertStringNotContainsString('fi-outlined', $button);
+        $this->assertStringContainsString('fi-color-primary', $button);
+        $response->assertSee('NetID sign-in isn\'t set up in this environment.');
+    }
+
+    public function test_production_does_not_say_netid_sign_in_is_not_set_up(): void
+    {
+        config(['local-auth.enabled' => true]);
+        $this->app->detectEnvironment(fn () => 'production');
+
+        $this->get('/app/login')
+            ->assertOk()
+            ->assertSee('Sign In with Email')
+            ->assertDontSee('data-testid="netid-not-set-up"', escape: false);
+    }
+
+    /**
+     * The opening tag of the "Sign In with Email" button.
+     */
+    private function emailButton(string $html): string
+    {
+        $this->assertSame(1, preg_match('/<a\b[^>]*data-testid="email-login"[^>]*>/', $html, $match));
+
+        return $match[0];
     }
 }

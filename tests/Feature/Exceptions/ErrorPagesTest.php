@@ -7,6 +7,7 @@ namespace Tests\Feature\Exceptions;
 use App\Domains\User\Models\User;
 use Illuminate\Support\Facades\Route;
 use PHPUnit\Framework\Attributes\CoversNothing;
+use PHPUnit\Framework\Attributes\DataProvider;
 use RuntimeException;
 use Tests\TestCase;
 
@@ -34,9 +35,41 @@ final class ErrorPagesTest extends TestCase
     {
         $this->get('/no-such-page')
             ->assertNotFound()
-            ->assertSee('Page Not Found')
-            ->assertSee('Back to Homepage')
+            ->assertSeeInOrder(['Error 404', 'Page Not Found', 'Go to the Home Page'])
             ->assertSee('Privacy Statement');
+    }
+
+    /**
+     * @return \Iterator<string, array{int, string, string}>
+     */
+    public static function actions(): \Iterator
+    {
+        yield 'unauthorized' => [401, 'Sign In', '/app/login'];
+        yield 'forbidden' => [403, 'Go to the Home Page', '/'];
+        yield 'expired' => [419, 'Reload the Page', '/changelog-page'];
+        yield 'too many requests' => [429, 'Go Back', '/changelog-page'];
+    }
+
+    #[DataProvider('actions')]
+    public function test_each_client_error_offers_its_next_step(int $status, string $label, string $path): void
+    {
+        Route::get('/__test/status/{status}', fn (int $status) => abort($status))->middleware('web');
+
+        $response = $this->get("/__test/status/{$status}", ['referer' => url('/changelog-page')])
+            ->assertStatus($status)
+            ->assertSee("Error {$status}");
+
+        $this->assertSame(1, preg_match('/<a\b[^>]*data-testid="error-action"[^>]*href="([^"]+)"[^>]*>\s*([^<]+?)\s*</', (string) $response->getContent(), $action));
+        $this->assertSame([url($path), $label], [$action[1], $action[2]]);
+    }
+
+    public function test_going_back_never_leaves_the_application(): void
+    {
+        Route::get('/__test/too-many', fn () => abort(429))->middleware('web');
+
+        $this->get('/__test/too-many', ['referer' => 'https://example.com/elsewhere'])->assertTooManyRequests()
+            ->assertSee('href="' . url('/') . '"', escape: false)
+            ->assertDontSee('example.com');
     }
 
     public function test_not_found_page_has_the_help_menu_and_sign_in_for_guests(): void
@@ -56,6 +89,53 @@ final class ErrorPagesTest extends TestCase
             ->assertDontSee('data-testid="sign-in-link"', escape: false);
     }
 
+    public function test_not_found_page_shows_the_impersonation_banner_while_impersonating(): void
+    {
+        $administrator = User::factory()->create();
+        $person = User::factory()->create(['first_name' => 'Pat', 'last_name' => 'Person']);
+
+        $this->actingAs($person)
+            ->withSession([resolve('impersonate')->getSessionKey() => $administrator->id])
+            ->get('/no-such-page')
+            ->assertNotFound()
+            ->assertSee('Impersonating user · ' . $person->full_name)
+            ->assertSee('action="' . route('impersonate.leave') . '"', escape: false)
+            ->assertSee('Leave Impersonation');
+    }
+
+    public function test_pages_show_no_impersonation_banner_otherwise(): void
+    {
+        $this->actingAs(User::factory()->create())
+            ->get('/no-such-page')
+            ->assertNotFound()
+            ->assertDontSee('Leave Impersonation');
+    }
+
+    public function test_the_header_shows_the_unit_lockup_when_one_is_set(): void
+    {
+        config(['northwestern-filament-theme.lockup' => 'images/unit-lockup.svg', 'northwestern-filament-theme.unit.name' => 'Office of Testing']);
+
+        $this->get('/no-such-page')
+            ->assertNotFound()
+            ->assertSee('data-testid="site-header-lockup"', escape: false)
+            ->assertSee('src="' . asset('images/unit-lockup.svg') . '" alt="Northwestern University Office of Testing"', escape: false);
+
+        // The bare error layout too: the lockup reads only config.
+        $this->get('/__test/unavailable')
+            ->assertServiceUnavailable()
+            ->assertSee('data-testid="site-header-lockup"', escape: false);
+    }
+
+    public function test_the_header_shows_the_wordmark_without_a_lockup(): void
+    {
+        config(['northwestern-filament-theme.lockup' => null]);
+
+        $this->get('/no-such-page')
+            ->assertNotFound()
+            ->assertDontSee('data-testid="site-header-lockup"', escape: false)
+            ->assertSee('nu-wordmark', escape: false);
+    }
+
     public function test_unknown_api_paths_are_not_caught_by_the_web_fallback(): void
     {
         $this->get('/api/no-such-endpoint')
@@ -68,6 +148,10 @@ final class ErrorPagesTest extends TestCase
         $this->get('/__test/unavailable')
             ->assertServiceUnavailable()
             ->assertSee('Service Unavailable')
+            ->assertSee('Error 503')
+            ->assertSee('Skip to Content')
+            ->assertSee('id="main"', escape: false)
+            ->assertDontSee('data-testid="error-action"', escape: false)
             ->assertDontSee('data-testid="help-menu-trigger"', escape: false)
             ->assertDontSee('data-testid="sign-in-link"', escape: false);
     }
@@ -98,8 +182,19 @@ final class ErrorPagesTest extends TestCase
     {
         $this->get('/__test/server-error')
             ->assertInternalServerError()
+            ->assertSeeInOrder(['Error 500', 'Something Went Wrong', 'IT Service Desk', 'Go to the Home Page'])
             ->assertSee('Sensitive failure detail')
             ->assertSee('Non-Production Only');
+    }
+
+    public function test_server_error_details_leave_out_an_empty_message(): void
+    {
+        Route::get('/__test/server-error-without-message', fn () => abort(500));
+
+        $this->get('/__test/server-error-without-message')
+            ->assertInternalServerError()
+            ->assertSee('View Full')
+            ->assertDontSee('border-red-600', escape: false);
     }
 
     /**
