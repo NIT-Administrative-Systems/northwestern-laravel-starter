@@ -1,4 +1,4 @@
-{{-- The announcement banner as the form describes it, without dismissing or page links. --}}
+{{-- The banner as the form describes it, without the dismiss button or page links. --}}
 <div class="flex flex-col gap-2">
     <x-announcement-banner :announcement="$announcement" />
 
