@@ -15,13 +15,9 @@ if (!app()->environment('production')) {
         <atom:link type="application/rss+xml"
                    href="{{ route('support.changelog.feed') }}"
                    rel="self" />
-        <title>
-            <![CDATA[{{ $title }}]]>
-        </title>
+        <title>{{ $title }}</title>
         <link>{{ route('support.changelog.index') }}</link>
-        <description>
-            <![CDATA[Platform release notes and updates.]]>
-        </description>
+        <description>Platform release notes and updates.</description>
         <language>en</language>
         <copyright>{{ date('Y') }} {{ config('app.name') }}</copyright>
         <pubDate>{{ ($entries->first()?->created_at ?? now())->toRssString() }}</pubDate>
@@ -31,9 +27,7 @@ if (!app()->environment('production')) {
 
         @foreach ($entries as $entry)
             <item>
-                <title>
-                    <![CDATA[{{ $entry->title ?? $entry->slug }}]]>
-                </title>
+                <title>{{ $entry->title ?? $entry->slug }}</title>
                 <link>{{ route('support.changelog.show', $entry) }}</link>
                 <description>
                     <![CDATA[<x-markdown :anchors="false" :options="['html_input' => 'escape']">{!! $entry->body !!}</x-markdown>]]>
