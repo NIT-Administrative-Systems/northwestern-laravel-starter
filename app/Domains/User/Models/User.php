@@ -28,6 +28,7 @@ use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
 use Filament\Models\Contracts\HasName;
 use Filament\Panel;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -38,6 +39,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
 use Laravel\Passport\Contracts\OAuthenticatable;
 use Laravel\Passport\HasApiTokens;
 use Northwestern\SysDev\Chassis\Models\Concerns\Auditable as AuditableConcern;
@@ -100,8 +102,24 @@ class User extends Authenticatable implements Auditable, FilamentUser, HasAvatar
 
     protected static function booted(): void
     {
+        // Credentials change only under the name of the person changing them, so the revocation
+        // below would be refused.
+        static::deleting(static function (): void {
+            if (resolve('impersonate')->isImpersonating()) {
+                throw new AuthorizationException("Users can't be deleted while impersonating someone. Stop impersonating, then try again.");
+            }
+        });
+
         // A deleted account can't call the API; its tokens and clients are revoked with it.
         static::deleted(static fn (User $user) => resolve(RevokeAllCredentials::class)($user));
+    }
+
+    /**
+     * Deletes the user and revokes their credentials together, so neither happens without the other.
+     */
+    public function delete(): ?bool
+    {
+        return DB::transaction(fn (): ?bool => parent::delete());
     }
 
     /**
