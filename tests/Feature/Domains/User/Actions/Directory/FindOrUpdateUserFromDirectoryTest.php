@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Tests\Feature\Domains\User\Actions\Directory;
 
 use App\Domains\Auth\Enums\AuthType;
+use App\Domains\Core\Enums\AuditEvent;
+use App\Domains\Core\Models\Audit;
 use App\Domains\User\Actions\Directory\FindOrUpdateUserFromDirectory;
 use App\Domains\User\Enums\Affiliation;
 use App\Domains\User\Exceptions\BadDirectoryEntry;
@@ -13,22 +15,25 @@ use Illuminate\Contracts\Bus\Dispatcher;
 use Illuminate\Support\Facades\Exceptions;
 use Northwestern\SysDev\SOA\DirectorySearch;
 use PHPUnit\Framework\Attributes\CoversClass;
+use Tests\Concerns\IssuesPersonalAccessTokens;
 use Tests\TestCase;
 
 #[CoversClass(FindOrUpdateUserFromDirectory::class)]
 final class FindOrUpdateUserFromDirectoryTest extends TestCase
 {
+    use IssuesPersonalAccessTokens;
+
     public function test_invoke(): void
     {
         $directoryApi = $this->createStub(DirectorySearch::class);
 
         User::factory()->create(['username' => 'xyz456']);
-        $inactiveUser = $this->service(['directorySearch' => $directoryApi])('xyz456');
+        $unlookedUpUser = $this->service(['directorySearch' => $directoryApi])('xyz456');
 
-        $this->assertTrue($inactiveUser->exists);
-        $this->assertTrue($inactiveUser->netid_inactive);
-        $this->assertNotNull($inactiveUser->directory_sync_last_failed_at);
-        $this->assertEquals('xyz456', $inactiveUser->username);
+        $this->assertTrue($unlookedUpUser->exists);
+        $this->assertNull($unlookedUpUser->netid_inactive);
+        $this->assertNotNull($unlookedUpUser->directory_sync_last_failed_at);
+        $this->assertEquals('xyz456', $unlookedUpUser->username);
 
         $directoryApi->method('lookup')->willReturn(self::studentData('abc123'));
         $activeUser = $this->service(['directorySearch' => $directoryApi])('abc123');
@@ -217,6 +222,55 @@ final class FindOrUpdateUserFromDirectoryTest extends TestCase
         $this->assertNotNull($user->directory_sync_last_failed_at);
     }
 
+    // lookup() answers false both when the NetID isn't found and when Directory Search can't be
+    // reached, so for someone with an account it proves nothing: they sign in as they were.
+    public function test_a_failed_lookup_leaves_an_existing_person_active(): void
+    {
+        $user = User::factory()->create(['username' => 'abc123', 'auth_type' => AuthType::SSO, 'netid_inactive' => false, 'first_name' => 'Stored']);
+        [$token] = $this->personalAccessToken($user);
+
+        $directoryApi = $this->createStub(DirectorySearch::class);
+        $directoryApi->method('lookup')->willReturn(false);
+        $directoryApi->method('getLastError')->willReturn('Verify connectivity to https://directory.example from the server: cURL error 28');
+
+        $found = $this->service(['directorySearch' => $directoryApi])('abc123');
+
+        $this->assertTrue($found->is($user));
+        $this->assertSame('Stored', $found->first_name);
+        $this->assertFalse($found->fresh()->netid_inactive);
+        $this->assertNotNull($found->fresh()->directory_sync_last_failed_at);
+
+        // The hourly sweep keeps their credentials.
+        $this->artisan('oauth:revoke-ineligible')->assertSuccessful();
+        $this->assertSame(0, Audit::query()->where('event', AuditEvent::PersonalAccessTokenRevoked->value)->count());
+        $this->assertNotEmpty($token);
+    }
+
+    public function test_a_failed_lookup_leaves_a_deactivated_person_deactivated(): void
+    {
+        $user = User::factory()->create(['username' => 'gone123', 'auth_type' => AuthType::SSO, 'netid_inactive' => true]);
+
+        $directoryApi = $this->createStub(DirectorySearch::class);
+        $directoryApi->method('lookup')->willReturn(false);
+
+        $this->assertTrue($this->service(['directorySearch' => $directoryApi])('gone123')->is($user));
+        $this->assertTrue($user->fresh()->netid_inactive);
+    }
+
+    public function test_a_failed_lookup_for_someone_new_creates_no_account(): void
+    {
+        $directoryApi = $this->createStub(DirectorySearch::class);
+        $directoryApi->method('lookup')->willReturn(false);
+
+        $this->expectException(BadDirectoryEntry::class);
+
+        try {
+            $this->service(['directorySearch' => $directoryApi])('new123');
+        } finally {
+            $this->assertFalse(User::query()->where('username', 'new123')->exists());
+        }
+    }
+
     public function test_does_not_mark_non_sso_user_as_inactive(): void
     {
         $directoryApi = $this->createStub(DirectorySearch::class);
@@ -242,7 +296,7 @@ final class FindOrUpdateUserFromDirectoryTest extends TestCase
         $directoryApi = $this->createStub(DirectorySearch::class);
         $directoryApi->method('lookup')
             ->willReturnOnConsecutiveCalls(
-                false,
+                ['uid' => 'recovered'],
                 self::studentData('recovered')
             );
 

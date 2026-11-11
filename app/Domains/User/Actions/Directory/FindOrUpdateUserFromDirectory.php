@@ -148,11 +148,14 @@ readonly class FindOrUpdateUserFromDirectory
     }
 
     /**
-     * Handles cases where directory data is missing or incomplete.
+     * Handles cases where the lookup failed or the directory entry is missing or incomplete.
      *
-     * If an existing {@see User} is found, and they authenticate via SSO, the user is flagged as having an
-     * inactive NetID and the directory sync failure timestamp is recorded. This allows the application to
-     * treat the account as effectively deprovisioned while still retaining local history.
+     * If an existing {@see User} is found, and they authenticate via SSO, the directory sync failure
+     * timestamp is recorded and the user is returned with the details already stored. An incomplete
+     * entry also flags the NetID as inactive, so the application treats the account as deprovisioned
+     * while still retaining local history. A failed lookup doesn't: Directory Search answers `false`
+     * both for a NetID it doesn't know and when it can't be reached, so an outage must not deactivate
+     * anyone or cost them their credentials. EventHub's NetID updates still deactivate accounts.
      *
      * If no existing user is found, a {@see BadDirectoryEntry} exception is thrown so that callers can surface
      * or log the invalid directory state.
@@ -166,7 +169,7 @@ readonly class FindOrUpdateUserFromDirectory
         if ($existingUser instanceof User) {
             if ($existingUser->auth_type === AuthType::SSO) {
                 $existingUser->update([
-                    'netid_inactive' => true,
+                    ...($directoryData === false ? [] : ['netid_inactive' => true]),
                     'directory_sync_last_failed_at' => now(),
                 ]);
             }
