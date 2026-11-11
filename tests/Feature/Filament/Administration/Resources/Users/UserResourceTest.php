@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Filament\Administration\Resources\Users;
 
 use App\Domains\Access\Enums\SystemPermission;
+use App\Domains\Auth\Models\LoginChallenge;
 use App\Domains\User\Models\User;
 use App\Filament\Administration\Resources\UserLoginRecords\UserLoginRecordResource;
 use App\Filament\Administration\Resources\Users\Pages\ListUsers;
@@ -15,10 +16,13 @@ use App\Filament\Administration\Resources\Users\RelationManagers\RoleActivityRel
 use App\Filament\Administration\Resources\Users\UserResource;
 use App\Providers\Filament\AdministrationPanelProvider;
 use Filament\Facades\Filament;
+use Filament\Notifications\Notification;
 use Filament\Tables\Filters\TrashedFilter;
+use Illuminate\Support\Facades\Exceptions;
 use Livewire\Livewire;
 use Northwestern\SysDev\SOA\DirectorySearch;
 use PHPUnit\Framework\Attributes\CoversNothing;
+use RuntimeException;
 use Tests\Feature\Domains\User\Actions\Directory\FindOrUpdateUserFromDirectoryTest;
 use Tests\Feature\Filament\Administration\Concerns\AssertsLinkedRows;
 use Tests\TestCase;
@@ -224,6 +228,22 @@ final class UserResourceTest extends TestCase
             ->assertRedirect(UserResource::getUrl('view', ['record' => $deactivated]));
 
         $this->assertSoftDeleted($deactivated);
+    }
+
+    public function test_a_code_that_fails_to_send_says_so_without_the_error_itself(): void
+    {
+        Exceptions::fake();
+        $superAdministrator = User::factory()->create();
+        $superAdministrator->givePermissionTo(SystemPermission::ManageAll);
+        $person = User::factory()->affiliate()->create();
+        $this->actingAs($superAdministrator);
+        LoginChallenge::creating(fn () => throw new RuntimeException('SQLSTATE[08006] could not connect to server'));
+
+        Livewire::test(ViewUser::class, ['record' => $person->getRouteKey()])
+            ->callAction('sendLoginCode')
+            ->assertNotified(Notification::make()->danger()->title('Verification Code Not Sent')->body('We couldn\'t send the code. Try again in a few minutes.'));
+
+        Exceptions::assertReported(RuntimeException::class);
     }
 
     public function test_a_deleted_person_is_offered_no_code_or_impersonation(): void
