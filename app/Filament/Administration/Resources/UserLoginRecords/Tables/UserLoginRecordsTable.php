@@ -48,12 +48,14 @@ class UserLoginRecordsTable
                     ->sortable()
                     ->visibleFrom('xl'),
                 TextColumn::make('ip_address')
+                    ->placeholder('—')
                     ->label('IP Address')
                     ->fontFamily(FontFamily::Mono)
                     ->copyable()
                     ->searchable(isIndividual: true, isGlobal: false)
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('user_agent')
+                    ->placeholder('—')
                     ->label('User Agent')
                     ->limit(40)
                     ->tooltip(fn ($state) => $state)

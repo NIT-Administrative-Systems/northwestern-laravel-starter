@@ -50,6 +50,7 @@ class AuditsTable
             ->modifyQueryUsing(fn (Builder $query) => $query->with(self::people()))
             ->columns([
                 TextColumn::make('trace_id')
+                    ->placeholder('—')
                     ->label('Trace ID')
                     ->fontFamily(FontFamily::Mono)
                     ->searchable(isIndividual: true, isGlobal: false)
@@ -82,6 +83,7 @@ class AuditsTable
                     ->sortable()
                     ->visibleFrom('xl'),
                 TextColumn::make('url')
+                    ->placeholder('—')
                     ->label('URL')
                     ->fontFamily(FontFamily::Mono)
                     ->formatStateUsing(fn ($state) => str_replace(config('app.url'), '', $state))
@@ -122,16 +124,19 @@ class AuditsTable
                     )
                     ->color(fn ($record) => $record->impersonator ? 'warning' : null),
                 TextColumn::make('ip_address')
+                    ->placeholder('—')
                     ->label('IP Address')
                     ->fontFamily(FontFamily::Mono)
                     ->copyable()
                     ->searchable(isIndividual: true, isGlobal: false)
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('user_agent')
+                    ->placeholder('—')
                     ->label('User Agent')
                     ->searchable(isIndividual: true, isGlobal: false)
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('tags')
+                    ->placeholder('—')
                     ->searchable(isIndividual: true, isGlobal: false)
                     ->toggleable(isToggledHiddenByDefault: true),
             ])

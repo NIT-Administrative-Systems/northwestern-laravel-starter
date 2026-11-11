@@ -86,6 +86,7 @@ class RoleActivityTable
                     ->placeholder('None'),
 
                 TextColumn::make('tags')
+                    ->placeholder('—')
                     ->label('Origin')
                     ->badge()
                     ->visibleFrom('2xl')

@@ -13,11 +13,14 @@ use App\Providers\Filament\AdministrationPanelProvider;
 use Filament\Facades\Filament;
 use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\CoversNothing;
+use Tests\Feature\Filament\Administration\Concerns\AssertsLinkedRows;
 use Tests\TestCase;
 
 #[CoversNothing]
 final class UserLoginRecordResourceTest extends TestCase
 {
+    use AssertsLinkedRows;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -37,6 +40,15 @@ final class UserLoginRecordResourceTest extends TestCase
             ->assertCanSeeTableRecords([$record])
             ->assertTableColumnStateSet('user.username', $person->username, $record)
             ->assertTableActionHasUrl('view', UserResource::getUrl('view', ['record' => $person]), $record);
+    }
+
+    public function test_a_sign_in_with_no_request_details_has_no_empty_links(): void
+    {
+        $record = UserLoginRecord::factory()->create(['ip_address' => null, 'user_agent' => null]);
+        $record->user->delete();
+        $this->actingAs($this->administrator());
+
+        $this->assertEveryEmptyCellHasPlaceholder(Livewire::test(ListUserLoginRecords::class)->loadTable(), $record);
     }
 
     private function administrator(): User

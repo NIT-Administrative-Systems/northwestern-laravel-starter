@@ -18,11 +18,14 @@ use Filament\Facades\Filament;
 use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Tests\Feature\Filament\Administration\Concerns\AssertsLinkedRows;
 use Tests\TestCase;
 
 #[CoversNothing]
 final class AuditResourceTest extends TestCase
 {
+    use AssertsLinkedRows;
+
     /** @return \Iterator<string, array{string}> */
     public static function auditPages(): \Iterator
     {
@@ -81,6 +84,17 @@ final class AuditResourceTest extends TestCase
         Livewire::test(ListRoleActivity::class)
             ->loadTable()
             ->assertTableColumnStateSet('user.full_name', $changer->full_name, $audit);
+    }
+
+    public function test_an_audit_with_no_request_details_has_no_empty_links(): void
+    {
+        $audit = Audit::query()->latest('id')->firstOrFail();
+        $audit->forceFill(['url' => null, 'ip_address' => null, 'user_agent' => null, 'tags' => null, 'trace_id' => null])->save();
+
+        $this->actingAs($this->administrator(SystemPermission::ViewAuditLogs));
+        Filament::setCurrentPanel(AdministrationPanelProvider::ID);
+
+        $this->assertEveryEmptyCellHasPlaceholder(Livewire::test(ListAudits::class)->loadTable(), $audit);
     }
 
     private function administrator(SystemPermission ...$permissions): User

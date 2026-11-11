@@ -14,11 +14,14 @@ use App\Providers\Filament\AdministrationPanelProvider;
 use Filament\Facades\Filament;
 use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\CoversNothing;
+use Tests\Feature\Filament\Administration\Concerns\AssertsLinkedRows;
 use Tests\TestCase;
 
 #[CoversNothing]
 final class RoleActivityResourceTest extends TestCase
 {
+    use AssertsLinkedRows;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -50,6 +53,16 @@ final class RoleActivityResourceTest extends TestCase
             ->filterTable('role', $editor->getKey())
             ->assertCanSeeTableRecords([$editorAssigned])
             ->assertCanNotSeeTableRecords([$facultyAssigned, $facultyRemoved]);
+    }
+
+    public function test_a_role_change_with_no_origin_has_no_empty_links(): void
+    {
+        User::factory()->affiliate()->create()->assignRoleWithAudit(Role::factory()->create(), RoleModificationOrigin::UiAction);
+        $audit = $this->latestRoleChange();
+        $audit->forceFill(['tags' => null])->save();
+        $this->actingAs($this->administrator());
+
+        $this->assertEveryEmptyCellHasPlaceholder(Livewire::test(ListRoleActivity::class)->loadTable(), $audit);
     }
 
     private function latestRoleChange(): Audit

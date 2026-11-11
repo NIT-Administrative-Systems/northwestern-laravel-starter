@@ -20,16 +20,40 @@ use Livewire\Livewire;
 use Northwestern\SysDev\SOA\DirectorySearch;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use Tests\Feature\Domains\User\Actions\Directory\FindOrUpdateUserFromDirectoryTest;
+use Tests\Feature\Filament\Administration\Concerns\AssertsLinkedRows;
 use Tests\TestCase;
 
 #[CoversNothing]
 final class UserResourceTest extends TestCase
 {
+    use AssertsLinkedRows;
+
     protected function setUp(): void
     {
         parent::setUp();
 
         Filament::setCurrentPanel(AdministrationPanelProvider::ID);
+    }
+
+    public function test_a_person_with_no_details_on_file_has_no_empty_links_in_the_list(): void
+    {
+        $person = User::factory()->create([
+            'first_name' => null,
+            'last_name' => null,
+            'email' => null,
+            'phone' => null,
+            'employee_id' => null,
+            'hr_employee_id' => null,
+            'primary_affiliation' => null,
+            'netid_inactive' => null,
+            'last_directory_sync_at' => null,
+            'directory_sync_last_failed_at' => null,
+        ]);
+        $administrator = User::factory()->affiliate()->create();
+        $administrator->givePermissionTo(SystemPermission::AccessAdministrationPanel, SystemPermission::ViewUsers);
+        $this->actingAs($administrator);
+
+        $this->assertEveryEmptyCellHasPlaceholder(Livewire::test(ListUsers::class), $person);
     }
 
     // Managing API access is enough to manage API users, and no one else.
