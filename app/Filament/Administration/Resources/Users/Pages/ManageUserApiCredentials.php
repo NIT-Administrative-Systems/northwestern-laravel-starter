@@ -23,7 +23,7 @@ class ManageUserApiCredentials extends UserRelationsPage
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedKey;
 
-    protected static function managers(): array
+    public static function managers(): array
     {
         return [
             ServiceClientsRelationManager::class,

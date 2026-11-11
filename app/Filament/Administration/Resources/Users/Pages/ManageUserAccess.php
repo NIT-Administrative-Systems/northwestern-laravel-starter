@@ -20,7 +20,7 @@ class ManageUserAccess extends UserRelationsPage
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShieldCheck;
 
-    protected static function managers(): array
+    public static function managers(): array
     {
         return [
             RolesRelationManager::class,

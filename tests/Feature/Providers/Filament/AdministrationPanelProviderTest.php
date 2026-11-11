@@ -15,7 +15,9 @@ use App\Domains\User\Models\User;
 use App\Domains\User\Models\UserLoginRecord;
 use App\Filament\Administration\Resources\Roles\Pages\ViewRole;
 use App\Filament\Administration\Resources\Roles\RoleResource;
-use App\Filament\Administration\Resources\Users\Pages\ViewUser;
+use App\Filament\Administration\Resources\Users\Pages\ManageUserAccess;
+use App\Filament\Administration\Resources\Users\Pages\ManageUserActivity;
+use App\Filament\Administration\Resources\Users\Pages\ManageUserApiCredentials;
 use App\Filament\Administration\Resources\Users\UserResource;
 use App\Providers\Filament\AdministrationPanelProvider;
 use Filament\Facades\Filament;
@@ -83,10 +85,20 @@ final class AdministrationPanelProviderTest extends TestCase
         // Relation managers load after the page, so each is rendered on its own.
         Filament::setCurrentPanel(AdministrationPanelProvider::ID);
 
-        foreach ([[$superAdministrator, UserResource::class, ViewUser::class], [$apiUser, UserResource::class, ViewUser::class], [$role, RoleResource::class, ViewRole::class]] as [$owner, $resource, $page]) {
-            foreach ($resource::getRelations() as $relationManager) {
-                if ($relationManager::canViewForRecord($owner, $page)) {
-                    Livewire::test($relationManager, ['ownerRecord' => $owner, 'pageClass' => $page])->assertOk();
+        // A person's relation managers are on their record's sub-pages; a role's are on its view page.
+        $managersByPage = [
+            ...array_map(fn (string $page): array => [$page, $page::managers()], [ManageUserAccess::class, ManageUserActivity::class, ManageUserApiCredentials::class]),
+            [ViewRole::class, RoleResource::getRelations()],
+        ];
+
+        foreach ($managersByPage as [$page, $relationManagers]) {
+            $owners = $page === ViewRole::class ? [$role] : [$superAdministrator, $apiUser];
+
+            foreach ($owners as $owner) {
+                foreach ($relationManagers as $relationManager) {
+                    if ($relationManager::canViewForRecord($owner, $page)) {
+                        Livewire::test($relationManager, ['ownerRecord' => $owner, 'pageClass' => $page])->assertOk();
+                    }
                 }
             }
         }

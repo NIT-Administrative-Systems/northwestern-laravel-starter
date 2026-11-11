@@ -23,7 +23,7 @@ abstract class UserRelationsPage extends ManageRelatedRecords
      *
      * @return list<class-string<RelationManager>>
      */
-    abstract protected static function managers(): array;
+    abstract public static function managers(): array;
 
     /**
      * @param  array<string, mixed>  $parameters

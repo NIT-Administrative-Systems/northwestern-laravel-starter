@@ -20,7 +20,7 @@ class ManageUserActivity extends UserRelationsPage
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClock;
 
-    protected static function managers(): array
+    public static function managers(): array
     {
         return [
             AuditsRelationManager::class,
