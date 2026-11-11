@@ -17,11 +17,9 @@ use Northwestern\SysDev\SOA\DirectorySearch;
 use Throwable;
 
 /**
- * Finds or updates a user from the directory.
+ * Creates or updates someone's account from their Northwestern Directory entry.
  *
- * This action performs a directory lookup to fetch a {@see User} based on a provided search value.
- * If a user is found, it dispatches a set of post-retrieval jobs either synchronously or asynchronously,
- * depending on the provided flag.
+ * It then runs the post-retrieval jobs, on the queue or, when asked, right away.
  */
 readonly class FindOrUpdateUserFromDirectory
 {
@@ -34,30 +32,8 @@ readonly class FindOrUpdateUserFromDirectory
     }
 
     /**
-     * Job(s) to execute after a {@see User} is successfully retrieved.
-     *
-     * This is the primary extension point for running custom logic after a user is synchronized.
-     * Each job must implement {@see ShouldQueue} and accept a {@see User} in its constructor.
-     *
-     * @return list<class-string<ShouldQueue>>
-     */
-    private function postRetrievalJobs(): array
-    {
-        $jobs = [
-            // Add your custom post-retrieval jobs here — see docs for the full job contract.
-        ];
-
-        if (config('platform.wildcard_photo_sync')) {
-            $jobs[] = DownloadWildcardPhotoJob::class;
-        }
-
-        return $jobs;
-    }
-
-    /**
      * @param  non-empty-string  $searchValue  NetID, email address, or employee ID.
-     * @param  bool  $immediate  Whether to synchronously run {@see self::postRetrievalJobs()} or dispatch them to the queue
-     *                           after a {@see User} is retrieved.
+     * @param  bool  $immediate  Run the post-retrieval jobs now rather than on the queue
      *
      * @throws BadDirectoryEntry
      * @throws InvalidArgumentException
@@ -76,7 +52,7 @@ readonly class FindOrUpdateUserFromDirectory
 
         foreach ($this->postRetrievalJobs() as $jobClass) {
             if ($immediate) {
-                // A failed synchronous post-retrieval job should not break the flow of user retrieval.
+                // A failed post-retrieval job shouldn't stop the user being retrieved.
                 try {
                     dispatch_sync(new $jobClass($user));
                 } catch (Throwable $e) {
@@ -88,6 +64,14 @@ readonly class FindOrUpdateUserFromDirectory
         }
 
         return $user;
+    }
+
+    /**
+     * Get the last error from Directory Search.
+     */
+    public function getLastError(): ?string
+    {
+        return $this->directorySearch->getLastError();
     }
 
     /**
@@ -113,7 +97,7 @@ readonly class FindOrUpdateUserFromDirectory
     }
 
     /**
-     * Based on the search value and type, attempts to find an existing user in the database.
+     * Find the account the search value already belongs to, if any.
      */
     private function findExistingUser(string $searchValue, DirectorySearchType $searchType): ?User
     {
@@ -125,20 +109,16 @@ readonly class FindOrUpdateUserFromDirectory
             DirectorySearchType::EmployeeId => User::withTrashed()->where('employee_id', $searchValue),
         };
 
-        // An active account comes before a deactivated one with the same email: PostgreSQL
-        // sorts nulls first when descending.
+        // An active account comes before a deactivated one with the same
+        // email, because PostgreSQL sorts nulls first when descending.
         return $query->orderByDesc('deleted_at')->first();
     }
 
     /**
-     *  Certain directory entries can come back with missing or incomplete data. This is often the result of
-     *  a previous Northwestern employee or student who is no longer active. If we couldn't at least find
-     *  an existing {@see User} record, throw an exception.
+     * Determine whether the entry is missing or lacks an affiliation or email address.
      *
-     * This commonly affects:
-     * - Unmatriculated students
-     * - Certain affiliates
-     * - Students whose admission was canceled/revoked
+     * That usually means someone who left Northwestern, some affiliates, or
+     * a student who never matriculated or whose admission was canceled.
      *
      * @param  array<string, mixed>|false|null  $directoryData
      *
@@ -150,18 +130,21 @@ readonly class FindOrUpdateUserFromDirectory
     }
 
     /**
-     * Handles cases where the lookup failed or the directory entry is missing or incomplete.
+     * Resolve a failed lookup, or an entry that is missing or incomplete.
      *
-     * If an existing {@see User} is found, and they authenticate via SSO, the directory sync failure
-     * timestamp is recorded and the user is returned with the details already stored. An incomplete
-     * entry also flags the NetID as inactive, so the application treats the account as deprovisioned
-     * while still retaining local history. A failed lookup doesn't: Directory Search answers `false`
-     * both for a NetID it doesn't know and when it can't be reached, so an outage must not deactivate
-     * anyone or cost them their credentials. EventHub's NetID updates still deactivate accounts.
+     * An existing SSO account records the failure and keeps the details
+     * it has. An incomplete entry also marks its NetID inactive: the
+     * account is treated as deprovisioned and keeps its history.
      *
-     * If no existing user is found, a failed lookup returns null, which callers treat as Directory Search being
-     * unavailable: sign-in retries and then shows the 503 page. An incomplete entry throws a
-     * {@see BadDirectoryEntry} exception so that callers can surface or log the invalid directory state.
+     * A failed lookup doesn't. Directory Search answers false both for
+     * a NetID it doesn't know and when it can't be reached, and an
+     * outage mustn't cost anyone their account or credentials.
+     * EventHub's NetID updates still deactivate accounts.
+     *
+     * With no account, a failed lookup returns null, which
+     * callers treat as an outage: sign-in retries, then
+     * shows the 503 page. An incomplete entry throws
+     * BadDirectoryEntry for the caller to report.
      *
      * @param  array<string, mixed>|false|null  $directoryData
      *
@@ -191,7 +174,7 @@ readonly class FindOrUpdateUserFromDirectory
     }
 
     /**
-     * Synchronizes directory data into a {@see User} model and persists it.
+     * Update the account from the directory entry and save it.
      *
      * @param  array<string, mixed>  $directoryData
      */
@@ -211,10 +194,23 @@ readonly class FindOrUpdateUserFromDirectory
     }
 
     /**
-     * Returns the last error from Directory Search.
+     * The jobs to run after a user is retrieved.
+     *
+     * This is where an application adds its own work after every sync. Each
+     * job implements ShouldQueue and takes the User in its constructor.
+     *
+     * @return list<class-string<ShouldQueue>>
      */
-    public function getLastError(): ?string
+    private function postRetrievalJobs(): array
     {
-        return $this->directorySearch->getLastError();
+        $jobs = [
+            // Add your own post-retrieval jobs here; the docs describe what a job needs.
+        ];
+
+        if (config('platform.wildcard_photo_sync')) {
+            $jobs[] = DownloadWildcardPhotoJob::class;
+        }
+
+        return $jobs;
     }
 }

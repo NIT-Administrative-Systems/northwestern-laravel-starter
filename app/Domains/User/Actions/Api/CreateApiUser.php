@@ -13,10 +13,11 @@ use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Creates an API user, a service account for an integration, with its first service client.
+ * Creates an API user for an integration, with its first service client.
  *
- * API users never sign in. Their clients exchange a client ID and secret at `/oauth/token`
- * for access tokens that act as the API user, with its roles.
+ * API users never sign in. Their service clients exchange
+ * a client ID and secret at `/oauth/token` for access
+ * tokens that act as the API user, with its roles.
  */
 readonly class CreateApiUser
 {
@@ -57,7 +58,7 @@ readonly class CreateApiUser
                 'timezone' => config('platform.default_user_timezone'),
             ]);
 
-            // Refused here, after the user exists, the transaction undoes the user too.
+            // A refusal here, after the user exists, rolls the user back with it.
             [$secret, $client] = ($this->createServiceClient)($user, $clientName, $secretExpiresAt, $allowedIps, createdBy: $createdBy);
 
             return [$user, $secret, $client];

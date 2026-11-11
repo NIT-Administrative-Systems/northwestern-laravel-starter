@@ -8,15 +8,18 @@ use App\Domains\Core\Data\Preferences;
 use App\Domains\User\Models\User;
 
 /**
- * A user's own settings, stored in `users.preferences` and edited on the Account area's
- * Preferences page. Timezone is not here: it is a column, because every date display reads it.
+ * A person's own settings, edited on their Preferences page.
  *
- * Add a preference as a promoted constructor property with a default, then add its field to
- * the Preferences page:
+ * Timezone isn't one: it's a column, because every date display reads it.
  *
- *     public function __construct(
- *         public bool $emailWeeklySummary = true,
- *     ) {}
+ * Add a preference as a promoted constructor property with
+ * a default, then add its field to the Preferences page:
+ *
+ * ```php
+ * public function __construct(
+ *     public bool $emailWeeklySummary = true,
+ * ) {}
+ * ```
  *
  * Read it with `$user->preferences->emailWeeklySummary`.
  *
@@ -25,11 +28,11 @@ use App\Domains\User\Models\User;
 final readonly class UserPreferences extends Preferences
 {
     public function __construct(
-        /** Email me before my personal access tokens expire. */
+        /** Email the person before their personal access tokens expire. */
         public bool $emailBeforeAccessTokensExpire = true,
-        /** Email me when an application connects to my account. The in-app notification is always sent. */
+        /** Email when an application connects to their account; the bell always shows it. */
         public bool $emailWhenApplicationConnects = true,
-        /** Email me announcements an administrator chose to notify people about. The in-app notification is always sent. */
+        /** Email the announcements people are notified of; the bell always shows them. */
         public bool $emailAnnouncements = true,
     ) {
     }

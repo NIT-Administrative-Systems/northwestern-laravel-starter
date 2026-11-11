@@ -15,13 +15,12 @@ use InvalidArgumentException;
 use Throwable;
 
 /**
- * Handles webhook notifications from Northwestern's **NetID Update** message topic.
+ * Receives Northwestern's NetID Update messages from EventHub.
  *
- * NetID update messages are sent when a user is deactivated, deprovisioned,
- * placed on security hold, or other lifecycle changes.
+ * They arrive when a NetID is deactivated, deprovisioned or put on security hold.
  *
- * @see NetIdUpdated For payload parsing and event origination
- * @see ProcessNetIdUpdate For event handling
+ * @see NetIdUpdated
+ * @see ProcessNetIdUpdate
  */
 class NetIdUpdateController extends Controller
 {
@@ -39,11 +38,8 @@ class NetIdUpdateController extends Controller
             $payload = $request->getContent();
             $event = NetIdUpdated::fromPayload($payload);
         } catch (Throwable $e) {
-            /**
-             * Unexpected errors should be reported but still return a successful
-             * response. We don't want malformed requests to hit the DLQ and
-             * continue retrying invalid payloads.
-             */
+            // Anything unexpected is reported, but the response is still a success,
+            // so the dead letter queue doesn't retry a malformed message forever.
             report_unless($e instanceof InvalidArgumentException, $e);
 
             return response()->json([

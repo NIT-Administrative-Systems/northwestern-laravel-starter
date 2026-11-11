@@ -13,11 +13,14 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Deactivates an account: soft-deletes it, revokes everything it can call the API with and signs
- * it out everywhere. The account and its history stay, and {@see ReactivateUser} restores it.
+ * Deactivates an account: it soft-deletes it, revokes everything it
+ * can call the API with and signs it out everywhere. The account
+ * and its history stay, and {@see ReactivateUser} restores it.
  *
- * Recorded as {@see AuditEvent::AccountDeactivated} rather than Eloquent's `deleted`, so it's
- * audited from the scheduler too, where model events aren't.
+ * The audit is AccountDeactivated rather than Eloquent's deleted event,
+ * so it's recorded from the scheduler too, where model events aren't.
+ *
+ * @see AuditEvent::AccountDeactivated
  */
 readonly class DeactivateUser
 {
@@ -43,7 +46,7 @@ readonly class DeactivateUser
         }
 
         DB::transaction(function () use ($user, $context): void {
-            // Quietly, so the delete isn't audited as a plain delete; the credentials are revoked below.
+            // Quietly, so the delete isn't audited as a plain delete.
             $user->deleteQuietly();
 
             ($this->revokeAllCredentials)($user);

@@ -6,22 +6,19 @@ namespace App\Domains\User\Actions\Directory;
 
 use App\Domains\User\Enums\Affiliation;
 use App\Domains\User\Models\User;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 
 class SyncUserFromDirectory
 {
     /**
-     * Updates a {@see User} model with appropriate directory data for their affiliations.
-     *
-     * This model HAS NOT been saved yet; the calling code will need to call {@see Model::save()}.
+     * Update the user from their directory entry, without saving it.
      *
      * @param  array<string, mixed>  $directoryData
      */
     public function __invoke(User $user, array $directoryData): User
     {
-        // For create-by-email, this might not be set yet - assign it from the directory data.
+        // A user found by email may not have a username yet.
         if (blank($user->username)) {
             $user->username = Arr::get($directoryData, 'uid');
         }
@@ -38,18 +35,13 @@ class SyncUserFromDirectory
     }
 
     /**
-     * Synchronizes demographic data from the Northwestern Directory into the user model with field priority logic.
+     * Fill in the user's name, contact details, IDs, departments and job titles.
      *
-     * This method maps LDAP directory fields to user model attributes using a priority-based
-     * system. When multiple directory fields could provide the same data (e.g., student email
-     * vs. general email), it searches them in priority order and uses the first non-empty value.
+     * Several directory fields can hold the same detail, such as
+     * a student's email and the general one. Each detail takes
+     * the first of its fields, in order, that has a value.
      *
-     * @param  User  $user  The user model to update (not yet saved)
-     * @param  array<string, mixed>  $directoryData  Raw LDAP directory data
-     * @return User The updated user model (still needs to be saved by caller)
-     *
-     * @see findValue() for the priority search logic
-     * @see findAll() for multi-value field extraction
+     * @param  array<string, mixed>  $directoryData
      */
     protected function syncDemographics(User $user, array $directoryData): User
     {
@@ -61,7 +53,7 @@ class SyncUserFromDirectory
         $departmentKeys = ['nuAllDepartmentName'];
         $jobTitleKeys = ['nuAllTitle'];
 
-        // Student data fields should have priority over less-specific fields when this is a student
+        // A student's own fields come before the general ones.
         if ($user->primary_affiliation === Affiliation::Student) {
             array_unshift($firstNameKeys, 'nuStudentGivenName');
             array_unshift($lastNameKeys, 'nuStudentSn');
@@ -69,15 +61,14 @@ class SyncUserFromDirectory
             array_unshift($emailKeys, 'nuStudentEmail');
             array_unshift($phoneKeys, 'nuAllStudentCurrentPhone');
 
-            // Job title for a student looks like 'Temporary Student'.
-            // That's (a) not useful and (b) probably rude, so don't pick it up.
+            // A student's job title reads like Temporary Student, which isn't useful or kind.
             $jobTitleKeys = [];
         }
 
         $nuStudentNumber = $this->findValue($directoryData, ['nuStudentNumber']);
         $employeeNumber = $this->findValue($directoryData, ['employeeNumber']);
 
-        // If either of the emplid fields are less than 7 characters, remove them from the array because they're trash
+        // An ID shorter than seven characters isn't a real one.
         if ($nuStudentNumber !== null && strlen($nuStudentNumber) < 7) {
             $employeeIdKeys = array_values(array_diff($employeeIdKeys, ['nuStudentNumber']));
         }
@@ -85,8 +76,7 @@ class SyncUserFromDirectory
             $employeeIdKeys = array_values(array_diff($employeeIdKeys, ['employeeNumber']));
         }
 
-        // Set hr_employee_id to employeeNumber only if both IDs exist and are different
-        // Otherwise, explicitly set it to null to ensure it's synced from directory data
+        // Keep the myHR ID only when it differs from the student ID; clear it otherwise.
         $user->hr_employee_id = ($employeeNumber !== null && $nuStudentNumber !== null && $employeeNumber !== $nuStudentNumber)
             ? $employeeNumber
             : null;
@@ -99,7 +89,7 @@ class SyncUserFromDirectory
         $user->departments = $this->findAll($directoryData, $departmentKeys);
         $user->job_titles = $this->findAll($directoryData, $jobTitleKeys);
 
-        // The directory has no timezone. New users get the default; after that it is the user's own preference.
+        // The directory has no timezone. New users get the default, then choose their own.
         if (! $user->exists) {
             $user->timezone = config('platform.default_user_timezone');
         }
@@ -108,10 +98,9 @@ class SyncUserFromDirectory
     }
 
     /**
-     * Check for the presence of multiple potential keys & return the first found.
+     * Get the first non-empty value among the keys, in order.
      *
-     * Some of the DirectorySearch results are ['a key'][0].
-     * This helper pops the first array key out, if it looks like that.
+     * Some fields hold a list, such as givenName, and give their first non-empty item.
      *
      * @param  array<string, mixed>  $directoryFields
      * @param  list<string>  $keys
@@ -119,33 +108,12 @@ class SyncUserFromDirectory
     private function findValue(array $directoryFields, array $keys): ?string
     {
         foreach ($keys as $key) {
-            if (! array_key_exists($key, $directoryFields)) {
-                continue;
-            }
+            foreach (Arr::wrap($directoryFields[$key] ?? null) as $item) {
+                $value = trim((string) $item);
 
-            $fieldValue = $directoryFields[$key];
-            if ($fieldValue === null) {
-                continue;
-            }
-            if ($fieldValue === '') {
-                continue;
-            }
-
-            if (is_array($fieldValue)) {
-                // Find the first non-empty value in the array
-                foreach ($fieldValue as $item) {
-                    $trimmed = trim((string) $item);
-                    if (filled($trimmed)) {
-                        return $trimmed;
-                    }
+                if ($value !== '') {
+                    return $value;
                 }
-
-                continue;
-            }
-
-            $trimmed = trim((string) $fieldValue);
-            if (filled($trimmed)) {
-                return $trimmed;
             }
         }
 
@@ -153,7 +121,7 @@ class SyncUserFromDirectory
     }
 
     /**
-     * Retrieves all non-empty values for the specified keys, flattened into a single array.
+     * Get every non-empty value of the keys, trimmed and without duplicates.
      *
      * @param  array<string, mixed>  $directoryFields
      * @param  list<string>  $keys
@@ -161,23 +129,12 @@ class SyncUserFromDirectory
      */
     private function findAll(array $directoryFields, array $keys): array
     {
-        $values = [];
-
-        foreach ($keys as $key) {
-            $fieldValue = Arr::get($directoryFields, $key);
-            if ($fieldValue !== null) {
-                $values[] = $fieldValue;
-            }
-        }
-
-        $cleanedValues = collect($values)
+        return array_values(collect($keys)
+            ->map(fn (string $key): mixed => Arr::get($directoryFields, $key))
             ->flatten()
-            ->reject(fn (mixed $fieldValue): bool => blank(trim((string) $fieldValue)))
-            ->map(fn (mixed $fieldValue): string => trim((string) $fieldValue))
+            ->map(fn (mixed $value): string => trim((string) $value))
+            ->reject(fn (string $value): bool => $value === '')
             ->unique()
-            ->values()
-            ->all();
-
-        return array_values($cleanedValues);
+            ->all());
     }
 }

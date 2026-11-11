@@ -14,12 +14,10 @@ use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Persists a user with a unique username by handling potential uniqueness constraint violations
- * and retrieving the existing user if a conflict occurs.
+ * Saves a user. When another request saved the same username first, it returns
+ * that user instead, and a new SSO user is given the Northwestern User role.
  *
- * For SSO users, the default "Northwestern User" system role is assigned.
- *
- * {@see FindOrUpdateUserFromDirectory}
+ * @see FindOrUpdateUserFromDirectory
  */
 final class PersistUserWithUniqueUsername
 {

@@ -9,12 +9,10 @@ use App\Domains\User\Models\User;
 use Illuminate\Http\Request;
 
 /**
- * Records a login event for a user after successful authentication.
+ * Records a sign-in with the person's segment at the time, their IP address and
+ * browser. SignIn::complete() calls it, as every sign-in method ends there.
  *
- * Captures the user's segment at the time of login (for historical metrics)
- * along with request metadata (IP address, user agent). Called by
- * {@see SignIn::complete()}, which every sign-in method ends with.
- *
+ * @see SignIn::complete()
  * @see DetermineUserSegment
  */
 readonly class RecordLogin
