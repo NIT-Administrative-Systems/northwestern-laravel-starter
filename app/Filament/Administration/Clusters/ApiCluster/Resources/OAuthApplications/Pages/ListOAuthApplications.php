@@ -52,7 +52,7 @@ class ListOAuthApplications extends ListRecords
                                 ->helperText('On for applications with a server that can keep a secret. Off for desktop, mobile and browser applications, which use PKCE instead.')
                                 ->default(true),
                         ])
-                        ->afterValidation(fn (array $state, RegisterOAuthApplication $register) => $secret->issueOnce(function () use ($state, $register): array {
+                        ->afterValidation(fn (array $state, RegisterOAuthApplication $register) => $secret->issueOnce($this, function () use ($state, $register): array {
                             [$plain, $client] = $register(
                                 $state['name'],
                                 array_values($state['redirect_uris']),
@@ -69,7 +69,7 @@ class ListOAuthApplications extends ListRecords
                     Wizard\Step::make('Credentials')->schema(OAuthApplicationSchemas::credentialsStep($secret)),
                 ])
                 ->modalSubmitActionLabel('Done')
-                ->action(fn () => $secret->forget())
+                ->action(fn () => $secret->forget($this))
                 ->successNotificationTitle('Application Registered'),
         ];
     }

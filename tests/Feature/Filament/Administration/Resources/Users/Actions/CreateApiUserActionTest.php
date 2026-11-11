@@ -14,6 +14,7 @@ use App\Filament\Support\RevealOnceSecret;
 use App\Providers\Filament\AdministrationPanelProvider;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
+use Illuminate\Support\Facades\Session;
 use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use Tests\TestCase;
@@ -50,11 +51,11 @@ final class CreateApiUserActionTest extends TestCase
         $user = User::query()->where('username', 'api-reporting')->sole();
         $this->assertSame(AuthType::API, $user->auth_type);
         $client = OAuthClient::query()->whereMorphedTo('owner', $user)->sole();
-        $this->assertSame($client->getKey(), RevealOnceSecret::for('api_user:create')->identifier());
+        $this->assertSame($client->getKey(), RevealOnceSecret::for('api_user:create')->identifier($component->instance()));
 
         $component->callMountedAction()->assertRedirect();
 
-        $this->assertFalse(RevealOnceSecret::for('api_user:create')->issued());
+        $this->assertSame([], preg_grep('/^reveal_once_secret:/', array_keys(Session::all())));
     }
 
     public function test_it_is_hidden_without_manage_api_access(): void

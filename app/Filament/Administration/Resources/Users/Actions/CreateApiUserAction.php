@@ -13,6 +13,7 @@ use App\Domains\User\Models\User;
 use App\Filament\Administration\Resources\Users\ServiceClients\Schemas\ServiceClientSchemas;
 use App\Filament\Support\RevealOnceSecret;
 use Filament\Actions\Action;
+use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
@@ -70,9 +71,9 @@ class CreateApiUserAction extends Action
                                             ->autocomplete(false)
                                             ->regex('/^[a-z-]+$/')
                                             ->rules([
-                                                fn () => function (string $attribute, $value, $fail) use ($secret) {
+                                                fn (HasActions $livewire) => function (string $attribute, $value, $fail) use ($secret, $livewire) {
                                                     // Skip validation if this run already created the user
-                                                    if ($secret->issued()) {
+                                                    if ($secret->issued($livewire)) {
                                                         return;
                                                     }
 
@@ -122,7 +123,7 @@ class CreateApiUserAction extends Action
                     ->schema([
                         ServiceClientSchemas::clientConfigurationSection(),
                     ])
-                    ->afterValidation(fn (array $state, CreateApiUser $createApiUser) => $secret->issueOnce(function () use ($state, $createApiUser): array {
+                    ->afterValidation(fn (array $state, CreateApiUser $createApiUser, HasActions $livewire) => $secret->issueOnce($livewire, function () use ($state, $createApiUser): array {
                         $username = 'api-' . preg_replace('/^api-/', '', strtolower((string) $state['username']));
 
                         $configuration = ServiceClientSchemas::normalizeConfigurationState($state);
@@ -147,9 +148,9 @@ class CreateApiUserAction extends Action
                     ),
             ])
             ->modalSubmitAction(fn (Action $action) => ServiceClientSchemas::copyCredentialsSubmitButton($action))
-            ->action(function () use ($secret) {
-                $userId = $secret->get('user_id');
-                $secret->forget();
+            ->action(function (HasActions $livewire) use ($secret) {
+                $userId = $secret->get($livewire, 'user_id');
+                $secret->forget($livewire);
 
                 if ($userId) {
                     /** @var User $user */

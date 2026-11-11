@@ -14,6 +14,7 @@ use App\Filament\Support\RevealOnceSecret;
 use App\Providers\Filament\AppPanelProvider;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
+use Illuminate\Support\Facades\Session;
 use Livewire\Livewire;
 use Mockery;
 use PHPUnit\Framework\Attributes\CoversNothing;
@@ -71,17 +72,17 @@ final class AccessTokensTest extends TestCase
         $this->assertSame(['view-users'], $token->scopes);
         $this->assertTrue($token->expires_at->isSameDay(now()->addDays(180)));
 
-        $shown = (string) RevealOnceSecret::for('personal_access_token:create')->secret();
+        $shown = (string) RevealOnceSecret::for('personal_access_token:create')->secret($component->instance());
         $this->withToken($shown)->getJson('/api/v1/me')->assertOk();
 
         $component->callMountedAction();
-        $this->assertFalse(RevealOnceSecret::for('personal_access_token:create')->issued());
+        $this->assertSame([], preg_grep('/^reveal_once_secret:/', array_keys(Session::all())));
         $this->assertStringNotContainsString($shown, json_encode($component->instance()->all(), JSON_THROW_ON_ERROR));
     }
 
     public function test_creating_again_after_cancelling_creates_a_new_token(): void
     {
-        Livewire::test(AccessTokens::class)
+        $component = Livewire::test(AccessTokens::class)
             ->mountAction(TestAction::make('createToken')->table())
             ->fillForm(['name' => 'Abandoned', 'lifetime' => TokenExpiration::SixMonths->value])
             ->goToNextWizardStep()
@@ -91,7 +92,7 @@ final class AccessTokensTest extends TestCase
             ->goToNextWizardStep();
 
         $second = OAuthToken::query()->where('user_id', $this->user->getKey())->where('name', 'Second')->sole();
-        $this->assertSame($second->getKey(), RevealOnceSecret::for('personal_access_token:create')->identifier());
+        $this->assertSame($second->getKey(), RevealOnceSecret::for('personal_access_token:create')->identifier($component->instance()));
     }
 
     public function test_a_person_can_only_choose_scopes_their_permissions_cover(): void
