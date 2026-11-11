@@ -28,7 +28,8 @@ Route::middleware('panel:' . AppPanelProvider::ID)->group(function () {
 });
 
 if (config('platform.wildcard_photo_sync')) {
-    Route::get('users/{user}/wildcard-photo', [App\Domains\User\Http\Controllers\WildcardPhotoController::class, 'show'])->name('users.wildcard-photo');
+    // Deactivated people keep their photo on their page in Administration.
+    Route::get('users/{user}/wildcard-photo', [App\Domains\User\Http\Controllers\WildcardPhotoController::class, 'show'])->name('users.wildcard-photo')->withTrashed();
 }
 
 if (config('changelog.enabled')) {
