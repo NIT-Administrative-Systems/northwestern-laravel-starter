@@ -13,8 +13,8 @@ use Illuminate\Support\Carbon;
 use Laravel\Passport\Events\AccessTokenCreated;
 
 /**
- * Records a person's connection to an application when the application gets a token for
- * them through the authorization code flow, and alerts them the first time.
+ * Records a person's connection to an application when it gets a token for them
+ * through the authorization code flow, and tells them the first time it does.
  *
  * Personal access tokens and service clients aren't connections and are ignored.
  */

@@ -9,8 +9,8 @@ use App\Domains\Api\Models\ApiRequestLog;
 use App\Domains\User\Models\User;
 
 /**
- * Reading the log of API requests, in Administration. The log is read-only, so there is nothing
- * else to allow.
+ * Allows reading the log of API requests, in Administration.
+ * The log is read-only, so there is nothing else to allow.
  */
 class ApiRequestLogPolicy
 {

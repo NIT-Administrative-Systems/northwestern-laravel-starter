@@ -13,8 +13,8 @@ use Illuminate\Support\Carbon;
 use Laravel\Passport\Token;
 
 /**
- * Passport's access token, with the starter's columns: when it was last used and when its
- * owner was last reminded that it expires.
+ * Passport's access token, with the starter's columns: when it was last
+ * used, and when its owner was last reminded that the token expires.
  *
  * @property string $id
  * @property int|null $user_id
@@ -39,7 +39,7 @@ class OAuthToken extends Token
     ];
 
     /**
-     * Personal access tokens: issued by a personal access client to the person who created them.
+     * Scope the query to personal access tokens, issued by a personal access client.
      *
      * @param  Builder<static>  $query
      * @return Builder<static>
@@ -51,7 +51,7 @@ class OAuthToken extends Token
     }
 
     /**
-     * Tokens that still work: not revoked and not expired.
+     * Scope the query to tokens that still work: not revoked and not expired.
      *
      * @param  Builder<static>  $query
      * @return Builder<static>

@@ -24,16 +24,19 @@ use Northwestern\SysDev\Chassis\Http\Middleware\AuthenticatesPassportTokens;
 use Northwestern\SysDev\Chassis\ValueObjects\ApiRequestContext;
 
 /**
- * Authenticates the API's Passport access tokens. A service client's token acts as the
- * API user that owns the client; a client without one is refused.
+ * Authenticates the API's Passport access tokens. A service client's token acts
+ * as the API user that owns the client, and a client without one is refused.
  */
 class AuthenticatePassportToken extends AuthenticatesPassportTokens
 {
-    /** Record a client's, a token's and a connection's last use at most this often, so busy integrations don't write on every request. */
+    /**
+     * Record at most this often the last use of a client, a token and a connection,
+     * so that a busy integration doesn't write to the database on every request.
+     */
     private const int LAST_USED_RESOLUTION_SECONDS = 300;
 
     /**
-     * Every API request acts for a user: a person, or the API user that owns a service client.
+     * Refuse a client acting alone: every request acts for a person or an API user.
      */
     protected function allowsClientsWithoutUser(): bool
     {
@@ -41,8 +44,8 @@ class AuthenticatePassportToken extends AuthenticatesPassportTokens
     }
 
     /**
-     * Resolve the owning API user through the guard's user provider, which eager-loads roles
-     * and skips deleted users, as it does for every other token.
+     * Resolve the owning API user through the guard's user provider, which eager-loads
+     * their roles and ignores deleted users, just as it does for every other token.
      */
     protected function clientOwner(Client $client): ?Authenticatable
     {
@@ -61,9 +64,10 @@ class AuthenticatePassportToken extends AuthenticatesPassportTokens
     }
 
     /**
-     * Whether the token's holder may still use it, as {@see CredentialAccess} decides: a deleted
-     * or deactivated account, or a holder who lost the permission the credential needs, is
-     * refused at once, before the hourly sweep revokes it.
+     * Determine whether {@see CredentialAccess} lets the token's holder still use it.
+     *
+     * A deleted or deactivated account, or a holder who no longer has the permission
+     * the credential needs, is refused at once before the hourly sweep revokes it.
      */
     protected function isEligible(Authenticatable $user): bool
     {
