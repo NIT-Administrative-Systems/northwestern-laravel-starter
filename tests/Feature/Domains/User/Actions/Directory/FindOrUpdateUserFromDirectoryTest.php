@@ -257,18 +257,14 @@ final class FindOrUpdateUserFromDirectoryTest extends TestCase
         $this->assertTrue($user->fresh()->netid_inactive);
     }
 
-    public function test_a_failed_lookup_for_someone_new_creates_no_account(): void
+    // Nothing is known about them, so the caller treats it as an outage: sign-in retries, then shows the 503 page.
+    public function test_a_failed_lookup_for_someone_new_finds_no_one_and_creates_no_account(): void
     {
         $directoryApi = $this->createStub(DirectorySearch::class);
         $directoryApi->method('lookup')->willReturn(false);
 
-        $this->expectException(BadDirectoryEntry::class);
-
-        try {
-            $this->service(['directorySearch' => $directoryApi])('new123');
-        } finally {
-            $this->assertFalse(User::query()->where('username', 'new123')->exists());
-        }
+        $this->assertNull($this->service(['directorySearch' => $directoryApi])('new123'));
+        $this->assertFalse(User::query()->where('username', 'new123')->exists());
     }
 
     public function test_does_not_mark_non_sso_user_as_inactive(): void

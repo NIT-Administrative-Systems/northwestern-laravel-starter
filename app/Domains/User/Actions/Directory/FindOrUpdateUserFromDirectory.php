@@ -157,14 +157,15 @@ readonly class FindOrUpdateUserFromDirectory
      * both for a NetID it doesn't know and when it can't be reached, so an outage must not deactivate
      * anyone or cost them their credentials. EventHub's NetID updates still deactivate accounts.
      *
-     * If no existing user is found, a {@see BadDirectoryEntry} exception is thrown so that callers can surface
-     * or log the invalid directory state.
+     * If no existing user is found, a failed lookup returns null, which callers treat as Directory Search being
+     * unavailable: sign-in retries and then shows the 503 page. An incomplete entry throws a
+     * {@see BadDirectoryEntry} exception so that callers can surface or log the invalid directory state.
      *
      * @param  array<string, mixed>|false|null  $directoryData
      *
      * @throws BadDirectoryEntry
      */
-    private function resolveInvalidDirectoryEntry(?User $existingUser, string $searchValue, array|false|null $directoryData): User
+    private function resolveInvalidDirectoryEntry(?User $existingUser, string $searchValue, array|false|null $directoryData): ?User
     {
         if ($existingUser instanceof User) {
             if ($existingUser->auth_type === AuthType::SSO) {
@@ -177,9 +178,13 @@ readonly class FindOrUpdateUserFromDirectory
             return $existingUser;
         }
 
+        if ($directoryData === false) {
+            return null;
+        }
+
         throw new BadDirectoryEntry(
             netId: $directoryData['uid'] ?? $searchValue,
-            directoryData: $directoryData ?: []
+            directoryData: $directoryData ?? []
         );
     }
 

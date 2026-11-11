@@ -20,7 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ### Fixed
 
-- A Directory Search outage no longer deactivates people. laravel-soa's `lookup()` returns `false` both for a NetID it doesn't find and when the service can't be reached, and `FindOrUpdateUserFromDirectory` marked the NetID inactive either way, after which `oauth:revoke-ineligible` revoked the person's credentials. Someone who already has an account now signs in with their stored details when the lookup fails, and only an incomplete directory entry or EventHub deactivates them.
+- A Directory Search outage no longer deactivates people. laravel-soa's `lookup()` returns `false` both for a NetID it doesn't find and when the service can't be reached, and `FindOrUpdateUserFromDirectory` marked the NetID inactive either way, after which `oauth:revoke-ineligible` revoked the person's credentials. Someone who already has an account now signs in with their stored details when the lookup fails, and only an incomplete directory entry or EventHub deactivates them. Someone signing in for the first time whose lookup fails gets the retries and the 503 page instead of an error, and no account.
 - Changing a role's type drops the permissions the new type doesn't show. The form's lists followed the saved type instead of the one chosen, and saving kept a hidden list's permissions.
 - Deleted people are no longer offered Send Verification Code or Impersonate, and `LoginCodes::issueFor()` refuses a deleted account. Impersonating a deactivated or deleted person is refused too.
 - `UpdateOAuthApplication` and `RegenerateOAuthApplicationSecret` throw an `InvalidArgumentException` for a client that isn't a connected application.
