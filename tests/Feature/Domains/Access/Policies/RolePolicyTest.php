@@ -160,7 +160,7 @@ final class RolePolicyTest extends TestCase
         $user->givePermissionTo(SystemPermission::ManageAll);
         $role = Role::factory()->systemManaged()->create();
 
-        // Policy returns false; super admins gain access via Gate::before(), not the policy
+        // The policy refuses; super administrators pass through Gate::before() instead.
         $this->assertFalse($this->policy()->attachUser($user, $role));
     }
 

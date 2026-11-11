@@ -12,13 +12,11 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 /**
- * Decides what `/` shows. Guests see the landing page; signed-in users are sent to
- * {@see destinationFor()} and never see it.
+ * Decides what `/` shows: the landing page for guests, and
+ * {@see destinationFor()} for people who are signed in.
  *
- * Every sign-in path (single sign-on, email login codes, and the guest redirect for
- * already signed-in users) lands on `/`, so this controller is the one place that
- * decides where signed-in users go. A link to a specific page still wins: sign-in
- * returns users to the page they asked for first.
+ * Every sign-in lands on `/` unless the person first asked for another
+ * page, so this is the one place deciding where signed-in people go.
  */
 class HomeController extends Controller
 {
@@ -34,8 +32,9 @@ class HomeController extends Controller
     }
 
     /**
-     * Where signed-in users land. Override this to send different users to different
-     * places, for example administrators to the administration panel.
+     * Get where a signed-in person lands. Override this
+     * to send different people to different places,
+     * such as administrators to Administration.
      */
     protected function destinationFor(User $user): string
     {

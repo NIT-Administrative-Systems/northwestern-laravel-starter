@@ -12,12 +12,11 @@ use LogicException;
 /**
  * Generates a deterministic, fixed-pattern numeric code.
  *
- * This generator is intended for local development, CI and testing suites,
- * where predictable output is needed for assertions and login challenges.
- * It repeats the sequence '1234567890' to fill the required length.
+ * For local development, CI and the tests, where a predictable code lets
+ * a script sign in. It repeats '1234567890' to the length asked for.
  *
- * Only {@see self::ENVIRONMENTS} may use it. The application checks when it boots,
- * and again on every code, so a deployed environment never issues a code anyone can guess.
+ * Only {@see self::ENVIRONMENTS} may use it: the application checks when it boots
+ * and for each code, so that no deployed environment issues a guessable code.
  */
 final class FixedNumericOneTimeCodeGenerator implements OneTimeCodeGenerator
 {

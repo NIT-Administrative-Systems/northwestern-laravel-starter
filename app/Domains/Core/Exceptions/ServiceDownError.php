@@ -44,8 +44,8 @@ class ServiceDownError extends Exception
     }
 
     /**
-     * The outage is in another service, so show the 503 page rather than a 500 with the stack trace.
-     * API and JSON requests get Problem Details. The error is still reported.
+     * Show the 503 page, not a 500 with a stack trace, as the outage is in another
+     * service. API and JSON requests get Problem Details. It's still reported.
      */
     public function render(Request $request): Response
     {

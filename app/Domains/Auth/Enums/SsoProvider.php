@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace App\Domains\Auth\Enums;
 
 /**
- * Northwestern single sign-on, through laravel-soa: Online Passport (agentless WebSSO) or
- * Microsoft Entra ID. An application signs people in with one of them, {@see configured()}.
+ * Northwestern single sign-on through laravel-soa: Online
+ * Passport (agentless WebSSO) or Microsoft Entra ID. An
+ * application uses one of them, {@see configured()}.
  */
 enum SsoProvider: string
 {
@@ -14,8 +15,9 @@ enum SsoProvider: string
     case EntraId = 'entra-id';
 
     /**
-     * The provider people sign in with: Online Passport when it's set up, otherwise Entra ID when
-     * it's set up, otherwise none. Only that provider's routes are registered.
+     * Get the provider people sign in with, the only one
+     * with routes: Online Passport when it's set up,
+     * else Entra ID when that's set up, else none.
      */
     public static function configured(): ?self
     {
@@ -29,7 +31,7 @@ enum SsoProvider: string
     }
 
     /**
-     * Whether the application is set up for this provider. Online Passport is chosen by its API key
+     * Determine whether this provider is set up. Online Passport needs its API key
      * or the ForgeRock direct strategy; Entra ID needs its client ID and secret.
      */
     public function isConfigured(): bool

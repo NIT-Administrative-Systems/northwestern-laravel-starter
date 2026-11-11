@@ -69,7 +69,7 @@ final class ConnectedApplicationsTest extends TestCase
     {
         config(['mcp.enabled' => true]);
         $this->user->givePermissionTo(SystemPermission::UseMcp);
-        $this->mcpToken();
+        $this->issueMcpToken();
 
         Livewire::test(ConnectedApplications::class)
             ->assertSee('Claude Code')
@@ -129,7 +129,7 @@ final class ConnectedApplicationsTest extends TestCase
         $client = $this->registerApplication();
         $client->forceFill(['name' => $name])->save();
         [, $verifier] = $this->requestAuthorization($client);
-        $accessToken = $this->exchange($client, $this->approve($client), $verifier)->assertOk()->json('access_token');
+        $accessToken = $this->exchangeAuthorizationCode($client, $this->approveAuthorization($client), $verifier)->assertOk()->json('access_token');
         $this->actingAs($this->user);
 
         return [OAuthConnection::query()->where('oauth_client_id', $client->getKey())->sole(), $accessToken];
@@ -144,7 +144,7 @@ final class ConnectedApplicationsTest extends TestCase
         $this->user->givePermissionTo(SystemPermission::UseMcp);
         $client = $this->registerMcpClient();
         [, $verifier] = $this->requestAuthorization($client, ['mcp:use']);
-        $this->exchange($client, $this->approve($client), $verifier)->assertOk();
+        $this->exchangeAuthorizationCode($client, $this->approveAuthorization($client), $verifier)->assertOk();
         $mcp = OAuthConnection::query()->where('oauth_client_id', $client->getKey())->sole();
         config(['mcp.enabled' => false]);
 

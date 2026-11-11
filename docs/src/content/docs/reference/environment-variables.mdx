@@ -133,7 +133,7 @@ These configure [passwordless verification codes](/features/authentication/#pass
 | `LOCAL_AUTH_CODE_EXPIRES_MINUTES`       | `10`    | Minutes before a code expires                                                                  |
 | `LOCAL_AUTH_CODE_MAX_ATTEMPTS`          | `8`     | Failed attempts before the challenge locks                                                     |
 | `LOCAL_AUTH_CODE_LOCK_MINUTES`          | `15`    | Minutes a locked challenge stays locked                                                        |
-| `LOCAL_ACCOUNT_INACTIVITY_DAYS`         | `null`  | Deactivate local accounts nobody has signed in to for this many days. `null` never does. See [Expiring Local Accounts](/features/authentication/#expiring-local-accounts) |
+| `LOCAL_ACCOUNT_INACTIVITY_DAYS`         | `null`  | Deactivate local accounts nobody has signed in to for this many days. `null` never does. Keep `LOGIN_RECORD_RETENTION_DAYS` at least this long. See [Expiring Local Accounts](/features/authentication/#expiring-local-accounts) |
 | `LOCAL_AUTH_CODE_MAX_FAILED_PER_DAY`    | `20`    | Incorrect codes an email may enter in a day, across all its codes                              |
 | `LOCAL_AUTH_CODE_RESEND_COOLDOWN`       | `30`    | Seconds before another code can be sent                                                        |
 
@@ -255,6 +255,7 @@ Days to keep each kind of record before the daily `model:prune` deletes it. `nul
 | `IMPERSONATION_LOG_RETENTION_DAYS` | `null` (kept forever) | Impersonation logs                 |
 | `LOGIN_CHALLENGE_RETENTION_DAYS`   | `30`                  | Email verification code challenges |
 | `API_REQUEST_LOG_RETENTION_DAYS`   | `90`                  | API request logs                   |
+| `EXPORT_RETENTION_DAYS` | `7` | Table exports and their files, counted from when they finish |
 | `NOTIFICATION_RETENTION_DAYS`      | `90`                  | Notifications, read or not         |
 | `IMPORT_RETENTION_DAYS`            | `30`                  | Imports, with their failed rows    |
 | `FAILED_IMPORT_ROW_RETENTION_DAYS` | `30`                  | Failed import rows                 |
@@ -333,6 +334,8 @@ See [Sentry](/features/sentry/).
 | `PG_BIN_DIRECTORY`  | `null` (auto-detected)       | Directory containing `pg_dump` and `psql`, for the `db:snapshot:*` commands. See [Database Snapshots](/features/database-snapshots/)                   |
 
 `config/telescope.php` and `config/debugbar.php` read many more `TELESCOPE_*` and `DEBUGBAR_*` variables. Their defaults are in those files.
+
+Outside the `local` environment, `TelescopeServiceProvider` records only reportable exceptions, failed requests, failed jobs and monitored tags, and only people with Manage All can open Telescope. It also leaves out the CSRF token and the secrets OAuth clients send (`client_secret`, `refresh_token`, `code`, `code_verifier` and `secret`) from request parameters, and the `Cookie`, CSRF and `Authorization` headers.
 
 ## Testing
 

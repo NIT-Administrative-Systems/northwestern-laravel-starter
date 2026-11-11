@@ -7,7 +7,7 @@ sidebar:
 
 import { Aside, FileTree, Steps } from "@astrojs/starlight/components";
 
-The app panel at `/app` is where an application built on the starter does its work. It is the default Filament panel, configured in `App\Providers\Filament\AppPanelProvider`, and any signed-in user can open it. API users can't: they authenticate through OAuth clients and never have a panel session. Back-office tools belong in the [administration panel](/architecture/ui-architecture/#the-administration-panel) instead.
+The app panel at `/app` is where an application built on the starter does its work. It is the default Filament panel, configured in `App\Providers\Filament\AppPanelProvider`, and any signed-in user can open it. API users can't: they authenticate through OAuth clients and never have a panel session. Nor can a deactivated account, so a session signed in before the account was deactivated is refused on its next request. Back-office tools belong in the [administration panel](/architecture/ui-architecture/#the-administration-panel) instead.
 
 The panel also owns sign-in for the whole application. Guests of any panel are sent to `/app/login` (see [Authentication](/features/authentication/#signing-in)), and in a locked-down environment users without an application role are sent to `/app/access-restricted` (see [Environment Lockdown](/getting-started/initial-customization/#5-environment-lockdown)).
 
@@ -51,6 +51,8 @@ Filament's generators target the default panel, so new resources and pages land 
 php artisan make:filament-resource Project --generate --model-namespace=App\\Domains\\Project\\Models
 php artisan make:filament-page Reports
 ```
+
+Both panels use Filament's strict authorization (`->strictAuthorization()`), so a new resource needs a policy for its model with every ability its pages ask for. See [Adding a Tool](/building/administration-panel/#adding-a-tool).
 
 Views for the panel's pages go in `resources/views/filament/app/`. The panel's Tailwind theme, `resources/css/filament/app/theme.css`, compiles classes from every file the repository tracks; only a package's views under `vendor/`, which git ignores, need an `@source` line, as Filament's have.
 

@@ -31,7 +31,7 @@ final class AuditsRolesTest extends TestCase
         $this->role = Role::factory()->createOne();
     }
 
-    public function test_assign_role_with_audit_creates_audit_record(): void
+    public function test_assigning_a_role_is_audited(): void
     {
         $this->user->assignRoleWithAudit($this->role, RoleModificationOrigin::System);
 
@@ -45,7 +45,7 @@ final class AuditsRolesTest extends TestCase
         $this->assertSame('role_assigned', $audit->event);
     }
 
-    public function test_assign_role_with_audit_captures_roles_before_and_after(): void
+    public function test_the_assignment_audit_has_the_roles_before_and_after(): void
     {
         $this->user->assignRoleWithAudit($this->role, RoleModificationOrigin::System);
 
@@ -67,7 +67,7 @@ final class AuditsRolesTest extends TestCase
         $this->assertContains($this->role->name, $afterRoleNames);
     }
 
-    public function test_remove_role_with_audit_creates_audit_record(): void
+    public function test_removing_a_role_is_audited(): void
     {
         $this->user->assignRoleWithAudit($this->role, RoleModificationOrigin::System);
 
@@ -83,7 +83,7 @@ final class AuditsRolesTest extends TestCase
         $this->assertSame('role_removed', $audit->event);
     }
 
-    public function test_remove_role_with_audit_captures_correct_diff(): void
+    public function test_the_removal_audit_shows_which_role_went(): void
     {
         $this->user->assignRoleWithAudit($this->role, RoleModificationOrigin::System);
 
@@ -109,7 +109,7 @@ final class AuditsRolesTest extends TestCase
         $this->assertNotContains($this->role->name, $afterRoleNames);
     }
 
-    public function test_audit_includes_modification_origin_as_tag(): void
+    public function test_the_audit_is_tagged_with_its_origin(): void
     {
         $this->user->assignRoleWithAudit($this->role, RoleModificationOrigin::UiAction);
 
@@ -122,7 +122,7 @@ final class AuditsRolesTest extends TestCase
         $this->assertStringContainsString('ui-action', (string) $audit->tags);
     }
 
-    public function test_audit_includes_context_as_tags(): void
+    public function test_context_is_added_to_the_audit_as_tags(): void
     {
         $this->user->assignRoleWithAudit($this->role, RoleModificationOrigin::System, ['reason' => 'test']);
 
@@ -136,7 +136,7 @@ final class AuditsRolesTest extends TestCase
         $this->assertStringContainsString('reason: test', (string) $audit->tags);
     }
 
-    public function test_assign_role_with_audit_accepts_array_of_roles(): void
+    public function test_several_roles_can_be_assigned_as_an_array(): void
     {
         $roles = Role::factory()->count(2)->create()->all();
 
@@ -157,7 +157,7 @@ final class AuditsRolesTest extends TestCase
         }
     }
 
-    public function test_assign_role_with_audit_accepts_collection_of_roles(): void
+    public function test_several_roles_can_be_assigned_as_a_collection(): void
     {
         $roles = Role::factory()->count(2)->create();
 
@@ -178,7 +178,7 @@ final class AuditsRolesTest extends TestCase
         }
     }
 
-    public function test_audit_handles_model_deleted_during_role_change(): void
+    public function test_a_user_deleted_during_the_change_is_still_audited(): void
     {
         $intercepted = false;
 
@@ -202,7 +202,7 @@ final class AuditsRolesTest extends TestCase
         $this->assertSame([], $audit->new_values['roles']);
     }
 
-    public function test_audit_excludes_context_from_tags_when_empty(): void
+    public function test_no_context_adds_no_tags(): void
     {
         $this->user->assignRoleWithAudit($this->role, RoleModificationOrigin::System);
 

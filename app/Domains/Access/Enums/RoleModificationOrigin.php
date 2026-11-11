@@ -13,42 +13,26 @@ use Filament\Support\Contracts\HasLabel;
 use Filament\Support\Icons\Heroicon;
 
 /**
- * Describes the origin or cause of a role assignment or removal.
- *
- * This enum provides audit context for understanding why a user's roles changed.
- *
- * ## Origins
- *
- * **UiAction** — A role was assigned or removed by an administrator through
- * the Filament UI.
- * - Triggered by: Role management actions performed manually in the UI.
- *
- * **BulkAssignment** — A role was assigned to a list of people an administrator
- * pasted or uploaded, in a queued import.
- * - Triggered by: {@see AddPersonToRole}, for each person in the list.
- *
- * **RemovedByDeletion** — A role was detached from all users because the
- * underlying role definition was deleted.
- * - Triggered by: Role deletion operations in Filament or system tooling.
- *
- * **NetIdStatusChange** — A role was removed due to a NetID lifecycle event
- * such as deactivation, deprovisioning, or security hold.
- * - Triggered by: NetID update webhooks processed in {@see ProcessNetIdUpdate}.
- *
- * **SsoProvisioning** — A role was assigned during first-time SSO login when
- * the user is provisioned from directory data.
- * - Triggered by: User creation in {@see PersistUserWithUniqueUsername}.
- *
- * **System** — A role was assigned or removed by a programmatic or automated
- * operation without a specific contextual origin (e.g., seeders, test setup).
+ * Why a person's roles changed, stored as a tag on the role audit.
  */
 enum RoleModificationOrigin: string implements HasColor, HasIcon, HasLabel
 {
+    /** An administrator assigned or removed the role in the administration panel. */
     case UiAction = 'ui-action';
+
+    /** {@see AddPersonToRole} gave it to someone on a pasted or uploaded list. */
     case BulkAssignment = 'bulk-assignment';
+
+    /** The role was deleted, which removes it from everyone who held it. */
     case RemovedByDeletion = 'removed-by-deletion';
+
+    /** {@see ProcessNetIdUpdate} removed it when the person's NetID was deactivated. */
     case NetIdStatusChange = 'netid-status-change';
+
+    /** {@see PersistUserWithUniqueUsername} gave it when a person first signed in. */
     case SsoProvisioning = 'sso-provisioning';
+
+    /** Code changed it with no other origin to give, such as a seeder or a test. */
     case System = 'system';
 
     public function getLabel(): string

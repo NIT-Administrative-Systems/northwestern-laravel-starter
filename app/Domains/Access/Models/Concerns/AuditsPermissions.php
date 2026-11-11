@@ -21,19 +21,13 @@ use Spatie\Permission\Models\Permission as SpatiePermission;
 trait AuditsPermissions
 {
     /**
-     * Synchronizes permissions for this role and creates a detailed audit log entry.
+     * Set the role's permissions to exactly these
+     * and record a Permissions Modified audit
+     * with the full list before and after.
      *
-     * This method performs a "sync" operation: it sets the role's permissions to exactly
-     * match the provided array, adding missing permissions and removing extras. It then
-     * creates a comprehensive audit trail that captures:
-     * - All permissions before the sync
-     * - Which permissions were added (if any)
-     * - Which permissions were removed (if any)
-     * - All permissions after the sync
+     * Nothing is recorded when nothing changed.
      *
-     * @param  array<int, string|Permission|SystemPermission>  $permissions  The complete set of permissions this role should have
-     *
-     * @see auditPermissionChange() for the audit event structure
+     * @param  array<int, string|Permission|SystemPermission>  $permissions
      */
     public function syncPermissionsWithAudit(array $permissions): void
     {
@@ -58,10 +52,8 @@ trait AuditsPermissions
     }
 
     /**
-     * Converts a collection of permissions to a simplified array format.
-     *
      * @param  EloquentCollection<int, SpatiePermission>  $permissions
-     * @return list<PermissionData> Array of simplified permission data
+     * @return list<PermissionData>
      */
     private function mapPermissionsToArray(EloquentCollection $permissions): array
     {
@@ -75,16 +67,8 @@ trait AuditsPermissions
     }
 
     /**
-     * Creates a custom audit log entry for permission changes with before/after snapshots.
-     *
-     * This method constructs a specialized audit event that captures the complete context
-     * of a permission sync operation. Unlike standard model audits that only track column
-     * changes, this creates a structured snapshot of the permission collection.
-     *
-     * @param  list<PermissionData>  $oldPermissions  Permissions before modification
-     * @param  list<PermissionData>  $newPermissions  Permissions after modification
-     *
-     * @see syncPermissionsWithAudit()
+     * @param  list<PermissionData>  $oldPermissions
+     * @param  list<PermissionData>  $newPermissions
      */
     private function auditPermissionChange(array $oldPermissions, array $newPermissions): void
     {

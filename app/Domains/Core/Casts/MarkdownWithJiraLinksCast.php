@@ -9,11 +9,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 /**
- * Eloquent cast that transforms backtick-wrapped JIRA issue identifiers into clickable links.
+ * Eloquent cast that transforms backtick-wrapped
+ * JIRA issue identifiers into clickable links.
  *
- * The identifier prefix (e.g., "PROJ", "GSTS") is read from `config('changelog.jira.identifier')`,
- * so each project can configure its own pattern. When the identifier is not set, the cast is a
- * no-op and backtick-wrapped text remains as plain code formatting.
+ * The prefix (such as "PROJ") comes from `changelog.jira.identifier`. Without
+ * it or `changelog.jira.url`, the cast changes nothing, and IDs stay code.
  *
  * Example: `PROJ-1234` becomes [`PROJ-1234`](https://...)
  *

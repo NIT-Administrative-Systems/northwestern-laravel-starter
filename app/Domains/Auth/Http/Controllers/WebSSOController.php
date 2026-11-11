@@ -40,6 +40,29 @@ class WebSSOController extends Controller
         $this->logout_return_to_route = 'filament.app.auth.login';
     }
 
+    public function oauthLogout(?string $postLogoutRedirectUri = null): Application|RedirectResponse|Redirector
+    {
+        // CI has no identity provider to send people to.
+        if (App::environment('ci')) {
+            $this->signIn->endSession();
+
+            return redirect()->route('filament.app.auth.login');
+        }
+
+        // The trait ends the session before sending the person to Entra ID's sign-out.
+        return $this->webSSOAuthOauthLogout(route('filament.app.auth.login'));
+    }
+
+    /**
+     * End the session here, then sign out of Online Passport.
+     */
+    public function logout(WebSSOStrategy $ssoStrategy): RedirectResponse
+    {
+        $this->signIn->endSession();
+
+        return $ssoStrategy->logout('filament.app.auth.login');
+    }
+
     protected function findUserByNetID(FindOrUpdateUserFromDirectory $findOrUpdateUserFromDirectory, ?string $netid = null): ?Authenticatable
     {
         /** @var ?Authenticatable */
@@ -58,7 +81,7 @@ class WebSSOController extends Controller
 
                 return $user;
             },
-            sleepMilliseconds: static::RETRY_SLEEP_MS,
+            sleepMilliseconds: self::RETRY_SLEEP_MS,
             when: fn (\Throwable $e) => ! ($e instanceof BadDirectoryEntry),
         );
     }
@@ -66,28 +89,5 @@ class WebSSOController extends Controller
     protected function authenticated(Request $request, User $user): RedirectResponse
     {
         return $this->signIn->complete($user, $request, SignInMethod::Sso);
-    }
-
-    public function oauthLogout(?string $postLogoutRedirectUri = null): Application|RedirectResponse|Redirector
-    {
-        // CI has no identity provider to send people to.
-        if (App::environment('ci')) {
-            $this->signIn->endSession();
-
-            return redirect()->route('filament.app.auth.login');
-        }
-
-        // The trait ends the session before sending the person to Entra ID's sign-out.
-        return $this->webSSOAuthOauthLogout(route('filament.app.auth.login'));
-    }
-
-    /**
-     * Override the trait's logout to also invalidate the Laravel session.
-     */
-    public function logout(WebSSOStrategy $ssoStrategy): RedirectResponse
-    {
-        $this->signIn->endSession();
-
-        return $ssoStrategy->logout('filament.app.auth.login');
     }
 }

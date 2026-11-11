@@ -40,7 +40,7 @@ final class AuthenticatePassportTokenTest extends TestCase
     public function test_a_service_client_acts_as_its_api_user(): void
     {
         $apiUser = User::factory()->api()->create();
-        [$token, $client] = $this->serviceClientToken($apiUser);
+        [$token, $client] = $this->issueServiceClientToken($apiUser);
 
         $this->withToken($token)->getJson('/api/v1/me')
             ->assertOk()
@@ -60,14 +60,14 @@ final class AuthenticatePassportTokenTest extends TestCase
         $role = Role::factory()->forRoleType(RoleTypeEnum::ApiIntegration)->create();
         $role->givePermissionTo(SystemPermission::ViewUsers);
         $apiUser->roles()->attach($role);
-        [$token] = $this->serviceClientToken($apiUser);
+        [$token] = $this->issueServiceClientToken($apiUser);
 
         $this->withToken($token)->getJson('/api/test/permission')->assertOk()->assertJsonPath('can_view_users', true);
     }
 
     public function test_the_clients_ip_allowlist_applies(): void
     {
-        [$token, $client] = $this->serviceClientToken(User::factory()->api()->create());
+        [$token, $client] = $this->issueServiceClientToken(User::factory()->api()->create());
         $client->forceFill(['allowed_ips' => ['10.0.0.0/8']])->save();
         Once::flush(); // Passport memoizes client lookups per request; these test requests share one.
 
@@ -81,7 +81,7 @@ final class AuthenticatePassportTokenTest extends TestCase
     public function test_a_restricted_client_is_refused_and_reported_when_the_request_has_no_ip(): void
     {
         Exceptions::fake();
-        [$token, $client] = $this->serviceClientToken(User::factory()->api()->create());
+        [$token, $client] = $this->issueServiceClientToken(User::factory()->api()->create());
         $client->forceFill(['allowed_ips' => ['10.0.0.0/8']])->save();
         Once::flush();
 
@@ -92,7 +92,7 @@ final class AuthenticatePassportTokenTest extends TestCase
 
     public function test_a_client_whose_secret_has_expired_is_refused(): void
     {
-        [$token, $client] = $this->serviceClientToken(User::factory()->api()->create());
+        [$token, $client] = $this->issueServiceClientToken(User::factory()->api()->create());
         $client->forceFill(['secret_expires_at' => now()->subMinute()])->save();
         Once::flush(); // Passport memoizes client lookups per request; these test requests share one.
 
@@ -102,7 +102,7 @@ final class AuthenticatePassportTokenTest extends TestCase
     public function test_a_deleted_api_user_is_refused(): void
     {
         $apiUser = User::factory()->api()->create();
-        [$token] = $this->serviceClientToken($apiUser);
+        [$token] = $this->issueServiceClientToken($apiUser);
         $apiUser->delete();
 
         $this->withToken($token)->getJson('/api/v1/me')->assertUnauthorized();
@@ -135,7 +135,7 @@ final class AuthenticatePassportTokenTest extends TestCase
     public function test_a_personal_token_stops_working_when_its_owner_loses_the_permission(): void
     {
         $user = User::factory()->create();
-        [$token] = $this->personalAccessToken($user);
+        [$token] = $this->issuePersonalAccessToken($user);
         $this->withToken($token)->getJson('/api/v1/me')->assertOk();
 
         $user->revokePermissionTo(SystemPermission::CreatePersonalAccessTokens);
@@ -146,7 +146,7 @@ final class AuthenticatePassportTokenTest extends TestCase
 
     public function test_it_records_when_a_personal_token_was_last_used(): void
     {
-        [$token, $record] = $this->personalAccessToken(User::factory()->create());
+        [$token, $record] = $this->issuePersonalAccessToken(User::factory()->create());
 
         $this->withToken($token)->getJson('/api/v1/me')->assertOk();
 
@@ -158,7 +158,7 @@ final class AuthenticatePassportTokenTest extends TestCase
         $this->actingAs(User::factory()->create());
         $client = $this->registerApplication();
         [, $verifier] = $this->requestAuthorization($client);
-        $token = $this->exchange($client, $this->approve($client), $verifier)->json('access_token');
+        $token = $this->exchangeAuthorizationCode($client, $this->approveAuthorization($client), $verifier)->json('access_token');
 
         $this->withToken($token)->getJson('/api/v1/me')->assertOk();
 
@@ -167,7 +167,7 @@ final class AuthenticatePassportTokenTest extends TestCase
 
     public function test_it_records_when_a_client_was_last_used_at_most_every_five_minutes(): void
     {
-        [$token, $client] = $this->serviceClientToken(User::factory()->api()->create());
+        [$token, $client] = $this->issueServiceClientToken(User::factory()->api()->create());
 
         $this->withToken($token)->getJson('/api/v1/me')->assertOk();
         $firstUse = $client->fresh()?->last_used_at;

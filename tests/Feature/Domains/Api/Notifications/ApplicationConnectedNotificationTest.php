@@ -41,7 +41,7 @@ final class ApplicationConnectedNotificationTest extends TestCase
         $this->actingAs($user);
         $client = $this->registerApplication();
         [, $verifier] = $this->requestAuthorization($client);
-        $this->exchange($client, $this->approve($client), $verifier);
+        $this->exchangeAuthorizationCode($client, $this->approveAuthorization($client), $verifier);
 
         $this->assertSame('Reporting Tool Connected to Your Account', $user->notifications()->sole()->data['title']);
     }

@@ -103,14 +103,15 @@ final class AddPersonToRoleTest extends TestCase
         $this->assertNotAdded('zzz999', 'No one with the NetID or email address zzz999 is in the Northwestern Directory.');
     }
 
-    // A Northwestern address missing from the directory is a typo or a lapsed account, not a guest.
+    // A Northwestern address missing from the directory is a typo or a lapsed account.
     public function test_a_northwestern_email_missing_from_the_directory_does_not_become_a_local_account(): void
     {
         $this->assertNotAdded('typo@u.northwestern.edu', 'No one with the NetID or email address typo@u.northwestern.edu is in the Northwestern Directory.');
         $this->assertFalse(User::query()->whereEmailEquals('typo@u.northwestern.edu')->exists());
     }
 
-    // The directory answered, but with a record too incomplete to make an account from.
+    // The directory answered, but with a record
+    // too incomplete to make an account from.
     public function test_an_incomplete_directory_entry_is_not_added(): void
     {
         $this->directory['half123'] = ['uid' => 'half123'];
@@ -134,7 +135,8 @@ final class AddPersonToRoleTest extends TestCase
         $this->assertSame(1, User::withTrashed()->whereEmailEquals('gone@example.com')->count());
     }
 
-    // Only Reactivate brings an account back, so a deactivated NetID is listed rather than restored.
+    // Only Reactivate brings an account back, so
+    // a deactivated NetID is listed instead.
     public function test_a_deactivated_netid_user_is_not_restored(): void
     {
         $this->inDirectory('abc123');

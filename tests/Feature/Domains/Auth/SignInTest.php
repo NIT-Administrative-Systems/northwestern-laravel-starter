@@ -124,7 +124,8 @@ final class SignInTest extends TestCase
         $this->assertSame(url('/app/some-page'), $response->getTargetUrl());
     }
 
-    // Single sign-on has already signed them in when it calls complete(), so they're signed out again.
+    // Single sign-on has already signed them in when it
+    // calls complete(), so they're signed out again.
     public function test_a_deactivated_account_is_refused_and_signed_out(): void
     {
         $user = User::factory()->create();
@@ -196,7 +197,7 @@ final class SignInTest extends TestCase
     public function test_everyone_else_signs_out_here(AuthType $authType, ?SsoProvider $provider): void
     {
         $this->useSso($provider);
-        // As a request loads them: logging out rotates the remember token, which a model fresh from the factory lacks.
+        // As a request loads them: signing out reads the remember token.
         $this->actingAs(User::factory()->create(['auth_type' => $authType])->fresh());
         $token = session()->token();
 

@@ -10,8 +10,8 @@ use App\Domains\User\Models\User;
 use Illuminate\Foundation\Testing\TestCase;
 
 /**
- * Creates a service client for an API user and exchanges it at `/oauth/token`, as an
- * integration would.
+ * Creates an API user's service client and exchanges
+ * it at `/oauth/token`, as an integration would.
  *
  * @mixin TestCase
  */
@@ -20,7 +20,7 @@ trait IssuesServiceClientTokens
     /**
      * @return array{0: string, 1: OAuthClient} The access token and the client
      */
-    protected function serviceClientToken(User $apiUser): array
+    protected function issueServiceClientToken(User $apiUser): array
     {
         [$secret, $client] = resolve(CreateServiceClient::class)($apiUser, 'Test client', now()->addMonth());
 
