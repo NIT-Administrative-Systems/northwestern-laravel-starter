@@ -15,6 +15,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Gate;
 use UnitEnum;
 
 class AuditResource extends Resource
@@ -32,6 +33,15 @@ class AuditResource extends Resource
     protected static ?int $navigationSort = 3;
 
     protected static ?string $description = 'Track all changes made to records with full audit history.';
+
+    /**
+     * Decided by the audit policy, named here so the audit log never falls back to Filament's
+     * default of letting every administrator in.
+     */
+    public static function canAccess(): bool
+    {
+        return Gate::allows('viewAny', Audit::class);
+    }
 
     public static function infolist(Schema $schema): Schema
     {
