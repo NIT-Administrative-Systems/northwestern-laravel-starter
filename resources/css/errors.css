@@ -1,22 +1,21 @@
 /*
- * Styles for error pages. They render without Filament, auth or the database, so they
- * load the Northwestern tokens and Tailwind directly instead of a panel theme.
+ * Styles for the bare error layout. Its pages render without Filament, auth or
+ * the database, so they load Tailwind and the Northwestern tokens directly
+ * instead of a panel theme.
  */
 @import "tailwindcss";
 @import "../../vendor/northwestern-sysdev/northwestern-filament-theme/dist/tokens.css";
 @import "../../vendor/northwestern-sysdev/northwestern-filament-theme/dist/tailwind-tokens.css";
 
-@source '../views/errors/**/*';
-@source '../views/components/layouts/error.blade.php';
-@source '../views/components/site-header.blade.php';
-
-/* The theme sets its type scale in the panels' CSS, not in the tokens imported here. The environment
-   badge's text uses this step, so without it the badge renders larger than on the public layout. */
+/* The theme sets its type scale in the panels' CSS, not in these tokens. The
+   environment badge's text uses this step, and without it the badge renders
+   larger than it does on the public layout. */
 :root {
     --nu-text-sm: 0.8125rem;
 }
 
-/* The header's focus ring, as in the panel themes: the footer's 3px white outline, set 2px off the control. */
+/* The header's focus ring, as in the panel themes: the footer's 3px white
+   outline, set 2px off the control. */
 .nu-site-header :is(a, button):focus-visible,
 .nu-site-header .nu-lockup:focus-visible /* outranks the lockup component's own 2px outline */ {
     outline: 3px solid var(--color-white);
