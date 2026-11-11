@@ -82,14 +82,57 @@ final class AppPanelProviderTest extends TestCase
     // /app first in the same application would leave the app panel's hook in place.
     public function test_administration_panel_has_no_footer(): void
     {
-        $admin = User::factory()->create();
-        $admin->givePermissionTo(SystemPermission::AccessAdministrationPanel);
+        $this->actingAs($this->administrator())->get('/administration')->assertOk()->assertDontSee('Privacy Statement');
+    }
 
-        $this->actingAs($admin)->get('/administration')->assertOk()->assertDontSee('Privacy Statement');
+    public function test_the_sidebar_names_the_panel(): void
+    {
+        $this->actingAs(User::factory()->create())
+            ->get('/app')
+            ->assertOk()
+            ->assertSeeInOrder(['data-testid="sidebar-panel-name"', config('app.name')], escape: false);
+    }
+
+    // Its own test, for the same reason as the footer's.
+    public function test_administration_panel_leads_back_to_the_app_and_has_the_help_menu(): void
+    {
+        config(['support.enabled' => true]);
+
+        $this->actingAs($this->administrator())
+            ->get('/administration')
+            ->assertOk()
+            ->assertSee('data-testid="app-panel-link"', escape: false)
+            ->assertSee('Back to ' . config('app.name'))
+            ->assertSee('data-testid="account-menu-link"', escape: false)
+            ->assertSee('/app/account/profile')
+            ->assertSee('data-testid="help-menu-trigger"', escape: false)
+            ->assertSeeInOrder(['data-testid="sidebar-panel-name"', 'Administration'], escape: false);
     }
 
     public function test_the_app_panel_has_database_notifications(): void
     {
         $this->assertTrue(Filament::getPanel(AppPanelProvider::ID)->hasDatabaseNotifications());
+    }
+
+    public function test_both_panels_collapse_their_sidebar_warn_about_unsaved_changes_and_save_in_a_transaction(): void
+    {
+        foreach ([AppPanelProvider::ID, AdministrationPanelProvider::ID] as $id) {
+            $panel = Filament::getPanel($id);
+
+            $this->assertTrue($panel->isSidebarCollapsibleOnDesktop(), $id);
+            $this->assertTrue($panel->hasUnsavedChangesAlerts(), $id);
+            $this->assertTrue($panel->hasDatabaseTransactions(), $id);
+        }
+    }
+
+    /**
+     * Someone who sees the administration panel's home, the overview.
+     */
+    private function administrator(): User
+    {
+        $admin = User::factory()->create();
+        $admin->givePermissionTo(SystemPermission::AccessAdministrationPanel, SystemPermission::ManageAll);
+
+        return $admin;
     }
 }

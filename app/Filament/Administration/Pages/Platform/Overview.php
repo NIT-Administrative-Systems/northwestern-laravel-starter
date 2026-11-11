@@ -6,10 +6,10 @@ namespace App\Filament\Administration\Pages\Platform;
 
 use App\Domains\Access\Enums\SystemPermission;
 use App\Domains\Api\Models\ApiRequestLog;
-use App\Filament\Administration\Navigation\AdministrationNavGroup;
 use BackedEnum;
 use Carbon\Carbon;
-use Filament\Pages\Page;
+use Filament\Facades\Filament;
+use Filament\Pages\Dashboard;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
@@ -20,7 +20,6 @@ use Spatie\Health\ResultStores\EloquentHealthResultStore;
 use Spatie\Health\ResultStores\StoredCheckResults\StoredCheckResult;
 use Spatie\Health\ResultStores\StoredCheckResults\StoredCheckResults;
 use Throwable;
-use UnitEnum;
 
 /**
  * @phpstan-type InfoRow array{value: string, mono?: bool}
@@ -31,8 +30,11 @@ use UnitEnum;
  * @phpstan-type LoginHeatmapRow array{date: Carbon, label: string, cells: list<LoginHeatmapCell>}
  * @phpstan-type LoginHeatmap array{rows: list<LoginHeatmapRow>, total: int, peak: array{count: int, when: Carbon}|null, days: int}
  * @phpstan-type ApiTraffic array{counts: list<int>, total: int, p95_ms: int}
+ *
+ * The administration panel's home. Only someone who may manage everything sees it; anyone else
+ * who opens the panel starts on the first page in their navigation.
  */
-class Overview extends Page
+class Overview extends Dashboard
 {
     protected static string|null|BackedEnum $navigationIcon = Heroicon::OutlinedSquares2x2;
 
@@ -46,13 +48,26 @@ class Overview extends Page
 
     protected static ?string $slug = 'overview';
 
-    protected static string|null|UnitEnum $navigationGroup = AdministrationNavGroup::Platform;
-
-    protected static ?int $navigationSort = 1;
-
     public static function canAccess(): bool
     {
         return auth()->user()->hasPermissionTo(SystemPermission::ManageAll);
+    }
+
+    /**
+     * Send someone who can't see the overview to the first page they can, instead of a 403 on
+     * the panel's home. With nothing to offer them, it stays a 403.
+     */
+    public function mountCanAuthorizeAccess(): void
+    {
+        if (static::canAccess()) {
+            return;
+        }
+
+        $firstPage = Filament::getCurrentOrDefaultPanel()->getRedirectUrl();
+
+        abort_if(blank($firstPage) || $firstPage === static::getUrl(), 403);
+
+        $this->redirect($firstPage);
     }
 
     /**

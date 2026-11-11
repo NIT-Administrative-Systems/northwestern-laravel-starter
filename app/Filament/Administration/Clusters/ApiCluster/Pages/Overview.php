@@ -25,13 +25,13 @@ class Overview extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSquares2x2;
 
-    protected static ?string $navigationLabel = 'Overview';
+    protected static ?string $navigationLabel = 'API Overview';
 
-    protected static ?string $title = 'Overview';
+    protected static ?string $title = 'API Overview';
 
     protected static ?string $slug = 'overview';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 1;
 
     protected string $view = 'filament.clusters.api-cluster.pages.overview';
 

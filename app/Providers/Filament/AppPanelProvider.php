@@ -76,8 +76,13 @@ class AppPanelProvider extends PanelProvider
                     ->name('environment-lockdown');
             })
             ->viteTheme('resources/css/filament/app/theme.css')
+            ->sidebarCollapsibleOnDesktop()
+            ->unsavedChangesAlerts()
+            ->databaseTransactions()
             ->renderHook(PanelsRenderHook::HEAD_END, fn (): string => Blade::render('<x-sentry-browser />'))
             ->renderHook(PanelsRenderHook::TOPBAR_LOGO_AFTER, fn (): string => Blade::render('<x-panel-brand />'))
+            // The top bar shows the application's name from lg up; below that, the sidebar does.
+            ->renderHook(PanelsRenderHook::SIDEBAR_NAV_START, fn (): string => Blade::render('<x-sidebar-panel-name class="lg:hidden" :name="config(\'app.name\')" />'))
             // After global search: after the theme's environment badge and just ahead of the user menu.
             ->renderHook(PanelsRenderHook::GLOBAL_SEARCH_AFTER, fn (): string => Blade::render('<x-help-menu />'))
             // Sign-in and the lockdown page; see HasSiteHeader.

@@ -479,7 +479,37 @@
                 </span>
             </x-slot>
 
-            <div class="-mx-4 -my-2 overflow-x-auto whitespace-nowrap sm:-mx-6">
+            {{-- Below md, a list: the table would scroll sideways with rows taller than the screen is wide. --}}
+            <ul class="divide-y divide-gray-950/5 md:hidden dark:divide-white/5" role="list">
+                @foreach ($scheduledTasks as $task)
+                    <li class="py-3 first:pt-0 last:pb-0">
+                        <p class="break-all font-mono text-sm font-medium text-gray-950 dark:text-white">
+                            {{ $this->formatScheduledCommand($task['command']) }}
+                        </p>
+                        @if ($task['description'])
+                            <p class="mt-1 text-pretty text-sm text-gray-500 dark:text-gray-400">
+                                {{ $task['description'] }}</p>
+                        @endif
+                        <dl class="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs">
+                            <dt class="text-gray-500 dark:text-gray-400">Schedule</dt>
+                            <dd>
+                                <code
+                                      class="rounded bg-gray-950/5 px-1.5 py-0.5 font-mono text-gray-700 dark:bg-white/10 dark:text-gray-300">{{ $task['expression'] }}</code>
+                            </dd>
+                            <dt class="text-gray-500 dark:text-gray-400">Next Run</dt>
+                            <dd class="tabular-nums text-gray-950 dark:text-white">
+                                {{ $task['next_due_date_human'] ?? '—' }}
+                                @if ($task['next_due_date'])
+                                    <span
+                                          class="text-gray-500 dark:text-gray-400">({{ $task['next_due_date'] }})</span>
+                                @endif
+                            </dd>
+                        </dl>
+                    </li>
+                @endforeach
+            </ul>
+
+            <div class="-mx-4 -my-2 hidden overflow-x-auto whitespace-nowrap sm:-mx-6 md:block">
                 <div class="inline-block min-w-full px-4 py-2 align-middle sm:px-6">
                     <table class="w-full text-sm">
                         <thead>
