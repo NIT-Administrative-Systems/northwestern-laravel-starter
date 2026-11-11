@@ -57,8 +57,8 @@ class ViewRole extends ViewRecord
                     TextEntry::make('permissions.label')
                         ->hiddenLabel()
                         ->badge()
-                        ->color(fn (string $state, Role $record): string => self::isPersonal($record, $state) ? PermissionScope::Personal->getColor() : 'primary')
-                        ->formatStateUsing(fn (string $state, Role $record): string => self::isPersonal($record, $state) ? "{$state} (Personal)" : $state)
+                        ->color(fn (string $state, Role $record): string => $this->isPersonal($record, $state) ? PermissionScope::Personal->getColor() : 'primary')
+                        ->formatStateUsing(fn (string $state, Role $record): string => $this->isPersonal($record, $state) ? "{$state} (Personal)" : $state)
                         ->placeholder('No permissions'),
                 ])
                 ->columnSpanFull(),
@@ -105,7 +105,7 @@ class ViewRole extends ViewRecord
         return $notices;
     }
 
-    private static function isPersonal(Role $record, string $label): bool
+    private function isPersonal(Role $record, string $label): bool
     {
         $permission = $record->permissions->firstWhere('label', $label);
 

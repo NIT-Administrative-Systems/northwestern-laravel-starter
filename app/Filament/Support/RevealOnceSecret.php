@@ -189,11 +189,11 @@ final readonly class RevealOnceSecret
             ->state(fn (?Model $record): ?string => $state($record))
             ->fontFamily(FontFamily::Mono)
             ->extraAttributes(['class' => 'break-all'])
-            ->belowContent(fn (?Model $record): HtmlString => self::copyButton((string) $state($record), $label))
+            ->belowContent(fn (?Model $record): HtmlString => $this->copyButton((string) $state($record), $label))
             ->dehydrated(false);
     }
 
-    private static function copyButton(string $value, string $label): HtmlString
+    private function copyButton(string $value, string $label): HtmlString
     {
         return new HtmlString(Blade::render(<<<'BLADE'
             <div x-data="{ copied: false }">
