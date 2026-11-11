@@ -56,7 +56,7 @@ final class AuthorizationCodeFlowTest extends TestCase
             ->assertSee('localhost')
             ->assertSee('Switch Account');
 
-        $tokens = $this->exchange($client, $this->approve($client), $verifier)->assertOk();
+        $tokens = $this->exchangeAuthorizationCode($client, $this->approveAuthorization($client), $verifier)->assertOk();
 
         $this->withToken($tokens->json('access_token'))->getJson('/api/v1/me')
             ->assertOk()
@@ -73,7 +73,7 @@ final class AuthorizationCodeFlowTest extends TestCase
         $this->actingAs(User::factory()->create());
         $client = $this->registerApplication();
         [, $verifier] = $this->requestAuthorization($client);
-        $tokens = $this->exchange($client, $this->approve($client), $verifier)->json();
+        $tokens = $this->exchangeAuthorizationCode($client, $this->approveAuthorization($client), $verifier)->json();
 
         $refreshed = $this->postJson('/oauth/token', [
             'grant_type' => 'refresh_token',
@@ -91,7 +91,7 @@ final class AuthorizationCodeFlowTest extends TestCase
         $client = $this->registerApplication();
         [, $verifier] = $this->requestAuthorization($client);
 
-        $this->exchange($client, $this->approve($client), $verifier . 'x')->assertBadRequest();
+        $this->exchangeAuthorizationCode($client, $this->approveAuthorization($client), $verifier . 'x')->assertBadRequest();
     }
 
     public function test_denying_returns_to_the_application_with_an_error(): void
@@ -117,7 +117,7 @@ final class AuthorizationCodeFlowTest extends TestCase
         $this->actingAs($user);
         $client = $this->registerApplication();
         [, $verifier] = $this->requestAuthorization($client);
-        $tokens = $this->exchange($client, $this->approve($client), $verifier)->json();
+        $tokens = $this->exchangeAuthorizationCode($client, $this->approveAuthorization($client), $verifier)->json();
 
         resolve(DisconnectApplication::class)(OAuthConnection::query()->sole(), $user);
 
@@ -133,7 +133,7 @@ final class AuthorizationCodeFlowTest extends TestCase
 
         [$response, $verifier] = $this->requestAuthorization($client);
 
-        $this->exchange($client, $this->codeFrom($response), $verifier)->assertOk();
+        $this->exchangeAuthorizationCode($client, $this->authorizationCodeFrom($response), $verifier)->assertOk();
     }
 
     // Environment lockdown covers the consent screen, so
@@ -158,7 +158,7 @@ final class AuthorizationCodeFlowTest extends TestCase
         [$consent, $verifier] = $this->requestAuthorization($client);
         $consent->assertDontSee(SystemPermission::ViewUsers->description());
 
-        $tokens = $this->exchange($client, $this->approve($client), $verifier)->assertOk();
+        $tokens = $this->exchangeAuthorizationCode($client, $this->approveAuthorization($client), $verifier)->assertOk();
         $this->assertSame([], OAuthConnection::query()->sole()->scopes);
         $this->assertNotEmpty($tokens->json('access_token'));
     }
@@ -172,7 +172,7 @@ final class AuthorizationCodeFlowTest extends TestCase
         [$consent, $verifier] = $this->requestAuthorization($client);
         $consent->assertOk()->assertDontSee(SystemPermission::ViewUsers->description());
 
-        $this->exchange($client, $this->approve($client), $verifier)->assertOk();
+        $this->exchangeAuthorizationCode($client, $this->approveAuthorization($client), $verifier)->assertOk();
         $this->assertSame([], OAuthConnection::query()->sole()->scopes);
     }
 
@@ -334,8 +334,8 @@ final class AuthorizationCodeFlowTest extends TestCase
     // Only an application acting for a person is a connection.
     public function test_service_client_and_personal_tokens_record_no_connection(): void
     {
-        $this->serviceClientToken(User::factory()->api()->create());
-        $this->personalAccessToken(User::factory()->create());
+        $this->issueServiceClientToken(User::factory()->api()->create());
+        $this->issuePersonalAccessToken(User::factory()->create());
 
         $this->assertSame(0, OAuthConnection::query()->count());
     }

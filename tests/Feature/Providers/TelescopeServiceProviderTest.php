@@ -18,4 +18,12 @@ final class TelescopeServiceProviderTest extends TestCase
             $this->assertContains($parameter, Telescope::$hiddenRequestParameters);
         }
     }
+
+    // The health endpoint's secret is a header, which a failed health request records.
+    public function test_credential_headers_are_hidden_from_recorded_requests(): void
+    {
+        foreach (['authorization', 'cookie', 'x-csrf-token', 'x-xsrf-token', 'x-secret-token'] as $header) {
+            $this->assertContains($header, Telescope::$hiddenRequestHeaders);
+        }
+    }
 }

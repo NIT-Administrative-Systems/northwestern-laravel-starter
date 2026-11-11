@@ -26,7 +26,7 @@ final class RevokeServiceClientTest extends TestCase
     // An integration loses access at once, not when its current token expires.
     public function test_it_revokes_the_client_and_the_tokens_it_holds(): void
     {
-        [$token, $client] = $this->serviceClientToken(User::factory()->api()->create());
+        [$token, $client] = $this->issueServiceClientToken(User::factory()->api()->create());
         $this->withToken($token)->getJson('/api/v1/me')->assertOk();
 
         resolve(RevokeServiceClient::class)($client);
@@ -41,7 +41,7 @@ final class RevokeServiceClientTest extends TestCase
     public function test_revoking_a_deleted_api_users_client_is_audited_on_the_api_user(): void
     {
         $apiUser = User::factory()->api()->create();
-        [, $client] = $this->serviceClientToken($apiUser);
+        [, $client] = $this->issueServiceClientToken($apiUser);
 
         $apiUser->delete();
 
@@ -53,7 +53,7 @@ final class RevokeServiceClientTest extends TestCase
 
     public function test_an_administrator_needs_manage_api_access(): void
     {
-        [, $client] = $this->serviceClientToken(User::factory()->api()->create());
+        [, $client] = $this->issueServiceClientToken(User::factory()->api()->create());
 
         try {
             resolve(RevokeServiceClient::class)($client, User::factory()->affiliate()->create());

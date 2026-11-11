@@ -32,7 +32,7 @@ final class CredentialKindTest extends TestCase
 
     public function test_a_token_takes_its_clients_kind(): void
     {
-        [, $token] = $this->personalAccessToken(User::factory()->affiliate()->create());
+        [, $token] = $this->issuePersonalAccessToken(User::factory()->affiliate()->create());
         $this->assertSame(CredentialKind::PersonalAccessToken, CredentialKind::of($token));
 
         $token->client()->delete();

@@ -327,11 +327,11 @@ final class LogsApiRequestsTest extends TestCase
         $user = User::factory()->create();
         $user->givePermissionTo(SystemPermission::UseMcp);
         $this->actingAs($user);
-        $token = $this->mcpToken();
+        $token = $this->issueMcpToken();
 
-        $this->mcp($token, 'tools/call', ['name' => 'echo', 'arguments' => ['text' => 'hello']])->assertOk();
-        $this->mcp($token, 'tools/call', ['name' => 'echo', 'arguments' => ['text' => 'h']])->assertOk();
-        $this->mcp($token, 'resources/read', ['uri' => 'file:///missing'])->assertBadRequest();
+        $this->sendMcpMessage($token, 'tools/call', ['name' => 'echo', 'arguments' => ['text' => 'hello']])->assertOk();
+        $this->sendMcpMessage($token, 'tools/call', ['name' => 'echo', 'arguments' => ['text' => 'h']])->assertOk();
+        $this->sendMcpMessage($token, 'resources/read', ['uri' => 'file:///missing'])->assertBadRequest();
         $this->postJson('/mcp', ['jsonrpc' => '2.0', 'method' => 'notifications/initialized'], ['Accept' => 'application/json, text/event-stream', 'Authorization' => "Bearer {$token}"])->assertAccepted();
 
         $this->assertSame([

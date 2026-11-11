@@ -25,7 +25,7 @@ final class DeactivateUserTest extends TestCase
         config(['session.driver' => 'database']);
         $administrator = $this->administrator();
         $person = User::factory()->create();
-        [, $token] = $this->personalAccessToken($person);
+        [, $token] = $this->issuePersonalAccessToken($person);
         DB::table('sessions')->insert(['id' => 'theirs', 'user_id' => $person->getKey(), 'payload' => '', 'last_activity' => now()->getTimestamp()]);
         $this->actingAs($administrator);
 

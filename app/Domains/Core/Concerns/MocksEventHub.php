@@ -12,13 +12,13 @@ use Northwestern\SysDev\SOA\Routing\EventHubWebhookRegistration;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Use this trait in console commands or tests to simulate a message being sent to EventHub on a specific queue.
- * By doing so, you can test the behavior of any application webhooks that are registered to that queue.
+ * Sends a message to the webhook an EventHub queue is routed to, so a
+ * console command or test can see how the application handles it.
  */
 trait MocksEventHub
 {
     /**
-     * Simulates sending a message to an EventHub queue and triggering the registered webhook.
+     * Send a message as EventHub would deliver it on `$queue`.
      *
      * @param  string  $queue  The EventHub topic/queue name (e.g., 'etidentity.ldap.netid.term')
      * @param  string  $message  The raw message payload to send (typically URL-encoded or JSON)
@@ -27,7 +27,7 @@ trait MocksEventHub
      *
      * @throws InvalidArgumentException When no webhook route is registered for the specified queue
      */
-    protected function send(string $queue, string $message, bool $viaQueue = false): string|TestResponse|Response
+    protected function sendEventHubMessage(string $queue, string $message, bool $viaQueue = false): string|TestResponse|Response
     {
         if ($viaQueue) {
             return resolve(EventHub\Queue::class)

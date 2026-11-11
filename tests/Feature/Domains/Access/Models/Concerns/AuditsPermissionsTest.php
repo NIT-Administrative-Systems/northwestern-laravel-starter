@@ -16,7 +16,7 @@ use Tests\TestCase;
 #[CoversTrait(AuditsPermissions::class)]
 final class AuditsPermissionsTest extends TestCase
 {
-    public function test_sync_permissions_creates_audit_when_permissions_change(): void
+    public function test_changing_a_roles_permissions_is_audited(): void
     {
         $role = Role::factory()->createOne();
 
@@ -32,7 +32,7 @@ final class AuditsPermissionsTest extends TestCase
         $this->assertSame('permissions_modified', $audit->event);
     }
 
-    public function test_sync_permissions_does_not_create_audit_when_no_changes(): void
+    public function test_setting_the_same_permissions_records_nothing(): void
     {
         $role = Role::factory()->createOne();
         $role->givePermissionTo(SystemPermission::ViewUsers);
@@ -50,7 +50,7 @@ final class AuditsPermissionsTest extends TestCase
         $this->assertSame($auditCountBefore, $auditCountAfter);
     }
 
-    public function test_sync_permissions_audit_captures_added_permissions(): void
+    public function test_the_audit_shows_added_permissions(): void
     {
         $role = Role::factory()->createOne();
 
@@ -75,7 +75,7 @@ final class AuditsPermissionsTest extends TestCase
         $this->assertArrayHasKey('api_relevant', $addedPermission);
     }
 
-    public function test_sync_permissions_audit_captures_removed_permissions(): void
+    public function test_the_audit_shows_removed_permissions(): void
     {
         $role = Role::factory()->createOne();
         $role->givePermissionTo(SystemPermission::ViewUsers);
@@ -101,7 +101,7 @@ final class AuditsPermissionsTest extends TestCase
         $this->assertEmpty($afterPermissions);
     }
 
-    public function test_sync_permissions_handles_model_deleted_during_sync(): void
+    public function test_a_role_deleted_during_the_change_is_still_audited(): void
     {
         $role = Role::factory()->createOne();
         $role->givePermissionTo(SystemPermission::ViewUsers);
@@ -129,7 +129,7 @@ final class AuditsPermissionsTest extends TestCase
         $this->assertSame([], $audit->new_values['permissions']);
     }
 
-    public function test_sync_permissions_audit_captures_before_and_after_state(): void
+    public function test_the_audit_has_the_permissions_before_and_after(): void
     {
         $role = Role::factory()->createOne();
         $role->givePermissionTo(SystemPermission::ViewUsers);

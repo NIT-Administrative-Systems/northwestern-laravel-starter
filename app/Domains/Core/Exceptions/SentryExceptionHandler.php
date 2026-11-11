@@ -10,8 +10,9 @@ use Northwestern\SysDev\Chassis\Exceptions\SentryExceptionHandler as BaseSentryE
 /**
  * Handles reporting exceptions to Sentry with enriched user context.
  *
- * {@see userContext()} is also the user context for the browser SDK, so PHP and
- * JavaScript reports identify users the same way.
+ * {@see userContext()} is the browser SDK's
+ * user context too, so PHP and JavaScript
+ * reports identify people the same way.
  */
 class SentryExceptionHandler extends BaseSentryExceptionHandler
 {

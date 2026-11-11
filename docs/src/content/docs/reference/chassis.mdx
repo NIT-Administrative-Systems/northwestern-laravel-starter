@@ -7,7 +7,7 @@ sidebar:
 
 import { Aside } from "@astrojs/starlight/components";
 
-[Chassis](https://github.com/NIT-Administrative-Systems/chassis) (`northwestern-sysdev/chassis`, version 1.4) is the package of building blocks that Northwestern Laravel applications share. The starter extends some of its classes and uses others as they are. You'll meet them in stack traces, in the browser tests, and when you change how the API, seeding or lockdown behaves.
+[Chassis](https://github.com/NIT-Administrative-Systems/chassis) (`northwestern-sysdev/chassis`, version 1.5) is the package of building blocks that Northwestern Laravel applications share. The starter extends some of its classes and uses others as they are. You'll meet them in stack traces, in the browser tests, and when you change how the API, seeding or lockdown behaves.
 
 <Aside type="tip">
     Change behavior by overriding a hook in the starter's subclass, not by
@@ -31,15 +31,16 @@ import { Aside } from "@astrojs/starlight/components";
 | `ValueObjects\ApiRequestContext`            | Read anywhere during an API request                             | The request's trace ID, principal, client, token, scopes and grant, in Laravel's `Context`       |
 | `Enums\ApiPrincipalType`, `Enums\OAuthGrantType`, `Enums\ApiRequestFailure` | The request log and context              | Who the request acted as (`user` or `client`), how the token was issued, and why a request was refused |
 | `Http\Middleware\EnsureFeatureEnabled`      | `routes/api.php`, `routes/ai.php`                               | Answers 503, or 404 with `,404`, while a config flag is off                                       |
-| `Exceptions\ProblemDetailsRenderer`, `Http\Responses\ProblemDetails` | `bootstrap/app.php`, `AppServiceProvider`    | Renders the REST API's errors as RFC 9457 Problem Details, except on the paths it's told to skip |
+| `Exceptions\ProblemDetailsRenderer`, `Http\Responses\ProblemDetails` | `bootstrap/app.php`, `AppServiceProvider`, `ServiceDownError`    | Renders the REST API's errors as RFC 9457 Problem Details, except on the paths it's told to skip (`oauth/*`, `mcp` and `.well-known/*`, set in `AppServiceProvider`) |
 | `Rules\ValidIpOrCidrRule`                   | Service client IP allowlists                                    | Validates an IP address or CIDR range                                                            |
 
 `AuthenticatesPassportTokens` hooks, which `AuthenticatePassportToken` overrides:
 
 - `allowedIps(Client $client)` returns a client's IP allowlist, or `null` for none.
-- `isEligible(Authenticatable $user)` decides whether the token's user may still use the API; the starter refuses deleted and deactivated accounts, and personal access tokens whose owner lost `CreatePersonalAccessTokens`.
+- `isEligible(Authenticatable $user)` decides whether the token's user may still use it; the starter asks `CredentialAccess`, which refuses deleted and deactivated accounts, personal access tokens whose owner lost `CreatePersonalAccessTokens`, and MCP clients whose person lost `UseMcp`.
 - `clientOwner(Client $client)` and `allowsClientsWithoutUser()` resolve whom a client credentials token acts as.
 - `authenticated(Request $request, Client $client, ?Authenticatable $user)` runs after a token is accepted; the starter records when the client, the token and the person's connection were last used.
+- `reportMissingIp(array $allowedIps)` runs when a client has an allowlist but the request's IP address can't be read, which the allowlist refuses; the starter reports a `MissingRequestIpForRestrictedTokenException`, usually a sign that [trusted proxies](/features/api-operations/#behind-a-proxy) aren't configured.
 
 `LogsPassportRequests` hooks, which `LogsApiRequests` overrides: `isEnabled()`, `isSamplingEnabled()`, `sampleRate()`, `additionalLogData()` and `persistLog(array $data)`.
 
@@ -62,12 +63,13 @@ To gate your own routes on a feature flag, use `EnsureFeatureEnabled` with a con
 | ------------------------------------------------ | --------------------------------------------------- | --------------------------------------------------------------------------------------------- |
 | `Models\Concerns\Auditable`                      | `BaseModel`, `User`, `Role`, `Permission`           | Records each model's changes in the audit log                                                 |
 | `Models\Concerns\RecordsCustomAudits`            | `RecordsAuditEvents`, on `User` and `Role`          | Adds `recordCustomAudit()` for audit events that aren't attribute changes; see [Audit Logging](/features/audit-logging/) |
-| `Models\Concerns\PrunesAfterRetentionPeriod`     | `Audit`, `UserLoginRecord`, `ImpersonationLog`, `LoginChallenge`, `ApiRequestLog` | Deletes records older than the days in a config key when `model:prune` runs; see [Data Retention](/getting-started/initial-customization/#7-data-retention) |
+| `Models\Concerns\PrunesAfterRetentionPeriod`     | `Audit`, `UserLoginRecord`, `ImpersonationLog`, `LoginChallenge`, `ApiRequestLog`, `Export`, `Import`, `FailedImportRow`, `DatabaseNotification`, `SupportTicket` | Deletes records older than the days in a config key when `model:prune` runs; see [Data Retention](/getting-started/initial-customization/#7-data-retention) |
 | `Attributes\AutomaticallyOrdered`                | Available to any model through `BaseModel`          | Orders a model's queries by `order_index`, then `label`, or the columns you name              |
 | `Seeding\IdempotentSeeder`, `Attributes\AutoSeed` | The starter's seeders                               | Seeders that are safe to run on every deployment; see [Idempotent Seeding](/architecture/idempotent-seeding/) |
 | `Console\Commands\RebuildDatabaseCommand`        | `db:rebuild`                                        | Rebuilds the local database; the starter adds key generation, demo data and IDE helpers       |
+| `Console\Commands\*`                             | `config:validate`, `db:seed:list`, `db:wake`, `restore-env-files`, `db:snapshot:*` | Registered by `ChassisServiceProvider`; see [Commands](/reference/commands/)                 |
 | `Database\ConfigurableDbDumperFactory`           | [Database snapshots](/features/database-snapshots/) | Finds `pg_dump` and `psql`, including Herd's on macOS and Windows                             |
-| `Database\DatabasePausedDetector`                | `bootstrap/app.php`                                 | Recognizes a paused database so the error page can say it's starting                          |
+| `Database\DatabasePausedDetector`                | `bootstrap/app.php`                                 | Recognizes a paused database, so people see a page saying it's starting and API, OAuth and MCP clients a `503` with `Retry-After` |
 
 ## Platform
 
@@ -75,15 +77,15 @@ To gate your own routes on a feature flag, use `EnsureFeatureEnabled` with a con
 | --------------------------------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------ |
 | `Http\Middleware\EnvironmentLockdown`               | `App\Http\Middleware\EnvironmentLockdown`    | While lockdown is on, sends people with only the default role to the lockdown page   |
 | `Contracts\ConfigValidator`, `Attributes\ValidatesConfig` | The starter's config validators       | The checks `config:validate` runs; see [Adding Custom Validators](/reference/commands/#adding-custom-validators) |
-| `Exceptions\SentryExceptionHandler`, `Http\Controllers\SentryTunnelController` | [Sentry](/features/sentry/) | Reports exceptions to Sentry and tunnels the browser SDK's events through the application |
+| `Exceptions\SentryExceptionHandler`, `Http\Controllers\SentryTunnelController` | `App\Domains\Core\Exceptions\SentryExceptionHandler`, `routes/auth.php`; see [Sentry](/features/sentry/) | Reports exceptions to Sentry and tunnels the browser SDK's events through the application |
 
 ## Formatting
 
 | Chassis class                     | Starter use                                         | What it does                                                                                        |
 | --------------------------------- | --------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `Formatting\TitleCase`            | Resource labels                                      | Writes names in title case, keeping words that carry capitals and translation placeholders          |
-| `Formatting\NorthwesternDateTime` | Emails and notifications                             | Writes dates and times in Northwestern style: "10:12 a.m. CDT Saturday, October 10"                 |
-| `Formatting\CountInWords`         | Login code messages, expiration notifications        | Writes a count and its noun: "five minutes"                                                         |
+| `Formatting\TitleCase`            | Model labels in titles, such as `UserLoginRecordResource`'s | Writes names in title case, keeping words that carry capitals and translation placeholders          |
+| `Formatting\NorthwesternDateTime` | Expiration reminder and support request emails       | Writes dates and times in Northwestern style: "10:12 a.m. CDT Saturday, October 10"                 |
+| `Formatting\CountInWords`         | Sign-in code messages, expiration reminders          | Writes a count and its noun: "five minutes"                                                         |
 | `Markdown\ShiftHeadings`          | `Changelog::bodyHtml()`                              | A CommonMark extension that moves a document's headings so the shallowest lands at the level you choose |
 
 [Interface Conventions](/building/interface-conventions/) shows how to use them.
@@ -98,12 +100,12 @@ To gate your own routes on a feature flag, use `EnsureFeatureEnabled` with a con
 | `toHaveNoClientErrors()`                            | The page logged `console.error()`, threw, left a promise rejection unhandled, or a Livewire request failed |
 | `toHaveNoServerErrors()`                            | The application reported an exception while serving the browser, Livewire updates included                    |
 | `toBeHealthy(exclude: [])`                          | Any of the above, or an image failed to load. Every problem is listed at once                                  |
-| `toBeHealthyInEachTheme()`, `toBeHealthyOnMobile()` | The page isn't healthy in light and dark mode, or at a phone's width                                           |
+| `toBeHealthyInEachTheme(exclude: [])`, `toBeHealthyOnMobile(exclude: [])` | The page isn't healthy in light and dark mode, or at a phone's width                                           |
 | `toAllBeHealthy(exclude: [])`                       | Any page in a list of paths isn't healthy. Every unhealthy page is listed                                      |
 
 | Helper                                   | What it does                                                                                                                                                       |
 | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `FilamentPages::in('administration')`    | Lists the paths of a panel's pages the signed-in person can open: each resource's index and create pages, and each page and dashboard. Pages that need a record are left out |
+| `FilamentPages::in('administration')`    | Lists the paths of a panel's pages the signed-in person can open: each resource's index and create pages, and each page, cluster and dashboard. Pages that need a record are left out, and `except:` leaves out the resource and page classes you name |
 | `ErrorPages::path(500)`                  | Registers a test route that answers with that status, so error pages that only a failure shows can be checked                                                     |
 | `FilamentPage::press($page, 'Create')`   | Clicks a Filament button by its label. Pest's own `press()` clicks the first element with that text, which on a Filament page is often a breadcrumb                 |
 | `FilamentPage::openUserMenu($page)`      | Opens the user menu. `confirmModal()`, `cancelModal()`, `assertNotified()` and `assertFieldError()` drive the rest of Filament's markup                             |

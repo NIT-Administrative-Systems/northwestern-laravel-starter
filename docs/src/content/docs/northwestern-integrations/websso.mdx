@@ -80,7 +80,7 @@ For a higher-level overview of all authentication methods, see the [Authenticati
 
 ## Routes
 
-Routes are defined in `routes/auth.php`. The Entra ID and Online Passport routes are registered only when that provider is configured; the shared logout route is always registered.
+Routes are defined in `routes/auth.php`. The Entra ID and Online Passport routes are registered only when that provider is configured; the shared sign-out route is always registered.
 
 ### Entra ID Routes
 
@@ -107,16 +107,16 @@ Routes are defined in `routes/auth.php`. The Entra ID and Online Passport routes
 
 ---
 
-## Logout
+## Signing Out
 
-### Entra ID Logout
+### Entra ID Sign-Out
 
 The `oauthLogout()` method handles SSO session cleanup:
 
 - **Outside CI** - Delegates to the `laravel-soa` trait's `oauthLogout()` method, which clears the local session and then redirects to Entra ID's logout endpoint.
-- **CI environment** - Skips the Entra redirect and performs a local-only logout to avoid external service dependencies.
+- **CI environment** - Skips the Entra redirect and signs out locally only, to avoid external service dependencies.
 
-### Online Passport Logout
+### Online Passport Sign-Out
 
 The `logout()` method (from the `WebSSOAuthentication` trait) redirects the user to ForgeRock's logout endpoint to clear the `nusso` session cookie. The local session is invalidated before the redirect.
 
@@ -153,7 +153,7 @@ A failed lookup for someone who already has an account isn't an error: they sign
 
 ## Online Passport Configuration
 
-Setting `WEBSSO_API_KEY` (or using `WEBSSO_STRATEGY=forgerock-direct`) switches the starter from Entra ID to Online Passport. The login and logout buttons will automatically route through ForgeRock instead of Microsoft.
+Setting `WEBSSO_API_KEY` (or using `WEBSSO_STRATEGY=forgerock-direct`) switches the starter from Entra ID to Online Passport. Signing in and out then goes through ForgeRock instead of Microsoft.
 
 <PropertyTable title="Environment Variables">
     <Property name="WEBSSO_STRATEGY" default="apigee">

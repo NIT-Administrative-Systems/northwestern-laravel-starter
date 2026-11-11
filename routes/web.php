@@ -7,8 +7,8 @@ use App\Providers\Filament\AppPanelProvider;
 use Illuminate\Support\Facades\Route;
 
 /*
- * Public pages render on the public layout (`<x-layouts.public>`) in the app panel's
- * context, so they load its theme and can use Filament's Blade components.
+ * Public pages render on `<x-layouts.public>` in the app panel's context.
+ * That loads its theme and lets them use Filament's Blade components.
  */
 Route::middleware('panel:' . AppPanelProvider::ID)->group(function () {
     Route::get('/', Controllers\HomeController::class)->name('home');
@@ -22,8 +22,10 @@ Route::middleware('panel:' . AppPanelProvider::ID)->group(function () {
         });
     }
 
-    // Unknown URLs 404 through the web middleware, so the not-found page knows who is signed in.
-    // API paths are left out: they 404 as JSON and shouldn't start a session.
+    // Unknown URLs 404 through the web middleware,
+    // so the not-found page knows who is signed
+    // in. API paths are left out: they 404 as
+    // JSON and shouldn't start a session.
     Route::fallback(fn () => abort(404))->where('fallbackPlaceholder', '^(?!api(/|$)).*');
 });
 
@@ -33,6 +35,7 @@ if (config('platform.wildcard_photo_sync')) {
 }
 
 if (config('changelog.enabled')) {
-    // The feed is XML, not a page, so it doesn't need the public layout's panel context.
+    // The feed is XML, not a page, so it doesn't
+    // need the public layout's panel context.
     Route::get('support/changelog/feed.rss', Controllers\Support\ChangelogFeedController::class)->name('support.changelog.feed');
 }

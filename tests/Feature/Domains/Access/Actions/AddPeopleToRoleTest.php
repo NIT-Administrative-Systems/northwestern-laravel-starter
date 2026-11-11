@@ -81,7 +81,7 @@ final class AddPeopleToRoleTest extends TestCase
         config(['queue.default' => 'database']);
 
         resolve(AddPeopleToRole::class)($this->role, 'abc123 zzz999', $this->administrator);
-        // Run each job as a worker would, without a worker's timeout alarm outliving the test.
+        // Run each job as a worker would, without a worker's timeout alarm outliving it.
         while ($job = Queue::connection('database')->pop()) {
             $job->fire();
         }
@@ -91,7 +91,7 @@ final class AddPeopleToRoleTest extends TestCase
         $this->assertSame('1 person added to the Editors role. 1 wasn\'t: download the list to see why.', $notification->data['body']);
     }
 
-    // Each chunk is a queued job; the person who added them is notified when the batch finishes.
+    // Each chunk is a queued job, and the person who added them hears when it's done.
     public function test_the_list_is_processed_in_queued_chunks(): void
     {
         Bus::fake();

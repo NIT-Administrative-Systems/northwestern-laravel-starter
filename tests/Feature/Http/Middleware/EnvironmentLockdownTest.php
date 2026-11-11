@@ -67,7 +67,7 @@ final class EnvironmentLockdownTest extends TestCase
             ->assertRedirect(route('filament.app.environment-lockdown'));
     }
 
-    // `logout` sends a WebSSO user on to WebSSO's sign-out, still signed in; lockdown must let them leave.
+    // `logout` sends a WebSSO user on to WebSSO, still signed in; they must get out.
     public function test_a_locked_out_websso_user_can_sign_out(): void
     {
         config(['platform.lockdown.enabled' => true]);

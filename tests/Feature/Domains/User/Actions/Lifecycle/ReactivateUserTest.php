@@ -24,7 +24,7 @@ final class ReactivateUserTest extends TestCase
     {
         $administrator = $this->administrator();
         $person = User::factory()->create();
-        [, $token] = $this->personalAccessToken($person);
+        [, $token] = $this->issuePersonalAccessToken($person);
         $this->actingAs($administrator);
         resolve(DeactivateUser::class)($person, $administrator);
 

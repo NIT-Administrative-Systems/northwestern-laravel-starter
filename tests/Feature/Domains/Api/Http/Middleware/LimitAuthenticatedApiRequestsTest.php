@@ -27,8 +27,8 @@ final class LimitAuthenticatedApiRequestsTest extends TestCase
     {
         config(['rate-limiting.api.per_minute' => 1, 'rate-limiting.api.per_ip_per_minute' => 100]);
 
-        [$tokenA] = $this->serviceClientToken(User::factory()->api()->create());
-        [$tokenB] = $this->serviceClientToken(User::factory()->api()->create());
+        [$tokenA] = $this->issueServiceClientToken(User::factory()->api()->create());
+        [$tokenB] = $this->issueServiceClientToken(User::factory()->api()->create());
 
         $this->withToken($tokenA)->getJson('/api/v1/me')->assertOk();
         $this->withToken($tokenA)->getJson('/api/v1/me')

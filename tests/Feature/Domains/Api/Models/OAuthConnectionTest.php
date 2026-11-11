@@ -24,7 +24,7 @@ final class OAuthConnectionTest extends TestCase
         $this->actingAs($user);
         $client = $this->registerApplication();
         [, $verifier] = $this->requestAuthorization($client);
-        $this->exchange($client, $this->approve($client), $verifier);
+        $this->exchangeAuthorizationCode($client, $this->approveAuthorization($client), $verifier);
 
         $this->assertTrue(OAuthConnection::query()->live()->exists());
 
@@ -40,7 +40,7 @@ final class OAuthConnectionTest extends TestCase
         $this->actingAs(User::factory()->create());
         $client = $this->registerApplication();
         [, $verifier] = $this->requestAuthorization($client);
-        $this->exchange($client, $this->approve($client), $verifier);
+        $this->exchangeAuthorizationCode($client, $this->approveAuthorization($client), $verifier);
 
         Passport::token()->newQuery()->update(['revoked' => true]);
 
@@ -52,14 +52,14 @@ final class OAuthConnectionTest extends TestCase
         $this->actingAs(User::factory()->create());
         $client = $this->registerApplication();
         [, $verifier] = $this->requestAuthorization($client);
-        $this->exchange($client, $this->approve($client), $verifier);
+        $this->exchangeAuthorizationCode($client, $this->approveAuthorization($client), $verifier);
         $connectedAt = OAuthConnection::query()->sole()->connected_at;
 
         // Its access token has expired by now, so Passport asks again.
         $this->travel(3)->days();
         [$response, $verifier] = $this->requestAuthorization($client);
         $response->assertOk();
-        $this->exchange($client, $this->approve($client), $verifier)->assertOk();
+        $this->exchangeAuthorizationCode($client, $this->approveAuthorization($client), $verifier)->assertOk();
 
         $this->assertTrue($connectedAt->eq(OAuthConnection::query()->sole()->connected_at));
     }

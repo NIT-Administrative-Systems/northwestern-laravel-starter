@@ -22,21 +22,17 @@ class HealthServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Health::checks([
-            // Sub-production databases scale to zero on AWS RDS. During idle periods
-            // the check would trip on connection timeouts and report noise, so
-            // the probe is prod-only.
+            // Databases below production scale to zero on RDS,
+            // and one still waking up would fail the check.
             DatabaseCheck::new()
                 ->if(App::isProduction()),
 
-            // Only monitor Redis when the app actually talks to it.
             RedisCheck::new()
-                ->if($this->usesRedisDriver()),
+                ->if($this->usesRedis()),
 
-            // QueueCheck reads a heartbeat written by the `health:queue-check-heartbeat`
-            // scheduled command. That command is prod-only (see routes/console.php), so
-            // the check is prod-only too — otherwise non-prod would always report the
-            // queue as stale. Heartbeat dispatch runs every 5 min in prod, so the
-            // staleness threshold is 15 min to leave headroom and avoid flapping.
+            // The heartbeat it reads is dispatched every
+            // five minutes, in production only, so 15
+            // minutes leaves room for a slow queue.
             QueueCheck::new()
                 ->if(App::isProduction())
                 ->failWhenHealthJobTakesLongerThanMinutes(15),
@@ -49,30 +45,28 @@ class HealthServiceProvider extends ServiceProvider
             OptimizedAppCheck::new()
                 ->unless(App::isLocal()),
 
-            // Per-check `everyXMinutes()` schedules only average out cleanly when
-            // `RunHealthChecksCommand` ticks every minute on the scheduler. When
-            // the endpoint runs checks on-demand (non-prod), any tick off-schedule
-            // records the check as "skipped" instead of its real state. Leaving
-            // these at the default every-minute cadence avoids that false reading;
-            // Packagist + Directory Search are cheap enough to poll at that rate.
+            // Outside production the endpoint runs the checks on demand, where a check with
+            // its own schedule reads as skipped between runs, so these run every minute.
             SecurityAdvisoriesCheck::new()
                 ->ignoredPackages([
                     //
                 ]),
 
-            // Optional locally; a deployed environment without a key should still fail.
+            // Optional locally, but a deployed environment without a key should still fail.
             DirectorySearchCheck::new()
                 ->unless(App::isLocal() && blank(config('nusoa.directorySearch.apiKey'))),
         ]);
     }
 
-    private function usesRedisDriver(): bool
+    /**
+     * Determine whether the cache, queue or sessions are stored in Redis.
+     */
+    private function usesRedis(): bool
     {
-        $redisDrivers = ['redis', 'predis'];
-
-        return in_array(config('database.redis.client'), $redisDrivers, true)
-            || in_array(config('cache.default'), $redisDrivers, true)
-            || in_array(config('queue.default'), $redisDrivers, true)
-            || in_array(config('session.driver'), $redisDrivers, true);
+        return in_array('redis', [
+            config('cache.default'),
+            config('queue.default'),
+            config('session.driver'),
+        ], true);
     }
 }

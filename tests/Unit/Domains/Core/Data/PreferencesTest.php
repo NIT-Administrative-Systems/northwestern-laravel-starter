@@ -38,7 +38,7 @@ final class PreferencesTest extends TestCase
         $this->assertSame('Willie', $preferences->nickname);
     }
 
-    // The JSON outlives the code: removed preferences and bad values must not break reading.
+    // The JSON outlives the code: removed preferences and bad values mustn't break it.
     public function test_unknown_keys_are_dropped_and_wrong_types_use_the_default(): void
     {
         $preferences = ExamplePreferences::fromArray([

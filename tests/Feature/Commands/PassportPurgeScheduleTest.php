@@ -34,7 +34,7 @@ final class PassportPurgeScheduleTest extends TestCase
         $this->actingAs($person);
         $client = $this->registerApplication();
         [, $verifier] = $this->requestAuthorization($client);
-        $this->exchange($client, $this->approve($client), $verifier)->assertOk();
+        $this->exchangeAuthorizationCode($client, $this->approveAuthorization($client), $verifier)->assertOk();
 
         $token = OAuthToken::query()->where('client_id', $client->getKey())->sole();
         $token->revoke();
@@ -52,7 +52,7 @@ final class PassportPurgeScheduleTest extends TestCase
         $this->actingAs($person);
         $client = $this->registerApplication();
         [, $verifier] = $this->requestAuthorization($client);
-        $this->exchange($client, $this->approve($client), $verifier)->assertOk();
+        $this->exchangeAuthorizationCode($client, $this->approveAuthorization($client), $verifier)->assertOk();
 
         $token = OAuthToken::query()->where('client_id', $client->getKey())->sole();
         $token->forceFill(['revoked' => true, 'expires_at' => now()->subDays(32)])->save();

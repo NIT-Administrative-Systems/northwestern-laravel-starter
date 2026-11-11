@@ -9,9 +9,10 @@ use Illuminate\Notifications\DatabaseNotification as BaseDatabaseNotification;
 use Northwestern\SysDev\Chassis\Models\Concerns\PrunesAfterRetentionPeriod;
 
 /**
- * A notification in a panel's notification bell. {@see User::notifications()} uses this model so
- * the scheduled `model:prune` deletes them after `platform.retention.notifications` days, read
- * or not.
+ * A notification in a panel's notification bell.
+ *
+ * {@see User::notifications()} uses this model, so the scheduled `model:prune`
+ * deletes them, read or not, after `platform.retention.notifications` days.
  */
 class DatabaseNotification extends BaseDatabaseNotification
 {

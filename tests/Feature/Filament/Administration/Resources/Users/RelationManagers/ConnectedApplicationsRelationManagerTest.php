@@ -29,7 +29,7 @@ final class ConnectedApplicationsRelationManagerTest extends TestCase
         $this->actingAs($person);
         $client = $this->registerApplication();
         [, $verifier] = $this->requestAuthorization($client);
-        $this->exchange($client, $this->approve($client), $verifier);
+        $this->exchangeAuthorizationCode($client, $this->approveAuthorization($client), $verifier);
         $connection = OAuthConnection::query()->sole();
 
         Filament::setCurrentPanel(AdministrationPanelProvider::ID);

@@ -20,7 +20,7 @@ final class RefuseTokensWhileFeatureOffTest extends TestCase
 
     public function test_service_clients_get_tokens_while_the_api_is_on(): void
     {
-        [$token] = $this->serviceClientToken(User::factory()->api()->create());
+        [$token] = $this->issueServiceClientToken(User::factory()->api()->create());
 
         $this->assertNotEmpty($token);
     }

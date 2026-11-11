@@ -124,7 +124,6 @@
             <file>app/Providers/IntegrationServiceProvider.php</file>
             <file>app/Providers/RateLimitingServiceProvider.php</file>
             <file>app/Providers/TelescopeServiceProvider.php</file>
-            <file>app/Providers/ViewServiceProvider.php</file>
 
             <!-- Console commands -->
             <file>app/Console/Commands/ForceDetachRoleCommand.php</file>

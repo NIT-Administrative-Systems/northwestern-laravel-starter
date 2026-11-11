@@ -13,8 +13,8 @@ use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Tool;
 
 /**
- * A tool for tests: echoes its text with the name of the person it acts as. The starter's
- * server ships with no tools.
+ * A test tool that echoes its text with the name of the person
+ * it acts as. The starter's server ships without any tools.
  */
 #[Description('Echoes text back with the name of the person calling.')]
 class EchoTool extends Tool

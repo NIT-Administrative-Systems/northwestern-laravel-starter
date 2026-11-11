@@ -11,10 +11,9 @@ use Northwestern\SysDev\Chassis\Contracts\ConfigValidator;
 /**
  * Validates EventHub configuration when mock mode is disabled.
  *
- * When the application is configured to use the real EventHub API,
- * this validator ensures all required credentials are present.
- * When no EventHub credentials are configured at all, the validator
- * is skipped since EventHub is an optional integration.
+ * Checks that every EventHub credential is set when the real EventHub API is used.
+ *
+ * It's skipped when none are set, since EventHub is optional.
  */
 #[ValidatesConfig(description: 'EventHub')]
 class EventHubValidator implements ConfigValidator

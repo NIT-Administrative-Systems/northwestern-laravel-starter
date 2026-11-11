@@ -14,7 +14,7 @@ abstract class ApiTestCase extends TestCase
 {
     use IssuesServiceClientTokens;
 
-    /** A client credentials access token for {@see self::$apiUser}, obtained from `/oauth/token`. */
+    /** A client credentials token for {@see self::$apiUser}, from `/oauth/token`. */
     protected string $accessToken;
 
     protected User $apiUser;
@@ -38,7 +38,7 @@ abstract class ApiTestCase extends TestCase
             ])
             ->createOne();
 
-        [$this->accessToken, $this->serviceClient] = $this->serviceClientToken($this->apiUser);
+        [$this->accessToken, $this->serviceClient] = $this->issueServiceClientToken($this->apiUser);
     }
 
     /**
@@ -49,7 +49,7 @@ abstract class ApiTestCase extends TestCase
     /**
      * List of HTTP method(s) that {@see self::endpoint()} supports.
      *
-     * Some GETs have a POST for large filter bodies, so both should be specified in that case.
+     * A GET with a POST twin for large filter bodies lists both.
      *
      * @return list<'get'|'post'|'put'|'patch'|'delete'>
      */
