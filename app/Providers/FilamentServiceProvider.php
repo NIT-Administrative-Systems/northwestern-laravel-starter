@@ -45,10 +45,8 @@ class FilamentServiceProvider extends ServiceProvider
                 ->emptyStateIcon(Heroicon::OutlinedInbox)
         );
 
-        Schema::configureUsing(fn (Schema $infolist) => $infolist
-            ->defaultDateTimeDisplayFormat(
-                (config('platform.datetime_display_format'))
-            ));
+        Schema::configureUsing(fn (Schema $schema) => $schema
+            ->defaultDateTimeDisplayFormat(config('platform.datetime_display_format')));
 
         Select::configureUsing(fn (Select $component) => $component->native(false));
         SelectFilter::configureUsing(fn (SelectFilter $component) => $component->native(false));

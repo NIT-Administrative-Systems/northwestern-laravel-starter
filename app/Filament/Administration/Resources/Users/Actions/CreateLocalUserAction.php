@@ -91,10 +91,8 @@ class CreateLocalUserAction extends Action
                             ),
                     ]),
             ])
-            ->action(function (array $data) {
-                $createLocalUser = resolve(CreateLocalUser::class);
-
-                $user = ($createLocalUser)(
+            ->action(function (array $data, CreateLocalUser $createLocalUser) {
+                $user = $createLocalUser(
                     email: $data['email'],
                     firstName: $data['first_name'],
                     lastName: $data['last_name'],

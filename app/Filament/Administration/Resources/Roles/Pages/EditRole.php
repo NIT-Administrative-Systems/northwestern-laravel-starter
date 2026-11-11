@@ -63,7 +63,6 @@ class EditRole extends EditRecord
                         );
                     })
                     ->before(function (Role $record) {
-                        // Remove the role from all assigned users before deleting
                         $record->users()
                             ->lazyById(100)
                             ->each(function (User $user) use ($record) {

@@ -49,7 +49,6 @@ class ApiRequestLogsTable
 
                 TextColumn::make('created_at')
                     ->label('Recorded')
-                    ->dateTime()
                     ->since()
                     ->dateTimeTooltip()
                     ->sortable(query: fn (Builder $query, string $direction): Builder => $query->orderBy('api_request_logs.created_at', $direction)),
@@ -146,14 +145,14 @@ class ApiRequestLogsTable
                 TextColumn::make('request_bytes')
                     ->label('Request Size')
                     ->placeholder('N/A')
-                    ->formatStateUsing(fn (?int $state): string => $state !== null ? Number::fileSize($state) : 'N/A')
+                    ->formatStateUsing(fn (int $state): string => Number::fileSize($state))
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('response_bytes')
                     ->label('Response Size')
                     ->placeholder('N/A')
-                    ->formatStateUsing(fn (?int $state): string => $state !== null ? Number::fileSize($state) : 'N/A')
+                    ->formatStateUsing(fn (int $state): string => Number::fileSize($state))
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
