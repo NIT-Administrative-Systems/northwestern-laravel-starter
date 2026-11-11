@@ -18,9 +18,9 @@ use Illuminate\Support\Facades\Mail;
 use Throwable;
 
 /**
- * Emails people about each of their personal access tokens that is about to expire, at the
- * intervals in `api.personal_access_tokens.expiration_notifications.intervals`, unless they turned the emails off
- * on the Account area's Preferences page.
+ * Emails people about each of their personal access tokens about to expire, at the
+ * intervals in `api.personal_access_tokens.expiration_notifications.intervals`.
+ * Nobody who turned the reminders off on their Preferences page is emailed.
  */
 class SendPersonalAccessTokenExpirationNotificationsCommand extends Command
 {
@@ -43,7 +43,7 @@ class SendPersonalAccessTokenExpirationNotificationsCommand extends Command
             foreach ($this->expiringTokensQuery($daysBeforeExpiration)->lazyById(100) as $token) {
                 $user = User::query()->find($token->user_id);
 
-                // Nobody is warned about a token they can no longer use, such as while the API is off.
+                // Nobody is warned about a token they can't use, such as while the API is off.
                 if (! $user instanceof User
                     || ! $user->preferences->emailBeforeAccessTokensExpire
                     || ! $credentials->decide($user, CredentialOperation::Use, CredentialKind::PersonalAccessToken, $user)->allowed) {
@@ -72,8 +72,9 @@ class SendPersonalAccessTokenExpirationNotificationsCommand extends Command
     }
 
     /**
-     * Active personal tokens expiring on the day `$daysBeforeExpiration` days from now, whose
-     * owner has an email address, and not notified in the last 24 hours.
+     * Get the active personal access tokens that expire on the day
+     * `$daysBeforeExpiration` days from now, whose owner has an
+     * email address, and not notified in the last 24 hours.
      *
      * @return Builder<OAuthToken>
      */

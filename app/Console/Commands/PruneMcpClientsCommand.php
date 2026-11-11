@@ -13,10 +13,12 @@ use Illuminate\Support\Carbon;
 use Laravel\Passport\Passport;
 
 /**
- * Cleans up the clients MCP clients register for themselves, which anyone can create:
- * deletes one nobody connected soon after it registered, and revokes one nobody has used for
- * a long time. Connections are kept apart from token rows, so `passport:purge` never makes a
- * client look unused. Administrator-registered and service clients are never touched.
+ * Cleans up the clients that MCP clients register for themselves, which
+ * anyone can create: it deletes a client nobody connected soon after
+ * it registered, and revokes one nobody has used for a long time.
+ *
+ * Connections are kept apart from access tokens, so `passport:purge` never makes a
+ * client look unused. Clients registered by an administrator are never touched.
  */
 class PruneMcpClientsCommand extends Command
 {

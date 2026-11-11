@@ -17,14 +17,17 @@ use App\Domains\User\Models\User;
 use Illuminate\Console\Command;
 
 /**
- * Revokes credentials their holders can no longer use: each live personal access token,
- * connection and service client that {@see CredentialAccess} refuses for a lasting reason,
- * such as a deactivated or deleted account or a lost permission. A feature that is turned off
- * isn't one: its credentials wait for it to be turned back on.
+ * Revokes the credentials that their holders can no longer use: each
+ * live personal access token, connection and service client that
+ * {@see CredentialAccess} refuses for a lasting reason, like
+ * a deactivated or deleted account or a lost permission.
  *
- * The API already refuses these on every request; this makes the records say so, so the
- * Account and Administration pages show them as revoked. Each goes through its own action, so
- * each is audited.
+ * A feature that is turned off isn't a lasting reason:
+ * its credentials wait for it to be turned back on.
+ *
+ * The API already refuses these on every request. Revoking them makes the
+ * records say so, so the Account and Administration pages show them as
+ * revoked. Each goes through its own action, so each gets audited.
  */
 class RevokeIneligibleCredentialsCommand extends Command
 {

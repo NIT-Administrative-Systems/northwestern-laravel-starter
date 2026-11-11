@@ -18,9 +18,12 @@ use Illuminate\Support\Facades\Mail;
 use Throwable;
 
 /**
- * Emails an API user's contact address about each service client whose secret is about to
- * expire, at the intervals in `api.client_secret_expiration_notifications.intervals`. A client stops
- * working when its secret expires, so its owner needs time to rotate it.
+ * Emails an API user's contact address about each service client
+ * whose secret is about to expire, at the intervals listed in
+ * `api.client_secret_expiration_notifications.intervals`.
+ *
+ * A client stops working when its secret expires,
+ * so its owner needs to rotate it before then.
  */
 class SendClientSecretExpirationNotificationsCommand extends Command
 {
@@ -57,7 +60,8 @@ class SendClientSecretExpirationNotificationsCommand extends Command
             $this->components->info("Found {$count} client secret(s) expiring in {$daysBeforeExpiration} days");
 
             foreach ($query->lazyById(100) as $client) {
-                // Nobody is warned about a client its API user can no longer use, such as while the API is off.
+                // Nobody is warned about a client its API user can
+                // no longer use, such as while the API is off.
                 $owner = $client->owner;
 
                 if (! $owner instanceof User || ! $credentials->decide($owner, CredentialOperation::Use, CredentialKind::ServiceClient, $owner)->allowed) {
@@ -81,8 +85,9 @@ class SendClientSecretExpirationNotificationsCommand extends Command
     }
 
     /**
-     * Active clients whose secret expires on the day `$daysBeforeExpiration` days from now,
-     * owned by an API user with a contact email, and not notified in the last 24 hours.
+     * Get the active clients whose secret expires on the day that is
+     * `$daysBeforeExpiration` days from now, owned by an API user
+     * with a contact email, and not notified in the last day.
      *
      * @return Builder<OAuthClient>
      */
@@ -103,8 +108,8 @@ class SendClientSecretExpirationNotificationsCommand extends Command
                 $targetDate->copy()->endOfDay(),
             ])
             ->where('secret_expires_at', '>', $now)
-            // Either never notified, or last notified more than 24 hours ago, so running the
-            // command more than once a day doesn't send duplicates.
+            // Either never notified, or last notified more than a day ago, so running
+            // the command more than once a day doesn't send the same notice twice.
             ->where(function (Builder $query) use ($now): void {
                 $query->whereNull('secret_expiration_notified_at')
                     ->orWhere('secret_expiration_notified_at', '<', $now->copy()->subHours(24));

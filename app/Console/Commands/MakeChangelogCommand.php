@@ -162,8 +162,8 @@ class MakeChangelogCommand extends Command
     /**
      * Generate a human-readable title from a date-based slug.
      *
-     * If the slug looks like a date (YYYY-MM-DD), it's formatted as "Month YYYY Release".
-     * Otherwise, the slug is title-cased.
+     * If the slug looks like a date (YYYY-MM-DD), the title becomes
+     * "Month YYYY Release"; if not, it is the slug in title case.
      */
     private function generateDefaultTitle(string $slug): string
     {
