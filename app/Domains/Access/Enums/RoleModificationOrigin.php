@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Access\Enums;
 
+use App\Domains\Access\Actions\AddPersonToRole;
 use App\Domains\User\Actions\PersistUserWithUniqueUsername;
 use App\Domains\User\Listeners\ProcessNetIdUpdate;
 use Filament\Support\Contracts\HasColor;
@@ -21,6 +22,10 @@ use Filament\Support\Icons\Heroicon;
  * **UiAction** — A role was assigned or removed by an administrator through
  * the Filament UI.
  * - Triggered by: Role management actions performed manually in the UI.
+ *
+ * **BulkAssignment** — A role was assigned to a list of people an administrator
+ * pasted or uploaded, in a queued import.
+ * - Triggered by: {@see AddPersonToRole}, for each person in the list.
  *
  * **RemovedByDeletion** — A role was detached from all users because the
  * underlying role definition was deleted.
@@ -40,6 +45,7 @@ use Filament\Support\Icons\Heroicon;
 enum RoleModificationOrigin: string implements HasColor, HasIcon, HasLabel
 {
     case UiAction = 'ui-action';
+    case BulkAssignment = 'bulk-assignment';
     case RemovedByDeletion = 'removed-by-deletion';
     case NetIdStatusChange = 'netid-status-change';
     case SsoProvisioning = 'sso-provisioning';
@@ -49,6 +55,7 @@ enum RoleModificationOrigin: string implements HasColor, HasIcon, HasLabel
     {
         return match ($this) {
             self::UiAction => 'UI Action',
+            self::BulkAssignment => 'Bulk Add',
             self::SsoProvisioning => 'SSO Provisioning',
             self::NetIdStatusChange => 'NetID Event',
             self::RemovedByDeletion => 'Role Deleted',
@@ -60,6 +67,7 @@ enum RoleModificationOrigin: string implements HasColor, HasIcon, HasLabel
     {
         return match ($this) {
             self::UiAction => 'gray',
+            self::BulkAssignment => 'info',
             self::SsoProvisioning => 'info',
             self::NetIdStatusChange => 'warning',
             self::RemovedByDeletion => 'danger',
@@ -71,6 +79,7 @@ enum RoleModificationOrigin: string implements HasColor, HasIcon, HasLabel
     {
         return match ($this) {
             self::UiAction => Heroicon::OutlinedCursorArrowRays,
+            self::BulkAssignment => Heroicon::OutlinedUserGroup,
             self::SsoProvisioning => Heroicon::OutlinedCloudArrowDown,
             self::NetIdStatusChange => Heroicon::OutlinedIdentification,
             self::RemovedByDeletion => Heroicon::OutlinedTrash,

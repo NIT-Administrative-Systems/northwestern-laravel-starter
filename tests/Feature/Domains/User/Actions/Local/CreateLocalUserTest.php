@@ -43,6 +43,17 @@ final class CreateLocalUserTest extends TestCase
         $this->assertEquals(['Engineering'], $user->departments);
     }
 
+    // People added to a role in bulk may come with an email address alone.
+    public function test_only_the_email_is_required(): void
+    {
+        $user = $this->action()(email: 'guest@example.com', sendLoginLink: false);
+
+        $this->assertNull($user->first_name);
+        $this->assertNull($user->last_name);
+        $this->assertSame([], $user->job_titles);
+        $this->assertSame([], $user->departments);
+    }
+
     public function test_normalizes_email_to_lowercase(): void
     {
         $user = $this->action()(
