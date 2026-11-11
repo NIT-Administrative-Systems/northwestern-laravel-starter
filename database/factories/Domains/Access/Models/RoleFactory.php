@@ -60,10 +60,8 @@ class RoleFactory extends Factory
 
     public function forRoleType(RoleTypeEnum $roleType): static
     {
-        $name = fake()->unique()->slug() . '-' . $roleType->value;
-
         return $this->state(fn () => [
-            'name' => $name,
+            'name' => fake()->unique()->slug() . '-' . $roleType->value,
             'role_type_id' => $this->getRoleType($roleType),
         ]);
     }
