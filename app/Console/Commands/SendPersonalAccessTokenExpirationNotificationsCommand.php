@@ -88,6 +88,8 @@ class SendPersonalAccessTokenExpirationNotificationsCommand extends Command
             ->where('revoked', false)
             ->whereBetween('expires_at', [$target->copy()->startOfDay(), $target->copy()->endOfDay()])
             ->where('expires_at', '>', $now)
+            // A 30-day token made today would otherwise be said to expire soon.
+            ->where('created_at', '<', $now->copy()->startOfDay())
             ->whereIn('user_id', User::query()->whereNotNull('email')->where('email', '!=', config('mail.from.address'))->select('id'))
             ->where(fn (Builder $query) => $query
                 ->whereNull('expiration_notified_at')

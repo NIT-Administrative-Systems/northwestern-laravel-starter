@@ -116,11 +116,22 @@ final class SendClientSecretExpirationNotificationsCommandTest extends TestCase
         Mail::assertQueued(ClientSecretExpirationNotification::class, 1);
     }
 
-    private function client(?string $email, Carbon $secretExpiresAt, ?Carbon $notifiedAt = null, string $name = 'Sync'): OAuthClient
+    public function test_a_secret_made_today_is_not_said_to_expire_soon(): void
+    {
+        $this->client('new@test.com', now()->addDays(30), createdAt: now());
+
+        $this->artisan(SendClientSecretExpirationNotificationsCommand::class)
+            ->expectsOutputToContain('No client secrets expiring in 30 days')
+            ->assertSuccessful();
+
+        Mail::assertNothingQueued();
+    }
+
+    private function client(?string $email, Carbon $secretExpiresAt, ?Carbon $notifiedAt = null, string $name = 'Sync', ?Carbon $createdAt = null): OAuthClient
     {
         [, $client] = resolve(CreateServiceClient::class)(User::factory()->api()->create(['email' => $email]), $name, $secretExpiresAt);
 
-        $client->forceFill(['secret_expiration_notified_at' => $notifiedAt])->save();
+        $client->forceFill(['secret_expiration_notified_at' => $notifiedAt, 'created_at' => $createdAt ?? now()->subDays(60)])->save();
 
         return $client;
     }
