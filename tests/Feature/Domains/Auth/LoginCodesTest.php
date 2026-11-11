@@ -110,6 +110,18 @@ final class LoginCodesTest extends TestCase
         $this->assertRejected('code', 'That code didn\'t work', fn () => $this->codes()->verify('123456', $this->request()));
     }
 
+    // A % or _ in the email is literal, so "%@example.com" or "t_st@example.com" doesn't reach test@example.com.
+    public function test_wildcards_in_an_email_reach_no_account(): void
+    {
+        User::factory()->affiliate()->create(['email' => 'test@example.com']);
+
+        $this->codes()->request('%@example.com', $this->request());
+        $this->codes()->request('t_st@example.com', $this->request());
+
+        $this->assertSame(0, LoginChallenge::query()->count());
+        Queue::assertNotPushed(SendLoginCodeEmailJob::class);
+    }
+
     public function test_requests_and_checks_take_the_same_minimum_time_for_known_and_unknown_emails(): void
     {
         User::factory()->affiliate()->create(['email' => 'known@example.com']);

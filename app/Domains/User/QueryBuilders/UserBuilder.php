@@ -46,9 +46,7 @@ class UserBuilder extends Builder
      */
     public function whereEmailEquals(string $email): static
     {
-        $normalized = strtolower(trim($email));
-
-        return $this->where('email', 'ilike', $normalized);
+        return $this->whereLowerEquals('email', $email);
     }
 
     /**
@@ -56,9 +54,19 @@ class UserBuilder extends Builder
      */
     public function whereUsernameEquals(string $username): static
     {
-        $normalized = strtolower(trim($username));
+        return $this->whereLowerEquals('username', $username);
+    }
 
-        return $this->where('username', 'ilike', $normalized);
+    /**
+     * An exact, case-insensitive match. ilike would treat % and _ in the value as wildcards, so "a_b@example.com"
+     * would also find "axb@example.com", and "%@example.com" would find anyone at that domain. Both sides go through
+     * the database's lower(), since PHP lowercases some characters differently (İ, for one).
+     */
+    private function whereLowerEquals(string $column, string $value): static
+    {
+        $wrapped = $this->getQuery()->getGrammar()->wrap($this->qualifyColumn($column));
+
+        return $this->whereRaw("lower({$wrapped}) = lower(?)", [trim($value)]);
     }
 
     /**
