@@ -1,8 +1,10 @@
 {{--
-    Laravel's Tailwind pagination view, with accessible Previous and Next labels: the disabled
-    spans get role="link" (aria-label isn't allowed on a plain span), and the labels are plain
-    text, because pagination.previous and pagination.next contain HTML entities that the
-    attribute would show escaped.
+    Laravel's Tailwind pagination view, with accessible Previous and Next labels.
+
+    Disabled spans get role="link", since aria-label isn't allowed on a plain span.
+
+    The labels are plain text: pagination.previous and pagination.next
+    hold HTML entities, which the attribute would show as escaped.
 --}}
 @if ($paginator->hasPages())
     <nav role="navigation" aria-label="{{ __('Pagination Navigation') }}">

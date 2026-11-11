@@ -39,7 +39,7 @@ final class ConnectedApplicationsTest extends TestCase
         $this->get('/app/account/connected-applications')->assertOk()->assertSee('No Connected Applications');
     }
 
-    // AI clients are connections too, so the page stays while only the MCP server is on.
+    // AI clients are connections too, so the page stays while only MCP is on.
     public function test_it_shows_while_the_api_or_the_mcp_server_is_enabled(): void
     {
         config(['api.enabled' => false, 'mcp.enabled' => true]);
@@ -86,7 +86,7 @@ final class ConnectedApplicationsTest extends TestCase
         $this->assertSame([$theirs->getKey()], OAuthConnection::query()->pluck('id')->all());
     }
 
-    // Disconnect All is scoped to the person by its own query; nobody else's connections or tokens are touched.
+    // Disconnect All queries only this person's connections and leaves others' alone.
     public function test_a_person_disconnects_every_application(): void
     {
         [$theirs, $theirToken] = $this->connectAs(User::factory()->create(), 'Reporting Tool');
@@ -135,7 +135,8 @@ final class ConnectedApplicationsTest extends TestCase
         return [OAuthConnection::query()->where('oauth_client_id', $client->getKey())->sole(), $accessToken];
     }
 
-    // A person sees only the kinds whose feature is on, and Disconnect All leaves the rest alone.
+    // A person sees only the kinds whose feature
+    // is on; Disconnect All leaves the rest.
     public function test_mcp_clients_are_left_out_while_mcp_is_off(): void
     {
         config(['mcp.enabled' => true]);

@@ -8,8 +8,10 @@ use App\Domains\Support\Models\Announcement;
 use Northwestern\SysDev\Chassis\Testing\Browser\FilamentPages;
 
 /*
- * Every page a signed-in person without roles can reach works and passes axe. The app panel's
- * pages are found from the panel, so a new page is checked without being listed here.
+ * Every page a signed-in person without roles can reach works and passes axe.
+ *
+ * The app panel's pages are found from the panel, so
+ * a new page is checked without being listed here.
  */
 
 beforeEach(fn () => $this->signInAsNorthwesternUser());
@@ -28,7 +30,7 @@ it('is healthy on every app panel page', function (bool $dark) {
 })->with(['light' => false, 'dark' => true]);
 
 it('is healthy on the lockdown page', function () {
-    // Without the Wildcard photo: lockdown covers its route too, so it would show as broken.
+    // Without the Wildcard photo: its route is behind lockdown too, so it would break.
     config(['platform.lockdown.enabled' => true, 'platform.wildcard_photo_sync' => false]);
 
     expect(visit('/app/access-restricted')->assertSee('Access Restricted'))->toBeHealthyInEachTheme();

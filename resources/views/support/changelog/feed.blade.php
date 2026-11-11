@@ -1,5 +1,5 @@
 <?php
-// Otherwise IDEs or PHP runtimes with short tags enabled will think <? means it's PHP time.
+// Echoed, so PHP with short open tags doesn't read the declaration as code.
 // {{-- prettier-ignore --}}
 echo '<?xml version="1.0" encoding="UTF-8"?>';
 

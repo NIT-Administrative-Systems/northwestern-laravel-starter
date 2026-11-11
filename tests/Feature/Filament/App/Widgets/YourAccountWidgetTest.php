@@ -33,7 +33,7 @@ final class YourAccountWidgetTest extends TestCase
             ->assertSee('Welcome, Willie');
     }
 
-    // The newest login record is the current sign-in, so the greeting reports the one before it.
+    // The newest login record is this sign-in; the greeting reports the one before.
     public function test_a_returning_user_is_welcomed_back_without_sign_in_details(): void
     {
         $user = User::factory()->create(['first_name' => 'Willie']);

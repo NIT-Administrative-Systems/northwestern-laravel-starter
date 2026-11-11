@@ -1,6 +1,6 @@
 {{--
-    Rendered by App\View\Components\HelpMenu, which decides the items. Each item
-    links to a page in this application, or opens the documentation in a new tab.
+    Rendered by App\View\Components\HelpMenu, which decides the items. Each
+    item links to a page here, or opens the documentation in a new tab.
 --}}
 @php
     use Filament\Support\Icons\Heroicon;

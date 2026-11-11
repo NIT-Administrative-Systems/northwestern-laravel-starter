@@ -1,22 +1,14 @@
+{{--
+    Exception details show to everyone outside production, where testers often use
+    accounts without administrative permissions or Sentry, so they can say what
+    failed when they report it. In production only Manage All can see them.
+
+    The database may be why this page renders, so anything that
+    could query it is wrapped in rescue() and fails closed.
+--}}
 @php
     use App\Domains\Access\Enums\SystemPermission;
 
-    /**
-     * Exception Detail Visibility Logic
-     *
-     * In non-production environments, we unconditionally display exception details to streamline the debugging process.
-     * Analysts and developers often test using standard user accounts that lack administrative permissions. Since some
-     * of these users may not have access to backend monitoring tools like Sentry, exposing the exception details
-     * directly in the UI helps them infer the nature of the failure and facilitates more accurate issue reports.
-     *
-     * In production, visibility is strictly limited to users with the ManageAll permission (typically administrators).
-     * This safeguards sensitive system information from being exposed to the general user base, while still granting
-     * administrators immediate access to stack traces. This allows for rapid diagnosis of live issues without having
-     * to cross-reference external logs or Sentry data.
-     *
-     * This page can render because the database is unavailable, so anything that may query it is wrapped in
-     * rescue() and fails closed.
-     */
     $isProduction = app()->environment('production');
     $user = rescue(fn() => auth()->user(), null, report: false);
     $userCanViewDetails = (bool) rescue(fn() => $user?->can(SystemPermission::ManageAll), false, report: false);

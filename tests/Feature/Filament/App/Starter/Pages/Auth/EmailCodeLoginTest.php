@@ -153,7 +153,7 @@ final class EmailCodeLoginTest extends TestCase
             ->assertRedirect(url('/app/some-page'));
     }
 
-    // Codes sent by an administrator, or read on another device, have no challenge in this session.
+    // A code an administrator sent, or one read elsewhere, has no challenge here.
     public function test_the_email_link_lets_a_code_issued_elsewhere_sign_the_user_in(): void
     {
         $user = User::factory()->affiliate()->create(['email' => 'test@example.com']);
@@ -294,7 +294,7 @@ final class EmailCodeLoginTest extends TestCase
     }
 
     /**
-     * Requests a code for `$email`, as the email step does: code 123456 for an account, a decoy otherwise.
+     * Request a code as the email step does: 123456 for an account, a decoy otherwise.
      */
     private function startFlow(string $email): void
     {

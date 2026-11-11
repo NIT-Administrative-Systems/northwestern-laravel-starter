@@ -1,21 +1,30 @@
 {{--
-    The Northwestern header for pages outside the panels' full layout: public pages, the
-    sign-in and lockdown pages, and error pages. It matches the panels' top bar (see
-    <x-panel-brand>): the wordmark, or the unit's lockup when NU_LOCKUP is set, the
-    application name, then whatever the page puts in the slot, such as the Help menu and
-    Sign in or the user menu. Above it, the theme's impersonation banner shows while someone
-    is impersonating, with Leave Impersonation, as the panels show it above their top bar.
+    The Northwestern header for pages outside the panels' full layout:
+    public pages, the sign-in and lockdown pages, and error pages.
 
-    Error pages use it, so it must render without Filament, auth or the database. The lockup
-    reads only config. The banner reads the session and the signed-in user, so it is left
-    out when those fail rather than failing the page.
+    It matches the panels' top bar (see <x-panel-brand>): the wordmark, or
+    the unit's lockup when NU_LOCKUP is set, the application name, then
+    the slot, which holds the Help menu and Sign In or the user menu.
 
-    On phones and tablets (below the lg breakpoint) the application name moves to a row of its
-    own, so the controls beside the wordmark never squeeze it. Outside production it shows the environment badge,
-    as the panels' top bar does: top right from the sm breakpoint, and with a short label at
-    the end of the name row on phones. The gold rule runs along the top of the header, where
-    the theme draws it on the panels' top bar, so it stays in place between signing in and
-    the app. The theme's default settings decide when the badge shows and its label.
+    Above it, the theme's impersonation banner, with Leave Impersonation, shows
+    while someone is impersonating, as the panels show it above the top bar.
+
+    Error pages use it, so it must render without Filament,
+    auth or the database. The lockup reads only config.
+
+    The banner reads the session and the signed-in user, so it
+    is left out if those fail rather than failing the page.
+
+    Below the lg breakpoint the application name moves to a row of
+    its own, so the controls by the wordmark never squeeze it.
+
+    Outside production it shows the environment badge, as the panels' top bar does:
+    top right from sm, and with a short label at the name row's end on a phone.
+
+    The theme's defaults decide when the badge shows and its label.
+
+    The gold rule runs along the top of the header, where the theme draws it
+    on the panels' top bar, so it stays put between sign-in and the app.
 
     From the lg breakpoint the row lines up with the footer's 70rem container.
 --}}
@@ -29,8 +38,7 @@
     $showEnvironment = $environment->isVisible();
     $hasLockup = NorthwesternTheme::lockupUrl() !== null;
 
-    // Its defaults match the panels' ->impersonationBanner(): lab404's session, the signed-in user's
-    // name, and the impersonate.leave route.
+    // Its defaults (lab404's session, impersonate.leave) match the panels' banner.
     $impersonationBanner = rescue(
         fn(): string => Blade::render('<x-northwestern-filament-theme::impersonation-banner />'),
         '',
@@ -44,15 +52,17 @@
     'nu-site-header bg-nu-purple-120 w-full text-white',
     'border-t-4 border-[var(--nu-gold)]' => $showEnvironment,
 ])>
-    {{-- 4rem tall in all, like the panels' top bar, which fits the rule inside that height. The
-         72rem row less its 1rem padding is the footer's 70rem container. --}}
+    {{-- 4rem tall in all, like the panels' top bar,
+         which fits the rule inside that height.
+
+         The 72rem row less its 1rem padding is the footer's 70rem container. --}}
     <div @class([
         'mx-auto flex w-full items-center gap-4 px-4 md:px-6 lg:max-w-6xl lg:px-4',
         'h-16' => !$showEnvironment,
         'h-15' => $showEnvironment,
     ])>
         @if ($hasLockup)
-            {{-- The white lockup at the panels' logo height, with the brand's clear space around it. --}}
+            {{-- The white lockup at the panels' logo height, with the brand's clear space. --}}
             <x-northwestern-filament-theme::lockup data-testid="site-header-lockup"
                                                    href="https://www.northwestern.edu/" />
         @else

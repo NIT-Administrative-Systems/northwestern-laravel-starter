@@ -1,6 +1,9 @@
 {{--
-    The panel's name at the top of the sidebar, so a phone, where the top bar has no room for
-    it, still says which panel you are in. Registered on the SIDEBAR_NAV_START render hook.
+    The panel's name at the top of the sidebar,
+    so a phone, whose top bar has no room for
+    it, still says which panel you are in.
+
+    Registered on the SIDEBAR_NAV_START render hook.
 --}}
 @props(['name'])
 

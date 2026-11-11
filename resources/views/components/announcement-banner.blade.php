@@ -1,16 +1,19 @@
 {{--
-    One announcement in a banner: the app panel's (with dismissing and links to the
-    Announcements page), the public pages' and sign-in pages' (without), and the preview in
-    Administration. Styled as a Filament callout, without its heading: a callout heading is an
-    <h4>, which would skip heading levels above the page's <h1>.
+    One announcement in a banner, for the app panel, the public
+    and sign-in pages, and for the preview in Administration.
+
+    Only the app panel's can be dismissed or link to the Announcements page.
+
+    Styled as a Filament callout without its heading, which is an
+    <h4> and would skip heading levels above the page's <h1>.
 --}}
 @props([
     'announcement',
     // Other live announcements the person hasn't dismissed, counted in "N more".
     'others' => 0,
-    // Show the dismiss button, which calls the surrounding Livewire component's dismiss().
+    // The dismiss button, which calls the surrounding Livewire component's dismiss().
     'dismissible' => false,
-    // The Announcements page; without it (signed-out visitors), the body isn't clamped and there are no page links.
+    // The Announcements page. Without it, the body shows in full and has no links.
     'pageUrl' => null,
 ])
 
@@ -29,7 +32,7 @@
                      :icon="$severity->getIcon()">
     <x-slot name="footer">
         <div class="flex flex-col gap-1">
-            {{-- Not .fi-callout-heading: the theme sets that as a small uppercase label, and this is a title. --}}
+            {{-- Not .fi-callout-heading: the theme styles that as a small uppercase label. --}}
             <p class="font-nu-heading text-base font-semibold text-gray-950 dark:text-white">
                 <span class="sr-only">{{ $severity->getLabel() }}:</span>
                 {{ $announcement->title }}
