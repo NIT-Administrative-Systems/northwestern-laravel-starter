@@ -23,18 +23,22 @@ use InvalidArgumentException;
 use Northwestern\SysDev\Chassis\Formatting\CountInWords;
 
 /**
- * Signing in with a code sent by email, for local accounts without a NetID: request a code,
- * then enter it. The page renders the steps; this owns everything behind them.
+ * Sign-in with a code sent by email, for local accounts without a NetID: request a
+ * code, then enter it. The page renders the steps; this owns what's behind them.
  *
- * Nothing it does reveals whether an email has an account. An unknown email takes the same
- * time, consumes the same limits, gets the same errors and moves to the same code step as a
- * known one, with a decoy in place of a real challenge, and checking a code takes the same time
- * whether or not its challenge is real.
+ * Nothing it does reveals whether an email has an account. An unknown email takes
+ * the same time, uses the same limits and gets the same errors as a known one.
  *
- * Progress lives in the session, with the challenge ID encrypted so real IDs and decoys look
- * alike, and a reload returns to the step the person was on. Every code email links to the code
- * step with its challenge ID encrypted in the URL ({@see link()}), so a code sent by an
- * administrator, or read on another device, can still be entered. The link alone signs no one in.
+ * It moves to the code step with a decoy in place of
+ * a real challenge, and checking a code takes as
+ * long whether or not its challenge is real.
+ *
+ * Progress lives in the session, so a reload returns to the same step,
+ * with the challenge ID encrypted so real IDs and decoys look alike.
+ *
+ * Every code email links to the code step with its challenge ID encrypted in
+ * the URL ({@see link()}), so a code sent by an administrator, or read on
+ * another device, can still be entered. The link alone signs no one in.
  *
  * ```php
  * $codes->request($email, $request);         // the email step
@@ -44,7 +48,7 @@ use Northwestern\SysDev\Chassis\Formatting\CountInWords;
  */
 final readonly class LoginCodes
 {
-    /** The query parameter that carries the encrypted challenge ID in a code email's link. */
+    /** The query parameter carrying the encrypted challenge ID in a code email's link. */
     public const string LINK_PARAMETER = 'challenge';
 
     private const string SESSION_EMAIL = 'login_code.email';
@@ -52,18 +56,20 @@ final readonly class LoginCodes
     private const string SESSION_CHALLENGE = 'login_code.challenge_id';
 
     /**
-     * The least time, in milliseconds, requesting a code takes, so an email with an account and
-     * one without can't be told apart by response time. Rate limits slow one client down; this
-     * covers an attacker who spreads requests over many.
+     * The least time, in milliseconds, a code request takes, so the response
+     * time can't tell an email that has an account from one that doesn't.
+     *
+     * Rate limits slow one client down, and this covers an
+     * attacker who spreads requests over many clients.
      */
     private const int MIN_REQUEST_TIME_MS = 500;
 
-    /** The least time, in milliseconds, checking a code takes: above a bcrypt check at production cost. */
+    /** The least time, in milliseconds, checking a code takes: more than bcrypt needs. */
     private const int MIN_VERIFY_TIME_MS = 500;
 
     private const int MAX_USER_AGENT_LENGTH = 512;
 
-    /** How long, in seconds, an email's rejected codes count against `local-auth.code.max_failed_per_day`. */
+    /** How long, in seconds, an email's rejected codes count towards the daily limit. */
     private const int FAILURES_WINDOW_SECONDS = 86400;
 
     private const string REJECTED = 'That code didn\'t work. Check it and try again.';
@@ -76,8 +82,9 @@ final readonly class LoginCodes
     }
 
     /**
-     * Starts signing in with `$email`: sends a code when a local account has that email, and moves
-     * to the code step either way.
+     * Start signing in with `$email`, moving to the code step.
+     *
+     * A code is sent only when a local account has that email.
      *
      * @throws ValidationException Keyed by `email` when a limit is reached
      */
@@ -93,7 +100,7 @@ final readonly class LoginCodes
     }
 
     /**
-     * Seconds until another code can be sent for the pending email, or 0 when it can be sent now.
+     * Get the seconds until another code can be sent for the pending email, or 0.
      */
     public function resendAvailableIn(): int
     {
@@ -107,8 +114,10 @@ final readonly class LoginCodes
     }
 
     /**
-     * Sends another code for the pending email, which replaces the one to enter. An email without
-     * a local account keeps its decoy. Does nothing when no sign-in is pending.
+     * Send another code for the pending email, replacing the one to enter.
+     *
+     * An email without a local account keeps its decoy,
+     * and nothing happens when no sign-in is pending.
      *
      * @throws ValidationException Keyed by `email` while the resend cooldown runs or when a limit is reached
      */
@@ -134,8 +143,9 @@ final readonly class LoginCodes
     }
 
     /**
-     * Checks a code for the pending sign-in, ends it, and returns the person the code signs in,
-     * with their email marked verified. The caller finishes signing them in.
+     * Check a code and return the person it signs in, ending the pending sign-in.
+     *
+     * Their email is marked verified, and the caller finishes signing them in.
      *
      * @throws ValidationException Keyed by `code` when the code is rejected or a limit is reached
      */
@@ -148,7 +158,7 @@ final readonly class LoginCodes
             throw ValidationException::withMessages(['code' => self::REJECTED]);
         }
 
-        // Every pending sign-in has an email, a decoy's included, so an unknown email reaches this limit too.
+        // A decoy has an email too, so an unknown email reaches this limit as well.
         $failuresKey = 'login-code:failed:' . $this->pendingEmail();
 
         if (RateLimiter::tooManyAttempts($failuresKey, (int) config('local-auth.code.max_failed_per_day', 20))) {
@@ -161,7 +171,7 @@ final readonly class LoginCodes
         $challenge = $this->timebox->call(function (Timebox $timebox) use ($challengeId, $code, $request): LoginChallenge|ValidationException {
             $timebox->dontReturnEarly();
 
-            // The rejection is returned, not thrown, so the transaction commits the failed attempt and any lockout.
+            // Returned rather than thrown, so the failed attempt and any lock are committed.
             return DB::transaction(fn (): LoginChallenge|ValidationException => $this->consume($challengeId, $code, $request));
         }, $minimumTimeMs * 1000);
 
@@ -183,8 +193,8 @@ final readonly class LoginCodes
     }
 
     /**
-     * Sends `$user` a code an administrator asked for. It's recorded as the administrator's request
-     * and counts against the person's hourly limit, so nobody can flood their inbox.
+     * Send `$user` a code an administrator asked for. It counts against
+     * the person's own hourly limit, so nobody can flood their inbox.
      *
      * @throws ValidationException Keyed by `email` when the person's hourly limit is reached
      * @throws InvalidArgumentException When the person's account is deleted
@@ -214,8 +224,9 @@ final readonly class LoginCodes
     }
 
     /**
-     * Moves to the code step from an email's link. A token that can't be decrypted, or a challenge
-     * that's expired, used or locked, is ignored.
+     * Move to the code step from an email's link. A token
+     * that can't be decrypted, or a challenge that has
+     * expired, been used or been locked, is ignored.
      */
     public function startFromLink(string $token): void
     {
@@ -251,8 +262,8 @@ final readonly class LoginCodes
     }
 
     /**
-     * Checks every limit before looking the email up, then issues a challenge only when a local
-     * account has it, all inside the same minimum time.
+     * Check every limit before looking the email up, then issue a challenge
+     * only when a local account has it, all within the same minimum time.
      *
      * @throws ValidationException
      */
@@ -274,7 +285,7 @@ final readonly class LoginCodes
             if (User::firstLocalByEmail($email) instanceof User) {
                 $challenge = $this->issue($email, $request);
             } else {
-                // An unknown email consumes its hourly slot too, so probing it is throttled the same way.
+                // An unknown email uses its hourly slot too, so probing it is throttled the same.
                 RateLimiter::hit("login-code:{$email}", 3600);
             }
         }, $minimumTimeMs * 1000);
@@ -287,8 +298,11 @@ final readonly class LoginCodes
     }
 
     /**
-     * Per minute, per IP and per email; per hour, per IP, so one address can't use up many
-     * accounts' limits and lock them out, and per email. Every limit is checked before any is
+     * Get the error for the first limit reached, or count the request.
+     * Each limit is per minute or per hour, and per IP or per email.
+     *
+     * With the hourly IP limit, one address can't use up many accounts'
+     * limits and lock them out. Each limit is checked before any is
      * counted, so a known and an unknown email are refused alike.
      */
     private function requestLimitError(string $email, string $ip): ?string
@@ -325,9 +339,9 @@ final readonly class LoginCodes
     }
 
     /**
-     * Creates a challenge with only its code's hash, ends the email's earlier open challenges,
-     * counts it against the email's hourly limit, and queues the email once the challenge is
-     * committed.
+     * Create a challenge holding only its code's hash, end the
+     * email's earlier open challenges, count it against the
+     * hourly limit, and queue the email after the commit.
      */
     private function issue(string $email, Request $request): LoginChallenge
     {
@@ -362,7 +376,7 @@ final readonly class LoginCodes
     }
 
     /**
-     * Verification attempts per minute, per IP and per challenge, counting every attempt.
+     * Limit verification attempts per minute, per IP and per challenge.
      *
      * @throws ValidationException
      */
@@ -388,9 +402,11 @@ final readonly class LoginCodes
     }
 
     /**
-     * Finds the challenge, locked for update, and uses it up if the code matches. A wrong code
-     * counts an attempt, and enough of them lock the challenge. Must run in a transaction, and
-     * returns the rejection rather than throwing it, which would roll the attempt back.
+     * Find the challenge, locked for update, and use it up if the code matches.
+     * A wrong code counts an attempt, and enough of them lock the challenge.
+     *
+     * Must run in a transaction. Returns the rejection rather
+     * than throwing it, which would roll the attempt back.
      */
     private function consume(string $challengeId, string $code, Request $request): LoginChallenge|ValidationException
     {
@@ -434,8 +450,8 @@ final readonly class LoginCodes
     }
 
     /**
-     * The pending challenge's ID: numeric for a real challenge, a UUID for a decoy. A value that
-     * can't be decrypted is dropped.
+     * Get the pending challenge's ID: numeric for a real challenge, a
+     * UUID for a decoy. A value that can't be decrypted is dropped.
      */
     private function pendingChallengeId(): ?string
     {
@@ -472,7 +488,8 @@ final readonly class LoginCodes
     }
 
     /**
-     * A challenge's ID, encrypted, or a decoy's: a random UUID, which looks the same once encrypted.
+     * Encrypt a challenge's ID, or a decoy's random
+     * UUID, which looks the same once encrypted.
      */
     private function encrypt(?LoginChallenge $challenge): string
     {

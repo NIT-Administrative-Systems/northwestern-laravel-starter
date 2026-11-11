@@ -13,15 +13,16 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Mail;
 
 /**
- * Sends a sign-in code by email ({@see LoginCodeMail}) and records when it was sent.
+ * Emails a sign-in code ({@see LoginCodeMail}) and records when it was sent.
  */
 class SendLoginCodeEmailJob implements ShouldQueue
 {
     use Queueable;
 
     /**
-     * The code travels encrypted: a queued payload shows up in the queue, worker logs,
-     * failed jobs and monitoring tools, and the code signs someone in until it expires.
+     * The code travels encrypted, because a queued payload shows
+     * up in the queue, worker logs, failed jobs and monitoring
+     * tools, and the code signs someone in until it expires.
      *
      * @param  positive-int  $loginChallengeId
      */

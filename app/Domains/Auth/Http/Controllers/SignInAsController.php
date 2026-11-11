@@ -13,10 +13,11 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 /**
- * Signs in as a seeded user without SSO, email or credentials, so a local environment
- * works with no Azure setup and agents can sign in with a URL. The route exists only
- * where sign-in-as is offered (AppPanelProvider), and this checks again in case it is
- * ever registered somewhere else.
+ * Signs in as a seeded user with no SSO, email or credentials, so a local
+ * environment works without Entra ID and agents can sign in from a URL.
+ *
+ * AppPanelProvider registers the route only where sign-in-as is offered,
+ * and this checks again in case it is ever registered somewhere else.
  */
 class SignInAsController extends Controller
 {

@@ -9,7 +9,7 @@ use App\Domains\Auth\Enums\AuthType;
 use App\Domains\User\Models\User;
 
 /**
- * Provides functionality to manage user impersonation capabilities.
+ * Who may impersonate whom, as lab404's impersonation package asks.
  *
  * @mixin User
  */
@@ -18,8 +18,7 @@ trait HandlesImpersonation
     /**
      * Determine if the user is allowed to impersonate another user.
      *
-     * The user must have the necessary permission to impersonate and to not be
-     * impersonating another user.
+     * They need the impersonation permission and can't already be impersonating.
      */
     public function canImpersonate(): bool
     {
@@ -39,18 +38,17 @@ trait HandlesImpersonation
     /**
      * Determine if the user is allowed to be impersonated.
      *
-     * The default implementation allows all users to be impersonated, but this
-     * can be overridden to apply additional constraints based on business
-     * rules or user-specific conditions.
+     * Override this to add rules of your own about who may be impersonated.
      */
     public function canBeImpersonated(): bool
     {
-        // API users have no session, and a deleted or deactivated person can't use the panels.
+        // API users have no session, and deactivated
+        // or deleted people can't use the panels.
         if ($this->auth_type === AuthType::API || $this->isInactive()) {
             return false;
         }
 
-        // Prevent impersonating users with higher privileges
+        // Only someone with Manage All may impersonate someone who has it.
         $impersonator = auth()->user();
 
         return ! ($impersonator && $this->hasPermissionTo(SystemPermission::ManageAll) && ! $impersonator->hasPermissionTo(SystemPermission::ManageAll));
