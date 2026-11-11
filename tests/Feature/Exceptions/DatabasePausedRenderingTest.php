@@ -30,17 +30,15 @@ final class DatabasePausedRenderingTest extends TestCase
     }
 
     /**
-     * @return array<string, array{string, array<string, string>}>
+     * @return \Iterator<string, array{string, array<string, string>}>
      */
-    public static function clientsThatDontReadHtml(): array
+    public static function clientsThatDontReadHtml(): \Iterator
     {
-        return [
-            'API' => ['/api/__test/database-paused', []],
-            'OAuth' => ['/oauth/__test/database-paused', []],
-            'MCP server' => ['/mcp', []],
-            'MCP path' => ['/mcp/__test/database-paused', []],
-            'expects JSON' => ['/__test/database-paused', ['Accept' => 'application/json']],
-        ];
+        yield 'API' => ['/api/__test/database-paused', []];
+        yield 'OAuth' => ['/oauth/__test/database-paused', []];
+        yield 'MCP server' => ['/mcp', []];
+        yield 'MCP path' => ['/mcp/__test/database-paused', []];
+        yield 'expects JSON' => ['/__test/database-paused', ['Accept' => 'application/json']];
     }
 
     /**
