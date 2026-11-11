@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Console\Commands\DeactivateInactiveLocalUsersCommand;
 use App\Console\Commands\NotifyAnnouncementAudiencesCommand;
 use App\Console\Commands\PruneMcpClientsCommand;
 use App\Console\Commands\RevokeIneligibleCredentialsCommand;
@@ -79,6 +80,11 @@ Schedule::command(PurgeCommand::class, ['--expired', '--hours' => 24 * 31])->dai
 
 // Self-registered MCP clients nobody connected, or nobody uses any more.
 Schedule::command(PruneMcpClientsCommand::class)->daily();
+
+// Local accounts nobody has signed in to for platform.accounts.local_inactivity_days days.
+if (filled(config('platform.accounts.local_inactivity_days'))) {
+    Schedule::command(DeactivateInactiveLocalUsersCommand::class)->daily();
+}
 
 /*
 |--------------------------------------------------------------------------

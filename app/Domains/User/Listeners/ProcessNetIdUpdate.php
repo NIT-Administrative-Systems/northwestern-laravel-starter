@@ -7,6 +7,7 @@ namespace App\Domains\User\Listeners;
 use App\Domains\Access\Enums\RoleModificationOrigin;
 use App\Domains\Access\Enums\SystemRole;
 use App\Domains\Access\Models\Role;
+use App\Domains\Auth\Actions\EndSessions;
 use App\Domains\User\Events\NetIdUpdated;
 use App\Domains\User\Models\User;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -18,12 +19,18 @@ use Illuminate\Support\Facades\DB;
  * When a NetID is deactivated, deprovisioned, or put on security hold, this listener:
  * - Removes all role assignments except the default {@see SystemRole::NorthwesternUser} role
  * - Marks the user's NetID as inactive
+ * - Signs them out everywhere, since they can no longer sign in with that NetID
  */
 class ProcessNetIdUpdate implements ShouldQueue
 {
+    public function __construct(
+        private readonly EndSessions $endSessions,
+    ) {
+    }
+
     public function handle(NetIdUpdated $event): void
     {
-        DB::transaction(static function () use ($event) {
+        DB::transaction(function () use ($event) {
             $user = User::query()
                 ->sso()
                 ->lockForUpdate()
@@ -43,6 +50,8 @@ class ProcessNetIdUpdate implements ShouldQueue
                 ));
 
             $user->update(['netid_inactive' => true]);
+
+            ($this->endSessions)($user);
 
             // Add custom deprovisioning logic here, if needed
         });

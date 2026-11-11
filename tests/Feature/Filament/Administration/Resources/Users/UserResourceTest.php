@@ -15,6 +15,7 @@ use App\Filament\Administration\Resources\Users\RelationManagers\RoleActivityRel
 use App\Filament\Administration\Resources\Users\UserResource;
 use App\Providers\Filament\AdministrationPanelProvider;
 use Filament\Facades\Filament;
+use Filament\Tables\Filters\TrashedFilter;
 use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use Tests\TestCase;
@@ -74,5 +75,59 @@ final class UserResourceTest extends TestCase
 
         $this->assertFalse(AuditsRelationManager::canViewForRecord($person, ViewUser::class));
         $this->assertFalse(UserLoginRecordResource::canAccess());
+    }
+
+    public function test_an_administrator_deactivates_and_reactivates_someone_from_their_page(): void
+    {
+        $administrator = User::factory()->affiliate()->create();
+        $administrator->givePermissionTo(SystemPermission::AccessAdministrationPanel, SystemPermission::ViewUsers, SystemPermission::EditUsers);
+        $person = User::factory()->create();
+        $this->actingAs($administrator);
+
+        Livewire::test(ViewUser::class, ['record' => $person->getRouteKey()])
+            ->assertActionHidden('reactivateUser')
+            ->callAction('deactivateUser')
+            ->assertNotified('Account Deactivated');
+
+        $this->assertSoftDeleted($person);
+
+        Livewire::test(ViewUser::class, ['record' => $person->getRouteKey()])
+            ->assertActionHidden('deactivateUser')
+            ->callAction('reactivateUser')
+            ->assertNotified('Account Reactivated');
+
+        $this->assertNotSoftDeleted($person);
+    }
+
+    public function test_nobody_deactivates_their_own_account_or_does_it_without_edit_users(): void
+    {
+        $administrator = User::factory()->affiliate()->create();
+        $administrator->givePermissionTo(SystemPermission::ManageAll);
+        $viewer = User::factory()->affiliate()->create();
+        $viewer->givePermissionTo(SystemPermission::AccessAdministrationPanel, SystemPermission::ViewUsers);
+        $person = User::factory()->create();
+
+        $this->actingAs($administrator);
+        Livewire::test(ViewUser::class, ['record' => $administrator->getRouteKey()])->assertActionHidden('deactivateUser');
+
+        $this->actingAs($viewer);
+        Livewire::test(ViewUser::class, ['record' => $person->getRouteKey()])->assertActionHidden('deactivateUser');
+    }
+
+    public function test_deactivated_people_are_found_with_the_trashed_filter(): void
+    {
+        $administrator = User::factory()->affiliate()->create();
+        $administrator->givePermissionTo(SystemPermission::AccessAdministrationPanel, SystemPermission::ViewUsers);
+        $person = User::factory()->create();
+        $deactivated = User::factory()->create();
+        $deactivated->delete();
+        $this->actingAs($administrator);
+
+        Livewire::test(ListUsers::class)
+            ->assertCanSeeTableRecords([$person])
+            ->assertCanNotSeeTableRecords([$deactivated])
+            ->filterTable(TrashedFilter::class, false)
+            ->assertCanSeeTableRecords([$deactivated])
+            ->assertCanNotSeeTableRecords([$person]);
     }
 }

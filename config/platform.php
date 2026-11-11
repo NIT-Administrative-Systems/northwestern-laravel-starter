@@ -155,4 +155,22 @@ return [
         'api_request_logs' => env('API_REQUEST_LOG_RETENTION_DAYS', 90),
         'exports' => env('EXPORT_RETENTION_DAYS', 7),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Account Lifecycle
+    |--------------------------------------------------------------------------
+    |
+    | Days a local (email-code) account may go without a sign-in before the
+    | daily users:deactivate-inactive-local deactivates it. A new account gets
+    | the same time for its first sign-in. Null never deactivates them.
+    |
+    | The last sign-in comes from the sign-in records, so keep the
+    | login_records retention above at least this long.
+    |
+    */
+
+    'accounts' => [
+        'local_inactivity_days' => env('LOCAL_ACCOUNT_INACTIVITY_DAYS'),
+    ],
 ];
