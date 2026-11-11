@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - The purple header and the panels' top bar use the footer's focus ring, a 3px white outline set 2px off the control, in both panel themes and `errors.css`.
 - The changelog's **RSS Feed** links to the feed, with a separate **Copy** button for its URL. Section headings in entries are smaller than entry titles, list bullets are darker, and the last entry has no rule under it.
 - `.env.example` lists the `NU_UNIT_*` settings and `NU_LOCKUP`.
+- Updated `northwestern-sysdev/northwestern-filament-theme` to `^4.3.0`. The site header on public, sign-in and error pages shows the unit's lockup when `NU_LOCKUP` is set, through the theme's `<x-northwestern-filament-theme::lockup />`, in place of the wordmark, and shows the theme's impersonation banner, with **Leave Impersonation**, while someone is impersonating, as the panels do.
 
 ### Security
 

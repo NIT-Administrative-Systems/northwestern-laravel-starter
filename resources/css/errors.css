@@ -17,7 +17,8 @@
 }
 
 /* The header's focus ring, as in the panel themes: the footer's 3px white outline, set 2px off the control. */
-.nu-site-header :is(a, button):focus-visible {
+.nu-site-header :is(a, button):focus-visible,
+.nu-site-header .nu-lockup:focus-visible /* outranks the lockup component's own 2px outline */ {
     outline: 3px solid var(--color-white);
     outline-offset: 2px;
 }

@@ -1,10 +1,14 @@
 {{--
     The Northwestern header for pages outside the panels' full layout: public pages, the
     sign-in and lockdown pages, and error pages. It matches the panels' top bar (see
-    <x-panel-brand>): the wordmark, the application name, then whatever the page puts in
-    the slot, such as the Help menu and Sign in or the user menu.
+    <x-panel-brand>): the wordmark, or the unit's lockup when NU_LOCKUP is set, the
+    application name, then whatever the page puts in the slot, such as the Help menu and
+    Sign in or the user menu. Above it, the theme's impersonation banner shows while someone
+    is impersonating, with Leave Impersonation, as the panels show it above their top bar.
 
-    Error pages use it, so it must render without Filament, auth or the database.
+    Error pages use it, so it must render without Filament, auth or the database. The lockup
+    reads only config. The banner reads the session and the signed-in user, so it is left
+    out when those fail rather than failing the page.
 
     On phones and tablets (below the lg breakpoint) the application name moves to a row of its
     own, so the controls beside the wordmark never squeeze it. Outside production it shows the environment badge,
@@ -16,12 +20,25 @@
     From the lg breakpoint the row lines up with the footer's 70rem container.
 --}}
 @php
+    use Illuminate\Support\Facades\Blade;
     use Illuminate\Support\Str;
     use Northwestern\FilamentTheme\EnvironmentIndicator\EnvironmentIndicatorConfig;
+    use Northwestern\FilamentTheme\NorthwesternTheme;
 
     $environment = new EnvironmentIndicatorConfig();
     $showEnvironment = $environment->isVisible();
+    $hasLockup = NorthwesternTheme::lockupUrl() !== null;
+
+    // Its defaults match the panels' ->impersonationBanner(): lab404's session, the signed-in user's
+    // name, and the impersonate.leave route.
+    $impersonationBanner = rescue(
+        fn(): string => Blade::render('<x-northwestern-filament-theme::impersonation-banner />'),
+        '',
+        report: false,
+    );
 @endphp
+
+{!! $impersonationBanner !!}
 
 <header @class([
     'nu-site-header bg-nu-purple-120 w-full text-white',
@@ -34,10 +51,16 @@
         'h-16' => !$showEnvironment,
         'h-15' => $showEnvironment,
     ])>
-        <a class="block shrink-0 [&_.nu-wordmark]:h-5 [&_.nu-wordmark]:w-auto [&_.nu-wordmark]:-translate-y-[10%] [&_.nu-wordmark]:text-white sm:[&_.nu-wordmark]:h-6"
-           href="https://www.northwestern.edu/">
-            @include('northwestern-filament-theme::wordmark')
-        </a>
+        @if ($hasLockup)
+            {{-- The white lockup at the panels' logo height, with the brand's clear space around it. --}}
+            <x-northwestern-filament-theme::lockup data-testid="site-header-lockup"
+                                                   href="https://www.northwestern.edu/" />
+        @else
+            <a class="block shrink-0 [&_.nu-wordmark]:h-5 [&_.nu-wordmark]:w-auto [&_.nu-wordmark]:-translate-y-[10%] [&_.nu-wordmark]:text-white sm:[&_.nu-wordmark]:h-6"
+               href="https://www.northwestern.edu/">
+                @include('northwestern-filament-theme::wordmark')
+            </a>
+        @endif
 
         <span class="hidden h-6 w-px shrink-0 bg-white/30 lg:block" aria-hidden="true"></span>
 

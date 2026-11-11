@@ -89,6 +89,53 @@ final class ErrorPagesTest extends TestCase
             ->assertDontSee('data-testid="sign-in-link"', escape: false);
     }
 
+    public function test_not_found_page_shows_the_impersonation_banner_while_impersonating(): void
+    {
+        $administrator = User::factory()->create();
+        $person = User::factory()->create(['first_name' => 'Pat', 'last_name' => 'Person']);
+
+        $this->actingAs($person)
+            ->withSession([resolve('impersonate')->getSessionKey() => $administrator->id])
+            ->get('/no-such-page')
+            ->assertNotFound()
+            ->assertSee('Impersonating user · ' . $person->full_name)
+            ->assertSee('action="' . route('impersonate.leave') . '"', escape: false)
+            ->assertSee('Leave Impersonation');
+    }
+
+    public function test_pages_show_no_impersonation_banner_otherwise(): void
+    {
+        $this->actingAs(User::factory()->create())
+            ->get('/no-such-page')
+            ->assertNotFound()
+            ->assertDontSee('Leave Impersonation');
+    }
+
+    public function test_the_header_shows_the_unit_lockup_when_one_is_set(): void
+    {
+        config(['northwestern-filament-theme.lockup' => 'images/unit-lockup.svg', 'northwestern-filament-theme.unit.name' => 'Office of Testing']);
+
+        $this->get('/no-such-page')
+            ->assertNotFound()
+            ->assertSee('data-testid="site-header-lockup"', escape: false)
+            ->assertSee('src="' . asset('images/unit-lockup.svg') . '" alt="Northwestern University Office of Testing"', escape: false);
+
+        // The bare error layout too: the lockup reads only config.
+        $this->get('/__test/unavailable')
+            ->assertServiceUnavailable()
+            ->assertSee('data-testid="site-header-lockup"', escape: false);
+    }
+
+    public function test_the_header_shows_the_wordmark_without_a_lockup(): void
+    {
+        config(['northwestern-filament-theme.lockup' => null]);
+
+        $this->get('/no-such-page')
+            ->assertNotFound()
+            ->assertDontSee('data-testid="site-header-lockup"', escape: false)
+            ->assertSee('nu-wordmark', escape: false);
+    }
+
     public function test_unknown_api_paths_are_not_caught_by_the_web_fallback(): void
     {
         $this->get('/api/no-such-endpoint')

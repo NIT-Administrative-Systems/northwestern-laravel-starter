@@ -18,7 +18,8 @@
 
 /* One focus ring on the purple header, the top bar and the footer: the footer's 3px white outline,
    set 2px off the control. The theme's purple outline would vanish against the header. */
-:is(.nu-site-header, .fi-topbar) :is(a, button):focus-visible {
+:is(.nu-site-header, .fi-topbar) :is(a, button):focus-visible,
+.nu-site-header .nu-lockup:focus-visible /* outranks the lockup component's own 2px outline */ {
     outline: 3px solid var(--color-white);
     outline-offset: 2px;
     box-shadow: none;

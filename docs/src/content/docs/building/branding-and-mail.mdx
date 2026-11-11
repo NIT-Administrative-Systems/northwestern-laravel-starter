@@ -17,7 +17,11 @@ The theme sets the panels' Filament colors (`primary` is Northwestern Purple) an
 
 ## The Wordmark and a Unit Lockup
 
-The panels' top bar shows the Northwestern wordmark. To show your unit's lockup instead, set `NU_LOCKUP` to a full URL or a path in `public/`. The lockup replaces the logo in the panels only: `<x-site-header>`, on public, sign-in and error pages, always shows the wordmark, and the footer shows the "Northwestern University" wordmark.
+The panels' top bar and `<x-site-header>`, on public, sign-in and error pages, show the Northwestern wordmark. To show your unit's lockup instead, set `NU_LOCKUP` to a full URL or a path in `public/`; use the white version, since both headers are purple. The header renders it with the theme's `<x-northwestern-filament-theme::lockup />` component, at 1.5rem with the brand's clear space around it, linking to northwestern.edu, and its accessible name is "Northwestern University" followed by `NU_UNIT_NAME`. The component reads only config, so error pages show the lockup too. The footer always shows the "Northwestern University" wordmark.
+
+## The Impersonation Banner
+
+While an administrator is impersonating someone, the panels show the theme's impersonation banner above their top bar, with **Leave Impersonation**. `<x-site-header>` renders the same banner above itself with `<x-northwestern-filament-theme::impersonation-banner />`, so public, sign-in and error pages show it too. Its defaults match the panels' `->impersonationBanner()`: it reads lab404's impersonation session, names the signed-in user, and posts to the `impersonate.leave` route. It renders nothing when no one is impersonating, and on an error page where the session or the signed-in user can't be read it is left out rather than failing the page.
 
 ## Light Pages Before Signing In
 
