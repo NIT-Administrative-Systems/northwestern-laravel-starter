@@ -9,7 +9,7 @@
     },
     "dependencies": {
         "@astrojs/starlight": "^0.42.10",
-        "@nu-appdev/northwestern-starlight-theme": "^1.8.0",
+        "@nu-appdev/northwestern-starlight-theme": "^1.9.0",
         "@nu-appdev/starlight-agent-docs": "^1.0.1",
         "astro": "^7.4.8",
         "astro-mermaid": "^2.2.0",
