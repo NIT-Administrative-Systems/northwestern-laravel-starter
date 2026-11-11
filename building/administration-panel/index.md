@@ -8,23 +8,33 @@ The administration panel at `/administration` holds the starter’s back-office 
 
 ## Navigation
 
+The sidebar starts with the panel’s name, “Administration”, so a phone says which panel you are in, and it collapses to icons on a desktop. The top bar has the same Help menu as the app panel, and the user menu has **Back to {app name}** and **Account** above Sign Out.
+
 The sidebar groups the tools with the `App\Filament\Administration\Navigation\AdministrationNavGroup` enum: **User Management**, **Platform** and **Developer Tools**. Give a resource or page its group with `protected static string|UnitEnum|null $navigationGroup = AdministrationNavGroup::Platform;`.
 
-| Tool                                                                                                              | Group           | Needs                                                      |
-| ----------------------------------------------------------------------------------------------------------------- | --------------- | ---------------------------------------------------------- |
-| [Users](https://laravel-starter.entapp.northwestern.edu/building/administration-panel/#users)                     | User Management | `ViewUsers`, or `ManageApiAccess` for API users only       |
-| [Roles](https://laravel-starter.entapp.northwestern.edu/building/administration-panel/#roles)                     | User Management | `ViewRoles`                                                |
-| [Announcements](https://laravel-starter.entapp.northwestern.edu/building/administration-panel/#announcements)     | Platform        | `ManageAnnouncements`                                      |
-| [API](https://laravel-starter.entapp.northwestern.edu/building/administration-panel/#the-api-cluster)             | Platform        | `ManageApiAccess`, or `ViewApiRequestLogs` with the API on |
-| [Audit Logs](https://laravel-starter.entapp.northwestern.edu/building/administration-panel/#audit-logs)           | Platform        | `ViewAuditLogs`                                            |
-| [Sign-In Records](https://laravel-starter.entapp.northwestern.edu/building/administration-panel/#sign-in-records) | Platform        | `ViewLoginRecords`                                         |
-| [Support Tickets](https://laravel-starter.entapp.northwestern.edu/building/administration-panel/#support-tickets) | Platform        | `ViewSupportTickets`, with Contact Support on              |
-| [Overview](https://laravel-starter.entapp.northwestern.edu/building/administration-panel/#platform-overview)      | Platform        | `ManageAll`                                                |
-| [Developer tools](https://laravel-starter.entapp.northwestern.edu/building/administration-panel/#developer-tools) | Developer Tools | `ManageAll`                                                |
+| Tool                                                                                                              | Group                | Needs                                                      |
+| ----------------------------------------------------------------------------------------------------------------- | -------------------- | ---------------------------------------------------------- |
+| [Overview](https://laravel-starter.entapp.northwestern.edu/building/administration-panel/#the-overview)           | (top of the sidebar) | `ManageAll`                                                |
+| [Users](https://laravel-starter.entapp.northwestern.edu/building/administration-panel/#users)                     | User Management      | `ViewUsers`, or `ManageApiAccess` for API users only       |
+| [Roles](https://laravel-starter.entapp.northwestern.edu/building/administration-panel/#roles)                     | User Management      | `ViewRoles`                                                |
+| [Announcements](https://laravel-starter.entapp.northwestern.edu/building/administration-panel/#announcements)     | Platform             | `ManageAnnouncements`                                      |
+| [API](https://laravel-starter.entapp.northwestern.edu/building/administration-panel/#the-api-cluster)             | Platform             | `ManageApiAccess`, or `ViewApiRequestLogs` with the API on |
+| [Audit Logs](https://laravel-starter.entapp.northwestern.edu/building/administration-panel/#audit-logs)           | Platform             | `ViewAuditLogs`                                            |
+| [Sign-In Records](https://laravel-starter.entapp.northwestern.edu/building/administration-panel/#sign-in-records) | Platform             | `ViewLoginRecords`                                         |
+| [Support Tickets](https://laravel-starter.entapp.northwestern.edu/building/administration-panel/#support-tickets) | Platform             | `ViewSupportTickets`, with Contact Support on              |
+| [Developer tools](https://laravel-starter.entapp.northwestern.edu/building/administration-panel/#developer-tools) | Developer Tools      | `ManageAll`                                                |
 
-## The Dashboard
+## The Overview
 
-`/administration` opens on Filament’s dashboard with a placeholder `WelcomeWidget` (`app/Filament/Administration/Widgets/WelcomeWidget.php`). Replace it with the widgets, stats and charts your administrators need.
+`/administration` opens on **Overview** (`App\Filament\Administration\Pages\Platform\Overview`), which extends Filament’s `Dashboard`. It shows the environment, services, feature flags, health check results, queues, scheduled tasks, sign-in activity and API traffic in one place, and it’s read-only. See [Health Checks](https://laravel-starter.entapp.northwestern.edu/features/health-checks/).
+
+Only someone with `ManageAll` sees it. Anyone else who opens `/administration` starts on the first page in their sidebar, and gets a 403 only when their sidebar is empty. Add your own sections to `resources/views/filament/pages/platform/overview.blade.php`.
+
+## Tables
+
+Every table in both panels shares the defaults in `FilamentServiceProvider`: below `sm` each row becomes a card with a label on every value (`stackedOnMobile()`), filters, sort and search are kept in the session so they survive opening a record and coming back, and the empty state uses a neutral inbox icon.
+
+Each administration table marks its secondary columns with `visibleFrom('lg')`, `visibleFrom('xl')` or `visibleFrom('2xl')`, so it fits its container at 1440 pixels and keeps the columns that matter at 1024. The log tables (Audit Logs, Sign-In Records, API Requests and Role Activity) load after the page appears (`deferLoading()`), and their filters fold away above the table (`FiltersLayout::AboveContentCollapsible`). Give a new table the same treatment: decide which three or four columns matter at 1024 pixels and put the rest behind a breakpoint.
 
 ## Users
 
@@ -34,26 +44,34 @@ The sidebar groups the tools with the `App\Filament\Administration\Navigation\Ad
 * **Add Local User** creates a person who signs in with an email verification code. Needs `CreateUsers`. See [Creating Local Users](https://laravel-starter.entapp.northwestern.edu/features/authentication/#creating-local-users).
 * **Create API User** creates an API user with its first service client. Needs `ManageApiAccess`, with the API on. See [API System](https://laravel-starter.entapp.northwestern.edu/features/api/).
 
-A person’s page shows their details and these tabs, each only when it applies to them and the viewer holds its permission:
+**Add People to a Role** gives a role to a pasted list of NetIDs and email addresses, or the people in a CSV file, creating the accounts that don’t exist yet. Needs `AssignRoles` and `CreateUsers`. See [Adding People in Bulk](https://laravel-starter.entapp.northwestern.edu/features/authorization/#adding-people-in-bulk).
 
-| Tab                    | Shows                                                        | Needs                                                  |
-| ---------------------- | ------------------------------------------------------------ | ------------------------------------------------------ |
-| Roles                  | Their roles, which can be assigned and removed here          | Viewing the person; changing roles needs `AssignRoles` |
-| Role History           | Every role assignment and removal                            | `ViewAuditLogs`                                        |
-| Audit Logs             | Every audited change to them                                 | `ViewAuditLogs`                                        |
-| Login Records          | Their sign-ins                                               | `ViewLoginRecords`                                     |
-| Personal Access Tokens | Their tokens, which can be revoked                           | `ManageApiAccess`                                      |
-| Connected Applications | Their applications and AI clients, which can be disconnected | `ManageApiAccess`                                      |
-| Service Clients        | An API user’s clients: create, rotate, restrict and revoke   | `ManageApiAccess`, for API users                       |
-| API Requests           | An API user’s request log                                    | `ViewApiRequestLogs`, for API users with logging on    |
+The **Trashed** filter finds deactivated accounts.
+
+A person’s record has four pages, in sub-navigation across the top: **Details**, **Access**, **Activity** and **API Credentials**. An API user’s record puts **API Credentials** second, since that is what an administrator opens it for. Each page shows a tab for each of these that applies to the person and that the viewer holds the permission for, and a page with no tabs is left out:
+
+| Page            | Tab                    | Shows                                                        | Needs                                                  |
+| --------------- | ---------------------- | ------------------------------------------------------------ | ------------------------------------------------------ |
+| Access          | Roles                  | Their roles, which can be assigned and removed here          | Viewing the person; changing roles needs `AssignRoles` |
+| Access          | Role History           | Every role assignment and removal                            | `ViewAuditLogs`                                        |
+| Activity        | Audit Logs             | Every audited change to them                                 | `ViewAuditLogs`                                        |
+| Activity        | Sign-In Records        | Their sign-ins                                               | `ViewLoginRecords`                                     |
+| API Credentials | Service Clients        | An API user’s clients: create, rotate, restrict and revoke   | `ManageApiAccess`, for API users                       |
+| API Credentials | Personal Access Tokens | Their tokens, which can be revoked                           | `ManageApiAccess`                                      |
+| API Credentials | Connected Applications | Their applications and AI clients, which can be disconnected | `ManageApiAccess`                                      |
+| API Credentials | API Requests           | An API user’s request log                                    | `ViewApiRequestLogs`, for API users with logging on    |
+
+The pages are `ManageUserAccess`, `ManageUserActivity` and `ManageUserApiCredentials` in `app/Filament/Administration/Resources/Users/Pages/`, and `UserResource::getRecordSubNavigation()` orders them. To add a tab, list its relation manager in the page’s `managers()`.
 
 These tabs stay while the API or MCP is off, so an administrator can still revoke what exists; creating, rotating and editing wait until the feature is back on. Who may do what with each credential is decided by `CredentialAccess` (see [API Operations](https://laravel-starter.entapp.northwestern.edu/features/api-operations/#when-the-starter-refuses)).
 
-The **Impersonate** button signs you in as the person. See [Impersonating Users](https://laravel-starter.entapp.northwestern.edu/features/authentication/#impersonating-users).
+The **Impersonate** button signs you in as the person and opens the app panel; leaving impersonation brings you back to their page. See [Impersonating Users](https://laravel-starter.entapp.northwestern.edu/features/authentication/#impersonating-users).
+
+**Deactivate** signs the person out everywhere, revokes their credentials and keeps them from signing in; **Reactivate** lets them sign in again, and nothing else does: signing in, a directory sync, **Add Northwestern User** and adding people in bulk all leave a deactivated account deactivated. Both need `EditUsers`. See [Deactivating Accounts](https://laravel-starter.entapp.northwestern.edu/features/authentication/#deactivating-accounts).
 
 ## Roles
 
-**Roles** lists every role with its type and how many people hold it. A role’s page shows its permissions and an **Assigned Users** tab for assigning and removing people. Its **Definition History** page shows every change to its definition, with what changed. Creating, editing and deleting roles need `EditRoles` and `DeleteRoles`. See [Authorization](https://laravel-starter.entapp.northwestern.edu/features/authorization/).
+**Roles** lists every role with its type and how many people hold it. A role’s page shows its name, type, how many people hold it and the permissions it grants, with personal permissions marked, and an **Assigned Users** tab for assigning and removing people, one at a time or [in bulk](https://laravel-starter.entapp.northwestern.edu/features/authorization/#adding-people-in-bulk). Its **Definition History** page shows every change to its definition, with what changed. Creating, editing and deleting roles need `EditRoles` and `DeleteRoles`. See [Authorization](https://laravel-starter.entapp.northwestern.edu/features/authorization/).
 
 The **Role Activity** button on the Roles page lists role assignments and removals across everyone, with where each came from. It needs `ViewAuditLogs`.
 
@@ -61,8 +79,8 @@ The **Role Activity** button on the Roles page lists role assignments and remova
 
 **API** groups the API’s tools under one sidebar entry, each page with its own rule:
 
-* **Overview** shows API users, clients, expiring secrets and the last day’s traffic. It needs `ManageApiAccess`, or `ViewApiRequestLogs` with the API on.
-* **API Requests** is the request log, with its charts. It needs `ViewApiRequestLogs`, with the API and request logging on. See [Request Logging](https://laravel-starter.entapp.northwestern.edu/features/api/#request-logging).
+* **API Overview**, where the cluster opens, shows API users, clients, expiring secrets and the last day’s traffic. It needs `ManageApiAccess`, or `ViewApiRequestLogs` with the API on.
+* **API Requests** is the request log, with its charts. Turn on the **Live** filter to refresh it every 30 seconds. It needs `ViewApiRequestLogs`, with the API and request logging on. See [Request Logging](https://laravel-starter.entapp.northwestern.edu/features/api/#request-logging).
 * **Applications** registers and manages OAuth applications. It needs `ManageApiAccess`; while the API is off it lists and revokes them but can’t register or edit. See [Connected Applications](https://laravel-starter.entapp.northwestern.edu/features/api/#connected-applications).
 * **MCP Clients** lists the clients that registered themselves and revokes them. It needs `ManageApiAccess`, whether or not MCP is on. See [MCP](https://laravel-starter.entapp.northwestern.edu/features/mcp/#managing-clients).
 
@@ -81,10 +99,6 @@ The **Role Activity** button on the Roles page lists role assignments and remova
 ## Support Tickets
 
 **Support Tickets** is a read-only log of Contact Support submissions and where each was delivered. It shows only while Contact Support is on. See [Support Tickets](https://laravel-starter.entapp.northwestern.edu/features/support-tickets/).
-
-## Platform Overview
-
-**Overview** (`/administration/overview`) shows the environment, services, feature flags, health check results, queues, scheduled tasks, sign-in activity and API traffic in one place. It’s read-only. See [Health Checks](https://laravel-starter.entapp.northwestern.edu/features/health-checks/).
 
 ## Developer Tools
 
@@ -113,11 +127,13 @@ Extend `App\Filament\Support\BaseExporter` instead of Filament’s `Exporter`. D
 
 A wizard that issues a credential and shows its secret once uses `App\Filament\Support\RevealOnceSecret`, as the service client, application and personal access token wizards do. Name the wizard with `RevealOnceSecret::for('report_feed:create')`, then:
 
-* `->mountUsing($secret->mountFresh())`, so a cancelled run leaves nothing for the next one to show;
-* `$secret->issueOnce(fn () => ['id' => ..., 'secret' => ...])` in the first step, so stepping back and forward doesn’t issue a second credential;
-* `$secret->identifierEntry()` and `$secret->secretEntry()` in the copy step;
-* `->action(fn () => $secret->forget())` on submit.
+* `->mountUsing($secret->mountFresh())`, which gives each run its own key, so a cancelled run, or one open in another browser tab, never shows its credential to another;
+* `$secret->issueOnce($livewire, fn () => ['id' => ..., 'secret' => ...])` in the first step, so stepping back and forward doesn’t issue a second credential;
+* `$secret->identifierEntry()` and `$secret->secretEntry()` in the copy step, which show the value in full, wrapped, with a **Copy** button under it;
+* `->modifyWizardUsing($secret->hideBackOnceIssued())`, so there is no **Back** to a form whose credential already exists;
+* `->modalSubmitAction($secret->savedAction())`, which labels the last button **I’ve Saved It**;
+* `->action(fn (HasActions $livewire) => $secret->forget($livewire))` on submit.
 
-The secret is kept encrypted in the session between the steps, never in Livewire state.
+Its other methods also take the Livewire component (`$livewire`, or `$this` on a page), which holds the run’s key in the mounted action’s arguments. The secret is kept encrypted in the session between the steps, never in Livewire state.
 
 The panel’s Tailwind theme is `resources/css/filament/administration/theme.css`. In tests, call `Filament::setCurrentPanel(AdministrationPanelProvider::ID)` before testing one of its Livewire pages, because the app panel is the default.

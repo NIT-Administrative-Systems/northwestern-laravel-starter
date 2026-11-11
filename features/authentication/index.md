@@ -40,10 +40,10 @@ Client credentials for integrations, which get short-lived access tokens.
 
 ## Signing In
 
-Sign-in belongs to the [App panel](https://laravel-starter.entapp.northwestern.edu/building/app-panel/). Guests who open a page in any panel are sent to `/app/login`, which lists the sign-in methods this application has configured:
+Sign-in belongs to the [App panel](https://laravel-starter.entapp.northwestern.edu/building/app-panel/). Guests who open a page in any panel are sent to `/app/login`, headed “Sign In to” and the application’s name, which lists the sign-in methods this application has configured:
 
 * **Sign In with NetID** appears when single sign-on is configured. It uses Online Passport (WebSSO) when that is configured, otherwise Entra ID.
-* **Sign In with Email** appears when `LOCAL_AUTH_ENABLED=true`.
+* **Sign In with Email** appears when `LOCAL_AUTH_ENABLED=true`. It is the secondary button beside NetID, and the primary one when it is the only method. Outside production, a note under it then says NetID sign-in isn’t set up in that environment.
 * **Sign In As** appears in the `local` environment only. See [Signing In Locally](https://laravel-starter.entapp.northwestern.edu/features/authentication/#signing-in-locally).
 * If none is available, the page explains that no sign-in methods are available.
 
@@ -284,6 +284,33 @@ Consistent response times prevent user enumeration via timing analysis
 
 ***
 
+## Deactivating Accounts
+
+An administrator with `EditUsers` deactivates someone with **Deactivate** on their page in Administration. `App\Domains\User\Actions\Lifecycle\DeactivateUser`:
+
+* soft-deletes the account, so it can’t sign in and drops out of the Users list (the **Trashed** filter finds it),
+* revokes their personal access tokens, connected applications and service clients with `RevokeAllCredentials`,
+* signs them out everywhere with `App\Domains\Auth\Actions\EndSessions`, which deletes their rows from the `sessions` table and cycles their remember token, and
+* records an **Account Deactivated** audit event.
+
+**Reactivate** (`ReactivateUser`) restores the account and records **Account Reactivated**. The credentials revoked with it stay revoked.
+
+Only **Reactivate** brings an account back. A deactivated person who signs in, with a NetID or any other method, is refused by `SignIn::complete()` and sees a page saying their account is deactivated and to contact the team that supports the application. Looking them up in the Northwestern Directory, whether at sign-in, from **Add Northwestern User** or the directory sync on their page, updates their details and leaves them deactivated. **Add Northwestern User** sends you to their page to reactivate them, and [adding people in bulk](https://laravel-starter.entapp.northwestern.edu/features/authorization/#adding-people-in-bulk) lists them as not added.
+
+Nobody deactivates or reactivates their own account, and nobody does either while impersonating, super administrators included. `App\Domains\User\AccountStatusAccess` decides both.
+
+When EventHub reports a NetID deactivated, deprovisioned or on security hold, `ProcessNetIdUpdate` ends that person’s sessions the same way. See [EventHub](https://laravel-starter.entapp.northwestern.edu/northwestern-integrations/eventhub/).
+
+### Expiring Local Accounts
+
+Set `LOCAL_ACCOUNT_INACTIVITY_DAYS` to deactivate local accounts nobody has signed in to for that many days. The daily `users:deactivate-inactive-local` command finds them from the sign-in records, and gives a new account the same time for its first sign-in. Northwestern accounts are left to the NetID lifecycle. It’s off by default.
+
+> **Keep sign-in records long enough**
+>
+> The last sign-in comes from the sign-in records, so keep `LOGIN_RECORD_RETENTION_DAYS` at least as long as `LOCAL_ACCOUNT_INACTIVITY_DAYS`. Otherwise someone whose last sign-in was pruned looks inactive.
+
+***
+
 ## API Authentication
 
 Integrations authenticate as API users through OAuth service clients issued by Laravel Passport.
@@ -406,9 +433,9 @@ All rate limiters are defined in `config/rate-limiting.php`.
 
 ## Impersonating Users
 
-Users with the `ManageImpersonation` permission can sign in as another user to see the application as they do. The **Impersonate** button on a user’s page in the administration panel posts to `/impersonate/take/{id}`. API users can’t be impersonated, and only a user with `ManageAll` can impersonate another user who has it.
+Users with the `ManageImpersonation` permission can sign in as another user to see the application as they do. The **Impersonate** button on a user’s page in the administration panel posts to `/impersonate/take/{id}` and opens the app panel as that person, since the page you came from is usually one they can’t open. API users can’t be impersonated, and only a user with `ManageAll` can impersonate another user who has it.
 
-While impersonating, both panels show the theme’s impersonation banner, whose leave button posts to `/impersonate/leave` and returns to the original account. Both routes are in `routes/auth.php` and share the [impersonation rate limit](https://laravel-starter.entapp.northwestern.edu/features/authentication/#impersonation).
+While impersonating, both panels show the theme’s impersonation banner, whose leave button posts to `/impersonate/leave` and returns to the original account, on the page where impersonation started. Both routes are in `routes/auth.php` and share the [impersonation rate limit](https://laravel-starter.entapp.northwestern.edu/features/authentication/#impersonation).
 
 Each start is recorded in the impersonation log, which is kept forever unless `IMPERSONATION_LOG_RETENTION_DAYS` is set. See [Audit Logging](https://laravel-starter.entapp.northwestern.edu/features/audit-logging/#what-gets-audited).
 

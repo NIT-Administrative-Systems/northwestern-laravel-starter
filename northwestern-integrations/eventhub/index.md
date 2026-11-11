@@ -32,17 +32,18 @@ The EventHub integration is provided by the [`northwestern-sysdev/laravel-soa`](
 
    * All roles except `Northwestern User` are removed
    * The user is marked as `netid_inactive = true`
+   * Their sessions end, and their remember token changes, so they’re signed out everywhere
 
 ***
 
 ## Customizing Deprovisioning Logic
 
-The `ProcessNetIdUpdate` listener handles the default deprovisioning behavior (role removal and marking the NetID inactive) inside a database transaction. To add your own business logic, such as sending notifications or archiving data, edit the transaction block in the listener. You don’t need to revoke API credentials here: once `netid_inactive` is set, the API refuses the person’s tokens on every request, and `oauth:revoke-ineligible` marks them revoked.
+The `ProcessNetIdUpdate` listener handles the default deprovisioning behavior (role removal, marking the NetID inactive and ending their sessions) inside a database transaction. To add your own business logic, such as sending notifications or archiving data, edit the transaction block in the listener. You don’t need to revoke API credentials here: once `netid_inactive` is set, the API refuses the person’s tokens on every request, and `oauth:revoke-ineligible` marks them revoked.
 
 app/Domains/User/Listeners/ProcessNetIdUpdate.php
 
 ```php
-DB::transaction(static function () use ($event) {
+DB::transaction(function () use ($event) {
     $user = User::query()
         ->sso()
         ->lockForUpdate()
@@ -65,6 +66,9 @@ DB::transaction(static function () use ($event) {
 
 
     $user->update(['netid_inactive' => true]);
+
+
+    ($this->endSessions)($user);
 
 
     // Add custom deprovisioning logic here, if needed

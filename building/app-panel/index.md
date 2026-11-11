@@ -43,7 +43,9 @@ The panel discovers Resources, Pages, Clusters and Widgets in `app/Filament/App/
   * Widgets/
     * YourAccountWidget.php
 
-The sidebar is for your application’s features. The starter ships only the dashboard and, outside production, the component gallery there; Contact Support is in the Help menu.
+The sidebar is for your application’s features. The starter ships only the dashboard and, outside production, the component gallery there; Contact Support is in the Help menu. Below `lg` the sidebar starts with the application’s name, since the top bar has no room for it on a phone, and on a desktop it collapses to icons.
+
+Both panels warn before someone leaves a form with unsaved changes (`->unsavedChangesAlerts()`), and save every create and edit in a database transaction (`->databaseTransactions()`). Tables in both panels share the defaults described in [The Administration Panel](https://laravel-starter.entapp.northwestern.edu/building/administration-panel/#tables): cards on a phone, and filters, sort and search kept in the session.
 
 Filament’s generators target the default panel, so new resources and pages land here without a `--panel` option:
 
@@ -157,11 +159,11 @@ Delete `app/Filament/App/Starter/Pages/ComponentGallery.php` when you no longer 
 
 ## The Top Bar
 
-The top bar holds what every page shares: the Northwestern wordmark, the application name (`<x-panel-brand>`), the environment badge outside production, the Help menu, the notification bell and the user menu.
+The top bar holds what every page shares: the Northwestern wordmark, the application name (`<x-panel-brand>`, from `sm` up), the environment badge outside production, the Help menu, the notification bell and the user menu.
 
 ### The Help Menu
 
-`<x-help-menu>` (`resources/views/components/help-menu.blade.php`) is rendered in the app panel’s top bar, just ahead of the user menu, and in the header of public pages. The administration panel doesn’t show it. Each item shows only when it is available:
+`<x-help-menu>` (`resources/views/components/help-menu.blade.php`) is rendered in both panels’ top bars, just ahead of the user menu, and in the header of public pages. Each item shows only when it is available:
 
 * **Announcements**, for signed-in users: the [Announcements](https://laravel-starter.entapp.northwestern.edu/features/announcements/) page.
 * **Changelog**, when the [changelog](https://laravel-starter.entapp.northwestern.edu/features/changelog/) is enabled.
@@ -192,6 +194,8 @@ The user menu has three items, set in `AppPanelProvider::userMenuItems()`:
 * **Account** links to the [Account area](https://laravel-starter.entapp.northwestern.edu/building/app-panel/#the-account-area).
 * **Administration** links to `/administration`. It shows only to users who can open that panel (`User::canAccessPanel()`).
 * **Sign Out** goes to the `logout` route.
+
+The administration panel’s user menu has **Back to {app name}**, which opens this panel, **Account** and **Sign Out**.
 
 ## Notifications
 
@@ -238,7 +242,7 @@ The bell picks up new notifications at its next poll. A Livewire component in th
 
 ## Simple Pages
 
-Simple pages (Filament’s `SimplePage`) render a single card without the sidebar. The sign-in pages and the lockdown page are simple pages. The app panel renders `<x-site-header>` above every simple page’s card, so they share the header of public and error pages.
+Simple pages (Filament’s `SimplePage`) render a single card without the sidebar. The sign-in pages and the lockdown page are simple pages. The app panel renders `<x-site-header>` above every simple page’s card, so they share the header of public and error pages. Pages that use `HasSiteHeader` are light only, like the public pages: the app panel renders `resources/views/filament/app/light-only.blade.php` in their `<head>`, which keeps Filament from switching them to dark mode, and the panel’s other pages keep following each person’s theme setting.
 
 1. Extend `Filament\Pages\SimplePage` in `app/Filament/App/Pages/`, and use `App\Filament\App\Starter\Pages\Concerns\HasSiteHeader`. The trait turns off Filament’s own logo and simple-page user menu, which would repeat what the header shows.
 

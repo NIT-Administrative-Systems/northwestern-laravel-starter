@@ -2,16 +2,30 @@
 
 Error pages live in `resources/views/errors/`. Laravel renders `{status}.blade.php` for an HTTP error with that status. They use one of two layouts, depending on whether the application can be trusted to work when the error happens.
 
-| Page                                       | View                                               | Layout                                                                                                        |
-| ------------------------------------------ | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| 401, 402, 403, 404, 419, 429               | `<x-error-layout title="...">`                     | The [public layout](https://laravel-starter.entapp.northwestern.edu/building/public-pages/#the-public-layout) |
-| 503 (maintenance, external service outage) | `<x-error-layout title="..." :navigation="false">` | `<x-layouts.error>`                                                                                           |
-| 500                                        | Its own body                                       | `<x-layouts.error>`                                                                                           |
-| Database paused                            | Its own body                                       | `<x-layouts.error>`                                                                                           |
+| Page                                       | View                                                                                               | Layout                                                                                                        |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| 401, 402, 403, 404, 419, 429               | `<x-error-layout :code="404" title="...">`                                                         | The [public layout](https://laravel-starter.entapp.northwestern.edu/building/public-pages/#the-public-layout) |
+| 503 (maintenance, external service outage) | `<x-error-layout :code="503" title="..." :navigation="false">`                                     | `<x-layouts.error>`                                                                                           |
+| 500                                        | `<x-error-layout :code="500" ... :navigation="false">`, with the report form and technical details | `<x-layouts.error>`                                                                                           |
+| Database paused                            | `<x-error-layout title="Database Paused" :navigation="false">`, with no status                     | `<x-layouts.error>`                                                                                           |
+
+Every page shares one body, so a 404 and a 500 look the same.
 
 ## Client Errors on the Public Layout
 
-`<x-error-layout>` (`App\View\Components\ErrorLayout`) renders `resources/views/errors/layout.blade.php`: a heading from `title`, the slot as the message, and a **Back to Homepage** button. By default it renders on the public layout, so the header keeps the Help menu and **Sign In** or the user menu, and the page uses the app panel’s theme.
+`<x-error-layout>` (`App\View\Components\ErrorLayout`) renders `resources/views/errors/layout.blade.php`: “Error” and the status from `code`, so people can quote it, a heading from `title`, the slot as the message, and one button for the next step. By default it renders on the public layout, so the header keeps the Help menu and **Sign In** or the user menu, and the page uses the app panel’s theme.
+
+The status decides the button:
+
+| Status            | Button                                                |
+| ----------------- | ----------------------------------------------------- |
+| 401               | **Sign In**, to the sign-in page                      |
+| 419               | **Reload the Page**, to the page the person came from |
+| 429               | **Go Back**, to the page the person came from         |
+| 503, or no `code` | None                                                  |
+| Any other         | **Go to the Home Page**                               |
+
+“The page the person came from” is the previous URL when it is on this application, and the home page otherwise. Two named slots add to the body: `help` for centered text under the message, such as who to contact, and `details` for wider content below the button. The button is styled with Tailwind classes that both `resources/css/filament/app/theme.css` and `resources/css/errors.css` compile, so it looks the same on either layout.
 
 The public layout looks up the signed-in user inside `rescue()`, so a failing lookup leaves the page signed out instead of failing it. A fallback route sends unknown URLs through the `web` middleware, so the not-found page knows who is signed in.
 
@@ -21,7 +35,7 @@ The public layout looks up the signed-in user inside `rescue()`, so a failing lo
 
 * It loads no Filament, makes no auth calls and doesn’t touch the database.
 * Its styles come from `resources/css/errors.css`, which imports Tailwind and the Northwestern design tokens directly instead of a panel theme.
-* It renders `<x-site-header>` without a Help menu or user menu, and the Northwestern footer.
+* It renders a skip link, `<x-site-header>` without a Help menu or user menu, the page in `<main id="main">`, and the Northwestern footer. Like the public layout, it is light only and has a white background.
 
 `<x-error-layout :navigation="false">` uses this layout. The 503 page passes it, because maintenance mode and outages are exactly when the panel and the database may be unavailable.
 
@@ -34,12 +48,12 @@ The public layout looks up the signed-in user inside `rescue()`, so a failing lo
 1. **Edit the message** of an existing client error in its view, for example `resources/views/errors/404.blade.php`:
 
    ```blade
-   <x-error-layout title="Page Not Found">
+   <x-error-layout :code="404" title="Page Not Found">
        We can't find that page. Check the address and try again.
    </x-error-layout>
    ```
 
-2. **Add a page for another status** as `resources/views/errors/{status}.blade.php`. Use `<x-error-layout>`, and pass `:navigation="false"` when the error means the application itself may not be working.
+2. **Add a page for another status** as `resources/views/errors/{status}.blade.php`. Use `<x-error-layout>` with the status as `:code`, and pass `:navigation="false"` when the error means the application itself may not be working. To give the status a button other than **Go to the Home Page**, add it to `ErrorLayout::action()`.
 
 3. **Cover a whole range** with `4xx.blade.php` or `5xx.blade.php`. Laravel falls back to them when no view matches the exact status. Without one, a status such as 405 renders Laravel’s plain error page.
 
@@ -51,11 +65,11 @@ Both `resources/css/filament/app/theme.css` and `resources/css/errors.css` compi
 
 `resources/views/errors/500.blade.php` renders for unhandled exceptions when `APP_DEBUG` is off. With debug on, Laravel shows its own exception page instead.
 
-It asks the user to try again and links to the IT Service Desk. The rest depends on the environment and on Sentry:
+It asks the user to try again, links to the IT Service Desk, and offers **Go to the Home Page**. The rest depends on the environment and on Sentry:
 
 * **Error ID.** When Sentry captured the exception, the page shows Sentry’s event ID, so a user can quote it in a report.
 * **Help Us Fix This.** With an event ID, the page also shows a form for the user’s name, email and a description. It sends the report to Sentry with `captureFeedback`, linked to the event. Name and email are filled in for signed-in users. See [Sentry](https://laravel-starter.entapp.northwestern.edu/features/sentry/).
-* **Technical Details.** The exception message and stack trace show to everyone outside production, so testers without Sentry access can describe failures. In production they show only to users with the `ManageAll` permission.
+* **Technical Details.** The exception message and stack trace show to everyone outside production, so testers without Sentry access can describe failures. In production they show only to users with the `ManageAll` permission. An exception without a message, such as `abort(500)`, shows only the stack trace.
 
 The user and permission lookups are wrapped in `rescue()`: if the database is down, the page renders without them and hides the technical details in production.
 
@@ -63,7 +77,7 @@ The user and permission lookups are wrapped in `rescue()`: if the database is do
 
 Non-production environments on Aurora Serverless v2 can scale the database to zero. The first request after a pause can time out while the database wakes up. `bootstrap/app.php` uses chassis’s `DatabasePausedDetector` to recognize that PostgreSQL connection timeout and renders `errors.database-paused` with status 500 in place of the 500 page.
 
-The page names the environment (`APP_ENV`), explains that its database is starting, and reloads itself after 30 seconds. Outside production these timeouts aren’t reported to Sentry.
+The page names the environment (`APP_ENV`), explains that its database is starting, and reloads itself after 30 seconds. Requests to `api/*`, `oauth/*` and the MCP server, and other requests that expect JSON, get a Problem Details 503 response with `Retry-After: 30` instead; Livewire requests still get the page. Outside production these timeouts aren’t reported to Sentry.
 
 ## External Service Outages
 

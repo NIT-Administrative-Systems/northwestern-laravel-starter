@@ -10,7 +10,17 @@ The theme sets the panels’ Filament colors (`primary` is Northwestern Purple) 
 
 ## The Wordmark and a Unit Lockup
 
-The panels’ top bar shows the Northwestern wordmark. To show your unit’s lockup instead, set `NU_LOCKUP` to a full URL or a path in `public/`. The lockup replaces the logo in the panels only: `<x-site-header>`, on public, sign-in and error pages, always shows the wordmark, and the footer shows the “Northwestern University” wordmark.
+The panels’ top bar and `<x-site-header>`, on public, sign-in and error pages, show the Northwestern wordmark. To show your unit’s lockup instead, set `NU_LOCKUP` to a full URL or a path in `public/`; use the white version, since both headers are purple. The header renders it with the theme’s `<x-northwestern-filament-theme::lockup />` component, at 1.5rem with the brand’s clear space around it, linking to northwestern.edu, and its accessible name is “Northwestern University” followed by `NU_UNIT_NAME`. The component reads only config, so error pages show the lockup too. The footer always shows the “Northwestern University” wordmark.
+
+## The Impersonation Banner
+
+While an administrator is impersonating someone, the panels show the theme’s impersonation banner above their top bar, with **Leave Impersonation**. `<x-site-header>` renders the same banner above itself with `<x-northwestern-filament-theme::impersonation-banner />`, so public, sign-in and error pages show it too. Its defaults match the panels’ `->impersonationBanner()`: it reads lab404’s impersonation session, names the signed-in user, and posts to the `impersonate.leave` route. It renders nothing when no one is impersonating, and on an error page where the session or the signed-in user can’t be read it is left out rather than failing the page.
+
+## Light Pages Before Signing In
+
+Every page a visitor sees before signing in is light: the public and error layouts, and the app panel’s simple pages (sign-in, the email code step and the lockdown page), whatever the browser’s theme. Department Templates 4.0 has no dark mode. Dark mode starts inside the panels, which follow each person’s theme setting. The app panel keeps its simple pages light with a short script, `resources/views/filament/app/light-only.blade.php`, that it renders on every page using `HasSiteHeader`; see [Simple Pages](https://laravel-starter.entapp.northwestern.edu/building/app-panel/#simple-pages).
+
+The purple header and the footer share one keyboard focus ring, a 3px white outline set 2px off the control. The app and administration themes and `resources/css/errors.css` set it on `<x-site-header>` and the panels’ top bar, matching the theme’s footer.
 
 ## The Footer
 
@@ -43,7 +53,7 @@ config/northwestern-filament-theme.php
 ],
 ```
 
-A `null` unit field falls back to Information Technology’s details, and an empty string hides that field. Set the `NU_UNIT_*` values when you set up the project; see [Your Unit’s Details](https://laravel-starter.entapp.northwestern.edu/getting-started/initial-customization/#6-your-units-details). The config file lists the social networks the footer has icons for.
+A `null` unit field falls back to Information Technology’s details, and an empty string hides that field. `.env.example` lists every `NU_UNIT_*` setting and `NU_LOCKUP` as `null`; replace them with your unit’s values when you set up the project; see [Your Unit’s Details](https://laravel-starter.entapp.northwestern.edu/getting-started/initial-customization/#6-your-units-details). The config file lists the social networks the footer has icons for.
 
 ## Email
 

@@ -124,7 +124,7 @@ In the `local`, `ci` and `testing` environments, the seeder backdates `created_a
 
 ## RSS Feed
 
-An RSS 2.0 feed is available at `/support/changelog/feed.rss`. The feed includes an Atom self-link, copyright notice, and conforms to the [RSS 2.0 specification](https://www.rssboard.org/rss-specification). A copy-to-clipboard button for the feed URL is displayed on the changelog index page. The feed holds the latest 20 entries (`changelog.feed.limit`), and the index shows 10 per page (`changelog.pagination.per_page`).
+An RSS 2.0 feed is available at `/support/changelog/feed.rss`. The feed includes an Atom self-link, copyright notice, and conforms to the [RSS 2.0 specification](https://www.rssboard.org/rss-specification). The changelog index page links to the feed with **RSS Feed**, and **Copy** beside it puts the feed’s URL on the clipboard. The feed holds the latest 20 entries (`changelog.feed.limit`), and the index shows 10 per page (`changelog.pagination.per_page`).
 
 ***
 
