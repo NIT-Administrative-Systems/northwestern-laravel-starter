@@ -8,8 +8,10 @@ use App\Domains\User\Models\User;
 use App\Filament\App\Starter\Pages\ComponentGallery;
 use App\Providers\Filament\AppPanelProvider;
 use Filament\Facades\Filament;
+use Illuminate\Support\Str;
 use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\CoversNothing;
+use ReflectionClass;
 use Tests\TestCase;
 
 #[CoversNothing]
@@ -30,6 +32,15 @@ final class ComponentGalleryTest extends TestCase
             ->assertSee('Starter placeholder')
             ->assertSee('Buttons')
             ->assertSee('Sample record one');
+    }
+
+    public function test_the_placeholder_names_the_pages_file(): void
+    {
+        $file = Str::after((string) new ReflectionClass(ComponentGallery::class)->getFileName(), base_path() . DIRECTORY_SEPARATOR);
+
+        $this->actingAs(User::factory()->create())
+            ->get('/app/gallery')
+            ->assertSee("Delete <code>{$file}</code>", escape: false);
     }
 
     // The app panel's dashboard is Filament's own, so the sidebar is the gallery's only way in.
