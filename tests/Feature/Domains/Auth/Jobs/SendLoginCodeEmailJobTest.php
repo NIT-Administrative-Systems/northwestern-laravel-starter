@@ -26,7 +26,7 @@ final class SendLoginCodeEmailJobTest extends TestCase
         Mail::fake();
     }
 
-    public function test_job_sends_email_and_updates_email_sent_at(): void
+    public function test_it_emails_the_code_and_records_when(): void
     {
         $challenge = LoginChallenge::create([
             'email' => 'test@example.com',
@@ -66,7 +66,7 @@ final class SendLoginCodeEmailJobTest extends TestCase
         });
     }
 
-    public function test_job_skips_when_challenge_missing_or_already_sent(): void
+    public function test_a_missing_or_already_sent_code_is_not_sent(): void
     {
         $missingJob = new SendLoginCodeEmailJob(999, Crypt::encryptString('000000'));
         $missingJob->handle(resolve(LoginCodes::class));

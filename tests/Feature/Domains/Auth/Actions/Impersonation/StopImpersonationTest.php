@@ -17,7 +17,7 @@ use Tests\TestCase;
 #[CoversClass(StopImpersonation::class)]
 final class StopImpersonationTest extends TestCase
 {
-    public function test_stop_impersonation(): void
+    public function test_leaving_impersonation_signs_the_administrator_back_in(): void
     {
         Event::fake();
 

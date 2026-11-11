@@ -28,14 +28,14 @@ final class LogoutSelectionControllerTest extends TestCase
         Route::getRoutes()->refreshNameLookups();
     }
 
-    public function test_redirects_to_login_selection_when_user_not_authenticated(): void
+    public function test_signing_out_with_nobody_signed_in_goes_to_sign_in(): void
     {
         $response = $this->post(route('logout'));
 
         $response->assertRedirect(route('filament.app.auth.login'));
     }
 
-    public function test_logs_out_local_user_and_redirects_to_login_selection(): void
+    public function test_a_local_account_signs_out_here_and_goes_to_sign_in(): void
     {
         $user = User::factory()->affiliate()->create();
 

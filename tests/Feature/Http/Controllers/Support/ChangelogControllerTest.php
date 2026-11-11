@@ -13,7 +13,7 @@ use Tests\TestCase;
 #[CoversClass(ChangelogController::class)]
 final class ChangelogControllerTest extends TestCase
 {
-    public function test_index_returns_view_with_paginated_entries_and_feed_url(): void
+    public function test_the_index_lists_entries_a_page_at_a_time_with_the_feed(): void
     {
         config(['changelog.pagination.per_page' => 2]);
 
@@ -38,7 +38,7 @@ final class ChangelogControllerTest extends TestCase
         $this->assertSame('2025-01-03', $entries->first()->slug);
     }
 
-    public function test_show_returns_view_for_selected_changelog_entry(): void
+    public function test_an_entry_has_its_own_page(): void
     {
         $entry = Changelog::factory()->create([
             'slug' => 'changelog-show-entry-test',

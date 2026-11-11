@@ -32,7 +32,7 @@ final class OAuthServiceProviderTest extends TestCase
         $this->assertTrue(Route::has('passport.token'));
     }
 
-    public function test_token_lifetimes(): void
+    public function test_tokens_last_an_hour_and_refresh_tokens_thirty_days(): void
     {
         $this->assertSame(3600, (int) CarbonInterval::instance(Passport::tokensExpireIn())->totalSeconds);
         $this->assertSame(30, (int) CarbonInterval::instance(Passport::refreshTokensExpireIn())->totalDays);

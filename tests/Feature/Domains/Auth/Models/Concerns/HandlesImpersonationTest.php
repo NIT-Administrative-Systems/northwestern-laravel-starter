@@ -16,7 +16,7 @@ use Tests\TestCase;
 #[CoversTrait(HandlesImpersonation::class)]
 final class HandlesImpersonationTest extends TestCase
 {
-    public function test_can_impersonate_returns_true_when_user_has_permission_and_not_impersonated(): void
+    public function test_someone_with_the_permission_may_impersonate(): void
     {
         $this->bindImpersonateService(false);
 
@@ -28,7 +28,7 @@ final class HandlesImpersonationTest extends TestCase
         $this->assertTrue($user->canImpersonate());
     }
 
-    public function test_can_impersonate_returns_false_when_user_lacks_permission(): void
+    public function test_someone_without_the_permission_may_not_impersonate(): void
     {
         $this->bindImpersonateService(false);
 
@@ -37,7 +37,7 @@ final class HandlesImpersonationTest extends TestCase
         $this->assertFalse($user->canImpersonate());
     }
 
-    public function test_can_impersonate_returns_false_when_currently_impersonated(): void
+    public function test_nobody_impersonates_while_already_impersonating(): void
     {
         $this->bindImpersonateService(true);
 
@@ -49,7 +49,7 @@ final class HandlesImpersonationTest extends TestCase
         $this->assertFalse($user->canImpersonate());
     }
 
-    public function test_can_impersonate_user_returns_false_for_self_target(): void
+    public function test_nobody_may_impersonate_themselves(): void
     {
         $this->bindImpersonateService(false);
 
@@ -61,7 +61,7 @@ final class HandlesImpersonationTest extends TestCase
         $this->assertFalse($user->canImpersonateUser($user));
     }
 
-    public function test_can_impersonate_user_returns_false_when_already_impersonating(): void
+    public function test_nobody_may_impersonate_someone_while_impersonating(): void
     {
         $this->bindImpersonateService(true);
 
@@ -74,7 +74,7 @@ final class HandlesImpersonationTest extends TestCase
         $this->assertFalse($user->canImpersonateUser($target));
     }
 
-    public function test_can_impersonate_user_returns_false_when_target_is_api_user(): void
+    public function test_an_api_user_cannot_be_impersonated(): void
     {
         $this->bindImpersonateService(false);
 
@@ -88,7 +88,7 @@ final class HandlesImpersonationTest extends TestCase
         $this->assertFalse($target->canBeImpersonated());
     }
 
-    public function test_can_impersonate_user_returns_true_when_all_guard_conditions_pass(): void
+    public function test_an_administrator_may_impersonate_an_ordinary_person(): void
     {
         $this->bindImpersonateService(false);
 
@@ -115,7 +115,7 @@ final class HandlesImpersonationTest extends TestCase
         $this->assertFalse($user->canImpersonateUser($target));
     }
 
-    public function test_can_be_impersonated_returns_false_when_target_has_manage_all_and_impersonator_does_not(): void
+    public function test_only_manage_all_may_impersonate_someone_with_manage_all(): void
     {
         $this->bindImpersonateService(false);
 
@@ -135,7 +135,7 @@ final class HandlesImpersonationTest extends TestCase
         $this->assertFalse($impersonator->canImpersonateUser($target));
     }
 
-    public function test_can_be_impersonated_returns_true_when_both_users_have_manage_all(): void
+    public function test_manage_all_may_impersonate_someone_with_manage_all(): void
     {
         $this->bindImpersonateService(false);
 
@@ -155,7 +155,7 @@ final class HandlesImpersonationTest extends TestCase
         $this->assertTrue($impersonator->canImpersonateUser($target));
     }
 
-    public function test_can_be_impersonated_returns_true_when_target_does_not_have_manage_all(): void
+    public function test_someone_without_manage_all_may_be_impersonated(): void
     {
         $this->bindImpersonateService(false);
 
