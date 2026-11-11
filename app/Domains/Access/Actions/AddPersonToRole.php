@@ -23,15 +23,18 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 
 /**
- * Gives one person in a list a role, finding or creating their account first. Each person in
- * a pasted list or uploaded CSV goes through this, from the queued import {@see AddPeopleToRole}
- * starts.
+ * Gives one person on a pasted list or uploaded CSV the
+ * role, finding or creating their account first, for
+ * the queued import {@see AddPeopleToRole} starts.
  *
- * A NetID, Northwestern email address or employee ID is looked up in the Northwestern Directory
- * and the account created or brought up to date from it. Any other email address that matches no
- * one becomes a local account, which signs in with a code sent to that address. The role is
- * given through {@see User::assignRoleWithAudit()}, so it's audited and checked like any other
- * assignment.
+ * It looks a NetID, Northwestern email address or employee ID up in the
+ * Northwestern Directory, and creates or updates the account from it.
+ *
+ * Any other email address that matches no one becomes a local
+ * account, which signs in with a code sent to that address.
+ *
+ * The role is given with {@see User::assignRoleWithAudit()},
+ * so it's audited and checked like every other assignment.
  */
 readonly class AddPersonToRole
 {
@@ -43,10 +46,12 @@ readonly class AddPersonToRole
     }
 
     /**
-     * Whether `$actor` may add people to `$role` in bulk. It creates accounts as well as giving
-     * the role, so it takes Create Users and Assign Roles. Assignment-locked roles are refused
-     * even for Manage All, as they are one person at a time, and API Integration roles belong to
-     * API users, whom a NetID or email address never finds.
+     * Decide whether `$actor` may add people to `$role` in bulk. It both creates
+     * accounts and gives the role, so it takes Create Users and Assign Roles.
+     *
+     * Assignment-locked roles are refused even with Manage All, as
+     * they're given one person at a time. API Integration roles
+     * are for API users, whom a NetID or email never finds.
      */
     public function decide(Role $role, User $actor): Response
     {
@@ -101,12 +106,13 @@ readonly class AddPersonToRole
 
         $user = $this->findOrCreate($person, $firstName, $lastName);
 
-        // Only Reactivate brings a deactivated account back, so its history says who did and why.
+        // Only Reactivate brings a deactivated account
+        // back, so its history says who did and why.
         if ($user->trashed()) {
             throw PersonNotAdded::deactivated($person);
         }
 
-        // Nobody gives themselves a role, whatever they hold; the list can name them like anyone else.
+        // Nobody gives themselves a role, whatever they hold, though a list may name them.
         if ($user->is($actor)) {
             throw PersonNotAdded::yourself();
         }
@@ -135,7 +141,7 @@ readonly class AddPersonToRole
             return $user;
         }
 
-        // The lookup returns no one for an API user's username or email, and for a person it couldn't find.
+        // The lookup finds no one for an API user's username or email, nor for a stranger.
         $isApiUser = User::query()->api()
             ->where(fn (UserBuilder $query) => $query->whereUsernameEquals($person)->orWhere(fn (UserBuilder $email) => $email->whereEmailEquals($person)))
             ->exists();
@@ -148,7 +154,7 @@ readonly class AddPersonToRole
      */
     private function createLocalUser(string $person, ?string $firstName, ?string $lastName): User
     {
-        // A Northwestern address missing from the directory is a typo or a lapsed account, not a guest.
+        // A Northwestern address missing from the directory is a typo or a lapsed account.
         if (DirectorySearchType::fromSearchValue($person) !== DirectorySearchType::Email
             || Str::endsWith(Str::lower($person), ['@northwestern.edu', '.northwestern.edu'])) {
             throw PersonNotAdded::notInDirectory($person);

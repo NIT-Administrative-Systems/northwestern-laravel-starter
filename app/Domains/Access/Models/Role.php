@@ -53,8 +53,7 @@ class Role extends SpatieRole implements Auditable
     }
 
     /**
-     * Determine if this role is a System Managed role type.
-     * System Managed roles cannot be edited through the UI.
+     * Determine whether the role is system-managed, which nobody may edit.
      */
     public function isSystemManagedType(): bool
     {
@@ -62,8 +61,8 @@ class Role extends SpatieRole implements Auditable
     }
 
     /**
-     * Whether this role suits `$user`: an API Integration role only an API user, and every other
-     * role only a person.
+     * Whether this role suits `$user`: an API Integration role
+     * only an API user, and every other role only a person.
      */
     public function suits(User $user): bool
     {
@@ -89,7 +88,7 @@ class Role extends SpatieRole implements Auditable
     }
 
     /**
-     * Every role's name by ID, looked up once per request, for lists that name each row's roles.
+     * Get every role's name by ID, once per request, for lists of each row's roles.
      *
      * @return array<int, string>
      */

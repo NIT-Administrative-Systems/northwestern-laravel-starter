@@ -14,11 +14,12 @@ use Illuminate\Auth\Access\AuthorizationException;
 use InvalidArgumentException;
 
 /**
- * Adds a pasted list of NetIDs and email addresses to a role. The list becomes an import, like
- * an uploaded CSV, and is processed in queued chunks by {@see AddPeopleToRoleImporter}, which
- * gives each person the role through {@see AddPersonToRole}. When it finishes, the person who
- * added them gets a notification saying how many were added, with a list of everyone who
- * wasn't and why.
+ * Adds a pasted list of NetIDs and email addresses to a role, as an import like
+ * an uploaded CSV that {@see AddPeopleToRoleImporter} runs in queued chunks.
+ *
+ * Each person gets the role through {@see AddPersonToRole}.
+ * When it's done, whoever added them hears how many were
+ * added, with a list of everyone who wasn't and why.
  */
 readonly class AddPeopleToRole
 {
@@ -35,8 +36,8 @@ readonly class AddPeopleToRole
     }
 
     /**
-     * The NetIDs and email addresses in a pasted list, separated by commas, semicolons, spaces or
-     * line breaks, each once.
+     * The NetIDs and email addresses in a pasted list, separated
+     * by commas, semicolons, spaces or line breaks, each once.
      *
      * @return list<string>
      */

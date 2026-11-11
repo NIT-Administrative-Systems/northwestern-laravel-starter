@@ -9,8 +9,8 @@ use App\Domains\Access\Models\Role;
 use RuntimeException;
 
 /**
- * Why {@see AddPersonToRole} didn't add someone. The message is shown to the administrator who
- * added them, in the list of people who weren't added.
+ * Why {@see AddPersonToRole} didn't add someone. The message is shown to the
+ * administrator who added them, in the list of people who weren't added.
  */
 final class PersonNotAdded extends RuntimeException
 {
