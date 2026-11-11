@@ -9,6 +9,8 @@ use App\Domains\Api\Enums\CredentialStatus;
 use App\Domains\Api\Models\OAuthConnection;
 use App\Domains\Api\Models\OAuthToken;
 use App\Domains\User\Models\User;
+use Illuminate\Auth\Access\AuthorizationException;
+use Mockery;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\Concerns\IssuesPersonalAccessTokens;
 use Tests\Concerns\IssuesServiceClientTokens;
@@ -54,6 +56,41 @@ final class RevokeAllCredentialsTest extends TestCase
         $this->assertSame(CredentialStatus::Revoked, $client->fresh()?->status);
     }
 
+    // Credentials only change under the name of the person changing them, so nobody is deleted while impersonating.
+    public function test_deleting_a_user_while_impersonating_is_refused(): void
+    {
+        $person = User::factory()->create();
+        [, $token] = $this->personalAccessToken($person);
+        $this->impersonating(true);
+
+        try {
+            $person->delete();
+            $this->fail('A user was deleted while impersonating.');
+        } catch (AuthorizationException $e) {
+            $this->assertSame("Users can't be deleted while impersonating someone. Stop impersonating, then try again.", $e->getMessage());
+        }
+
+        $this->assertFalse($person->fresh()?->trashed());
+        $this->assertSame(CredentialStatus::Active, $token->fresh()?->status);
+    }
+
+    // The delete and the revocation happen together: if revoking fails, the user isn't deleted.
+    public function test_a_user_whose_credentials_cannot_be_revoked_is_not_deleted(): void
+    {
+        $person = User::factory()->create();
+        [, $token] = $this->personalAccessToken($person);
+        // Impersonation starts between the delete and the revocation, so revoking is refused.
+        $this->impersonating(false, true);
+
+        try {
+            $person->delete();
+            $this->fail('The credentials were revoked while impersonating.');
+        } catch (AuthorizationException) {
+            $this->assertFalse($person->fresh()?->trashed());
+            $this->assertSame(CredentialStatus::Active, $token->fresh()?->status);
+        }
+    }
+
     // Disconnecting through the action removes the connection, so the person's list is empty too.
     public function test_it_disconnects_a_persons_applications(): void
     {
@@ -67,5 +104,13 @@ final class RevokeAllCredentialsTest extends TestCase
 
         $this->assertSame(0, OAuthConnection::query()->count());
         $this->assertFalse(OAuthToken::query()->where('user_id', $person->getKey())->where('revoked', false)->exists());
+    }
+
+    private function impersonating(bool ...$answers): void
+    {
+        $impersonate = Mockery::mock();
+        $impersonate->shouldReceive('isImpersonating')->andReturn(...$answers);
+        $impersonate->shouldReceive('getImpersonatorId')->andReturn(null);
+        $this->app->instance('impersonate', $impersonate);
     }
 }

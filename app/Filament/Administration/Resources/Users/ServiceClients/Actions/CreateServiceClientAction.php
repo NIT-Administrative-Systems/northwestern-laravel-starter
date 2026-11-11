@@ -42,7 +42,7 @@ class CreateServiceClientAction extends Action
                     ->schema([
                         ServiceClientSchemas::clientConfigurationSection(),
                     ])
-                    ->afterValidation(fn (array $state, CreateServiceClient $createServiceClient, ServiceClientsRelationManager $livewire) => $secret->issueOnce(function () use ($state, $createServiceClient, $livewire): array {
+                    ->afterValidation(fn (array $state, CreateServiceClient $createServiceClient, ServiceClientsRelationManager $livewire) => $secret->issueOnce($livewire, function () use ($state, $createServiceClient, $livewire): array {
                         $configuration = ServiceClientSchemas::normalizeConfigurationState($state);
 
                         [$plain, $client] = $createServiceClient(
@@ -59,7 +59,7 @@ class CreateServiceClientAction extends Action
                     ->schema(ServiceClientSchemas::copyCredentialsStepSchema($secret)),
             ])
             ->modalSubmitAction(fn (Action $action) => ServiceClientSchemas::copyCredentialsSubmitButton($action))
-            ->action(fn () => $secret->forget())
+            ->action(fn (ServiceClientsRelationManager $livewire) => $secret->forget($livewire))
             ->successNotificationTitle('Service Client Created');
     }
 }

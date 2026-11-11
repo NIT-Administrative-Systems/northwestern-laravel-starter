@@ -10,7 +10,11 @@ use Illuminate\Support\Facades\Route;
 use Northwestern\SysDev\Chassis\Http\Controllers\SentryTunnelController;
 
 Route::prefix('auth')->group(function () {
-    Route::post('logout', Controllers\LogoutSelectionController::class)->name('logout');
+    // No CSRF token: a page left open until its session expired must still sign out, not show
+    // Page Expired. A forged sign-out can't harm anyone: the session cookie is SameSite=Lax, so a
+    // cross-site POST arrives without it, and the SSO providers' sign-out routes are GETs anyway.
+    Route::post('logout', Controllers\LogoutSelectionController::class)->name('logout')
+        ->withoutMiddleware([PreventRequestForgery::class]);
 
     // Only the provider people sign in with has routes.
     $provider = SsoProvider::configured();

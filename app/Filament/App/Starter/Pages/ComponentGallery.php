@@ -118,7 +118,7 @@ class ComponentGallery extends Page implements HasTable
                 Callout::make()
                     ->description(new HtmlString(
                         '<strong>Starter placeholder.</strong> Sample content showing Filament\'s components in the Northwestern theme. '
-                        . 'It isn\'t available in production. Delete <code>app/Filament/App/Pages/ComponentGallery.php</code> when you no longer need it.'
+                        . 'It isn\'t available in production. Delete <code>app/Filament/App/Starter/Pages/ComponentGallery.php</code> when you no longer need it.'
                     ))
                     ->icon(Heroicon::OutlinedSwatch)
                     ->warning(),

@@ -14,6 +14,7 @@ use App\Filament\Support\RevealOnceSecret;
 use App\Providers\Filament\AdministrationPanelProvider;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
+use Illuminate\Support\Facades\Session;
 use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use Tests\TestCase;
@@ -50,11 +51,32 @@ final class CreateApiUserActionTest extends TestCase
         $user = User::query()->where('username', 'api-reporting')->sole();
         $this->assertSame(AuthType::API, $user->auth_type);
         $client = OAuthClient::query()->whereMorphedTo('owner', $user)->sole();
-        $this->assertSame($client->getKey(), RevealOnceSecret::for('api_user:create')->identifier());
+        $page = $component->instance();
+        $this->assertInstanceOf(ListUsers::class, $page);
+        $this->assertSame($client->getKey(), RevealOnceSecret::for('api_user:create')->identifier($page));
 
         $component->callMountedAction()->assertRedirect();
 
-        $this->assertFalse(RevealOnceSecret::for('api_user:create')->issued());
+        $this->assertSame([], preg_grep('/^reveal_once_secret:/', array_keys(Session::all())));
+    }
+
+    // Usernames stay unique among deleted users too, so the rule must see them.
+    public function test_a_deleted_users_username_is_reported_as_taken(): void
+    {
+        User::factory()->api()->create(['username' => 'api-reporting'])->delete();
+
+        Livewire::test(ListUsers::class)
+            ->mountAction(TestAction::make('createApiUser'))
+            ->fillForm([
+                'first_name' => 'Reporting',
+                'username' => 'reporting',
+                'name' => 'Production',
+                'expiration' => TokenExpiration::ThreeMonths->value,
+            ])
+            ->goToNextWizardStep()
+            ->assertHasFormErrors(['username' => 'A deleted user has this username. Choose another.']);
+
+        $this->assertSame(1, User::withTrashed()->where('username', 'api-reporting')->count());
     }
 
     public function test_it_is_hidden_without_manage_api_access(): void

@@ -15,6 +15,8 @@ use Laravel\Passport\Exceptions\InvalidAuthTokenException;
 use Northwestern\SysDev\Chassis\Database\DatabasePausedDetector;
 use Northwestern\SysDev\Chassis\Exceptions\ProblemDetailsRenderer;
 use Northwestern\SysDev\Chassis\Exceptions\UnknownOAuthClientException;
+use Northwestern\SysDev\Chassis\Http\Responses\ProblemDetails;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -40,13 +42,18 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->replace(FrameworkHandleCors::class, HandleCors::class);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        // Database pause errors (custom handling for web)
-        $exceptions->render(function (Throwable $e, Request $request): ?Response {
-            if (resolve(DatabasePausedDetector::class)->causedByPausedDatabase($e)) {
-                return response()->view('errors.database-paused', [], 500);
+        // A paused database is starting up. People get a page that reloads itself; API, OAuth and
+        // MCP clients get Problem Details with Retry-After. Livewire shows the page in its modal.
+        $exceptions->render(function (Throwable $e, Request $request): ?SymfonyResponse {
+            if (! resolve(DatabasePausedDetector::class)->causedByPausedDatabase($e)) {
+                return null;
             }
 
-            return null;
+            if (! $request->hasHeader('X-Livewire') && ($request->is('api/*', 'oauth/*', 'mcp', 'mcp/*') || $request->wantsJson())) {
+                return ProblemDetails::serviceUnavailable(detail: 'The database is starting up. Try again shortly.', retryAfter: 30);
+            }
+
+            return response()->view('errors.database-paused', [], 500);
         });
 
         // An OAuth consent screen approved or denied after its session expired, or in another tab:

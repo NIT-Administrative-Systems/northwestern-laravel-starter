@@ -13,6 +13,7 @@ use App\Domains\User\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Notification;
 use PHPUnit\Framework\Attributes\CoversClass;
+use RuntimeException;
 use Tests\TestCase;
 
 #[CoversClass(NotifyAnnouncementAudience::class)]
@@ -79,6 +80,27 @@ final class NotifyAnnouncementAudienceTest extends TestCase
 
             $this->assertSame($seeing, $notified, "Audience mismatch for announcement {$announcement->getKey()}.");
         }
+    }
+
+    // A run that fails partway gives up its claim, so the next run notifies the audience.
+    public function test_a_failed_run_can_be_retried(): void
+    {
+        $person = User::factory()->create();
+        $announcement = Announcement::factory()->create(['notify_audience' => true]);
+        Notification::shouldReceive('send')->once()->andThrow(new RuntimeException('The queue is unavailable.'));
+
+        try {
+            new NotifyAnnouncementAudience($announcement)->handle();
+            $this->fail('The notifications were sent.');
+        } catch (RuntimeException) {
+            $this->assertNull($announcement->fresh()?->notified_at);
+        }
+
+        Notification::fake();
+        new NotifyAnnouncementAudience($announcement)->handle();
+
+        Notification::assertSentTo($person, AnnouncementNotification::class);
+        $this->assertNotNull($announcement->fresh()?->notified_at);
     }
 
     public function test_it_sends_nothing_unless_the_author_asked(): void
