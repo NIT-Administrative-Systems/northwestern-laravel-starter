@@ -313,10 +313,10 @@ When EventHub reports a NetID deactivated, deprovisioned or on security hold, `P
 
 ### Expiring Local Accounts
 
-Set `LOCAL_ACCOUNT_INACTIVITY_DAYS` to deactivate local accounts nobody has signed in to for that many days. The daily `users:deactivate-inactive-local` command finds them from the sign-in records, and gives a new account the same time for its first sign-in. Northwestern accounts are left to the NetID lifecycle. It's off by default.
+Set `LOCAL_ACCOUNT_INACTIVITY_DAYS` to deactivate local accounts nobody has signed in to for that many days. The daily `users:deactivate-inactive-local` command finds them from the sign-in records, and gives a new account the same time for its first sign-in. Reactivating an account counts as a sign-in, so a reactivated account gets the full time again. Northwestern accounts are left to the NetID lifecycle. It's off by default.
 
 <Aside type="caution" title="Keep sign-in records long enough">
-The last sign-in comes from the sign-in records, so keep `LOGIN_RECORD_RETENTION_DAYS` at least as long as `LOCAL_ACCOUNT_INACTIVITY_DAYS`. Otherwise someone whose last sign-in was pruned looks inactive.
+The last sign-in comes from the sign-in records and the last reactivation from the audit log, so keep `LOGIN_RECORD_RETENTION_DAYS` and `AUDIT_RETENTION_DAYS` at least as long as `LOCAL_ACCOUNT_INACTIVITY_DAYS`. Otherwise someone whose last sign-in or reactivation was pruned looks inactive.
 </Aside>
 
 ---

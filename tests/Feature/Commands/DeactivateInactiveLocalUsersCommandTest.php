@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Tests\Feature\Commands;
 
 use App\Console\Commands\DeactivateInactiveLocalUsersCommand;
+use App\Domains\Access\Enums\SystemPermission;
 use App\Domains\Auth\Enums\AuthType;
+use App\Domains\User\Actions\Lifecycle\ReactivateUser;
 use App\Domains\User\Models\User;
 use App\Domains\User\Models\UserLoginRecord;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -32,6 +34,26 @@ final class DeactivateInactiveLocalUsersCommandTest extends TestCase
         $this->assertNotSoftDeleted($active);
         $this->assertNotSoftDeleted($new);
         $this->assertNotSoftDeleted($northwestern);
+    }
+
+    public function test_a_reactivated_account_gets_the_full_time_again(): void
+    {
+        config(['platform.accounts.local_inactivity_days' => 90]);
+        $reactivated = $this->localUser(createdDaysAgo: 200, signedInDaysAgo: 150);
+        $reactivated->delete();
+        $administrator = User::factory()->create();
+        $administrator->givePermissionTo(SystemPermission::EditUsers);
+        resolve(ReactivateUser::class)($reactivated, $administrator);
+
+        $this->artisan(DeactivateInactiveLocalUsersCommand::class)->assertSuccessful();
+
+        $this->assertNotSoftDeleted($reactivated);
+
+        $this->travel(91)->days();
+
+        $this->artisan(DeactivateInactiveLocalUsersCommand::class)->assertSuccessful();
+
+        $this->assertSoftDeleted($reactivated);
     }
 
     public function test_local_accounts_never_expire_by_default(): void
