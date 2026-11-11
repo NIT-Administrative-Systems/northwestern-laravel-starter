@@ -31,7 +31,9 @@ class ProcessNetIdUpdate implements ShouldQueue
     public function handle(NetIdUpdated $event): void
     {
         DB::transaction(function () use ($event) {
+            // A deactivated account too, so reactivating it doesn't bring back the roles.
             $user = User::query()
+                ->withTrashed()
                 ->sso()
                 ->lockForUpdate()
                 ->with('roles')

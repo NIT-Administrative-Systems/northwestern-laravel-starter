@@ -53,12 +53,13 @@ class NetIdUpdateController extends Controller
             ]);
         }
 
-        $user = User::query()
+        $isKnownNetId = User::query()
+            ->withTrashed()
             ->sso()
             ->where('username', $event->netId)
             ->exists();
 
-        if (! $user) {
+        if (! $isKnownNetId) {
             return response()->json([
                 'status' => self::STATUS_IGNORED,
                 'reason' => self::REASON_UNKNOWN_USER,

@@ -85,6 +85,15 @@ final class NetIdUpdateControllerTest extends TestCase
             && $event->action === NetIdUpdateAction::SecurityHold);
     }
 
+    public function test_it_accepts_an_update_for_a_deactivated_account(): void
+    {
+        User::factory()->create(['username' => 'abc123', 'auth_type' => AuthType::SSO])->delete();
+
+        $this->send('etidentity.ldap.netid.term', 'netid=abc123&action=deactivate')->assertAccepted();
+
+        Event::assertDispatched(NetIdUpdated::class);
+    }
+
     public function test_it_returns_ignored_for_unknown_users(): void
     {
         $response = $this->send('etidentity.ldap.netid.term', 'netid=unknown9999&action=deactivate');
