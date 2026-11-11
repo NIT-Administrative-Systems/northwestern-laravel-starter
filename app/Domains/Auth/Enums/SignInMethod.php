@@ -7,7 +7,7 @@ namespace App\Domains\Auth\Enums;
 use App\Domains\Auth\SignIn;
 
 /**
- * The ways a person can sign in. {@see SignIn::methods()} says which this application offers.
+ * The ways to sign in. {@see SignIn::methods()} says which are offered.
  */
 enum SignInMethod: string
 {
@@ -21,9 +21,10 @@ enum SignInMethod: string
     case SignInAs = 'sign-in-as';
 
     /**
-     * Whether the sign-in outlasts the session, through Laravel's remember cookie. Signing in again
-     * with single sign-on is usually silent, since the identity provider still has a session, and
-     * sign-in-as is one click. An email code costs a trip to the inbox, so it's remembered.
+     * Determine whether the sign-in outlasts the session, through the remember cookie.
+     *
+     * An email code costs a trip to the inbox, so it's remembered. Signing in
+     * again with SSO is usually silent, and sign-in-as is a single click.
      */
     public function remembers(): bool
     {

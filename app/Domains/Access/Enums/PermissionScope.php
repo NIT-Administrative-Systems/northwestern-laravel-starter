@@ -9,28 +9,12 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Str;
 
 /**
- * Defines the authorization scope of permissions to distinguish between system-wide
- * and contextually-limited access.
+ * How far a permission reaches: every record, or only what the person owns.
  *
- * Permission scopes provide visual and logical distinctions in the role management UI,
- * helping administrators understand the breadth of access granted by each permission.
+ * A system-wide permission such as `view-users` reaches every record.
  *
- * ## Scope Types
- *
- * **SystemWide**: System-wide permissions that grant unrestricted access across all resources.
- * - Example: `view-users` allows viewing ALL users in the system
- * - Example: `edit-roles` allows editing ANY role
- * - Typically assigned to administrators and staff
- *
- * **Personal**: Permissions limited to resources owned by or directly related to the user.
- * - Example: `view-own-profile` allows viewing only the user's own profile
- * - Example: `edit-own-posts` allows editing only posts created by the user
- * - Enables self-service functionality without granting broad system access
- *
- * ## Usage in Policies
- *
- * When implementing Laravel policies, personal-scoped permissions should include
- * ownership checks:
+ * A personal one such as `edit-own-post` reaches only the
+ * person's own, so its policy checks ownership as well:
  *
  * ```php
  * public function update(User $user, Post $post): bool
@@ -45,16 +29,13 @@ use Illuminate\Support\Str;
  * }
  * ```
  *
- * @see SystemPermission::scope() For assigning scopes to individual permissions
+ * @see SystemPermission::scope()
  */
 enum PermissionScope: string implements HasLabel
 {
     case SystemWide = 'system-wide';
     case Personal = 'personal';
 
-    /**
-     * A human-readable label of the permission.
-     */
     public function getLabel(): string
     {
         return Str::of($this->value)->replace('-', ' ')->title()->toString();

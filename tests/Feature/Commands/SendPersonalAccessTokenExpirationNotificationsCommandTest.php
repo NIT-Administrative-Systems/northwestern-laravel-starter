@@ -104,7 +104,7 @@ final class SendPersonalAccessTokenExpirationNotificationsCommandTest extends Te
 
     private function expiringToken(User $user): \App\Domains\Api\Models\OAuthToken
     {
-        [, $token] = $this->personalAccessToken($user);
+        [, $token] = $this->issuePersonalAccessToken($user);
         $token->forceFill(['expires_at' => now()->addDays(7)->setTime(15, 0)])->save();
 
         return $token;

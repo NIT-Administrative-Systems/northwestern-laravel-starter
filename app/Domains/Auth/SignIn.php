@@ -17,15 +17,18 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 
 /**
- * How people sign in and out: which methods this application offers, the one step every
- * method ends with, and where signing out goes.
+ * How people sign in and out: the methods this application offers,
+ * the step every method ends with, and where signing out leads.
  *
- * - The sign-in page, the panel's routes and the administrators' local-account actions ask
- *   {@see offers()}.
- * - The SSO controller, sign-in-as and the email code page finish with {@see complete()}, so
- *   every sign-in starts a fresh session and is recorded the same way.
- * - Signing out goes through {@see signOut()}, and anything else that ends a session, such as
- *   switching account on the consent screen, through {@see endSession()}.
+ * The sign-in page, the panel's routes and the actions for
+ * local accounts in Administration ask {@see offers()}.
+ *
+ * SSO, sign-in-as and the email code page all finish
+ * with {@see complete()}, so every sign-in starts
+ * a fresh session and is recorded the same way.
+ *
+ * Signing out goes through {@see signOut()}, and anything else ending a session,
+ * such as switching account on the consent screen, uses {@see endSession()}.
  */
 final readonly class SignIn
 {
@@ -36,9 +39,10 @@ final readonly class SignIn
     }
 
     /**
-     * The methods this application offers, in the order the sign-in page lists them: single
-     * sign-on when a provider is configured, email codes when `local-auth.enabled` is on, and
-     * sign-in-as in the `local` environment only, an explicit allowlist rather than "not production".
+     * Get the methods this application offers, in the sign-in page's order.
+     *
+     * Single sign-on when a provider is set up, email codes when `local-auth.enabled`
+     * is on, and sign-in-as in `local` alone: an allowlist, not "not production".
      *
      * @return list<SignInMethod>
      */
@@ -57,8 +61,8 @@ final readonly class SignIn
     }
 
     /**
-     * Where a person starts signing in with `$method`, or null when it isn't offered. Sign-in-as
-     * has one address per seeded user, so none here.
+     * Get the URL that starts signing in with `$method`, or null when it
+     * isn't offered. Sign-in-as has one per seeded user, so none here.
      */
     public function url(SignInMethod $method): ?string
     {
@@ -73,17 +77,19 @@ final readonly class SignIn
     }
 
     /**
-     * Signs `$user` in once their method has verified them: a new session and CSRF token, so a
-     * session fixed before sign-in is worthless, a login record, and the page they asked for or `/`,
-     * where HomeController decides where signed-in people go.
+     * Sign `$user` in once their method has verified them, and send them to
+     * the page they asked for, or to `/`, where HomeController decides.
      *
-     * A deactivated account is refused, however it signed in, until an administrator reactivates it.
+     * The new session and CSRF token make a session fixed before sign-in worthless.
+     *
+     * Every sign-in is recorded, and a deactivated account is refused.
+     *
      *
      * @throws AccountDeactivated
      */
     public function complete(User $user, Request $request, SignInMethod $method): RedirectResponse
     {
-        // Single sign-on has signed them in by now; a deactivated account doesn't stay signed in.
+        // Single sign-on has signed them in by now, so sign a deactivated account out.
         if ($user->trashed()) {
             $this->endSession();
 
@@ -100,8 +106,9 @@ final readonly class SignIn
     }
 
     /**
-     * Signs the person out the way they signed in: through the identity provider for single
-     * sign-on, so its session ends too, or here for a local account.
+     * Sign the person out the way they signed in: through
+     * the identity provider for single sign-on, so its
+     * session ends too, or here for a local account.
      */
     public function signOut(Request $request): RedirectResponse
     {

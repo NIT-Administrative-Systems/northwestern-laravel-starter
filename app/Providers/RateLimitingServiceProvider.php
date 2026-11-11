@@ -14,13 +14,13 @@ class RateLimitingServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        // Every API and OAuth request, before authentication: a generous per-IP ceiling against
-        // floods and token guessing.
+        // Each API and OAuth request, before authentication: a generous
+        // ceiling per IP address, against floods and token guessing.
         RateLimiter::for('api', static fn (Request $request) => Limit::perMinute((int) config('rate-limiting.api.per_ip_per_minute'))
             ->by('api:ip:' . $request->ip()));
 
-        // Authenticated API requests are also limited per client or user, after authentication,
-        // by {@see LimitAuthenticatedApiRequests}.
+        // {@see LimitAuthenticatedApiRequests} also limits API
+        // requests per client or user, after authentication.
 
         // The MCP server's limits are in App\Mcp\McpServiceProvider.
 

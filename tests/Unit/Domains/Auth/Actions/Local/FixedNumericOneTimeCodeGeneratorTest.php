@@ -81,7 +81,7 @@ final class FixedNumericOneTimeCodeGeneratorTest extends TestCase
         $this->assertSame('123456', ($this->generator)(6));
     }
 
-    // Checked when the application boots, so a deployment that turns it on fails at once.
+    // Checked at boot, so a deployment that turns it on fails at once.
     public function test_the_application_refuses_to_boot_with_it_turned_on_in_a_deployed_environment(): void
     {
         config(['local-auth.use_fixed_code' => true]);

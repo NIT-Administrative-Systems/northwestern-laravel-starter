@@ -84,7 +84,7 @@ The application expects specific services to exist before you can begin local de
         Update the file by referencing the services you created in the previous step and setting other project-specific defaults:
 
         ```bash
-        // .env.example
+        # .env.example
         APP_NAME="Your Project Name"
         APP_URL=https://your-project-name.test
         DB_DATABASE=your_project_name_local
@@ -104,7 +104,7 @@ The application expects specific services to exist before you can begin local de
         If you're using [Laravel Herd](https://herd.laravel.com), update the `name` field to match your folder/repository name:
 
         ```diff
-        // herd.yml
+        # herd.yml
         - name: northwestern-laravel-starter
         + name: your-project-name
         ```
@@ -144,7 +144,7 @@ Entra ID only redirects back to the redirect URIs registered for the application
     If your application uses **Microsoft Entra ID** (the default):
 
     ```bash
-    // .env
+    # .env
     AZURE_CLIENT_ID=your-client-id
     AZURE_CLIENT_SECRET=your-client-secret
     DIRECTORY_SEARCH_API_KEY=your-value-here
@@ -161,7 +161,7 @@ Entra ID only redirects back to the redirect URIs registered for the application
     If your application uses **Online Passport** (agentless WebSSO):
 
     ```bash
-    // .env
+    # .env
     WEBSSO_URL_BASE=https://prd-nusso.it.northwestern.edu
     WEBSSO_API_URL_BASE=https://northwestern-prod.apigee.net/agentless-websso
     WEBSSO_API_KEY=your-api-key
@@ -198,7 +198,8 @@ This will:
 - Create all database tables
 - Seed system permissions, role types and default roles
 - Sync changelog entries from `resources/changelogs/`
-- Seed the demo users, which the sign-in page offers under **Sign In As**
+- Generate the OAuth signing keys in `storage/` if they don't exist yet
+- Seed the demo users, which the sign-in page offers under **Sign In As**, and print the demo API user's service client ID and secret
 - Regenerate the model IDE helper files
 
 :::caution

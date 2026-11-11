@@ -11,10 +11,9 @@ use Northwestern\SysDev\Chassis\Contracts\ConfigValidator;
 /**
  * Validates that the Directory Search API key is configured.
  *
- * The Directory Search API is required for user provisioning during
- * SSO login and for stakeholder seeding. It is optional locally, where
- * demo users are seeded without it, so a local environment with no key
- * skips this check.
+ * The Directory Search API is required for user provisioning during SSO login
+ * and for stakeholder seeding. It is optional locally, where demo users are
+ * seeded without it, so a local environment with no key skips this check.
  */
 #[ValidatesConfig(description: 'Directory Search')]
 class DirectorySearchValidator implements ConfigValidator

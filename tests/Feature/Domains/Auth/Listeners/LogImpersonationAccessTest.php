@@ -14,7 +14,7 @@ use Tests\TestCase;
 #[CoversClass(LogImpersonationAccess::class)]
 final class LogImpersonationAccessTest extends TestCase
 {
-    public function test_impersonation_log_is_created(): void
+    public function test_starting_impersonation_is_logged(): void
     {
         $impersonator = User::factory()->create();
         $impersonated = User::factory()->create();

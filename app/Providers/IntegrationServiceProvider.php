@@ -10,34 +10,19 @@ use Mockery\MockInterface;
 use Northwestern\SysDev\SOA\EventHub\Topic;
 
 /**
- * Configures mock implementations for external API integrations.
- *
- * When mocking is enabled, API services use local data instead of making
- * actual HTTP requests to enable offline development and faster testing.
+ * Answers EventHub's topic API locally when EVENT_HUB_MOCK_ENABLED
+ * is on, so that development and tests never publish a message.
  */
 class IntegrationServiceProvider extends ServiceProvider
 {
     /**
-     * Bind first-party API services that the application directly consumes.
-     */
-    public function register(): void
-    {
-        //
-    }
-
-    /**
-     * Bind vendor package APIs after other service providers load.
-     *
-     * Must run in boot() to prevent vendor packages from overriding our bindings.
+     * Bind the mocks after every provider registers, so a package can't replace them.
      */
     public function boot(): void
     {
         $this->bindEventHubApi();
     }
 
-    /**
-     * Mock EventHub API to avoid actual message publishing during development/testing.
-     */
     private function bindEventHubApi(): void
     {
         if (! config('nusoa.eventHub.mock')) {

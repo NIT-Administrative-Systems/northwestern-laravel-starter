@@ -40,7 +40,7 @@ The configuration it passes to the browser:
 
 ### The tunnel
 
-Ad blockers often block requests to `sentry.io`. The browser SDK sends its reports to `POST /sentry/tunnel` instead, and chassis's `SentryTunnelController` relays them to Sentry. It forwards only envelopes addressed to the configured `sentry.dsn`, so it can't be used to send data to other Sentry projects.
+Ad blockers often block requests to `sentry.io`. The browser SDK sends its reports to `POST /sentry/tunnel` instead, and Chassis's `SentryTunnelController` relays them to Sentry. It forwards only envelopes addressed to the configured `sentry.dsn`, so it can't be used to send data to other Sentry projects.
 
 ### Selective Imports
 
@@ -54,7 +54,7 @@ The `dataCollection` object passed to `init()` turns off the browser SDK's defau
 
 To add a Sentry feature, import it in `resources/js/sentry.js` and add it to the integrations passed to `init()`. For example, [Session Replay](https://docs.sentry.io/platforms/javascript/session-replay/):
 
-```js ins={4, 13}
+```js ins={4, 12}
 import {
     browserTracingIntegration,
     captureException,

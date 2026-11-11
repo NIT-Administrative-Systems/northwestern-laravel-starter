@@ -18,7 +18,8 @@ final class HandleCorsTest extends TestCase
         config(['mcp.enabled' => true, 'cors.allowed_origins' => ['https://dashboard.example.edu']]);
     }
 
-    // Browser-based MCP clients call the server and the OAuth endpoints from their own origin.
+    // Browser-based MCP clients call the server and
+    // the OAuth endpoints from their own origin.
     public function test_any_origin_may_call_the_mcp_and_oauth_endpoints_without_credentials(): void
     {
         foreach (['/mcp', '/oauth/token', '/oauth/register', '/.well-known/oauth-protected-resource/mcp'] as $path) {

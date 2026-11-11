@@ -52,8 +52,8 @@ final class AccessTokensTest extends TestCase
 
     public function test_it_lists_the_persons_tokens_only(): void
     {
-        [, $mine] = $this->personalAccessToken($this->user);
-        [, $theirs] = $this->personalAccessToken(User::factory()->create());
+        [, $mine] = $this->issuePersonalAccessToken($this->user);
+        [, $theirs] = $this->issuePersonalAccessToken(User::factory()->create());
 
         Livewire::test(AccessTokens::class)
             ->assertCanSeeTableRecords([$mine])
@@ -67,7 +67,7 @@ final class AccessTokensTest extends TestCase
         $this->user->forceFill(['timezone' => 'America/Chicago'])->save();
         // 9 p.m. on November 9 in Chicago.
         $this->travelTo(CarbonImmutable::parse('2026-11-10 03:00:00', 'UTC'));
-        $this->personalAccessToken($this->user);
+        $this->issuePersonalAccessToken($this->user);
 
         Livewire::test(AccessTokens::class)
             ->assertSee('Nov 9, 2026')
@@ -129,7 +129,7 @@ final class AccessTokensTest extends TestCase
     public function test_reaching_the_limit_says_so(): void
     {
         config(['api.personal_access_tokens.max_active' => 1]);
-        $this->personalAccessToken($this->user);
+        $this->issuePersonalAccessToken($this->user);
 
         Livewire::test(AccessTokens::class)
             ->mountAction(TestAction::make('createToken')->table())
@@ -142,7 +142,7 @@ final class AccessTokensTest extends TestCase
 
     public function test_a_person_revokes_a_token(): void
     {
-        [, $token] = $this->personalAccessToken($this->user);
+        [, $token] = $this->issuePersonalAccessToken($this->user);
 
         Livewire::test(AccessTokens::class)->callAction(TestAction::make('revoke')->table($token));
 
@@ -151,7 +151,7 @@ final class AccessTokensTest extends TestCase
 
     public function test_an_impersonator_sees_the_tokens_but_cannot_create_or_revoke_them(): void
     {
-        [, $token] = $this->personalAccessToken($this->user);
+        [, $token] = $this->issuePersonalAccessToken($this->user);
 
         $impersonate = Mockery::mock();
         $impersonate->shouldReceive('isImpersonating')->andReturn(true);

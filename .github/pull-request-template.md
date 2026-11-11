@@ -1,22 +1,22 @@
 ## Overview
 
 <!--
-Provide a brief overview of your changes. Focus on technical aspects -- the JIRA ticket # should be in your title, so people can refer to that for functional requirements.
+Give a brief overview of your changes. Focus on the technical side: the Jira ticket in your title covers the functional requirements.
 
-A screenshot is worth a thousand words -- pictures of UI changes are great to include.
+Screenshots of interface changes help reviewers.
 
-When you open the PR, create it as a draft pull request if you aren't done & don't want changes merged. Opening your PR early is a great way to get feedback before you've gone too far down a path!
+Open the pull request as a draft if it isn't finished and shouldn't be merged yet. Opening it early is a good way to get feedback before you've gone too far down a path.
 -->
 
 ## Checklist
 
 <!--
-Run through this checklist. Check off items once you've considered them & decided you have them covered in the PR, or they are not applicable.
+Check off each item once you've covered it in this pull request or decided it doesn't apply.
 
-***YOU MUST CHECK ALL ITEMS OFF BEFORE THE PR WILL BE CONSIDERED.***
+***Every item must be checked before the pull request is reviewed.***
 -->
 
-- [ ] PR title starts with the JIRA ticket identifier (e.g. `ABC-XXX - Some Description`)
-- [ ] `tests`/ added or updated
+- [ ] The title starts with the Jira ticket identifier (for example, `ABC-123 - Some Description`)
+- [ ] Tests added or updated
 - [ ] Migrations tested
-- [ ] Relevant documentation is updated (`README.md`, `docs/` stuff)
+- [ ] Documentation updated (`README.md`, `docs/`)

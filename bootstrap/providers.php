@@ -10,7 +10,6 @@ return [
     App\Providers\EloquentServiceProvider::class,
     App\Providers\TelescopeServiceProvider::class,
     App\Providers\IntegrationServiceProvider::class,
-    App\Providers\ViewServiceProvider::class,
     App\Providers\HealthServiceProvider::class,
     App\Providers\SupportServiceProvider::class,
     App\Providers\FilamentServiceProvider::class,
