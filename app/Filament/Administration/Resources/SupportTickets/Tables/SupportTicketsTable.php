@@ -30,28 +30,19 @@ class SupportTicketsTable
                 TextColumn::make('id')
                     ->label('ID')
                     ->numeric()
+                    ->sortable()
+                    ->visibleFrom('xl'),
+
+                TextColumn::make('created_at')
+                    ->label('Submitted')
+                    ->since()
+                    ->dateTimeTooltip()
                     ->sortable(),
 
                 TextColumn::make('user.full_name')
                     ->label('Submitter')
                     ->description(fn (SupportTicket $record) => $record->user?->username)
                     ->searchable(['first_name', 'last_name']),
-
-                TextColumn::make('subject')
-                    ->searchable()
-                    ->limit(50)
-                    ->tooltip(fn (SupportTicket $record) => strlen($record->subject) > 50 ? $record->subject : null),
-
-                TextColumn::make('ticketing_system')
-                    ->label('Gateway')
-                    ->badge()
-                    ->formatStateUsing(fn (?TicketSystem $state) => $state?->getLabel() ?? '—'),
-
-                TextColumn::make('ticket_number')
-                    ->label('Ticket #')
-                    ->fontFamily(FontFamily::Mono)
-                    ->copyable()
-                    ->placeholder('—'),
 
                 TextColumn::make('status')
                     ->label('Status')
@@ -78,6 +69,25 @@ class SupportTicketsTable
                         return $record->fallback_sent_at ? 'warning' : 'danger';
                     }),
 
+                TextColumn::make('subject')
+                    ->searchable()
+                    ->limit(50)
+                    ->wrap()
+                    ->tooltip(fn (SupportTicket $record) => strlen($record->subject) > 50 ? $record->subject : null),
+
+                TextColumn::make('ticketing_system')
+                    ->label('Gateway')
+                    ->badge()
+                    ->formatStateUsing(fn (?TicketSystem $state) => $state?->getLabel() ?? '—')
+                    ->visibleFrom('xl'),
+
+                TextColumn::make('ticket_number')
+                    ->label('Ticket #')
+                    ->fontFamily(FontFamily::Mono)
+                    ->copyable()
+                    ->placeholder('—')
+                    ->visibleFrom('2xl'),
+
                 TextColumn::make('requester_email')
                     ->label('Email')
                     ->copyable()
@@ -89,12 +99,6 @@ class SupportTicketsTable
                     ->limit(40)
                     ->tooltip(fn (SupportTicket $record) => $record->error_message)
                     ->toggleable(isToggledHiddenByDefault: true),
-
-                TextColumn::make('created_at')
-                    ->label('Submitted')
-                    ->since()
-                    ->dateTimeTooltip()
-                    ->sortable(),
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([

@@ -27,15 +27,16 @@ class LocalUserInfolist
         return $schema->components([
             Grid::make([
                 'default' => 1,
-                'lg' => 3,
+                '@4xl' => 3,
             ])
+                ->gridContainer()
                 ->columnSpanFull()
                 ->schema([
                     // Left side: overview + notes (2/3 width)
                     Grid::make(1)
                         ->columnSpan([
                             'default' => 1,
-                            'lg' => 2,
+                            '@4xl' => 2,
                         ])
                         ->schema([
                             Section::make('User Overview')
@@ -125,7 +126,7 @@ class LocalUserInfolist
                         ->icon(Heroicon::OutlinedShieldCheck)
                         ->columnSpan([
                             'default' => 1,
-                            'lg' => 1,
+                            '@4xl' => 1,
                         ])
                         ->schema([
                             Group::make([
@@ -136,12 +137,10 @@ class LocalUserInfolist
 
                             TextEntry::make('created_at')
                                 ->label('Created')
-                                ->inlineLabel()
                                 ->dateTime(),
 
                             TextEntry::make('latest_login_record.logged_in_at')
                                 ->label('Last Sign-In')
-                                ->inlineLabel()
                                 ->placeholder('Never')
                                 ->dateTime()
                                 ->since()

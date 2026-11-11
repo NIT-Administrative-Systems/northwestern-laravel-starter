@@ -1,10 +1,12 @@
 {{--
     The application name after the wordmark in the panels' top bar, so the panels match
-    <x-site-header>. Registered on the TOPBAR_LOGO_AFTER render hook.
+    <x-site-header>. Registered on the TOPBAR_LOGO_AFTER render hook. Below sm the top bar has
+    room only for the wordmark, so the name shows at the top of the sidebar instead
+    (<x-sidebar-panel-name>).
 --}}
 <span class="ms-3 hidden h-6 w-px shrink-0 bg-white/30 sm:block" aria-hidden="true"></span>
 
-<a class="font-nu-heading ms-3 line-clamp-2 min-w-0 max-w-[40vw] text-sm font-semibold leading-tight text-white sm:max-w-none sm:text-lg"
+<a class="font-nu-heading ms-3 hidden min-w-0 text-lg font-semibold leading-tight text-white sm:line-clamp-2"
    href="{{ filament()->getHomeUrl() }}">
     {{ config('app.name') }}
 </a>

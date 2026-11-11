@@ -34,7 +34,7 @@ class ApiRequestLogResource extends Resource
 
     protected static ?string $description = 'View and analyze API request logs, response times, and error patterns.';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 2;
 
     /**
      * {@see self::canAccess()} decides, as it does for the list page: the policy doesn't know

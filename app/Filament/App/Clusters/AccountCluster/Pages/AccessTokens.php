@@ -32,7 +32,6 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Text;
 use Filament\Schemas\Components\Wizard;
 use Filament\Schemas\Schema;
-use Filament\Support\Enums\IconPosition;
 use Filament\Support\Exceptions\Halt;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
@@ -187,10 +186,8 @@ class AccessTokens extends Page implements HasTable
                         $secret->secretEntry('token', 'Token'),
                     ]),
             ])
-            ->modalSubmitAction(fn (Action $action): Action => $action
-                ->label('Done')
-                ->icon(Heroicon::OutlinedCheckCircle)
-                ->iconPosition(IconPosition::After))
+            ->modifyWizardUsing($secret->hideBackOnceIssued())
+            ->modalSubmitAction($secret->savedAction())
             ->action(fn () => $secret->forget($this))
             ->successNotificationTitle('Token Created');
     }

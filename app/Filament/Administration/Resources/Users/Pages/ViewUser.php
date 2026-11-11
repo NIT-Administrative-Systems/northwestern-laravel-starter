@@ -13,6 +13,7 @@ use App\Filament\Administration\Resources\Users\Schemas\ApiUserInfolist;
 use App\Filament\Administration\Resources\Users\Schemas\LocalUserInfolist;
 use App\Filament\Administration\Resources\Users\Schemas\NorthwesternUserInfolist;
 use App\Filament\Administration\Resources\Users\UserResource;
+use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Resources\Pages\ViewRecord;
@@ -22,6 +23,10 @@ use Filament\Support\Icons\Heroicon;
 class ViewUser extends ViewRecord
 {
     protected static string $resource = UserResource::class;
+
+    protected static ?string $navigationLabel = 'Details';
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedInformationCircle;
 
     public function infolist(Schema $schema): Schema
     {

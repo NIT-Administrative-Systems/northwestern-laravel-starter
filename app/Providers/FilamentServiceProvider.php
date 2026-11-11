@@ -35,6 +35,14 @@ class FilamentServiceProvider extends ServiceProvider
                 ->deferFilters(false)
                 ->paginationPageOptions([10, 25, 50, 100])
                 ->defaultPaginationPageOption(25)
+                // Below sm, each row is a card with a label on every value.
+                ->stackedOnMobile()
+                // Opening a record and coming back keeps the table as it was left.
+                ->persistFiltersInSession()
+                ->persistSortInSession()
+                ->persistSearchInSession()
+                // Filament's default is an x-mark, which reads as an error.
+                ->emptyStateIcon(Heroicon::OutlinedInbox)
         );
 
         Schema::configureUsing(fn (Schema $infolist) => $infolist

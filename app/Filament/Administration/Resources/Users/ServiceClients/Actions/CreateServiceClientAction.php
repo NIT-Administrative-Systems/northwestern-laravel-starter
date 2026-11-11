@@ -58,7 +58,8 @@ class CreateServiceClientAction extends Action
                 Wizard\Step::make('Copy Credentials')
                     ->schema(ServiceClientSchemas::copyCredentialsStepSchema($secret)),
             ])
-            ->modalSubmitAction(fn (Action $action) => ServiceClientSchemas::copyCredentialsSubmitButton($action))
+            ->modifyWizardUsing($secret->hideBackOnceIssued())
+            ->modalSubmitAction($secret->savedAction())
             ->action(fn (ServiceClientsRelationManager $livewire) => $secret->forget($livewire))
             ->successNotificationTitle('Service Client Created');
     }

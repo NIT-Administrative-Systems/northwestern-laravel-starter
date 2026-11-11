@@ -41,7 +41,8 @@ class UserLoginRecordsTable
                     ->sortable(),
                 TextColumn::make('segment')
                     ->badge()
-                    ->sortable(),
+                    ->sortable()
+                    ->visibleFrom('xl'),
                 TextColumn::make('ip_address')
                     ->label('IP Address')
                     ->fontFamily(FontFamily::Mono)
@@ -56,6 +57,7 @@ class UserLoginRecordsTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('logged_in_at', direction: 'desc')
+            ->deferLoading()
             ->heading('Sign-In Records')
             ->searchable(! $isRelationManager)
             ->splitSearchTerms(false)

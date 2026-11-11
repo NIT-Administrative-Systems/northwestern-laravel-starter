@@ -52,7 +52,9 @@ final class McpClientResourceTest extends TestCase
     {
         config(['api.enabled' => false]);
 
-        $this->get('/administration')
+        // The panel's home sends someone without the overview to the first page they can open.
+        $this->followingRedirects()
+            ->get('/administration')
             ->assertOk()
             ->assertSee('href="' . ApiCluster::getUrl(panel: AdministrationPanelProvider::ID) . '"', escape: false);
 

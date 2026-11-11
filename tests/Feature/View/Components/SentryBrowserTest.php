@@ -56,7 +56,7 @@ final class SentryBrowserTest extends TestCase
     {
         config(['sentry.dsn' => self::DSN]);
         $admin = User::factory()->create();
-        $admin->givePermissionTo(SystemPermission::AccessAdministrationPanel);
+        $admin->givePermissionTo(SystemPermission::AccessAdministrationPanel, SystemPermission::ManageAll);
 
         $this->actingAs($admin)->get('/app')->assertOk()->assertSee('sentry-browser-config', escape: false);
         $this->actingAs($admin)->get('/administration')->assertOk()->assertSee('sentry-browser-config', escape: false);

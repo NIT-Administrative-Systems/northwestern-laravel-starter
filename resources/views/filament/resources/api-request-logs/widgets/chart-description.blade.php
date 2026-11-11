@@ -15,42 +15,47 @@
     $leftMeta = $leftMeta ?? null;
 @endphp
 
-<div class="{{ $singleColumn ? 'grid-cols-1' : 'grid-cols-2' }} grid gap-6 text-sm">
-    <div class="flex flex-col">
-        <div class="mb-1 text-[0.7rem] font-medium uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">
-            {{ $leftLabel }}
-        </div>
+{{-- The columns follow the widget's width, not the screen's, so a path or a range never breaks mid-word. --}}
+<div class="@container">
+    <div class="{{ $singleColumn ? 'grid-cols-1' : 'grid-cols-1 @md:grid-cols-2' }} @md:gap-6 grid gap-4 text-sm">
+        <div class="flex min-w-0 flex-col">
+            <div class="mb-1 text-[0.7rem] font-medium uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">
+                {{ $leftLabel }}
+            </div>
 
-        <div
-             class="whitespace-normal break-words font-mono text-lg font-semibold leading-tight text-gray-900 dark:text-gray-100">
-            {{ $leftValue }}
+            <div class="truncate font-mono text-lg font-semibold leading-tight text-gray-900 dark:text-gray-100"
+                 title="{{ $leftValue }}">
+                {{ $leftValue }}
+            </div>
 
             @if ($leftMeta)
-                <span class="ml-1 whitespace-nowrap align-baseline text-xs font-normal text-gray-500 dark:text-gray-400">
-                    ({{ $leftMeta }})
-                </span>
+                <div class="mt-0.5 whitespace-nowrap text-xs text-gray-500 dark:text-gray-400">
+                    {{ $leftMeta }}
+                </div>
             @endif
         </div>
-    </div>
 
-    @unless ($singleColumn)
-        <div class="{{ $rightGridClass }} grid gap-3">
-            @foreach ($rightColumns as $column)
-                <div class="flex flex-col items-center justify-center">
-                    <div class="{{ getColorClass($column['color']) }} mb-1 text-[0.7rem] font-semibold tracking-[0.14em]">
-                        {{ $column['label'] }}
-                    </div>
-                    <div class="font-mono text-lg font-semibold leading-tight text-gray-900 dark:text-gray-100">
-                        {{ $column['value'] }}
-                    </div>
-
-                    @if (!empty($column['meta']))
-                        <div class="mt-0.5 text-[0.65rem] text-gray-500 dark:text-gray-400">
-                            {{ $column['meta'] }}
+        @unless ($singleColumn)
+            <div class="{{ $rightGridClass }} grid gap-3">
+                @foreach ($rightColumns as $column)
+                    <div class="flex flex-col items-center justify-center">
+                        <div
+                             class="{{ getColorClass($column['color']) }} mb-1 whitespace-nowrap text-[0.7rem] font-semibold tracking-[0.14em]">
+                            {{ $column['label'] }}
                         </div>
-                    @endif
-                </div>
-            @endforeach
-        </div>
-    @endunless
+                        <div
+                             class="whitespace-nowrap font-mono text-lg font-semibold leading-tight text-gray-900 dark:text-gray-100">
+                            {{ $column['value'] }}
+                        </div>
+
+                        @if (!empty($column['meta']))
+                            <div class="mt-0.5 whitespace-nowrap text-[0.65rem] text-gray-500 dark:text-gray-400">
+                                {{ $column['meta'] }}
+                            </div>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+        @endunless
+    </div>
 </div>

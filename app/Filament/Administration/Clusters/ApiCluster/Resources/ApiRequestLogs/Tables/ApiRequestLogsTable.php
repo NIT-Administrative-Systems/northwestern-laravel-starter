@@ -13,6 +13,7 @@ use Filament\Actions\ViewAction;
 use Filament\Support\Enums\FontFamily;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Enums\PaginationMode;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -27,7 +28,9 @@ class ApiRequestLogsTable
     public static function configure(Table $table, bool $isRelationManager = false): Table
     {
         return $table
-            ->poll()
+            // Refreshes only while Live is on, so the rows don't move while someone reads them.
+            ->poll(fn (HasTable $livewire): ?string => ($livewire->getTableFilterState('live')['isActive'] ?? false) ? '30s' : null)
+            ->deferLoading()
             ->recordClasses(fn (ApiRequestLog $record): ?string => $record->duration_ms > (int) config('api.request_logging.slow_request_threshold_ms')
                 ? 'bg-red-50/50 dark:bg-red-900/10'
                 : null)
@@ -38,6 +41,13 @@ class ApiRequestLogsTable
                     ->searchable(isIndividual: true, isGlobal: false)
                     ->copyable()
                     ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('created_at')
+                    ->label('Recorded')
+                    ->dateTime()
+                    ->since()
+                    ->dateTimeTooltip()
+                    ->sortable(query: fn (Builder $query, string $direction): Builder => $query->orderBy('api_request_logs.created_at', $direction)),
 
                 TextColumn::make('user.username')
                     ->label('User')
@@ -50,7 +60,8 @@ class ApiRequestLogsTable
                     ->label('Client')
                     ->placeholder('N/A')
                     ->searchable(isIndividual: true, isGlobal: false)
-                    ->toggleable(),
+                    ->toggleable()
+                    ->visibleFrom('2xl'),
 
                 TextColumn::make('grant_type')
                     ->label('Grant')
@@ -76,13 +87,16 @@ class ApiRequestLogsTable
                         'DELETE' => 'danger',
                         default => 'gray',
                     })
-                    ->sortable(),
+                    ->sortable()
+                    ->visibleFrom('xl'),
 
                 TextColumn::make('path')
                     ->label('Endpoint')
                     ->limit(40)
                     ->wrap()
                     ->tooltip(fn ($record) => $record->path)
+                    // A path has no spaces, so let it break anywhere rather than widen the table.
+                    ->extraAttributes(['class' => 'break-all'])
                     ->fontFamily(FontFamily::Mono)
                     ->searchable(),
 
@@ -112,7 +126,8 @@ class ApiRequestLogsTable
                     ->placeholder('N/A')
                     ->badge()
                     ->tooltip(fn (ApiRequestLog $record) => $record->failure_reason?->getDescription())
-                    ->sortable(),
+                    ->sortable()
+                    ->visibleFrom('2xl'),
 
                 TextColumn::make('duration_ms')
                     ->label('Duration')
@@ -120,7 +135,8 @@ class ApiRequestLogsTable
                     ->color(fn (int $state): string => $state > config('api.request_logging.slow_request_threshold_ms') ? 'danger' : 'gray')
                     ->weight(fn (int $state) => $state > config('api.request_logging.slow_request_threshold_ms') ? FontWeight::Bold : FontWeight::Normal)
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->visibleFrom('xl'),
 
                 TextColumn::make('request_bytes')
                     ->label('Request Size')
@@ -143,23 +159,21 @@ class ApiRequestLogsTable
                     ->searchable(isIndividual: true, isGlobal: false)
                     ->toggleable(isToggledHiddenByDefault: true),
 
-                TextColumn::make('created_at')
-                    ->label('Recorded')
-                    ->dateTime()
-                    ->since()
-                    ->dateTimeTooltip()
-                    ->sortable(query: fn (Builder $query, string $direction): Builder => $query->orderBy('api_request_logs.created_at', $direction)),
             ])
             ->defaultSort('created_at', 'desc')
             ->heading('API Requests')
             ->searchable(! $isRelationManager)
-            // The table polls; skip the full COUNT(*) the default paginator runs on every refresh.
+            // The table can poll; skip the full COUNT(*) the default paginator runs on every refresh.
             ->paginationMode(PaginationMode::Simple)
             // Global search covers the user and endpoint. Hidden columns search individually.
             ->splitSearchTerms(false)
             ->searchDebounce('750ms')
             ->defaultPaginationPageOption(10)
             ->filters([
+                Filter::make('live')
+                    ->label('Live')
+                    ->toggle(),
+
                 SelectFilter::make('date_preset')
                     ->label('Date Range')
                     ->options([

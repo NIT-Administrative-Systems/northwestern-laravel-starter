@@ -39,4 +39,14 @@ class ListUsers extends ListRecords
                 ->button(),
         ];
     }
+
+    /**
+     * No "List" crumb under a title that already names the list.
+     *
+     * @return array<string, string>
+     */
+    public function getBreadcrumbs(): array
+    {
+        return [];
+    }
 }

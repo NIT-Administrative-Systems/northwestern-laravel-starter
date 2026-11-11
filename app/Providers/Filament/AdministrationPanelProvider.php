@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace App\Providers\Filament;
 
 use App\Filament\Administration\Navigation\AdministrationNavGroup;
+use App\Filament\App\Clusters\AccountCluster\Pages\Profile;
 use Filament\Actions\Action;
+use Filament\Facades\Filament;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Navigation\NavigationItem;
-use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Enums\Width;
@@ -42,9 +43,29 @@ class AdministrationPanelProvider extends PanelProvider
             ->strictAuthorization()
             ->maxContentWidth(Width::Full)
             ->viteTheme('resources/css/filament/administration/theme.css')
+            ->sidebarCollapsibleOnDesktop()
+            ->unsavedChangesAlerts()
+            ->databaseTransactions()
             ->renderHook(PanelsRenderHook::HEAD_END, fn (): string => Blade::render('<x-sentry-browser />'))
             ->renderHook(PanelsRenderHook::TOPBAR_LOGO_AFTER, fn (): string => Blade::render('<x-panel-brand />'))
+            // After global search, as in the app panel: just ahead of the user menu.
+            ->renderHook(PanelsRenderHook::GLOBAL_SEARCH_AFTER, fn (): string => Blade::render('<x-help-menu />'))
+            ->renderHook(PanelsRenderHook::SIDEBAR_NAV_START, fn (): string => Blade::render('<x-sidebar-panel-name name="Administration" />'))
             ->userMenuItems([
+                'app' => Action::make('app')
+                    ->label(fn (): string => 'Back to ' . config('app.name'))
+                    ->icon(Heroicon::OutlinedArrowUturnLeft)
+                    ->url(fn (): string => Filament::getPanel(AppPanelProvider::ID)->getUrl())
+                    ->extraAttributes([
+                        'data-testid' => 'app-panel-link',
+                    ]),
+                'account' => Action::make('account')
+                    ->label('Account')
+                    ->icon(Heroicon::OutlinedUserCircle)
+                    ->url(fn (): string => Profile::getUrl(panel: AppPanelProvider::ID))
+                    ->extraAttributes([
+                        'data-testid' => 'account-menu-link',
+                    ]),
                 'logout' => fn (Action $action) => $action
                     ->label('Sign Out')
                     ->icon(Heroicon::OutlinedArrowRightOnRectangle)
@@ -57,9 +78,6 @@ class AdministrationPanelProvider extends PanelProvider
             ->discoverPages(in: app_path('Filament/Administration/Pages'), for: 'App\Filament\Administration\Pages')
             ->discoverClusters(in: app_path('Filament/Administration/Clusters'), for: 'App\Filament\Administration\Clusters')
             ->discoverWidgets(in: app_path('Filament/Administration/Widgets'), for: 'App\Filament\Administration\Widgets')
-            ->pages([
-                Dashboard::class,
-            ])
             ->widgets([
                 //
             ])

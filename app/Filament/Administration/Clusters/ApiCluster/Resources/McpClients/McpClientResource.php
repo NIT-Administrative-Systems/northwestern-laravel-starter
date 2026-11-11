@@ -85,7 +85,7 @@ class McpClientResource extends Resource
                 TextColumn::make('connections_count')->label('Connections')->numeric(),
                 TextColumn::make('last_used_at')->label('Last Used')->since()->dateTimeTooltip()->placeholder('Never')->sortable(),
                 TextColumn::make('status')->badge(),
-                TextColumn::make('created_at')->label('Registered')->since()->dateTimeTooltip()->sortable(),
+                TextColumn::make('created_at')->label('Registered')->since()->dateTimeTooltip()->sortable()->visibleFrom('xl'),
             ])
             ->defaultSort('created_at', 'desc')
             ->recordActions([

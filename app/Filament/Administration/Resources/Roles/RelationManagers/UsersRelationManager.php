@@ -15,6 +15,7 @@ use App\Domains\User\Support\UserOptionLabel;
 use App\Domains\User\Support\UserSearch;
 use App\Filament\Administration\Resources\Roles\Actions\AddPeopleAction;
 use App\Filament\Administration\Resources\Roles\Actions\ImportPeopleAction;
+use App\Filament\Administration\Resources\Users\Tables\UsersTable;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\AttachAction;
 use Filament\Actions\DetachAction;
@@ -51,7 +52,8 @@ class UsersRelationManager extends RelationManager
             ->columns([
                 TextColumn::make('clerical_name')
                     ->sortable(query: fn (Builder $query, $direction) => $query->orderBy('last_name', $direction)->orderBy('first_name', $direction))
-                    ->label('Name'),
+                    ->label('Name')
+                    ->wrap(),
                 TextColumn::make('username')
                     ->label('NetID')
                     ->fontFamily(FontFamily::Mono)
@@ -60,9 +62,10 @@ class UsersRelationManager extends RelationManager
                 TextColumn::make('primary_affiliation')
                     ->label('Primary Affiliation')
                     ->searchable()
-                    ->badge(),
-                TextColumn::make('roles.name')
-                    ->badge(),
+                    ->badge()
+                    ->visibleFrom('xl'),
+                UsersTable::rolesColumn()
+                    ->visibleFrom('xl'),
                 TextColumn::make('first_name')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),

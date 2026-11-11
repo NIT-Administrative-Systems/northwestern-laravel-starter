@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Administration\Resources\Users\Tables;
 
+use App\Domains\Access\Enums\SystemRole;
 use App\Domains\Auth\Enums\AuthType;
 use App\Domains\User\Enums\Affiliation;
 use App\Domains\User\Models\User;
@@ -28,7 +29,8 @@ class UsersTable
             ->columns([
                 TextColumn::make('clerical_name')
                     ->sortable(query: fn (Builder $query, $direction) => $query->orderBy('last_name', $direction)->orderBy('first_name', $direction))
-                    ->label('Name'),
+                    ->label('Name')
+                    ->wrap(),
                 TextColumn::make('first_name')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -65,16 +67,15 @@ class UsersTable
                 TextColumn::make('primary_affiliation')
                     ->label('Primary Affiliation')
                     ->searchable()
-                    ->badge(),
+                    ->badge()
+                    ->visibleFrom('xl'),
                 TextColumn::make('auth_type')
                     ->label('Authentication')
                     ->badge()
                     ->searchable()
-                    ->toggleable(),
-                TextColumn::make('roles.name')
-                    ->badge()
-                    // Rows link to the user, so an empty cell would be a link with no text.
-                    ->placeholder('No roles'),
+                    ->toggleable()
+                    ->visibleFrom('2xl'),
+                self::rolesColumn(),
                 IconColumn::make('netid_inactive')
                     ->label('NetID Status')
                     ->getStateUsing(fn (User $record) => NetIdStatus::getState($record))
@@ -147,5 +148,29 @@ class UsersTable
             ])
             ->emptyStateHeading('No Users Found')
             ->emptyStateIcon('heroicon-o-users');
+    }
+
+    /**
+     * A person's roles, without the default role every NetID user has, which would push the
+     * roles that tell people apart off the row. Also used by a role's Assigned Users.
+     */
+    public static function rolesColumn(): TextColumn
+    {
+        return TextColumn::make('roles.name')
+            ->label('Roles')
+            ->badge()
+            ->state(fn (User $record): array => $record->roles
+                ->pluck('name')
+                ->reject(fn (string $name): bool => $name === SystemRole::NorthwesternUser->value)
+                ->values()
+                ->all())
+            ->limitList(2)
+            ->expandableLimitedList()
+            ->listWithLineBreaks()
+            ->wrap()
+            // Long role names wrap inside the badge instead of widening the table.
+            ->extraAttributes(['class' => 'max-w-48'])
+            // Rows link to the user, so an empty cell would be a link with no text.
+            ->placeholder(fn (User $record): string => $record->roles->isEmpty() ? 'No roles' : 'No other roles');
     }
 }

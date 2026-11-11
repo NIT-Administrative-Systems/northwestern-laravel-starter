@@ -27,6 +27,7 @@ class RolesTable
             ->columns([
                 TextColumn::make('name')
                     ->label('Role')
+                    ->wrap()
                     ->searchable(),
                 TextColumn::make('role_type.slug')
                     ->label('Role Type')
@@ -39,7 +40,8 @@ class RolesTable
                     ->falseIcon(Heroicon::LockOpen)
                     ->trueColor('warning')
                     ->falseColor('gray')
-                    ->tooltip(fn (Role $record) => $record->isAssignmentLocked() ? 'Assigned automatically, so it can\'t be changed here' : 'Assignment is open'),
+                    ->tooltip(fn (Role $record) => $record->isAssignmentLocked() ? 'Assigned automatically, so it can\'t be changed here' : 'Assignment is open')
+                    ->visibleFrom('2xl'),
                 TextColumn::make('permissions_count')
                     ->label('Permissions')
                     ->badge()
@@ -64,12 +66,14 @@ class RolesTable
                         return $tooltip;
                     })
                     ->weight(FontWeight::Medium)
-                    ->sortable(),
+                    ->sortable()
+                    ->visibleFrom('lg'),
                 TextColumn::make('users_count')
                     ->label('Assigned Users')
                     ->counts('users')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->visibleFrom('xl'),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

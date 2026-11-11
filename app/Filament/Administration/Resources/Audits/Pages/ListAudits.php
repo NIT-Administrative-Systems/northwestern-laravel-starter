@@ -12,4 +12,14 @@ class ListAudits extends ListRecords
     protected static string $resource = AuditResource::class;
 
     protected ?string $subheading = 'Every change to an audited record.';
+
+    /**
+     * No "List" crumb under a title that already names the list.
+     *
+     * @return array<string, string>
+     */
+    public function getBreadcrumbs(): array
+    {
+        return [];
+    }
 }

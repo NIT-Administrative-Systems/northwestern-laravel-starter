@@ -12,6 +12,7 @@ use Filament\Actions\Action;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Flex;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
@@ -27,103 +28,90 @@ class NorthwesternUserInfolist
     public static function configure(Schema $schema): Schema
     {
         return $schema->components([
-            Grid::make()
-                ->columns([
-                    'default' => 1,
-                    'lg' => 3,
-                ])
+            // Splits by the content's width, not the screen's, since the sidebar takes a third of a 1024px screen.
+            Grid::make([
+                'default' => 1,
+                '@4xl' => 3,
+            ])
+                ->gridContainer()
                 ->columnSpanFull()
                 ->schema([
                     Grid::make(1)
                         ->columnSpan([
                             'default' => 1,
-                            'lg' => 2,
+                            '@4xl' => 2,
                         ])
                         ->schema([
                             Section::make('User Overview')
                                 ->icon(Heroicon::OutlinedIdentification)
                                 ->schema([
-                                    Grid::make([
-                                        'default' => 1,
-                                        'xl' => 12,
-                                    ])
-                                        ->schema([
-                                            ImageEntry::make('wildcard_photo')
-                                                ->visible(fn (User $record) => config('platform.wildcard_photo_sync'))
-                                                ->hiddenLabel()
-                                                ->square()
-                                                ->columnSpan([
-                                                    'default' => 1,
-                                                    'xl' => fn () => config('platform.wildcard_photo_sync') ? 2 : 0,
-                                                ])
-                                                ->getStateUsing(function (User $record): string {
-                                                    if (! config('platform.wildcard_photo_sync')) {
-                                                        return '';
-                                                    }
+                                    Flex::make([
+                                        ImageEntry::make('wildcard_photo')
+                                            ->visible(fn (User $record) => config('platform.wildcard_photo_sync'))
+                                            ->hiddenLabel()
+                                            ->square()
+                                            ->imageSize(96)
+                                            ->grow(false)
+                                            ->getStateUsing(function (User $record): string {
+                                                if (! config('platform.wildcard_photo_sync')) {
+                                                    return '';
+                                                }
 
-                                                    if (filled($record->wildcard_photo_s3_key)) {
-                                                        return route('users.wildcard-photo', [
-                                                            'user' => $record,
-                                                            'c' => md5($record->wildcard_photo_last_synced_at->toString()),
-                                                        ]);
-                                                    }
+                                                if (filled($record->wildcard_photo_s3_key)) {
+                                                    return route('users.wildcard-photo', [
+                                                        'user' => $record,
+                                                        'c' => md5($record->wildcard_photo_last_synced_at->toString()),
+                                                    ]);
+                                                }
 
-                                                    return route('users.wildcard-photo', $record);
-                                                })
-                                                ->defaultImageUrl(asset('images/default-profile-photo.svg'))
-                                                ->extraImgAttributes([
-                                                    'loading' => 'lazy',
-                                                ]),
+                                                return route('users.wildcard-photo', $record);
+                                            })
+                                            ->defaultImageUrl(asset('images/default-profile-photo.svg'))
+                                            ->extraImgAttributes([
+                                                'loading' => 'lazy',
+                                            ]),
 
-                                            Grid::make()
-                                                ->columnSpan([
-                                                    'default' => 1,
-                                                    'xl' => fn () => config('platform.wildcard_photo_sync') ? 10 : 12,
-                                                ])
-                                                ->columns([
-                                                    'default' => 1,
-                                                    'xl' => 2,
-                                                ])
-                                                ->schema([
-                                                    TextEntry::make('full_name')
-                                                        ->size(TextSize::Large)
-                                                        ->weight(FontWeight::Medium)
-                                                        ->color('primary')
-                                                        ->label('Name'),
+                                        Grid::make([
+                                            'default' => 1,
+                                            '@lg' => 2,
+                                        ])
+                                            ->gridContainer()
+                                            ->schema([
+                                                TextEntry::make('full_name')
+                                                    ->size(TextSize::Large)
+                                                    ->weight(FontWeight::Medium)
+                                                    ->color('primary')
+                                                    ->label('Name'),
 
-                                                    TextEntry::make('username')
-                                                        ->label('NetID')
-                                                        ->fontFamily(FontFamily::Mono)
-                                                        ->copyable(),
+                                                TextEntry::make('username')
+                                                    ->label('NetID')
+                                                    ->fontFamily(FontFamily::Mono)
+                                                    ->copyable(),
 
-                                                    TextEntry::make('email')
-                                                        ->label('Email')
-                                                        ->url(fn ($state) => filled($state) ? 'mailto:' . $state : null)
-                                                        ->openUrlInNewTab()
-                                                        ->placeholder('N/A')
-                                                        ->columnSpanFull()
-                                                        ->columnSpan([
-                                                            'default' => 1,
-                                                        ]),
+                                                TextEntry::make('email')
+                                                    ->label('Email')
+                                                    ->url(fn ($state) => filled($state) ? 'mailto:' . $state : null)
+                                                    ->openUrlInNewTab()
+                                                    ->placeholder('N/A'),
 
-                                                    TextEntry::make('employee_id')
-                                                        ->label('Employee ID')
-                                                        ->icon(Heroicon::OutlinedHashtag)
-                                                        ->copyable(),
+                                                TextEntry::make('employee_id')
+                                                    ->label('Employee ID')
+                                                    ->icon(Heroicon::OutlinedHashtag)
+                                                    ->copyable(),
 
-                                                    TextEntry::make('phone')
-                                                        ->label('Phone Number')
-                                                        ->url(fn ($state) => filled($state) ? 'tel:' . preg_replace('/\D+/', '', (string) $state) : null)
-                                                        ->openUrlInNewTab()
-                                                        ->placeholder('N/A'),
+                                                TextEntry::make('phone')
+                                                    ->label('Phone Number')
+                                                    ->url(fn ($state) => filled($state) ? 'tel:' . preg_replace('/\D+/', '', (string) $state) : null)
+                                                    ->openUrlInNewTab()
+                                                    ->placeholder('N/A'),
 
-                                                    TextEntry::make('hr_employee_id')
-                                                        ->label('myHR Employee ID')
-                                                        ->icon(Heroicon::OutlinedHashtag)
-                                                        ->visible(fn ($record) => filled($record->hr_employee_id))
-                                                        ->copyable(),
-                                                ]),
-                                        ]),
+                                                TextEntry::make('hr_employee_id')
+                                                    ->label('myHR Employee ID')
+                                                    ->icon(Heroicon::OutlinedHashtag)
+                                                    ->visible(fn ($record) => filled($record->hr_employee_id))
+                                                    ->copyable(),
+                                            ]),
+                                    ])->from('sm'),
                                 ]),
 
                             Section::make('Organization')
@@ -154,7 +142,7 @@ class NorthwesternUserInfolist
                         ->icon(Heroicon::OutlinedShieldCheck)
                         ->columnSpan([
                             'default' => 1,
-                            'lg' => 1,
+                            '@4xl' => 1,
                         ])
                         ->schema([
                             Group::make([
@@ -172,14 +160,12 @@ class NorthwesternUserInfolist
 
                             TextEntry::make('created_at')
                                 ->label('Created')
-                                ->inlineLabel()
                                 ->dateTime(),
 
                             TextEntry::make('latest_login_record.logged_in_at')
                                 ->label('Last Sign-In')
                                 ->placeholder('Never')
                                 ->dateTime()
-                                ->inlineLabel()
                                 ->since()
                                 ->dateTimeTooltip(),
 

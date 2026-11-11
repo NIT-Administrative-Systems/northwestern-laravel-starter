@@ -152,7 +152,8 @@ class CreateApiUserAction extends Action
                         ServiceClientSchemas::copyCredentialsStepSchema($secret),
                     ),
             ])
-            ->modalSubmitAction(fn (Action $action) => ServiceClientSchemas::copyCredentialsSubmitButton($action))
+            ->modifyWizardUsing($secret->hideBackOnceIssued())
+            ->modalSubmitAction($secret->savedAction())
             ->action(function (HasActions $livewire) use ($secret) {
                 $userId = $secret->get($livewire, 'user_id');
                 $secret->forget($livewire);

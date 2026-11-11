@@ -119,7 +119,7 @@ class ServiceClientsRelationManager extends RelationManager
                     RotateServiceClientAction::make(),
                     EditServiceClientIpRestrictionsAction::make(),
                     RevokeServiceClientAction::make(),
-                ])->label('Actions')->button(),
+                ]),
             ])
             ->paginated(false);
     }
