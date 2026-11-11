@@ -30,7 +30,11 @@ Every role belongs to a **role type** that determines how it can be managed and 
 * **System Managed** - Reserved for roles the starter ships with. Their definitions (name, permissions) are seeder-managed and cannot be edited or deleted through the admin panel. Users with `ManageAll` **can** assign and remove system-managed roles from users via the UI (unless the role is also assignment-locked).
 * **Application Admin** - For roles that grant administrative capabilities within your application (e.g., “Department Manager”, “Content Editor”). Created and managed by administrators in Filament.
 * **Application Role** - For standard user roles that grant specific feature access (e.g., “Report Viewer”, “Data Entry”). The most common type you’ll create.
-* **API Integration** - For API consumer roles. These can only be assigned to API users and only display API-relevant permissions in the role form.
+* **API Integration** - For API consumer roles. These can only be assigned to API users and only display API-relevant permissions in the role form. It works both ways: an API user can only be given API Integration roles. `assignRoleWithAudit()` throws an `InvalidArgumentException` for a mismatch, so seeders and code are held to it too.
+
+Nobody can give themselves a role, from the role’s **Assigned Users** tab or their own user record, Super Administrators included. Removing your own role is allowed.
+
+When a role is saved, its permissions come from the lists the form shows for the role’s type, kept to what that type allows: API permissions for an API Integration role, interface permissions for any other. System-managed permissions are saved only by someone with `ManageAll`; anyone else leaves a role’s system-managed permissions as they were. Changing a role’s type drops the permissions the new type doesn’t show.
 
 ***
 
@@ -256,6 +260,8 @@ $user->assignRoleWithAudit(
     context: ['reason' => 'Promoted to team lead'],
 );
 ```
+
+It throws an `InvalidArgumentException`, and assigns nothing, when a role doesn’t suit the user: an API Integration role for anyone but an API user, or another role for an API user (`Role::suits()`).
 
 ### `removeRoleWithAudit()`
 

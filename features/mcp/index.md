@@ -67,7 +67,7 @@ Most clients return from sign-in to `https://` or `http://localhost`. A desktop 
 
 ### Separate from the REST API
 
-An MCP client’s token carries only `mcp:use`. The REST API refuses any token with `mcp:use` (`403`), and the MCP server accepts only tokens with it, approved by a person who still has `UseMcp`. Service client, personal access and other application tokens are refused there (`403`). One middleware enforces both sides, `RequireTokenAudience`, with `TokenAudience::Api` on the REST API’s routes and `TokenAudience::Mcp` on the server’s.
+An MCP client’s token carries only `mcp:use`, and the consent screen refuses an MCP client that doesn’t ask for it. The kind of client a token was issued to decides where it works: the REST API refuses every MCP client’s token (`403`), whatever scopes it carries, and the MCP server accepts only an MCP client’s token with `mcp:use`, approved by a person who still has `UseMcp`. Service client, personal access and other application tokens are refused there (`403`). One middleware enforces both sides, `RequireTokenAudience`, with `TokenAudience::Api` on the REST API’s routes and `TokenAudience::Mcp` on the server’s.
 
 > **Known gap: audience binding**
 >

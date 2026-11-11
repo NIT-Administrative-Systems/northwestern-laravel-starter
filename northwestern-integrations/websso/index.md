@@ -29,7 +29,7 @@ For a higher-level overview of all authentication methods, see the [Authenticati
 
 4. **Directory Search lookup**
 
-   `WebSSOController::findUserByNetID()` calls `FindOrUpdateUserFromDirectory` to provision or update the user from Northwestern’s directory. This includes a 3-attempt retry with 500ms delays. If all retries fail, the user sees the 503 page (see [Error Handling](https://laravel-starter.entapp.northwestern.edu/northwestern-integrations/websso/#error-handling)).
+   `WebSSOController::findUserByNetID()` calls `FindOrUpdateUserFromDirectory` to provision or update the user from Northwestern’s directory. This includes a 3-attempt retry with 500ms delays. If all retries fail, the user sees the 503 page (see [Error Handling](https://laravel-starter.entapp.northwestern.edu/northwestern-integrations/websso/#error-handling)). Someone who already has an account signs in with their stored details when the lookup fails, and stays active (see [Directory Search](https://laravel-starter.entapp.northwestern.edu/northwestern-integrations/directory-search/#failed-lookups-and-invalid-directory-data)).
 
 5. **Session established**
 
@@ -105,7 +105,7 @@ The `logout()` method (from the `WebSSOAuthentication` trait) redirects the user
 
 ## Error Handling
 
-If the Directory Search lookup fails after 3 retries during the SSO callback, the controller throws a `ServiceDownError` for `ExternalService::DirectorySearch` (`directory-search`). The exception renders itself: browser requests get the 503 page (`resources/views/errors/503.blade.php`), and API or JSON requests get a Problem Details 503 response with `Retry-After: 60`. The error is still reported to Sentry.
+A failed lookup for someone who already has an account isn’t an error: they sign in with the details already stored, and their account isn’t deactivated, because Directory Search answers the same way when it is down as when a NetID is unknown. For someone signing in for the first time, a failed lookup returns no user. If the lookup still returns no user after 3 tries during the SSO callback, the controller throws a `ServiceDownError` for `ExternalService::DirectorySearch` (`directory-search`). The exception renders itself: browser requests get the 503 page (`resources/views/errors/503.blade.php`), and API or JSON requests get a Problem Details 503 response with `Retry-After: 60`. The error is still reported to Sentry.
 
 ***
 

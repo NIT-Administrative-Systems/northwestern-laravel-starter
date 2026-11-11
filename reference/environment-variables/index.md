@@ -113,17 +113,18 @@ See [Authentication](https://laravel-starter.entapp.northwestern.edu/features/au
 
 These configure [passwordless verification codes](https://laravel-starter.entapp.northwestern.edu/features/authentication/#passwordless-verification-codes) for users without a NetID.
 
-| Variable                                | Default | Description                                                                                    |
-| --------------------------------------- | ------- | ---------------------------------------------------------------------------------------------- |
-| `LOCAL_AUTH_ENABLED`                    | `true`  | Allow sign-in with a code sent by email                                                        |
-| `LOCAL_AUTH_USE_FIXED_CODE`             | `false` | Issue a predictable code (`123456` for six digits). Throws in `production`, `develop` and `qa` |
-| `LOCAL_AUTH_RATE_LIMIT_PER_HOUR`        | `10`    | Code requests per email address per hour                                                       |
-| `LOCAL_AUTH_RATE_LIMIT_PER_IP_PER_HOUR` | `20`    | Code requests per IP address per hour                                                          |
-| `LOCAL_AUTH_CODE_DIGITS`                | `6`     | Digits in a code                                                                               |
-| `LOCAL_AUTH_CODE_EXPIRES_MINUTES`       | `10`    | Minutes before a code expires                                                                  |
-| `LOCAL_AUTH_CODE_MAX_ATTEMPTS`          | `8`     | Failed attempts before the challenge locks                                                     |
-| `LOCAL_AUTH_CODE_LOCK_MINUTES`          | `15`    | Minutes a locked challenge stays locked                                                        |
-| `LOCAL_AUTH_CODE_RESEND_COOLDOWN`       | `30`    | Seconds before another code can be sent                                                        |
+| Variable                                | Default | Description                                                                                                                            |
+| --------------------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `LOCAL_AUTH_ENABLED`                    | `true`  | Allow sign-in with a code sent by email                                                                                                |
+| `LOCAL_AUTH_USE_FIXED_CODE`             | `false` | Issue a predictable code (`123456` for six digits). Only in `local`, `testing` and `ci`: anywhere else the application refuses to boot |
+| `LOCAL_AUTH_RATE_LIMIT_PER_HOUR`        | `10`    | Code requests per email address per hour                                                                                               |
+| `LOCAL_AUTH_RATE_LIMIT_PER_IP_PER_HOUR` | `20`    | Code requests per IP address per hour                                                                                                  |
+| `LOCAL_AUTH_CODE_DIGITS`                | `6`     | Digits in a code                                                                                                                       |
+| `LOCAL_AUTH_CODE_EXPIRES_MINUTES`       | `10`    | Minutes before a code expires                                                                                                          |
+| `LOCAL_AUTH_CODE_MAX_ATTEMPTS`          | `8`     | Failed attempts before the challenge locks                                                                                             |
+| `LOCAL_AUTH_CODE_LOCK_MINUTES`          | `15`    | Minutes a locked challenge stays locked                                                                                                |
+| `LOCAL_AUTH_CODE_MAX_FAILED_PER_DAY`    | `20`    | Incorrect codes an email may enter in a day, across all its codes                                                                      |
+| `LOCAL_AUTH_CODE_RESEND_COOLDOWN`       | `30`    | Seconds before another code can be sent                                                                                                |
 
 ## API
 

@@ -169,14 +169,19 @@ To sync an additional directory attribute (e.g., building/office location):
 
 ***
 
-## Invalid Directory Data
+## Failed Lookups and Invalid Directory Data
 
-When a directory lookup returns invalid data (missing required fields), the behavior depends on whether the user already exists:
+`DirectorySearch::lookup()` returns `false` both when the NetID isn’t in the directory and when Directory Search can’t be reached or answers with an error, so a failed lookup can’t tell a departed person from an outage. The starter treats it as unknown. When the directory does answer but the entry is missing required fields, that is an answer, and it counts.
 
-* **Existing SSO user** - The account is marked with `netid_inactive = true` and `directory_sync_last_failed_at` is recorded. The user is not deleted. Other existing users are returned unchanged, and API users skip the lookup entirely.
-* **New user** - A `BadDirectoryEntry` exception is thrown, preventing account creation with incomplete data.
+What happens depends on whether the user already exists:
 
-This ensures that transient directory issues don’t destroy existing accounts while still preventing invalid new accounts.
+* **Existing SSO user, failed lookup** - `directory_sync_last_failed_at` is recorded and the user is returned with the details already stored, so they sign in as before. `netid_inactive` is left as it was, so an outage never deactivates anyone, and `oauth:revoke-ineligible` doesn’t revoke their credentials.
+* **Existing SSO user, incomplete entry** - The account is marked with `netid_inactive = true` and `directory_sync_last_failed_at` is recorded. The user is not deleted.
+* **Other existing users** - Returned unchanged. API users skip the lookup entirely.
+* **New user, failed lookup** - No user is returned and no account is created. Sign-in treats it as Directory Search being unavailable: it retries, then shows the 503 page (see [WebSSO error handling](https://laravel-starter.entapp.northwestern.edu/northwestern-integrations/websso/#error-handling)).
+* **New user, incomplete entry** - A `BadDirectoryEntry` exception is thrown, preventing account creation with incomplete data.
+
+Deactivation comes from the directory’s answers and from [EventHub](https://laravel-starter.entapp.northwestern.edu/northwestern-integrations/eventhub/), whose NetID deactivation events still set `netid_inactive`. A deactivated or deleted person can’t use either panel: their next request is refused.
 
 ***
 

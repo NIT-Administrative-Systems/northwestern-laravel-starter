@@ -219,13 +219,17 @@ LOCAL_AUTH_CODE_MAX_ATTEMPTS=8
 LOCAL_AUTH_CODE_LOCK_MINUTES=15
 
 
+# Incorrect codes an email may enter in a day, across all its codes
+LOCAL_AUTH_CODE_MAX_FAILED_PER_DAY=20
+
+
 # Seconds before another code can be sent
 LOCAL_AUTH_CODE_RESEND_COOLDOWN=30
 ```
 
 > **Tip**
 >
-> Setting `LOCAL_AUTH_USE_FIXED_CODE=true` in your local `.env` replaces random verification codes with a fixed, predictable code (e.g. `123456` for a 6-digit code). This avoids needing to check your mail trap every time you log in during development. This setting is blocked from running in production, develop, and QA environments as a safety measure.
+> Setting `LOCAL_AUTH_USE_FIXED_CODE=true` in your local `.env` replaces random verification codes with a fixed, predictable code (e.g. `123456` for a 6-digit code). This avoids needing to check your mail trap every time you log in during development. It works only when `APP_ENV` is `local`, `testing` or `ci`. In any other environment the application refuses to boot with it turned on, so a deployment that sets it fails at once.
 
 ### Creating Local Users
 
@@ -264,7 +268,11 @@ Codes expire after `LOCAL_AUTH_CODE_EXPIRES_MINUTES` (default: 10 minutes)
 
 Single-Use Codes
 
-Each code can only be used once, preventing replay attacks
+Each code can only be used once, preventing replay attacks. A new code ends the earlier ones for that email, so only the latest works
+
+Daily Guess Limit
+
+An email can enter `LOCAL_AUTH_CODE_MAX_FAILED_PER_DAY` incorrect codes (default: 20) across all its codes before it waits out the day
 
 Rate Limiting
 
