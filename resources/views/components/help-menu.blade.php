@@ -1,52 +1,9 @@
 {{--
-    The Help menu in the app panel's top bar and the public header. Each item shows only
-    when it is available: announcements (signed-in users), the changelog, Contact Support
-    (signed-in users, when support is enabled), and the documentation link set in
-    `support.documentation_url`.
+    Rendered by App\View\Components\HelpMenu, which decides the items. Each item
+    links to a page in this application, or opens the documentation in a new tab.
 --}}
 @php
-    use App\Filament\App\Starter\Pages\Announcements;
-    use App\Filament\App\Starter\Pages\ContactSupport;
-    use App\Providers\Filament\AppPanelProvider;
     use Filament\Support\Icons\Heroicon;
-    use Illuminate\Support\Facades\Route;
-
-    $signedIn = rescue(fn() => auth()->check(), false, report: false);
-
-    $items = array_filter([
-        $signedIn
-            ? [
-                'label' => 'Announcements',
-                'url' => Announcements::getUrl(panel: AppPanelProvider::ID),
-                'icon' => Heroicon::OutlinedMegaphone,
-                'external' => false,
-            ]
-            : null,
-        Route::has('support.changelog.index')
-            ? [
-                'label' => 'Changelog',
-                'url' => route('support.changelog.index'),
-                'icon' => Heroicon::OutlinedNewspaper,
-                'external' => false,
-            ]
-            : null,
-        $signedIn && ContactSupport::canAccess()
-            ? [
-                'label' => 'Contact Support',
-                'url' => ContactSupport::getUrl(panel: AppPanelProvider::ID),
-                'icon' => Heroicon::OutlinedLifebuoy,
-                'external' => false,
-            ]
-            : null,
-        filled(config('support.documentation_url'))
-            ? [
-                'label' => 'Documentation',
-                'url' => config('support.documentation_url'),
-                'icon' => Heroicon::OutlinedBookOpen,
-                'external' => true,
-            ]
-            : null,
-    ]);
 @endphp
 
 @if ($items !== [])
