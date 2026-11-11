@@ -21,16 +21,14 @@ class PermissionSeeder extends Seeder implements IdempotentSeederInterface
     public function run(): void
     {
         $this->withAuditing([Permission::class], function () {
-            collect(SystemPermission::cases())->map(function (SystemPermission $permission): array {
-                return [
-                    'name' => $permission->value,
-                    'label' => $permission->getLabel(),
-                    'description' => $permission->description(),
-                    'system_managed' => $permission->isSystemManaged(),
-                    'api_relevant' => $permission->isApiRelevant(),
-                    'scope' => $permission->scope(),
-                ];
-            })->each(function (array $permissionData) {
+            collect(SystemPermission::cases())->map(fn (SystemPermission $permission): array => [
+                'name' => $permission->value,
+                'label' => $permission->getLabel(),
+                'description' => $permission->description(),
+                'system_managed' => $permission->isSystemManaged(),
+                'api_relevant' => $permission->isApiRelevant(),
+                'scope' => $permission->scope(),
+            ])->each(function (array $permissionData) {
                 try {
                     Permission::create($permissionData);
                 } catch (PermissionAlreadyExists) {

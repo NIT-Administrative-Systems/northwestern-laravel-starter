@@ -61,7 +61,7 @@ class AnnouncementResource extends Resource
 
         return [
             ...$data,
-            'role_ids' => $targeted ? array_values(array_map('intval', $data['role_ids'] ?? [])) : null,
+            'role_ids' => $targeted ? array_values(array_map(intval(...), $data['role_ids'] ?? [])) : null,
             'affiliations' => $targeted ? array_values($data['affiliations'] ?? []) : null,
         ];
     }

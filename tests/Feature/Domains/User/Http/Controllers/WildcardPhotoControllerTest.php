@@ -42,9 +42,7 @@ final class WildcardPhotoControllerTest extends TestCase
             ->andReturn(true);
 
         Storage::shouldReceive('temporaryUrl')
-            ->withArgs(function ($path, $expiration): bool {
-                return is_string($path) && $expiration instanceof \DateTimeInterface;
-            })
+            ->withArgs(fn ($path, $expiration): bool => is_string($path) && $expiration instanceof \DateTimeInterface)
             ->once()
             ->andReturn(self::TEMPORARY_URL);
 

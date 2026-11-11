@@ -47,9 +47,7 @@ class UsersRelationManager extends RelationManager
             ->recordTitleAttribute('username')
             ->columns([
                 TextColumn::make('clerical_name')
-                    ->sortable(query: function (Builder $query, $direction) {
-                        return $query->orderBy('last_name', $direction)->orderBy('first_name', $direction);
-                    })
+                    ->sortable(query: fn (Builder $query, $direction) => $query->orderBy('last_name', $direction)->orderBy('first_name', $direction))
                     ->label('Name'),
                 TextColumn::make('username')
                     ->label('NetID')

@@ -29,7 +29,7 @@
         "league/flysystem-aws-s3-v3": "^3.29",
         "livewire/livewire": "^4.0",
         "mockery/mockery": "^1.6",
-        "northwestern-sysdev/chassis": "^1.5.1",
+        "northwestern-sysdev/chassis": "^1.5.2",
         "northwestern-sysdev/laravel-soa": "^12.0",
         "northwestern-sysdev/northwestern-filament-theme": "^4.2.1",
         "northwestern-sysdev/tdx-php-sdk": "^0.6",
@@ -41,7 +41,7 @@
         "spatie/laravel-markdown": "^2.7",
         "spatie/laravel-permission": "^8.0",
         "spatie/security-advisories-health-check": "^1.3",
-        "zircote/swagger-php": "^6.0"
+        "zircote/swagger-php": "^7.0"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^3.5.5",
@@ -103,8 +103,8 @@
         "format:frontend": "pnpm run format",
         "analyse:php": "vendor/bin/phpstan analyse --memory-limit=2G",
         "test:browser": "vendor/bin/pest --testsuite=Browser --parallel",
-        "openapi:generate": "@php ./vendor/bin/openapi app/ vendor/northwestern-sysdev/chassis/src/",
-        "openapi:generate:v1": "@php ./vendor/bin/openapi app/ vendor/northwestern-sysdev/chassis/src/ --exclude Api/V2 --output docs/schemas/api-schema.yaml",
+        "openapi:generate": "@php ./vendor/bin/openapi -c cleanup.enabled=false app/ vendor/northwestern-sysdev/chassis/src/",
+        "openapi:generate:v1": "@php ./vendor/bin/openapi -c cleanup.enabled=false app/ vendor/northwestern-sysdev/chassis/src/ --exclude Api/V2 --output docs/schemas/api-schema.yaml",
         "ide-helper:generate": [
             "@php artisan ide-helper:generate",
             "@php artisan ide-helper:meta",

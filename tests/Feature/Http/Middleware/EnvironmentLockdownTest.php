@@ -27,9 +27,7 @@ final class EnvironmentLockdownTest extends TestCase
     {
         parent::setUp();
 
-        Route::middleware(['web', EnvironmentLockdown::class])->get($this->endpoint, function () {
-            return response()->json(['ok' => true]);
-        });
+        Route::middleware(['web', EnvironmentLockdown::class])->get($this->endpoint, fn () => response()->json(['ok' => true]));
 
         $this->adminRole = Role::factory()->create(['name' => 'Admin']);
         $this->nuRole = Role::query()->where('name', SystemRole::NorthwesternUser->value)->firstOrFail();
@@ -173,9 +171,7 @@ final class EnvironmentLockdownTest extends TestCase
 
         foreach (config('platform.lockdown.exempted_routes', []) as $routeName) {
             Route::middleware(['web', EnvironmentLockdown::class])
-                ->get('/test-route-' . str_replace('.', '-', $routeName), function () {
-                    return response()->json(['ok' => true]);
-                })
+                ->get('/test-route-' . str_replace('.', '-', $routeName), fn () => response()->json(['ok' => true]))
                 ->name($routeName);
 
             $this->actingAs($user)

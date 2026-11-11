@@ -47,7 +47,7 @@ abstract readonly class Preferences implements Castable
         }
 
         // Through reflection, because each subclass declares its own constructor.
-        return (new ReflectionClass(static::class))->newInstanceArgs($arguments);
+        return new ReflectionClass(static::class)->newInstanceArgs($arguments);
     }
 
     /**
@@ -79,12 +79,12 @@ abstract readonly class Preferences implements Castable
     {
         $class = static::class;
 
-        return new class($class) implements CastsAttributes
+        return new readonly class($class) implements CastsAttributes
         {
             /**
              * @param  class-string<Preferences>  $class
              */
-            public function __construct(private readonly string $class)
+            public function __construct(private string $class)
             {
             }
 
@@ -115,7 +115,7 @@ abstract readonly class Preferences implements Castable
      */
     private static function parameters(): array
     {
-        return (new ReflectionClass(static::class))->getConstructor()?->getParameters() ?? [];
+        return new ReflectionClass(static::class)->getConstructor()?->getParameters() ?? [];
     }
 
     /**

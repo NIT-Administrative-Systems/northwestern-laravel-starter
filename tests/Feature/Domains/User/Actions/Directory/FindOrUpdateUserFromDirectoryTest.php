@@ -130,9 +130,7 @@ final class FindOrUpdateUserFromDirectoryTest extends TestCase
 
         $this->assertInstanceOf(User::class, $user);
 
-        Exceptions::assertReported(function (\Exception $e) {
-            return $e->getMessage() === 'Job dispatch failed';
-        });
+        Exceptions::assertReported(fn (\Exception $e) => $e->getMessage() === 'Job dispatch failed');
     }
 
     public function test_missing_email_returns_existing_user(): void

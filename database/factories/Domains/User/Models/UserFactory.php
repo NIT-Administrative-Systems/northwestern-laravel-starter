@@ -96,21 +96,19 @@ class UserFactory extends Factory
 
     public function api(): self
     {
-        return $this->state(function () {
-            return [
-                'auth_type' => AuthType::API,
-                'primary_affiliation' => Affiliation::Other,
-                'username' => 'api-' . fake()->unique()->userName(),
-                'email' => null,
-                'first_name' => fake()->company(),
-                'last_name' => 'API',
-                'employee_id' => null,
-                'phone' => null,
-                'job_titles' => [],
-                'departments' => [],
-                'last_directory_sync_at' => null,
-            ];
-        });
+        return $this->state(fn () => [
+            'auth_type' => AuthType::API,
+            'primary_affiliation' => Affiliation::Other,
+            'username' => 'api-' . fake()->unique()->userName(),
+            'email' => null,
+            'first_name' => fake()->company(),
+            'last_name' => 'API',
+            'employee_id' => null,
+            'phone' => null,
+            'job_titles' => [],
+            'departments' => [],
+            'last_directory_sync_at' => null,
+        ]);
     }
 
     public function student(): self

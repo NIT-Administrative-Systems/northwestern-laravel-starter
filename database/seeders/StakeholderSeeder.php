@@ -106,8 +106,8 @@ class StakeholderSeeder extends Seeder
         }
 
         return array_values(array_filter(
-            array_map('trim', $config),
-            fn (string $netId) => filled($netId),
+            array_map(trim(...), $config),
+            filled(...),
         ));
     }
 }

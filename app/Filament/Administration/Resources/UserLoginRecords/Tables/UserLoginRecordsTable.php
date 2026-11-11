@@ -24,10 +24,9 @@ class UserLoginRecordsTable
             ->columns([
                 TextColumn::make('user.clerical_name')
                     ->label('Name')
-                    ->searchable(query: function (Builder $query, string $search): Builder {
+                    ->searchable(query:
                         /** @phpstan-ignore-next-line  */
-                        return $query->orWhereHas('user', fn (Builder $q) => $q->searchByName($search));
-                    })
+                        fn (Builder $query, string $search): Builder => $query->orWhereHas('user', fn (Builder $q) => $q->searchByName($search)))
                     ->hidden($isRelationManager),
                 TextColumn::make('user.username')
                     ->label('Username')

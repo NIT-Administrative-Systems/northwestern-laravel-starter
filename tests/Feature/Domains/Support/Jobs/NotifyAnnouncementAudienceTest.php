@@ -26,8 +26,8 @@ final class NotifyAnnouncementAudienceTest extends TestCase
         User::factory()->create(['netid_inactive' => true]);
         $announcement = Announcement::factory()->create(['notify_audience' => true]);
 
-        (new NotifyAnnouncementAudience($announcement))->handle();
-        (new NotifyAnnouncementAudience($announcement))->handle();
+        new NotifyAnnouncementAudience($announcement)->handle();
+        new NotifyAnnouncementAudience($announcement)->handle();
 
         Notification::assertSentTo($person, AnnouncementNotification::class);
         Notification::assertCount(1);
@@ -44,7 +44,7 @@ final class NotifyAnnouncementAudienceTest extends TestCase
         $staff = User::factory()->staff()->create();
         $announcement = Announcement::factory()->targeted([$coordinators], [Affiliation::Student])->create(['notify_audience' => true]);
 
-        (new NotifyAnnouncementAudience($announcement))->handle();
+        new NotifyAnnouncementAudience($announcement)->handle();
 
         Notification::assertSentTo([$coordinator, $student], AnnouncementNotification::class);
         Notification::assertNotSentTo($staff, AnnouncementNotification::class);
@@ -86,7 +86,7 @@ final class NotifyAnnouncementAudienceTest extends TestCase
         Notification::fake();
         User::factory()->create();
 
-        (new NotifyAnnouncementAudience(Announcement::factory()->create()))->handle();
+        new NotifyAnnouncementAudience(Announcement::factory()->create())->handle();
 
         Notification::assertNothingSent();
     }

@@ -30,10 +30,8 @@ class UserLoginRecordFactory extends Factory
 
     public function useExistingLookups(): self
     {
-        return $this->state(function () {
-            return [
-                'user_id' => User::inRandomOrder()->value('id'),
-            ];
-        });
+        return $this->state(fn () => [
+            'user_id' => User::inRandomOrder()->value('id'),
+        ]);
     }
 }

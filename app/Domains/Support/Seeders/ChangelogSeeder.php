@@ -36,7 +36,7 @@ class ChangelogSeeder extends IdempotentSeeder
 
     protected string $slugColumn = 'slug';
 
-    private MarkdownConverter $markdownConverter;
+    private readonly MarkdownConverter $markdownConverter;
 
     public function __construct()
     {

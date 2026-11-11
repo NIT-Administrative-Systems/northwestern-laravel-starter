@@ -48,6 +48,6 @@ final class ApplicationConnectedNotificationTest extends TestCase
 
     private function connection(): OAuthConnection
     {
-        return (new OAuthConnection())->setRelation('oauth_client', $this->registerApplication());
+        return new OAuthConnection()->setRelation('oauth_client', $this->registerApplication());
     }
 }

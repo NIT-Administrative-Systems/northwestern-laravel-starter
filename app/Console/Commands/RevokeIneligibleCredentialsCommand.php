@@ -64,7 +64,7 @@ class RevokeIneligibleCredentialsCommand extends Command
         $clients = 0;
 
         // Not the serviceClients() scope: it hides clients whose API user was deleted.
-        $serviceClients = OAuthClient::query()->where('owner_type', (new User())->getMorphClass())->where('revoked', false);
+        $serviceClients = OAuthClient::query()->where('owner_type', new User()->getMorphClass())->where('revoked', false);
 
         foreach ($serviceClients->lazyById() as $client) {
             if ($refused(User::withTrashed()->find($client->getAttribute('owner_id')), CredentialKind::ServiceClient)) {

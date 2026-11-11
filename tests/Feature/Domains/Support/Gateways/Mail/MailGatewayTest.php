@@ -33,13 +33,9 @@ final class MailGatewayTest extends TestCase
 
         $gateway->create($ticket);
 
-        Mail::assertQueued(SupportTicketMessage::class, function (SupportTicketMessage $mailable) {
-            return $mailable->hasTo('support@northwestern.edu');
-        });
+        Mail::assertQueued(SupportTicketMessage::class, fn (SupportTicketMessage $mailable) => $mailable->hasTo('support@northwestern.edu'));
 
-        Mail::assertQueued(SupportTicketConfirmation::class, function (SupportTicketConfirmation $mailable) use ($ticket) {
-            return $mailable->hasTo($ticket->requester_email);
-        });
+        Mail::assertQueued(SupportTicketConfirmation::class, fn (SupportTicketConfirmation $mailable) => $mailable->hasTo($ticket->requester_email));
     }
 
     public function test_create_returns_successful_result(): void

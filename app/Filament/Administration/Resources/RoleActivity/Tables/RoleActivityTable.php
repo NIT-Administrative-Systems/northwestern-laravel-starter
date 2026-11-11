@@ -56,9 +56,7 @@ class RoleActivityTable
 
                         return $user?->username;
                     })
-                    ->searchable(query: function (Builder $query, string $search): Builder {
-                        return resolve(UserSearch::class)->applyToRelation($query, 'auditable', $search, includeEmail: false, boolean: 'or');
-                    })
+                    ->searchable(query: fn (Builder $query, string $search): Builder => resolve(UserSearch::class)->applyToRelation($query, 'auditable', $search, includeEmail: false, boolean: 'or'))
                     ->url(
                         fn (Audit $record) => $record->auditable
                         ? route('filament.administration.resources.users.view', ['record' => $record->auditable])
@@ -105,11 +103,9 @@ class RoleActivityTable
 
                 TextColumn::make('user.full_name')
                     ->label('Performed By')
-                    ->state(function (Audit $record): string {
-                        return $record->user
-                            ? $record->user->full_name
-                            : 'System';
-                    })
+                    ->state(fn (Audit $record): string => $record->user
+                        ? $record->user->full_name
+                        : 'System')
                     ->description(function (Audit $record): ?string {
                         if ($record->user) {
                             $desc = $record->user->username;

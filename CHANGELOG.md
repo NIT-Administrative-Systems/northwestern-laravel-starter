@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [v3.1.0] - 2026-11-10
+
+### Changed
+
+- Updated PHP dependencies, including Laravel `13.42.0`, Filament `5.11.2`, Livewire `4.4.8`, Passport `13.11.0`, Chassis `1.5.2`, Pest `5.3.5`, PHPUnit `13.4.5`, PHPStan `2.3.5`, Larastan `3.14.0`, Rector `2.8.4`, and related transitive packages. Filament frontend assets were republished.
+- Updated `zircote/swagger-php` from `6.11.0` to `7.5.0`, which Chassis `1.5.2` allows. The generated schema is now OpenAPI `3.1.0`. `composer openapi:generate` and `openapi:generate:v1` pass `-c cleanup.enabled=false`, so the pagination and validation-problem schemas that no starter endpoint references stay in the document for applications to use.
+- `rector.php` uses `withPhpSets()` in place of the deprecated per-version PHP set, and the code takes its rewrites, mostly arrow functions and `new` without wrapping parentheses. `SpatieEnumMethodCallToEnumConstRector` is skipped, because it rewrote Spatie Health's `Status::ok()` to a constant that class doesn't define.
+- Updated frontend dependencies, including Vite `8.3.7`, `@sentry/browser` `11.11.0`, Tailwind CSS `4.3.5`, Playwright `1.65.0`, and `@sentry/vite-plugin` `11.11.0`. The Sentry plugin now releases with the Sentry SDK, so its version jumps from `5.4.0`. Its options are unchanged, and it no longer installs `@sentry/cli`.
+- Updated the documentation site to Astro `7.4.8`, Starlight `0.42.10`, `@nu-appdev/northwestern-starlight-theme` `1.9.0`, Mermaid `12.3.0` with `astro-mermaid` `2.2.0`, `starlight-openapi` `0.27.0`, and `starlight-links-validator` `0.27.0`. Theme `1.9.0` keeps Mermaid 11's classic look and layout on Mermaid 12.
+- Updated GitHub Actions dependencies (`actions/setup-node` `v7.1.0`, `actions/upload-artifact` `v7.0.2`, `actions/download-artifact` `v8.0.2`, `pnpm/action-setup` `v6.1.1`, `shivammathur/setup-php` `2.40.0`, `EnricoMi/publish-unit-test-result-action` `v2.26.0`), zizmor `1.32.0`, and the OpenTofu version in the commented validation steps and the deployment guide to `1.13.9`.
+- The dark lockup in the README and on the documentation site draws "Laravel Starter" in white instead of grey, so it reads clearly on dark backgrounds.
+
+### Security
+
+- Resolved the open Dependabot alerts for Livewire, `shell-quote`, Vite, `undici`, DOMPurify, `fast-uri`, `source-map-js`, `smol-toml`, KaTeX and `satori`, which theme `1.9.0` moves to `0.63.2`. `glob` and `minimatch` overrides in `pnpm-workspace.yaml` patch the copies the Blade Prettier plugin resolves, and an `fflate` override in `docs/pnpm-workspace.yaml` patches the `0.7.3` that `satori` pins (GHSA-px8p-9vwx-vf98).
+
 ## [v3.0.0] - 2026-10-07
 
 Version 3 rebuilds the starter's interface on one stack, Filament (Livewire, Alpine and Tailwind CSS), with Northwestern branding from `northwestern-sysdev/northwestern-filament-theme` and Department Templates 4.0, and removes the Bootstrap interface. It replaces the bespoke API access tokens with Laravel Passport: service clients, personal access tokens, applications people connect through OAuth, and an MCP server for AI clients. Version 3 is for new applications; applications built on version 2 stay on version 2.
@@ -987,7 +1003,8 @@ First stable release. For installation, configuration, and usage guides, visit t
 - **CI pipeline**: GitHub Actions workflow with PHP/Node setup, database provisioning, Pest and Cypress test execution; Dependabot configuration.
 - **Developer tooling**: `.editorconfig`, `.prettierrc`, `.nvmrc` (Node v24), custom stubs, Rector configuration.
 
-[Unreleased]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v3.0.0...HEAD
+[Unreleased]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v3.1.0...HEAD
+[v3.1.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v3.0.0...v3.1.0
 [v3.0.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.6.0...v3.0.0
 [v2.6.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.5.0...v2.6.0
 [v2.5.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.4.0...v2.5.0
