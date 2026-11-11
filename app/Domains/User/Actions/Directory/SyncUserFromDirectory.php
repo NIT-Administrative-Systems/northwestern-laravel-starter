@@ -7,7 +7,6 @@ namespace App\Domains\User\Actions\Directory;
 use App\Domains\User\Enums\Affiliation;
 use App\Domains\User\Models\User;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Carbon;
 
 class SyncUserFromDirectory
 {
@@ -29,7 +28,7 @@ class SyncUserFromDirectory
         $user = $this->syncDemographics($user, $directoryData);
 
         $user->netid_inactive = false;
-        $user->last_directory_sync_at = Carbon::now();
+        $user->last_directory_sync_at = now();
 
         return $user;
     }
