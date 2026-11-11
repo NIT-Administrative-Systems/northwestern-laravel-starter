@@ -22,49 +22,40 @@ use Spatie\Health\Commands\ScheduleCheckHeartbeatCommand;
 use Spatie\Health\Models\HealthCheckResultHistoryItem;
 
 /*
-|--------------------------------------------------------------------------|
-| ❗⚠️ IMPORTANT ⚠️❗
-|--------------------------------------------------------------------------|
-| When defining schedules in non-production environments, take into account
-| that our RDS databases automatically scale down to zero during periods of
-| inactivity. Running frequent or unnecessary tasks (especially over nights
-| or weekends) can repeatedly wake the databases, negating the cost-saving
-| benefits we aim to achieve.
+|--------------------------------------------------------------------------
+| Scheduling Outside Production
+|--------------------------------------------------------------------------
 |
-|--------------------------------------------------------------------------|
-| 🔄 Environment-Specific Scheduling
-|--------------------------------------------------------------------------|
-| To prevent unnecessary database wake-ups in non-production environments,
-| reduced-frequency schedules should *always* be wrapped in an
-| `App::isProduction()` conditional.
+| Databases below production scale to zero on RDS while
+| idle, and every task that touches one wakes it up.
 |
-| Example:
-|   if (App::isProduction()) {
-|       Schedule::job(...)->everyMinute();
-|   } else {
-|       Schedule::job(...)->weekdays()->at('12:00');
-|   }
+| Run frequent tasks in production only, with a weekday slot everywhere else:
 |
-|--------------------------------------------------------------------------|
-| 🗓️ Task Grouping Best Practice
-|--------------------------------------------------------------------------|
-| Whenever possible, group non-production schedules close together in time.
-| If the database is already awake for one task, later tasks executed will
-| complete more efficiently without triggering additional cold-starts.
+| ```php
+| if (App::isProduction()) {
+|     Schedule::command(...)->everyFiveMinutes();
+| } else {
+|     Schedule::command(...)->weekdays()->at('12:00');
+| }
+| ```
+|
+| Put those slots together, so one wake-up serves them all.
+|
 */
 
 /*
 |--------------------------------------------------------------------------
-| 🌞 Daily Commands
+| Daily
 |--------------------------------------------------------------------------
-| Commands executed once per day to handle tasks such as maintenance, data
-| syncing, and periodic cleanups to ensure the application runs smoothly.
+|
+| Pruning, cleanup and reminders, once a day.
+|
 */
 
 Schedule::command(TelescopePruneCommand::class)->daily();
 Schedule::command(CleanTemporaryS3FilesCommand::class)->daily();
-// model:prune resolves --path from the project root and Symfony's Finder expands the wildcard, so
-// the scheduler can start from any working directory.
+// model:prune resolves --path from the project root and expands
+// the wildcard, so the scheduler can start in any directory.
 Schedule::command(PruneCommand::class, ['--path' => 'app/Domains/*/Models'])->daily();
 Schedule::command(PruneCommand::class, ['--model' => [HealthCheckResultHistoryItem::class]])->daily();
 
@@ -76,17 +67,20 @@ if (config('api.personal_access_tokens.expiration_notifications.enabled')) {
     Schedule::command(SendPersonalAccessTokenExpirationNotificationsCommand::class)->dailyAt('09:00');
 }
 
-// Delete OAuth tokens and codes that expired more than 31 days ago, revoked or not. Not revoked
-// ones sooner: refresh tokens are found through their access tokens when access is revoked, so
-// an access token must outlive its refresh token's 30-day lifetime. Without `--expired`, Passport
+// OAuth tokens and codes that expired more than 31 days
+// ago, revoked or not. Without `--expired`, Passport
 // would delete everything revoked on the next run.
+//
+// Revoking access finds the refresh tokens through
+// their access tokens, so an access token has to
+// outlive its refresh token's 30-day lifetime.
 Schedule::command(PurgeCommand::class, ['--expired', '--hours' => 24 * 31])->daily();
 
 // Self-registered MCP clients nobody connected, or nobody uses any more.
 Schedule::command(PruneMcpClientsCommand::class)->daily();
 
-// The queue's own tables, which model:prune doesn't reach. Their retention is in days, like the
-// others under platform.retention; null keeps them.
+// The queue's own tables, which model:prune doesn't reach. Their retention is
+// in days, like the others under platform.retention, and null keeps them.
 if (filled($failedJobDays = config('platform.retention.failed_jobs'))) {
     Schedule::command(PruneFailedJobsCommand::class, ['--hours' => 24 * (int) $failedJobDays])->daily();
 }
@@ -96,44 +90,32 @@ if (filled($jobBatchDays = config('platform.retention.job_batches'))) {
     Schedule::command(PruneBatchesCommand::class, ['--hours' => $jobBatchHours, '--unfinished' => $jobBatchHours, '--cancelled' => $jobBatchHours])->daily();
 }
 
-// Local accounts nobody has signed in to for platform.accounts.local_inactivity_days days.
+// Local accounts nobody has signed in to for that many days.
 if (filled(config('platform.accounts.local_inactivity_days'))) {
     Schedule::command(DeactivateInactiveLocalUsersCommand::class)->daily();
 }
 
 /*
 |--------------------------------------------------------------------------
-| ⏱️ Hourly Commands
+| Hourly
 |--------------------------------------------------------------------------
-| Commands executed every hour to process frequent updates or time-sensitive
-| operations requiring regular intervals.
 */
 
-// The API refuses these credentials on every request already; this marks them revoked. Outside
-// production it runs with the weekday group, so idle databases aren't woken every hour.
+// The API already refuses these credentials; this marks them revoked.
 if (App::isProduction()) {
     Schedule::command(RevokeIneligibleCredentialsCommand::class)->hourly();
 }
 
 /*
 |--------------------------------------------------------------------------
-| 📅 Weekly Commands
+| Weekdays
 |--------------------------------------------------------------------------
-| Commands executed once per week for tasks such as recurring notifications
-| or summary reports, typically scheduled on a specific day of the week.
+|
+| Outside production, the tasks that run often in production run
+| together once a weekday, so idle databases can stay asleep.
+|
 */
 
-//
-
-/*
-|--------------------------------------------------------------------------
-| 📅 Weekday Commands
-|--------------------------------------------------------------------------
-| Commands executed only on weekdays for business-related notifications or
-| tasks that align with regular business hours.
-*/
-
-// Frequent production commands, grouped once a weekday elsewhere so idle databases can scale to zero.
 if (! App::isProduction()) {
     Schedule::command(RevokeIneligibleCredentialsCommand::class)->weekdays()->at('12:00');
     Schedule::command(NotifyAnnouncementAudiencesCommand::class)->weekdays()->at('12:00');
@@ -141,32 +123,20 @@ if (! App::isProduction()) {
 
 /*
 |--------------------------------------------------------------------------
-| ⚡ Frequent Jobs
+| Every Few Minutes
 |--------------------------------------------------------------------------
-| High-priority or real-time processing jobs that need to run frequently
-| to handle time-sensitive data or events.
 */
 
-// ScheduleCheckHeartbeatCommand writes a single cache entry — no DB or queue
-// traffic — so it runs in every environment. Without it, Spatie's ScheduleCheck
-// reports "the schedule did not run yet" indefinitely.
+// Only a cache write, so it runs everywhere; the Schedule health check reads it.
 Schedule::command(ScheduleCheckHeartbeatCommand::class)->everyMinute();
 
-// Notifies the audience of a scheduled announcement once it starts, when its author asked.
-// Outside production it runs with the weekday group.
+// Notifies an announcement's audience when it starts, if its author asked.
 if (App::isProduction()) {
     Schedule::command(NotifyAnnouncementAudiencesCommand::class)->everyFiveMinutes();
 }
 
 if (App::isProduction()) {
-    // The other two health commands touch infrastructure on every tick and have
-    // no consumer in non-prod. Run `php artisan health:check` on demand in
-    // local/dev when you need a snapshot.
-    //
-    // Queue heartbeat runs every 5 min (QueueCheck staleness threshold is 15 min
-    // in HealthServiceProvider so there's no flapping). RunHealthChecksCommand
-    // ticks every minute so individual checks decide their own cadence via
-    // ->everyMinute() / ->everyFiveMinutes() etc. on the Check instance.
+    // Nobody reads these outside production; run `php artisan health:check` there.
     Schedule::command(DispatchQueueCheckJobsCommand::class)->everyFiveMinutes();
     Schedule::command(RunHealthChecksCommand::class)->everyMinute();
 }

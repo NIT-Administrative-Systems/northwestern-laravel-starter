@@ -12,12 +12,17 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Str;
 
 /**
- * Every audit event the application records: Eloquent's model events, and the custom events
- * recorded through {@see RecordsAuditEvents}. Each one says how it's shown, so the audit
- * tables, filters, timeline and exports stay in step. A new custom event is a new case.
+ * Every audit event the application records: Eloquent's model events,
+ * and the custom events recorded through {@see RecordsAuditEvents}.
  *
- * Audits store the event as a string, and an audit can carry one this enum doesn't name, such as
- * one recorded before it existed. The `*For()` methods describe any stored event.
+ * Each says how it's shown, so the audit tables,
+ * filters, timeline and exports stay in step.
+ *
+ * A new custom event is a new case.
+ *
+ * Audits store the event as a string, so an audit can carry
+ * one this enum doesn't name, such as one recorded before
+ * it existed. The `*For()` methods describe any event.
  */
 enum AuditEvent: string implements HasColor, HasIcon, HasLabel
 {

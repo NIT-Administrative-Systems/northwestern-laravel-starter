@@ -27,7 +27,7 @@ final class TracksPermissionSourcesTest extends TestCase
         $this->role = Role::factory()->createOne();
     }
 
-    public function test_has_permission_from_role_returns_true_when_user_has_role_with_permission(): void
+    public function test_a_role_the_user_holds_grants_its_permission(): void
     {
         $this->role->givePermissionTo(SystemPermission::ViewUsers);
         $this->user->assignRoleWithAudit($this->role, RoleModificationOrigin::System);
@@ -35,21 +35,21 @@ final class TracksPermissionSourcesTest extends TestCase
         $this->assertTrue($this->user->hasPermissionFromRole(SystemPermission::ViewUsers, $this->role));
     }
 
-    public function test_has_permission_from_role_returns_false_when_user_has_role_without_permission(): void
+    public function test_a_role_without_the_permission_grants_nothing(): void
     {
         $this->user->assignRoleWithAudit($this->role, RoleModificationOrigin::System);
 
         $this->assertFalse($this->user->hasPermissionFromRole(SystemPermission::ViewUsers, $this->role));
     }
 
-    public function test_has_permission_from_role_returns_false_when_user_does_not_have_role(): void
+    public function test_a_role_the_user_does_not_hold_grants_nothing(): void
     {
         $this->role->givePermissionTo(SystemPermission::ViewUsers);
 
         $this->assertFalse($this->user->hasPermissionFromRole(SystemPermission::ViewUsers, $this->role));
     }
 
-    public function test_has_permission_from_role_returns_false_when_permission_comes_from_different_role(): void
+    public function test_only_the_role_that_grants_a_permission_is_its_source(): void
     {
         $roleWithPermission = Role::factory()->createOne(['name' => 'role-with-permission']);
         $roleWithPermission->givePermissionTo(SystemPermission::ViewUsers);
@@ -63,7 +63,7 @@ final class TracksPermissionSourcesTest extends TestCase
         $this->assertTrue($this->user->hasPermissionFromRole(SystemPermission::ViewUsers, $roleWithPermission));
     }
 
-    public function test_memoizes_role_permissions_across_multiple_checks(): void
+    public function test_a_roles_permissions_are_loaded_once_per_user(): void
     {
         $this->role->givePermissionTo([
             SystemPermission::ViewUsers,
@@ -83,7 +83,7 @@ final class TracksPermissionSourcesTest extends TestCase
         $this->assertLessThanOrEqual(1, $queryCount);
     }
 
-    public function test_get_roles_with_permission_returns_all_roles_granting_permission(): void
+    public function test_every_role_that_grants_a_permission_is_found(): void
     {
         $adminRole = Role::factory()->createOne(['name' => 'admin']);
         $adminRole->givePermissionTo(SystemPermission::ViewUsers);
@@ -103,7 +103,7 @@ final class TracksPermissionSourcesTest extends TestCase
         $this->assertFalse($roles->contains('id', $basicRole->id));
     }
 
-    public function test_get_roles_with_permission_returns_empty_when_no_roles_grant_permission(): void
+    public function test_no_role_is_found_when_none_grants_the_permission(): void
     {
         $this->user->assignRoleWithAudit($this->role, RoleModificationOrigin::System);
 
@@ -112,14 +112,14 @@ final class TracksPermissionSourcesTest extends TestCase
         $this->assertCount(0, $roles);
     }
 
-    public function test_get_roles_with_permission_returns_empty_when_user_has_no_roles(): void
+    public function test_a_user_without_roles_has_no_source_for_a_permission(): void
     {
         $roles = $this->user->getRolesWithPermission(SystemPermission::ViewUsers);
 
         $this->assertCount(0, $roles);
     }
 
-    public function test_get_permissions_from_role_returns_all_permissions_from_role(): void
+    public function test_a_held_role_gives_all_its_permissions(): void
     {
         $this->role->givePermissionTo([
             SystemPermission::ViewUsers,
@@ -136,7 +136,7 @@ final class TracksPermissionSourcesTest extends TestCase
         $this->assertTrue($permissions->contains(SystemPermission::ViewRoles));
     }
 
-    public function test_get_permissions_from_role_returns_empty_when_user_does_not_have_role(): void
+    public function test_a_role_the_user_does_not_hold_gives_no_permissions(): void
     {
         $this->role->givePermissionTo(SystemPermission::ViewUsers);
 
@@ -145,7 +145,7 @@ final class TracksPermissionSourcesTest extends TestCase
         $this->assertCount(0, $permissions);
     }
 
-    public function test_get_permissions_from_role_returns_empty_when_role_has_no_permissions(): void
+    public function test_a_role_without_permissions_gives_none(): void
     {
         $this->user->assignRoleWithAudit($this->role, RoleModificationOrigin::System);
 
@@ -154,7 +154,7 @@ final class TracksPermissionSourcesTest extends TestCase
         $this->assertCount(0, $permissions);
     }
 
-    public function test_get_permissions_from_role_returns_permission_enum_instances(): void
+    public function test_permissions_from_a_role_are_system_permissions(): void
     {
         $this->role->givePermissionTo(SystemPermission::ViewUsers);
         $this->user->assignRoleWithAudit($this->role, RoleModificationOrigin::System);

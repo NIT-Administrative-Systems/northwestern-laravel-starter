@@ -73,7 +73,7 @@ Then follow the [installation guide](https://laravel-starter.entapp.northwestern
 ### Access and Accountability
 
 - **[Sign-in](https://laravel-starter.entapp.northwestern.edu/features/authentication/)**: Single sign-on, emailed codes for partners without a NetID, and impersonation for troubleshooting.
-- **[Roles and permissions](https://laravel-starter.entapp.northwestern.edu/features/authorization/)**: Managed in the administration panel, with a history of every change.
+- **[Roles and permissions](https://laravel-starter.entapp.northwestern.edu/features/authorization/)**: Managed in the administration panel, given to many people at once from a list or a CSV file, with a history of every change.
 - **[Audit trail](https://laravel-starter.entapp.northwestern.edu/features/audit-logging/)**: Changes to your models, and every role, permission and credential event, with the values before and after.
 - **[Data retention](https://laravel-starter.entapp.northwestern.edu/getting-started/initial-customization/#7-data-retention)**: A retention period for each kind of record, including notifications, imports and the queue's failed jobs, with older records pruned daily.
 
@@ -100,4 +100,4 @@ Then follow the [installation guide](https://laravel-starter.entapp.northwestern
 
 ## Acknowledgements
 
-Built on [Laravel](https://laravel.com), [Filament](https://filamentphp.com) and many other open-source packages. Thanks to the Laravel community and [Northwestern University IT](https://www.it.northwestern.edu).
+Built on [Laravel](https://laravel.com), [Filament](https://filamentphp.com) and many other open-source packages. Thanks to the Laravel community and [Northwestern IT](https://www.it.northwestern.edu).

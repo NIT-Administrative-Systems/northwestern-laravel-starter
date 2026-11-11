@@ -6,7 +6,14 @@
 - **Strict typing**: Start files with `declare(strict_types=1)`;. Use typed properties, scalar/union/DTO types, and return types everywhere. Favor constructor property promotion and `readonly` when stable immutability is intentional.
 - **PHP language features**: Use named arguments, match expressions, nullsafe operator (?->), and attributes over DocBlock annotations. Prefer enums for constrained sets and value objects for domain primitives.
 - **Naming**: Classes/interfaces/traits/enum cases in `PascalCase`, methods/variables in `camelCase`, configuration keys in `snake_case`, and class constants in `UPPER_SNAKE_CASE`.
-- **DocBlocks**: Only add DocBlocks when types need extra context (e.g., collections with generics, third-party payloads). Use `@comment` for attribute/accessor documentation that should be picked up by code generators. Document _why_ a decision is made, not obvious logic.
+- **Comments and DocBlocks**: A comment says what the code can't: why this approach, which constraint forces it, what would break without it. Don't restate the code or narrate its history. Write comments in Laravel's tapered style, as in `Illuminate\Auth\SessionGuard`: a comment of up to 80 characters stays on one line, and a longer one is a paragraph whose first line is at most 80 characters and each following line two to four characters shorter. Get the shape from word choice and line breaks, never from padding, abbreviations or bent grammar. The taper applies to `//` comments, docblock prose, config banner text, Blade `{{-- --}}` comments and TypeScript and CSS comments; PHPDoc tags are exempt. A method docblock opens with a third-person summary ("Determine whether…", "Get the…"). Add a DocBlock only for what the signature can't say: generics, array shapes, a `@throws` callers must handle. Use `@comment` for accessor documentation that code generators read.
+
+    ```php
+    // If we've already retrieved the user for the current request we can just
+    // return it back immediately. We do not want to fetch the user data on
+    // every call to this method because that would be tremendously slow.
+    ```
+
 - **Dependencies**: Prefer dependency injection over manually resolving classes out of the container when possible. Use Laravel contracts when binding abstractions for easier testing.
 
 ## Architectural conventions
@@ -26,7 +33,7 @@
 - **Model properties**: Use `protected $hidden` array for sensitive fields (passwords, tokens). Use `protected $casts` property for type casting, NOT the `casts()` method. Define `protected array $auditExclude` to exclude fields from audit logs (e.g., timestamps that change frequently, tokens, passwords).
 - **Model attributes**: Use Laravel's `Attribute` casting for computed properties. Mark with `@comment` for code generator support. Pattern: `protected function attributeName(): Attribute { return Attribute::make(get: fn() => ...) }`.
 - **Model concerns**: Extract reusable model behavior into traits in `Models/Concerns/`. Examples: `HandlesImpersonation`, `AuditsRoles`. Use Chassis's `PrunesAfterRetentionPeriod` (`Northwestern\SysDev\Chassis\Models\Concerns`) for records that expire. Record a custom audit event with `RecordsAuditEvents::recordAuditEvent()` and a case of the `AuditEvent` enum, never an event string: the enum is what labels, colors and filters it.
-- **Policies & authorization**: Register policies per model and check them explicitly. Align permissions with `spatie/laravel-permission` using enum-based permission constants (e.g., `SystemPermission`).
+- **Policies & authorization**: Register policies per model and check them explicitly. Align permissions with `spatie/laravel-permission` using enum-based permission constants (e.g., `SystemPermission`). Both panels use Filament's `->strictAuthorization()`, so a resource whose model has no policy, or whose policy lacks an ability a page asks for, throws; a resource that decides access in `canAccess()` returns the same from `canViewAny()`.
 - **Livewire & Filament**: Keep Livewire components lean, delegating heavy logic to actions. In Filament resources, extract form/table definitions into methods for reuse and keep validation centralized.
 - **Showing a secret once**: A wizard that issues a credential uses `App\Filament\Support\RevealOnceSecret` for the session, encryption and copy step; don't store a secret in the session or in Livewire state yourself.
 - **Exports**: Extend `App\Filament\Support\BaseExporter`, never Filament's `Exporter` directly: it neutralizes spreadsheet formulas in every cell and writes the completion notice from `recordNoun()`. `ExportAction`'s label, icon, format and disk are set once in `FilamentServiceProvider`.
@@ -96,12 +103,12 @@ This application has **one frontend stack**: Filament (Livewire, Alpine and Tail
 
 Put each page where it belongs:
 
-| Surface                                  | Location                       | Use for                                                                                                                                                                                                          |
-| ---------------------------------------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| App panel (`/app`, default panel)        | `app/Filament/App/`            | The application's features for its users. Default to this.                                                                                                                                                       |
-| Administration panel (`/administration`) | `app/Filament/Administration/` | Back-office tooling                                                                                                                                                                                              |
-| Public layout (`<x-layouts.public>`)     | `resources/views/public/`      | Pages that must work without signing in. Routes use the `panel:app` middleware so Filament's Blade components work. Light only.                                                                                  |
-| Error layout (`<x-layouts.error>`)       | `resources/views/errors/`      | The 500, 503 and database-paused pages. No Filament, auth or database calls; wrap anything that could query the database in `rescue()`. Client error pages (401, 402, 403, 404, 419, 429) use the public layout. |
+| Surface                                  | Location                       | Use for                                                                                                                                                                                                                                                                                                                                                                               |
+| ---------------------------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| App panel (`/app`, default panel)        | `app/Filament/App/`            | The application's features for its users. Default to this.                                                                                                                                                                                                                                                                                                                            |
+| Administration panel (`/administration`) | `app/Filament/Administration/` | Back-office tooling                                                                                                                                                                                                                                                                                                                                                                   |
+| Public layout (`<x-layouts.public>`)     | `resources/views/public/`      | Pages that must work without signing in. Routes use the `panel:app` middleware so Filament's Blade components work. Light only.                                                                                                                                                                                                                                                       |
+| Error pages (`<x-error-layout>`)         | `resources/views/errors/`      | Every error page: a title, the status as `code`, one sentence, and optional `help` and `details` slots. Client errors (401, 402, 403, 404, 419, 429) render on the public layout. The 500, 503 and database-paused pages pass `:navigation="false"` for the bare `<x-layouts.error>`: no Filament, auth or database calls; wrap anything that could query the database in `rescue()`. |
 
 **Stack details:**
 
@@ -113,7 +120,7 @@ Put each page where it belongs:
 **Key patterns:**
 
 ```php
-// Generators target the default (app) panel; add --panel=administration for back-office resources
+// Generators target the app panel; pass --panel=administration for back office.
 php artisan make:filament-resource User --generate --model-namespace=App\\Domains\\User\\Models
 
 // Relation managers must specify full model path
@@ -130,7 +137,7 @@ php artisan make:filament-relation-manager --panel=administration --related-mode
 
 - **Keep Blade declarative:** Push business logic into view models, presenters, or Livewire components. Use `@php` blocks sparingly and never for business rules.
 - **Component reusability:** Prefer Blade components (`<x-component>`) or includes for repeated UI fragments. Register view composers for globally shared data (navigation, user context).
-- **Layout hierarchy:** Outside panels, use the layout components (`<x-layouts.public>`, `<x-layouts.error>`). `@push('scripts')` works only on `<x-layouts.error>`; `<x-layouts.public>` has no `@stack('scripts')`, so give public pages behavior with Alpine, which the layout already loads.
+- **Layout hierarchy:** Outside panels, use `<x-layouts.public>` for pages and `<x-error-layout>` for error pages. `@push('scripts')` works only on the bare error layout (`:navigation="false"`, which renders `<x-layouts.error>`); `<x-layouts.public>` has no `@stack('scripts')`, so give public pages behavior with Alpine, which the layout already loads.
 - **Security helpers:** Always use built-in helpers (`@can`, `@csrf`, `@vite`, `@method`) instead of manual HTML to maintain consistency and security.
 - **Avoid inline PHP:** Never embed business logic in views. Views should only handle presentation logic (loops, conditionals for display).
 

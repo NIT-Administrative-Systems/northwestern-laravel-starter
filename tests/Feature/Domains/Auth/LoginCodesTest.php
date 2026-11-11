@@ -96,11 +96,12 @@ final class LoginCodesTest extends TestCase
         $this->assertNotNull($user->fresh()?->email_verified_at);
         $this->assertNotNull($challenge->fresh()?->consumed_at);
         $this->assertNull($this->codes()->pendingEmail());
-        // Recording the sign-in is SignIn::complete()'s, so every method records it the same way.
+        // SignIn::complete() records the sign-in, so every method records it the same way.
         $this->assertSame(0, UserLoginRecord::query()->count());
     }
 
-    // An unknown email reaches the same code step, so a request can't tell whether it has an account.
+    // An unknown email reaches the same code step, so a
+    // request can't tell whether it has an account.
     public function test_an_unknown_email_gets_the_same_code_step_and_no_code(): void
     {
         $this->codes()->request('missing@example.com', $this->request());
@@ -111,7 +112,8 @@ final class LoginCodesTest extends TestCase
         $this->assertRejected('code', 'That code didn\'t work', fn () => $this->codes()->verify('123456', $this->request()));
     }
 
-    // A % or _ in the email is literal, so "%@example.com" or "t_st@example.com" doesn't reach test@example.com.
+    // A % or _ is literal, so "%@example.com" and
+    // "t_st@example.com" miss test@example.com.
     public function test_wildcards_in_an_email_reach_no_account(): void
     {
         User::factory()->affiliate()->create(['email' => 'test@example.com']);
@@ -139,7 +141,7 @@ final class LoginCodesTest extends TestCase
         }
     }
 
-    // A known email used to have its hourly limit checked twice in one request; it's counted once.
+    // A known email's hourly limit was checked twice in a request; it counts once.
     public function test_a_request_counts_once_against_the_hourly_limit(): void
     {
         User::factory()->affiliate()->create(['email' => 'test@example.com']);
@@ -157,7 +159,7 @@ final class LoginCodesTest extends TestCase
         RateLimiter::hit('login-code:missing@example.com', 3600);
 
         foreach (['known@example.com', 'missing@example.com'] as $email) {
-            // A real plural, with one through nine spelled out: "in 60 minutes", "in one minute".
+            // Real plurals, with one to nine spelled out: "in 60 minutes", "in one minute".
             $this->assertRejected('email', 'Too many sign-in attempts', fn () => $this->codes()->request($email, $this->request()));
         }
 
@@ -342,7 +344,7 @@ final class LoginCodesTest extends TestCase
         Queue::assertNothingPushed();
     }
 
-    // Only the latest code works, so an older email's code can't be guessed at alongside it.
+    // Only the latest code works, so an older code can't be guessed at alongside it.
     public function test_a_new_code_voids_the_earlier_ones(): void
     {
         $this->codes = ['111111', '222222'];
@@ -382,7 +384,8 @@ final class LoginCodesTest extends TestCase
         $this->assertTrue($this->codes()->verify('222222', $this->request())->is($user));
     }
 
-    // Counted for an email without an account too, so the limit doesn't tell the two apart.
+    // Counted for an email without an account too,
+    // so the limit doesn't tell the two apart.
     public function test_wrong_codes_for_an_unknown_email_reach_the_same_limit(): void
     {
         config(['local-auth.code.max_failed_per_day' => 2]);
@@ -395,7 +398,8 @@ final class LoginCodesTest extends TestCase
         $this->assertRejected('code', 'Too many incorrect codes', fn () => $this->codes()->verify('000000', $this->request()));
     }
 
-    // A code sent by an administrator, or read on another device, has no sign-in pending in this browser.
+    // A code sent by an administrator, or read on another
+    // device, has no sign-in pending in this browser.
     public function test_an_emails_link_starts_the_code_step_for_its_challenge(): void
     {
         $user = User::factory()->affiliate()->create(['email' => 'partner@example.com']);

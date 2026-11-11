@@ -60,9 +60,10 @@ before pushing again.
   `BaseExporter` for every export, and show a new credential's secret with `RevealOnceSecret`.
 - **Public pages** in `resources/views/public/`, on `<x-layouts.public>`, with routes in the
   `panel:app` middleware group in `routes/web.php`.
-- **Error pages** in `resources/views/errors/`. Client errors (401, 402, 403, 404, 419, 429)
-  render on the public layout; 500, 503 and database-paused use `<x-layouts.error>`, which
-  must not use Filament, auth or the database.
+- **Error pages** in `resources/views/errors/`, written with `<x-error-layout>` and the status as
+  `code`. Client errors (401, 402, 403, 404, 419, 429) render on the public layout; 500, 503 and
+  database-paused pass `:navigation="false"` for the bare `<x-layouts.error>`, which must not
+  use Filament, auth or the database.
 - **Shared header**: `<x-site-header>` on public, sign-in, lockdown and error pages;
   `<x-panel-brand>` adds the application name to the panels' top bar.
 - **Configuration** in `config/`, read from env variables with sane defaults. Starter
@@ -71,6 +72,10 @@ before pushing again.
 
 ## Rules that are easy to miss
 
+- **Comments taper, as Laravel's do.** A comment of up to 80 characters stays on one line; a
+  longer one is a paragraph whose lines each run two to four characters shorter than the line
+  above. Shape it with word choice, never padding or abbreviation; PHPDoc tags are exempt. See
+  "Comments and DocBlocks" in `copilot-instructions.md`.
 - **Tailwind skips what git ignores.** The app and administration themes and
   `resources/css/errors.css` detect sources automatically, so a class in any file the
   repository tracks compiles. A class that appears only in a package's views under `vendor/`
@@ -82,6 +87,10 @@ before pushing again.
   description that opens with bold text instead of a heading.
 - **Clickable table rows wrap every cell in a link.** A cell that can be empty needs a
   `->placeholder()`, or it becomes a link with no text.
+- **Both panels use Filament's strict authorization.** A resource whose model has no policy, or
+  whose policy lacks an ability a page asks for (`viewAny`, `view`, `create` and so on), throws
+  instead of allowing it. Give every new resource's model a policy, or decide access in the
+  resource's `canAccess()` and return the same from `canViewAny()`.
 - **Panel tests:** `app` is the default panel. Livewire tests of administration pages must
   call `Filament::setCurrentPanel(AdministrationPanelProvider::ID)` first.
 - **Render hooks registered when a panel boots persist for the rest of a test.** Request

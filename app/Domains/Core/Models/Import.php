@@ -8,9 +8,13 @@ use Filament\Actions\Imports\Models\Import as BaseImport;
 use Northwestern\SysDev\Chassis\Models\Concerns\PrunesAfterRetentionPeriod;
 
 /**
- * A Filament table import. Filament records imports with its own model; this one is here so the
- * scheduled `model:prune` deletes them after `platform.retention.imports` days. Their failed rows
- * go with them, and the uploaded file is Livewire's temporary upload, which Livewire cleans up.
+ * A Filament table import.
+ *
+ * The scheduled `model:prune` deletes it after `platform.retention.imports` days.
+ *
+ * Its failed rows go with it. The uploaded
+ * file is a Livewire temporary upload,
+ * which Livewire cleans up itself.
  */
 class Import extends BaseImport
 {

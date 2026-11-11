@@ -10,10 +10,11 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Laravel's CORS handling, plus `cors.open_paths`: endpoints any origin may call, without
- * credentials, such as the MCP server, its discovery documents, client registration and the
- * OAuth token endpoint, which browser-based MCP clients call directly. Every other path
- * follows `config/cors.php` as usual.
+ * Laravel's CORS handling plus `cors.open_paths`, endpoints any origin may call
+ * without credentials. Every other path follows `config/cors.php` as usual.
+ *
+ * Those are the MCP server, its discovery documents, client registration and
+ * the OAuth token endpoint, which browser-based MCP clients call directly.
  */
 class HandleCors extends BaseHandleCors
 {

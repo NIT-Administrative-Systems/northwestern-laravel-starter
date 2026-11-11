@@ -31,7 +31,7 @@ final class ImpersonationControllerTest extends TestCase
         $this->authorizedUser->givePermissionTo(SystemPermission::ManageImpersonation);
     }
 
-    public function test_take_impersonation_requires_authorization(): void
+    public function test_impersonating_needs_the_impersonation_permission(): void
     {
         $unauthorizedUser = User::factory()->create();
         $this->actingAs($unauthorizedUser);
@@ -41,7 +41,7 @@ final class ImpersonationControllerTest extends TestCase
         $response->assertForbidden();
     }
 
-    public function test_take_impersonation_redirects_to_custom_url(): void
+    public function test_impersonating_follows_the_url_the_action_returns(): void
     {
         $this->actingAs($this->authorizedUser);
 
@@ -56,7 +56,7 @@ final class ImpersonationControllerTest extends TestCase
         $response->assertRedirect('https://example.com/dashboard');
     }
 
-    public function test_take_impersonation_redirects_to_custom_non_root_url(): void
+    public function test_impersonating_follows_a_path_the_action_returns(): void
     {
         $this->actingAs($this->authorizedUser);
 
@@ -70,7 +70,7 @@ final class ImpersonationControllerTest extends TestCase
         $response->assertRedirect('/admin/users');
     }
 
-    public function test_take_impersonation_redirects_back(): void
+    public function test_impersonating_someone_who_cannot_be_impersonated_goes_back(): void
     {
         $this->actingAs($this->authorizedUser);
 
@@ -84,7 +84,7 @@ final class ImpersonationControllerTest extends TestCase
         $response->assertRedirect('/');
     }
 
-    public function test_leave_impersonation_redirects_to_custom_url(): void
+    public function test_leaving_follows_the_url_the_action_returns(): void
     {
         $this->mock(StopImpersonation::class, function ($mock) {
             $mock->expects('__invoke')
@@ -96,7 +96,7 @@ final class ImpersonationControllerTest extends TestCase
         $response->assertRedirect('https://example.com/dashboard');
     }
 
-    public function test_leave_impersonation_redirects_back(): void
+    public function test_leaving_can_go_back(): void
     {
         $this->mock(StopImpersonation::class, function ($mock) {
             $mock->expects('__invoke')
@@ -108,7 +108,7 @@ final class ImpersonationControllerTest extends TestCase
         $response->assertRedirect();
     }
 
-    public function test_take_impersonation_fails_without_authenticated_user(): void
+    public function test_guests_are_sent_to_sign_in(): void
     {
         auth()->logout();
 
@@ -119,7 +119,7 @@ final class ImpersonationControllerTest extends TestCase
         $this->assertGuest();
     }
 
-    public function test_take_impersonation_redirects_to_the_app_panel_if_redirect_is_root(): void
+    public function test_impersonating_starts_in_the_app_panel(): void
     {
         $this->actingAs($this->authorizedUser);
 
@@ -138,8 +138,8 @@ final class ImpersonationControllerTest extends TestCase
         $this->assertSame($referer, session('impersonation.return_url'));
     }
 
-    // The Impersonate button is on the administrator's view of the user, which the person being
-    // impersonated usually can't open.
+    // The Impersonate button is on the administrator's view of
+    // the person, which they usually can't open themselves.
     public function test_impersonating_from_the_users_page_lands_somewhere_the_person_can_see(): void
     {
         $this->authorizedUser->givePermissionTo(SystemPermission::AccessAdministrationPanel, SystemPermission::ViewUsers);
@@ -153,7 +153,7 @@ final class ImpersonationControllerTest extends TestCase
         $this->get($response->headers->get('Location'))->assertOk();
     }
 
-    public function test_take_impersonation_stores_valid_referer_url_in_session(): void
+    public function test_the_page_the_administrator_came_from_is_kept_for_leaving(): void
     {
         Session::start();
         $this->actingAs($this->authorizedUser);
@@ -169,7 +169,7 @@ final class ImpersonationControllerTest extends TestCase
         $this->assertSame($referer, session('impersonation.return_url'));
     }
 
-    public function test_take_impersonation_does_not_store_invalid_referer_url_in_session(): void
+    public function test_a_page_on_another_site_is_not_kept_for_leaving(): void
     {
         Session::start();
         $this->actingAs($this->authorizedUser);

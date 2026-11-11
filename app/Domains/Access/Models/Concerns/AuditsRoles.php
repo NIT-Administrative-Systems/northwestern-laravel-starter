@@ -22,24 +22,14 @@ use InvalidArgumentException;
 trait AuditsRoles
 {
     /**
-     * Assigns one or more roles to the user and creates a detailed audit log entry.
+     * Give the user one or more roles and record a Role
+     * Assigned audit: their roles before and after,
+     * why they changed, and any context as tags.
      *
-     * This method captures the complete state of the user's roles both before and after
-     * the assignment, creating a comprehensive audit trail. The audit log includes:
-     * - All roles the user had before the change
-     * - The specific role(s) that were assigned
-     * - All roles the user has after the change
-     * - The origin/reason for the change
-     * - Optional contextual metadata
-     *
-     * @param  Role|array<Role>|BaseCollection<int, Role>  $roles  The role(s) to assign
-     * @param  RoleModificationOrigin  $origin  The source/reason for this role change
-     * @param  array<string, mixed>  $context  Additional contextual information
+     * @param  Role|array<Role>|BaseCollection<int, Role>  $roles
+     * @param  array<string, mixed>  $context  Added to the audit as "key: value" tags
      *
      * @throws InvalidArgumentException When a role doesn't suit the user: see {@see Role::suits()}
-     *
-     * @see auditRoleChange() for the audit event structure
-     * @see removeRoleWithAudit() for the inverse operation
      */
     public function assignRoleWithAudit(
         Role|array|BaseCollection $roles,
@@ -61,22 +51,11 @@ trait AuditsRoles
     }
 
     /**
-     * Removes one or more roles from the user and creates a detailed audit log entry.
+     * Take one or more roles from the user, and record a Role Removed audit with
+     * their roles before and after, why they changed, and any context as tags.
      *
-     * This method captures the complete state of the user's roles both before and after
-     * the removal, creating a comprehensive audit trail. The audit log includes:
-     * - All roles the user had before the change
-     * - The specific role(s) that were removed
-     * - All roles the user has after the change
-     * - The origin/reason for the change
-     * - Optional contextual metadata
-     *
-     * @param  Role|array<Role>|BaseCollection<int, Role>  $roles  The role(s) to remove
-     * @param  RoleModificationOrigin  $origin  The source/reason for this role change
-     * @param  array<string, mixed>  $context  Additional contextual information
-     *
-     * @see auditRoleChange() for the audit event structure
-     * @see assignRoleWithAudit() for the inverse operation
+     * @param  Role|array<Role>|BaseCollection<int, Role>  $roles
+     * @param  array<string, mixed>  $context  Added to the audit as "key: value" tags
      */
     public function removeRoleWithAudit(
         Role|array|BaseCollection $roles,
@@ -92,19 +71,12 @@ trait AuditsRoles
     }
 
     /**
-     * Creates a custom audit log entry for role changes with before/after snapshots.
+     * The origin is the audit's first tag. The roles before and after
+     * share one shape, so the audit's diff compares like with like.
      *
-     * The modification origin is stored as a tag, and optional context entries are
-     * appended as tags (e.g., "reason: promoted"). The diff between old and new
-     * values uses an identical structure for clean visual comparison.
-     *
-     * @param  AuditEvent::RoleAssigned|AuditEvent::RoleRemoved  $event  The specific audit event type
-     * @param  list<RoleData>  $oldRoles  The collection of roles before modification
-     * @param  RoleModificationOrigin  $origin  The source/reason for this role change
-     * @param  array<string, mixed>  $context  Additional contextual information
-     *
-     * @see assignRoleWithAudit()
-     * @see removeRoleWithAudit()
+     * @param  AuditEvent::RoleAssigned|AuditEvent::RoleRemoved  $event
+     * @param  list<RoleData>  $oldRoles
+     * @param  array<string, mixed>  $context
      */
     private function auditRoleChange(
         AuditEvent $event,
@@ -112,7 +84,6 @@ trait AuditsRoles
         RoleModificationOrigin $origin,
         array $context = []
     ): void {
-        // Get latest roles after the modification
         $freshModel = $this->fresh(['roles.role_type']);
         $newRoles = $freshModel
             ? $this->mapRolesToArray($freshModel->roles)
@@ -122,10 +93,8 @@ trait AuditsRoles
     }
 
     /**
-     * Converts a collection of roles to a simplified array format.
-     *
      * @param  BaseCollection<int, Role>  $roles
-     * @return list<RoleData> Array of simplified role data
+     * @return list<RoleData>
      */
     private function mapRolesToArray(BaseCollection $roles): array
     {

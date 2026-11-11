@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Domains\Access\Enums;
 
-use App\Domains\Access\Models\Role;
 use App\Providers\AppServiceProvider;
 use Filament\Support\Contracts\HasLabel;
 use Illuminate\Support\Facades\Gate;
@@ -15,25 +14,19 @@ enum SystemPermission: string implements HasLabel
     // System Administration
 
     /**
-     * Super-administrator permission that bypasses all authorization checks.
+     * Bypasses every authorization check. {@see AppServiceProvider} allows anyone who
+     * holds it in a {@see Gate::before()} callback, before any gate or policy runs.
      *
-     * A {@see Gate::before()} callback in {@see AppServiceProvider} returns `true` for
-     * any user holding this permission, short-circuiting every Gate and Policy check.
-     * Not on API requests: there a Passport token is limited to its scopes, and the
-     * scope, the person's permissions and the policy decide.
+     * Not on API requests, where a token is held to its scopes, and
+     * the scope, the person's permissions and the policy decide.
      *
-     * You never need to check for ManageAll inside a Policy. The `Gate::before` hook
-     * fires first and grants access automatically. Adding an explicit check would be
-     * redundant and misleading.
+     * A policy never needs to check for it.
      *
-     * Use `$user->can(SystemPermission::ManageAll)` (which flows through the Gate) to
-     * restrict features to super-administrators only - things that no other permission
-     * should ever grant.
+     * For a feature only super administrators may use,
+     * ask `$user->can(SystemPermission::ManageAll)`.
      *
-     * Use `$user->hasPermissionTo(SystemPermission::ManageAll)` (Spatie direct check,
-     * bypasses the Gate) only in infrastructure code where using `can()` would cause
-     * recursion — e.g., in {@see Role::canBeManageBy()} where the check must not
-     * trigger the before hook.
+     * `$user->hasPermissionTo()` checks it without the gate, for
+     * the code where `can()` would recurse into that callback.
      */
     case ManageAll = 'manage-all';
     case AccessAdministrationPanel = 'access-administration-panel';
@@ -64,9 +57,6 @@ enum SystemPermission: string implements HasLabel
     case ViewSupportTickets = 'view-support-tickets';
     case ManageAnnouncements = 'manage-announcements';
 
-    /**
-     * A human-readable label of the permission.
-     */
     public function getLabel(): string
     {
         return Str::of($this->value)
@@ -78,8 +68,7 @@ enum SystemPermission: string implements HasLabel
     }
 
     /**
-     * A short description of the permission. This is used in the UI to describe what the permission
-     * allows the user to do.
+     * Get the sentence the administration panel shows for what the permission allows.
      */
     public function description(): string
     {
@@ -117,9 +106,8 @@ enum SystemPermission: string implements HasLabel
     }
 
     /**
-     * A system-managed permission is one that is security-sensitive and has unique operational use cases.
-     * These permissions are typically only assigned to system administrators, and only users with
-     * the {@see self::ManageAll} permission can assign or revoke these permissions from roles.
+     * Determine whether the permission is system-managed: so sensitive that only
+     * someone with {@see self::ManageAll} may add it to a role or remove it.
      */
     public function isSystemManaged(): bool
     {
@@ -136,10 +124,13 @@ enum SystemPermission: string implements HasLabel
     }
 
     /**
-     * Whether the permission is also an OAuth scope of the same name (`view-users`). People
-     * who hold it can grant it to their personal access tokens and to applications they
-     * connect, service clients hold every such scope, and a route requires it with
-     * {@see \App\Domains\Api\Http\Middleware\RequireApiScope}. Data access, not interface.
+     * Determine whether the permission is also an OAuth scope of the same
+     * name (`view-users`), for data access rather than the interface.
+     *
+     * People who hold it can grant it to their personal access tokens and the
+     * applications they connect, and service clients hold every such scope.
+     *
+     * Routes require it with {@see \App\Domains\Api\Http\Middleware\RequireApiScope}.
      */
     public function isApiRelevant(): bool
     {
@@ -150,47 +141,23 @@ enum SystemPermission: string implements HasLabel
     }
 
     /**
-     * Determines the authorization scope of this permission.
+     * Get how far the permission reaches. Every one the starter ships is system-wide.
      *
-     * The scope indicates whether the permission grants system-wide access (SystemWide)
-     * or is limited to resources owned by the user (Personal).
-     *
-     * ## Default Behavior
-     *
-     * All permissions in the starter are SystemWide by default, meaning they grant
-     * unrestricted system-wide access.
-     *
-     * ## Adding Personal-Scoped Permissions
-     *
-     * When adding permissions for self-service functionality (e.g., users managing their
-     * own profiles or content), explicitly mark them as Personal scope:
+     * Mark a self-service permission, which reaches only the person's
+     * own records, as personal, and check ownership in its policy:
      *
      * ```php
      * return match ($this) {
-     *     // Personal-scoped permissions (limited to owned resources)
      *     self::ViewOwnProfile,
-     *     self::EditOwnProfile,
-     *     self::ViewOwnAuditLogs => PermissionScope::Personal,
-     *
-     *     // All other permissions default to system-wide access
+     *     self::EditOwnProfile => PermissionScope::Personal,
      *     default => PermissionScope::SystemWide,
      * };
      * ```
      *
-     * Remember to implement corresponding ownership checks in your Laravel policies
-     * when using personal-scoped permissions.
-     *
-     * @see PermissionScope For detailed documentation on permission scopes
+     * @see PermissionScope
      */
     public function scope(): PermissionScope
     {
-        return match ($this) {
-            // When adding personal-scoped permissions, add them here:
-            // self::ViewOwnProfile,
-            // self::EditOwnProfile => PermissionScope::Personal,
-
-            // All permissions are SystemWide (system-wide) by default
-            default => PermissionScope::SystemWide,
-        };
+        return PermissionScope::SystemWide;
     }
 }

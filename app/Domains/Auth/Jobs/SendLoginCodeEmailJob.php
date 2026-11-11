@@ -13,25 +13,18 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Mail;
 
 /**
- * Responsible for sending the {@see LoginCodeMail} email containing the OTP, and recording
- * the {@see LoginChallenge::$email_sent_at} timestamp.
+ * Emails a sign-in code ({@see LoginCodeMail}) and records when it was sent.
  */
 class SendLoginCodeEmailJob implements ShouldQueue
 {
     use Queueable;
 
     /**
+     * The code travels encrypted, because a queued payload shows
+     * up in the queue, worker logs, failed jobs and monitoring
+     * tools, and the code signs someone in until it expires.
+     *
      * @param  positive-int  $loginChallengeId
-     * @param  string  $encryptedCode  The verification code encrypted at the time the challenge is issued.
-     *
-     * Queued jobs are serialized and transported through the queue (e.g., SES), and the payload
-     * commonly becomes visible in multiple places:
-     * - The queue transport itself
-     * - Worker logs and retry/failure payloads
-     * - APM tools that capture job context
-     *
-     * While the verification code is short-lived, it is still a valid authentication factor during its
-     * lifetime. Encrypting it ensures the raw code is not exposed in any of these places.
      */
     public function __construct(
         public readonly int $loginChallengeId,
@@ -42,13 +35,10 @@ class SendLoginCodeEmailJob implements ShouldQueue
 
     public function handle(LoginCodes $loginCodes): void
     {
-        $challenge = LoginChallenge::find($this->loginChallengeId);
+        $challenge = LoginChallenge::query()->find($this->loginChallengeId);
 
-        if (! $challenge) {
-            return;
-        }
-
-        if (filled($challenge->email_sent_at)) {
+        // A backlog can reach a code after it expired or a newer one replaced it.
+        if (! $challenge?->isActive() || filled($challenge->email_sent_at)) {
             return;
         }
 

@@ -9,9 +9,9 @@ use Illuminate\Http\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
- * A deactivated account tried to sign in. {@see SignIn::complete()} throws it for every sign-in
- * method, after ending the session, and the person sees a page saying their account is
- * deactivated and who can reactivate it.
+ * A deactivated account tried to sign in. {@see SignIn::complete()}
+ * throws it for every method, after ending the session, and the
+ * person sees a page saying who can reactivate the account.
  */
 final class AccountDeactivated extends HttpException
 {
