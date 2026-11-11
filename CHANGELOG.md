@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [v3.2.0] - 2026-11-11
+
 ### Added
 
 - An **Add People** menu on a role's Assigned Users tab and on the Users list gives a role to a pasted list of NetIDs and email addresses, or the people in a CSV file through a Filament importer, up to 1,000 at a time. NetIDs and Northwestern addresses are looked up with `FindOrUpdateUserFromDirectory`; any other address that matches no one becomes a local account. The list is processed on the queue in chunks, each role is given with `assignRoleWithAudit()` and a new `BulkAssignment` origin, and the administrator gets a notification with a download of everyone who wasn't added and why. It needs `AssignRoles` and `CreateUsers`, and isn't offered for assignment-locked or API Integration roles. `CreateLocalUser` now needs only an email address.
@@ -1066,7 +1068,8 @@ First stable release. For installation, configuration, and usage guides, visit t
 - **CI pipeline**: GitHub Actions workflow with PHP/Node setup, database provisioning, Pest and Cypress test execution; Dependabot configuration.
 - **Developer tooling**: `.editorconfig`, `.prettierrc`, `.nvmrc` (Node v24), custom stubs, Rector configuration.
 
-[Unreleased]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v3.1.0...HEAD
+[Unreleased]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v3.2.0...HEAD
+[v3.2.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v3.1.0...v3.2.0
 [v3.1.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v3.0.0...v3.1.0
 [v3.0.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.6.0...v3.0.0
 [v2.6.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.5.0...v2.6.0
