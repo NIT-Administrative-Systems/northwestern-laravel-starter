@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Administration\Resources\RoleActivity;
 
 use App\Domains\Core\Models\Audit;
+use App\Filament\Administration\Resources\Audits\Tables\AuditsTable;
 use App\Filament\Administration\Resources\RoleActivity\Pages\ListRoleActivity;
 use App\Filament\Administration\Resources\RoleActivity\Tables\RoleActivityTable;
 use Filament\Resources\Resource;
@@ -46,7 +47,7 @@ class RoleActivityResource extends Resource
 
         return $query
             ->roleActivity()
-            ->with(['user', 'impersonator', 'auditable']);
+            ->with([...AuditsTable::people(), 'auditable']);
     }
 
     /** @return array<string, \Filament\Resources\Pages\PageRegistration> */

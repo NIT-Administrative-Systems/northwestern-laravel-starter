@@ -40,6 +40,6 @@ class AuditsRelationManager extends RelationManager
         return AuditsTable::configure($table)
             ->modifyQueryUsing(fn (Builder $query) => Audit::query()
                 ->where('user_id', $this->getOwnerRecord()->getKey())
-                ->with('impersonator'));
+                ->with(AuditsTable::people()));
     }
 }
