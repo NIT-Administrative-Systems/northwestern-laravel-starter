@@ -53,13 +53,6 @@ class ServiceClientsRelationManager extends RelationManager
             ->icon(Heroicon::OutlinedKey);
     }
 
-    protected function getTableHeaderActions(): array
-    {
-        return [
-            CreateServiceClientAction::make(),
-        ];
-    }
-
     public function table(Table $table): Table
     {
         return $table
@@ -131,5 +124,12 @@ class ServiceClientsRelationManager extends RelationManager
     {
         /** @var User */
         return $this->getOwnerRecord();
+    }
+
+    protected function getTableHeaderActions(): array
+    {
+        return [
+            CreateServiceClientAction::make(),
+        ];
     }
 }

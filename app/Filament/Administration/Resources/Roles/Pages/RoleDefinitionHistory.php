@@ -31,11 +31,6 @@ class RoleDefinitionHistory extends Page implements Tables\Contracts\HasTable
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClock;
 
-    public function getTitle(): string|Htmlable
-    {
-        return $this->record->name . ' — Definition History';
-    }
-
     public function mount(int|string $record): void
     {
         /** @var Role $resolved */
@@ -45,9 +40,9 @@ class RoleDefinitionHistory extends Page implements Tables\Contracts\HasTable
         $this->authorizeAccess();
     }
 
-    protected function authorizeAccess(): void
+    public function getTitle(): string|Htmlable
     {
-        abort_unless(static::getResource()::canView($this->record), 403);
+        return $this->record->name . ' — Definition History';
     }
 
     public function table(Tables\Table $table): Tables\Table
@@ -59,5 +54,10 @@ class RoleDefinitionHistory extends Page implements Tables\Contracts\HasTable
                     ->where('auditable_id', $this->record->getKey())
             )
         );
+    }
+
+    protected function authorizeAccess(): void
+    {
+        abort_unless(static::getResource()::canView($this->record), 403);
     }
 }

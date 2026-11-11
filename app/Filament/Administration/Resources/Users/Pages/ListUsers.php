@@ -18,6 +18,16 @@ class ListUsers extends ListRecords
 {
     protected static string $resource = UserResource::class;
 
+    /**
+     * No "List" crumb under a title that already names the list.
+     *
+     * @return array<string, string>
+     */
+    public function getBreadcrumbs(): array
+    {
+        return [];
+    }
+
     protected function getHeaderActions(): array
     {
         return [
@@ -38,15 +48,5 @@ class ListUsers extends ListRecords
                 ->outlined()
                 ->button(),
         ];
-    }
-
-    /**
-     * No "List" crumb under a title that already names the list.
-     *
-     * @return array<string, string>
-     */
-    public function getBreadcrumbs(): array
-    {
-        return [];
     }
 }

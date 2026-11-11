@@ -16,6 +16,16 @@ class ListRoles extends ListRecords
 {
     protected static string $resource = RoleResource::class;
 
+    /**
+     * No "List" crumb under a title that already names the list.
+     *
+     * @return array<string, string>
+     */
+    public function getBreadcrumbs(): array
+    {
+        return [];
+    }
+
     protected function getHeaderActions(): array
     {
         return [
@@ -32,15 +42,5 @@ class ListRoles extends ListRecords
                 ->label('Create Role')
                 ->icon(Heroicon::OutlinedPlusCircle),
         ];
-    }
-
-    /**
-     * No "List" crumb under a title that already names the list.
-     *
-     * @return array<string, string>
-     */
-    public function getBreadcrumbs(): array
-    {
-        return [];
     }
 }
