@@ -257,7 +257,7 @@ final class FindOrUpdateUserFromDirectoryTest extends TestCase
     public function test_a_failed_lookup_leaves_an_existing_person_active(): void
     {
         $user = User::factory()->create(['username' => 'abc123', 'auth_type' => AuthType::SSO, 'netid_inactive' => false, 'first_name' => 'Stored']);
-        [$token] = $this->personalAccessToken($user);
+        [$token] = $this->issuePersonalAccessToken($user);
 
         $directoryApi = $this->createStub(DirectorySearch::class);
         $directoryApi->method('lookup')->willReturn(false);

@@ -9,16 +9,9 @@ use App\Domains\Core\Models\BaseModel;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * Role Type category model.
- *
- * Role types provide a hierarchical organization of roles into logical categories.
- * For example, you might have:
- * - "Platform" type for system-wide administrative roles
- * - "Application" type for application-specific roles
- * - "Organization" type for organization-specific roles
- *
- * This allows grouping related roles together in the admin interface and
- * makes it easier to manage large numbers of roles.
+ * A kind of role, one of {@see RoleTypeEnum}.
+ * The type decides which permissions a role
+ * may hold and whether it can be edited.
  */
 class RoleType extends BaseModel
 {

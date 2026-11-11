@@ -15,7 +15,7 @@ use Tests\TestCase;
 #[CoversClass(StartImpersonation::class)]
 final class StartImpersonationTest extends TestCase
 {
-    public function test_user_cannot_impersonate_throws_403(): void
+    public function test_someone_without_the_permission_is_refused(): void
     {
         $managerMock = Mockery::mock(ImpersonateManager::class);
         $userMock = Mockery::mock(User::class);
@@ -36,7 +36,7 @@ final class StartImpersonationTest extends TestCase
         }
     }
 
-    public function test_self_impersonation_throws_403(): void
+    public function test_nobody_impersonates_themselves(): void
     {
         $managerMock = Mockery::mock(ImpersonateManager::class);
         $userMock = Mockery::mock(User::class);
@@ -67,7 +67,7 @@ final class StartImpersonationTest extends TestCase
         }
     }
 
-    public function test_impersonation_already_active_throws_403(): void
+    public function test_impersonating_while_already_impersonating_is_refused(): void
     {
         $managerMock = Mockery::mock(ImpersonateManager::class);
         $userMock = Mockery::mock(User::class);
@@ -99,7 +99,7 @@ final class StartImpersonationTest extends TestCase
         }
     }
 
-    public function test_nonexistent_user_throws_404(): void
+    public function test_impersonating_someone_who_does_not_exist_is_not_found(): void
     {
         $managerMock = Mockery::mock(ImpersonateManager::class);
         $userMock = Mockery::mock(User::class);
@@ -134,7 +134,7 @@ final class StartImpersonationTest extends TestCase
         }
     }
 
-    public function test_impersonation_succeeds_and_returns_redirect_url(): void
+    public function test_impersonating_someone_returns_where_to_go_next(): void
     {
         $managerMock = Mockery::mock(ImpersonateManager::class);
         $userMock = Mockery::mock(User::class);
@@ -175,7 +175,7 @@ final class StartImpersonationTest extends TestCase
         $this->assertSame('https://example.com/dashboard', $redirectUrl);
     }
 
-    public function test_user_that_cannot_be_impersonated_redirects_back(): void
+    public function test_someone_who_cannot_be_impersonated_sends_the_administrator_back(): void
     {
         $managerMock = Mockery::mock(ImpersonateManager::class);
         $userMock = Mockery::mock(User::class);

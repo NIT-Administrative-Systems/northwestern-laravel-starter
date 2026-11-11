@@ -8,20 +8,10 @@ use Illuminate\Http\Request;
 use Northwestern\SysDev\Chassis\Http\Middleware\EnvironmentLockdown as BaseEnvironmentLockdown;
 
 /**
- * Restricts application access to users with assigned roles beyond the default Northwestern User role.
+ * Keeps a locked-down environment, such as staging or a demo, to people with a
+ * role beyond Northwestern User. Everyone else is sent to the lockdown page.
  *
- * This middleware is typically enabled in non-production environments (staging, demo)
- * to prevent unauthorized users who discover the application URL from accessing it.
- * Users with only the default Northwestern User role (or no roles) are redirected
- * to a lockdown page explaining they need to be granted access by an administrator.
- *
- * ## Exemptions
- *
- * The following requests bypass lockdown:
- * - Lockdown disabled via config
- * - User is impersonating another user
- * - User has at least one role besides Northwestern User
- * - Request is to an authentication or lockdown route
+ * Impersonation and `platform.lockdown.exempted_routes` pass through.
  */
 class EnvironmentLockdown extends BaseEnvironmentLockdown
 {

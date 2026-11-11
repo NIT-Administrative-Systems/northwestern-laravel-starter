@@ -8,9 +8,13 @@ use Filament\Actions\Imports\Models\FailedImportRow as BaseFailedImportRow;
 use Northwestern\SysDev\Chassis\Models\Concerns\PrunesAfterRetentionPeriod;
 
 /**
- * A row a Filament import couldn't process, kept so the person who imported it can download
- * them. The scheduled `model:prune` deletes them after `platform.retention.failed_import_rows`
- * days, in place of the month Filament's own model would keep them.
+ * A row a Filament import couldn't process, kept
+ * for the person who imported it to download.
+ *
+ * The scheduled `model:prune` deletes these after
+ * `platform.retention.failed_import_rows` days.
+ *
+ * Filament's own model would keep them for a month.
  */
 class FailedImportRow extends BaseFailedImportRow
 {

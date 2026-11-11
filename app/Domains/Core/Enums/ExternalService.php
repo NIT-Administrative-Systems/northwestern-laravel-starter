@@ -7,20 +7,16 @@ namespace App\Domains\Core\Enums;
 use Illuminate\Support\Str;
 
 /**
- * The application might need to interact with external services. Define them here to make interacting
- * with APIs and throwing exceptions more manageable.
+ * Outside services the application calls, named in {@see ServiceDownError}.
  */
 enum ExternalService: string
 {
     case DirectorySearch = 'directory-search';
 
-    /**
-     * A human-readable label of the external service.
-     */
     public function label(): string
     {
         return match ($this) {
-            // Auto-converts the string to a title. You can override one by adding a specific case.
+            // The others are their value in title case; add a case to name one differently.
             default => Str::of($this->value)->replace('-', ' ')->title()->toString(),
         };
     }

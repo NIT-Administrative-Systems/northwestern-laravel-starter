@@ -32,14 +32,15 @@ final class OAuthServiceProviderTest extends TestCase
         $this->assertTrue(Route::has('passport.token'));
     }
 
-    public function test_token_lifetimes(): void
+    public function test_tokens_last_an_hour_and_refresh_tokens_thirty_days(): void
     {
         $this->assertSame(3600, (int) CarbonInterval::instance(Passport::tokensExpireIn())->totalSeconds);
         $this->assertSame(30, (int) CarbonInterval::instance(Passport::refreshTokensExpireIn())->totalDays);
         $this->assertSame(365, (int) CarbonInterval::instance(Passport::personalAccessTokensExpireIn())->totalDays);
     }
 
-    // Integrations call from servers; a browser origin must be allowed explicitly (config/cors.php).
+    // Integrations call from servers; a browser origin
+    // must be allowed explicitly (config/cors.php).
     public function test_the_api_allows_no_browser_origin_by_default(): void
     {
         $this->options('/api/v1/me', [], [

@@ -24,7 +24,7 @@ final class ServiceDownErrorTest extends TestCase
         Route::get('/api/__test/service-down', $throw);
     }
 
-    // The outage is in another service: people get the 503 page, never the upstream error.
+    // The outage is elsewhere, so people get the 503 page, never the upstream error.
     public function test_a_browser_gets_the_service_unavailable_page(): void
     {
         $this->get('/__test/service-down')

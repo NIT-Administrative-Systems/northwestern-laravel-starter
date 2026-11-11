@@ -10,10 +10,11 @@ use Illuminate\Database\Eloquent\Builder;
 /**
  * A Filament table export, and its file.
  *
- * Exports are kept for `platform.retention.exports` days after they finish (7 by default), then
- * the scheduled `model:prune` deletes each one and its file. Filament prunes them one by one, so
- * the file goes too, which is why this doesn't use Chassis's PrunesAfterRetentionPeriod: it
- * deletes in bulk.
+ * Exports are kept for `platform.retention.exports` days after they finish, seven
+ * by default, and then the scheduled `model:prune` deletes each with its file.
+ *
+ * Chassis's PrunesAfterRetentionPeriod deletes in bulk, which would
+ * leave the files behind, so this prunes exports one at a time.
  */
 class Export extends BaseExport
 {

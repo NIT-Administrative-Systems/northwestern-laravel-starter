@@ -10,12 +10,9 @@ use App\Domains\User\Models\User;
 use Illuminate\Support\Collection;
 
 /**
- * Provides methods to check if a user has a permission through a specific role.
- *
- * This trait enables fine-grained permission source checking, which is useful when:
- * - Implementing hierarchical permissions where the same permission may come from different roles
- * - Applying different behaviors based on which role grants access (e.g., different rate limits for API vs admin roles)
- * - Building authorization logic that depends on the context of how access was granted
+ * Which of a user's roles grant a permission,
+ * for rules that depend on how someone came
+ * to hold it, not only whether they do.
  *
  * @mixin User
  *
@@ -24,23 +21,15 @@ use Illuminate\Support\Collection;
 trait TracksPermissionSources
 {
     /**
-     * Memoization cache for role permission lookups.
+     * Each role's permission names by role ID, kept for the life of this model.
      *
      * @var array<int|string, Collection<int, string>>
      */
     private array $rolePermissionsCache = [];
 
     /**
-     * Determine if the user has a specific permission granted through a specific role.
-     *
-     * This method checks whether a permission is granted to the user specifically
-     * through the given role, not just whether the user has the permission at all.
-     * This distinction matters when authorization logic depends on *how* the user
-     * obtained a permission.
-     *
-     * @param  SystemPermission  $permission  The permission to check
-     * @param  Role  $role  The role that should grant this permission
-     * @return bool True if the user has this role AND the role includes this permission
+     * Determine whether `$role` is one of the user's roles and
+     * grants them `$permission`, whatever the others grant.
      */
     public function hasPermissionFromRole(SystemPermission $permission, Role $role): bool
     {
@@ -54,10 +43,9 @@ trait TracksPermissionSources
     }
 
     /**
-     * Get all roles that grant the user a specific permission.
+     * Get the user's roles that grant `$permission`.
      *
-     * @param  SystemPermission  $permission  The permission to check
-     * @return Collection<int, Role> Collection of roles that grant this permission
+     * @return Collection<int, Role>
      */
     public function getRolesWithPermission(SystemPermission $permission): Collection
     {
@@ -69,14 +57,9 @@ trait TracksPermissionSources
     }
 
     /**
-     * Get all permissions the user has through a specific role.
+     * Get the permissions `$role` gives the user, or none when they don't hold it.
      *
-     * Returns only the permissions that both:
-     * 1. The user has (through any role)
-     * 2. Are granted by the specified role
-     *
-     * @param  Role  $role  The role to get permissions from
-     * @return Collection<int, SystemPermission> Collection of permissions from this role
+     * @return Collection<int, SystemPermission>
      */
     public function getPermissionsFromRole(Role $role): Collection
     {
@@ -93,14 +76,7 @@ trait TracksPermissionSources
     }
 
     /**
-     * Get all permission names granted by a specific role.
-     *
-     * Results are memoized per-role for the lifetime of this model instance
-     * to avoid redundant database queries when checking multiple permissions
-     * against the same role.
-     *
-     * @param  Role  $role  The role to get permissions for
-     * @return Collection<int, string> Collection of permission names (string values)
+     * @return Collection<int, string>
      */
     private function getRolePermissionNames(Role $role): Collection
     {

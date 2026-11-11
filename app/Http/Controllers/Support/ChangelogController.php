@@ -11,9 +11,7 @@ use Illuminate\View\View;
 /**
  * Handles the public-facing changelog pages.
  *
- * Displays a paginated index of all changelog entries and individual
- * entry detail pages. Entries are ordered by `authored_at` descending
- * via the model's global scope.
+ * The public changelog: its entries, newest first, and a page for each one.
  */
 class ChangelogController extends Controller
 {
@@ -26,7 +24,7 @@ class ChangelogController extends Controller
         $perPage = config('changelog.pagination.per_page', 10);
 
         return view('public.changelog.index', [
-            'entries' => Changelog::paginate($perPage),
+            'entries' => Changelog::query()->paginate($perPage),
             'feedUrl' => route('support.changelog.feed'),
         ]);
     }

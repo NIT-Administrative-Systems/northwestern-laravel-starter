@@ -12,7 +12,7 @@ use Tests\TestCase;
 
 final class GateSuperAdminBypassTest extends TestCase
 {
-    public function test_user_with_manage_all_can_pass_any_gate_check(): void
+    public function test_manage_all_passes_any_gate(): void
     {
         $user = User::factory()->createOne();
         $role = Role::factory()->createOne();
@@ -22,7 +22,7 @@ final class GateSuperAdminBypassTest extends TestCase
         $this->assertTrue($user->can(SystemPermission::ViewUsers));
     }
 
-    public function test_user_with_manage_all_bypasses_policy_checks(): void
+    public function test_manage_all_passes_any_policy(): void
     {
         $user = User::factory()->createOne();
         $role = Role::factory()->createOne();
@@ -34,7 +34,7 @@ final class GateSuperAdminBypassTest extends TestCase
         $this->assertTrue($user->can('view', $anotherUser));
     }
 
-    public function test_user_without_manage_all_cannot_pass_unauthorized_gate_check(): void
+    public function test_others_are_refused_a_gate_they_lack(): void
     {
         $user = User::factory()->createOne();
         $role = Role::factory()->createOne();
@@ -43,7 +43,7 @@ final class GateSuperAdminBypassTest extends TestCase
         $this->assertFalse($user->can(SystemPermission::ViewUsers));
     }
 
-    public function test_user_without_manage_all_respects_granted_permissions(): void
+    public function test_others_pass_a_gate_their_permissions_allow(): void
     {
         $user = User::factory()->createOne();
         $role = Role::factory()->createOne();

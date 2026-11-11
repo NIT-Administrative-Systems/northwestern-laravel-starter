@@ -29,11 +29,13 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(Authenticatable::class, User::class);
-        // OAuth and MCP clients expect their own protocols' error bodies, not Problem Details.
+
+        // OAuth and MCP clients expect their protocols' own error bodies.
         $this->app->singleton(ProblemDetailsRenderer::class, fn (): ProblemDetailsRenderer => new ProblemDetailsRenderer(
             exceptPaths: ['oauth/*', 'mcp', 'mcp/*', '.well-known/*'],
         ));
         $this->app->bind(DbDumperFactory::class, fn (): ConfigurableDbDumperFactory => new ConfigurableDbDumperFactory());
+
         if (config('local-auth.use_fixed_code')) {
             // Fails the deployment at once, rather than on the first sign-in code.
             FixedNumericOneTimeCodeGenerator::ensureAllowed();
@@ -56,14 +58,15 @@ class AppServiceProvider extends ServiceProvider
         $this->configureRequests();
     }
 
-    /** Configure Vite asset handling and prefetching strategy. */
     protected function configureVite(): void
     {
         Vite::useAggressivePrefetching();
     }
 
-    /** Register the custom user provider and configure the super-admin gate bypass. */
-    public function configureAuthentication(): void
+    /**
+     * Register the eager-loading user provider, and let Manage All past every gate.
+     */
+    protected function configureAuthentication(): void
     {
         Auth::provider(
             'eager-load-eloquent',
@@ -71,15 +74,9 @@ class AppServiceProvider extends ServiceProvider
             static fn (Application $application, array $config): EagerLoadEloquentUserProvider => new EagerLoadEloquentUserProvider($application['hash'], $config['model'])
         );
 
-        /**
-         * Users with the {@see SystemPermission::ManageAll} permission bypass all authorization checks.
-         * This is important to remember when adding new authorization checks to the application.
-         * Be sure to accurately test new features with and without the permission.
-         *
-         * Not on API requests: a token is limited to its scopes, and its user's own permissions
-         * and policies decide the rest, so a super-administrator's token is no exception.
-         */
+        // Test each new check with and without Manage All, which passes every one of them.
         Gate::before(static function (User $user): ?true {
+            // An API token keeps to its scopes, a super administrator's included.
             if ($user->currentAccessToken() instanceof \Laravel\Passport\Contracts\ScopeAuthorizable) {
                 return null;
             }
@@ -88,17 +85,21 @@ class AppServiceProvider extends ServiceProvider
         });
     }
 
-    /** Prevent destructive database commands (migrate:fresh, db:wipe, etc.) in production. */
-    public function configureCommands(): void
+    /**
+     * Refuse destructive database commands, such as `migrate:fresh`, in production.
+     */
+    protected function configureCommands(): void
     {
         DB::prohibitDestructiveCommands(App::isProduction());
     }
 
-    /** Force HTTPS in deployed environments. */
-    public function configureRoutes(): void
+    /**
+     * Force HTTPS URLs in deployed environments.
+     */
+    protected function configureRoutes(): void
     {
-        // Deployed environments are always HTTPS behind their proxy. Locally, follow APP_URL, so a
-        // plain-HTTP server on any port (a worktree's, an agent's) keeps working.
+        // Deployed environments are always HTTPS behind their proxy. Locally,
+        // follow APP_URL, so a plain-HTTP server on any port keeps working.
         $localOverHttp = App::isLocal() && ! str_starts_with((string) config('app.url'), 'https://');
 
         if (! App::environment(['ci', 'testing']) && ! $localOverHttp) {
@@ -106,8 +107,10 @@ class AppServiceProvider extends ServiceProvider
         }
     }
 
-    /** Show full HTTP exception bodies locally and prevent unmocked HTTP calls in tests. */
-    public function configureRequests(): void
+    /**
+     * Show whole HTTP client error bodies locally; refuse unfaked requests in tests.
+     */
+    protected function configureRequests(): void
     {
         if (App::environment(['local', 'ci', 'testing'])) {
             RequestException::dontTruncate();

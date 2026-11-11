@@ -78,7 +78,7 @@ final class McpClientResourceTest extends TestCase
         $user->givePermissionTo(SystemPermission::UseMcp);
         $admin = auth()->user();
         $this->actingAs($user);
-        $token = $this->mcpToken();
+        $token = $this->issueMcpToken();
         $client = McpClientResource::getEloquentQuery()->sole();
         $this->assertNotNull($admin);
         $this->actingAs($admin);
@@ -88,6 +88,6 @@ final class McpClientResourceTest extends TestCase
             ->assertNotified('MCP Client Revoked');
 
         $this->assertSame(CredentialStatus::Revoked, $client->fresh()?->status);
-        $this->mcp($token, 'tools/list')->assertUnauthorized();
+        $this->sendMcpMessage($token, 'tools/list')->assertUnauthorized();
     }
 }

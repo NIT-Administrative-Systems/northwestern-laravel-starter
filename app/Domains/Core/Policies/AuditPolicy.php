@@ -9,8 +9,8 @@ use App\Domains\Core\Models\Audit;
 use App\Domains\User\Models\User;
 
 /**
- * Who may read the audit log. Laravel finds a policy by its model's namespace, so this one lives
- * in the domain that owns {@see Audit}.
+ * Who may read the audit log. Laravel finds a policy by its model's
+ * namespace, so this lives in the domain that owns {@see Audit}.
  */
 class AuditPolicy
 {

@@ -7,9 +7,9 @@ declare(strict_types=1);
 | Test Case
 |--------------------------------------------------------------------------
 |
-| The closure you provide to your test functions is always bound to a specific PHPUnit test
-| case class. By default, that class is "PHPUnit\Framework\TestCase". Of course, you may
-| need to change it using the "uses()" function to bind a different classes or traits.
+| Feature tests written as Pest functions run on
+| the application's TestCase; unit tests run
+| on PHPUnit's, without the application.
 |
 */
 
@@ -26,9 +26,13 @@ uses(
 | Browser Tests
 |--------------------------------------------------------------------------
 |
-| tests/Browser runs in a real browser through Pest's browser plugin and Playwright. It isn't
-| part of the default run: use `composer test:browser`, after `pnpm build`. Chassis adds the
-| health and accessibility expectations; these are the rules every page is checked against.
+| They drive a real browser through Pest's browser plugin
+| and Playwright, and aren't part of the default run:
+| use `composer test:browser` after `pnpm build`.
+|
+| Chassis adds the health and accessibility expectations.
+|
+| These are the rules every page is checked against.
 |
 */
 

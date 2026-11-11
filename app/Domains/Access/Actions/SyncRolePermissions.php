@@ -11,15 +11,16 @@ use App\Domains\Access\Models\Role;
 use App\Domains\User\Models\User;
 
 /**
- * Sets a role's permissions to the ones an editor chose, keeping only those the role's type
- * allows and the editor may grant:
+ * Sets a role's permissions to the ones an editor chose, keeping
+ * only those the role's type allows and the editor may grant.
  *
- * - an API Integration role holds API permissions only;
- * - any other role holds interface permissions, and system-managed ones only from an editor with
- *   Manage All. An editor without it leaves the role's system-managed permissions as they were.
+ * An API Integration role holds API permissions only.
  *
- * Anything else the editor sent is dropped, so a list the form hid, or a value sent by hand,
- * grants nothing. The change is audited on the role.
+ * Any other role holds interface permissions, and system-managed ones only from
+ * an editor with Manage All. An editor without it leaves those as they were.
+ *
+ * Anything else in the editor's request is dropped, so a list the form hid, or
+ * a value sent by hand, grants nothing. The change is audited on the role.
  */
 final readonly class SyncRolePermissions
 {

@@ -15,7 +15,8 @@ use Tests\TestCase;
 final class ErrorPagesTest extends TestCase
 {
     /**
-     * Roll back only the real test connection, not the unreachable one these tests switch to.
+     * Roll back only the real test connection, not
+     * the unreachable one these tests switch to.
      *
      * @var list<string>
      */

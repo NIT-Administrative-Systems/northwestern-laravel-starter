@@ -138,7 +138,7 @@ class MyTest extends TestCase
             'auth_type' => AuthType::SSO,
         ]);
 
-        $this->send(
+        $this->sendEventHubMessage(
             queue: 'etidentity.ldap.netid.term',
             message: 'netid=abc123&action=deactivate',
         );

@@ -30,7 +30,7 @@ final class RateLimitingServiceProviderTest extends TestCase
         config(['rate-limiting.api.per_ip_per_minute' => 1]);
 
         $this->postJson('/oauth/token', ['grant_type' => 'client_credentials'])->assertBadRequest();
-        // Passport's endpoints keep plain JSON errors; Problem Details are for the REST API.
+        // Passport keeps plain JSON errors; Problem Details are for the REST API.
         $this->postJson('/oauth/token', ['grant_type' => 'client_credentials'])
             ->assertTooManyRequests()
             ->assertHeader('Content-Type', 'application/json');

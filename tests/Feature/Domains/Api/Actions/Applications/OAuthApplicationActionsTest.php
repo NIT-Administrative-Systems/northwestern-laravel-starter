@@ -131,7 +131,7 @@ final class OAuthApplicationActionsTest extends TestCase
         foreach ([User::factory()->create(), User::factory()->create()] as $user) {
             $this->actingAs($user);
             [, $verifier] = $this->requestAuthorization($client);
-            $tokens[] = $this->exchange($client, $this->approve($client), $verifier)->json();
+            $tokens[] = $this->exchangeAuthorizationCode($client, $this->approveAuthorization($client), $verifier)->json();
         }
 
         resolve(RevokeOAuthApplication::class)($client);
@@ -157,7 +157,7 @@ final class OAuthApplicationActionsTest extends TestCase
         foreach ([$willie, $other] as $user) {
             $this->actingAs($user);
             [, $verifier] = $this->requestAuthorization($client);
-            $tokens[$user->getKey()] = $this->exchange($client, $this->approve($client), $verifier)->json('access_token');
+            $tokens[$user->getKey()] = $this->exchangeAuthorizationCode($client, $this->approveAuthorization($client), $verifier)->json('access_token');
         }
 
         resolve(DisconnectApplication::class)(OAuthConnection::query()->where('user_id', $willie->getKey())->sole(), $willie);
@@ -173,7 +173,7 @@ final class OAuthApplicationActionsTest extends TestCase
         $person = User::factory()->create();
         $this->actingAs($person);
         [, $verifier] = $this->requestAuthorization($client);
-        $this->exchange($client, $this->approve($client), $verifier);
+        $this->exchangeAuthorizationCode($client, $this->approveAuthorization($client), $verifier);
 
         resolve(DisconnectApplication::class)(OAuthConnection::query()->sole(), $this->administrator());
 
@@ -188,7 +188,7 @@ final class OAuthApplicationActionsTest extends TestCase
         $person = User::factory()->create();
         $this->actingAs($person);
         [, $verifier] = $this->requestAuthorization($client);
-        $this->exchange($client, $this->approve($client), $verifier);
+        $this->exchangeAuthorizationCode($client, $this->approveAuthorization($client), $verifier);
 
         $impersonate = Mockery::mock();
         $impersonate->shouldReceive('isImpersonating')->andReturn(true);
@@ -242,7 +242,7 @@ final class OAuthApplicationActionsTest extends TestCase
     public function test_only_a_connected_application_is_changed_as_one(): void
     {
         config(['mcp.enabled' => true]);
-        [, $serviceClient] = $this->serviceClientToken(User::factory()->api()->create());
+        [, $serviceClient] = $this->issueServiceClientToken(User::factory()->api()->create());
         $mcpClient = $this->registerMcpClient();
 
         foreach ([$serviceClient, $mcpClient] as $client) {

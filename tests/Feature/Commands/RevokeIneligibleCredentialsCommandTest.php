@@ -25,11 +25,11 @@ final class RevokeIneligibleCredentialsCommandTest extends TestCase
     public function test_it_revokes_personal_tokens_whose_owners_lost_the_permission(): void
     {
         $lost = User::factory()->create();
-        [, $lostToken] = $this->personalAccessToken($lost);
+        [, $lostToken] = $this->issuePersonalAccessToken($lost);
         $lost->revokePermissionTo(SystemPermission::CreatePersonalAccessTokens);
 
         $kept = User::factory()->create();
-        [, $keptToken] = $this->personalAccessToken($kept);
+        [, $keptToken] = $this->issuePersonalAccessToken($kept);
 
         $this->artisan(RevokeIneligibleCredentialsCommand::class)
             ->expectsOutputToContain('Revoked 1 personal access token(s), 0 connection(s) and 0 service client(s)')
@@ -45,13 +45,13 @@ final class RevokeIneligibleCredentialsCommandTest extends TestCase
         $lost = User::factory()->create();
         $lost->givePermissionTo(SystemPermission::UseMcp);
         $this->actingAs($lost);
-        $this->mcpToken();
+        $this->issueMcpToken();
         $lost->revokePermissionTo(SystemPermission::UseMcp);
 
         $kept = User::factory()->create();
         $kept->givePermissionTo(SystemPermission::UseMcp);
         $this->actingAs($kept);
-        $keptToken = $this->mcpToken();
+        $keptToken = $this->issueMcpToken();
 
         $this->artisan(RevokeIneligibleCredentialsCommand::class)
             ->expectsOutputToContain('0 personal access token(s), 1 connection(s)')
@@ -59,13 +59,13 @@ final class RevokeIneligibleCredentialsCommandTest extends TestCase
 
         $this->assertSame([$kept->id], OAuthConnection::query()->pluck('user_id')->all());
         $this->assertFalse(OAuthToken::query()->where('user_id', $lost->id)->where('revoked', false)->exists());
-        $this->mcp($keptToken, 'tools/list')->assertOk();
+        $this->sendMcpMessage($keptToken, 'tools/list')->assertOk();
     }
 
     public function test_it_revokes_everything_belonging_to_deactivated_accounts(): void
     {
         $inactive = User::factory()->create();
-        [, $token] = $this->personalAccessToken($inactive);
+        [, $token] = $this->issuePersonalAccessToken($inactive);
         $inactive->forceFill(['netid_inactive' => true])->saveQuietly();
 
         $this->artisan(RevokeIneligibleCredentialsCommand::class)
@@ -81,7 +81,7 @@ final class RevokeIneligibleCredentialsCommandTest extends TestCase
     public function test_it_revokes_the_service_clients_of_a_deleted_api_user(): void
     {
         $apiUser = User::factory()->api()->create();
-        [, $client] = $this->serviceClientToken($apiUser);
+        [, $client] = $this->issueServiceClientToken($apiUser);
         $apiUser->deleteQuietly();
 
         $this->artisan(RevokeIneligibleCredentialsCommand::class)
@@ -95,7 +95,7 @@ final class RevokeIneligibleCredentialsCommandTest extends TestCase
     public function test_turning_a_feature_off_revokes_nothing(): void
     {
         $holder = User::factory()->create();
-        [, $token] = $this->personalAccessToken($holder);
+        [, $token] = $this->issuePersonalAccessToken($holder);
         config(['api.enabled' => false]);
 
         $this->artisan(RevokeIneligibleCredentialsCommand::class)

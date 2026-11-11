@@ -10,11 +10,11 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Since you'll often want information about an authenticated user's roles
- * and permissions for authorization, they are eager loaded upfront.
- *
- * If you find that you need to eager load more relationships, you can
- * add them to the `withQuery` method below.
+ * Loads the signed-in user with their roles,
+ * role types and permissions, which almost
+ * every authorization check reads. Add
+ * any other relationship that every
+ * request needs to `withQuery()`.
  */
 class EagerLoadEloquentUserProvider extends EloquentUserProvider
 {
