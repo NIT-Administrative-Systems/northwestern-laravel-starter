@@ -23,7 +23,8 @@ return [
 
     // Use a fixed, predictable verification code (e.g. "123456") instead of random codes.
     // Useful for local development and CI where you need to repeatedly verify codes.
-    // Blocked from running in production, develop, and QA as a safety measure.
+    // Allowed only in the local, testing and ci environments: anywhere else the application
+    // refuses to boot.
     'use_fixed_code' => (bool) env('LOCAL_AUTH_USE_FIXED_CODE', false),
 
     // Maximum requests per email per hour (applies to both form submissions and code sends)

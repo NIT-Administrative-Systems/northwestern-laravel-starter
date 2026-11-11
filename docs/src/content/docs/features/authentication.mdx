@@ -230,7 +230,7 @@ LOCAL_AUTH_CODE_RESEND_COOLDOWN=30
 ```
 
 <Aside type="tip">
-  Setting `LOCAL_AUTH_USE_FIXED_CODE=true` in your local `.env` replaces random verification codes with a fixed, predictable code (e.g. `123456` for a 6-digit code). This avoids needing to check your mail trap every time you log in during development. This setting is blocked from running in production, develop, and QA environments as a safety measure.
+  Setting `LOCAL_AUTH_USE_FIXED_CODE=true` in your local `.env` replaces random verification codes with a fixed, predictable code (e.g. `123456` for a 6-digit code). This avoids needing to check your mail trap every time you log in during development. It works only when `APP_ENV` is `local`, `testing` or `ci`. In any other environment the application refuses to boot with it turned on, so a deployment that sets it fails at once.
 </Aside>
 
 ### Creating Local Users

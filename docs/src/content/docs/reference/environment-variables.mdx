@@ -126,7 +126,7 @@ These configure [passwordless verification codes](/features/authentication/#pass
 | Variable                                | Default | Description                                                                                    |
 | --------------------------------------- | ------- | ---------------------------------------------------------------------------------------------- |
 | `LOCAL_AUTH_ENABLED`                    | `true`  | Allow sign-in with a code sent by email                                                        |
-| `LOCAL_AUTH_USE_FIXED_CODE`             | `false` | Issue a predictable code (`123456` for six digits). Throws in `production`, `develop` and `qa` |
+| `LOCAL_AUTH_USE_FIXED_CODE`             | `false` | Issue a predictable code (`123456` for six digits). Only in `local`, `testing` and `ci`: anywhere else the application refuses to boot |
 | `LOCAL_AUTH_RATE_LIMIT_PER_HOUR`        | `10`    | Code requests per email address per hour                                                       |
 | `LOCAL_AUTH_RATE_LIMIT_PER_IP_PER_HOUR` | `20`    | Code requests per IP address per hour                                                          |
 | `LOCAL_AUTH_CODE_DIGITS`                | `6`     | Digits in a code                                                                               |

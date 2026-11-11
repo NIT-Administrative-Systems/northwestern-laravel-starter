@@ -12,13 +12,32 @@ use LogicException;
 /**
  * Generates a deterministic, fixed-pattern numeric code.
  *
- * This generator is intended for use in CI environments and testing suites,
+ * This generator is intended for local development, CI and testing suites,
  * where predictable output is needed for assertions and login challenges.
  * It repeats the sequence '1234567890' to fill the required length.
+ *
+ * Only {@see self::ENVIRONMENTS} may use it. The application checks when it boots,
+ * and again on every code, so a deployed environment never issues a code anyone can guess.
  */
 final class FixedNumericOneTimeCodeGenerator implements OneTimeCodeGenerator
 {
+    /** The environments allowed to use a fixed code. */
+    public const array ENVIRONMENTS = ['local', 'testing', 'ci'];
+
     private const string SEED = '1234567890';
+
+    /**
+     * @throws LogicException Outside {@see self::ENVIRONMENTS}
+     */
+    public static function ensureAllowed(): void
+    {
+        if (! App::environment(self::ENVIRONMENTS)) {
+            throw new LogicException(sprintf(
+                'The fixed sign-in code can only be used in the local, testing and ci environments, not [%s]. Turn off LOCAL_AUTH_USE_FIXED_CODE.',
+                App::environment(),
+            ));
+        }
+    }
 
     /**
      * Generate a predictable code based on the SEED pattern.
@@ -28,11 +47,7 @@ final class FixedNumericOneTimeCodeGenerator implements OneTimeCodeGenerator
      */
     public function __invoke(int $digits): string
     {
-        if (App::environment(['production', 'develop', 'qa'])) {
-            throw new LogicException(
-                'The FixedNumericOneTimeCodeGenerator must not be used in production, develop, or QA environments.'
-            );
-        }
+        self::ensureAllowed();
 
         if ($digits < 1) {
             throw new InvalidArgumentException('Digits must be >= 1.');
