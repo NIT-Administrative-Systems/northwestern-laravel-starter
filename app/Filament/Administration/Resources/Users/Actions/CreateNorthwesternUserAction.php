@@ -28,7 +28,6 @@ class CreateNorthwesternUserAction extends Action
 
         $this->authorize(SystemPermission::CreateUsers)
             ->label('Add Northwestern User')
-            ->name('create-nu-user')
             ->icon(Heroicon::OutlinedIdentification)
             ->color('primary')
             ->modalHeading('Add Northwestern User')

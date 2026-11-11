@@ -45,8 +45,6 @@ class RoleResource extends Resource
 
     protected static ?int $navigationSort = 2;
 
-    protected static ?string $description = 'Define roles and assign permissions to control user access.';
-
     protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     /** @return array<NavigationItem> */

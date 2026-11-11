@@ -223,7 +223,7 @@ final class UserResourceTest extends TestCase
         $this->actingAs($administrator);
 
         Livewire::test(ListUsers::class)
-            ->callAction('create-nu-user', ['netid' => 'gone123'])
+            ->callAction('createNorthwesternUser', ['netid' => 'gone123'])
             ->assertNotified('Account Deactivated')
             ->assertRedirect(UserResource::getUrl('view', ['record' => $deactivated]));
 

@@ -45,8 +45,6 @@ class UserResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
-    protected static ?string $description = 'Manage users, their roles, and authentication settings.';
-
     protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     public static function table(Table $table): Table

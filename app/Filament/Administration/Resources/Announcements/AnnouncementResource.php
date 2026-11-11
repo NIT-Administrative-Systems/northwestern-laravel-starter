@@ -36,8 +36,6 @@ class AnnouncementResource extends Resource
 
     protected static ?int $navigationSort = 5;
 
-    protected static ?string $description = 'Messages shown to the application\'s users in a banner and on their Announcements page.';
-
     public static function form(Schema $schema): Schema
     {
         return AnnouncementForm::configure($schema);

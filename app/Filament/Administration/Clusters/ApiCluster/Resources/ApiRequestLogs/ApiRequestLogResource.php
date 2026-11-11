@@ -32,8 +32,6 @@ class ApiRequestLogResource extends Resource
 
     protected static ?string $slug = 'requests';
 
-    protected static ?string $description = 'View and analyze API request logs, response times, and error patterns.';
-
     protected static ?int $navigationSort = 2;
 
     /**
