@@ -24,7 +24,11 @@ Create a snapshot with a descriptive name:
 php artisan db:snapshot:create my-snapshot-name
 ```
 
-The snapshot will be saved to the `database/snapshots/` directory.
+The snapshot is saved as `database/snapshots/my-snapshot-name.sql`, which git ignores. Without a name, it’s saved as `database-dump.sql`.
+
+### Schema Validation
+
+Each snapshot records a checksum of the files in `database/migrations` and the application’s seeders, kept in `database/snapshots/snapshot-checksums.json`. When those files have changed since the snapshot was taken, `db:snapshot:restore` lists both checksums and file counts and asks before restoring, because the snapshot’s tables may no longer match the code. Pass `--skip-schema-validation` to `db:snapshot:create` or `db:snapshot:restore` to skip the checksum.
 
 ### Example Workflow
 
@@ -67,6 +71,8 @@ Create an automatic backup before restoring:
 ```bash
 php artisan db:snapshot:restore my-snapshot-name --backup
 ```
+
+The backup is a snapshot named after the one you restore, such as `my-snapshot-name-pre-restore-2026-11-11-093000`. Restoring asks for confirmation first; `--force` skips the question. After loading the snapshot, it clears the permission cache.
 
 > **Destructive Operation**
 >

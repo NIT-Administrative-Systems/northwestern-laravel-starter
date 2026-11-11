@@ -1,6 +1,6 @@
 # Directory Search
 
-The Directory Search integration looks up Northwestern users by NetID, email, or employee ID via the LDAP-backed Directory Search API. It is the primary mechanism for user provisioning during SSO login and for keeping user profile data synchronized with Northwestern’s identity system.
+The Directory Search integration looks up Northwestern users by NetID, email, or employee ID via the LDAP-backed Directory Search API. It is how accounts are created during single sign-on, and how the starter keeps user profile data synchronized with Northwestern’s identity system.
 
 The underlying API client is provided by the [`northwestern-sysdev/laravel-soa`](https://github.com/NIT-Administrative-Systems/SysDev-laravel-soa) package.
 
@@ -28,6 +28,8 @@ Directory Search is optional in the `local` environment. Local demo users are se
 
    `PersistUserWithUniqueUsername` saves the user in a transaction and assigns the `Northwestern User` role to SSO users. If the save collides with an existing username, it returns the existing user instead.
 
+   The existing account is found with `UserBuilder::firstExistingSsoByNetIdOrNew()` or `firstExistingByEmailOrNewSso()`, which include [deactivated accounts](https://laravel-starter.entapp.northwestern.edu/features/authentication/#deactivating-accounts). A deactivated person’s details are updated, and the account stays deactivated: a lookup never restores it.
+
 ***
 
 ## Key Classes
@@ -43,7 +45,7 @@ Directory Search is optional in the `local` environment. Local demo users are se
 
 ## Post-Retrieval Jobs
 
-After a user is synced and persisted, `FindOrUpdateUserFromDirectory` dispatches a configurable list of **post-retrieval jobs**. This is the extension point for running custom logic when a user is fetched from the directory, whether during SSO sign-in, user creation in the administration panel, or the administration panel’s **Refresh from Directory** action.
+After a user is synced and persisted, `FindOrUpdateUserFromDirectory` dispatches a configurable list of **post-retrieval jobs**. This is the extension point for running custom logic when a user is fetched from the directory, whether during SSO sign-in, user creation in the administration panel, [adding people in bulk](https://laravel-starter.entapp.northwestern.edu/features/authorization/#adding-people-in-bulk), or the administration panel’s **Refresh from Directory** action.
 
 Add your jobs to the `postRetrievalJobs()` method in `FindOrUpdateUserFromDirectory`:
 
@@ -105,13 +107,14 @@ The caller controls whether jobs run synchronously or are dispatched to the queu
 
 | Caller                                     | `$immediate` | Behavior                                                                        |
 | ------------------------------------------ | :----------: | ------------------------------------------------------------------------------- |
-| SSO login                                  |    `false`   | Jobs are **queued**, login completes immediately                                |
+| SSO sign-in                                |    `false`   | Jobs are **queued**, sign-in completes immediately                              |
+| Adding people in bulk                      |    `false`   | Jobs are **queued** from the import’s own queued job                            |
 | Filament user creation                     |    `true`    | Jobs run **synchronously**, the admin sees the result before the page redirects |
 | Filament **Refresh from Directory** action |    `true`    | Jobs run **synchronously**, the admin sees the refreshed record                 |
 
 > **Tip**
 >
-> When jobs run synchronously (`$immediate = true`), failures are caught and reported via your exception handler. They will **not** break the login or creation flow.
+> When jobs run synchronously (`$immediate = true`), failures are caught and reported via your exception handler. They will **not** break the sign-in or creation flow.
 
 The starter ships with [`DownloadWildcardPhotoJob`](https://laravel-starter.entapp.northwestern.edu/northwestern-integrations/wildcard-photos/) as a built-in post-retrieval job (enabled when `platform.wildcard_photo_sync` is `true`).
 
@@ -181,7 +184,7 @@ What happens depends on whether the user already exists:
 * **New user, failed lookup** - No user is returned and no account is created. Sign-in treats it as Directory Search being unavailable: it retries, then shows the 503 page (see [WebSSO error handling](https://laravel-starter.entapp.northwestern.edu/northwestern-integrations/websso/#error-handling)).
 * **New user, incomplete entry** - A `BadDirectoryEntry` exception is thrown, preventing account creation with incomplete data.
 
-Deactivation comes from the directory’s answers and from [EventHub](https://laravel-starter.entapp.northwestern.edu/northwestern-integrations/eventhub/), whose NetID deactivation events still set `netid_inactive`. A deactivated or deleted person can’t use either panel: their next request is refused.
+An inactive NetID comes from the directory’s answers and from [EventHub](https://laravel-starter.entapp.northwestern.edu/northwestern-integrations/eventhub/), whose NetID deactivation events still set `netid_inactive`. Someone whose NetID is inactive, or whose account an administrator [deactivated](https://laravel-starter.entapp.northwestern.edu/features/authentication/#deactivating-accounts), can’t use either panel: `User::canAccessPanel()` refuses their next request.
 
 ***
 

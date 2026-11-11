@@ -50,7 +50,15 @@ final class LoginCodesTest extends TestCase
 }
 ```
 
-The coverage exclusions in `phpunit.xml` must not include a class or trait that a test names in one of these attributes; PHPUnit warns when coverage runs.
+### Coverage
+
+The starter keeps line coverage at 100% for the code `phpunit.xml`’s `<source>` includes: `app/`, less exclusions such as models, enums, seeders and `app/Filament`. Only declared targets count: a test’s lines count for the classes and traits its attributes name, so a new trait needs a `#[CoversTrait]` in some test.
+
+A test must not name a class the exclusions leave out. PHPUnit warns and drops everything that test covers, and the included classes it exercises show as untested. Mark a test whose subject is excluded, such as a Filament page or a model, `#[CoversNothing]`. Check coverage with Herd, which runs PHP with Xdebug:
+
+```bash
+herd coverage -dmemory_limit=2G vendor/bin/pest --coverage --min=100
+```
 
 ### Factories
 
@@ -218,8 +226,8 @@ Add the pages they can’t find to the file for the people who can see them:
 When a third-party widget has a violation you can’t fix, exclude its element by selector and say why in a comment:
 
 ```php
-// The @pierre/diffs viewer renders syntax colors on its change backgrounds inside a shadow
-// DOM, and none of its themes meet color contrast there.
+// The @pierre/diffs viewer draws syntax colors on its change backgrounds in a
+// shadow DOM, and none of the viewer's themes meets color contrast there.
 expect(visit("/administration/audits/{$audit->getKey()}"))->toBeHealthyInEachTheme(exclude: ['diffs-container']);
 ```
 

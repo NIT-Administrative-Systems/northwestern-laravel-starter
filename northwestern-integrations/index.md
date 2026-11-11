@@ -6,7 +6,7 @@ The starter integrates with Northwestern-specific services for identity manageme
 
 Directory Search
 
-Look up Northwestern users by NetID, email, or employee ID via the LDAP-backed Directory Search API. Used during SSO login for automatic user provisioning and profile synchronization.
+Look up Northwestern users by NetID, email, or employee ID via the LDAP-backed Directory Search API. Used during single sign-on to create accounts and keep their details in sync.
 
 [Directory Search →](https://laravel-starter.entapp.northwestern.edu/northwestern-integrations/directory-search/)
 
@@ -18,7 +18,7 @@ Single sign-on authentication for Northwestern users. Ships with Microsoft Entra
 
 EventHub
 
-Consume event messages from Northwestern’s EventHub enterprise messaging platform. The starter listens for NetID lifecycle events to automatically deactivate users.
+Consume event messages from Northwestern’s EventHub enterprise messaging platform. The starter listens for NetID lifecycle events to mark a NetID inactive, remove its roles and sign the person out.
 
 [EventHub →](https://laravel-starter.entapp.northwestern.edu/northwestern-integrations/eventhub/)
 

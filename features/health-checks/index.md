@@ -91,7 +91,7 @@ While checks keep failing, a notification goes out at most once an hour (`notifi
 
 The application uses `EloquentHealthResultStore` to persist health check results in the database. This enables:
 
-* Viewing health status in the admin panel’s Platform Overview page
+* Viewing health status on **Overview**, the administration panel’s home, which people with Manage All see
 * Historical tracking for trend analysis
 * Results available immediately after scheduler runs
 

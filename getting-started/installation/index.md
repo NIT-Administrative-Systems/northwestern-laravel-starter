@@ -184,7 +184,8 @@ This will:
 * Create all database tables
 * Seed system permissions, role types and default roles
 * Sync changelog entries from `resources/changelogs/`
-* Seed the demo users, which the sign-in page offers under **Sign In As**
+* Generate the OAuth signing keys in `storage/` if they don’t exist yet
+* Seed the demo users, which the sign-in page offers under **Sign In As**, and print the demo API user’s service client ID and secret
 * Regenerate the model IDE helper files
 
 > **Caution**

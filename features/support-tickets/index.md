@@ -150,11 +150,13 @@ The `fallback_sent_at` timestamp on the ticket is only set when the fallback suc
 
 ## Filament Admin Panel
 
-The `SupportTicketResource` provides a **read-only** view of all submitted tickets in the administration panel, under the **Platform** navigation group. It requires the `ViewSupportTickets` permission and is only visible when `SUPPORT_ENABLED=true`.
+The `SupportTicketResource` provides a **read-only** view of all submitted tickets in the administration panel, under the **Platform** navigation group. It requires the `ViewSupportTickets` permission and is only visible when `SUPPORT_ENABLED=true`. `SupportTicketPolicy` answers `viewAny` and `view` with the same permission, which the panel’s strict authorization asks for.
 
 The resource displays a red badge on the navigation item showing the count of tickets where `post_error = true`, giving administrators immediate visibility into failed submissions.
 
 Tickets are globally searchable by subject, ticket number, requester email, and submitter name/username.
+
+Tickets are kept forever by default, since they record what people asked for. Set `SUPPORT_TICKET_RETENTION_DAYS` to a number of days and the daily `model:prune` deletes older ones; see [Data Retention](https://laravel-starter.entapp.northwestern.edu/getting-started/initial-customization/#7-data-retention).
 
 ***
 
@@ -287,11 +289,11 @@ Adding a new gateway requires three steps: add an enum case, implement the inter
    JIRA_PROJECT_KEY=SUP
    ```
 
-The factory resolves gateways through the enum, so no additional wiring is needed. The automatic email fallback, admin panel, and submission recording all work with your new driver.
+`SupportServiceProvider` binds the gateway the enum names, so no additional wiring is needed. The automatic email fallback, admin panel, and submission recording all work with your new driver.
 
 ### Alternative: Rebinding the Interface
 
-If you need a completely custom gateway that doesn’t fit the enum-driven pattern, you can bypass the factory entirely by rebinding the `TicketSystemGateway` interface in `AppServiceProvider::boot()`:
+If you need a completely custom gateway that doesn’t fit the enum-driven pattern, you can bypass the enum entirely by rebinding the `TicketSystemGateway` interface in `AppServiceProvider::boot()`:
 
 app/Providers/AppServiceProvider.php
 
@@ -358,6 +360,10 @@ Support team email address
 [#](https://laravel-starter.entapp.northwestern.edu/features/support-tickets/#prop-support-reference-prefix)`SUPPORT_REFERENCE_PREFIX``SUP`
 
 Reference prefix for mail gateway (e.g. `SUP-47`)
+
+[#](https://laravel-starter.entapp.northwestern.edu/features/support-tickets/#prop-support-ticket-retention-days)`SUPPORT_TICKET_RETENTION_DAYS``null (kept)`
+
+Days to keep submitted tickets before pruning
 
 TeamDynamix
 

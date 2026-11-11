@@ -154,7 +154,7 @@ In local, CI, and testing environments, HTTP client exceptions include the full 
 
 ## Filament Defaults
 
-Configured in `FilamentServiceProvider`, except the impersonation banner. These apply to every panel.
+Configured in `FilamentServiceProvider`, except the panel settings and the impersonation banner, which each panel provider sets. These apply to every panel.
 
 ### User Timezone on All Datetimes
 
@@ -162,12 +162,15 @@ All `DateTimePicker`, `TextColumn`, and `TextEntry` components that display date
 
 ### Table Defaults
 
-| Setting            | Value                                             |
-| ------------------ | ------------------------------------------------- |
-| Default pagination | 25 per page                                       |
-| Pagination options | 10, 25, 50, 100                                   |
-| Deferred filters   | Disabled (filters apply immediately)              |
-| DateTime format    | From `config('platform.datetime_display_format')` |
+| Setting                   | Value                                                                               |
+| ------------------------- | ----------------------------------------------------------------------------------- |
+| Default pagination        | 25 per page                                                                         |
+| Pagination options        | 10, 25, 50, 100                                                                     |
+| Deferred filters          | Disabled (filters apply immediately)                                                |
+| DateTime format           | From `config('platform.datetime_display_format')`                                   |
+| Below the `sm` breakpoint | Each row is a card with a label on every value (`stackedOnMobile()`)                |
+| Filters, sort and search  | Kept in the session, so opening a record and coming back leaves the table as it was |
+| Empty state icon          | An inbox (`Heroicon::OutlinedInbox`), in place of Filament’s x-mark                 |
 
 ### Non-Native Selects
 
@@ -175,7 +178,20 @@ All `Select` and `SelectFilter` components render as Filament’s custom searcha
 
 ### Export Defaults
 
-All Filament export actions default to CSV format and write to the `s3` disk.
+Every `ExportAction` is labelled **Export**, with a gray download icon, offers CSV only and writes to the `s3` disk. Exporters extend `App\Filament\Support\BaseExporter`, which neutralizes spreadsheet formulas in every cell.
+
+### Panel Settings
+
+`AppPanelProvider` and `AdministrationPanelProvider` both turn on:
+
+| Setting                         | Effect                                                                                                                                                                                                                                                                                                                   |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `strictAuthorization()`         | A resource whose model has no policy, or whose policy lacks an ability a page asks for, throws instead of being allowed. Give each resource’s model a policy with every ability its pages ask for. A resource that decides access in `canAccess()` returns the same from `canViewAny()`, as `ApiRequestLogResource` does |
+| `unsavedChangesAlerts()`        | The browser warns before someone leaves a form with unsaved changes                                                                                                                                                                                                                                                      |
+| `databaseTransactions()`        | Each create, save and action runs in a database transaction, rolled back if it fails                                                                                                                                                                                                                                     |
+| `sidebarCollapsibleOnDesktop()` | The sidebar can be collapsed on a desktop                                                                                                                                                                                                                                                                                |
+
+A panel you add should set the same.
 
 ### Impersonation Banner
 
@@ -202,7 +218,7 @@ API routes return errors as structured [RFC 9457 Problem Details](https://www.rf
 
 ### Database Timeout Handling
 
-When a database connection times out (common with scale-to-zero RDS in non-production), the application renders a custom “database paused” error page instead of a generic 500. In non-production environments, these timeout errors are also suppressed from error reporting to reduce noise during RDS wake-up periods.
+When a database connection times out (common with scale-to-zero RDS in non-production), people get a “database paused” page that reloads itself, instead of a generic 500. API, OAuth and MCP requests, and any other request that expects JSON, get a Problem Details `503` with `Retry-After: 30` instead; Livewire requests get the page. In non-production environments, these timeout errors are also left out of error reporting, to reduce noise while RDS wakes up.
 
 ### Event Auto-Discovery
 

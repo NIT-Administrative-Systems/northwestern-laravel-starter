@@ -27,7 +27,7 @@ Add another panel when a distinct audience needs its own navigation, its own per
 
 2. **Define a panel ID constant**
 
-   Follow the pattern from `AppPanelProvider` and `AdministrationPanelProvider`. Define a public `ID` constant and reference it consistently:
+   Follow the pattern from `AppPanelProvider` and `AdministrationPanelProvider`. Define a public `ID` constant and reference it consistently, and turn on Filament’s strict authorization, as both panels do:
 
    app/Providers/Filament/PortalPanelProvider.php
 
@@ -42,6 +42,7 @@ Add another panel when a distinct audience needs its own navigation, its own per
            return $panel
                ->id(self::ID)
                ->path(self::ID)
+               ->strictAuthorization()
                // ...
        }
    }
@@ -117,13 +118,23 @@ Add another panel when a distinct audience needs its own navigation, its own per
    @source '../../../../resources/views/filament/portal/**/*';
    @source '../../../../resources/views/components/**/*';
    @source '../../../../vendor/filament/**/*';
+
+
+   /* The footer's focus ring on the purple top bar, as in the other panels. */
+   .fi-topbar :is(a, button):focus-visible {
+       outline: 3px solid var(--color-white);
+       outline-offset: 2px;
+       box-shadow: none;
+   }
    ```
 
-   Add the file to the `input` array in `vite.config.js`, then register the theme, the plugin, and the application name beside the wordmark:
+   Add the file to the `input` array in `vite.config.js`, then register the theme, the plugin, the application name beside the wordmark, the panel’s name at the top of the sidebar, and the Help menu:
 
    ```php
    ->viteTheme('resources/css/filament/portal/theme.css')
    ->renderHook(PanelsRenderHook::TOPBAR_LOGO_AFTER, fn (): string => Blade::render('<x-panel-brand />'))
+   ->renderHook(PanelsRenderHook::SIDEBAR_NAV_START, fn (): string => Blade::render('<x-sidebar-panel-name name="Portal" />'))
+   ->renderHook(PanelsRenderHook::GLOBAL_SEARCH_AFTER, fn (): string => Blade::render('<x-help-menu />'))
    ->plugins([
        NorthwesternTheme::make()
            ->impersonationBanner()
@@ -133,9 +144,12 @@ Add another panel when a distinct audience needs its own navigation, its own per
 
 7. **Add optional features**
 
-   Consider which features from the Administration panel you want to carry over:
+   Consider which features from the other panels you want to carry over. Both collapse the sidebar on a desktop, warn before someone leaves unsaved changes, and save each create and edit in a database transaction:
 
    ```php
+   ->sidebarCollapsibleOnDesktop()
+   ->unsavedChangesAlerts()
+   ->databaseTransactions()
    ->databaseNotifications()
    ->databaseNotificationsPolling('30s')
    ->globalSearch()
@@ -157,7 +171,7 @@ Add another panel when a distinct audience needs its own navigation, its own per
 
 ### Update `canAccessPanel()`
 
-The `User::canAccessPanel()` method uses a `match` statement that intentionally throws an exception for unrecognized panel IDs. You **must** add your new panel here:
+The `User::canAccessPanel()` method uses a `match` statement that intentionally throws an exception for unrecognized panel IDs. You **must** add your new panel here. The method refuses a deactivated or deleted account before the `match`, so the new panel needs no check of its own for that:
 
 app/Domains/User/Models/User.php
 

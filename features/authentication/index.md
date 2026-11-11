@@ -97,14 +97,12 @@ protected function destinationFor(User $user): string
 
 **No landing page**
 
-To send guests straight to sign-in instead of showing the landing page, change the guest branch of `__invoke()`:
+To send guests straight to sign-in instead of showing the landing page, replace the `return view('public.landing');` that ends `__invoke()`:
 
 app/Http/Controllers/HomeController.php
 
 ```php
-if (! $user instanceof User) {
-    return redirect()->to(Filament::getPanel(AppPanelProvider::ID)->getLoginUrl());
-}
+return redirect()->to(Filament::getPanel(AppPanelProvider::ID)->getLoginUrl());
 ```
 
 ***
@@ -137,11 +135,11 @@ Northwestern users authenticate via single sign-on using their NetID credentials
 
 6. **Session established**
 
-   User is logged in and session cookie is set
+   `SignIn::complete()` signs the user in and starts a new session
 
 ### User Provisioning
 
-When a Northwestern user logs in for the first time, the application:
+When a Northwestern user signs in for the first time, the application:
 
 1. **Validates NetID** from SSO response
 
@@ -155,7 +153,7 @@ When a Northwestern user logs in for the first time, the application:
    * Affiliations (student, faculty, staff, etc.)
    * etc.
 
-Subsequent logins update the user’s demographic data to keep it synchronized.
+Later sign-ins update the user’s demographic data to keep it synchronized. If Directory Search can’t be reached, someone who already has an account signs in with the details already stored, and someone signing in for the first time sees the 503 page after three attempts. A lookup never reactivates a [deactivated account](https://laravel-starter.entapp.northwestern.edu/features/authentication/#deactivating-accounts). See [Directory Search](https://laravel-starter.entapp.northwestern.edu/northwestern-integrations/directory-search/#failed-lookups-and-invalid-directory-data).
 
 ***
 
@@ -194,11 +192,11 @@ External users (non-Northwestern) can access the application via time-limited ve
 LOCAL_AUTH_ENABLED=true
 
 
-# Rate limit for login code requests per email (per hour)
+# Sign-in code requests per email, per hour
 LOCAL_AUTH_RATE_LIMIT_PER_HOUR=10
 
 
-# Rate limit for login code requests per IP (per hour)
+# Sign-in code requests per IP address, per hour
 LOCAL_AUTH_RATE_LIMIT_PER_IP_PER_HOUR=20
 
 
@@ -229,7 +227,7 @@ LOCAL_AUTH_CODE_RESEND_COOLDOWN=30
 
 > **Tip**
 >
-> Setting `LOCAL_AUTH_USE_FIXED_CODE=true` in your local `.env` replaces random verification codes with a fixed, predictable code (e.g. `123456` for a 6-digit code). This avoids needing to check your mail trap every time you log in during development. It works only when `APP_ENV` is `local`, `testing` or `ci`. In any other environment the application refuses to boot with it turned on, so a deployment that sets it fails at once.
+> Setting `LOCAL_AUTH_USE_FIXED_CODE=true` in your local `.env` replaces random verification codes with a fixed, predictable code (e.g. `123456` for a 6-digit code). This avoids checking your mail trap every time you sign in during development. It works only when `APP_ENV` is `local`, `testing` or `ci`. In any other environment the application refuses to boot with it turned on, so a deployment that sets it fails at once.
 
 ### Creating Local Users
 
@@ -243,7 +241,7 @@ LOCAL_AUTH_CODE_RESEND_COOLDOWN=30
 
 **Programmatically**
 
-`CreateLocalUser` generates a unique username and creates the local user as an affiliate. With `sendLoginLink: true` (the default), it also emails a verification code.
+`CreateLocalUser` generates a unique username and creates the local user as an affiliate. Only the email is required; the other details are optional. With `sendLoginLink: true` (the default), it also emails a verification code.
 
 ```php
 use App\Domains\User\Actions\Local\CreateLocalUser;
@@ -259,6 +257,8 @@ $user = resolve(CreateLocalUser::class)(
     sendLoginLink: true,
 );
 ```
+
+To give a role to many people at once, local accounts included, use **Add People to a Role** on the Users list or a role’s Assigned Users tab. See [Adding People in Bulk](https://laravel-starter.entapp.northwestern.edu/features/authorization/#adding-people-in-bulk).
 
 ### Security Features
 
@@ -276,7 +276,7 @@ An email can enter `LOCAL_AUTH_CODE_MAX_FAILED_PER_DAY` incorrect codes (default
 
 Rate Limiting
 
-Limits login code requests to prevent abuse and enumeration attacks
+Limits sign-in code requests to prevent abuse and enumeration attacks
 
 Timing Attack Protection
 
@@ -296,6 +296,8 @@ An administrator with `EditUsers` deactivates someone with **Deactivate** on the
 **Reactivate** (`ReactivateUser`) restores the account and records **Account Reactivated**. The credentials revoked with it stay revoked.
 
 Only **Reactivate** brings an account back. A deactivated person who signs in, with a NetID or any other method, is refused by `SignIn::complete()` and sees a page saying their account is deactivated and to contact the team that supports the application. Looking them up in the Northwestern Directory, whether at sign-in, from **Add Northwestern User** or the directory sync on their page, updates their details and leaves them deactivated. **Add Northwestern User** sends you to their page to reactivate them, and [adding people in bulk](https://laravel-starter.entapp.northwestern.edu/features/authorization/#adding-people-in-bulk) lists them as not added.
+
+A session that signed in before the account was deactivated stops working too: `User::canAccessPanel()` refuses both panels to an account that is deleted or whose NetID is inactive, so its next request is refused.
 
 Nobody deactivates or reactivates their own account, and nobody does either while impersonating, super administrators included. `App\Domains\User\AccountStatusAccess` decides both.
 
@@ -347,7 +349,7 @@ See the [API Documentation](https://laravel-starter.entapp.northwestern.edu/feat
 
 ## User Segmentation
 
-Every login creates a `UserLoginRecord` with a **segment**, a classification of the user at that moment. Segments feed the login analytics dashboard (charts, stats, filters) and are captured at login time so historical metrics remain accurate even if user roles change later.
+Every sign-in creates a `UserLoginRecord` with a **segment**, a classification of the user at that moment. Segments feed the **Sign-In Records** page in the administration panel (charts, stats, filters) and are captured at sign-in so historical metrics stay accurate when roles change later.
 
 Sign-in records are deleted after `LOGIN_RECORD_RETENTION_DAYS` (default 365). See [Data Retention](https://laravel-starter.entapp.northwestern.edu/getting-started/initial-customization/#7-data-retention).
 
@@ -399,7 +401,7 @@ All charts, filters, exports, and stats pull from the `UserSegment`. Adding a ne
 
 Authentication uses layered rate limits to prevent brute force attacks and abuse. Limits are applied per IP and per identifier (email or challenge ID) to balance security with usability. `App\Domains\Auth\LoginCodes` enforces the passwordless limits itself, along with the resend cooldown, because the email sign-in page’s Livewire actions don’t pass through route middleware.
 
-### Passwordless Login
+### Passwordless Sign-In
 
 Rate Limits
 
@@ -433,7 +435,7 @@ All rate limiters are defined in `config/rate-limiting.php`.
 
 ## Impersonating Users
 
-Users with the `ManageImpersonation` permission can sign in as another user to see the application as they do. The **Impersonate** button on a user’s page in the administration panel posts to `/impersonate/take/{id}` and opens the app panel as that person, since the page you came from is usually one they can’t open. API users can’t be impersonated, and only a user with `ManageAll` can impersonate another user who has it.
+Users with the `ManageImpersonation` permission can sign in as another user to see the application as they do. The **Impersonate** button on a user’s page in the administration panel posts to `/impersonate/take/{id}` and opens the app panel as that person, since the page you came from is usually one they can’t open. API users can’t be impersonated, and neither can a deactivated account or one whose NetID is inactive (`canBeImpersonated()` in `HandlesImpersonation`). Only a user with `ManageAll` can impersonate another user who has it.
 
 While impersonating, both panels show the theme’s impersonation banner, whose leave button posts to `/impersonate/leave` and returns to the original account, on the page where impersonation started. Both routes are in `routes/auth.php` and share the [impersonation rate limit](https://laravel-starter.entapp.northwestern.edu/features/authentication/#impersonation).
 

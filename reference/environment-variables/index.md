@@ -113,19 +113,19 @@ See [Authentication](https://laravel-starter.entapp.northwestern.edu/features/au
 
 These configure [passwordless verification codes](https://laravel-starter.entapp.northwestern.edu/features/authentication/#passwordless-verification-codes) for users without a NetID.
 
-| Variable                                | Default | Description                                                                                                                                                                                                              |
-| --------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `LOCAL_AUTH_ENABLED`                    | `true`  | Allow sign-in with a code sent by email                                                                                                                                                                                  |
-| `LOCAL_AUTH_USE_FIXED_CODE`             | `false` | Issue a predictable code (`123456` for six digits). Only in `local`, `testing` and `ci`: anywhere else the application refuses to boot                                                                                   |
-| `LOCAL_AUTH_RATE_LIMIT_PER_HOUR`        | `10`    | Code requests per email address per hour                                                                                                                                                                                 |
-| `LOCAL_AUTH_RATE_LIMIT_PER_IP_PER_HOUR` | `20`    | Code requests per IP address per hour                                                                                                                                                                                    |
-| `LOCAL_AUTH_CODE_DIGITS`                | `6`     | Digits in a code                                                                                                                                                                                                         |
-| `LOCAL_AUTH_CODE_EXPIRES_MINUTES`       | `10`    | Minutes before a code expires                                                                                                                                                                                            |
-| `LOCAL_AUTH_CODE_MAX_ATTEMPTS`          | `8`     | Failed attempts before the challenge locks                                                                                                                                                                               |
-| `LOCAL_AUTH_CODE_LOCK_MINUTES`          | `15`    | Minutes a locked challenge stays locked                                                                                                                                                                                  |
-| `LOCAL_ACCOUNT_INACTIVITY_DAYS`         | `null`  | Deactivate local accounts nobody has signed in to for this many days. `null` never does. See [Expiring Local Accounts](https://laravel-starter.entapp.northwestern.edu/features/authentication/#expiring-local-accounts) |
-| `LOCAL_AUTH_CODE_MAX_FAILED_PER_DAY`    | `20`    | Incorrect codes an email may enter in a day, across all its codes                                                                                                                                                        |
-| `LOCAL_AUTH_CODE_RESEND_COOLDOWN`       | `30`    | Seconds before another code can be sent                                                                                                                                                                                  |
+| Variable                                | Default | Description                                                                                                                                                                                                                                                                     |
+| --------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `LOCAL_AUTH_ENABLED`                    | `true`  | Allow sign-in with a code sent by email                                                                                                                                                                                                                                         |
+| `LOCAL_AUTH_USE_FIXED_CODE`             | `false` | Issue a predictable code (`123456` for six digits). Only in `local`, `testing` and `ci`: anywhere else the application refuses to boot                                                                                                                                          |
+| `LOCAL_AUTH_RATE_LIMIT_PER_HOUR`        | `10`    | Code requests per email address per hour                                                                                                                                                                                                                                        |
+| `LOCAL_AUTH_RATE_LIMIT_PER_IP_PER_HOUR` | `20`    | Code requests per IP address per hour                                                                                                                                                                                                                                           |
+| `LOCAL_AUTH_CODE_DIGITS`                | `6`     | Digits in a code                                                                                                                                                                                                                                                                |
+| `LOCAL_AUTH_CODE_EXPIRES_MINUTES`       | `10`    | Minutes before a code expires                                                                                                                                                                                                                                                   |
+| `LOCAL_AUTH_CODE_MAX_ATTEMPTS`          | `8`     | Failed attempts before the challenge locks                                                                                                                                                                                                                                      |
+| `LOCAL_AUTH_CODE_LOCK_MINUTES`          | `15`    | Minutes a locked challenge stays locked                                                                                                                                                                                                                                         |
+| `LOCAL_ACCOUNT_INACTIVITY_DAYS`         | `null`  | Deactivate local accounts nobody has signed in to for this many days. `null` never does. Keep `LOGIN_RECORD_RETENTION_DAYS` at least this long. See [Expiring Local Accounts](https://laravel-starter.entapp.northwestern.edu/features/authentication/#expiring-local-accounts) |
+| `LOCAL_AUTH_CODE_MAX_FAILED_PER_DAY`    | `20`    | Incorrect codes an email may enter in a day, across all its codes                                                                                                                                                                                                               |
+| `LOCAL_AUTH_CODE_RESEND_COOLDOWN`       | `30`    | Seconds before another code can be sent                                                                                                                                                                                                                                         |
 
 ## API
 
@@ -238,19 +238,20 @@ A `null` unit field shows Information Technology’s details. An empty value hid
 
 Days to keep each kind of record before the daily `model:prune` deletes it. `null` or an empty value keeps records forever. See [Data Retention](https://laravel-starter.entapp.northwestern.edu/getting-started/initial-customization/#7-data-retention).
 
-| Variable                           | Default               | Description                                       |
-| ---------------------------------- | --------------------- | ------------------------------------------------- |
-| `AUDIT_RETENTION_DAYS`             | `null` (kept forever) | Audit logs                                        |
-| `LOGIN_RECORD_RETENTION_DAYS`      | `365`                 | Sign-in records                                   |
-| `IMPERSONATION_LOG_RETENTION_DAYS` | `null` (kept forever) | Impersonation logs                                |
-| `LOGIN_CHALLENGE_RETENTION_DAYS`   | `30`                  | Email verification code challenges                |
-| `API_REQUEST_LOG_RETENTION_DAYS`   | `90`                  | API request logs                                  |
-| `NOTIFICATION_RETENTION_DAYS`      | `90`                  | Notifications, read or not                        |
-| `IMPORT_RETENTION_DAYS`            | `30`                  | Imports, with their failed rows                   |
-| `FAILED_IMPORT_ROW_RETENTION_DAYS` | `30`                  | Failed import rows                                |
-| `SUPPORT_TICKET_RETENTION_DAYS`    | `null` (kept forever) | Support tickets                                   |
-| `FAILED_JOB_RETENTION_DAYS`        | `30`                  | Failed queue jobs, pruned by `queue:prune-failed` |
-| `JOB_BATCH_RETENTION_DAYS`         | `30`                  | Job batches, pruned by `queue:prune-batches`      |
+| Variable                           | Default               | Description                                                  |
+| ---------------------------------- | --------------------- | ------------------------------------------------------------ |
+| `AUDIT_RETENTION_DAYS`             | `null` (kept forever) | Audit logs                                                   |
+| `LOGIN_RECORD_RETENTION_DAYS`      | `365`                 | Sign-in records                                              |
+| `IMPERSONATION_LOG_RETENTION_DAYS` | `null` (kept forever) | Impersonation logs                                           |
+| `LOGIN_CHALLENGE_RETENTION_DAYS`   | `30`                  | Email verification code challenges                           |
+| `API_REQUEST_LOG_RETENTION_DAYS`   | `90`                  | API request logs                                             |
+| `EXPORT_RETENTION_DAYS`            | `7`                   | Table exports and their files, counted from when they finish |
+| `NOTIFICATION_RETENTION_DAYS`      | `90`                  | Notifications, read or not                                   |
+| `IMPORT_RETENTION_DAYS`            | `30`                  | Imports, with their failed rows                              |
+| `FAILED_IMPORT_ROW_RETENTION_DAYS` | `30`                  | Failed import rows                                           |
+| `SUPPORT_TICKET_RETENTION_DAYS`    | `null` (kept forever) | Support tickets                                              |
+| `FAILED_JOB_RETENTION_DAYS`        | `30`                  | Failed queue jobs, pruned by `queue:prune-failed`            |
+| `JOB_BATCH_RETENTION_DAYS`         | `30`                  | Job batches, pruned by `queue:prune-batches`                 |
 
 ## Environment lockdown
 
@@ -323,6 +324,8 @@ See [Sentry](https://laravel-starter.entapp.northwestern.edu/features/sentry/).
 | `PG_BIN_DIRECTORY`  | `null` (auto-detected)       | Directory containing `pg_dump` and `psql`, for the `db:snapshot:*` commands. See [Database Snapshots](https://laravel-starter.entapp.northwestern.edu/features/database-snapshots/) |
 
 `config/telescope.php` and `config/debugbar.php` read many more `TELESCOPE_*` and `DEBUGBAR_*` variables. Their defaults are in those files.
+
+Outside the `local` environment, `TelescopeServiceProvider` records only reportable exceptions, failed requests, failed jobs and monitored tags, and only people with Manage All can open Telescope. It also leaves out the CSRF token and the secrets OAuth clients send (`client_secret`, `refresh_token`, `code`, `code_verifier` and `secret`) from request parameters, and the `Cookie`, CSRF and `Authorization` headers.
 
 ## Testing
 

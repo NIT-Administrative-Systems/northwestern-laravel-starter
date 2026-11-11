@@ -72,4 +72,6 @@ When integrations come [through Apigee](https://laravel-starter.entapp.northwest
 
 ## Error Responses
 
-The REST API under `/api` answers errors as [Problem Details](https://www.rfc-editor.org/rfc/rfc9457) (`application/problem+json`). Passport’s `/oauth/*` endpoints and the MCP server keep their own protocols’ error bodies, which OAuth and MCP clients expect.
+The REST API under `/api` answers errors as [Problem Details](https://www.rfc-editor.org/rfc/rfc9457) (`application/problem+json`). Passport’s `/oauth/*` endpoints and the MCP server keep their own protocols’ error bodies, which OAuth and MCP clients expect. `AppServiceProvider` lists the paths that keep their own bodies.
+
+A paused database is the exception. While it starts up, a request to `/api`, `/oauth` or `/mcp`, or any request that expects JSON, gets a Problem Details `503` with `Retry-After: 30`, so a client can wait and retry. People in a browser get the Database Paused page instead, which reloads itself. `bootstrap/app.php` decides, with Chassis’s `DatabasePausedDetector`.

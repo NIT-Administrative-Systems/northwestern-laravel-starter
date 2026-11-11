@@ -34,17 +34,17 @@ Only someone with `ManageAll` sees it. Anyone else who opens `/administration` s
 
 Every table in both panels shares the defaults in `FilamentServiceProvider`: below `sm` each row becomes a card with a label on every value (`stackedOnMobile()`), filters, sort and search are kept in the session so they survive opening a record and coming back, and the empty state uses a neutral inbox icon.
 
-Each administration table marks its secondary columns with `visibleFrom('lg')`, `visibleFrom('xl')` or `visibleFrom('2xl')`, so it fits its container at 1440 pixels and keeps the columns that matter at 1024. The log tables (Audit Logs, Sign-In Records, API Requests and Role Activity) load after the page appears (`deferLoading()`), and their filters fold away above the table (`FiltersLayout::AboveContentCollapsible`). Give a new table the same treatment: decide which three or four columns matter at 1024 pixels and put the rest behind a breakpoint.
+Each administration table marks its secondary columns with `visibleFrom('lg')`, `visibleFrom('xl')` or `visibleFrom('2xl')`, so it fits its container at 1440 pixels and keeps the columns that matter at 1024. The log tables (Audit Logs, Sign-In Records, API Requests and Role Activity) load after the page appears (`deferLoading()`). Audit Logs, API Requests, Role Activity and a role’s Definition History fold their filters away above the table (`FiltersLayout::AboveContentCollapsible`). Give a new table the same treatment: decide which three or four columns matter at 1024 pixels and put the rest behind a breakpoint.
 
 ## Users
 
-**Users** lists everyone, with filters for sign-in method, affiliation and role. Someone with `ManageApiAccess` but not `ViewUsers` sees only API users, whose service clients they manage. Three actions create people:
+**Users** lists everyone, with filters for sign-in method, affiliation and role. Someone with `ManageApiAccess` but not `ViewUsers` sees only API users, whose service clients they manage. The **Add User** menu creates one person:
 
 * **Add Northwestern User** looks a person up in Directory Search by NetID or email and creates them. Needs `CreateUsers`.
 * **Add Local User** creates a person who signs in with an email verification code. Needs `CreateUsers`. See [Creating Local Users](https://laravel-starter.entapp.northwestern.edu/features/authentication/#creating-local-users).
-* **Create API User** creates an API user with its first service client. Needs `ManageApiAccess`, with the API on. See [API System](https://laravel-starter.entapp.northwestern.edu/features/api/).
+* **Add API User** creates an API user with its first service client. Needs `ManageApiAccess`, with the API on. See [API System](https://laravel-starter.entapp.northwestern.edu/features/api/).
 
-**Add People to a Role** gives a role to a pasted list of NetIDs and email addresses, or the people in a CSV file, creating the accounts that don’t exist yet. Needs `AssignRoles` and `CreateUsers`. See [Adding People in Bulk](https://laravel-starter.entapp.northwestern.edu/features/authorization/#adding-people-in-bulk).
+The **Add People to a Role** menu gives a role to a pasted list of NetIDs and email addresses, or the people in a CSV file, creating the accounts that don’t exist yet. Needs `AssignRoles` and `CreateUsers`. See [Adding People in Bulk](https://laravel-starter.entapp.northwestern.edu/features/authorization/#adding-people-in-bulk).
 
 The **Trashed** filter finds deactivated accounts.
 
@@ -53,12 +53,12 @@ A person’s record has four pages, in sub-navigation across the top: **Details*
 | Page            | Tab                    | Shows                                                        | Needs                                                  |
 | --------------- | ---------------------- | ------------------------------------------------------------ | ------------------------------------------------------ |
 | Access          | Roles                  | Their roles, which can be assigned and removed here          | Viewing the person; changing roles needs `AssignRoles` |
-| Access          | Role History           | Every role assignment and removal                            | `ViewAuditLogs`                                        |
-| Activity        | Audit Logs             | Every audited change to them                                 | `ViewAuditLogs`                                        |
-| Activity        | Sign-In Records        | Their sign-ins                                               | `ViewLoginRecords`                                     |
+| Access          | Role History           | Every role assignment and removal                            | `ViewAuditLogs`, for people other than API users       |
+| Activity        | Audit Logs             | Every audited change to them                                 | `ViewAuditLogs`, for people other than API users       |
+| Activity        | Sign-In Records        | Their sign-ins                                               | `ViewLoginRecords`, for people other than API users    |
 | API Credentials | Service Clients        | An API user’s clients: create, rotate, restrict and revoke   | `ManageApiAccess`, for API users                       |
-| API Credentials | Personal Access Tokens | Their tokens, which can be revoked                           | `ManageApiAccess`                                      |
-| API Credentials | Connected Applications | Their applications and AI clients, which can be disconnected | `ManageApiAccess`                                      |
+| API Credentials | Personal Access Tokens | Their tokens, which can be revoked                           | `ManageApiAccess`, for people other than API users     |
+| API Credentials | Connected Applications | Their applications and AI clients, which can be disconnected | `ManageApiAccess`, for people other than API users     |
 | API Credentials | API Requests           | An API user’s request log                                    | `ViewApiRequestLogs`, for API users with logging on    |
 
 The pages are `ManageUserAccess`, `ManageUserActivity` and `ManageUserApiCredentials` in `app/Filament/Administration/Resources/Users/Pages/`, and `UserResource::getRecordSubNavigation()` orders them. To add a tab, list its relation manager in the page’s `managers()`.
@@ -71,7 +71,7 @@ The **Impersonate** button signs you in as the person and opens the app panel; l
 
 ## Roles
 
-**Roles** lists every role with its type and how many people hold it. A role’s page shows its name, type, how many people hold it and the permissions it grants, with personal permissions marked, and an **Assigned Users** tab for assigning and removing people, one at a time or [in bulk](https://laravel-starter.entapp.northwestern.edu/features/authorization/#adding-people-in-bulk). Its **Definition History** page shows every change to its definition, with what changed. Creating, editing and deleting roles need `EditRoles` and `DeleteRoles`. See [Authorization](https://laravel-starter.entapp.northwestern.edu/features/authorization/).
+**Roles** lists every role with its type and how many people hold it. A role’s page shows its name, type, how many people hold it and the permissions it grants, with personal permissions marked, and an **Assigned Users** tab for assigning and removing people, one at a time or [in bulk](https://laravel-starter.entapp.northwestern.edu/features/authorization/#adding-people-in-bulk). Its **Definition History** page shows every change to its definition, with what changed. Creating and editing roles need `EditRoles`, deleting them `DeleteRoles`, and assigning them `AssignRoles`. Nobody can give themselves a role, from either the role’s tab or their own record, Super Administrators included. See [Authorization](https://laravel-starter.entapp.northwestern.edu/features/authorization/).
 
 The **Role Activity** button on the Roles page lists role assignments and removals across everyone, with where each came from. It needs `ViewAuditLogs`.
 
@@ -129,7 +129,7 @@ A wizard that issues a credential and shows its secret once uses `App\Filament\S
 
 * `->mountUsing($secret->mountFresh())`, which gives each run its own key, so a cancelled run, or one open in another browser tab, never shows its credential to another;
 * `$secret->issueOnce($livewire, fn () => ['id' => ..., 'secret' => ...])` in the first step, so stepping back and forward doesn’t issue a second credential;
-* `$secret->identifierEntry()` and `$secret->secretEntry()` in the copy step, which show the value in full, wrapped, with a **Copy** button under it;
+* `$secret->identifierEntry('client_id', 'Client ID')` and `$secret->secretEntry('client_secret', 'Client Secret')` in the copy step, which show the value in full, wrapped, with a **Copy** button under it;
 * `->modifyWizardUsing($secret->hideBackOnceIssued())`, so there is no **Back** to a form whose credential already exists;
 * `->modalSubmitAction($secret->savedAction())`, which labels the last button **I’ve Saved It**;
 * `->action(fn (HasActions $livewire) => $secret->forget($livewire))` on submit.

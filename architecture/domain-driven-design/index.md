@@ -65,6 +65,8 @@ The starter follows Domain-Driven Design (DDD) principles to organize code aroun
         * …
       * Models/
         * …
+      * Policies/
+        * …
       * Services/
         * …
       * …
@@ -79,7 +81,7 @@ The starter follows Domain-Driven Design (DDD) principles to organize code aroun
         * …
       * Models/
         * …
-      * Repositories/
+      * Policies/
         * …
       * Seeders/
         * …
@@ -153,8 +155,8 @@ The **Core** domain contains foundational functionality that applies across the 
 
 * `BaseModel`, which models extend. Model concerns shared with other applications, such as `PrunesAfterRetentionPeriod` for records that expire and `RecordsCustomAudits` for audit events a model’s own changes don’t capture (which the starter’s `RecordsAuditEvents` builds on), come from [Chassis](https://laravel-starter.entapp.northwestern.edu/reference/chassis/)
 * The typed preferences base class (`Data/Preferences`), which `UserPreferences` extends
-* The audit log: the `Audit` model, the `AuditEvent` enum that names every event, and `RecordsAuditEvents` for recording one
-* Filament’s table `Export` model, which prunes exports and their files after `platform.retention.exports` days
+* The audit log: the `Audit` model, its `AuditPolicy`, the `AuditEvent` enum that names every event, and `RecordsAuditEvents` for recording one
+* The framework’s own records, each pruned after its `platform.retention` period: Filament’s `Export` (with its file), `Import` and `FailedImportRow`, and `DatabaseNotification`, which `User::notifications()` uses
 * The `ExternalService` enum
 * Configuration validators (`Services/ConfigValidation/`)
 * Shared exceptions (`NoRollbackException`, `ServiceDownError`, `SentryExceptionHandler`)
@@ -178,8 +180,9 @@ The **Auth** domain handles who someone is: signing in and out.
 **Responsibilities:**
 
 * The sign-in methods and the step every sign-in ends with (`SignIn`), and single sign-on through Online Passport or Entra ID
-* Email login codes (`LoginCodes`)
+* Email sign-in codes (`LoginCodes`)
 * Sign-in-as for seeded users in the `local` environment
+* Signing a person out everywhere (`EndSessions`), when their account is deactivated or EventHub reports their NetID deactivated
 * Impersonation and its log
 
 ### Access Domain
@@ -192,6 +195,7 @@ The **Access** domain handles what someone may do: roles and permissions.
 
 * `SystemPermission`, the single source of truth for permissions, and the system roles
 * Roles, role types and permissions, and their seeding
+* Giving a role to one person (`AddPersonToRole`) or to a pasted list or CSV file of people (`AddPeopleToRole`), and keeping a role’s permissions to those its type allows (`SyncRolePermissions`)
 * Recording changes to roles and permissions (`AuditsRoles`, `AuditsPermissions`), and finding which role grants a permission (`TracksPermissionSources`)
 
 ### Api Domain
@@ -216,6 +220,7 @@ The **User** domain handles everything related to user data and management:
 **Responsibilities:**
 
 * User management and profile data
+* Creating local and API users, and deactivating and reactivating accounts (`Actions/Lifecycle`)
 * User segmentation and affiliation
 * Directory integration (searching, syncing)
 * User login tracking
@@ -381,13 +386,13 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class UserBuilder extends Builder
 {
-    public function sso(): self
+    public function sso(): static
     {
         return $this->where('auth_type', AuthType::SSO);
     }
 
 
-    public function whereEmailEquals(string $email): self
+    public function whereEmailEquals(string $email): static
     {
         // An exact match: ilike would treat % and _ in the email as wildcards.
         return $this->whereRaw('lower(email) = lower(?)', [trim($email)]);

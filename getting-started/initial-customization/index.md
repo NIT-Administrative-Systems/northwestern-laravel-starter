@@ -69,12 +69,12 @@ Edit `config/local-auth.php` or set environment variables:
 LOCAL_AUTH_ENABLED=true
 
 
-# Rate limit for login code requests per email (per hour)
+# Sign-in code requests allowed per email address per hour
 LOCAL_AUTH_RATE_LIMIT_PER_HOUR=10
 
 
-# Rate limit for login code requests per IP (per hour)
-# Prevents a single IP from exhausting multiple accounts' per-email rate limits
+# Sign-in code requests allowed per IP address per hour, so one address
+# can't use up the per-email limits of many accounts
 LOCAL_AUTH_RATE_LIMIT_PER_IP_PER_HOUR=20
 ```
 
@@ -96,7 +96,7 @@ Disabled
 
 ### Passwordless Code Settings
 
-Edit `config/local-auth.php` to tune the OTP length, expiration, and lockout behavior.
+Edit `config/local-auth.php`, or set the `LOCAL_AUTH_CODE_*` variables, to tune the code’s length, expiration and lockout. `max_failed_per_day` counts incorrect codes per email address across all its codes, including addresses with no account.
 
 ```php
 'code' => [
@@ -104,17 +104,18 @@ Edit `config/local-auth.php` to tune the OTP length, expiration, and lockout beh
     'expires_in_minutes' => 10,
     'max_attempts' => 8,
     'lock_minutes' => 15,
+    'max_failed_per_day' => 20,
     'resend_cooldown_seconds' => 30,
 ],
 ```
 
 ### How Local Auth Works
 
-1. Admin creates a local user account in the administration panel (`/administration`): **Users** → **Add User** → **Add Local User**
-2. Admin can trigger an immediate verification code, or the user can request one themselves
-3. User receives an email with a verification code valid for a limited time
-4. User enters the code and is authenticated (no password needed)
-5. Code expires and becomes invalid after use
+1. An administrator creates a local account in the administration panel (`/administration`): **Users** → **Add User** → **Add Local User**. Adding people to a role in bulk also creates one for an email address that matches nobody
+2. The administrator can send a verification code at once, or the person can request one themselves
+3. The person receives an email with a code that is valid for a limited time
+4. They enter the code and are signed in, with no password
+5. The code stops working once it is used, and requesting a new code ends the earlier ones
 
 ***
 
@@ -310,6 +311,8 @@ The scheduler runs `model:prune` daily, which deletes records older than their r
 `model:prune` doesn’t reach the queue’s own tables, so the scheduler runs `queue:prune-failed` and `queue:prune-batches` daily for failed jobs and job batches, with their periods converted to hours. Setting either to `null` leaves its table alone.
 
 A few records are cleaned up on fixed schedules of their own: OAuth tokens and codes 31 days after they expire, and unused self-registered MCP clients. See [Cleanup and Revocation](https://laravel-starter.entapp.northwestern.edu/features/api-operations/#cleanup-and-revocation).
+
+If you set `LOCAL_ACCOUNT_INACTIVITY_DAYS`, keep `LOGIN_RECORD_RETENTION_DAYS` at least as long: the daily `users:deactivate-inactive-local` reads each local account’s last sign-in from the sign-in records, so someone whose records were pruned looks inactive. See [Expiring Local Accounts](https://laravel-starter.entapp.northwestern.edu/features/authentication/#expiring-local-accounts).
 
 To give another model a retention period, use Chassis’s `Northwestern\SysDev\Chassis\Models\Concerns\PrunesAfterRetentionPeriod` trait, return its setting from `retentionConfigKey()`, and add the setting under `platform.retention`. Override `retentionColumn()` when the record’s date isn’t `created_at`, and prefer an indexed column.
 

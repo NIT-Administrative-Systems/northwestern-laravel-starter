@@ -21,7 +21,9 @@ The queue worker is required. Jobs go to Redis (`QUEUE_CONNECTION=redis`), so ma
 
 ### The API Specification
 
-`composer openapi:generate:v1` writes the OpenAPI schema from the `#[OA\...]` attributes in `app/` to `docs/schemas/api-schema.yaml`, which the docs site renders as its [API Specification](https://laravel-starter.entapp.northwestern.edu/api). CI regenerates it on every pull request; run it yourself to check your attributes. `composer openapi:generate` prints the schema without writing it.
+`composer openapi:generate:v1` writes the OpenAPI schema from the `#[OA\...]` attributes in `app/` to `docs/schemas/api-schema.yaml`, which the docs site renders as its [API Specification](https://laravel-starter.entapp.northwestern.edu/api). The schema is OpenAPI 3.1.0. CI regenerates it on every pull request; run it yourself to check your attributes. `composer openapi:generate` prints the schema without writing it.
+
+Both scripts scan Chassis’s `src/` as well as `app/`, and pass `-c cleanup.enabled=false` so swagger-php keeps components no operation references yet. That keeps the pagination and validation-problem schemas in the document for your own endpoints to reference, though no starter endpoint uses them.
 
 ### The Documentation Site
 

@@ -78,11 +78,11 @@ Blade::render(
 );
 ```
 
-`RoleActivityTable` and `RoleDefinitionHistoryTable` render their role lists this way.
+`RoleDefinitionHistoryTable` renders its role lists this way.
 
 > **No links inside clickable rows**
 >
-> When a table’s rows link to a record, every cell is already inside a link. Don’t put a link in a cell’s HTML: a link can’t contain another, and the browser splits them into empty links that fail accessibility checks.
+> When a table’s rows link to a record, every cell is already inside a link. Don’t put a link in a cell’s HTML: a link can’t contain another, and the browser splits them into empty links that fail accessibility checks. For the same reason, give a column that can be empty a `->placeholder()`, or its cell becomes a link with no text.
 
 ## Headings in Rendered Markdown
 

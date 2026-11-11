@@ -18,7 +18,7 @@ The starter has **one frontend stack**: [Filament](https://filamentphp.com/), bu
 
 ## The app panel
 
-The app panel at `/app` is where an application built on the starter does its work. Any signed-in user can open it, except API users, and Resources, Pages, Clusters and Widgets in `app/Filament/App/` are discovered automatically. See [The App Panel](https://laravel-starter.entapp.northwestern.edu/building/app-panel/) for its dashboard, Account area, Help menu, notifications and simple pages.
+The app panel at `/app` is where an application built on the starter does its work. Any signed-in user can open it, except API users and deactivated accounts, and Resources, Pages, Clusters and Widgets in `app/Filament/App/` are discovered automatically. See [The App Panel](https://laravel-starter.entapp.northwestern.edu/building/app-panel/) for its dashboard, Account area, Help menu, notifications and simple pages.
 
 ## The administration panel
 
@@ -64,9 +64,14 @@ class AppPanelProvider extends PanelProvider
 }
 ```
 
-The access check for an entire panel is `User::canAccessPanel()`, which matches on the panel ID. A panel that isn’t listed there throws, so a new panel can’t be opened by accident:
+The access check for an entire panel is `User::canAccessPanel()`, which matches on the panel ID. A deactivated or deleted account opens no panel, so a session signed in before the change is refused on its next request. A panel that isn’t listed in the `match` throws, so a new panel can’t be opened by accident:
 
 ```php
+if ($this->isInactive()) {
+    return false;
+}
+
+
 return match ($panel->getId()) {
     AppPanelProvider::ID => ! $this->is_api_user,
     AdministrationPanelProvider::ID => $this->can(SystemPermission::AccessAdministrationPanel),
@@ -94,6 +99,8 @@ php artisan make:filament-resource User --generate --model-namespace=App\\Domain
 ```
 
 The `--generate` flag is highly recommended as it uses model introspection to create reasonable defaults for forms and columns.
+
+Both panels use Filament’s strict authorization (`->strictAuthorization()`). A resource whose model has no policy, or whose policy lacks an ability one of its pages asks for, throws instead of letting everyone in, so give the model a policy before you open the resource. See [Adding a Tool](https://laravel-starter.entapp.northwestern.edu/building/administration-panel/#adding-a-tool).
 
 Filament’s generators target the default panel, which is the app panel. For an administration resource or page, add `--panel=administration`:
 

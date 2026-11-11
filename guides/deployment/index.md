@@ -35,7 +35,7 @@ Vapor runs the scheduler and queue workers for you. On any other target, you run
 * `php artisan schedule:run` every minute, from cron or an equivalent
 * A long-running `php artisan queue:work` process, kept alive by a process supervisor
 
-The scheduler (`routes/console.php`) runs retention pruning (`model:prune`), Telescope and temporary S3 file cleanup, the health checks and their heartbeat, OAuth token purging and MCP client cleanup, revoking credentials people can no longer hold, the client secret and personal access token reminders, and announcement notifications. Without it, expired records are never deleted, reminders and scheduled announcement notifications never go out, and the health check reports that the schedule has not run. The full list is in [Scheduled Tasks](https://laravel-starter.entapp.northwestern.edu/reference/commands/#scheduled-tasks).
+The scheduler (`routes/console.php`) runs retention pruning (`model:prune`, and `queue:prune-failed` and `queue:prune-batches` for the queue’s tables), Telescope and temporary S3 file cleanup, the health checks and their heartbeat, OAuth token purging and MCP client cleanup, revoking credentials people can no longer hold, the client secret and personal access token reminders, announcement notifications, and, when `LOCAL_ACCOUNT_INACTIVITY_DAYS` is set, deactivating unused local accounts. Without it, expired records are never deleted, reminders and scheduled announcement notifications never go out, and the health check reports that the schedule has not run. The full list is in [Scheduled Tasks](https://laravel-starter.entapp.northwestern.edu/reference/commands/#scheduled-tasks).
 
 ### OAuth Signing Keys
 

@@ -88,6 +88,10 @@ When a role’s permissions are modified:
 * User who made the change
 * Timestamp of the sync
 
+**Account Deactivation**
+
+Deactivating and reactivating an account record **Account Deactivated** (`account_deactivated`) and **Account Reactivated** (`account_reactivated`) on that person, with `deleted_at` before and after, instead of Eloquent’s `deleted` and `restored`. A system deactivation, such as `users:deactivate-inactive-local`, records why in its context. See [Deactivating Accounts](https://laravel-starter.entapp.northwestern.edu/features/authentication/#deactivating-accounts).
+
 **Impersonation Sessions**
 
 When an administrator starts impersonating a user, `LogImpersonationAccess` (listening for `TakeImpersonation`) writes an `ImpersonationLog` to the `user_impersonation_logs` table with:
@@ -102,15 +106,21 @@ Nothing records when an impersonation ends. Audit entries for changes made while
 
 OAuth clients and tokens have UUID or string keys, which the audits table can’t store, so their changes are recorded as custom events on a person instead:
 
-| Event                                                                                                    | Recorded on                       | When                                                        |
-| -------------------------------------------------------------------------------------------------------- | --------------------------------- | ----------------------------------------------------------- |
-| `service_client_created`, `service_client_revoked`, `service_client_ip_restrictions_updated`             | The API user that owns the client | A service client is created, rotated, restricted or revoked |
-| `application_registered`, `application_updated`, `application_secret_regenerated`, `application_revoked` | The administrator who acted       | An administrator manages an application                     |
-| `mcp_client_revoked`                                                                                     | The administrator who acted       | An administrator revokes an MCP client                      |
-| `personal_access_token_revoked`                                                                          | The token’s owner                 | An administrator revokes someone else’s token               |
-| `application_disconnected`                                                                               | The person                        | An administrator disconnects an application for someone     |
+| Event                                                                                                    | Recorded on                       | When                                                                                                             |
+| -------------------------------------------------------------------------------------------------------- | --------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `service_client_created`, `service_client_revoked`, `service_client_ip_restrictions_updated`             | The API user that owns the client | A service client is created, rotated, restricted or revoked                                                      |
+| `application_registered`, `application_updated`, `application_secret_regenerated`, `application_revoked` | The administrator who acted       | An administrator manages an application                                                                          |
+| `mcp_client_revoked`                                                                                     | The administrator who acted       | An administrator revokes an MCP client                                                                           |
+| `personal_access_token_revoked`                                                                          | The token’s owner                 | Anyone but the owner revokes the token: an administrator, deactivating the account, or `oauth:revoke-ineligible` |
+| `application_disconnected`                                                                               | The person                        | Anyone but the person disconnects an application for them                                                        |
 
 None of them records a secret. Updates record the values before and after; revoking an application records how many connections it removed.
+
+***
+
+## Viewing Audits
+
+The administration panel’s **Audit Logs** and **Role Activity** pages need the `ViewAuditLogs` permission: `App\Domains\Core\Policies\AuditPolicy` decides, and both resources ask it in `canAccess()`. The audit history on the **Activity** page of a person’s record needs the same permission.
 
 ***
 

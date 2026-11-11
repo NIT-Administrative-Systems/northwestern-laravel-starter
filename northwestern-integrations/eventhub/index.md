@@ -32,7 +32,9 @@ The EventHub integration is provided by the [`northwestern-sysdev/laravel-soa`](
 
    * All roles except `Northwestern User` are removed
    * The user is marked as `netid_inactive = true`
-   * Their sessions end, and their remember token changes, so they’re signed out everywhere
+   * `EndSessions` deletes their sessions and changes their remember token, so they’re signed out everywhere
+
+The account isn’t [deactivated](https://laravel-starter.entapp.northwestern.edu/features/authentication/#deactivating-accounts) the way **Deactivate** does it: it isn’t soft-deleted, and it stays in the Users list. An inactive NetID is enough to keep the person out, since `User::canAccessPanel()` refuses both panels and `CredentialAccess` refuses their API credentials.
 
 ***
 

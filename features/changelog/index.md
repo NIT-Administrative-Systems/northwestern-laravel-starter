@@ -46,7 +46,7 @@ Each file in `resources/changelogs/` must contain YAML front matter with `slug` 
 ---
 slug: "2026-02-10"
 date: "2026-02-10"
-title: "Changelog & Notification Preferences"
+title: "Changelog and Notification Preferences"
 ---
 
 

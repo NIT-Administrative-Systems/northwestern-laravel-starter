@@ -8,7 +8,7 @@ This feature is disabled by default and can be enabled with a single environment
 
 1. **Photo sync triggered**
 
-   When a user is fetched from the directory, `FindOrUpdateUserFromDirectory` dispatches a `DownloadWildcardPhotoJob` if `WILDCARD_PHOTO_SYNC_ENABLED` is true. During SSO sign-in the job is queued. It runs synchronously only when an administrator creates a user or uses **Refresh from Directory** in the administration panel.
+   When a user is fetched from the directory, `FindOrUpdateUserFromDirectory` dispatches a `DownloadWildcardPhotoJob` if `WILDCARD_PHOTO_SYNC_ENABLED` is true. It runs synchronously only when an administrator creates a user or uses **Refresh from Directory** in the administration panel; otherwise, as during SSO sign-in or when adding people in bulk, it is queued.
 
 2. **LDAP photo retrieval**
 
@@ -34,9 +34,9 @@ The response includes `Cache-Control: private, max-age=1800` (30 minutes) to mat
 
 ## Routes
 
-| Method | URI                            | Name                   | Notes                                   |
-| ------ | ------------------------------ | ---------------------- | --------------------------------------- |
-| `GET`  | `/users/{user}/wildcard-photo` | `users.wildcard-photo` | Only registered when feature is enabled |
+| Method | URI                            | Name                   | Notes                                                                                                                                |
+| ------ | ------------------------------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `GET`  | `/users/{user}/wildcard-photo` | `users.wildcard-photo` | Only registered when the feature is enabled. Finds deactivated users too, so their photo still shows on their page in Administration |
 
 ***
 
@@ -48,7 +48,7 @@ The response includes `Cache-Control: private, max-age=1800` (30 minutes) to mat
 WILDCARD_PHOTO_SYNC_ENABLED=true
 ```
 
-When disabled, the photo route is not registered and the `DownloadWildcardPhotoJob` is not dispatched during login. The feature is completely inert.
+When disabled, the photo route is not registered and the `DownloadWildcardPhotoJob` is not dispatched during sign-in. The feature is completely inert.
 
 > **Note**
 >

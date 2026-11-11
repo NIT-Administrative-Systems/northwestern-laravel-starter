@@ -33,7 +33,7 @@ The configuration it passes to the browser:
 
 ### The tunnel
 
-Ad blockers often block requests to `sentry.io`. The browser SDK sends its reports to `POST /sentry/tunnel` instead, and chassis’s `SentryTunnelController` relays them to Sentry. It forwards only envelopes addressed to the configured `sentry.dsn`, so it can’t be used to send data to other Sentry projects.
+Ad blockers often block requests to `sentry.io`. The browser SDK sends its reports to `POST /sentry/tunnel` instead, and Chassis’s `SentryTunnelController` relays them to Sentry. It forwards only envelopes addressed to the configured `sentry.dsn`, so it can’t be used to send data to other Sentry projects.
 
 ### Selective Imports
 
