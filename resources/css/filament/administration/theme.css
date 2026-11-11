@@ -10,3 +10,11 @@
 @source '../../../../resources/views/components/sidebar-panel-name.blade.php';
 @source '../../../../resources/views/components/announcement-banner.blade.php';
 @source '../../../../vendor/filament/**/*';
+
+/* One focus ring on the purple top bar and the footer, as in the app panel: the footer's 3px white
+   outline, set 2px off the control. The theme's purple outline would vanish against the top bar. */
+.fi-topbar :is(a, button):focus-visible {
+    outline: 3px solid var(--color-white);
+    outline-offset: 2px;
+    box-shadow: none;
+}

@@ -109,6 +109,18 @@ final class AppPanelProviderTest extends TestCase
             ->assertSeeInOrder(['data-testid="sidebar-panel-name"', 'Administration'], escape: false);
     }
 
+    public function test_the_simple_pages_with_the_site_header_stay_light(): void
+    {
+        config(['local-auth.enabled' => true]);
+
+        $this->get('/app/login')->assertOk()->assertSee('const keepLight', escape: false);
+    }
+
+    public function test_the_panel_pages_follow_the_theme_setting(): void
+    {
+        $this->actingAs(User::factory()->create())->get('/app')->assertOk()->assertDontSee('const keepLight', escape: false);
+    }
+
     public function test_the_app_panel_has_database_notifications(): void
     {
         $this->assertTrue(Filament::getPanel(AppPanelProvider::ID)->hasDatabaseNotifications());

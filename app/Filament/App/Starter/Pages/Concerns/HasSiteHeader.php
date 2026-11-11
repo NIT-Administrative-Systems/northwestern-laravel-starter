@@ -9,7 +9,9 @@ namespace App\Filament\App\Starter\Pages\Concerns;
  * <x-site-header> above the card through the SIMPLE_LAYOUT_START render hook.
  *
  * The header carries the wordmark, the application name and the user menu, so
- * Filament's own logo and simple-page user menu are turned off.
+ * Filament's own logo and simple-page user menu are turned off. Pages using it are
+ * light only, like the public layout: the app panel renders
+ * `filament.app.light-only` in their <head>.
  */
 trait HasSiteHeader
 {

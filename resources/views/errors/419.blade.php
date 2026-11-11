@@ -1,3 +1,3 @@
-<x-error-layout title="Page Expired">
-    This page expired. Go back and try again.
+<x-error-layout title="Page Expired" :code="419">
+    This page expired. Reload it and try again.
 </x-error-layout>
