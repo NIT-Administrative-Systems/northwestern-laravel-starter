@@ -15,6 +15,11 @@ class RolePolicy
         return $user->hasPermissionTo(SystemPermission::ViewRoles);
     }
 
+    public function view(User $user, Role $role): bool
+    {
+        return $this->viewAny($user);
+    }
+
     public function create(User $user): bool
     {
         return $user->hasPermissionTo(SystemPermission::EditRoles);

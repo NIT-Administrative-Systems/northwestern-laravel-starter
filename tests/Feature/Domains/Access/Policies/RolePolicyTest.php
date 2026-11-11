@@ -30,6 +30,18 @@ final class RolePolicyTest extends TestCase
         $this->assertTrue($this->policy()->viewAny($user));
     }
 
+    public function test_view_follows_view_any(): void
+    {
+        $user = User::factory()->create();
+        $role = Role::factory()->forRoleType(RoleTypeEnum::ApplicationRole)->create();
+
+        $this->assertFalse($this->policy()->view($user, $role));
+
+        $user->givePermissionTo(SystemPermission::ViewRoles);
+
+        $this->assertTrue($this->policy()->view($user, $role));
+    }
+
     public function test_create_denies_user_without_permission(): void
     {
         $user = User::factory()->create();
