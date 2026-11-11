@@ -21,16 +21,12 @@ final class Layout
      */
     public static function visit(string $path, int $width): PendingAwaitablePage
     {
-        $page = visit($path, [
+        return visit($path, [
             'viewport' => ['width' => $width, 'height' => 900],
             'deviceScaleFactor' => 1,
             'isMobile' => $width < 768,
             'hasTouch' => $width < 1024,
         ]);
-
-        assert($page instanceof PendingAwaitablePage);
-
-        return $page;
     }
 
     /**
