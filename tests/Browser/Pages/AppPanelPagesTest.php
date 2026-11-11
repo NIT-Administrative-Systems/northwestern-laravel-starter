@@ -21,12 +21,18 @@ it('is healthy on every app panel page', function (bool $dark) {
 
     expect([
         ...FilamentPages::in('app'),
-        '/app/access-restricted',
         '/support/changelog',
         '/this-page-does-not-exist',
         '/administration',
     ])->toAllBeHealthy();
 })->with(['light' => false, 'dark' => true]);
+
+it('is healthy on the lockdown page', function () {
+    // Without the Wildcard photo: lockdown covers its route too, so it would show as broken.
+    config(['platform.lockdown.enabled' => true, 'platform.wildcard_photo_sync' => false]);
+
+    expect(visit('/app/access-restricted')->assertSee('Access Restricted'))->toBeHealthyInEachTheme();
+});
 
 it("is healthy on the app panel's dashboard on a phone", function () {
     expect(visit('/app'))->toBeHealthyOnMobile();

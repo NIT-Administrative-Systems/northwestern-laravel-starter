@@ -18,7 +18,8 @@ use Illuminate\Support\HtmlString;
 
 /**
  * Shown to signed-in users who have no role granting access to a locked-down
- * environment. {@see EnvironmentLockdownMiddleware} redirects them here.
+ * environment. {@see EnvironmentLockdownMiddleware} redirects them here, and
+ * anyone it would let through goes home instead.
  */
 class EnvironmentLockdown extends SimplePage
 {
@@ -33,7 +34,7 @@ class EnvironmentLockdown extends SimplePage
         /** @var User $user */
         $user = auth()->user();
 
-        if ($user->non_default_roles->isNotEmpty()) {
+        if (! config('platform.lockdown.enabled') || $user->isImpersonated() || $user->non_default_roles->isNotEmpty()) {
             $this->redirect('/');
         }
     }
