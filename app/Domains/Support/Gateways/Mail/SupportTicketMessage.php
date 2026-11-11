@@ -12,11 +12,12 @@ use Illuminate\Mail\Mailable;
 use Northwestern\SysDev\Chassis\Formatting\NorthwesternDateTime;
 
 /**
- * Email sent to the support team with the ticket details.
+ * The support team's email with a support request.
  *
- * Contains the submitter's name, the full request body, and — when in fallback
- * mode — a warning that the primary gateway failed. This is an internal email;
- * the user-facing confirmation is handled by {@see SupportTicketConfirmation}.
+ * As the fallback, it warns that the ticket system didn't create the
+ * ticket. The requester's own copy is SupportTicketConfirmation.
+ *
+ * @see SupportTicketConfirmation
  */
 class SupportTicketMessage extends Mailable implements ShouldQueue
 {

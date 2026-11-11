@@ -8,7 +8,7 @@ use Filament\Support\Contracts\HasDescription;
 use Filament\Support\Contracts\HasLabel;
 
 /**
- * Who sees an announcement. Super Administrators see every announcement, whatever its audience.
+ * Who sees an announcement. Super Administrators see all of them anyway.
  */
 enum AnnouncementAudience: string implements HasDescription, HasLabel
 {

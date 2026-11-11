@@ -17,8 +17,10 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Support\Str;
 
 /**
- * Tells a person about an announcement whose author chose to notify its audience. Always shown
- * in the app's notification bell; emailed too unless they turned that off in their preferences.
+ * Tells a person about an announcement whose author chose to notify its audience.
+ *
+ * It always shows in the notification bell, and it's emailed
+ * too unless they switched that off in their preferences.
  */
 class AnnouncementNotification extends Notification implements ShouldQueue
 {
@@ -63,8 +65,9 @@ class AnnouncementNotification extends Notification implements ShouldQueue
     public function toMail(User $notifiable): MailMessage
     {
         return new MailMessage()
-            // The same sign-off as the starter's own emails, rather than Laravel's "Regards," (two
-            // trailing spaces are a Markdown line break).
+            // The same sign-off as the starter's
+            // own emails. Two trailing spaces
+            // make a Markdown line break.
             ->salutation("Thanks,  \n" . config('app.name'))
             ->subject($this->announcement->title)
             ->greeting('Hello ' . ($notifiable->first_name ?: $notifiable->full_name) . ',')

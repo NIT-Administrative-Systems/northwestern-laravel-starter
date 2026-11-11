@@ -9,8 +9,9 @@ use App\Domains\Support\Models\Announcement;
 use App\Domains\User\Models\User;
 
 /**
- * Managing announcements in Administration, all of it behind `ManageAnnouncements`. Reading
- * them is for their audience, through {@see Announcement::visibleTo()}, not this policy.
+ * Managing announcements in Administration, all of it behind ManageAnnouncements.
+ *
+ * Who reads them is decided by Announcement::visibleTo(), not this policy.
  */
 class AnnouncementPolicy
 {

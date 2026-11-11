@@ -9,8 +9,9 @@ use App\Domains\Support\Models\SupportTicket;
 use App\Domains\User\Models\User;
 
 /**
- * Reading the support tickets people submitted, in Administration. The log is read-only, so
- * there is nothing else to allow.
+ * Reading the support tickets people submitted, in Administration.
+ *
+ * The log is read-only, so there is nothing else to allow.
  */
 class SupportTicketPolicy
 {

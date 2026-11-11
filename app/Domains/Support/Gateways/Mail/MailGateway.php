@@ -12,21 +12,19 @@ use Illuminate\Support\Facades\Mail;
 use Throwable;
 
 /**
- * Submits support tickets via email.
+ * Submits support tickets by email.
  *
- * Sends the ticket details to the support team mailbox and a separate
- * confirmation to the requester. Used as the primary driver when
- * {@see TicketSystem::Mail} is configured, or as the auto
- * fallback when a non-mail primary gateway fails.
+ * It emails the ticket to the support team and a confirmation to the requester.
  *
- * When operating in fallback mode ({@see $isFallbackStrategy}), the support
- * team email includes a warning that the primary gateway failed.
+ * It's the driver when support.driver is mail, and
+ * the fallback when another ticket system fails.
+ *
+ * As the fallback, the support team's email warns that the ticket system failed.
  */
 class MailGateway implements TicketSystemGateway
 {
     /**
-     * @param  bool  $isFallbackStrategy  Whether this instance is being used as a fallback
-     *                                    after a primary gateway failure.
+     * @param  bool  $isFallbackStrategy  Whether another ticket system failed first
      */
     public function __construct(
         protected bool $isFallbackStrategy = false,
@@ -35,11 +33,9 @@ class MailGateway implements TicketSystemGateway
     }
 
     /**
-     * Send the ticket via email and return a structured result.
+     * Queue the support team's email and the requester's confirmation.
      *
-     * Dispatches two queued emails: one to the support team ({@see SupportTicketMessage})
-     * and one to the requester ({@see SupportTicketConfirmation}). On success, the
-     * {@see CreationResult::$ticketNumber} is the mail-generated reference (e.g., "SUP-47").
+     * The ticket number is the gateway's own reference, such as SUP-47.
      */
     public function create(SupportTicket $ticket): CreationResult
     {
@@ -71,11 +67,8 @@ class MailGateway implements TicketSystemGateway
     }
 
     /**
-     * Generate a human-readable reference number for the mail gateway.
-     *
-     * This is the mail gateway's equivalent of an external ticket ID.
-     * Other gateways (e.g., TeamDynamix) should return their own
-     * native references.
+     * The mail gateway's reference, such as SUP-47,
+     * standing in for a ticket system's number.
      */
     private function generateReference(SupportTicket $ticket): string
     {

@@ -10,8 +10,8 @@ use Filament\Support\Contracts\HasLabel;
 use Filament\Support\Icons\Heroicon;
 
 /**
- * How much an announcement matters. It sets the banner's colour and icon, which announcement
- * the banner shows first, and whether people can dismiss it.
+ * How much an announcement matters. It sets the banner's color and icon,
+ * which one the banner shows first, and whether people can dismiss it.
  */
 enum AnnouncementSeverity: string implements HasColor, HasIcon, HasLabel
 {

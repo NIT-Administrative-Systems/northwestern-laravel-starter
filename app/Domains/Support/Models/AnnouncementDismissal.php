@@ -10,8 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 /**
- * A person's dismissal of an announcement from the banner. The announcement stays on the
- * Announcements page.
+ * A person's dismissal of an announcement from their banner.
  *
  * @property int $announcement_id
  * @property int $user_id
@@ -22,7 +21,8 @@ class AnnouncementDismissal extends BaseModel
     public $timestamps = false;
 
     /**
-     * Not audited: dismissals are routine and per person. The announcement's own changes are.
+     * Not audited: dismissals are routine and per
+     * person. The announcement's changes are.
      *
      * @var list<string>
      */
