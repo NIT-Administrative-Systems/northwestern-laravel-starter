@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use App\Domains\Access\Enums\RoleModificationOrigin;
-use App\Domains\Access\Enums\RoleTypeEnum;
+use App\Domains\Access\Enums\SystemRole;
 use App\Domains\Access\Models\Role;
 use App\Domains\User\Actions\Directory\FindOrUpdateUserFromDirectory;
 use App\Domains\User\Models\User;
@@ -14,11 +14,13 @@ use Illuminate\Support\Collection;
 use Throwable;
 
 /**
- * Seed the environment with users who have specific roles in the application. These are users that
- * at a minimum are affiliated with Northwestern University and have a NetID.
+ * Gives the stakeholders named in the configuration their roles.
  *
- * The {@see DemoSeeder} doesn't call it: it looks people up in Directory Search. Run it on its
- * own in a deployed environment to give the stakeholders their roles.
+ * DemoSeeder doesn't call it, because it looks people up in Directory Search.
+ *
+ * Run it on its own in a deployed environment.
+ *
+ * @see DemoSeeder
  */
 class StakeholderSeeder extends Seeder
 {
@@ -33,16 +35,13 @@ class StakeholderSeeder extends Seeder
         $this->superAdmins();
     }
 
+    /**
+     * Makes the NetIDs in SUPER_ADMIN_NETIDS Super Administrators.
+     *
+     * It's comma-separated, so each environment names its own without a code change.
+     */
     protected function superAdmins(): void
     {
-        /**
-         * Assign the Super Administrator role to a predefined list of NetIDs.
-         *
-         * The list is sourced from the `SUPER_ADMIN_NETIDS` environment variable,
-         * which should contain a comma-separated list of NetIDs. This allows teams
-         * to easily configure users per environment without modifying code or
-         * manually processing user assignments.
-         */
         $userNetIds = $this->parseStakeholderConfig(config('platform.stakeholders.super_admins', []));
 
         if ($userNetIds === []) {
@@ -53,7 +52,7 @@ class StakeholderSeeder extends Seeder
 
         $this->createAndAssignRole(
             $userNetIds,
-            Role::whereHas('role_type', fn (\Illuminate\Contracts\Database\Query\Builder $query) => $query->where('slug', RoleTypeEnum::SystemManaged))->firstOrFail()
+            Role::query()->where('name', SystemRole::SuperAdministrator)->firstOrFail()
         );
     }
 
@@ -93,11 +92,10 @@ class StakeholderSeeder extends Seeder
     }
 
     /**
-     * Parses a stakeholder configuration value, which can be either a comma-separated string
-     * of NetIDs or an array of NetIDs, into a clean array of NetIDs.
+     * Turn a comma-separated string or a list of NetIDs into a clean list.
      *
-     * @param  string|list<string>  $config  The configuration value from `config/platform.php`.
-     * @return list<string> A cleaned array of NetIDs.
+     * @param  string|list<string>  $config
+     * @return list<string>
      */
     protected function parseStakeholderConfig(string|array $config): array
     {

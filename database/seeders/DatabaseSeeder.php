@@ -9,19 +9,15 @@ use Northwestern\SysDev\Chassis\Attributes\AutoSeed;
 use Northwestern\SysDev\Chassis\Seeding\IdempotentSeederResolver;
 
 /**
- * Production-safe database seeder that runs across all environments.
+ * Seeds every environment, production included, and must be safe to run again.
  *
- * Automatically discovers and executes all seeders decorated with the #[AutoSeed] attribute
- * in dependency-resolved order. All seeders MUST be idempotent.
+ * It finds every seeder marked #[AutoSeed] and
+ * runs them in the order their dependencies
+ * need, so each one must be idempotent.
  *
- * Typical use cases:
- * - Seeding reference data (roles, permissions, statuses)
- * - Maintaining system-required records
- * - Updating existing records when data structure changes
- *
- * Avoid:
- * - Creating test/demo data (use DemoSeeder instead)
- * - Non-idempotent operations that fail on subsequent runs
+ * Use it for reference data, such as roles and
+ * permissions, and records the system needs.
+ * Demo and test data belong in DemoSeeder.
  *
  * @see AutoSeed
  * @see IdempotentSeederResolver
