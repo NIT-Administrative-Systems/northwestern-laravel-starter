@@ -27,7 +27,7 @@ trait MocksEventHub
      *
      * @throws InvalidArgumentException When no webhook route is registered for the specified queue
      */
-    protected function send(string $queue, string $message, bool $viaQueue = false): string|TestResponse|Response
+    protected function sendEventHubMessage(string $queue, string $message, bool $viaQueue = false): string|TestResponse|Response
     {
         if ($viaQueue) {
             return resolve(EventHub\Queue::class)

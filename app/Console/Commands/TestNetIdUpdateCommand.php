@@ -69,7 +69,7 @@ class TestNetIdUpdateCommand extends Command implements PromptsForMissingInput
         $this->components->twoColumnDetail('Transport', $transport);
         $this->components->twoColumnDetail('Queue', self::QUEUE);
 
-        $this->send(self::QUEUE, $payload, $viaQueue);
+        $this->sendEventHubMessage(self::QUEUE, $payload, $viaQueue);
 
         $this->components->success('Fake NetID update submitted.');
 

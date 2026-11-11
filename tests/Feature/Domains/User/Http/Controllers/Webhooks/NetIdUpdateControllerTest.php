@@ -35,7 +35,7 @@ final class NetIdUpdateControllerTest extends TestCase
     {
         User::factory()->create(['username' => 'abc123', 'auth_type' => AuthType::SSO]);
 
-        $response = $this->send('etidentity.ldap.netid.term', 'netid=abc123&action=deactivate');
+        $response = $this->sendEventHubMessage('etidentity.ldap.netid.term', 'netid=abc123&action=deactivate');
 
         $response
             ->assertAccepted()
@@ -53,7 +53,7 @@ final class NetIdUpdateControllerTest extends TestCase
     {
         User::factory()->create(['username' => 'test123', 'auth_type' => AuthType::SSO]);
 
-        $response = $this->send('etidentity.ldap.netid.term', 'netid=test123&action=deprovision');
+        $response = $this->sendEventHubMessage('etidentity.ldap.netid.term', 'netid=test123&action=deprovision');
 
         $response
             ->assertAccepted()
@@ -71,7 +71,7 @@ final class NetIdUpdateControllerTest extends TestCase
     {
         User::factory()->create(['username' => 'sec456', 'auth_type' => AuthType::SSO]);
 
-        $response = $this->send('etidentity.ldap.netid.term', 'netid=sec456&action=sechold');
+        $response = $this->sendEventHubMessage('etidentity.ldap.netid.term', 'netid=sec456&action=sechold');
 
         $response
             ->assertAccepted()
@@ -87,7 +87,7 @@ final class NetIdUpdateControllerTest extends TestCase
 
     public function test_it_returns_ignored_for_unknown_users(): void
     {
-        $response = $this->send('etidentity.ldap.netid.term', 'netid=unknown9999&action=deactivate');
+        $response = $this->sendEventHubMessage('etidentity.ldap.netid.term', 'netid=unknown9999&action=deactivate');
 
         $response
             ->assertOk()
@@ -102,7 +102,7 @@ final class NetIdUpdateControllerTest extends TestCase
 
     public function test_it_returns_ignored_json_for_malformed_payload(): void
     {
-        $response = $this->send('etidentity.ldap.netid.term', 'invalid payload data');
+        $response = $this->sendEventHubMessage('etidentity.ldap.netid.term', 'invalid payload data');
 
         $response
             ->assertOk()
@@ -116,7 +116,7 @@ final class NetIdUpdateControllerTest extends TestCase
 
     public function test_it_returns_ignored_json_for_unknown_action(): void
     {
-        $response = $this->send('etidentity.ldap.netid.term', 'netid=test123&action=unknownaction');
+        $response = $this->sendEventHubMessage('etidentity.ldap.netid.term', 'netid=test123&action=unknownaction');
 
         $response
             ->assertOk()
