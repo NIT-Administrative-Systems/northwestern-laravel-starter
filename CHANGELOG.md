@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+### Security
+
+- `UserBuilder::whereEmailEquals()` and `whereUsernameEquals()` match exactly, comparing `lower(column) = lower(?)` instead of using `ilike`, which treated `%` and `_` in the value as wildcards. A sign-in code request for `%@example.com` reached the first local account at that domain, and a lookup for `a_b@example.com` could find `axb@example.com`.
+
 ## [v3.1.0] - 2026-11-10
 
 ### Changed
