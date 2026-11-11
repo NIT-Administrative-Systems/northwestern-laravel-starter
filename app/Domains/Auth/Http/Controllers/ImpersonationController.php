@@ -8,6 +8,8 @@ use App\Domains\Access\Enums\SystemPermission;
 use App\Domains\Auth\Actions\Impersonation\StartImpersonation;
 use App\Domains\Auth\Actions\Impersonation\StopImpersonation;
 use App\Http\Controllers\Controller;
+use App\Providers\Filament\AppPanelProvider;
+use Filament\Facades\Filament;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
@@ -35,6 +37,12 @@ class ImpersonationController extends Controller
             guardName: $guardName,
         );
 
+        // The page the administrator came from is usually one the person being impersonated
+        // can't open, so start them in the app panel; the stored URL is for leaving.
+        if ($redirectTo === '/') {
+            return redirect()->to(Filament::getPanel(AppPanelProvider::ID)->getUrl());
+        }
+
         return $this->resolveRedirect($redirectTo);
     }
 
@@ -47,7 +55,7 @@ class ImpersonationController extends Controller
     /**
      * Store the referer URL in session if it belongs to the same domain.
      *
-     * Used after impersonation starts to redirect back to the page the admin was viewing.
+     * Used when impersonation ends to return to the page the admin was viewing.
      */
     private function storeReturnUrl(Request $request): void
     {
@@ -65,19 +73,10 @@ class ImpersonationController extends Controller
         }
     }
 
-    /**
-     * Resolve the redirect target, preferring the stored return URL over the default root.
-     */
     private function resolveRedirect(string $redirectTo): RedirectResponse
     {
         if ($redirectTo === 'back') {
             return redirect()->back();
-        }
-
-        $returnUrl = Session::get('impersonation.return_url');
-
-        if ($redirectTo === '/' && $returnUrl) {
-            return redirect()->to($returnUrl);
         }
 
         return redirect()->to($redirectTo);

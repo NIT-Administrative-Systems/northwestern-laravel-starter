@@ -9,6 +9,8 @@ use App\Domains\Auth\Actions\Impersonation\StartImpersonation;
 use App\Domains\Auth\Actions\Impersonation\StopImpersonation;
 use App\Domains\Auth\Http\Controllers\ImpersonationController;
 use App\Domains\User\Models\User;
+use App\Providers\Filament\AppPanelProvider;
+use Filament\Facades\Filament;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Support\Facades\Session;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -117,7 +119,7 @@ final class ImpersonationControllerTest extends TestCase
         $this->assertGuest();
     }
 
-    public function test_take_impersonation_redirects_to_referer_if_redirect_is_root(): void
+    public function test_take_impersonation_redirects_to_the_app_panel_if_redirect_is_root(): void
     {
         $this->actingAs($this->authorizedUser);
 
@@ -132,7 +134,23 @@ final class ImpersonationControllerTest extends TestCase
             'Referer' => $referer,
         ]);
 
-        $response->assertRedirect($referer);
+        $response->assertRedirect(Filament::getPanel(AppPanelProvider::ID)->getUrl());
+        $this->assertSame($referer, session('impersonation.return_url'));
+    }
+
+    // The Impersonate button is on the administrator's view of the user, which the person being
+    // impersonated usually can't open.
+    public function test_impersonating_from_the_users_page_lands_somewhere_the_person_can_see(): void
+    {
+        $this->authorizedUser->givePermissionTo(SystemPermission::AccessAdministrationPanel, SystemPermission::ViewUsers);
+        $person = User::factory()->create();
+
+        $userPage = config('app.url') . '/administration/users/' . $person->id;
+
+        $response = $this->actingAs($this->authorizedUser)->post('/impersonate/take/' . $person->id, [], ['Referer' => $userPage]);
+
+        $this->assertSame($person->id, auth()->id());
+        $this->get($response->headers->get('Location'))->assertOk();
     }
 
     public function test_take_impersonation_stores_valid_referer_url_in_session(): void
