@@ -56,6 +56,20 @@ final class SupportTicketMessageTest extends TestCase
         $this->assertTrue($mailable->viewData['fallbackMode']);
     }
 
+    // A local account's username is generated from its email address; only a NetID is a NetID.
+    public function test_a_local_accounts_username_is_not_labelled_as_a_netid(): void
+    {
+        $local = SupportTicket::factory()->for(User::factory()->affiliate()->create())->pending()->create();
+        $northwestern = SupportTicket::factory()->for(User::factory()->create())->pending()->create();
+
+        $localHtml = new SupportTicketMessage($local, 'SUP-1', false)->render();
+        $northwesternHtml = new SupportTicketMessage($northwestern, 'SUP-2', false)->render();
+
+        $this->assertStringContainsString('>Username</strong>', $localHtml);
+        $this->assertStringNotContainsString('>NetID</strong>', $localHtml);
+        $this->assertStringContainsString('>NetID</strong>', $northwesternHtml);
+    }
+
     // People type plain text: neither HTML nor Markdown in it should render in the team's email.
     public function test_details_render_as_the_text_that_was_typed(): void
     {

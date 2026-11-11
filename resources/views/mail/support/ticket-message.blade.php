@@ -19,7 +19,7 @@
 | **Submitted** | {{ $submittedAt }} |
 | **Requester** | {{ $submitterName }} |
 | **Email** | [{{ $submitterEmail }}](mailto:{{ $submitterEmail }}) |
-| **NetID** | {{ $submitterUsername }} |
+| **{{ $submitterUsernameLabel }}** | {{ $submitterUsername }} |
 @if ($submitterAffiliation)
 | **Affiliation** | {{ $submitterAffiliation }} |
 @endif
