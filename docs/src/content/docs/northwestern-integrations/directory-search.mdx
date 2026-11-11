@@ -5,8 +5,11 @@ sidebar:
     order: 1
 ---
 
-import { Aside, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
-import { PropertyTable, Property } from '@nu-appdev/northwestern-starlight-theme/components';
+import { Aside, Steps, Tabs, TabItem } from "@astrojs/starlight/components";
+import {
+    PropertyTable,
+    Property,
+} from "@nu-appdev/northwestern-starlight-theme/components";
 
 The Directory Search integration looks up Northwestern users by NetID, email, or employee ID via the LDAP-backed Directory Search API. It is the primary mechanism for user provisioning during SSO login and for keeping user profile data synchronized with Northwestern's identity system.
 
@@ -20,23 +23,23 @@ Directory Search is optional in the `local` environment. Local demo users are se
 
 1. **Search type detection**
 
-   `DirectorySearchType::fromSearchValue()` auto-detects whether the input is an email address, employee ID (numeric), or NetID (fallback).
+    `DirectorySearchType::fromSearchValue()` auto-detects whether the input is an email address, employee ID (numeric), or NetID (fallback).
 
 2. **API lookup**
 
-   The `DirectorySearch` class from `laravel-soa` calls Northwestern's Directory Search API with a `basic` detail level.
+    The `DirectorySearch` class from `laravel-soa` calls Northwestern's Directory Search API with a `basic` detail level.
 
 3. **Validation**
 
-   The response is validated to ensure required fields are present. `eduPersonPrimaryAffiliation` and `mail` must exist for the entry to be considered valid.
+    The response is validated to ensure required fields are present. `eduPersonPrimaryAffiliation` and `mail` must exist for the entry to be considered valid.
 
 4. **Field mapping**
 
-   `SyncUserFromDirectory` maps raw LDAP attributes onto the User model, handling multi-value arrays and student-specific field priority.
+    `SyncUserFromDirectory` maps raw LDAP attributes onto the User model, handling multi-value arrays and student-specific field priority.
 
 5. **Persistence**
 
-   `PersistUserWithUniqueUsername` saves the user in a transaction and assigns the `Northwestern User` role to SSO users. If the save collides with an existing username, it returns the existing user instead.
+    `PersistUserWithUniqueUsername` saves the user in a transaction and assigns the `Northwestern User` role to SSO users. If the save collides with an existing username, it returns the existing user instead.
 
 </Steps>
 
@@ -44,11 +47,11 @@ Directory Search is optional in the `local` environment. Local demo users are se
 
 ## Key Classes
 
-| Class | Purpose |
-|-------|---------|
-| `FindOrUpdateUserFromDirectory` | Orchestrates the full lookup-validate-sync-persist flow |
-| `SyncUserFromDirectory` | Maps LDAP attributes to User model fields |
-| `DirectorySearchType` | Auto-detects search input type (email, employee ID, NetID) |
+| Class                           | Purpose                                                                                                   |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `FindOrUpdateUserFromDirectory` | Orchestrates the full lookup-validate-sync-persist flow                                                   |
+| `SyncUserFromDirectory`         | Maps LDAP attributes to User model fields                                                                 |
+| `DirectorySearchType`           | Auto-detects search input type (email, employee ID, NetID)                                                |
 | `PersistUserWithUniqueUsername` | Saves the user, assigns the Northwestern User role, and returns the existing user on a username collision |
 
 ---
@@ -106,14 +109,16 @@ class AssignDepartmentJob implements ShouldQueue
 
 The caller controls whether jobs run synchronously or are dispatched to the queue via the `$immediate` flag:
 
-| Caller | `$immediate` | Behavior |
-|--------|:------------:|----------|
-| SSO login | `false` | Jobs are **queued**, login completes immediately |
-| Filament user creation | `true` | Jobs run **synchronously**, the admin sees the result before the page redirects |
-| Filament **Refresh from Directory** action | `true` | Jobs run **synchronously**, the admin sees the refreshed record |
+| Caller                                     | `$immediate` | Behavior                                                                        |
+| ------------------------------------------ | :----------: | ------------------------------------------------------------------------------- |
+| SSO login                                  |   `false`    | Jobs are **queued**, login completes immediately                                |
+| Filament user creation                     |    `true`    | Jobs run **synchronously**, the admin sees the result before the page redirects |
+| Filament **Refresh from Directory** action |    `true`    | Jobs run **synchronously**, the admin sees the refreshed record                 |
 
 <Aside type="tip">
-When jobs run synchronously (`$immediate = true`), failures are caught and reported via your exception handler. They will **not** break the login or creation flow.
+    When jobs run synchronously (`$immediate = true`), failures are caught and
+    reported via your exception handler. They will **not** break the login or
+    creation flow.
 </Aside>
 
 The starter ships with [`DownloadWildcardPhotoJob`](/northwestern-integrations/wildcard-photos/) as a built-in post-retrieval job (enabled when `platform.wildcard_photo_sync` is `true`).
@@ -126,17 +131,17 @@ The `SyncUserFromDirectory::syncDemographics()` method defines how LDAP director
 
 ### Default Mappings
 
-| User Attribute | LDAP Keys (priority order) | Notes |
-|----------------|----------------------------|-------|
-| `first_name` | `givenName` | Students prepend `nuStudentGivenName` |
-| `last_name` | `sn` | Students prepend `nuStudentSn` |
-| `email` | `mail` | Students prepend `nuStudentEmail` |
-| `employee_id` | `nuStudentNumber`, `employeeNumber` | IDs shorter than 7 characters are discarded |
-| `phone` | `telephoneNumber` | Students prepend `nuAllStudentCurrentPhone` |
-| `departments` | `nuAllDepartmentName` | Multi-value (stored as JSON array) |
-| `job_titles` | `nuAllTitle` | Suppressed for students |
-| `hr_employee_id` | `employeeNumber` | Set when both `employeeNumber` and `nuStudentNumber` exist and differ |
-| `timezone` | — | Set from `config('platform.default_user_timezone')` (default: `America/Chicago`) when the user is created. Later syncs keep the timezone the user chose in their [Account preferences](/building/app-panel/#preferences) |
+| User Attribute   | LDAP Keys (priority order)          | Notes                                                                                                                                                                                                                    |
+| ---------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `first_name`     | `givenName`                         | Students prepend `nuStudentGivenName`                                                                                                                                                                                    |
+| `last_name`      | `sn`                                | Students prepend `nuStudentSn`                                                                                                                                                                                           |
+| `email`          | `mail`                              | Students prepend `nuStudentEmail`                                                                                                                                                                                        |
+| `employee_id`    | `nuStudentNumber`, `employeeNumber` | IDs shorter than 7 characters are discarded                                                                                                                                                                              |
+| `phone`          | `telephoneNumber`                   | Students prepend `nuAllStudentCurrentPhone`                                                                                                                                                                              |
+| `departments`    | `nuAllDepartmentName`               | Multi-value (stored as JSON array)                                                                                                                                                                                       |
+| `job_titles`     | `nuAllTitle`                        | Suppressed for students                                                                                                                                                                                                  |
+| `hr_employee_id` | `employeeNumber`                    | Set when both `employeeNumber` and `nuStudentNumber` exist and differ                                                                                                                                                    |
+| `timezone`       | —                                   | Set from `config('platform.default_user_timezone')` (default: `America/Chicago`) when the user is created. Later syncs keep the timezone the user chose in their [Account preferences](/building/app-panel/#preferences) |
 
 For students, student-specific LDAP fields are prepended to the key arrays so they take priority. The `findValue()` helper returns the first non-empty match, so earlier keys win.
 
@@ -148,40 +153,45 @@ To sync an additional directory attribute (e.g., building/office location):
 
 1. **Add a migration**
 
-   ```bash
-   php artisan make:migration add_building_to_users_table
-   ```
+    ```bash
+    php artisan make:migration add_building_to_users_table
+    ```
 
-   ```php ins={2}
-   Schema::table('users', function (Blueprint $table) {
-       $table->string('building')->nullable();
-   });
-   ```
+    ```php ins={2}
+    Schema::table('users', function (Blueprint $table) {
+        $table->string('building')->nullable();
+    });
+    ```
 
 2. **Update the field mapping**
 
-   In `SyncUserFromDirectory::syncDemographics()`, add the new mapping alongside the existing ones:
+    In `SyncUserFromDirectory::syncDemographics()`, add the new mapping alongside the existing ones:
 
-   ```php ins={1} title="app/Domains/User/Actions/Directory/SyncUserFromDirectory.php"
-   $user->building = $this->findValue($directoryData, ['nuPosition1Building', 'postalAddress']);
-   ```
+    ```php ins={1} title="app/Domains/User/Actions/Directory/SyncUserFromDirectory.php"
+    $user->building = $this->findValue($directoryData, ['nuPosition1Building', 'postalAddress']);
+    ```
 
 3. **Update the User model** (if needed)
 
-   Add a cast if the field requires one (e.g., `array`, `datetime`). No `$fillable` changes are needed because the starter runs `Model::unguard()` globally.
+    Add a cast if the field requires one (e.g., `array`, `datetime`). No `$fillable` changes are needed because the starter runs `Model::unguard()` globally.
 
 </Steps>
 
 ---
 
-## Invalid Directory Data
+## Failed Lookups and Invalid Directory Data
 
-When a directory lookup returns invalid data (missing required fields), the behavior depends on whether the user already exists:
+`DirectorySearch::lookup()` returns `false` both when the NetID isn't in the directory and when Directory Search can't be reached or answers with an error, so a failed lookup can't tell a departed person from an outage. The starter treats it as unknown. When the directory does answer but the entry is missing required fields, that is an answer, and it counts.
 
-- **Existing SSO user** - The account is marked with `netid_inactive = true` and `directory_sync_last_failed_at` is recorded. The user is not deleted. Other existing users are returned unchanged, and API users skip the lookup entirely.
-- **New user** - A `BadDirectoryEntry` exception is thrown, preventing account creation with incomplete data.
+What happens depends on whether the user already exists:
 
-This ensures that transient directory issues don't destroy existing accounts while still preventing invalid new accounts.
+- **Existing SSO user, failed lookup** - `directory_sync_last_failed_at` is recorded and the user is returned with the details already stored, so they sign in as before. `netid_inactive` is left as it was, so an outage never deactivates anyone, and `oauth:revoke-ineligible` doesn't revoke their credentials.
+- **Existing SSO user, incomplete entry** - The account is marked with `netid_inactive = true` and `directory_sync_last_failed_at` is recorded. The user is not deleted.
+- **Other existing users** - Returned unchanged. API users skip the lookup entirely.
+- **New user, failed lookup** - No user is returned and no account is created. Sign-in treats it as Directory Search being unavailable: it retries, then shows the 503 page (see [WebSSO error handling](/northwestern-integrations/websso/#error-handling)).
+- **New user, incomplete entry** - A `BadDirectoryEntry` exception is thrown, preventing account creation with incomplete data.
+
+Deactivation comes from the directory's answers and from [EventHub](/northwestern-integrations/eventhub/), whose NetID deactivation events still set `netid_inactive`. A deactivated or deleted person can't use either panel: their next request is refused.
 
 ---
 
@@ -194,7 +204,10 @@ The `DirectorySearchCheck` class provides a [Spatie Health](https://spatie.be/do
 ## Environment Variables
 
 <PropertyTable>
-    <Property name="DIRECTORY_SEARCH_URL" default="https://northwestern-prod.apigee.net/directory-search">
+    <Property
+        name="DIRECTORY_SEARCH_URL"
+        default="https://northwestern-prod.apigee.net/directory-search"
+    >
         Directory Search API base URL
     </Property>
     <Property name="DIRECTORY_SEARCH_API_KEY" required>

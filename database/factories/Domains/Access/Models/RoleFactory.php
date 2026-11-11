@@ -76,7 +76,8 @@ class RoleFactory extends Factory
         }
 
         if (! $type instanceof RoleTypeEnum) {
-            return fake()->randomElement($this->roleTypes);
+            // Any type a person's role can have: an API Integration role suits only API users.
+            return fake()->randomElement(array_diff_key($this->roleTypes, [RoleTypeEnum::ApiIntegration->value => true]));
         }
 
         return $this->roleTypes[$type->value];

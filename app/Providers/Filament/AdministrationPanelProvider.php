@@ -39,6 +39,7 @@ class AdministrationPanelProvider extends PanelProvider
             ])
             ->id(self::ID)
             ->path(self::ID)
+            ->strictAuthorization()
             ->maxContentWidth(Width::Full)
             ->viteTheme('resources/css/filament/administration/theme.css')
             ->renderHook(PanelsRenderHook::HEAD_END, fn (): string => Blade::render('<x-sentry-browser />'))

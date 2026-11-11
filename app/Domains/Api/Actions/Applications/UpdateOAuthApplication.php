@@ -32,6 +32,7 @@ readonly class UpdateOAuthApplication
      * @param  list<string>  $scopes
      *
      * @throws AuthorizationException
+     * @throws InvalidArgumentException When the client isn't a connected application, or can't be changed
      */
     public function __invoke(
         OAuthClient $client,
@@ -44,6 +45,10 @@ readonly class UpdateOAuthApplication
         User $updatedBy,
     ): void {
         $this->credentials->decide($updatedBy, CredentialOperation::Modify, CredentialKind::ConnectedApplication, null)->authorize();
+
+        if (CredentialKind::of($client) !== CredentialKind::ConnectedApplication) {
+            throw new InvalidArgumentException('Only a connected application can be changed here.');
+        }
 
         if ($client->getAttributes()['revoked']) {
             throw new InvalidArgumentException('A revoked application cannot be changed.');

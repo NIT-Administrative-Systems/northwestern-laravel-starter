@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Domains\User\Listeners;
 
 use App\Domains\Access\Enums\RoleModificationOrigin;
+use App\Domains\Access\Enums\RoleTypeEnum;
 use App\Domains\Access\Enums\SystemRole;
 use App\Domains\Access\Models\Role;
 use App\Domains\Auth\Enums\AuthType;
@@ -210,7 +211,8 @@ final class ProcessNetIdUpdateTest extends TestCase
             'auth_type' => AuthType::API,
             'netid_inactive' => false,
         ]);
-        $user->assignRoleWithAudit($this->adminRole(), RoleModificationOrigin::System);
+        $apiRole = Role::factory()->forRoleType(RoleTypeEnum::ApiIntegration)->create();
+        $user->assignRoleWithAudit($apiRole, RoleModificationOrigin::System);
 
         $event = NetIdUpdated::fromPayload('netid=api123&action=deactivate');
         $listener = new ProcessNetIdUpdate();
@@ -218,7 +220,7 @@ final class ProcessNetIdUpdateTest extends TestCase
 
         $user->refresh();
 
-        $this->assertTrue($user->hasRole('admin'));
+        $this->assertTrue($user->hasRole($apiRole));
         $this->assertFalse($user->netid_inactive);
     }
 }

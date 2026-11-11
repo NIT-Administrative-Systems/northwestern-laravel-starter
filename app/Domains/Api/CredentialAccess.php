@@ -118,7 +118,7 @@ readonly class CredentialAccess
             return AccessDecision::refuse(AccessRefusal::WrongAccountType, $kind);
         }
 
-        if ($holder instanceof User && in_array($operation, [CredentialOperation::Issue, CredentialOperation::Modify], true) && $this->isInactive($holder)) {
+        if ($holder instanceof User && in_array($operation, [CredentialOperation::Issue, CredentialOperation::Modify], true) && $holder->isInactive()) {
             return AccessDecision::refuse(AccessRefusal::AccountInactive, $kind);
         }
 
@@ -131,7 +131,7 @@ readonly class CredentialAccess
             return AccessDecision::refuse(AccessRefusal::WrongAccountType, $kind);
         }
 
-        if (in_array($operation, [CredentialOperation::Issue, CredentialOperation::Use], true) && $this->isInactive($holder)) {
+        if (in_array($operation, [CredentialOperation::Issue, CredentialOperation::Use], true) && $holder->isInactive()) {
             return AccessDecision::refuse(AccessRefusal::AccountInactive, $kind);
         }
 
@@ -164,17 +164,6 @@ readonly class CredentialAccess
     private function isWrongAccountType(User $holder, CredentialKind $kind): bool
     {
         return ($kind === CredentialKind::ServiceClient) !== ($holder->auth_type === AuthType::API);
-    }
-
-    /**
-     * Read from the raw attributes: a user built in memory, or selected with fewer columns, may
-     * not have them, and the application refuses access to attributes that weren't retrieved.
-     */
-    private function isInactive(User $user): bool
-    {
-        $attributes = $user->getAttributes();
-
-        return ($attributes['deleted_at'] ?? null) !== null || (bool) ($attributes['netid_inactive'] ?? false);
     }
 
     /**
