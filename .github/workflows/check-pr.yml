@@ -549,6 +549,13 @@ jobs:
       - name: 🎯 Configure PHPUnit Matcher
         uses: mheap/phpunit-matcher-action@dcbd4ead41890163b65d0b21534387ce72980ee5 # v1.4.0
 
+      # The theme's CSS loads its fonts from common.northwestern.edu, and a page hasn't loaded
+      # until they arrive. Every test opens a browser with an empty cache, so a slow lookup or
+      # response from that server times out whichever test is loading a page. Resolving the host to
+      # this machine makes the requests fail at once, and pages render in their fallback fonts.
+      - name: 🚫 Block Remote Theme Fonts
+        run: echo "127.0.0.1 common.northwestern.edu" | sudo tee -a /etc/hosts
+
       # The application runs inside the test process, so there's no server to start. A failed
       # assertion saves a screenshot to tests/Browser/Screenshots.
       - name: 🌐 Run Browser Tests
