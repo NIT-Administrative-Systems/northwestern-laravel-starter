@@ -61,7 +61,7 @@ final class LogsApiRequestsTest extends TestCase
 
     public function test_a_request_with_no_user_or_failure_is_not_logged(): void
     {
-        // No user_id or failure_reason in context
+        // Neither a user nor a failure reason is in the context.
         Context::add(ApiRequestContext::TRACE_ID, Str::uuid()->toString());
 
         $this->getJson($this->endpoint)->assertOk();
@@ -227,7 +227,7 @@ final class LogsApiRequestsTest extends TestCase
             $this->getJson('/api/error')->assertNotFound();
         }
 
-        // All 3 error requests should be logged despite 0% sampling
+        // Every error is logged, even at a sample rate of zero.
         $this->assertDatabaseCount(ApiRequestLog::class, 3);
     }
 
@@ -247,7 +247,7 @@ final class LogsApiRequestsTest extends TestCase
             $this->getJson($this->endpoint)->assertOk();
         }
 
-        // All 3 requests with failure reasons should be logged despite 0% sampling
+        // Every failure is logged, even at a sample rate of zero.
         $this->assertDatabaseCount(ApiRequestLog::class, 3);
     }
 
@@ -268,7 +268,7 @@ final class LogsApiRequestsTest extends TestCase
 
         $logCount = ApiRequestLog::count();
 
-        // With 50% sampling, we expect roughly 15 logs (allow wide tolerance for randomness)
+        // About 15 are logged; the bounds are wide because sampling is random.
         $this->assertGreaterThan(3, $logCount, 'Expected at least ~10% of 30 requests to be logged');
         $this->assertLessThan(27, $logCount, 'Expected at most ~90% of 30 requests to be logged');
     }
@@ -277,7 +277,7 @@ final class LogsApiRequestsTest extends TestCase
     {
         $user = User::factory()->api()->create();
 
-        // Create a route with middleware that sets context and forces a DB error
+        // A trace ID that isn't a UUID makes saving the log fail.
         app()->bind('test.set.context.with.error', fn () => function ($request, $next) use ($user) {
             Context::add(ApiRequestContext::USER_ID, $user->id);
             Context::add(ApiRequestContext::TRACE_ID, 'invalid-trace-id-format-to-cause-error');
@@ -288,8 +288,7 @@ final class LogsApiRequestsTest extends TestCase
         Route::middleware(['test.set.context.with.error', LogsApiRequests::class])
             ->get('/api/db-error-test', fn () => response()->json(['ok' => true]));
 
-        // Even if logging fails internally (caught by try/catch),
-        // the request should still succeed
+        // Logging fails, but the request still succeeds.
         $this->getJson('/api/db-error-test')->assertOk();
     }
 
@@ -303,7 +302,7 @@ final class LogsApiRequestsTest extends TestCase
             ->assertOk();
 
         $log = ApiRequestLog::first();
-        // Laravel in test mode may still use 127.0.0.1 or the forwarded IP
+        // The forwarded address or 127.0.0.1, depending on the trusted proxies.
         $this->assertNotEmpty($log->ip_address);
     }
 
@@ -313,12 +312,10 @@ final class LogsApiRequestsTest extends TestCase
         Context::add(ApiRequestContext::USER_ID, $user->id);
         Context::add(ApiRequestContext::TRACE_ID, Str::uuid()->toString());
 
-        // In test environment, we'll always have an IP (127.0.0.1)
-        // but we can verify the logic handles null by checking the code path
         $this->getJson($this->endpoint)->assertOk();
 
         $log = ApiRequestLog::first();
-        // In tests, this will be 127.0.0.1, but the middleware code handles null → 'unknown'
+        // In tests this is 127.0.0.1; the middleware records a missing IP as 'unknown'.
         $this->assertNotNull($log->ip_address);
     }
 

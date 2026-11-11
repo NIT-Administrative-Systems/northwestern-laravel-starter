@@ -56,7 +56,7 @@ final class RevokeAllCredentialsTest extends TestCase
         $this->assertSame(CredentialStatus::Revoked, $client->fresh()?->status);
     }
 
-    // Credentials only change under the name of the person changing them, so nobody is deleted while impersonating.
+    // Deleting revokes credentials, which never change while someone is impersonating.
     public function test_deleting_a_user_while_impersonating_is_refused(): void
     {
         $person = User::factory()->create();
@@ -74,12 +74,13 @@ final class RevokeAllCredentialsTest extends TestCase
         $this->assertSame(CredentialStatus::Active, $token->fresh()?->status);
     }
 
-    // The delete and the revocation happen together: if revoking fails, the user isn't deleted.
+    // The delete and the revocation happen together:
+    // if revoking fails, the user isn't deleted.
     public function test_a_user_whose_credentials_cannot_be_revoked_is_not_deleted(): void
     {
         $person = User::factory()->create();
         [, $token] = $this->personalAccessToken($person);
-        // Impersonation starts between the delete and the revocation, so revoking is refused.
+        // Impersonation starts after the delete, so the revocation is refused.
         $this->impersonating(false, true);
 
         try {
@@ -91,7 +92,7 @@ final class RevokeAllCredentialsTest extends TestCase
         }
     }
 
-    // Disconnecting through the action removes the connection, so the person's list is empty too.
+    // The action removes the connection too, so the person's list is empty.
     public function test_it_disconnects_a_persons_applications(): void
     {
         $person = User::factory()->create();

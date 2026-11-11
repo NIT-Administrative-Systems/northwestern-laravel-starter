@@ -26,8 +26,8 @@ use Tests\Fixtures\Mcp\EchoServer;
 use Tests\TestCase;
 
 /**
- * An MCP client connecting the way Claude, VS Code and Cursor do: from the server's 401, through
- * discovery, self-registration and consent, to calling a tool.
+ * An MCP client connecting as Claude, VS Code and Cursor do: from the server's
+ * 401, through discovery, self-registration and consent, to calling a tool.
  */
 #[CoversClass(AddScopeToChallenge::class)]
 #[CoversClass(OAuthDiscoveryController::class)]
@@ -147,7 +147,7 @@ final class McpFlowTest extends TestCase
         $this->actingAs($user);
         $client = $this->registerMcpClient();
 
-        // Consent now refuses such a request, so pass it by to get the token one would have had.
+        // Consent now refuses this request, so skip it to get the token it once gave.
         $this->withoutMiddleware(AuthorizeOAuthConsent::class);
         [, $verifier] = $this->requestAuthorization($client, []);
         $token = (string) $this->exchange($client, $this->approve($client), $verifier)->assertOk()->json('access_token');
@@ -190,8 +190,9 @@ final class McpFlowTest extends TestCase
         }
     }
 
-    // Losing the permission ends access at once: the token stops working, so the client signs in
-    // again and the consent screen refuses it. oauth:revoke-ineligible then disconnects it.
+    // Losing the permission ends access at once: the token stops
+    // working and the consent screen refuses the client's next
+    // sign-in. oauth:revoke-ineligible then disconnects it.
     public function test_only_people_with_the_use_mcp_permission_connect_and_keep_using_a_client(): void
     {
         $this->actingAs(User::factory()->create());

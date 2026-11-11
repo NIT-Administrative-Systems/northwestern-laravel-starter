@@ -16,9 +16,12 @@ use Tests\Concerns\RunsAuthorizationCodeFlow;
 use Tests\TestCase;
 
 /**
- * The daily `passport:purge` in routes/console.php. Refresh tokens are found through their
- * access tokens, so an access token must outlive its refresh token's 30-day lifetime even
- * once it's revoked; deleting it sooner would hide a live refresh token from a disconnect.
+ * The daily `passport:purge` in routes/console.php.
+ *
+ * Refresh tokens are found through their access tokens, so
+ * even a revoked access token must outlive its refresh
+ * token's 30-day lifetime: deleting it sooner would
+ * hide a live refresh token from a disconnection.
  */
 #[CoversNothing]
 final class PassportPurgeScheduleTest extends TestCase
@@ -53,8 +56,8 @@ final class PassportPurgeScheduleTest extends TestCase
 
         $token = OAuthToken::query()->where('client_id', $client->getKey())->sole();
         $token->forceFill(['revoked' => true, 'expires_at' => now()->subDays(32)])->save();
-        // Its 30-day refresh token expired two days ago. Passport keeps an access token while its
-        // refresh token is live.
+        // Its 30-day refresh token expired two days ago. Passport keeps
+        // an access token as long as its refresh token still works.
         Passport::refreshToken()->newQuery()->where('access_token_id', $token->getKey())->update(['expires_at' => now()->subDays(2)]);
 
         $this->runScheduledPurge();

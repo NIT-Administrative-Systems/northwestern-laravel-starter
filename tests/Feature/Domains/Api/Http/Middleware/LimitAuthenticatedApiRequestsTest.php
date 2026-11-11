@@ -22,7 +22,7 @@ final class LimitAuthenticatedApiRequestsTest extends TestCase
         config(['api.enabled' => true]);
     }
 
-    // Every integration behind one IP address (an API gateway, say) must not share one limit.
+    // Integrations behind one IP address, such as a gateway, mustn't share a limit.
     public function test_authenticated_requests_are_limited_per_client_not_per_ip_address(): void
     {
         config(['rate-limiting.api.per_minute' => 1, 'rate-limiting.api.per_ip_per_minute' => 100]);

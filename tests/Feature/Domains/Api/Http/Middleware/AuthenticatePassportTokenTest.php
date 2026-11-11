@@ -29,7 +29,8 @@ final class AuthenticatePassportTokenTest extends TestCase
 {
     use IssuesPersonalAccessTokens, IssuesServiceClientTokens, RunsAuthorizationCodeFlow;
 
-    // The realm comes from APP_NAME: config/api.php loads before the app config, so config('app.name') was empty there.
+    // The realm comes from APP_NAME: config/api.php loads before
+    // the app config, so config('app.name') was empty there.
     public function test_a_refused_request_names_the_applications_api_realm(): void
     {
         $this->getJson('/api/v1/me')
@@ -50,7 +51,7 @@ final class AuthenticatePassportTokenTest extends TestCase
         $this->assertSame($client->getKey(), Context::get(ApiRequestContext::OAUTH_CLIENT_ID));
     }
 
-    // Passport's guard is the default during API requests, but roles and permissions belong to `web`.
+    // Passport's guard is the default in API requests; permissions belong to `web`.
     public function test_permission_checks_work_during_api_requests(): void
     {
         Route::middleware(['api', AuthenticatePassportToken::class])
@@ -77,7 +78,8 @@ final class AuthenticatePassportTokenTest extends TestCase
         $this->withToken($token)->withServerVariables(['REMOTE_ADDR' => '10.1.2.3'])->getJson('/api/v1/me')->assertOk();
     }
 
-    // Behind a misconfigured proxy every request looks IP-less; an allowlisted client must fail closed, loudly.
+    // Behind a misconfigured proxy no request has an IP address,
+    // so a client with an allowlist is refused and reported.
     public function test_a_restricted_client_is_refused_and_reported_when_the_request_has_no_ip(): void
     {
         Exceptions::fake();
@@ -119,7 +121,7 @@ final class AuthenticatePassportTokenTest extends TestCase
         $this->assertSame('token-invalid-or-expired', Context::get(ApiRequestContext::FAILURE_REASON));
     }
 
-    // Every API request acts for a user; a client with no API user behind it has no permissions.
+    // Every API request acts for a user; a client with no API user has no permissions.
     public function test_a_client_without_an_owner_is_refused(): void
     {
         $client = resolve(ClientRepository::class)->createClientCredentialsGrantClient('Ownerless');

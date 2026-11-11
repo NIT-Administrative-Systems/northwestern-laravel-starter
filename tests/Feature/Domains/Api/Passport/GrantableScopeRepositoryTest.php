@@ -14,8 +14,8 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 /**
- * The narrowing an authorization code gets is tested through the whole flow in
- * AuthorizationCodeFlowTest; these are the cases the flow can't reach.
+ * The narrowing an authorization code gets is tested through the whole flow
+ * in AuthorizationCodeFlowTest; these are the cases the flow can't reach.
  */
 #[CoversClass(GrantableScopeRepository::class)]
 final class GrantableScopeRepositoryTest extends TestCase

@@ -38,7 +38,8 @@ final class CreatePersonalAccessTokenTest extends TestCase
             ->assertJsonPath('data.username', $user->username);
     }
 
-    // Passport signs every personal token for its one maximum lifetime; the chosen expiry is enforced on top.
+    // Passport signs every personal token for its one maximum
+    // lifetime, and the chosen expiry is enforced on top.
     public function test_the_token_stops_working_when_its_chosen_lifetime_ends(): void
     {
         [$accessToken] = $this->create($this->holder(), [], TokenExpiration::OneMonth);

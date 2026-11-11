@@ -30,7 +30,7 @@ final class DenyFramingOfConsentTest extends TestCase
             ->assertHeader('X-Frame-Options', 'DENY');
     }
 
-    // The page for a deleted or revoked application is rendered from an exception, inside this middleware.
+    // The error page is rendered from an exception, inside this middleware.
     public function test_the_page_for_an_unknown_application_cannot_be_framed(): void
     {
         $this->actingAs(User::factory()->create());

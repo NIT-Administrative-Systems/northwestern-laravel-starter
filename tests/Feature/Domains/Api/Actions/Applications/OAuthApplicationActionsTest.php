@@ -61,7 +61,8 @@ final class OAuthApplicationActionsTest extends TestCase
         $this->assertTrue($client->first_party);
     }
 
-    // Applications have UUID keys that don't fit the audits table, so their changes are recorded on the administrator.
+    // An application's UUID key doesn't fit the audits table, so
+    // its changes are recorded on the administrator instead.
     public function test_an_administrators_changes_are_audited_on_them(): void
     {
         $administrator = $this->administrator();
@@ -147,7 +148,7 @@ final class OAuthApplicationActionsTest extends TestCase
         }
     }
 
-    // A personal disconnect never touches other people connected to the same application.
+    // Disconnecting never touches other people connected to the same application.
     public function test_disconnecting_leaves_other_people_connected(): void
     {
         $client = $this->registerApplication();
@@ -238,7 +239,7 @@ final class OAuthApplicationActionsTest extends TestCase
         }
     }
 
-    // A service client, MCP client or personal access client is changed only through its own actions.
+    // Service, MCP and personal access clients change only through their own actions.
     public function test_only_a_connected_application_is_changed_as_one(): void
     {
         config(['mcp.enabled' => true]);

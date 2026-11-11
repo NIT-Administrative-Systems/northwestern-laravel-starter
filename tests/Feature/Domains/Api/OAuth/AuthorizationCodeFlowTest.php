@@ -100,7 +100,8 @@ final class AuthorizationCodeFlowTest extends TestCase
         $client = $this->registerApplication();
         $this->requestAuthorization($client);
 
-        // Passport returns the application's state from the authorization request it kept in the session.
+        // Passport returns the application's state from the
+        // authorization request it kept in the session.
         $this->delete('/oauth/authorize', ['client_id' => $client->getKey(), 'auth_token' => session('authToken')])
             ->assertRedirectContains(self::REDIRECT_URI)
             ->assertRedirectContains('error=access_denied')
@@ -109,7 +110,7 @@ final class AuthorizationCodeFlowTest extends TestCase
         $this->assertSame(0, OAuthConnection::query()->count());
     }
 
-    // After disconnecting, nothing the application holds works: not its access token, not its refresh token.
+    // Nothing works after disconnecting: not the access token, not the refresh token.
     public function test_disconnecting_stops_the_access_and_refresh_tokens(): void
     {
         $user = User::factory()->create();
@@ -135,7 +136,8 @@ final class AuthorizationCodeFlowTest extends TestCase
         $this->exchange($client, $this->codeFrom($response), $verifier)->assertOk();
     }
 
-    // Environment lockdown covers the consent screen, so a locked-out person can't connect an application.
+    // Environment lockdown covers the consent screen, so
+    // someone locked out can't connect an application.
     public function test_the_consent_screen_follows_environment_lockdown(): void
     {
         config(['platform.lockdown.enabled' => true]);
@@ -161,7 +163,7 @@ final class AuthorizationCodeFlowTest extends TestCase
         $this->assertNotEmpty($tokens->json('access_token'));
     }
 
-    // A person can't give an application more than they hold, whatever it's allowed to ask for.
+    // A person can't give an application more than they hold, whatever it may ask for.
     public function test_a_person_grants_only_the_scopes_they_hold(): void
     {
         $this->actingAs(User::factory()->affiliate()->create());
@@ -186,7 +188,8 @@ final class AuthorizationCodeFlowTest extends TestCase
         $consent->assertNotFound();
     }
 
-    // Passport approves the request it kept in the session, so a client_id posted with the form decides nothing.
+    // Passport approves the request it kept in the session, so
+    // a client_id posted with the form counts for nothing.
     public function test_approving_is_decided_on_the_client_passport_approves(): void
     {
         config(['mcp.enabled' => true]);
@@ -273,7 +276,7 @@ final class AuthorizationCodeFlowTest extends TestCase
             ->assertDontSee('Check this address.');
     }
 
-    // A domain in another script can imitate a familiar name, so its plain (punycode) form is shown too.
+    // A lookalike domain in another script shows its punycode form too.
     public function test_the_consent_screen_warns_about_an_internationalized_domain(): void
     {
         $this->actingAs(User::factory()->create());
@@ -288,7 +291,8 @@ final class AuthorizationCodeFlowTest extends TestCase
             ->assertSee('https://xn--bcher-kva.example');
     }
 
-    // A self-registered MCP client keeps its client ID after it's deleted or revoked, and Passport would answer with JSON.
+    // A self-registered MCP client keeps its client ID after it's
+    // deleted or revoked, and Passport would answer with JSON.
     public function test_a_deleted_or_revoked_client_shows_a_page_instead_of_passports_json(): void
     {
         $this->actingAs(User::factory()->create());
@@ -327,7 +331,7 @@ final class AuthorizationCodeFlowTest extends TestCase
         $this->assertNull(session('url.intended'));
     }
 
-    // Only an application acting for a person is a connection: not a service client, not a person's own token.
+    // Only an application acting for a person is a connection.
     public function test_service_client_and_personal_tokens_record_no_connection(): void
     {
         $this->serviceClientToken(User::factory()->api()->create());
@@ -336,7 +340,7 @@ final class AuthorizationCodeFlowTest extends TestCase
         $this->assertSame(0, OAuthConnection::query()->count());
     }
 
-    // Event discovery registers the listener; registering it again ran it twice for every token.
+    // Event discovery registers the listener; registering it twice ran it twice.
     public function test_the_connection_listener_is_registered_once(): void
     {
         $this->assertCount(1, Event::getRawListeners()[AccessTokenCreated::class]);

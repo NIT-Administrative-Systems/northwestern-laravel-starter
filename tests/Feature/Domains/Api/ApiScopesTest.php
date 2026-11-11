@@ -40,7 +40,7 @@ final class ApiScopesTest extends TestCase
         $this->assertSame('unknown-scope', ApiScopes::label('unknown-scope'));
     }
 
-    // OpenAPI attributes can't call code, so BaseApiController lists the scopes itself.
+    // OpenAPI attributes can't call code, so BaseApiController lists scopes itself.
     public function test_the_published_api_schema_lists_the_rest_scopes(): void
     {
         $schema = Yaml::parseFile(base_path('docs/schemas/api-schema.yaml'));
