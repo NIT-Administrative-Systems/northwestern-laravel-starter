@@ -128,11 +128,13 @@ class NorthwesternUserInfolist
                                     TextEntry::make('job_titles')
                                         ->label('Job Titles')
                                         ->badge()
+                                        ->wrap()
                                         ->placeholder('No job titles')
                                         ->columnSpanFull(),
 
                                     TextEntry::make('departments')
                                         ->badge()
+                                        ->wrap()
                                         ->placeholder('No departments')
                                         ->columnSpanFull(),
                                 ]),

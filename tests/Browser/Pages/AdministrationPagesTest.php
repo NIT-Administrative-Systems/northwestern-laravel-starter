@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 use App\Domains\Access\Enums\RoleTypeEnum;
 use App\Domains\Access\Models\Role;
+use App\Domains\Api\Actions\ServiceClients\CreateServiceClient;
 use App\Domains\Core\Models\Audit;
 use App\Domains\Support\Models\Announcement;
 use App\Domains\Support\Models\SupportTicket;
 use App\Domains\User\Models\User;
+use App\Domains\User\Models\UserLoginRecord;
 use Northwestern\SysDev\Chassis\Testing\Browser\FilamentPages;
+use Tests\Browser\Layout;
 
 /*
  * Every administration page works and passes axe for a super administrator. Pages are found
@@ -98,3 +101,38 @@ it('is healthy on the consent screen for a self-registered MCP client', function
 
     expect($page->assertSee('Unverified AI client.'))->toBeHealthyInEachTheme();
 });
+
+// Long values are the ones that break a layout: names, emails, job titles and role names.
+it('fits every administration page and its tables at :dataset pixels', function (int $width) {
+    $person = User::factory()->create([
+        'first_name' => 'Maximiliana Alexandrina Josephine',
+        'last_name' => 'Featherstonehaugh-Wolstenholme',
+        'email' => 'maximiliana.featherstonehaugh-wolstenholme@northwestern.edu',
+        'job_titles' => ['Associate Director of Strategic Enrollment Communications and Outreach'],
+        'departments' => ['Feinberg School of Medicine Department of Preventive Medicine'],
+    ]);
+    $role = Role::factory()->forRoleType(RoleTypeEnum::ApplicationRole)->create(['name' => 'Graduate Program Coordinators for the School of Professional Studies']);
+    $role->users()->attach($person);
+    UserLoginRecord::factory()->for($person)->create();
+    Role::factory()->forRoleType(RoleTypeEnum::ApplicationRole)->create(['name' => 'enrollment-communications-and-outreach-reviewers'])->users()->attach($person);
+    Announcement::factory()->create(['title' => 'Scheduled maintenance of the enrollment reporting warehouse this weekend']);
+    $apiUser = User::factory()->api()->create();
+    resolve(CreateServiceClient::class)($apiUser, 'Nightly enrollment warehouse synchronization client', now()->addYear());
+
+    $paths = [
+        ...FilamentPages::in('administration'),
+        "/administration/users/{$person->getKey()}",
+        "/administration/users/{$person->getKey()}/access",
+        "/administration/users/{$apiUser->getKey()}/api-credentials",
+        "/administration/roles/{$role->getKey()}",
+    ];
+
+    $page = Layout::visit('/administration', $width);
+    $problems = [];
+
+    foreach ($paths as $path) {
+        $problems[$path] = Layout::problems($page->navigate($path));
+    }
+
+    expect(array_filter($problems))->toBe([]);
+})->with(['320' => 320, '768' => 768, '1024' => 1024, '1440' => 1440]);

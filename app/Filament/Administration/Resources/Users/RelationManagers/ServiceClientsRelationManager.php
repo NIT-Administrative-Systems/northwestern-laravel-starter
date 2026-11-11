@@ -81,7 +81,8 @@ class ServiceClientsRelationManager extends RelationManager
                 TextColumn::make('last_used_at')
                     ->label('Last Used')
                     ->placeholder('Never')
-                    ->dateTime(),
+                    ->dateTime()
+                    ->visibleFrom('lg'),
                 TextColumn::make('secret_expires_at')
                     ->label('Secret Expires')
                     ->dateTime('F j, Y'),

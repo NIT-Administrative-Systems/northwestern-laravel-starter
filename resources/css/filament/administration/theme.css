@@ -18,3 +18,70 @@
     outline-offset: 2px;
     box-shadow: none;
 }
+
+/* Filament keeps each badge on one line, even in a column or entry marked
+   ->wrap(), so a long badge, such as a role or job title, runs past its
+   cell or is cut off. In those columns and entries, the badge wraps. */
+:is(
+        .fi-ta-text.fi-ta-text-has-badges,
+        .fi-in-text.fi-in-text-has-badges
+    ).fi-wrapped
+    .fi-badge {
+    max-width: 100%;
+    white-space: normal;
+
+    & .fi-badge-label {
+        overflow-wrap: anywhere;
+        white-space: normal;
+    }
+}
+
+/* Global search fills this top bar, so below xl the Help menu shows only
+   its icon and the search field narrows to make room. Below lg the bar
+   also drops the application name, which no longer fits beside it. On
+   phones, Filament already shows search and Help as icons alone. */
+@media (40rem <= width < 80rem) {
+    .fi-topbar [data-testid="help-menu-trigger"] > :not(:first-child) {
+        display: none;
+    }
+
+    .fi-topbar-start,
+    .fi-topbar-end,
+    .fi-topbar-end .fi-global-search-ctn,
+    .fi-topbar-end .fi-global-search-ctn * {
+        min-width: 0;
+    }
+
+    .fi-topbar-end {
+        flex-shrink: 1;
+    }
+
+    .fi-topbar-end > :not(.fi-global-search-ctn) {
+        flex-shrink: 0;
+    }
+}
+
+@media (40rem <= width < 64rem) {
+    .fi-topbar-start {
+        flex-shrink: 0;
+    }
+
+    .fi-topbar-start > :not(:has(.fi-logo)) {
+        display: none;
+    }
+}
+
+/* Below 384px the top bar can't fit the wordmark beside search, Help,
+   notifications and the user menu, so it shrinks the wordmark. Below
+   368px it also leaves out Help, which the app panel still shows. */
+@media (width < 24rem) {
+    .fi-topbar-start .fi-logo:has(> .nu-wordmark) {
+        height: 0.875rem !important; /* outranks the theme's own !important */
+    }
+}
+
+@media (width < 23rem) {
+    .fi-topbar-end [data-testid="help-menu"] {
+        display: none;
+    }
+}

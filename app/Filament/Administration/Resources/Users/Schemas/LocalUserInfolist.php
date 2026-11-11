@@ -74,11 +74,13 @@ class LocalUserInfolist
                                                 TextEntry::make('job_titles')
                                                     ->label('Job Title')
                                                     ->badge()
+                                                    ->wrap()
                                                     ->placeholder('No job title set'),
 
                                                 TextEntry::make('departments')
                                                     ->label('Organization')
                                                     ->badge()
+                                                    ->wrap()
                                                     ->placeholder('No organization set'),
                                             ]),
                                         ]),

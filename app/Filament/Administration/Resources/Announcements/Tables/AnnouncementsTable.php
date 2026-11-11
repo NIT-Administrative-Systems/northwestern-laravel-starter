@@ -26,6 +26,7 @@ class AnnouncementsTable
                     ->label('Title')
                     ->searchable()
                     ->sortable()
+                    ->wrap()
                     ->description(fn (Announcement $record): string => $record->audienceSummary()),
                 TextColumn::make('status')
                     ->label('Status')

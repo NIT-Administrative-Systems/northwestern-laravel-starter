@@ -66,10 +66,12 @@ class Profile extends Page
                             TextEntry::make('job_titles')
                                 ->label($isNetIdUser ? 'Job Titles' : 'Title')
                                 ->badge()
+                                ->wrap()
                                 ->placeholder('None'),
                             TextEntry::make('departments')
                                 ->label($isNetIdUser ? 'Departments' : 'Department')
                                 ->badge()
+                                ->wrap()
                                 ->placeholder('None'),
                         ]),
                     ]),

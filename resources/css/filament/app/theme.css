@@ -120,3 +120,20 @@
     height: 3rem;
     font-size: 1.25rem;
 }
+
+/* Filament keeps each badge on one line, even in a column or entry marked
+   ->wrap(), so a long badge, such as a role or job title, runs past its
+   cell or is cut off. In those columns and entries, the badge wraps. */
+:is(
+        .fi-ta-text.fi-ta-text-has-badges,
+        .fi-in-text.fi-in-text-has-badges
+    ).fi-wrapped
+    .fi-badge {
+    max-width: 100%;
+    white-space: normal;
+
+    & .fi-badge-label {
+        overflow-wrap: anywhere;
+        white-space: normal;
+    }
+}
