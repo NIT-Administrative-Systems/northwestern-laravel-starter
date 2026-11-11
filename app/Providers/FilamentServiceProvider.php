@@ -45,10 +45,8 @@ class FilamentServiceProvider extends ServiceProvider
                 ->emptyStateIcon(Heroicon::OutlinedInbox)
         );
 
-        Schema::configureUsing(fn (Schema $infolist) => $infolist
-            ->defaultDateTimeDisplayFormat(
-                (config('platform.datetime_display_format'))
-            ));
+        Schema::configureUsing(fn (Schema $schema) => $schema
+            ->defaultDateTimeDisplayFormat(config('platform.datetime_display_format')));
 
         Select::configureUsing(fn (Select $component) => $component->native(false));
         SelectFilter::configureUsing(fn (SelectFilter $component) => $component->native(false));
@@ -57,9 +55,9 @@ class FilamentServiceProvider extends ServiceProvider
             $component->timezone($timezone());
         });
 
-        // Dates and times show in the person's timezone, including date-only ones such as a
-        // timestamp shown with ->date(). A database DATE column has no time to convert, so show
-        // it with ->date(timezone: config('app.timezone')) to keep its day.
+        // Dates and times show in the person's timezone, including date-only ones such
+        // as a timestamp shown with ->date(). A DATE column has no time to convert,
+        // so use ->date(timezone: config('app.timezone')) and it keeps its day.
         TextColumn::configureUsing(static function (TextColumn $component) use ($timezone) {
             $component->timezone(function (TextColumn $column) use ($timezone): ?string {
                 if ($column->isDateTime() || $column->isDate()) {

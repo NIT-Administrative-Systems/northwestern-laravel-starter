@@ -45,8 +45,6 @@ class RoleResource extends Resource
 
     protected static ?int $navigationSort = 2;
 
-    protected static ?string $description = 'Define roles and assign permissions to control user access.';
-
     protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     /** @return array<NavigationItem> */
@@ -110,7 +108,7 @@ class RoleResource extends Resource
             'Type' => $record->role_type->slug->getLabel(),
         ];
 
-        if (property_exists($record, 'users_count') && $record->users_count !== null) {
+        if ($record->users_count !== null) {
             $details['Users'] = $record->users_count . ' assigned';
         }
 

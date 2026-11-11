@@ -28,7 +28,8 @@ class NorthwesternUserInfolist
     public static function configure(Schema $schema): Schema
     {
         return $schema->components([
-            // Splits by the content's width, not the screen's, since the sidebar takes a third of a 1024px screen.
+            // Split by the content's width, not the screen's:
+            // the sidebar takes a third of a 1024px screen.
             Grid::make([
                 'default' => 1,
                 '@4xl' => 3,

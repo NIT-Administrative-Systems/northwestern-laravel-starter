@@ -34,8 +34,6 @@ class UserLoginRecordResource extends Resource
 
     protected static ?int $navigationSort = 4;
 
-    protected static ?string $description = 'Who signed in, how, and when.';
-
     // Filament's Str::ucwords would give "Sign-in Records".
     public static function getTitleCaseModelLabel(): string
     {

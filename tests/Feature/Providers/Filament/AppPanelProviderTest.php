@@ -78,8 +78,8 @@ final class AppPanelProviderTest extends TestCase
         $this->actingAs(User::factory()->create())->get('/app')->assertOk()->assertSee('Privacy Statement');
     }
 
-    // Its own test: the footer's render hook is registered when a panel boots, so requesting
-    // /app first in the same application would leave the app panel's hook in place.
+    // A test of its own: the footer's render hook is registered when a panel boots, so
+    // requesting /app first in the same application would leave its hook in place.
     public function test_administration_panel_has_no_footer(): void
     {
         $this->actingAs($this->administrator())->get('/administration')->assertOk()->assertDontSee('Privacy Statement');

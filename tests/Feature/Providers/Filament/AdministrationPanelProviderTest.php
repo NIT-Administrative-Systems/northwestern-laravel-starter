@@ -35,9 +35,10 @@ final class AdministrationPanelProviderTest extends TestCase
     use IssuesPersonalAccessTokens, IssuesServiceClientTokens, RunsAuthorizationCodeFlow;
 
     /**
-     * Both panels use Filament's strict authorization, which throws when a page, table or action
-     * asks about a model with no policy, or a policy without that ability, instead of allowing it.
-     * Tables only ask about their rows, so every table here has one.
+     * Both panels use Filament's strict authorization, which throws when
+     * a page, table or action asks about a model with no policy, or a
+     * policy without that ability, instead of allowing it. Tables
+     * only ask about their rows, so every table here has one.
      */
     public function test_every_page_table_and_tab_has_the_authorization_it_asks_for(): void
     {
@@ -85,7 +86,7 @@ final class AdministrationPanelProviderTest extends TestCase
         // Relation managers load after the page, so each is rendered on its own.
         Filament::setCurrentPanel(AdministrationPanelProvider::ID);
 
-        // A person's relation managers are on their record's sub-pages; a role's are on its view page.
+        // A person's managers are on their record's pages; a role's are on its view page.
         $managersByPage = [
             ...array_map(fn (string $page): array => [$page, $page::managers()], [ManageUserAccess::class, ManageUserActivity::class, ManageUserApiCredentials::class]),
             [ViewRole::class, RoleResource::getRelations()],

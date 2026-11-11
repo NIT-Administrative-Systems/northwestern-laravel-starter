@@ -9,11 +9,9 @@ use Carbon\Carbon;
 use Livewire\Attributes\On;
 
 /**
- * Shared state and listeners for widgets that react to the user login records
- * {@see DateRangeFilterWidget} broadcasts.
- *
- * Defaults to the last 30 days in the authenticated user's timezone and
- * re-renders the widget whenever the filter widget emits an updated range.
+ * State shared by the widgets that follow DateRangeFilterWidget
+ * on Sign-In Records. They start on the last 30 days in the
+ * person's timezone, and render again for each new range.
  */
 trait TracksBroadcastDateRange
 {

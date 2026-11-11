@@ -8,6 +8,7 @@ use App\Domains\Access\Models\Role;
 use App\Domains\User\Models\User;
 use App\Filament\Administration\Exports\RoleExporter;
 use App\Filament\Administration\Exports\UserExporter;
+use App\Filament\Administration\Exports\UserLoginRecordExporter;
 use App\Filament\Support\BaseExporter;
 use Filament\Actions\Exports\Models\Export;
 use PHPUnit\Framework\Attributes\CoversNothing;
@@ -15,8 +16,9 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 /**
- * Exporters are under app/Filament, outside the coverage gate, so this keeps CSV injection out
- * of every export.
+ * Exporters are under app/Filament, outside
+ * the coverage gate, so this test keeps
+ * CSV injection out of every export.
  */
 #[CoversNothing]
 final class BaseExporterTest extends TestCase
@@ -62,9 +64,12 @@ final class BaseExporterTest extends TestCase
     {
         $export = new Export();
         $export->forceFill(['successful_rows' => 1, 'total_rows' => 1]);
-        $this->assertSame('Exported 1 user.', UserExporter::getCompletedNotificationBody($export));
+        $this->assertSame('Exported one user.', UserExporter::getCompletedNotificationBody($export));
 
         $export->forceFill(['successful_rows' => 1200, 'total_rows' => 1203]);
-        $this->assertSame('Exported 1,200 roles. 3 rows failed.', RoleExporter::getCompletedNotificationBody($export));
+        $this->assertSame('Exported 1,200 roles. Three rows failed.', RoleExporter::getCompletedNotificationBody($export));
+
+        $export->forceFill(['successful_rows' => 12, 'total_rows' => 12]);
+        $this->assertSame('Exported 12 sign-in records.', UserLoginRecordExporter::getCompletedNotificationBody($export));
     }
 }

@@ -21,14 +21,14 @@ use Illuminate\Support\HtmlString;
 use Northwestern\SysDev\Chassis\Rules\ValidIpOrCidrRule;
 
 /**
- * Reusable schema fragments for the service client {@see Wizard}s. Each wizard shows the new
- * client's secret once, through {@see RevealOnceSecret}.
+ * Schema pieces for the service client wizards. Each wizard shows
+ * the new client's secret only once, through RevealOnceSecret.
  */
 class ServiceClientSchemas
 {
     /**
-     * The client's name, secret lifetime and IP restrictions. In rotation flows the previous
-     * client is bound and its values pre-fill the form.
+     * The client's name, secret lifetime and IP restrictions. When rotating
+     * a client, the form starts with the values of the previous client.
      */
     public static function clientConfigurationSection(): Section
     {

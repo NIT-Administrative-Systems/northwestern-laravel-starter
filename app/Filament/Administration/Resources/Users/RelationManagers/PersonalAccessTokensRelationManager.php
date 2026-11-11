@@ -22,8 +22,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * A person's personal access tokens, which an administrator can revoke, for example when one
- * leaks. The revocation is recorded in the person's audit history.
+ * A person's personal access tokens, which an administrator
+ * can revoke, for example when one of them leaks. Every
+ * revocation is also recorded in their audit history.
  */
 class PersonalAccessTokensRelationManager extends RelationManager
 {

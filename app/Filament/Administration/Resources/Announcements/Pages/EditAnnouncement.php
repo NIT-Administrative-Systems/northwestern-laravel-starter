@@ -20,10 +20,13 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Carbon;
+use Northwestern\SysDev\Chassis\Formatting\CountInWords;
 
 /**
- * Edits an announcement and moves it through its life: publish a draft, end a live one, show a
- * live one again to the people who dismissed it, or start over from a copy.
+ * Edits an announcement and moves it through its
+ * life: publish a draft, end a live one, show
+ * a live one again to people who dismissed
+ * it, or start over from a copy of it.
  *
  * @property-read Announcement $record
  */
@@ -96,7 +99,7 @@ class EditAnnouncement extends EditRecord
                 ->visible(fn (): bool => $this->record->status === AnnouncementStatus::Live && $this->record->dismissals()->exists())
                 ->requiresConfirmation()
                 ->modalHeading('Show Again to People Who Dismissed It')
-                ->modalDescription(fn (): string => 'It returns to the banner for the ' . $this->record->dismissals()->count() . ' people who dismissed it, for example after an important change.')
+                ->modalDescription(fn (): string => 'It returns to the banner for the ' . CountInWords::of($this->record->dismissals()->count(), 'person') . ' who dismissed it, for example after an important change.')
                 ->modalSubmitActionLabel('Show Again')
                 ->action(function (): void {
                     $this->record->dismissals()->delete();

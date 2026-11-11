@@ -45,8 +45,6 @@ class UserResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
-    protected static ?string $description = 'Manage users, their roles, and authentication settings.';
-
     protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     public static function table(Table $table): Table
@@ -55,8 +53,8 @@ class UserResource extends Resource
     }
 
     /**
-     * Details, then a page for each group of the person's relations. An API user's credentials
-     * are what an administrator opens it for, so they come first.
+     * Details, then a page for each group of the person's relations. People
+     * open an API user's record for its credentials, so they come second.
      *
      * @return array<NavigationItem>
      */
@@ -121,7 +119,8 @@ class UserResource extends Resource
     }
 
     /**
-     * Everyone for View Users; only API users for someone who manages API access without it.
+     * Everyone for View Users, and only API users for someone
+     * who manages API access but doesn't have View Users.
      *
      * @return Builder<User>
      */

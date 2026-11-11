@@ -21,8 +21,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * The applications a person has connected, which an administrator can disconnect. The
- * disconnect is recorded in the person's audit history.
+ * The applications a person has connected, which an administrator can
+ * disconnect. A disconnection is recorded in their audit history.
  */
 class ConnectedApplicationsRelationManager extends RelationManager
 {

@@ -25,8 +25,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * An API user's service clients: the client credentials an integration uses to get access
- * tokens that act as the API user.
+ * An API user's service clients: the client credentials that an integration
+ * uses to get the access tokens that act as the API user it belongs to.
  */
 class ServiceClientsRelationManager extends RelationManager
 {
@@ -51,13 +51,6 @@ class ServiceClientsRelationManager extends RelationManager
     {
         return Tab::make('Service Clients')
             ->icon(Heroicon::OutlinedKey);
-    }
-
-    protected function getTableHeaderActions(): array
-    {
-        return [
-            CreateServiceClientAction::make(),
-        ];
     }
 
     public function table(Table $table): Table
@@ -131,5 +124,12 @@ class ServiceClientsRelationManager extends RelationManager
     {
         /** @var User */
         return $this->getOwnerRecord();
+    }
+
+    protected function getTableHeaderActions(): array
+    {
+        return [
+            CreateServiceClientAction::make(),
+        ];
     }
 }

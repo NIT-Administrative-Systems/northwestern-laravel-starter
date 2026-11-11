@@ -15,14 +15,6 @@ class ListSupportTickets extends ListRecords
 
     protected ?string $subheading = 'Requests sent through Contact Support.';
 
-    /** @return array<class-string<Widget>> */
-    protected function getHeaderWidgets(): array
-    {
-        return [
-            SupportTicketSubmissionLogBanner::class,
-        ];
-    }
-
     /**
      * No "List" crumb under a title that already names the list.
      *
@@ -31,5 +23,13 @@ class ListSupportTickets extends ListRecords
     public function getBreadcrumbs(): array
     {
         return [];
+    }
+
+    /** @return array<class-string<Widget>> */
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            SupportTicketSubmissionLogBanner::class,
+        ];
     }
 }

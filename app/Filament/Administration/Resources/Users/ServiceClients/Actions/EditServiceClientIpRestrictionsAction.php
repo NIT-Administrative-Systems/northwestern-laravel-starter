@@ -17,7 +17,7 @@ use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Section;
 use Filament\Support\Enums\Size;
 use Filament\Support\Icons\Heroicon;
-use Illuminate\Support\Str;
+use Northwestern\SysDev\Chassis\Formatting\CountInWords;
 use Northwestern\SysDev\Chassis\Rules\ValidIpOrCidrRule;
 
 class EditServiceClientIpRestrictionsAction extends Action
@@ -65,8 +65,8 @@ class EditServiceClientIpRestrictionsAction extends Action
                 fn (OAuthClient $record) => Notification::make()
                     ->title('IP Restrictions Updated')
                     ->body(filled($record->allowed_ips)
-                        ? 'The client is now restricted to ' . count($record->allowed_ips) . ' IP ' . Str::plural('address', count($record->allowed_ips))
-                        : 'The client now accepts requests from any IP address')
+                        ? 'The client is now restricted to ' . CountInWords::of(count($record->allowed_ips), 'IP address') . '.'
+                        : 'The client now accepts requests from any IP address.')
                     ->success()
             )
             ->visible(fn (OAuthClient $record): bool => ServiceClientSchemas::isMutable($record));

@@ -60,6 +60,7 @@ class UsersRelationManager extends RelationManager
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('primary_affiliation')
+                    ->placeholder('—')
                     ->label('Primary Affiliation')
                     ->searchable()
                     ->badge()
@@ -67,28 +68,34 @@ class UsersRelationManager extends RelationManager
                 UsersTable::rolesColumn()
                     ->visibleFrom('xl'),
                 TextColumn::make('first_name')
+                    ->placeholder('—')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('last_name')
+                    ->placeholder('—')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('employee_id')
+                    ->placeholder('—')
                     ->label('Employee ID')
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('hr_employee_id')
+                    ->placeholder('—')
                     ->label('myHR Employee ID')
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('email')
+                    ->placeholder('—')
                     ->label('Email')
                     ->copyable()
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('phone')
+                    ->placeholder('—')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('timezone')

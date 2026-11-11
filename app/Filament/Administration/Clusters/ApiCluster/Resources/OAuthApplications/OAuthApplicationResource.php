@@ -4,35 +4,24 @@ declare(strict_types=1);
 
 namespace App\Filament\Administration\Clusters\ApiCluster\Resources\OAuthApplications;
 
-use App\Domains\Api\Actions\Applications\RegenerateOAuthApplicationSecret;
-use App\Domains\Api\Actions\Applications\RevokeOAuthApplication;
-use App\Domains\Api\Actions\Applications\UpdateOAuthApplication;
 use App\Domains\Api\Concerns\AuthorizesCredentials;
 use App\Domains\Api\Enums\CredentialKind;
 use App\Domains\Api\Enums\CredentialOperation;
-use App\Domains\Api\Enums\CredentialStatus;
 use App\Domains\Api\Models\OAuthClient;
 use App\Domains\Api\Models\OAuthConnection;
 use App\Filament\Administration\Clusters\ApiCluster;
 use App\Filament\Administration\Clusters\ApiCluster\Resources\OAuthApplications\Pages\ListOAuthApplications;
-use App\Filament\Administration\Clusters\ApiCluster\Resources\OAuthApplications\Schemas\OAuthApplicationSchemas;
-use App\Filament\Support\RevealOnceSecret;
+use App\Filament\Administration\Clusters\ApiCluster\Resources\OAuthApplications\Tables\OAuthApplicationsTable;
 use BackedEnum;
-use Filament\Actions\Action;
-use Filament\Actions\ActionGroup;
-use Filament\Actions\Contracts\HasActions;
 use Filament\Resources\Resource;
-use Filament\Schemas\Components\Wizard;
-use Filament\Support\Enums\FontFamily;
 use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * External applications that people can connect to their account through the authorization
- * code flow. Administrators register them; dynamically registered clients aren't listed.
+ * External applications people connect to their account through
+ * the authorization code flow. Administrators register them.
+ * Clients that registered themselves aren't listed here.
  */
 class OAuthApplicationResource extends Resource
 {
@@ -55,8 +44,8 @@ class OAuthApplicationResource extends Resource
     protected static ?int $navigationSort = 3;
 
     /**
-     * The model has no policy: {@see self::canAccess()} decides here too, so Filament's strict
-     * authorization never looks for one.
+     * The model has no policy, so canAccess() decides here
+     * too and strict authorization never looks for one.
      */
     public static function canViewAny(): bool
     {
@@ -78,84 +67,7 @@ class OAuthApplicationResource extends Resource
 
     public static function table(Table $table): Table
     {
-        $secret = RevealOnceSecret::for('application:regenerate');
-
-        return $table
-            ->columns([
-                TextColumn::make('name')->label('Name')->searchable()->sortable(),
-                TextColumn::make('id')
-                    ->label('Client ID')
-                    ->fontFamily(FontFamily::Mono)
-                    ->copyable()
-                    ->limit(13)
-                    ->tooltip(fn (OAuthClient $record): string => $record->id)
-                    ->visibleFrom('xl'),
-                TextColumn::make('redirect_uris')
-                    ->label('Redirects To')
-                    ->formatStateUsing(fn (string $state): string => parse_url($state, PHP_URL_HOST) ?: $state)
-                    ->badge()
-                    ->color('gray'),
-                TextColumn::make('scopes')->label('Allowed Scopes')->badge()->placeholder('None')->visibleFrom('xl'),
-                IconColumn::make('first_party')->label('First-Party')->boolean()->visibleFrom('2xl'),
-                TextColumn::make('connections_count')->label('Connections')->numeric()->visibleFrom('xl'),
-                TextColumn::make('status')->badge(),
-                TextColumn::make('created_at')->label('Registered')->date()->toggleable(isToggledHiddenByDefault: true),
-            ])
-            ->defaultSort('name')
-            ->recordActions([
-                ActionGroup::make([
-                    Action::make('edit')
-                        ->label('Edit')
-                        ->icon(Heroicon::OutlinedPencilSquare)
-                        ->schema(OAuthApplicationSchemas::detailsFields())
-                        ->fillForm(fn (OAuthClient $record): array => $record->only(['name', 'description', 'contact_email', 'redirect_uris', 'scopes', 'first_party']))
-                        ->action(fn (OAuthClient $record, array $data, UpdateOAuthApplication $update) => $update(
-                            $record,
-                            $data['name'],
-                            array_values($data['redirect_uris']),
-                            array_values($data['scopes'] ?? []),
-                            (bool) $data['first_party'],
-                            $data['description'] ?? null,
-                            $data['contact_email'] ?? null,
-                            static::actingUser(),
-                        ))
-                        ->successNotificationTitle('Application Updated')
-                        ->visible(fn (OAuthClient $record): bool => $record->status === CredentialStatus::Active && self::allows(CredentialOperation::Modify)),
-                    Action::make('regenerateSecret')
-                        ->label('Regenerate Secret')
-                        ->icon(Heroicon::OutlinedArrowPath)
-                        ->closeModalByClickingAway(false)
-                        ->closeModalByEscaping(false)
-                        ->mountUsing($secret->mountFresh())
-                        ->steps([
-                            Wizard\Step::make('Regenerate')
-                                ->description('The current secret stops working immediately. Update the application with the new one.')
-                                ->afterValidation(fn (OAuthClient $record, RegenerateOAuthApplicationSecret $regenerate, HasActions $livewire) => $secret->issueOnce(
-                                    $livewire,
-                                    fn (): array => ['id' => $record->getKey(), 'secret' => $regenerate($record, static::actingUser())],
-                                    scope: $record,
-                                )),
-                            Wizard\Step::make('Copy Secret')->schema(OAuthApplicationSchemas::credentialsStep($secret)),
-                        ])
-                        ->modifyWizardUsing($secret->hideBackOnceIssued())
-                        ->modalSubmitAction($secret->savedAction())
-                        ->action(fn (HasActions $livewire) => $secret->forget($livewire))
-                        ->visible(fn (OAuthClient $record): bool => $record->confidential() && $record->status === CredentialStatus::Active && self::allows(CredentialOperation::Modify)),
-                    Action::make('revoke')
-                        ->label('Revoke')
-                        ->icon(Heroicon::OutlinedXCircle)
-                        ->color('danger')
-                        ->requiresConfirmation()
-                        ->modalHeading('Revoke Application')
-                        ->modalDescription('The application loses access to everyone\'s account immediately, and every connection to it is removed. This can\'t be undone.')
-                        ->modalSubmitActionLabel('Revoke Application')
-                        ->action(fn (OAuthClient $record, RevokeOAuthApplication $revoke) => $revoke($record, static::actingUser()))
-                        ->successNotificationTitle('Application Revoked')
-                        ->visible(fn (OAuthClient $record): bool => $record->status === CredentialStatus::Active && self::allows(CredentialOperation::Revoke)),
-                ]),
-            ])
-            ->emptyStateHeading('No Applications Registered')
-            ->emptyStateDescription('Register an application so people can connect it to their account.');
+        return OAuthApplicationsTable::configure($table);
     }
 
     public static function getPages(): array
@@ -163,13 +75,5 @@ class OAuthApplicationResource extends Resource
         return [
             'index' => ListOAuthApplications::route('/'),
         ];
-    }
-
-    /**
-     * Whether the signed-in administrator may do this to applications, which are decided as a whole.
-     */
-    private static function allows(CredentialOperation $operation): bool
-    {
-        return static::allowsCredential($operation, CredentialKind::ConnectedApplication);
     }
 }

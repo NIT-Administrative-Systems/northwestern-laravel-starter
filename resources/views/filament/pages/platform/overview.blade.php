@@ -236,7 +236,7 @@
                                  class="@md:grid @md:grid-cols-[minmax(0,1fr)_auto] @md:items-center flex flex-col gap-6">
                                 {{-- Left: the heatmap, filling the remaining row width (its cells scale to match). --}}
                                 <div class="flex min-w-0 flex-col gap-2">
-                                    {{-- Hour axis. Four labels (0 / 6 / 12 / 18) aligned with their columns in the grid below. --}}
+                                    {{-- The hour axis: labels at 0, 6, 12 and 18, over their columns in the grid below. --}}
                                     <div
                                          class="grid grid-cols-[2rem_repeat(24,_minmax(0,1fr))] items-end gap-x-0.5 text-xs tabular-nums text-gray-500 dark:text-gray-400">
                                         <span></span>
@@ -247,7 +247,7 @@
                                         @endfor
                                     </div>
 
-                                    {{-- Heatmap rows. Label column is 2rem so the 24 data columns get the rest of the width. --}}
+                                    {{-- Heatmap rows: the label column is 2rem, and the 24 hours share the rest. --}}
                                     <div class="flex flex-col gap-0.5"
                                          role="img"
                                          aria-label="Sign-in activity heatmap over the last {{ $loginHeatmap['days'] }} days">
@@ -276,7 +276,7 @@
                                     </div>
                                 </div>
 
-                                {{-- Right: summary + legend sits at the end of the row at a natural (content-sized) width. --}}
+                                {{-- The summary and legend sit at the end of the row, as wide as their content. --}}
                                 <div class="@md:pl-6 flex w-48 shrink-0 flex-col gap-4">
                                     <div>
                                         <p class="text-2xl font-semibold tabular-nums text-gray-950 dark:text-white">
@@ -479,7 +479,7 @@
                 </span>
             </x-slot>
 
-            {{-- Below md, a list: the table would scroll sideways with rows taller than the screen is wide. --}}
+            {{-- Below md, a list: the table would scroll sideways, with very tall rows. --}}
             <ul class="divide-y divide-gray-950/5 md:hidden dark:divide-white/5" role="list">
                 @foreach ($scheduledTasks as $task)
                     <li class="py-3 first:pt-0 last:pb-0">

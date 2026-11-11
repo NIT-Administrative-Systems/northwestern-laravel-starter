@@ -32,8 +32,8 @@ class ApiCluster extends Cluster
     protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     /**
-     * Open when any of its pages is. Filament applies this only to navigation, so each page
-     * checks its own access too.
+     * Open when any of its pages is. Filament applies this only to
+     * the navigation, so each page also checks its own access.
      */
     public static function canAccess(): bool
     {

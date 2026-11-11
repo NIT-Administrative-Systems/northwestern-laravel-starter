@@ -230,8 +230,8 @@ class RoleDefinitionHistoryTable
     }
 
     /**
-     * Format a group of permission changes, showing up to 3 names inline
-     * with a "+N more" overflow for larger sets.
+     * Format a group of permission changes, with up to
+     * three names shown and "+N more" for the rest.
      *
      * @param  list<string>  $labels
      */

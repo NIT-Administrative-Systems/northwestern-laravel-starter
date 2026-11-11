@@ -32,13 +32,11 @@ class ApiRequestLogResource extends Resource
 
     protected static ?string $slug = 'requests';
 
-    protected static ?string $description = 'View and analyze API request logs, response times, and error patterns.';
-
     protected static ?int $navigationSort = 2;
 
     /**
-     * {@see self::canAccess()} decides, as it does for the list page: the policy doesn't know
-     * whether the API and its request logging are turned on.
+     * canAccess() decides, as it does for the list page, since the policy
+     * doesn't know whether the API and request logging are turned on.
      */
     public static function canViewAny(): bool
     {

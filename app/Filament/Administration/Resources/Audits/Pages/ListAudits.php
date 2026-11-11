@@ -11,6 +11,8 @@ class ListAudits extends ListRecords
 {
     protected static string $resource = AuditResource::class;
 
+    protected static ?string $title = 'Audit Logs';
+
     protected ?string $subheading = 'Every change to an audited record.';
 
     /**

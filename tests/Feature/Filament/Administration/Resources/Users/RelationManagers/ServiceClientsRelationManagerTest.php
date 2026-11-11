@@ -16,6 +16,7 @@ use App\Filament\Support\RevealOnceSecret;
 use App\Providers\Filament\AdministrationPanelProvider;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
+use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
 use Livewire\Features\SupportTesting\Testable;
@@ -59,7 +60,7 @@ final class ServiceClientsRelationManagerTest extends TestCase
             ->assertSee('Nightly sync');
     }
 
-    // A quiet menu, as on Applications, rather than a filled Actions button on every row.
+    // A quiet menu, as on Applications, not a filled Actions button on each row.
     public function test_a_clients_actions_are_in_an_icon_menu(): void
     {
         $this->client('Nightly sync');
@@ -71,7 +72,7 @@ final class ServiceClientsRelationManagerTest extends TestCase
         $this->assertDoesNotMatchRegularExpression('/<button[^>]*fi-btn[^>]*>\s*(<[^>]+>\s*)*Actions\s*</s', $html);
     }
 
-    // The secret is shown once, kept only encrypted in the session until the operator confirms.
+    // The secret shows once, kept only encrypted in the session until it's confirmed.
     public function test_creating_a_client_shows_its_secret_once(): void
     {
         $component = $this->relationManager()
@@ -93,8 +94,9 @@ final class ServiceClientsRelationManagerTest extends TestCase
         $this->assertSame([], preg_grep('/^reveal_once_secret:/', array_keys(Session::all())));
     }
 
-    // Each run keeps its own secret: one abandoned or still open in another browser tab neither
-    // stops the next from issuing its client nor shows it that run's client.
+    // Each run keeps its own secret. One abandoned, or
+    // open in another tab, doesn't stop the next one
+    // issuing its client or show it that client.
     public function test_wizards_open_in_two_tabs_each_create_and_show_their_own_client(): void
     {
         $otherApiUser = User::factory()->api()->create();
@@ -143,7 +145,8 @@ final class ServiceClientsRelationManagerTest extends TestCase
 
         $this->relationManager()
             ->callAction(TestAction::make('editServiceClientIpRestrictions')->table($client), ['allowed_ips' => ['192.0.2.0/24']])
-            ->assertHasNoFormErrors();
+            ->assertHasNoFormErrors()
+            ->assertNotified(Notification::make()->success()->title('IP Restrictions Updated')->body('The client is now restricted to one IP address.'));
 
         $this->assertSame(['192.0.2.0/24'], $client->fresh()?->allowed_ips);
     }
@@ -173,7 +176,7 @@ final class ServiceClientsRelationManagerTest extends TestCase
         ]);
     }
 
-    // While the API is off administrators can still revoke service clients, but not create or change them.
+    // With the API off, service clients can be revoked but not created or changed.
     public function test_while_the_api_is_off_clients_can_be_revoked_but_not_created_or_changed(): void
     {
         [, $client] = resolve(CreateServiceClient::class)($this->apiUser, 'Sync', now()->addMonth());

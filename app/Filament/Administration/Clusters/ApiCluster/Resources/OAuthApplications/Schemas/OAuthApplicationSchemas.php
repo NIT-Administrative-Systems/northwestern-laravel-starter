@@ -20,7 +20,7 @@ use Illuminate\Support\HtmlString;
 use Northwestern\SysDev\Chassis\Rules\OAuthRedirectUri;
 
 /**
- * Form fields and the one-time credentials step for registering OAuth applications.
+ * Form fields and the one-time credentials step for registering applications.
  */
 class OAuthApplicationSchemas
 {

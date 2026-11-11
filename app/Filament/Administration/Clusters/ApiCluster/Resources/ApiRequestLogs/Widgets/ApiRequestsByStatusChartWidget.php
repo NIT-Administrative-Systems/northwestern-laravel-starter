@@ -12,8 +12,8 @@ use Illuminate\Support\HtmlString;
 class ApiRequestsByStatusChartWidget extends BaseApiRequestChartWidget
 {
     /**
-     * Request totals per status range, summed from the chart query so the description
-     * does not scan the date range a second time.
+     * Request totals per status range, summed from the chart's query
+     * so that the description doesn't scan the date range again.
      *
      * @var Collection<string, int>|null
      */
