@@ -24,27 +24,26 @@
     $sentryEventId = app()->bound('sentry') ? app('sentry')->getLastEventId() : null;
 @endphp
 
-<x-layouts.error title="Something Went Wrong">
-    <section class="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:py-20">
-        <div class="text-center">
-            <h1 class="font-nu-heading text-nu-purple-100 text-4xl font-bold tracking-tight">Something Went Wrong</h1>
+<x-error-layout title="Something Went Wrong"
+                :code="500"
+                :navigation="false">
+    Wait a moment and try again.
 
-            <p class="mt-6 text-lg text-gray-600">Wait a moment and try again.</p>
+    <x-slot:help>
+        <p class="mt-2 text-gray-600">
+            If the problem continues, contact the
+            <a class="text-nu-purple-100 font-semibold underline"
+               href="https://www.it.northwestern.edu/support/service-desk/"
+               target="_blank"
+               rel="noopener noreferrer">IT Service Desk</a>.
+        </p>
 
-            <p class="mt-2 text-gray-600">
-                If the problem continues, contact the
-                <a class="text-nu-purple-100 font-semibold underline"
-                   href="https://www.it.northwestern.edu/support/service-desk/"
-                   target="_blank"
-                   rel="noopener noreferrer">IT Service Desk</a>.
-            </p>
+        @if ($sentryEventId)
+            <p class="mt-4 font-mono text-xs uppercase tracking-wide text-gray-500">Error ID: {{ $sentryEventId }}</p>
+        @endif
+    </x-slot:help>
 
-            @if ($sentryEventId)
-                <p class="mt-4 font-mono text-xs uppercase tracking-wide text-gray-500">Error ID: {{ $sentryEventId }}
-                </p>
-            @endif
-        </div>
-
+    <x-slot:details>
         @if ($sentryEventId)
             <div class="mt-12 border border-gray-200 bg-gray-50 p-6">
                 <h2 class="font-nu-heading text-lg font-bold text-gray-900">Help Us Fix This</h2>
@@ -99,10 +98,13 @@
                     </span>
                 </div>
 
-                <p
-                   class="mt-3 break-words border-l-4 border-red-600 bg-red-50 p-4 font-mono text-sm font-semibold text-red-800">
-                    {{ $exception->getMessage() }}
-                </p>
+                {{-- abort(500) and some exceptions carry no message: no empty box for them. --}}
+                @if (filled($exception->getMessage()))
+                    <p
+                       class="mt-3 break-words border-l-4 border-red-600 bg-red-50 p-4 font-mono text-sm font-semibold text-red-800">
+                        {{ $exception->getMessage() }}
+                    </p>
+                @endif
 
                 <details class="mt-3">
                     <summary class="cursor-pointer bg-gray-900 px-4 py-2 text-sm font-semibold text-white">View Full
@@ -111,7 +113,7 @@
                 </details>
             </div>
         @endif
-    </section>
+    </x-slot:details>
 
     @if ($sentryEventId)
         @push('scripts')
@@ -143,4 +145,4 @@
             </script>
         @endpush
     @endif
-</x-layouts.error>
+</x-error-layout>

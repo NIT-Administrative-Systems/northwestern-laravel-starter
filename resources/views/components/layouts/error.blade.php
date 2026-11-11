@@ -30,9 +30,14 @@
 </head>
 
 <body class="font-nu-body flex min-h-screen flex-col bg-white text-gray-900 antialiased">
+    <a class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:bg-white focus:px-4 focus:py-2"
+       href="#main">
+        Skip to Content
+    </a>
+
     <x-site-header />
 
-    <main class="flex-1">
+    <main class="flex-1" id="main">
         {{ $slot }}
     </main>
 

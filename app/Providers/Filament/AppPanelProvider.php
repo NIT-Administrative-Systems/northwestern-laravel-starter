@@ -10,6 +10,7 @@ use App\Domains\Auth\SignIn;
 use App\Filament\App\Clusters\AccountCluster\Pages\Profile;
 use App\Filament\App\Starter\Pages\Auth\EmailCodeLogin;
 use App\Filament\App\Starter\Pages\Auth\Login;
+use App\Filament\App\Starter\Pages\Concerns\HasSiteHeader;
 use App\Filament\App\Starter\Pages\EnvironmentLockdown as EnvironmentLockdownPage;
 use App\Http\Middleware\EnvironmentLockdown;
 use Filament\Actions\Action;
@@ -78,6 +79,11 @@ class AppPanelProvider extends PanelProvider
             })
             ->viteTheme('resources/css/filament/app/theme.css')
             ->renderHook(PanelsRenderHook::HEAD_END, fn (): string => Blade::render('<x-sentry-browser />'))
+            // Sign-in and the lockdown page are light only, like the public layout.
+            ->renderHook(PanelsRenderHook::HEAD_END, fn (array $scopes): string => array_any(
+                $scopes,
+                fn (string $scope): bool => in_array(HasSiteHeader::class, class_uses_recursive($scope), true),
+            ) ? view('filament.app.light-only')->render() : '')
             ->renderHook(PanelsRenderHook::TOPBAR_LOGO_AFTER, fn (): string => Blade::render('<x-panel-brand />'))
             // After global search: after the theme's environment badge and just ahead of the user menu.
             ->renderHook(PanelsRenderHook::GLOBAL_SEARCH_AFTER, fn (): string => Blade::render('<x-help-menu />'))

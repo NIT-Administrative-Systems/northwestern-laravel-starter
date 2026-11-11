@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+### Changed
+
+- Every error page shares one body on both layouts: "Error" and the status code, the title, the message, and one button for the next step. 401 offers **Sign In**, 419 **Reload the Page** and 429 **Go Back**, both to the previous page on this application; 503 and database-paused have none, and the others offer **Go to the Home Page**, written as two words as the university's style guide asks. The 500 and database-paused pages use `<x-error-layout>` too, and the 500 page no longer shows an empty message box for an exception without a message. `<x-error-layout>` takes the status as `code`, and `help` and `details` slots for extra content.
+- The sign-in, email code and lockdown pages stay light in dark mode, like the public and error pages, so every page before signing in is light and dark mode starts inside the panels. The lockdown page's user menu hides its theme switcher, as public pages do.
+- The sign-in card is headed "Sign In to" and the application's name. When email is the only sign-in method, **Sign In with Email** is the primary button, and outside production a note says NetID sign-in isn't set up in that environment.
+- The site header keeps the application name on its own row below the `lg` breakpoint, so it no longer shrinks to a few letters on tablets, and on phones shows the environment badge at the end of that row with a short label. From `lg` up its content lines up with the footer. The header's **Sign In** button is the medium size.
+- On touch screens, the header's controls, the sign-in pages' buttons and links (including **Resend Code**, **Use a Different Email** and **Back to Sign-In Options**) and the changelog's buttons are at least 44px tall.
+- The public and error layouts share one look: a white background (the public layout was gray), a 36px page title, and a skip link and `<main id="main">` on the error layout. `resources/css/errors.css` defines the type step the environment badge uses, so the badge is the same size on both.
+- The purple header and the panels' top bar use the footer's focus ring, a 3px white outline set 2px off the control, in both panel themes and `errors.css`.
+- The changelog's **RSS Feed** links to the feed, with a separate **Copy** button for its URL. Section headings in entries are smaller than entry titles, list bullets are darker, and the last entry has no rule under it.
+- `.env.example` lists the `NU_UNIT_*` settings and `NU_LOCKUP`.
+- Updated `northwestern-sysdev/northwestern-filament-theme` to `^4.3.0`. The site header on public, sign-in and error pages shows the unit's lockup when `NU_LOCKUP` is set, through the theme's `<x-northwestern-filament-theme::lockup />`, in place of the wordmark, and shows the theme's impersonation banner, with **Leave Impersonation**, while someone is impersonating, as the panels do.
+- Both panels use Filament's strict authorization (`->strictAuthorization()`): a resource whose model has no policy, or a policy without an ability a page asks for, throws instead of allowing it. The MCP client, application and API request resources, whose `canAccess()` decides, return it from `canViewAny()` too.
+- `assignRoleWithAudit()` throws an `InvalidArgumentException` when a role doesn't suit the user: an API Integration role for anyone but an API user, or any other role for an API user. Both relation managers and seeders share the rule (`Role::suits()`). `RoleFactory`'s default role type is never API Integration.
+
 ### Fixed
 
 - The daily `model:prune` of `app/Domains/*/Models` found no models when the scheduler started outside the project root, because it globbed the path against the working directory. It now passes the pattern to `--path`, which `model:prune` resolves from the project root.
@@ -18,6 +33,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - An announcement's audience was never notified if the notification job failed partway, because the job had already marked it notified. The claim and the fan-out now run in one transaction, so a failed run can be retried.
 - Deleting a user while impersonating soft-deleted them and left their credentials active, because the revocation is refused while impersonating. The delete is refused while impersonating, and the delete and the revocation run in one transaction.
 - The Component Gallery told developers to delete `app/Filament/App/Pages/ComponentGallery.php`; the page is `app/Filament/App/Starter/Pages/ComponentGallery.php`.
+- A Directory Search outage no longer deactivates people. laravel-soa's `lookup()` returns `false` both for a NetID it doesn't find and when the service can't be reached, and `FindOrUpdateUserFromDirectory` marked the NetID inactive either way, after which `oauth:revoke-ineligible` revoked the person's credentials. Someone who already has an account now signs in with their stored details when the lookup fails, and only an incomplete directory entry or EventHub deactivates them. Someone signing in for the first time whose lookup fails gets the retries and the 503 page instead of an error, and no account.
+- Changing a role's type drops the permissions the new type doesn't show. The form's lists followed the saved type instead of the one chosen, and saving kept a hidden list's permissions.
+- Deleted people are no longer offered Send Verification Code or Impersonate, and `LoginCodes::issueFor()` refuses a deleted account. Impersonating a deactivated or deleted person is refused too.
+- `UpdateOAuthApplication` and `RegenerateOAuthApplicationSecret` throw an `InvalidArgumentException` for a client that isn't a connected application.
+- The support ticket and API request logs have policies (`SupportTicketPolicy`, `ApiRequestLogPolicy`), and `RolePolicy` and `UserLoginRecordPolicy` have `view()`, which Filament's strict authorization asks for.
 
 ### Security
 
@@ -30,19 +50,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - Sign-in codes are limited per email across all its codes: 20 incorrect codes a day by default (`LOCAL_AUTH_CODE_MAX_FAILED_PER_DAY`), counted for emails without an account too. A new code ends the email's earlier open codes, so only the latest works.
 - Nobody can give themselves a role, from the role's Assigned Users tab or their own user record. `RolePolicy::attachUser()` takes the person being assigned, and both relation managers refuse it on the server for everyone, Super Administrators included.
 - `UserBuilder::whereEmailEquals()` and `whereUsernameEquals()` match exactly, comparing `lower(column) = lower(?)` instead of using `ilike`, which treated `%` and `_` in the value as wildcards. A sign-in code request for `%@example.com` reached the first local account at that domain, and a lookup for `a_b@example.com` could find `axb@example.com`.
-
-### Fixed
-
-- A Directory Search outage no longer deactivates people. laravel-soa's `lookup()` returns `false` both for a NetID it doesn't find and when the service can't be reached, and `FindOrUpdateUserFromDirectory` marked the NetID inactive either way, after which `oauth:revoke-ineligible` revoked the person's credentials. Someone who already has an account now signs in with their stored details when the lookup fails, and only an incomplete directory entry or EventHub deactivates them. Someone signing in for the first time whose lookup fails gets the retries and the 503 page instead of an error, and no account.
-- Changing a role's type drops the permissions the new type doesn't show. The form's lists followed the saved type instead of the one chosen, and saving kept a hidden list's permissions.
-- Deleted people are no longer offered Send Verification Code or Impersonate, and `LoginCodes::issueFor()` refuses a deleted account. Impersonating a deactivated or deleted person is refused too.
-- `UpdateOAuthApplication` and `RegenerateOAuthApplicationSecret` throw an `InvalidArgumentException` for a client that isn't a connected application.
-- The support ticket and API request logs have policies (`SupportTicketPolicy`, `ApiRequestLogPolicy`), and `RolePolicy` and `UserLoginRecordPolicy` have `view()`, which Filament's strict authorization asks for.
-
-### Changed
-
-- Both panels use Filament's strict authorization (`->strictAuthorization()`): a resource whose model has no policy, or a policy without an ability a page asks for, throws instead of allowing it. The MCP client, application and API request resources, whose `canAccess()` decides, return it from `canViewAny()` too.
-- `assignRoleWithAudit()` throws an `InvalidArgumentException` when a role doesn't suit the user: an API Integration role for anyone but an API user, or any other role for an API user. Both relation managers and seeders share the rule (`Role::suits()`). `RoleFactory`'s default role type is never API Integration.
 
 ## [v3.1.0] - 2026-11-10
 

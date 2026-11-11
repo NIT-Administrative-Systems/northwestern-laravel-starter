@@ -75,7 +75,8 @@
     <x-sentry-browser />
 </head>
 
-<body class="fi-body flex min-h-screen flex-col bg-white text-gray-950 antialiased">
+{{-- White, like the error layout: important, because the theme's unlayered `body.fi-body` sets a gray background. --}}
+<body class="fi-body bg-white! flex min-h-screen flex-col text-gray-950 antialiased">
     <a class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:bg-white focus:px-4 focus:py-2"
        href="#main">
         Skip to Content
@@ -91,8 +92,7 @@
                                 data-testid="sign-in-link"
                                 tag="a"
                                 :href="$appPanel->getLoginUrl()"
-                                color="gray"
-                                size="sm">
+                                color="gray">
                 Sign In
             </x-filament::button>
         @endif
