@@ -35,7 +35,7 @@ class Overview extends Page
 
     protected string $view = 'filament.clusters.api-cluster.pages.overview';
 
-    protected ?string $subheading = 'API configuration and usage statistics';
+    protected ?string $subheading = 'API configuration and usage statistics.';
 
     /**
      * For whoever may see service clients, even while the API is off, and for request log

@@ -11,7 +11,7 @@ class ListMcpClients extends ListRecords
 {
     protected static string $resource = McpClientResource::class;
 
-    protected ?string $subheading = 'AI clients that registered themselves to connect to the MCP server';
+    protected ?string $subheading = 'AI clients that registered themselves to connect to the MCP server.';
 
     /**
      * No "List" crumb under a title that already names the list.

@@ -23,7 +23,7 @@ class ListOAuthApplications extends ListRecords
 
     protected static string $resource = OAuthApplicationResource::class;
 
-    protected ?string $subheading = 'External applications people can connect to their account';
+    protected ?string $subheading = 'External applications people can connect to their account.';
 
     /**
      * No "List" crumb under a title that already names the list.

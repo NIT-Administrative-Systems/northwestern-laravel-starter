@@ -42,7 +42,7 @@ class Overview extends Dashboard
 
     protected static ?string $title = 'Overview';
 
-    protected ?string $subheading = 'Platform configuration and system health';
+    protected ?string $subheading = 'Platform configuration and system health.';
 
     protected static ?string $navigationLabel = 'Overview';
 
