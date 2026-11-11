@@ -13,9 +13,11 @@ use App\Domains\User\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 
 /**
- * Revokes a personal access token. People revoke their own on the Account page; an
- * administrator revoking someone else's, or the system sweeping one its holder can no longer
- * use, is recorded as an audit event on that person.
+ * Revokes a personal access token. People revoke their own on the Account page.
+ *
+ * The system sweeping a token its holder can no longer
+ * use, or an administrator revoking someone else's,
+ * is recorded as an audit event on that person.
  */
 readonly class RevokePersonalAccessToken
 {

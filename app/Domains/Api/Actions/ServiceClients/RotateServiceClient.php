@@ -14,9 +14,9 @@ use Illuminate\Auth\Access\AuthorizationException;
 use InvalidArgumentException;
 
 /**
- * Replaces a service client with a new one for the same API user. The old client keeps
- * working, so the integration can switch secrets without downtime; revoke it once the
- * integration uses the new one.
+ * Replaces a service client with a new one for the same API user. The old client
+ * keeps working, so the integration can switch secrets without interruption.
+ * Revoke the old client once the integration has switched to the new one.
  */
 readonly class RotateServiceClient
 {

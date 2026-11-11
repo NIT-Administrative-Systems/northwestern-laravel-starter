@@ -31,7 +31,7 @@ enum TokenExpiration: int implements HasLabel
     }
 
     /**
-     * The lifetimes a personal access token may choose, up to `$maxDays`.
+     * Get the lifetimes a personal access token may choose, up to `$maxDays`.
      *
      * @return list<self>
      */
@@ -44,7 +44,7 @@ enum TokenExpiration: int implements HasLabel
     }
 
     /**
-     * The expiration date, counted from now or from `$from`.
+     * Get the expiration date, counted from now or from `$from`.
      */
     public function expiresAt(?Carbon $from = null): Carbon
     {

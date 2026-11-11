@@ -7,15 +7,18 @@ namespace App\Domains\Api\Enums;
 use Filament\Support\Contracts\HasLabel;
 
 /**
- * How an OAuth client came to exist. Cleanup rules depend on it: administrator-registered
- * clients are never removed automatically, dynamically registered ones can be.
+ * How an OAuth client came to exist. Cleanup depends on it: an administrator's
+ * clients are never removed automatically, but self-registered ones can be.
  */
 enum ClientOrigin: string implements HasLabel
 {
-    /** Created by the application: a service client or an OAuth application in Administration, or Passport's personal access client. */
+    /**
+     * Created by the application: a service client or an OAuth application
+     * an administrator registered, or Passport's personal access client.
+     */
     case Administrator = 'administrator';
 
-    /** Registered by the client itself, such as an MCP client using dynamic registration. */
+    /** Registered by the client itself, as MCP clients do through dynamic registration. */
     case Dynamic = 'dynamic';
 
     public function getLabel(): string

@@ -9,9 +9,10 @@ use App\Domains\Api\Models\OAuthToken;
 use InvalidArgumentException;
 
 /**
- * The kinds of credential that call the application: a person's personal access tokens, the
- * applications and MCP clients a person connects, and the service clients an API user owns.
- * One Passport model backs several kinds, so {@see self::of()} tells them apart.
+ * The kinds of credential that call the application: a person's personal
+ * access tokens, the applications and MCP clients a person connects,
+ * and the service clients that API users own. One Passport model
+ * backs several kinds, so {@see self::of()} tells them apart.
  */
 enum CredentialKind
 {
@@ -21,7 +22,7 @@ enum CredentialKind
     case ServiceClient;
 
     /**
-     * The kind of a client, or of a token by its client.
+     * Get the kind of a client, or of a token by its client.
      *
      * @throws InvalidArgumentException When a token's client no longer exists
      */
@@ -42,8 +43,8 @@ enum CredentialKind
     }
 
     /**
-     * Whether the feature this kind belongs to is turned on: `mcp.enabled` for MCP clients,
-     * `api.enabled` for the rest.
+     * Determine whether the feature this kind belongs to is turned on:
+     * `mcp.enabled` for MCP clients and `api.enabled` for the rest.
      */
     public function isEnabled(): bool
     {
@@ -51,7 +52,7 @@ enum CredentialKind
     }
 
     /**
-     * The kind in a sentence, plural: "personal access tokens".
+     * Get the kind's plural name for use in a sentence: "personal access tokens".
      */
     public function plural(): string
     {

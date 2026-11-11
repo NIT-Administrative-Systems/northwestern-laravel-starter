@@ -16,13 +16,18 @@ use Illuminate\Support\Facades\DB;
 use Laravel\Passport\ClientRepository;
 
 /**
- * Registers an external application that people can connect to their account through the
- * authorization code flow. A confidential application, such as a web server, gets a client
- * secret; a public one, such as a desktop or browser app, uses PKCE instead. An MCP client
- * registers itself through the same action, with a dynamic origin.
+ * Registers an external application that people can connect
+ * to their accounts through the authorization code flow.
  *
- * An administrator's registration is audited on them: the client's UUID key doesn't fit the
- * audits table. A self-registered MCP client has no one to audit it on.
+ * A confidential application, such as a web server,
+ * gets a client secret; a public one, such as a
+ * desktop or browser app, uses PKCE instead.
+ *
+ * MCP clients register themselves through this action too, with a dynamic origin.
+ *
+ * An administrator's registration is audited on them, because
+ * the client's UUID key doesn't fit the audits table, and a
+ * self-registered MCP client has no one to audit it on.
  */
 readonly class RegisterOAuthApplication
 {

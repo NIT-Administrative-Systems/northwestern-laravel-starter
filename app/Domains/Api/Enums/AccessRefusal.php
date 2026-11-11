@@ -9,13 +9,19 @@ namespace App\Domains\Api\Enums;
  */
 enum AccessRefusal
 {
-    /** The operation doesn't exist for this kind and actor, such as a person modifying their own token. */
+    /**
+     * The operation doesn't exist for this kind of credential
+     * and actor, such as a person editing their own token.
+     */
     case Unsupported;
 
     /** The feature the credential belongs to is turned off. */
     case FeatureOff;
 
-    /** The actor is impersonating someone, and credentials never change under someone else's name. */
+    /**
+     * The actor is impersonating someone, and no credential
+     * changes under another person's name while they do.
+     */
     case Impersonating;
 
     /** The actor, or the credential's holder, lacks the permission it needs. */
@@ -24,12 +30,16 @@ enum AccessRefusal
     /** The holder's account is deleted or deactivated. */
     case AccountInactive;
 
-    /** The holder is the wrong kind of account: a person holding a service client, or an API user holding a token. */
+    /**
+     * The holder is the wrong kind of account: a person holding a
+     * service client, or an API user with any other credential.
+     */
     case WrongAccountType;
 
     /**
-     * Whether the refusal lasts, so a credential refused for it should be revoked. A feature
-     * that is turned off may be turned back on, so its credentials are kept.
+     * Determine whether the refusal lasts, meaning that a credential
+     * refused for it should be revoked. A feature that is turned
+     * off may be turned back on, so its credentials are kept.
      */
     public function isLasting(): bool
     {
