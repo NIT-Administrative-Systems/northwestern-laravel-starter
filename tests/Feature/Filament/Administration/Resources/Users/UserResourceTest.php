@@ -103,7 +103,7 @@ final class UserResourceTest extends TestCase
 
         $this->actingAs($superAdministrator)->post(route('impersonate', [$person->id]));
 
-        $this->assertFalse(app('impersonate')->isImpersonating());
+        $this->assertFalse(resolve('impersonate')->isImpersonating());
         $this->assertTrue(auth()->user()->is($superAdministrator));
     }
 }
