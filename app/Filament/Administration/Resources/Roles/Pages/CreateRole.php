@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Filament\Administration\Resources\Roles\Pages;
 
-use App\Domains\Access\Enums\SystemPermission;
+use App\Domains\Access\Actions\SyncRolePermissions;
 use App\Domains\Access\Models\Role;
 use App\Filament\Administration\Resources\Roles\RoleResource;
+use App\Filament\Administration\Resources\Roles\Schemas\RoleForm;
 use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Support\Arr;
 
 /**
  * @property-read Role $record
@@ -18,23 +20,19 @@ class CreateRole extends CreateRecord
 
     protected static bool $canCreateAnother = false;
 
+    /** @var list<string> The permissions chosen in the lists the form showed. */
+    protected array $chosenPermissions = [];
+
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $data['guard_name'] = 'web';
+        $this->chosenPermissions = array_values(Arr::flatten(Arr::only($data, RoleForm::PERMISSION_LISTS)));
 
-        return $data;
+        return [...Arr::except($data, RoleForm::PERMISSION_LISTS), 'guard_name' => 'web'];
     }
 
     protected function afterCreate(): void
     {
-        $apiPermissions = $this->data['api_permissions'] ?? [];
-        $regularPermissions = $this->data['regular_permissions'] ?? [];
-        $systemPermissions = auth()->user()->hasPermissionTo(SystemPermission::ManageAll)
-            ? ($this->data['system_permissions'] ?? [])
-            : [];
-        $allPermissions = array_merge($apiPermissions, $regularPermissions, $systemPermissions);
-
-        $this->record->syncPermissionsWithAudit($allPermissions);
+        resolve(SyncRolePermissions::class)($this->record, $this->chosenPermissions, auth()->user());
     }
 
     protected function getRedirectUrl(): string

@@ -148,25 +148,29 @@ readonly class FindOrUpdateUserFromDirectory
     }
 
     /**
-     * Handles cases where directory data is missing or incomplete.
+     * Handles cases where the lookup failed or the directory entry is missing or incomplete.
      *
-     * If an existing {@see User} is found, and they authenticate via SSO, the user is flagged as having an
-     * inactive NetID and the directory sync failure timestamp is recorded. This allows the application to
-     * treat the account as effectively deprovisioned while still retaining local history.
+     * If an existing {@see User} is found, and they authenticate via SSO, the directory sync failure
+     * timestamp is recorded and the user is returned with the details already stored. An incomplete
+     * entry also flags the NetID as inactive, so the application treats the account as deprovisioned
+     * while still retaining local history. A failed lookup doesn't: Directory Search answers `false`
+     * both for a NetID it doesn't know and when it can't be reached, so an outage must not deactivate
+     * anyone or cost them their credentials. EventHub's NetID updates still deactivate accounts.
      *
-     * If no existing user is found, a {@see BadDirectoryEntry} exception is thrown so that callers can surface
-     * or log the invalid directory state.
+     * If no existing user is found, a failed lookup returns null, which callers treat as Directory Search being
+     * unavailable: sign-in retries and then shows the 503 page. An incomplete entry throws a
+     * {@see BadDirectoryEntry} exception so that callers can surface or log the invalid directory state.
      *
      * @param  array<string, mixed>|false|null  $directoryData
      *
      * @throws BadDirectoryEntry
      */
-    private function resolveInvalidDirectoryEntry(?User $existingUser, string $searchValue, array|false|null $directoryData): User
+    private function resolveInvalidDirectoryEntry(?User $existingUser, string $searchValue, array|false|null $directoryData): ?User
     {
         if ($existingUser instanceof User) {
             if ($existingUser->auth_type === AuthType::SSO) {
                 $existingUser->update([
-                    'netid_inactive' => true,
+                    ...($directoryData === false ? [] : ['netid_inactive' => true]),
                     'directory_sync_last_failed_at' => now(),
                 ]);
             }
@@ -174,9 +178,13 @@ readonly class FindOrUpdateUserFromDirectory
             return $existingUser;
         }
 
+        if ($directoryData === false) {
+            return null;
+        }
+
         throw new BadDirectoryEntry(
             netId: $directoryData['uid'] ?? $searchValue,
-            directoryData: $directoryData ?: []
+            directoryData: $directoryData ?? []
         );
     }
 

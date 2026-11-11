@@ -26,6 +26,12 @@ final class SignInAsControllerTest extends TestCase
     public function createApplication(): Application
     {
         $variables = ['APP_ENV' => $this->providedData()[0] ?? 'local', 'APP_URL' => $this->providedData()[1] ?? null];
+
+        // CI turns the fixed sign-in code on, and the application refuses to boot with it outside local, testing and ci.
+        if (! in_array($variables['APP_ENV'], ['local', 'testing', 'ci'], true)) {
+            $variables['LOCAL_AUTH_USE_FIXED_CODE'] = 'false';
+        }
+
         $previous = [];
 
         foreach (array_filter($variables) as $name => $value) {

@@ -60,7 +60,7 @@ class RolesRelationManager extends RelationManager
                     fn ($query) => $query->whereHas('role_type', fn (\Illuminate\Contracts\Database\Query\Builder $q) => $q->where('slug', '!=', RoleTypeEnum::ApiIntegration))
                 )
                 ->get()
-                ->filter(fn (Role $role) => Gate::allows('attachUser', $role));
+                ->filter(fn (Role $role) => Gate::allows('attachUser', [$role, $user]));
         });
     }
 
@@ -94,7 +94,8 @@ class RolesRelationManager extends RelationManager
             ])
             ->headerActions([
                 AttachAction::make()
-                    ->authorize(SystemPermission::AssignRoles)
+                    // Nobody can give themselves a role, so the action isn't offered on your own record.
+                    ->authorize(fn (): bool => ! $this->getOwnerRecord()->is(auth()->user()) && Gate::allows(SystemPermission::AssignRoles))
                     ->label('Assign Role')
                     ->color('primary')
                     ->outlined()
@@ -139,13 +140,13 @@ class RolesRelationManager extends RelationManager
                         }
 
                         abort_if($role->isAssignmentLocked(), 403, 'This role is assignment-locked and cannot be assigned through the UI.');
-                        abort_unless(Gate::allows('attachUser', $role), 403, 'You are not authorized to assign this role.');
+                        abort_if($user->is(auth()->user()), 403, 'You can\'t give yourself a role.');
+                        abort_unless(Gate::allows('attachUser', [$role, $user]), 403, 'You are not authorized to assign this role.');
 
-                        // Validate that API roles can only be assigned to API users and vice versa
-                        if ($role->role_type->slug === RoleTypeEnum::ApiIntegration && ! $user->is_api_user) {
+                        if (! $role->suits($user)) {
                             Notification::make()
                                 ->title('Role Not Assigned')
-                                ->body('API Integration roles can only be assigned to API users.')
+                                ->body('API Integration roles can only be assigned to API users, and other roles only to people.')
                                 ->danger()
                                 ->send();
 

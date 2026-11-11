@@ -23,7 +23,8 @@ return [
 
     // Use a fixed, predictable verification code (e.g. "123456") instead of random codes.
     // Useful for local development and CI where you need to repeatedly verify codes.
-    // Blocked from running in production, develop, and QA as a safety measure.
+    // Allowed only in the local, testing and ci environments: anywhere else the application
+    // refuses to boot.
     'use_fixed_code' => (bool) env('LOCAL_AUTH_USE_FIXED_CODE', false),
 
     // Maximum requests per email per hour (applies to both form submissions and code sends)
@@ -45,6 +46,9 @@ return [
 
         // Minutes a challenge stays locked after max attempts
         'lock_minutes' => (int) env('LOCAL_AUTH_CODE_LOCK_MINUTES', 15),
+
+        // Incorrect codes an email may enter in a day, across all its codes; then it waits out the day
+        'max_failed_per_day' => (int) env('LOCAL_AUTH_CODE_MAX_FAILED_PER_DAY', 20),
 
         // Cooldown before resending another code
         'resend_cooldown_seconds' => (int) env('LOCAL_AUTH_CODE_RESEND_COOLDOWN', 30),

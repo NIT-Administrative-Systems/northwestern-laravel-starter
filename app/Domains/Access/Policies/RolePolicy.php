@@ -15,6 +15,11 @@ class RolePolicy
         return $user->hasPermissionTo(SystemPermission::ViewRoles);
     }
 
+    public function view(User $user, Role $role): bool
+    {
+        return $this->viewAny($user);
+    }
+
     public function create(User $user): bool
     {
         return $user->hasPermissionTo(SystemPermission::EditRoles);
@@ -39,16 +44,18 @@ class RolePolicy
     }
 
     /**
-     * Permission check for assigning this role to users.
+     * Permission check for assigning this role to users, or to `$assignee` when one is named:
+     * nobody may give themselves a role.
      *
      * System Managed roles return false here — super admins gain access
      * via Gate::before(), consistent with how all other policies work.
      * Does NOT check assignment_locked — that's enforced outside the gate
-     * so it cannot be bypassed by super admins.
+     * so it cannot be bypassed by super admins. The relation managers refuse
+     * self-assignment outside the gate too, for the same reason.
      */
-    public function attachUser(User $user, Role $role): bool
+    public function attachUser(User $user, Role $role, ?User $assignee = null): bool
     {
-        if ($role->isSystemManagedType()) {
+        if ($role->isSystemManagedType() || $user->is($assignee)) {
             return false;
         }
 
@@ -56,7 +63,7 @@ class RolePolicy
     }
 
     /**
-     * Permission check for removing this role from users.
+     * Permission check for removing this role from users. People may remove their own roles.
      */
     public function detachUser(User $user, Role $role): bool
     {

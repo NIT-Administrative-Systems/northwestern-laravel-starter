@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Tests\Unit\Domains\Auth\Actions\Local;
 
 use App\Domains\Auth\Actions\Local\FixedNumericOneTimeCodeGenerator;
+use App\Domains\Auth\Contracts\OneTimeCodeGenerator;
+use App\Providers\AppServiceProvider;
 use InvalidArgumentException;
 use LogicException;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -61,14 +63,43 @@ final class FixedNumericOneTimeCodeGeneratorTest extends TestCase
     }
 
     #[DataProvider('blockedEnvironmentProvider')]
-    public function test_throws_in_blocked_environments(string $environment): void
+    public function test_throws_outside_local_testing_and_ci(string $environment): void
     {
         $this->app['env'] = $environment;
 
         $this->expectException(LogicException::class);
-        $this->expectExceptionMessageIsOrContains('must not be used in production, develop, or QA environments');
+        $this->expectExceptionMessageIsOrContains('The fixed sign-in code can only be used in the local, testing and ci environments');
 
         ($this->generator)(6);
+    }
+
+    #[DataProvider('allowedEnvironmentProvider')]
+    public function test_generates_in_local_testing_and_ci(string $environment): void
+    {
+        $this->app['env'] = $environment;
+
+        $this->assertSame('123456', ($this->generator)(6));
+    }
+
+    // Checked when the application boots, so a deployment that turns it on fails at once.
+    public function test_the_application_refuses_to_boot_with_it_turned_on_in_a_deployed_environment(): void
+    {
+        config(['local-auth.use_fixed_code' => true]);
+        $this->app['env'] = 'staging';
+
+        $this->expectException(LogicException::class);
+
+        new AppServiceProvider($this->app)->register();
+    }
+
+    public function test_the_application_boots_with_it_turned_on_locally(): void
+    {
+        config(['local-auth.use_fixed_code' => true]);
+        $this->app['env'] = 'local';
+
+        new AppServiceProvider($this->app)->register();
+
+        $this->assertInstanceOf(FixedNumericOneTimeCodeGenerator::class, $this->app->make(OneTimeCodeGenerator::class));
     }
 
     /** @return \Iterator<string, array{string}> */
@@ -77,5 +108,15 @@ final class FixedNumericOneTimeCodeGeneratorTest extends TestCase
         yield 'production' => ['production'];
         yield 'develop' => ['develop'];
         yield 'qa' => ['qa'];
+        yield 'staging' => ['staging'];
+        yield 'an environment the starter doesn\'t name' => ['uat'];
+    }
+
+    /** @return \Iterator<string, array{string}> */
+    public static function allowedEnvironmentProvider(): \Iterator
+    {
+        yield 'local' => ['local'];
+        yield 'testing' => ['testing'];
+        yield 'ci' => ['ci'];
     }
 }

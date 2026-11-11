@@ -42,7 +42,15 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
             return;
         }
 
-        Telescope::hideRequestParameters(['_token']);
+        // The CSRF token, and the client secrets, codes and refresh tokens OAuth clients send.
+        Telescope::hideRequestParameters([
+            '_token',
+            'client_secret',
+            'refresh_token',
+            'code',
+            'code_verifier',
+            'secret',
+        ]);
 
         Telescope::hideRequestHeaders([
             'cookie',

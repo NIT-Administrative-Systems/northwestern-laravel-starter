@@ -75,4 +75,35 @@ final class UserResourceTest extends TestCase
         $this->assertFalse(AuditsRelationManager::canViewForRecord($person, ViewUser::class));
         $this->assertFalse(UserLoginRecordResource::canAccess());
     }
+
+    public function test_a_deleted_person_is_offered_no_code_or_impersonation(): void
+    {
+        $superAdministrator = User::factory()->create();
+        $superAdministrator->givePermissionTo(SystemPermission::ManageAll);
+        $person = User::factory()->affiliate()->create();
+        $this->actingAs($superAdministrator);
+
+        Livewire::test(ViewUser::class, ['record' => $person->getRouteKey()])
+            ->assertActionVisible('sendLoginCode')
+            ->assertActionVisible('impersonate');
+
+        $person->delete();
+
+        Livewire::test(ViewUser::class, ['record' => $person->getRouteKey()])
+            ->assertActionHidden('sendLoginCode')
+            ->assertActionHidden('impersonate');
+    }
+
+    public function test_a_deleted_person_cannot_be_impersonated_by_posting_to_the_route(): void
+    {
+        $superAdministrator = User::factory()->create();
+        $superAdministrator->givePermissionTo(SystemPermission::ManageAll);
+        $person = User::factory()->affiliate()->create();
+        $person->delete();
+
+        $this->actingAs($superAdministrator)->post(route('impersonate', [$person->id]));
+
+        $this->assertFalse(resolve('impersonate')->isImpersonating());
+        $this->assertTrue(auth()->user()->is($superAdministrator));
+    }
 }
