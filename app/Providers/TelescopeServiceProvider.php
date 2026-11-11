@@ -15,8 +15,6 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
 {
     public function register(): void
     {
-        // Telescope::night();
-
         $this->hideSensitiveRequestDetails();
 
         $isLocal = $this->app->environment('local');
@@ -34,7 +32,7 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
     }
 
     /**
-     * Prevent sensitive request details from being logged by Telescope.
+     * Keep secrets out of the requests Telescope records outside the local environment.
      */
     protected function hideSensitiveRequestDetails(): void
     {
@@ -52,18 +50,18 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
             'secret',
         ]);
 
+        // X-Secret-Token carries the health endpoint's secret.
         Telescope::hideRequestHeaders([
             'cookie',
             'x-csrf-token',
             'x-xsrf-token',
             'authorization',
+            'x-secret-token',
         ]);
     }
 
     /**
-     * Register the Telescope gate.
-     *
-     * This gate determines who can access Telescope in non-local environments.
+     * Register the gate that decides who may open Telescope outside the local environment.
      */
     protected function gate(): void
     {
