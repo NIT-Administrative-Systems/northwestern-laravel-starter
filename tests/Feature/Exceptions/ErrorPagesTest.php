@@ -7,6 +7,7 @@ namespace Tests\Feature\Exceptions;
 use App\Domains\User\Models\User;
 use Illuminate\Support\Facades\Route;
 use PHPUnit\Framework\Attributes\CoversNothing;
+use PHPUnit\Framework\Attributes\DataProvider;
 use RuntimeException;
 use Tests\TestCase;
 
@@ -34,9 +35,44 @@ final class ErrorPagesTest extends TestCase
     {
         $this->get('/no-such-page')
             ->assertNotFound()
-            ->assertSee('Page Not Found')
-            ->assertSee('Back to Homepage')
+            ->assertSeeInOrder(['Error 404', 'Page Not Found', 'Go to the Home Page'])
             ->assertSee('Privacy Statement');
+    }
+
+    /**
+     * @return array<string, array{int, string, string}>
+     */
+    public static function actions(): array
+    {
+        return [
+            'unauthorized' => [401, 'Sign In', '/app/login'],
+            'forbidden' => [403, 'Go to the Home Page', '/'],
+            'expired' => [419, 'Reload the Page', '/changelog-page'],
+            'too many requests' => [429, 'Go Back', '/changelog-page'],
+        ];
+    }
+
+    #[DataProvider('actions')]
+    public function test_each_client_error_offers_its_next_step(int $status, string $label, string $path): void
+    {
+        Route::get('/__test/status/{status}', fn (int $status) => abort($status))->middleware('web');
+
+        $response = $this->get("/__test/status/{$status}", ['referer' => url('/changelog-page')])
+            ->assertStatus($status)
+            ->assertSee("Error {$status}");
+
+        $this->assertSame(1, preg_match('/<a\b[^>]*data-testid="error-action"[^>]*href="([^"]+)"[^>]*>\s*([^<]+?)\s*</', (string) $response->getContent(), $action));
+        $this->assertSame([url($path), $label], [$action[1], $action[2]]);
+    }
+
+    public function test_going_back_never_leaves_the_application(): void
+    {
+        Route::get('/__test/too-many', fn () => abort(429))->middleware('web');
+
+        $this->get('/__test/too-many', ['referer' => 'https://example.com/elsewhere'])
+            ->assertStatus(429)
+            ->assertSee('href="' . url('/') . '"', escape: false)
+            ->assertDontSee('example.com');
     }
 
     public function test_not_found_page_has_the_help_menu_and_sign_in_for_guests(): void
@@ -68,6 +104,10 @@ final class ErrorPagesTest extends TestCase
         $this->get('/__test/unavailable')
             ->assertServiceUnavailable()
             ->assertSee('Service Unavailable')
+            ->assertSee('Error 503')
+            ->assertSee('Skip to Content')
+            ->assertSee('id="main"', escape: false)
+            ->assertDontSee('data-testid="error-action"', escape: false)
             ->assertDontSee('data-testid="help-menu-trigger"', escape: false)
             ->assertDontSee('data-testid="sign-in-link"', escape: false);
     }
@@ -98,8 +138,19 @@ final class ErrorPagesTest extends TestCase
     {
         $this->get('/__test/server-error')
             ->assertInternalServerError()
+            ->assertSeeInOrder(['Error 500', 'Something Went Wrong', 'IT Service Desk', 'Go to the Home Page'])
             ->assertSee('Sensitive failure detail')
             ->assertSee('Non-Production Only');
+    }
+
+    public function test_server_error_details_leave_out_an_empty_message(): void
+    {
+        Route::get('/__test/server-error-without-message', fn () => abort(500));
+
+        $this->get('/__test/server-error-without-message')
+            ->assertInternalServerError()
+            ->assertSee('View Full')
+            ->assertDontSee('border-red-600', escape: false);
     }
 
     /**
