@@ -17,6 +17,7 @@ use App\Mcp\Http\Controllers\RegisterClientController;
 use App\Mcp\Http\Middleware\AddScopeToChallenge;
 use App\Mcp\McpServiceProvider;
 use App\Mcp\Servers\AppServer;
+use Illuminate\Support\Facades\Auth;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\Concerns\IssuesPersonalAccessTokens;
 use Tests\Concerns\IssuesServiceClientTokens;
@@ -234,6 +235,22 @@ final class McpFlowTest extends TestCase
         $call()->assertOk();
         $call()->assertTooManyRequests();
         $this->mcp($token, 'tools/list')->assertOk();
+    }
+
+    public function test_one_persons_tool_calls_leave_another_persons_limit_alone(): void
+    {
+        config(['mcp.rate_limits.tool_calls_per_minute' => 1]);
+        $this->actingAs($this->mcpUser());
+        $firstToken = $this->mcpToken();
+        $this->actingAs($this->mcpUser());
+        $secondToken = $this->mcpToken();
+        // An MCP client carries only its token, never a session.
+        Auth::forgetGuards();
+        $call = fn (string $token) => $this->mcp($token, 'tools/call', ['name' => 'echo', 'arguments' => ['text' => 'hello']]);
+
+        $call($firstToken)->assertOk();
+        $call($secondToken)->assertOk();
+        $call($firstToken)->assertTooManyRequests();
     }
 
     /**
