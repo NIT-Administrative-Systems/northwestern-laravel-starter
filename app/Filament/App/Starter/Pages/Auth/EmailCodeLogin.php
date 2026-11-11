@@ -54,7 +54,7 @@ class EmailCodeLogin extends SimplePage
 
     public function mount(): void
     {
-        abort_unless(resolve(SignIn::class)->offers(SignInMethod::EmailCode), 404);
+        $this->refuseUnlessOffered();
 
         if (Filament::auth()->check()) {
             $this->redirect('/');
@@ -174,7 +174,7 @@ class EmailCodeLogin extends SimplePage
 
     public function requestCode(): void
     {
-        abort_unless(resolve(SignIn::class)->offers(SignInMethod::EmailCode), 404);
+        $this->refuseUnlessOffered();
 
         $loginCodes = resolve(LoginCodes::class);
 
@@ -196,8 +196,7 @@ class EmailCodeLogin extends SimplePage
 
     public function verifyCode(): RedirectResponse
     {
-        $signIn = resolve(SignIn::class);
-        abort_unless($signIn->offers(SignInMethod::EmailCode), 404);
+        $this->refuseUnlessOffered();
 
         $code = (string) $this->codeForm->getState()['code'];
 
@@ -207,11 +206,13 @@ class EmailCodeLogin extends SimplePage
             throw ValidationException::withMessages(['codeData.code' => $e->errors()['code'] ?? []]);
         }
 
-        return $signIn->complete($user, request(), SignInMethod::EmailCode);
+        return resolve(SignIn::class)->complete($user, request(), SignInMethod::EmailCode);
     }
 
     public function resendCode(): void
     {
+        $this->refuseUnlessOffered();
+
         $loginCodes = resolve(LoginCodes::class);
 
         if ($loginCodes->pendingEmail() === null) {
@@ -258,5 +259,14 @@ class EmailCodeLogin extends SimplePage
         $this->codeForm->fill();
 
         $this->js("document.querySelector('input[type=\"email\"]')?.focus()");
+    }
+
+    /**
+     * Refuse with a 404 when email codes are off, including when they are turned
+     * off after the page loaded, since every step runs as its own request.
+     */
+    private function refuseUnlessOffered(): void
+    {
+        abort_unless(resolve(SignIn::class)->offers(SignInMethod::EmailCode), 404);
     }
 }

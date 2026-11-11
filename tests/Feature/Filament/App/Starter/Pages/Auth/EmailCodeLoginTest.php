@@ -244,6 +244,19 @@ final class EmailCodeLoginTest extends TestCase
         $this->assertSame(0, LoginChallenge::count());
     }
 
+    public function test_resend_sends_nothing_once_email_codes_are_turned_off(): void
+    {
+        User::factory()->affiliate()->create(['email' => 'test@example.com']);
+        $this->startFlow('test@example.com');
+        $component = Livewire::test(EmailCodeLogin::class);
+
+        config(['local-auth.enabled' => false]);
+
+        $component->call('resendCode')->assertNotFound();
+
+        $this->assertSame(1, LoginChallenge::count());
+    }
+
     public function test_resend_without_a_pending_sign_in_returns_to_the_first_step(): void
     {
         Livewire::test(EmailCodeLogin::class)
