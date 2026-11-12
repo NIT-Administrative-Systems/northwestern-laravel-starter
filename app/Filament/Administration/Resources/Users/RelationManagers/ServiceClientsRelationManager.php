@@ -68,13 +68,15 @@ class ServiceClientsRelationManager extends RelationManager
                 TextColumn::make('name')
                     ->label('Name')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->wrap(),
                 TextColumn::make('id')
                     ->label('Client ID')
                     ->fontFamily(FontFamily::Mono)
                     ->copyable()
                     ->limit(13)
-                    ->tooltip(fn (OAuthClient $record): string => $record->id),
+                    ->tooltip(fn (OAuthClient $record): string => $record->id)
+                    ->visibleFrom('xl'),
                 TextColumn::make('status')
                     ->size(TextSize::Medium)
                     ->badge(),
@@ -82,7 +84,7 @@ class ServiceClientsRelationManager extends RelationManager
                     ->label('Last Used')
                     ->placeholder('Never')
                     ->dateTime()
-                    ->visibleFrom('lg'),
+                    ->visibleFrom('xl'),
                 TextColumn::make('secret_expires_at')
                     ->label('Secret Expires')
                     ->dateTime('F j, Y'),
