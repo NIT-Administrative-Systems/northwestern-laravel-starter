@@ -62,7 +62,7 @@ final class ConnectedApplicationsRelationManagerTest extends TestCase
         $this->actingAs($admin);
 
         Livewire::test(ConnectedApplicationsRelationManager::class, ['ownerRecord' => $person, 'pageClass' => ViewUser::class])
-            ->assertSee('AI client · name not verified')
+            ->assertSee('AI client')
             ->assertSee('AI client · verified by claude.ai');
     }
 

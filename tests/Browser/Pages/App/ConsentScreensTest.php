@@ -81,7 +81,7 @@ it('is healthy on the consent screen for a self-registered MCP client', function
         'code_challenge_method' => 'S256',
     ]));
 
-    expect($page->assertVisible('@unverified-client')->assertSee('Name not verified'))->toBeHealthyInEachTheme();
+    expect($page->assertMissing('@verified-client')->assertSee('Only approve it if you started this connection.'))->toBeHealthyInEachTheme();
 });
 
 it('is healthy on the consent screen for an MCP client from a client metadata document', function () {

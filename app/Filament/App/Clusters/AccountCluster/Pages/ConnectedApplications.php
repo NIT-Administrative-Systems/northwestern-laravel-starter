@@ -85,7 +85,7 @@ class ConnectedApplications extends Page implements HasTable
                     ->description(fn (OAuthConnection $record): ?string => match (true) {
                         ! $record->oauth_client?->isMcpClient() => null,
                         $record->oauth_client->verifiedBy() !== null => "AI client · verified by {$record->oauth_client->verifiedBy()}",
-                        default => 'AI client · name not verified',
+                        default => 'AI client',
                     }),
                 TextColumn::make('scopes')->label('Allowed To')->badge()->formatStateUsing(fn (string $state): string => ApiScopes::label($state))->placeholder('See Your Account Details'),
                 TextColumn::make('connected_at')->label('Connected')->date(),

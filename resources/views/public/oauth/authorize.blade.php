@@ -12,7 +12,6 @@
     @var \App\Domains\Api\Models\OAuthClient $client
     @var \Northwestern\SysDev\Chassis\ValueObjects\OAuthRedirectTarget $redirectTarget Where approving sends the person
     @var string|null $verifiedBy The host whose client metadata document named the client
-    @var bool $unverified The client registered itself, so its name is only its own claim
     @var bool $seesAccount The token can read the person's account details
     @var \App\Domains\User\Models\User $user
     @var list<\Laravel\Passport\Scope> $scopes The requested scopes the token will carry
@@ -37,13 +36,6 @@
                                        data-testid="verified-client"
                                        color="success"
                                        icon="heroicon-m-check-badge">Verified by {{ $verifiedBy }}</x-filament::badge>
-                </div>
-            @elseif ($unverified)
-                <div class="mt-2">
-                    <x-filament::badge class="w-fit"
-                                       data-testid="unverified-client"
-                                       color="warning"
-                                       icon="heroicon-m-exclamation-triangle">Name not verified</x-filament::badge>
                 </div>
             @endif
 

@@ -81,9 +81,8 @@ final readonly class OAuthConsent
      * Besides Passport's own values, `scopes` is the requested scopes the token
      * will carry, and `redirectTarget` is where approving sends the person.
      *
-     * `verifiedBy` is the host whose client metadata document named
-     * an MCP client, such as `claude.ai`; `unverified` means the
-     * client registered itself, so its name is only a claim.
+     * `verifiedBy` is the host whose client metadata document gave an MCP client
+     * its name, such as `claude.ai`, or null for a client that named itself.
      *
      * `seesAccount` says whether the token can read the person's account details.
      *
@@ -102,7 +101,6 @@ final readonly class OAuthConsent
             // registered; without one, it uses the only URI the client has.
             'redirectTarget' => OAuthRedirectTarget::from($request->string('redirect_uri')->toString() ?: $client->redirect_uris[0]),
             'verifiedBy' => $client->verifiedBy(),
-            'unverified' => $client->isMcpClient() && $client->verifiedBy() === null,
             'seesAccount' => CredentialKind::of($client) !== CredentialKind::McpClient,
         ];
     }

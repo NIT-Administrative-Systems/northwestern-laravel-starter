@@ -71,7 +71,7 @@ final class McpClientResourceTest extends TestCase
         Livewire::test(ListMcpClients::class)
             ->assertCanSeeTableRecords([$mcpClient])
             ->assertCanNotSeeTableRecords([$application])
-            ->assertSee('Name not verified');
+            ->assertSee('Self-registered');
     }
 
     public function test_a_client_from_a_metadata_document_is_marked_with_its_host(): void
@@ -83,7 +83,7 @@ final class McpClientResourceTest extends TestCase
         Livewire::test(ListMcpClients::class)
             ->assertCanSeeTableRecords([$client])
             ->assertSee('Verified by claude.ai')
-            ->assertDontSee('Name not verified');
+            ->assertDontSee('Self-registered');
     }
 
     public function test_an_administrator_revokes_a_client(): void

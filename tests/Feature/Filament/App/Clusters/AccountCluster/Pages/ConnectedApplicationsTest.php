@@ -64,7 +64,7 @@ final class ConnectedApplicationsTest extends TestCase
         Livewire::test(ConnectedApplications::class)->assertCanNotSeeTableRecords([$mine]);
     }
 
-    // An MCP client named itself, so the list says so.
+    // A client that named itself is an AI client, with no host to name.
     public function test_a_self_registered_mcp_client_is_labelled(): void
     {
         config(['mcp.enabled' => true]);
@@ -73,7 +73,8 @@ final class ConnectedApplicationsTest extends TestCase
 
         Livewire::test(ConnectedApplications::class)
             ->assertSee('Claude Code')
-            ->assertSee('AI client · name not verified');
+            ->assertSee('AI client')
+            ->assertDontSee('verified by');
     }
 
     // The name comes from Claude's document on claude.ai, so the list names that host.
@@ -85,8 +86,7 @@ final class ConnectedApplicationsTest extends TestCase
 
         Livewire::test(ConnectedApplications::class)
             ->assertSee('Claude Code')
-            ->assertSee('AI client · verified by claude.ai')
-            ->assertDontSee('name not verified');
+            ->assertSee('AI client · verified by claude.ai');
     }
 
     public function test_a_person_disconnects_an_application(): void

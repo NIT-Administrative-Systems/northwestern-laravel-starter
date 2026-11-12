@@ -88,7 +88,8 @@ final class McpFlowTest extends TestCase
         [$consent, $verifier] = $this->requestAuthorization($client, ['mcp:use']);
         $consent->assertOk()
             ->assertSeeInOrder(['<h1', 'Connect', 'Claude Code', '</h1>'], escape: false)
-            ->assertSee('Name not verified')
+            ->assertDontSee('Verified by')
+            ->assertSee('Only approve it if you started this connection.')
             ->assertSee("Use this application's tools from an AI client")
             ->assertDontSee('See your account details');
 
@@ -113,7 +114,7 @@ final class McpFlowTest extends TestCase
         $consent->assertOk()
             ->assertSeeInOrder(['<h1', 'Connect', 'Claude Code', '</h1>'], escape: false)
             ->assertSee('Verified by claude.ai')
-            ->assertDontSee('Name not verified');
+            ->assertSee('Only approve it if you started this connection.');
 
         $client = OAuthClient::query()->where('client_metadata_url', self::CLAUDE_CODE_METADATA_URL)->sole();
         $tokens = $this->exchangeAuthorizationCode(self::CLAUDE_CODE_METADATA_URL, $this->approveAuthorization($client), $verifier)->assertOk()->json();
