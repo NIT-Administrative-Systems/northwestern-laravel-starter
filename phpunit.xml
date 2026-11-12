@@ -162,5 +162,16 @@
         <env name="SUPPORT_ENABLED" value="true" />
         <env name="CHANGELOG_ENABLED" value="true" />
         <env name="WILDCARD_PHOTO_SYNC_ENABLED" value="true" />
+        <env name="MCP_ENABLED" value="true" />
+        <env name="API_REQUEST_LOGGING_ENABLED" value="true" />
+        <!-- Empty, so a test never sees a developer's real keys or single sign-on. -->
+        <env name="AZURE_CLIENT_ID" value="" />
+        <env name="AZURE_CLIENT_SECRET" value="" />
+        <env name="WEBSSO_API_KEY" value="" />
+        <env name="WEBSSO_STRATEGY" value="apigee" />
+        <env name="DIRECTORY_SEARCH_API_KEY" value="" />
+        <env name="EVENT_HUB_BASE_URL" value="" />
+        <env name="EVENT_HUB_API_KEY" value="" />
+        <env name="EVENT_HUB_HMAC_VERIFICATION_SHARED_SECRET" value="" />
     </php>
 </phpunit>
