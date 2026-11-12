@@ -171,6 +171,8 @@ The page checks run in light and dark mode, and use [Chassis’s](https://larave
 
 A failure lists every problem on the page at once. `toBeAccessible()`, `toHaveNoClientErrors()` and `toHaveNoServerErrors()` check one kind of problem; `toBeHealthyInEachTheme()` and `toBeHealthyOnMobile()` check a page in both themes or at a phone’s width; and `toAllBeHealthy()` checks a list of paths and names every page that fails.
 
+The three files in `Pages/` also check layout with Chassis’s `toAllFitEachWidth()`, which visits each page at 320, 768, 1024 and 1440 pixels. A page fails if it’s wider than the screen, if two controls in its header overlap, if a table or badge runs past its container, or if anything makes a scroll container scroll sideways. A container that scrolls by design, such as a `pre` or a wide table with `tabindex="0"`, is left alone. Public pages are checked at 320 pixels with `tapTargets: true`, which also fails a control under 44 pixels tall on a touch screen. The administration test signs in with a long NetID and gives its records long names, job titles and role names, since long values are what break a layout.
+
 `tests/Pest.php` turns off two axe rules for every page: `duplicate-id`, and `empty-table-header`, because Filament leaves the actions column’s header cell empty in every table.
 
 ### Writing a Test
@@ -212,12 +214,12 @@ A few things about the browser plugin that are easy to miss:
 
 ### Adding a Page
 
-`FilamentPages::in('app')` and `FilamentPages::in('administration')` find each panel’s pages from the panel itself: each resource’s index and create pages, and each page and dashboard the signed-in person can open. A new Filament page or resource is checked without any change to the tests.
+`FilamentPages::in('app')` and `FilamentPages::in('administration')` find each panel’s pages from the panel itself: each resource’s index and create pages, and each page and dashboard the signed-in person can open. A new Filament page or resource is checked, for health and for layout, without any change to the tests.
 
 Add the pages they can’t find to the file for the people who can see them:
 
-* **A record page**, such as a view or edit page, needs a record. Add it to the dataset of the record pages test in `Pages/AdministrationPagesTest.php`, with a closure that makes the record and returns the path.
-* **A public page** goes in the `public pages` dataset in `Pages/PublicPagesTest.php`, which also checks it at a phone’s width.
+* **A record page**, such as a view or edit page, needs a record. Add it to the dataset of the record pages test in `Pages/AdministrationPagesTest.php`, with a closure that makes the record and returns the path. Add its path to the list in that file’s layout test too, with a record whose values are long.
+* **A public page** goes in the `public pages` dataset in `Pages/PublicPagesTest.php`, which also checks it at a phone’s width, and in the list of paths in that file’s layout test.
 * **A page that needs data to show its interesting state**, such as a banner or a consent screen, gets a test of its own that makes the data and asserts that the state is visible before it checks the page.
 * **A new error page** goes in the list of statuses in the error page test in `Pages/PublicPagesTest.php`. `ErrorPages::path($status)` registers a test route that answers with that status.
 
@@ -230,6 +232,8 @@ When a third-party widget has a violation you can’t fix, exclude its element b
 // shadow DOM, and none of the viewer's themes meets color contrast there.
 expect(visit("/administration/audits/{$audit->getKey()}"))->toBeHealthyInEachTheme(exclude: ['diffs-container']);
 ```
+
+The layout expectations take `exclude:` too. Fix a layout failure in the page first, with a breakpoint on a column or `->wrap()` on a long value; exclude only an element you can’t change, with the same kind of comment.
 
 ### Debugging
 
