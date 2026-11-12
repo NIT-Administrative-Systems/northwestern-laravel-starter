@@ -174,7 +174,7 @@ final class McpFlowTest extends TestCase
 
     public function test_metadata_documents_are_not_advertised_without_a_host_to_fetch_them_from(): void
     {
-        config(['mcp.client_metadata_hosts' => []]);
+        config(['mcp.client_metadata_urls' => []]);
 
         $this->getJson('/.well-known/oauth-authorization-server')->assertJsonPath('client_id_metadata_document_supported', false);
     }

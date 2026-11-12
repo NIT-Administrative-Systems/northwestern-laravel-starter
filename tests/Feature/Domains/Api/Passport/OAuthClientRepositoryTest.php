@@ -23,7 +23,7 @@ final class OAuthClientRepositoryTest extends TestCase
     {
         parent::setUp();
 
-        config(['mcp.enabled' => true, 'mcp.client_metadata_hosts' => ['claude.ai']]);
+        config(['mcp.enabled' => true, 'mcp.client_metadata_urls' => [self::CLAUDE_CODE_METADATA_URL]]);
         $this->fakeClientMetadataDocument();
         $this->clients = resolve(ClientRepository::class);
     }

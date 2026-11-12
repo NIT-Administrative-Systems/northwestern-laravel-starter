@@ -40,7 +40,7 @@ class OAuthDiscoveryController
             'token_endpoint_auth_methods_supported' => ['none'],
             'code_challenge_methods_supported' => ['S256'],
             // Claude identifies itself with a metadata document only when this is true.
-            'client_id_metadata_document_supported' => config('mcp.client_metadata_hosts') !== [],
+            'client_id_metadata_document_supported' => config('mcp.client_metadata_urls') !== [],
         ]);
     }
 

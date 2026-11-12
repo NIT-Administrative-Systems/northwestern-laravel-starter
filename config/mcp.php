@@ -41,22 +41,28 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Client Metadata Document Hosts
+    | Client Metadata Documents
     |--------------------------------------------------------------------------
     |
     | A client can identify itself with the URL of a metadata document it publishes,
-    | instead of registering. The server fetches the document only from the hosts
-    | listed here, so the client's name is the host's word, not just its own.
+    | instead of registering. The server fetches only the documents listed here,
+    | so the client's name is the publishing host's word rather than its own.
     |
-    | Claude uses `claude.ai`, VS Code uses `vscode.dev` and the Copilot CLI
-    | uses `github.com`. Leave it empty and every client registers itself.
+    | These are the ones Claude and Claude Code publish
+    | on `claude.ai`, VS Code's on `vscode.dev` and
+    | the Copilot CLI's on `github.com`. Leave it
+    | empty and every client registers itself.
     |
     */
 
-    'client_metadata_hosts' => Str::of((string) env('MCP_CLIENT_METADATA_HOSTS', 'claude.ai,vscode.dev,github.com'))
-        ->lower()
+    'client_metadata_urls' => Str::of((string) env('MCP_CLIENT_METADATA_URLS', implode(',', [
+        'https://claude.ai/oauth/mcp-oauth-client-metadata',
+        'https://claude.ai/oauth/claude-code-client-metadata',
+        'https://vscode.dev/oauth/client-metadata.json',
+        'https://github.com/copilot/cli/client-metadata.json',
+    ])))
         ->explode(',')
-        ->map(fn (string $host): string => trim($host))
+        ->map(fn (string $url): string => trim($url))
         ->filter()
         ->values()
         ->all(),

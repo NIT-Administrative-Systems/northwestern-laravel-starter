@@ -27,14 +27,13 @@ final class ClientMetadataDocumentsTest extends TestCase
     {
         parent::setUp();
 
-        config(['mcp.enabled' => true, 'mcp.client_metadata_hosts' => ['claude.ai']]);
+        config(['mcp.enabled' => true, 'mcp.client_metadata_urls' => [self::CLAUDE_CODE_METADATA_URL]]);
         $this->documents = resolve(ClientMetadataDocuments::class);
     }
 
-    public function test_it_accepts_an_https_url_with_a_path_on_a_listed_host(): void
+    public function test_it_accepts_only_a_listed_document_url(): void
     {
         $this->assertTrue($this->documents->accepts(self::CLAUDE_CODE_METADATA_URL));
-        $this->assertTrue($this->documents->accepts('https://claude.ai/oauth/metadata.json?v=2'));
     }
 
     /**
@@ -42,16 +41,13 @@ final class ClientMetadataDocumentsTest extends TestCase
      */
     public static function refusedUrls(): iterable
     {
+        yield 'another document on a listed host' => ['https://claude.ai/oauth/other-client-metadata'];
         yield 'plain http' => ['http://claude.ai/oauth/claude-code-client-metadata'];
+        yield 'a query' => ['https://claude.ai/oauth/claude-code-client-metadata?v=2'];
+        yield 'a trailing slash' => ['https://claude.ai/oauth/claude-code-client-metadata/'];
+        yield 'a host in another case' => ['https://Claude.ai/oauth/claude-code-client-metadata'];
         yield 'an unlisted host' => ['https://claude.example/oauth/claude-code-client-metadata'];
-        yield 'a subdomain of a listed host' => ['https://evil.claude.ai/oauth/claude-code-client-metadata'];
-        yield 'a port' => ['https://claude.ai:8443/oauth/claude-code-client-metadata'];
-        yield 'credentials' => ['https://user:pass@claude.ai/oauth/claude-code-client-metadata'];
-        yield 'a fragment' => ['https://claude.ai/oauth/claude-code-client-metadata#top'];
-        yield 'no path' => ['https://claude.ai'];
-        yield 'the root path' => ['https://claude.ai/'];
-        yield 'a dot segment' => ['https://claude.ai/oauth/../claude-code-client-metadata'];
-        yield 'not a URL' => ['https:///nothing'];
+        yield 'not a URL' => ['not a url'];
     }
 
     #[DataProvider('refusedUrls')]
@@ -63,12 +59,12 @@ final class ClientMetadataDocumentsTest extends TestCase
         $this->assertNull($this->documents->find($url));
     }
 
-    public function test_it_accepts_nothing_while_mcp_is_off_or_no_host_is_listed(): void
+    public function test_it_accepts_nothing_while_mcp_is_off_or_no_document_is_listed(): void
     {
-        config(['mcp.client_metadata_hosts' => []]);
+        config(['mcp.client_metadata_urls' => []]);
         $this->assertFalse($this->documents->accepts(self::CLAUDE_CODE_METADATA_URL));
 
-        config(['mcp.client_metadata_hosts' => ['claude.ai'], 'mcp.enabled' => false]);
+        config(['mcp.client_metadata_urls' => [self::CLAUDE_CODE_METADATA_URL], 'mcp.enabled' => false]);
         $this->assertFalse($this->documents->accepts(self::CLAUDE_CODE_METADATA_URL));
     }
 

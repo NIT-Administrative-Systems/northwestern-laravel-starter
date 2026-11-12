@@ -15,7 +15,6 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Support\Uri;
 use Laravel\Mcp\Server\Registrar;
-use League\Uri\Exceptions\SyntaxError;
 use Northwestern\SysDev\Chassis\Rules\OAuthRedirectUri;
 
 /**
@@ -25,9 +24,9 @@ use Northwestern\SysDev\Chassis\Rules\OAuthRedirectUri;
  *
  * Claude publishes one for Claude Code and one for its apps, on `claude.ai`.
  *
- * The server fetches documents only from hosts in `mcp.client_metadata_hosts`, so
- * an anonymous request can't make it fetch an address it picks, and a name from
- * a listed host's document is the host's word rather than the client's own.
+ * The server fetches only the documents listed in `mcp.client_metadata_urls`, so
+ * an anonymous request can't make it fetch an address it picks, and the name
+ * from a listed document is its publisher's word rather than the client's.
  *
  * Each document becomes one MCP client shared by everyone who connects it.
  * When that client is revoked or pruned, the next connection creates a
@@ -44,28 +43,11 @@ readonly class ClientMetadataDocuments
     }
 
     /**
-     * Determine whether `$clientId` is a document URL the server fetches: HTTPS on a
-     * listed host, with a path and no port, credentials, fragment or dot segments.
+     * Determine whether `$clientId` is one of the document URLs the server trusts.
      */
     public function accepts(string $clientId): bool
     {
-        if (! config('mcp.enabled')) {
-            return false;
-        }
-
-        try {
-            $uri = Uri::of($clientId);
-        } catch (SyntaxError) {
-            return false;
-        }
-
-        return $uri->scheme() === 'https'
-            && in_array($uri->host(), config('mcp.client_metadata_hosts'), true)
-            && $uri->port() === null
-            && $uri->user() === null
-            && $uri->fragment() === null
-            && $uri->pathSegments()->isNotEmpty()
-            && $uri->pathSegments()->intersect(['.', '..'])->isEmpty();
+        return config('mcp.enabled') && in_array($clientId, config('mcp.client_metadata_urls'), true);
     }
 
     /**
