@@ -6,6 +6,54 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+### Added
+
+- The browser tests check every page's layout with Chassis's layout expectations at 320, 768, 1024 and 1440 pixels. A page fails if it is wider than the screen, if controls in its header overlap, or if a table or badge runs past its container. On guest pages, a control under 44px tall on a touch screen fails too. The administration test fills its pages with long names, NetIDs, job titles and role names.
+
+### Changed
+
+- Updated `northwestern-sysdev/northwestern-filament-theme` to `^4.4.0` and `northwestern-sysdev/chassis` to `^1.6`. The theme now fits the panels' top bar from 320 pixels, wraps badges in columns and entries marked `->wrap()`, owns the focus ring on purple and styles the sign-in card, so the panel themes keep only the starter's own rules. The site header takes the focus ring with the theme's `nu-focus-on-purple` class, the Help menu shows only its icon below `xl` with `nu-topbar-icon-below-xl`, and the administration top bar leaves out Help below 368 pixels.
+- Overview's Scheduled Tasks is a list until its section is 896 pixels wide, rather than below `md`. A user's Service Clients shows Client ID and Last Used from `xl`, service client names and audit events wrap, and Sign-In Records shows its stats two to a row until there is room for four, with the segment chart's legend below the donut.
+- The test helpers in `tests/Concerns` say what they do: `personalAccessToken()` is `issuePersonalAccessToken()`, `serviceClientToken()` is `issueServiceClientToken()`, `mcpToken()` is `issueMcpToken()`, `mcp()` is `sendMcpMessage()`, `approve()` is `approveAuthorization()`, `codeFrom()` is `authorizationCodeFrom()`, `exchange()` is `exchangeAuthorizationCode()` and `MocksEventHub::send()` is `sendEventHubMessage()`.
+- `<x-help-menu>` and the public announcement banner decide what to show in their component classes, `HelpMenu` and `PublicAnnouncementBanner`, so their views hold only markup. The MCP client and connected application resources build their tables in `McpClientsTable` and `OAuthApplicationsTable`, like every other resource.
+- PHPStan keeps its cache in `storage/phpstan`, which git ignores, instead of `/tmp/phpstan`, which every checkout on a machine shared.
+- `phpunit.xml` turns on MCP and API request logging, leaves single sign-on unconfigured, and leaves the Directory Search and EventHub keys empty, as `.env.ci` does. A developer's `.env` no longer changes what the tests see or hands them real keys.
+- Comments follow Laravel's tapered style throughout, and the coding standards and `AGENTS.md` describe it. The starter's own config files have one banner per setting, and `.env.example` lists the settings it was missing.
+
+### Removed
+
+- `App\Providers\ViewServiceProvider`, which registered nothing, and the unused `Relation::getModelFromAlias()` macro.
+
+### Fixed
+
+- An administrator who could only impersonate could act as someone with `AssignRoles` and give their own account a role. Impersonation is now refused for anyone who holds a permission the impersonator lacks, directly or through a role; `ManageAll` counts as every permission.
+- A second browser tab starting an email sign-in for another address let the first tab, still showing the first address, sign in as the second. The first tab now refuses the code and shows the newer address.
+- A queued sign-in code email went out even after the code expired, was used or locked, or was replaced by a newer one.
+- Sign-in-as showed Not Found for a deactivated account instead of the Account Deactivated page.
+- Outside local, Telescope recorded the health endpoint's `X-Secret-Token` header on failed requests.
+- The Redis health check ran whenever `REDIS_CLIENT` was `predis`, even when no store used Redis, and `QueueValidator` failed with predis, whose `ping()` returns a status object.
+- The database-paused page answered browsers with a 500 instead of a 503.
+- `role:force-detach` matched the username exactly, so `ABC123` found no user named `abc123`.
+- `users:deactivate-inactive-local` deactivated a local account again the day after an administrator reactivated it. It now counts the **Account Reactivated** audit as activity, so keep audits at least as long as `LOCAL_ACCOUNT_INACTIVITY_DAYS`.
+- The daily `mcp:prune-clients` deleted revoked MCP clients, whose connections revoking had removed, leaving their revoked tokens pointing at nothing.
+- A 30-day personal access token or client secret got an "expires soon" notice on the day it was made.
+- `Audit::user()` and `impersonator()`, `UserLoginRecord::user()`, `ApiRequestLog::user()` and `SupportTicket::user()` left out deactivated people, so exports showed blank names. They include deleted users now, so Sign-In Records and API Requests no longer fail to load when someone in them is deactivated, and Audit Logs and Role Activity no longer show a deactivated person's changes as made by System.
+- A directory lookup that failed or came back incomplete skipped deactivated accounts, so a deactivated person got the 503 or bad-entry page instead of Account Deactivated, and an incomplete entry never marked their NetID inactive. EventHub NetID deactivations skipped deactivated accounts too, so reactivating one brought back roles the NetID had lost.
+- An email search for someone whose stored email differs, such as a student found by their non-student address, returned the account without the directory's details.
+- On the lockdown page, a locked-out person's own photo redirected to the access-restricted page. Wildcard photo links were also signed on the default disk, while the photos are stored on S3.
+- New local and API users got the timezone `DEFAULT_USER_TIMEZONE` had when the migration ran, not the current one.
+- `RoleFactory::forRoleType()` gave every role the same name, so making more than one failed.
+- Deleting an announcement while its audience was being notified failed the queued job and each person's notification.
+- The changelog's RSS feed showed apostrophes and ampersands in titles as `&#039;` and `&amp;`, padded with whitespace.
+- **Resend Code** still sent a code after email sign-in was turned off.
+- The lockdown page told people without a role they had no access, even with lockdown off or while an administrator impersonated them.
+- The Role filter on Role Activity matched any change made while the person held the role, and missed role names JSON escapes, such as one with a slash. It now matches the role that changed.
+- Linked rows in Users, Assigned Users, Audit Logs, Role Activity, Sign-In Records and Support Tickets turned empty cells into links with no text.
+- A role's global search result never showed how many people have it, and **Send Verification Code** put a raw exception message in its notification.
+- Long role names, job titles, departments and token names ran past their cells or were cut off. Several tables scrolled sideways at 768 or 1024 pixels, and the administration top bar overlapped itself between 320 and 1024 pixels.
+- The landing page's buttons, the email sign-in field and the 500 page's stack trace toggle were under 44px tall on a phone.
+- Copy: the Audit Logs page was titled "Audits", and Role Activity's browser tab said "Audits". Sentences used numerals for one to nine and phrases like "1 people", "login records", "account(s)" and "announcement(s)". **Dismiss Announcement** and **View Full Audit Entry** were in sentence case, the database-paused page used three periods for an ellipsis, the Announcements page printed the year on every date, and the support team's email called a local account's username a NetID. The fallback support email also said Sentry had the error, even without Sentry.
+
 ## [v3.2.0] - 2026-11-11
 
 ### Added
