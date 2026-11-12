@@ -87,8 +87,8 @@ final class McpFlowTest extends TestCase
 
         [$consent, $verifier] = $this->requestAuthorization($client, ['mcp:use']);
         $consent->assertOk()
-            ->assertSee('Connect Claude Code')
-            ->assertSee('Unverified AI client.')
+            ->assertSeeInOrder(['<h1', 'Connect', 'Claude Code', '</h1>'], escape: false)
+            ->assertSee('Name not verified')
             ->assertSee("Use this application's tools from an AI client")
             ->assertDontSee('See your account details');
 
@@ -111,10 +111,9 @@ final class McpFlowTest extends TestCase
 
         [$consent, $verifier] = $this->requestAuthorization(self::CLAUDE_CODE_METADATA_URL, ['mcp:use']);
         $consent->assertOk()
-            ->assertSee('Connect Claude Code')
-            ->assertSee('Verified AI client.')
-            ->assertSee('Its name comes from claude.ai')
-            ->assertDontSee('Unverified AI client.');
+            ->assertSeeInOrder(['<h1', 'Connect', 'Claude Code', '</h1>'], escape: false)
+            ->assertSee('Verified by claude.ai')
+            ->assertDontSee('Name not verified');
 
         $client = OAuthClient::query()->where('client_metadata_url', self::CLAUDE_CODE_METADATA_URL)->sole();
         $tokens = $this->exchangeAuthorizationCode(self::CLAUDE_CODE_METADATA_URL, $this->approveAuthorization($client), $verifier)->assertOk()->json();
@@ -165,8 +164,8 @@ final class McpFlowTest extends TestCase
 
         [$consent, $verifier] = $this->requestAuthorization($url, ['mcp:use'], redirectUri: $redirectUri);
         $consent->assertOk()
-            ->assertSee("Connect {$document['client_name']}")
-            ->assertSee('Its name comes from ' . parse_url($url, PHP_URL_HOST));
+            ->assertSeeInOrder(['<h1', 'Connect', $document['client_name'], '</h1>'], escape: false)
+            ->assertSee('Verified by ' . parse_url($url, PHP_URL_HOST));
 
         $client = OAuthClient::query()->where('client_metadata_url', $url)->sole();
         $this->exchangeAuthorizationCode($url, $this->approveAuthorization($client), $verifier, $redirectUri)->assertOk();

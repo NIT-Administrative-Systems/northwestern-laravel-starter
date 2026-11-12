@@ -21,6 +21,7 @@ use Filament\Schemas\Components\Text;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
@@ -61,10 +62,11 @@ class Login extends SimplePage
 
     /**
      * The card names the application; phones show it only in the header's lower row.
+     * The verb is quiet so the name stands out, as on the OAuth consent screen.
      */
-    public function getHeading(): string
+    public function getHeading(): Htmlable
     {
-        return 'Sign In to ' . config('app.name');
+        return new HtmlString('<span class="font-medium text-gray-500 dark:text-gray-400">Sign In to</span> ' . e(config('app.name')));
     }
 
     public function content(Schema $schema): Schema

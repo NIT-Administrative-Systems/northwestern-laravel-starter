@@ -81,7 +81,7 @@ it('is healthy on the consent screen for a self-registered MCP client', function
         'code_challenge_method' => 'S256',
     ]));
 
-    expect($page->assertSee('Unverified AI client.'))->toBeHealthyInEachTheme();
+    expect($page->assertVisible('@unverified-client')->assertSee('Name not verified'))->toBeHealthyInEachTheme();
 });
 
 it('is healthy on the consent screen for an MCP client from a client metadata document', function () {
@@ -106,5 +106,5 @@ it('is healthy on the consent screen for an MCP client from a client metadata do
         'code_challenge_method' => 'S256',
     ]));
 
-    expect($page->assertVisible('@verified-client')->assertSee('Its name comes from claude.ai'))->toBeHealthyInEachTheme();
+    expect($page->assertVisible('@verified-client')->assertSee('Verified by claude.ai'))->toBeHealthyInEachTheme();
 });

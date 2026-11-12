@@ -144,7 +144,7 @@ final class LoginTest extends TestCase
 
         $this->get('/app/login')
             ->assertOk()
-            ->assertSeeInOrder(['<h1 class="fi-simple-header-heading">', 'Sign In to ' . e(config('app.name')), '</h1>'], escape: false)
+            ->assertSeeInOrder(['<h1 class="fi-simple-header-heading">', 'Sign In to</span> ' . e(config('app.name')), '</h1>'], escape: false)
             ->assertSeeInOrder(['<title>', 'Sign In', ' - ', e(config('app.name')), '</title>'], escape: false)
             ->assertSee('For students, faculty, staff, and affiliates.')
             ->assertSee('For approved external partners without a NetID.')
