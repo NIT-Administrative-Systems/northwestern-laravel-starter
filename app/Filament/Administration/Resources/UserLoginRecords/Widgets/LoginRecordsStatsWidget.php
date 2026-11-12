@@ -17,6 +17,9 @@ class LoginRecordsStatsWidget extends BaseWidget
 
     protected ?string $pollingInterval = null;
 
+    // Four in a row only when the widget is wide enough for each label on a line.
+    protected int|array|null $columns = ['@md' => 2, '@3xl' => 4, '!@md' => 2, '!@xl' => 4];
+
     protected function getStats(): array
     {
         /** @var object{total: int, unique_users: int} $totals */

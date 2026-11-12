@@ -313,10 +313,10 @@ When EventHub reports a NetID deactivated, deprovisioned or on security hold, `P
 
 ### Expiring Local Accounts
 
-Set `LOCAL_ACCOUNT_INACTIVITY_DAYS` to deactivate local accounts nobody has signed in to for that many days. The daily `users:deactivate-inactive-local` command finds them from the sign-in records, and gives a new account the same time for its first sign-in. Northwestern accounts are left to the NetID lifecycle. It's off by default.
+Set `LOCAL_ACCOUNT_INACTIVITY_DAYS` to deactivate local accounts nobody has signed in to for that many days. The daily `users:deactivate-inactive-local` command finds them from the sign-in records, and gives a new account the same time for its first sign-in. Reactivating an account counts as a sign-in, so a reactivated account gets the full time again. Northwestern accounts are left to the NetID lifecycle. It's off by default.
 
 <Aside type="caution" title="Keep sign-in records long enough">
-The last sign-in comes from the sign-in records, so keep `LOGIN_RECORD_RETENTION_DAYS` at least as long as `LOCAL_ACCOUNT_INACTIVITY_DAYS`. Otherwise someone whose last sign-in was pruned looks inactive.
+The last sign-in comes from the sign-in records and the last reactivation from the audit log, so keep `LOGIN_RECORD_RETENTION_DAYS` and `AUDIT_RETENTION_DAYS` at least as long as `LOCAL_ACCOUNT_INACTIVITY_DAYS`. Otherwise someone whose last sign-in or reactivation was pruned looks inactive.
 </Aside>
 
 ---
@@ -444,7 +444,7 @@ All rate limiters are defined in `config/rate-limiting.php`.
 
 ## Impersonating Users
 
-Users with the `ManageImpersonation` permission can sign in as another user to see the application as they do. The **Impersonate** button on a user's page in the administration panel posts to `/impersonate/take/{id}` and opens the app panel as that person, since the page you came from is usually one they can't open. API users can't be impersonated, and neither can a deactivated account or one whose NetID is inactive (`canBeImpersonated()` in `HandlesImpersonation`). Only a user with `ManageAll` can impersonate another user who has it.
+Users with the `ManageImpersonation` permission can sign in as another user to see the application as they do. The **Impersonate** button on a user's page in the administration panel posts to `/impersonate/take/{id}` and opens the app panel as that person, since the page you came from is usually one they can't open. API users can't be impersonated, and neither can a deactivated account or one whose NetID is inactive (`canBeImpersonated()` in `HandlesImpersonation`). Nor can someone who holds a permission the impersonator lacks, whether it comes from a role or was given directly, since acting as them would lend the impersonator that permission. `ManageAll` counts as every permission, so a user who has it may impersonate anyone the earlier rules allow.
 
 While impersonating, both panels show the theme's impersonation banner, whose leave button posts to `/impersonate/leave` and returns to the original account, on the page where impersonation started. Both routes are in `routes/auth.php` and share the [impersonation rate limit](#impersonation).
 

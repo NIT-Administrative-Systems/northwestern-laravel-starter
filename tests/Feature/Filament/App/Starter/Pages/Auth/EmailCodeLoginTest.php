@@ -197,6 +197,25 @@ final class EmailCodeLoginTest extends TestCase
         $this->assertGuest();
     }
 
+    // The pending sign-in is per session, so the newest request replaces it.
+    public function test_a_tab_whose_sign_in_another_tab_replaced_does_not_sign_in_as_the_other_address(): void
+    {
+        User::factory()->affiliate()->create(['email' => 'first@example.com']);
+        $second = User::factory()->affiliate()->create(['email' => 'second@example.com']);
+        $this->startFlow('first@example.com');
+        $firstTab = Livewire::test(EmailCodeLogin::class)->assertSet('email', 'first@example.com');
+
+        $this->startFlow($second->email);
+
+        $firstTab->fillForm(['code' => '123456'], 'codeForm')
+            ->call('verifyCode')
+            ->assertHasFormErrors(['code'], 'codeForm')
+            ->assertSet('email', 'second@example.com')
+            ->assertSee('second@example.com');
+
+        $this->assertGuest();
+    }
+
     public function test_code_must_have_the_configured_number_of_digits(): void
     {
         $this->startFlow('test@example.com');

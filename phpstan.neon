@@ -17,7 +17,7 @@ parameters:
         - tests/Browser
     level: 6
     editorUrl: 'phpstorm://open?file=%%file%%&line=%%line%%'
-    tmpDir: /tmp/phpstan
+    tmpDir: storage/phpstan
     treatPhpDocTypesAsCertain: false
     checkModelProperties: true
     checkModelAppends: true

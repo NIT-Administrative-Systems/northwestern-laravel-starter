@@ -82,6 +82,27 @@ final class EnvironmentLockdownTest extends TestCase
             ->assertSee('Signed out');
     }
 
+    // The lockdown page shows the person's own photo in the top bar.
+    public function test_a_locked_out_person_still_gets_their_own_photo(): void
+    {
+        config(['platform.lockdown.enabled' => true]);
+
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->get(route('users.wildcard-photo', $user))
+            ->assertRedirect(asset('images/default-profile-photo.svg'));
+    }
+
+    public function test_a_locked_out_person_does_not_get_someone_elses_photo(): void
+    {
+        config(['platform.lockdown.enabled' => true]);
+
+        $this->actingAs(User::factory()->create())
+            ->get(route('users.wildcard-photo', User::factory()->create()))
+            ->assertRedirect(route('filament.app.environment-lockdown'));
+    }
+
     public function test_redirects_users_with_no_roles(): void
     {
         config(['platform.lockdown.enabled' => true]);

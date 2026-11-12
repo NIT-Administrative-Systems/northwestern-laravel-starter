@@ -200,9 +200,22 @@ class EmailCodeLogin extends SimplePage
         $this->refuseUnlessOffered();
 
         $code = (string) $this->codeForm->getState()['code'];
+        $loginCodes = resolve(LoginCodes::class);
+
+        // Another tab may have started a sign-in for another address since this one
+        // showed its code step. Verifying would sign in as that address instead.
+        $pendingEmail = $loginCodes->pendingEmail();
+
+        if ($pendingEmail !== null && $pendingEmail !== $this->email) {
+            $this->email = $pendingEmail;
+
+            throw ValidationException::withMessages([
+                'codeData.code' => 'A newer request in another tab replaced this one. Enter the code we sent to the address above.',
+            ]);
+        }
 
         try {
-            $user = resolve(LoginCodes::class)->verify($code, request());
+            $user = $loginCodes->verify($code, request());
         } catch (ValidationException $e) {
             throw ValidationException::withMessages(['codeData.code' => $e->errors()['code'] ?? []]);
         }

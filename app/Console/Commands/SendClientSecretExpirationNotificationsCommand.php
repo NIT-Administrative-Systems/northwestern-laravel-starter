@@ -108,6 +108,9 @@ class SendClientSecretExpirationNotificationsCommand extends Command
                 $targetDate->copy()->endOfDay(),
             ])
             ->where('secret_expires_at', '>', $now)
+            // Rotating makes a new client, so this is when the secret was made,
+            // and a 30-day secret made today would be said to expire soon.
+            ->where('created_at', '<', $now->copy()->startOfDay())
             // Either never notified, or last notified more than a day ago, so running
             // the command more than once a day doesn't send the same notice twice.
             ->where(function (Builder $query) use ($now): void {

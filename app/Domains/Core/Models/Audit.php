@@ -49,13 +49,13 @@ class Audit extends BaseModel
     /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class)->withTrashed();
     }
 
     /** @return BelongsTo<User, $this> */
     public function impersonator(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'impersonator_user_id');
+        return $this->belongsTo(User::class, 'impersonator_user_id')->withTrashed();
     }
 
     /** @return MorphTo<Model, $this> */

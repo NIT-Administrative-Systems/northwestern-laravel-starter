@@ -91,7 +91,8 @@ class LoginsBySegmentChartWidget extends ChartWidget
             'plugins' => [
                 'legend' => [
                     'display' => true,
-                    'position' => 'right',
+                    // Beside the chart, a long segment name and its percentage get cut off.
+                    'position' => 'bottom',
                 ],
             ],
             'cutout' => '55%',

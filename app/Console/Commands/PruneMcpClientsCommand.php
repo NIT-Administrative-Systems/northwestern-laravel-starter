@@ -30,7 +30,10 @@ class PruneMcpClientsCommand extends Command
     {
         $deleted = 0;
 
+        // Revoking a client deletes its connections, and its revoked
+        // tokens would point at nothing if the client went too.
         $unconnected = OAuthClient::query()->mcpClients()
+            ->where('revoked', false)
             ->where('created_at', '<', Carbon::now()->subHours((int) config('mcp.cleanup.unconnected_hours')))
             ->whereDoesntHave('connections');
 

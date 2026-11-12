@@ -19,8 +19,6 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Number;
 use Northwestern\SysDev\Chassis\Enums\ApiRequestFailure;
 use Northwestern\SysDev\Chassis\Enums\OAuthGrantType;
@@ -34,8 +32,6 @@ class ApiRequestLogsTable
             // don't move while someone is reading them.
             ->poll(fn (HasTable $livewire): ?string => ($livewire->getTableFilterState('live')['isActive'] ?? false) ? '30s' : null)
             ->deferLoading()
-            // A deleted API user's requests still show who made them.
-            ->modifyQueryUsing(fn (Builder $query) => $query->with(['user' => fn (Relation $user) => $user->withoutGlobalScope(SoftDeletingScope::class)]))
             ->recordClasses(fn (ApiRequestLog $record): ?string => $record->duration_ms > (int) config('api.request_logging.slow_request_threshold_ms')
                 ? 'bg-red-50/50 dark:bg-red-900/10'
                 : null)
@@ -57,7 +53,7 @@ class ApiRequestLogsTable
                     ->label('User')
                     ->fontFamily(FontFamily::Mono)
                     ->placeholder('Unauthenticated')
-                    ->searchable(query: fn (Builder $query, string $search): Builder => $query->orWhereHas('user', fn (Builder $q) => $q->withoutGlobalScope(SoftDeletingScope::class)->where('username', 'ilike', "%{$search}%")))
+                    ->searchable(query: fn (Builder $query, string $search): Builder => $query->orWhereHas('user', fn (Builder $q) => $q->where('username', 'ilike', "%{$search}%")))
                     ->hidden($isRelationManager),
 
                 TextColumn::make('oauth_client.name')

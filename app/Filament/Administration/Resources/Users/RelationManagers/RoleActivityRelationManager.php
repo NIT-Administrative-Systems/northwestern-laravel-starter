@@ -8,7 +8,6 @@ use App\Domains\Access\Enums\SystemPermission;
 use App\Domains\Auth\Enums\AuthType;
 use App\Domains\Core\Models\Audit;
 use App\Domains\User\Models\User;
-use App\Filament\Administration\Resources\Audits\Tables\AuditsTable;
 use App\Filament\Administration\Resources\RoleActivity\Tables\RoleActivityTable;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -42,7 +41,7 @@ class RoleActivityRelationManager extends RelationManager
             ->modifyQueryUsing(fn (Builder $query) => Audit::query()
                 ->roleActivity()
                 ->where('auditable_id', $this->getOwnerRecord()->getKey())
-                ->with([...AuditsTable::people(), 'auditable']))
+                ->with(['user', 'impersonator', 'auditable']))
             ->defaultPaginationPageOption(10)
             ->emptyStateHeading('No Role Changes')
             ->emptyStateDescription('No roles have been assigned to or removed from this person.')

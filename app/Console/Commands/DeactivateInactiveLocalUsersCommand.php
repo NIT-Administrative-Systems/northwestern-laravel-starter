@@ -4,21 +4,23 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Domains\Core\Enums\AuditEvent;
 use App\Domains\User\Actions\Lifecycle\DeactivateUser;
 use App\Domains\User\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 /**
  * Deactivates local (email-code) accounts nobody has signed in to for the number
- * of days in `platform.accounts.local_inactivity_days`. A new account gets the
- * same time to be used for the first time. Northwestern accounts are left to
- * the NetID lifecycle, and API users have their own credentials' expiry.
+ * of days in `platform.accounts.local_inactivity_days`, counting the day an
+ * account was created or reactivated as a sign-in. Northwestern accounts
+ * are left to the NetID lifecycle, and API users to their credentials.
  *
- * The last sign-in comes from the sign-in records, so keep the retention
- * of `platform.retention.login_records` at least as long as this, or
- * someone who signed in before the oldest record looks inactive.
+ * The last sign-in comes from the sign-in records and the reactivation
+ * from the Account Reactivated audit. Keep both retention periods at
+ * least as long as this, or someone recently active looks inactive.
  */
 class DeactivateInactiveLocalUsersCommand extends Command
 {
@@ -41,7 +43,10 @@ class DeactivateInactiveLocalUsersCommand extends Command
         $inactive = User::query()
             ->local()
             ->where('created_at', '<', $cutoff)
-            ->whereDoesntHave('login_records', fn (Builder $query) => $query->where('logged_in_at', '>=', $cutoff));
+            ->whereDoesntHave('login_records', fn (Builder $query) => $query->where('logged_in_at', '>=', $cutoff))
+            ->whereDoesntHave('audits', fn (Builder $query) => $query
+                ->where('event', AuditEvent::AccountReactivated->value)
+                ->where('created_at', '>=', $cutoff));
 
         $deactivated = 0;
 
@@ -50,7 +55,7 @@ class DeactivateInactiveLocalUsersCommand extends Command
             $deactivated++;
         }
 
-        $this->components->info("Deactivated {$deactivated} local account(s) with no sign-in for {$days} days.");
+        $this->components->info("Deactivated {$deactivated} local " . Str::plural('account', $deactivated) . " with no sign-in for {$days} days.");
 
         return self::SUCCESS;
     }

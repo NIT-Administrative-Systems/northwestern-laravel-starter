@@ -7,6 +7,7 @@ namespace App\Console\Commands;
 use App\Domains\Support\Jobs\NotifyAnnouncementAudience;
 use App\Domains\Support\Models\Announcement;
 use Illuminate\Console\Command;
+use Illuminate\Support\Str;
 
 /**
  * Notifies the audiences of announcements that have started,
@@ -29,7 +30,7 @@ class NotifyAnnouncementAudiencesCommand extends Command
             $count++;
         }
 
-        $this->components->info("Queued notifications for {$count} announcement(s).");
+        $this->components->info("Queued notifications for {$count} " . Str::plural('announcement', $count) . '.');
 
         return self::SUCCESS;
     }

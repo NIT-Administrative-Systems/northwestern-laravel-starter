@@ -25,7 +25,8 @@ final class DatabasePausedRenderingTest extends TestCase
             );
         });
 
-        $this->get('/__test/database-paused')->assertInternalServerError()
+        $this->get('/__test/database-paused')->assertServiceUnavailable()
+            ->assertHeader('Retry-After', '30')
             ->assertSee('Database Paused');
     }
 
@@ -61,7 +62,7 @@ final class DatabasePausedRenderingTest extends TestCase
         Route::get('/__test/database-paused', $this->pausedDatabaseQuery(...));
 
         $this->get('/__test/database-paused', ['X-Livewire' => '1', 'Accept' => 'application/json'])
-            ->assertInternalServerError()
+            ->assertServiceUnavailable()
             ->assertSee('Database Paused');
     }
 

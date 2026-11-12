@@ -102,10 +102,20 @@ final class SendPersonalAccessTokenExpirationNotificationsCommandTest extends Te
             ->assertSuccessful();
     }
 
+    public function test_a_token_made_today_is_not_said_to_expire_soon(): void
+    {
+        config(['api.personal_access_tokens.expiration_notifications.intervals' => [30]]);
+        $this->issuePersonalAccessToken(User::factory()->create());
+
+        $this->artisan(SendPersonalAccessTokenExpirationNotificationsCommand::class)->assertSuccessful();
+
+        Mail::assertNothingQueued();
+    }
+
     private function expiringToken(User $user): \App\Domains\Api\Models\OAuthToken
     {
         [, $token] = $this->issuePersonalAccessToken($user);
-        $token->forceFill(['expires_at' => now()->addDays(7)->setTime(15, 0)])->save();
+        $token->forceFill(['created_at' => now()->subDays(60), 'expires_at' => now()->addDays(7)->setTime(15, 0)])->save();
 
         return $token;
     }
