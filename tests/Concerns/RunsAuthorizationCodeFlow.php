@@ -25,7 +25,7 @@ trait RunsAuthorizationCodeFlow
     protected const string CLAUDE_CODE_METADATA_URL = 'https://claude.ai/oauth/claude-code-client-metadata';
 
     /**
-     * Serve Claude Code's client metadata document as claude.ai does, with `$overrides`.
+     * Serve Claude Code's client metadata document as claude.ai does.
      *
      * @param  array<string, mixed>  $overrides
      */
@@ -124,8 +124,8 @@ trait RunsAuthorizationCodeFlow
     }
 
     /**
-     * Connect Claude Code with its client metadata document as the signed-in person, and
-     * return the access token. The person needs the Use MCP permission.
+     * Connect Claude Code through its client metadata document as the signed-in
+     * person and return the access token. They need the Use MCP permission.
      */
     protected function issueMcpTokenWithMetadataDocument(): string
     {

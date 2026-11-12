@@ -86,7 +86,7 @@ it('is healthy on the consent screen for a self-registered MCP client', function
 
 it('is healthy on the consent screen for an MCP client from a client metadata document', function () {
     $this->signInAsSuperAdministrator();
-    // Visited by its UUID: the browser's server can't share this test's fake for claude.ai.
+    // Visit it by UUID: the browser's server can't see this test's fake for claude.ai.
     [, $client] = resolve(RegisterOAuthApplication::class)(
         'Claude Code',
         ['http://localhost/callback', 'http://127.0.0.1/callback'],

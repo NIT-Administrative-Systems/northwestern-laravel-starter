@@ -12,9 +12,9 @@ use League\Uri\Exceptions\SyntaxError;
 use Northwestern\SysDev\Chassis\Passport\OAuthClientRepository as ChassisOAuthClientRepository;
 
 /**
- * Passport's client repository. A client ID is a UUID, found as Chassis finds it, or the URL
- * of an MCP client's metadata document, which finds or creates that client through
- * {@see ClientMetadataDocuments}. Passport identifies the client by its UUID after that.
+ * Passport's client repository. A UUID client ID is found as Chassis
+ * finds it, and the URL of an MCP client's metadata document goes
+ * to {@see ClientMetadataDocuments}, which returns the client.
  */
 class OAuthClientRepository extends ChassisOAuthClientRepository
 {
@@ -24,19 +24,22 @@ class OAuthClientRepository extends ChassisOAuthClientRepository
             return parent::find($id);
         }
 
-        // Resolved here: registering a client needs this repository, so it can't be injected.
+        // Resolved here because registering a client needs this repository.
         $client = resolve(ClientMetadataDocuments::class)->find((string) $id);
 
-        return $client instanceof OAuthClient ? $this->allowingLoopbackPort($client) : null;
+        return $client instanceof OAuthClient ? $this->withRequestedLoopbackRedirect($client) : null;
     }
 
     /**
-     * A native client such as Claude Code lists `http://localhost/callback` in its document and
-     * returns on whichever port it opened (RFC 8252). Passport ignores the port only for
-     * `127.0.0.1`, so a `localhost` redirect this request asks for joins the client's list for
-     * this request when it matches one of them without the port. Nothing saves the copy.
+     * Add the localhost redirect this request asks for when
+     * one the client lists matches it without its port.
+     *
+     * Claude Code lists `http://localhost/callback` and returns on whichever port
+     * it opened (RFC 8252), but Passport ignores the port only for `127.0.0.1`.
+     *
+     * The copy only serves this request; nothing saves it.
      */
-    private function allowingLoopbackPort(OAuthClient $client): OAuthClient
+    private function withRequestedLoopbackRedirect(OAuthClient $client): OAuthClient
     {
         $requested = request()->string('redirect_uri')->toString();
 
@@ -50,7 +53,7 @@ class OAuthClientRepository extends ChassisOAuthClientRepository
             return $client;
         }
 
-        // Passport compares the request's redirect URI exactly, so it joins the list as sent.
+        // Passport matches the redirect URI exactly, so it joins the list as sent.
         $copy = clone $client;
         $copy->redirect_uris = [...$client->redirect_uris, $requested];
 

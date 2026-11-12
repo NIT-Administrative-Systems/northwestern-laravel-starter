@@ -88,7 +88,8 @@ final class ClientMetadataDocumentsTest extends TestCase
         Http::assertSent(fn ($request): bool => $request->url() === self::CLAUDE_CODE_METADATA_URL && $request->hasHeader('Accept', 'application/json'));
     }
 
-    // Everyone who connects Claude Code shares one client, and the document is fetched once a day.
+    // Everyone who connects Claude Code shares one
+    // client, and the document is fetched daily.
     public function test_it_reuses_the_client_and_the_cached_document(): void
     {
         $this->fakeClientMetadataDocument();

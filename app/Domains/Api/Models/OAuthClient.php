@@ -165,7 +165,7 @@ class OAuthClient extends Client
 
     /**
      * Determine whether this is an MCP client: one that registered itself, or one the
-     * server created from the client metadata document the client identified itself with.
+     * server created from the metadata document the client identified itself with.
      */
     public function isMcpClient(): bool
     {
@@ -173,8 +173,8 @@ class OAuthClient extends Client
     }
 
     /**
-     * The host whose client metadata document gave this MCP client its name, such as
-     * `claude.ai`, or null when the client named itself by registering.
+     * Get the host whose client metadata document named this MCP client, such as
+     * `claude.ai`, or null for a client that named itself when it registered.
      */
     public function verifiedBy(): ?string
     {

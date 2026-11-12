@@ -76,7 +76,7 @@ final class ConnectedApplicationsTest extends TestCase
             ->assertSee('AI client · name not verified');
     }
 
-    // Claude's name comes from its metadata document on claude.ai, so the list says who vouched for it.
+    // The name comes from Claude's document on claude.ai, so the list names that host.
     public function test_an_mcp_client_from_a_metadata_document_is_labelled_with_its_host(): void
     {
         config(['mcp.enabled' => true]);

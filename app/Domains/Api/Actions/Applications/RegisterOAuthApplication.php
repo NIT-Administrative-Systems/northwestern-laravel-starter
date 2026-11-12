@@ -23,8 +23,9 @@ use Laravel\Passport\ClientRepository;
  * gets a client secret; a public one, such as a
  * desktop or browser app, uses PKCE instead.
  *
- * MCP clients register themselves through this action too, with a dynamic origin, and so
- * does a client the server creates from a client metadata document, with that document's URL.
+ * MCP clients register themselves through this action too, with a
+ * dynamic origin, as does a client the server creates from the
+ * client metadata document a client identified itself with.
  *
  * An administrator's registration is audited on them, because
  * the client's UUID key doesn't fit the audits table, and a

@@ -63,8 +63,9 @@ class AuthorizeOAuthConsent
             $scopes = array_map(fn (ScopeEntityInterface $scope): string => $scope->getIdentifier(), $authRequest?->getScopes() ?? []);
         }
 
-        // Found as Passport finds it, so an MCP client's metadata document URL is checked too.
-        // Passport answers an unknown or malformed client ID itself.
+        // Found the way Passport finds it, so a metadata
+        // document URL is checked too. Passport itself
+        // answers an unknown or malformed client ID.
         $client = is_string($clientId) ? $this->clients->find($clientId) : null;
         $client = $client instanceof OAuthClient ? $client : null;
 

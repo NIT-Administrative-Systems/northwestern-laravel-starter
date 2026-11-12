@@ -19,18 +19,19 @@ use League\Uri\Exceptions\SyntaxError;
 use Northwestern\SysDev\Chassis\Rules\OAuthRedirectUri;
 
 /**
- * Client ID metadata documents, the MCP authorization spec's way for a client to identify
- * itself without registering: its `client_id` is the HTTPS URL of a JSON document that
- * names it and lists its redirect URIs. Claude publishes one for Claude Code and one for
- * its apps, at `claude.ai`.
+ * Client ID metadata documents, the MCP authorization spec's way for a client
+ * to identify itself without registering: the client's `client_id` is the
+ * HTTPS URL of a JSON document that gives its name and redirect URIs.
  *
- * The server fetches only from hosts in `mcp.client_metadata_hosts`, so an anonymous request
- * can't make it fetch an address of its choosing, and a name from one of these documents is
- * the host's word rather than the client's own. The consent screen shows it as verified.
+ * Claude publishes one for Claude Code and one for its apps, on `claude.ai`.
  *
- * Each document becomes one MCP client that everyone who connects it shares. When that client
- * is revoked or pruned, the next connection creates a new one, as a client that registers
- * itself would register again.
+ * The server fetches documents only from hosts in `mcp.client_metadata_hosts`, so
+ * an anonymous request can't make it fetch an address it picks, and a name from
+ * a listed host's document is the host's word rather than the client's own.
+ *
+ * Each document becomes one MCP client shared by everyone who connects it.
+ * When that client is revoked or pruned, the next connection creates a
+ * new one, as a client that registers itself would register again.
  */
 readonly class ClientMetadataDocuments
 {
@@ -43,8 +44,8 @@ readonly class ClientMetadataDocuments
     }
 
     /**
-     * Determine whether `$clientId` is a document URL the server fetches: HTTPS on a listed host,
-     * with a path and no port, credentials, fragment or dot segments, while MCP is on.
+     * Determine whether `$clientId` is a document URL the server fetches: HTTPS on a
+     * listed host, with a path and no port, credentials, fragment or dot segments.
      */
     public function accepts(string $clientId): bool
     {
@@ -68,8 +69,9 @@ readonly class ClientMetadataDocuments
     }
 
     /**
-     * The MCP client for the document at `$url`, created on first use and kept in step with the
-     * document, or null when the URL isn't accepted or the document can't be fetched or is invalid.
+     * Get the MCP client for the document at `$url`, created on first
+     * use and kept in step with the document, or null when the URL
+     * isn't accepted or the document is unreachable or invalid.
      */
     public function find(string $url): ?OAuthClient
     {

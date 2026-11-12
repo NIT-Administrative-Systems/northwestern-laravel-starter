@@ -80,11 +80,12 @@ final readonly class OAuthConsent
      *
      * Besides Passport's own values, `scopes` is the requested scopes the token
      * will carry, and `redirectTarget` is where approving sends the person.
-     * `verifiedBy` is the host whose client metadata document named an MCP
-     * client, such as `claude.ai`. `unverified` says the client registered
-     * itself instead, so its name is only its own claim. `seesAccount` says
-     * whether the token can read the person's account details, which an
-     * MCP client's token can't.
+     *
+     * `verifiedBy` is the host whose client metadata document named
+     * an MCP client, such as `claude.ai`; `unverified` means the
+     * client registered itself, so its name is only a claim.
+     *
+     * `seesAccount` says whether the token can read the person's account details.
      *
      * @param  array{client: OAuthClient, user: User, scopes: list<Scope>, request: Request, authToken: string}  $parameters
      * @return array<string, mixed>
