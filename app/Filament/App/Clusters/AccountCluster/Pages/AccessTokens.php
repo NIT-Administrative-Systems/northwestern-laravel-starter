@@ -94,20 +94,21 @@ class AccessTokens extends Page implements HasTable
                 ->orderByRaw('expires_at <= ?', [now()])
                 ->latest())
             ->columns([
-                TextColumn::make('name')->label('Name'),
+                TextColumn::make('name')->label('Name')->wrap(),
                 TextColumn::make('scopes')
                     ->label('Access')
                     ->badge()
                     ->formatStateUsing(fn (string $state): string => ApiScopes::label($state))
                     ->placeholder('None'),
                 TextColumn::make('status')->label('Status')->badge(),
-                TextColumn::make('created_at')->label('Created')->date(),
+                TextColumn::make('created_at')->label('Created')->date()->visibleFrom('2xl'),
                 TextColumn::make('expires_at')->label('Expires')->date(),
                 TextColumn::make('last_used_at')
                     ->label('Last Used')
                     ->since()
                     ->dateTimeTooltip()
-                    ->placeholder('Never'),
+                    ->placeholder('Never')
+                    ->visibleFrom('xl'),
             ])
             ->headerActions([$this->createAction()])
             ->recordActions([

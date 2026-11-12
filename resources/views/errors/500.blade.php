@@ -99,7 +99,9 @@
                 @endif
 
                 <details class="mt-3">
-                    <summary class="cursor-pointer bg-gray-900 px-4 py-2 text-sm font-semibold text-white">View Full
+                    <summary
+                             class="pointer-coarse:py-3 cursor-pointer bg-gray-900 px-4 py-2 text-sm font-semibold text-white">
+                        View Full
                         Stack Trace</summary>
                     <pre class="max-h-96 overflow-auto whitespace-pre-wrap bg-gray-900 p-4 font-mono text-xs text-gray-100">{{ $exception->getTraceAsString() }}</pre>
                 </details>

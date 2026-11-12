@@ -19,14 +19,16 @@
         </p>
 
         <div class="mt-10 flex flex-wrap justify-center gap-3">
-            <x-filament::button tag="a"
+            <x-filament::button class="pointer-coarse:min-h-11"
+                                tag="a"
                                 :href="Filament::getPanel(AppPanelProvider::ID)->getLoginUrl()"
                                 size="lg"
                                 icon="heroicon-m-arrow-right-end-on-rectangle">
                 Sign In
             </x-filament::button>
 
-            <x-filament::button href="https://laravel-starter.entapp.northwestern.edu/"
+            <x-filament::button class="pointer-coarse:min-h-11"
+                                href="https://laravel-starter.entapp.northwestern.edu/"
                                 tag="a"
                                 target="_blank"
                                 color="gray"
@@ -36,7 +38,8 @@
                 Documentation
             </x-filament::button>
 
-            <x-filament::button href="https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter"
+            <x-filament::button class="pointer-coarse:min-h-11"
+                                href="https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter"
                                 tag="a"
                                 target="_blank"
                                 color="gray"

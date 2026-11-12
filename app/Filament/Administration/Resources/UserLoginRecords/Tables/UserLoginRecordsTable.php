@@ -28,6 +28,7 @@ class UserLoginRecordsTable
             ->columns([
                 TextColumn::make('user.clerical_name')
                     ->label('Name')
+                    ->wrap()
                     ->searchable(query:
                         /** @phpstan-ignore-next-line  */
                         fn (Builder $query, string $search): Builder => $query->orWhereHas('user', fn (Builder $q) => $q->withoutGlobalScope(SoftDeletingScope::class)->searchByName($search)))

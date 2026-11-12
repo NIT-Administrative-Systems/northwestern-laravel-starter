@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 use Lab404\Impersonate\Services\ImpersonateManager;
 use Mockery\MockInterface;
 use Northwestern\SysDev\Chassis\Testing\Browser\ErrorPages;
+use Northwestern\SysDev\Chassis\Testing\Browser\Layout;
 
 /*
  * Every page a guest can reach works and passes axe,
@@ -99,4 +100,25 @@ it('is healthy on the account deactivated page', function () {
     expect(visit('/account-deactivated')->assertSee('Account Deactivated'))
         ->toBeHealthyInEachTheme()
         ->toBeHealthyOnMobile();
+});
+
+it('fits a 320 pixel phone, with controls a finger can tap', function () {
+    User::factory()->affiliate()->create(['email' => 'partner@example.com']);
+    Changelog::factory()->create();
+    $paths = [
+        '/',
+        '/app/login',
+        '/app/login/email',
+        '/support/changelog',
+        ...array_map(ErrorPages::path(...), [401, 402, 403, 404, 419, 429, 500, 503]),
+    ];
+
+    expect($paths)->toAllFitEachWidth(widths: [320], tapTargets: true);
+
+    $page = Layout::visit('/app/login/email', width: 320)
+        ->type('@email-input', 'partner@example.com')
+        ->click('@continue-button')
+        ->assertVisible('@code-input');
+
+    expect($page)->toFitTheScreen(tapTargets: true);
 });

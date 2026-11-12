@@ -11,33 +11,12 @@
     display: none;
 }
 
-/* One focus ring on the purple header, top bar and footer:
-   the footer's 3px white outline, 2px off the control.
-
-   The theme's purple outline would vanish against the purple. */
-:is(.nu-site-header, .fi-topbar) :is(a, button):focus-visible,
-.nu-site-header .nu-lockup:focus-visible /* outranks the lockup component's own 2px outline */ {
-    outline: 3px solid var(--color-white);
-    outline-offset: 2px;
-    box-shadow: none;
-}
-
-/* Phones: 44px (2.75rem) tap targets for the header's controls, and for
-   the sign-in actions and the code step's links on the simple pages. */
+/* Phones: 44px (2.75rem) tap targets for the site header's controls. */
 @media (pointer: coarse) {
     .nu-site-header :is(button, .fi-btn) {
         min-width: 2.75rem;
         min-height: 2.75rem;
         justify-content: center;
-    }
-
-    .fi-simple-main :is(.fi-btn, .fi-link) {
-        min-height: 2.75rem;
-    }
-
-    /* Filament pins a link's label to the baseline, at the top of the taller link. */
-    .fi-simple-main .fi-link > .fi-link-label {
-        align-self: center;
     }
 }
 
@@ -46,16 +25,6 @@
    It has a dropdown list of its own: hide the list, or its border stays behind. */
 .fi-body:has(.nu-site-header) .fi-dropdown-list:has(> .fi-theme-switcher) {
     display: none;
-}
-
-/* Sign-in and lockdown: a Northwestern Purple accent on the card. */
-.fi-simple-main {
-    border-top: 4px solid var(--nu-purple-100);
-}
-
-/* Filament runs the card edge to edge on phones. A gutter keeps it a card there. */
-.fi-simple-main-ctn {
-    padding-inline: 1rem;
 }
 
 /* The local "Sign in as" menu's trigger spans the card like the buttons above. */

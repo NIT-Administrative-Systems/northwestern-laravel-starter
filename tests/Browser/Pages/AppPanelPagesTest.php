@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Domains\Api\Actions\Applications\RegisterOAuthApplication;
+use App\Domains\Api\Actions\PersonalAccessTokens\CreatePersonalAccessToken;
+use App\Domains\Api\Enums\TokenExpiration;
 use App\Domains\Support\Enums\AnnouncementSeverity;
 use App\Domains\Support\Models\Announcement;
 use Northwestern\SysDev\Chassis\Testing\Browser\FilamentPages;
@@ -101,4 +103,16 @@ it('is healthy on the page for an application that is no longer registered', fun
     ]));
 
     expect($page->assertSee('Application Not Registered'))->toBeHealthyInEachTheme();
+});
+
+// An administrator sees every page, here with values long enough to wrap.
+it('fits every app panel page and its tables at each width', function () {
+    $user = $this->signInAsSuperAdministrator();
+    $user->forceFill([
+        'job_titles' => ['Associate Director of Strategic Enrollment Communications and Outreach'],
+        'departments' => ['Feinberg School of Medicine Department of Preventive Medicine'],
+    ])->save();
+    resolve(CreatePersonalAccessToken::class)($user, 'Weekly enrollment report for the dean of the graduate school', [], TokenExpiration::OneMonth);
+
+    expect(FilamentPages::in('app'))->toAllFitEachWidth();
 });

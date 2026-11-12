@@ -30,7 +30,6 @@
 --}}
 @php
     use Illuminate\Support\Facades\Blade;
-    use Illuminate\Support\Str;
     use Northwestern\FilamentTheme\EnvironmentIndicator\EnvironmentIndicatorConfig;
     use Northwestern\FilamentTheme\NorthwesternTheme;
 
@@ -49,7 +48,7 @@
 {!! $impersonationBanner !!}
 
 <header @class([
-    'nu-site-header bg-nu-purple-120 w-full text-white',
+    'nu-site-header nu-focus-on-purple bg-nu-purple-120 w-full text-white',
     'border-t-4 border-[var(--nu-gold)]' => $showEnvironment,
 ])>
     {{-- 4rem tall in all, like the panels' top bar,
@@ -103,7 +102,7 @@
         @if ($showEnvironment)
             <div class="nu-site-header-environment shrink-0 sm:hidden">
                 @include('northwestern-filament-theme::environment-indicator', [
-                    'config' => new EnvironmentIndicatorConfig(label: Str::ucfirst(app()->environment())),
+                    'config' => $environment,
                     'placement' => 'topbar',
                 ])
             </div>

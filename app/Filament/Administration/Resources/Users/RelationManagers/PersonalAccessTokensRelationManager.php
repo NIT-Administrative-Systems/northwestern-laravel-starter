@@ -55,7 +55,7 @@ class PersonalAccessTokensRelationManager extends RelationManager
                 ->orderByRaw('expires_at <= ?', [now()])
                 ->latest())
             ->columns([
-                TextColumn::make('name')->label('Name'),
+                TextColumn::make('name')->label('Name')->wrap(),
                 TextColumn::make('scopes')
                     ->label('Access')
                     ->badge()

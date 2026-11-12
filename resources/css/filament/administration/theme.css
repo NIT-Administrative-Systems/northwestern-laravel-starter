@@ -6,10 +6,9 @@
 /* Tailwind finds classes in tracked files but skips vendor/, which git ignores. */
 @source '../../../../vendor/filament/**/*';
 
-/* One focus ring on the purple top bar and the footer, as in the app
-   panel: the footer's 3px white outline, set 2px off the control. */
-.fi-topbar :is(a, button):focus-visible {
-    outline: 3px solid var(--color-white);
-    outline-offset: 2px;
-    box-shadow: none;
+/* Below 368px the top bar has no room for Help, which the app panel keeps. */
+@media (width < 23rem) {
+    .fi-topbar-end [data-testid="help-menu"] {
+        display: none;
+    }
 }

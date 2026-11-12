@@ -14,7 +14,7 @@
     --nu-text-sm: 0.8125rem;
 }
 
-/* The panel themes' header focus ring: a 3px white outline, 2px off the control. */
+/* The theme's focus ring on purple, a 3px white outline 2px off the control. */
 .nu-site-header :is(a, button):focus-visible,
 .nu-site-header .nu-lockup:focus-visible /* outranks the lockup component's own 2px outline */ {
     outline: 3px solid var(--color-white);

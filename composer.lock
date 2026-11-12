@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8d099fbef38efa32d096990008f9b583",
+    "content-hash": "96a490d29ffe980f1173ccb1218be30d",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -5511,16 +5511,16 @@
         },
         {
             "name": "northwestern-sysdev/chassis",
-            "version": "v1.5.2",
+            "version": "v1.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/NIT-Administrative-Systems/chassis.git",
-                "reference": "55ceb696aa52e545479f9e4ea42b71b196881ebc"
+                "reference": "7aef10d8dd8dd38a64732200c22fa516ef803fa9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/NIT-Administrative-Systems/chassis/zipball/55ceb696aa52e545479f9e4ea42b71b196881ebc",
-                "reference": "55ceb696aa52e545479f9e4ea42b71b196881ebc",
+                "url": "https://api.github.com/repos/NIT-Administrative-Systems/chassis/zipball/7aef10d8dd8dd38a64732200c22fa516ef803fa9",
+                "reference": "7aef10d8dd8dd38a64732200c22fa516ef803fa9",
                 "shasum": ""
             },
             "require": {
@@ -5580,7 +5580,8 @@
                 "issues": "https://github.com/NIT-Administrative-Systems/chassis/issues",
                 "source": "https://github.com/NIT-Administrative-Systems/chassis"
             },
-            "time": "2026-11-09T14:32:19+00:00"
+            "time": "2026-11-12T14:52:30+00:00",
+            "published-time": "2026-11-12T14:53:15+00:00"
         },
         {
             "name": "northwestern-sysdev/event-hub-php-sdk",
@@ -5700,16 +5701,16 @@
         },
         {
             "name": "northwestern-sysdev/northwestern-filament-theme",
-            "version": "v4.3.0",
+            "version": "v4.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/NIT-Administrative-Systems/northwestern-filament-theme.git",
-                "reference": "7684e342e5ee8535b355c57cda1d982c8d19b710"
+                "reference": "63ce331fdcbc2d71fe2d7e4adaea989b618dce5b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/NIT-Administrative-Systems/northwestern-filament-theme/zipball/7684e342e5ee8535b355c57cda1d982c8d19b710",
-                "reference": "7684e342e5ee8535b355c57cda1d982c8d19b710",
+                "url": "https://api.github.com/repos/NIT-Administrative-Systems/northwestern-filament-theme/zipball/63ce331fdcbc2d71fe2d7e4adaea989b618dce5b",
+                "reference": "63ce331fdcbc2d71fe2d7e4adaea989b618dce5b",
                 "shasum": ""
             },
             "require": {
@@ -5764,8 +5765,8 @@
                 "issues": "https://github.com/NIT-Administrative-Systems/northwestern-filament-theme/issues",
                 "source": "https://github.com/NIT-Administrative-Systems/northwestern-filament-theme"
             },
-            "time": "2026-11-11T19:45:46+00:00",
-            "published-time": "2026-11-11T19:48:46+00:00"
+            "time": "2026-11-12T15:17:36+00:00",
+            "published-time": "2026-11-12T15:19:28+00:00"
         },
         {
             "name": "northwestern-sysdev/tdx-php-sdk",
