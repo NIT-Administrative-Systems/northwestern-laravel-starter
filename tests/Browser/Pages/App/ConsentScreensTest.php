@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Domains\Api\Actions\Applications\RegisterOAuthApplication;
+use App\Domains\Api\Enums\ClientOrigin;
 
 /*
  * The OAuth consent screens a connected application or MCP client opens pass axe.
@@ -80,5 +81,30 @@ it('is healthy on the consent screen for a self-registered MCP client', function
         'code_challenge_method' => 'S256',
     ]));
 
-    expect($page->assertSee('Unverified AI client.'))->toBeHealthyInEachTheme();
+    expect($page->assertMissing('@verified-client')->assertSee('Only approve it if you started this connection.'))->toBeHealthyInEachTheme();
+});
+
+it('is healthy on the consent screen for an MCP client from a client metadata document', function () {
+    $this->signInAsSuperAdministrator();
+    // Visit it by UUID: the browser's server can't see this test's fake for claude.ai.
+    [, $client] = resolve(RegisterOAuthApplication::class)(
+        'Claude Code',
+        ['http://localhost/callback', 'http://127.0.0.1/callback'],
+        false,
+        ['mcp:use'],
+        origin: ClientOrigin::Dynamic,
+        clientMetadataUrl: 'https://claude.ai/oauth/claude-code-client-metadata',
+    );
+
+    $page = visit('/oauth/authorize?' . http_build_query([
+        'client_id' => $client->getKey(),
+        'redirect_uri' => 'http://127.0.0.1:4100/callback',
+        'response_type' => 'code',
+        'scope' => 'mcp:use',
+        'state' => 'browser-test',
+        'code_challenge' => 'E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM',
+        'code_challenge_method' => 'S256',
+    ]));
+
+    expect($page->assertVisible('@verified-client')->assertSee('Verified by claude.ai'))->toBeHealthyInEachTheme();
 });

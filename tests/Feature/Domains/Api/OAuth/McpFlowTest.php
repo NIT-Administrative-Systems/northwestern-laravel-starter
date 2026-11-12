@@ -10,15 +10,19 @@ use App\Domains\Api\Http\Middleware\AuthorizeOAuthConsent;
 use App\Domains\Api\Http\Middleware\RequireTokenAudience;
 use App\Domains\Api\Models\OAuthClient;
 use App\Domains\Api\Models\OAuthConnection;
+use App\Domains\Api\Passport\OAuthClientRepository;
 use App\Domains\Api\Passport\OAuthConsent;
 use App\Domains\User\Models\User;
+use App\Mcp\ClientMetadataDocuments;
 use App\Mcp\Http\Controllers\OAuthDiscoveryController;
 use App\Mcp\Http\Controllers\RegisterClientController;
 use App\Mcp\Http\Middleware\AddScopeToChallenge;
 use App\Mcp\McpServiceProvider;
 use App\Mcp\Servers\AppServer;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\Concerns\IssuesPersonalAccessTokens;
 use Tests\Concerns\IssuesServiceClientTokens;
 use Tests\Concerns\RunsAuthorizationCodeFlow;
@@ -37,6 +41,8 @@ use Tests\TestCase;
 #[CoversClass(AuthorizeOAuthConsent::class)]
 #[CoversClass(OAuthConsent::class)]
 #[CoversClass(AppServer::class)]
+#[CoversClass(OAuthClientRepository::class)]
+#[CoversClass(ClientMetadataDocuments::class)]
 final class McpFlowTest extends TestCase
 {
     use IssuesPersonalAccessTokens, IssuesServiceClientTokens, RunsAuthorizationCodeFlow;
@@ -70,7 +76,8 @@ final class McpFlowTest extends TestCase
             ->assertJsonPath('issuer', url('/'))
             ->assertJsonPath('registration_endpoint', url('/oauth/register'))
             ->assertJsonPath('token_endpoint_auth_methods_supported', ['none'])
-            ->assertJsonPath('code_challenge_methods_supported', ['S256']);
+            ->assertJsonPath('code_challenge_methods_supported', ['S256'])
+            ->assertJsonPath('client_id_metadata_document_supported', true);
 
         $this->actingAs($user);
         $client = $this->registerMcpClient('Claude Code');
@@ -80,8 +87,9 @@ final class McpFlowTest extends TestCase
 
         [$consent, $verifier] = $this->requestAuthorization($client, ['mcp:use']);
         $consent->assertOk()
-            ->assertSee('Connect Claude Code')
-            ->assertSee('Unverified AI client.')
+            ->assertSeeInOrder(['<h1', 'Connect', 'Claude Code', '</h1>'], escape: false)
+            ->assertDontSee('Verified by')
+            ->assertSee('Only approve it if you started this connection.')
             ->assertSee("Use this application's tools from an AI client")
             ->assertDontSee('See your account details');
 
@@ -92,6 +100,105 @@ final class McpFlowTest extends TestCase
             ->assertJsonPath('result.isError', false)
             ->assertJsonPath('result.structuredContent', ['text' => 'hello', 'person' => $user->full_name]);
         $this->assertSame(['mcp:use'], OAuthConnection::query()->sole()->scopes);
+    }
+
+    // Claude sends the URL of the metadata document it publishes as its client ID, on
+    // every request, and returns to whichever localhost port it opened.
+    public function test_claude_connects_with_its_client_metadata_document(): void
+    {
+        $this->fakeClientMetadataDocument();
+        $user = $this->mcpUser();
+        $this->actingAs($user);
+
+        [$consent, $verifier] = $this->requestAuthorization(self::CLAUDE_CODE_METADATA_URL, ['mcp:use']);
+        $consent->assertOk()
+            ->assertSeeInOrder(['<h1', 'Connect', 'Claude Code', '</h1>'], escape: false)
+            ->assertSee('Verified by claude.ai')
+            ->assertSee('Only approve it if you started this connection.');
+
+        $client = OAuthClient::query()->where('client_metadata_url', self::CLAUDE_CODE_METADATA_URL)->sole();
+        $tokens = $this->exchangeAuthorizationCode(self::CLAUDE_CODE_METADATA_URL, $this->approveAuthorization($client), $verifier)->assertOk()->json();
+
+        $this->sendMcpMessage($tokens['access_token'], 'tools/call', ['name' => 'echo', 'arguments' => ['text' => 'hello']])
+            ->assertOk()
+            ->assertJsonPath('result.structuredContent', ['text' => 'hello', 'person' => $user->full_name]);
+        $this->postJson('/oauth/token', ['grant_type' => 'refresh_token', 'client_id' => self::CLAUDE_CODE_METADATA_URL, 'refresh_token' => $tokens['refresh_token']])
+            ->assertOk()
+            ->assertJsonStructure(['access_token', 'refresh_token']);
+        $this->assertSame($client->getKey(), OAuthConnection::query()->sole()->oauth_client_id);
+    }
+
+    /**
+     * The documents VS Code and the Copilot CLI publish, as their hosts serve them.
+     *
+     * @return iterable<string, array{string, array<string, mixed>, string}>
+     */
+    public static function copilotDocuments(): iterable
+    {
+        yield 'VS Code' => ['https://vscode.dev/oauth/client-metadata.json', [
+            'client_name' => 'Visual Studio Code',
+            'grant_types' => ['authorization_code', 'refresh_token', 'urn:ietf:params:oauth:grant-type:device_code'],
+            'response_types' => ['code'],
+            'token_endpoint_auth_method' => 'none',
+            'application_type' => 'native',
+            'redirect_uris' => ['http://127.0.0.1:33418/', 'https://vscode.dev/redirect'],
+        ], 'https://vscode.dev/redirect'];
+        yield 'Copilot CLI' => ['https://github.com/copilot/cli/client-metadata.json', [
+            'client_name' => 'GitHub Copilot CLI',
+            'application_type' => 'native',
+            'grant_types' => ['authorization_code', 'refresh_token', 'urn:ietf:params:oauth:grant-type:device_code'],
+            'response_types' => ['code'],
+            'token_endpoint_auth_method' => 'none',
+            'redirect_uris' => ['http://127.0.0.1/', 'http://127.0.0.1/callback'],
+        ], 'http://127.0.0.1:51734/callback'];
+    }
+
+    /**
+     * @param  array<string, mixed>  $document
+     */
+    #[DataProvider('copilotDocuments')]
+    public function test_copilot_connects_with_its_client_metadata_document_on_a_default_host(string $url, array $document, string $redirectUri): void
+    {
+        Http::preventStrayRequests();
+        Http::fake([$url => Http::response(['client_id' => $url, ...$document])]);
+        $this->actingAs($this->mcpUser());
+
+        [$consent, $verifier] = $this->requestAuthorization($url, ['mcp:use'], redirectUri: $redirectUri);
+        $consent->assertOk()
+            ->assertSeeInOrder(['<h1', 'Connect', $document['client_name'], '</h1>'], escape: false)
+            ->assertSee('Verified by ' . parse_url($url, PHP_URL_HOST));
+
+        $client = OAuthClient::query()->where('client_metadata_url', $url)->sole();
+        $this->exchangeAuthorizationCode($url, $this->approveAuthorization($client), $verifier, $redirectUri)->assertOk();
+    }
+
+    public function test_metadata_documents_are_not_advertised_without_a_host_to_fetch_them_from(): void
+    {
+        config(['mcp.client_metadata_urls' => []]);
+
+        $this->getJson('/.well-known/oauth-authorization-server')->assertJsonPath('client_id_metadata_document_supported', false);
+    }
+
+    // The consent check finds the client by its document's URL, as Passport does.
+    public function test_consent_refuses_a_metadata_document_client_to_someone_without_the_use_mcp_permission(): void
+    {
+        $this->fakeClientMetadataDocument();
+        $this->actingAs(User::factory()->create());
+
+        [$consent] = $this->requestAuthorization(self::CLAUDE_CODE_METADATA_URL, ['mcp:use']);
+
+        $consent->assertForbidden();
+    }
+
+    public function test_a_document_on_an_unlisted_host_is_an_unknown_client(): void
+    {
+        Http::preventStrayRequests();
+        $this->actingAs($this->mcpUser());
+
+        [$consent] = $this->requestAuthorization('https://claude.example/oauth/claude-code-client-metadata', ['mcp:use']);
+
+        $consent->assertBadRequest()->assertSee('Application Not Registered');
+        $this->assertSame(0, OAuthClient::query()->count());
     }
 
     public function test_registration_accepts_only_https_loopback_and_configured_app_schemes(): void

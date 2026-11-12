@@ -19,8 +19,9 @@ use Northwestern\SysDev\Chassis\Rules\OAuthRedirectUri;
  * Anyone may register, so a client can do nothing until
  * a person with the `UseMcp` permission approves it.
  *
- * A client is public (PKCE, no secret), may ask only for `mcp:use`, and
- * has its self-reported name marked unverified on the consent screen.
+ * A client is public (PKCE, no secret) and may ask
+ * only for `mcp:use`. It chose its own name, so
+ * the consent screen shows no verified badge.
  *
  * `mcp:prune-clients` removes clients nobody connects.
  */

@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Uri;
 use Laravel\Passport\Client;
 
 /**
@@ -46,6 +47,7 @@ use Laravel\Passport\Client;
  * @property string|null $secret
  * @property list<string> $grant_types
  * @property ClientOrigin $origin
+ * @property string|null $client_metadata_url
  * @property list<string>|null $allowed_ips
  * @property Carbon|null $secret_expires_at
  * @property Carbon|null $secret_expiration_notified_at
@@ -162,11 +164,21 @@ class OAuthClient extends Client
     }
 
     /**
-     * Determine whether this is an MCP client, which named itself when it registered.
+     * Determine whether this is an MCP client: one that registered itself, or one the
+     * server created from the metadata document the client identified itself with.
      */
     public function isMcpClient(): bool
     {
         return $this->origin === ClientOrigin::Dynamic;
+    }
+
+    /**
+     * Get the host whose client metadata document named this MCP client, such as
+     * `claude.ai`, or null for a client that named itself when it registered.
+     */
+    public function verifiedBy(): ?string
+    {
+        return $this->client_metadata_url === null ? null : Uri::of($this->client_metadata_url)->host();
     }
 
     /**

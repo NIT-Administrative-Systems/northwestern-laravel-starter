@@ -10,6 +10,7 @@ use App\Domains\User\Models\User;
 use App\Filament\Administration\Clusters\ApiCluster;
 use App\Filament\Administration\Clusters\ApiCluster\Resources\McpClients\McpClientResource;
 use App\Filament\Administration\Clusters\ApiCluster\Resources\McpClients\Pages\ListMcpClients;
+use App\Mcp\ClientMetadataDocuments;
 use App\Providers\Filament\AdministrationPanelProvider;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
@@ -70,7 +71,19 @@ final class McpClientResourceTest extends TestCase
         Livewire::test(ListMcpClients::class)
             ->assertCanSeeTableRecords([$mcpClient])
             ->assertCanNotSeeTableRecords([$application])
-            ->assertSee('Name not verified');
+            ->assertSee('Self-registered');
+    }
+
+    public function test_a_client_from_a_metadata_document_is_marked_with_its_host(): void
+    {
+        $this->fakeClientMetadataDocument();
+        $client = resolve(ClientMetadataDocuments::class)->find(self::CLAUDE_CODE_METADATA_URL);
+        $this->assertInstanceOf(\App\Domains\Api\Models\OAuthClient::class, $client);
+
+        Livewire::test(ListMcpClients::class)
+            ->assertCanSeeTableRecords([$client])
+            ->assertSee('Verified by claude.ai')
+            ->assertDontSee('Self-registered');
     }
 
     public function test_an_administrator_revokes_a_client(): void

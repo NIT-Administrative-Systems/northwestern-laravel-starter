@@ -8,6 +8,7 @@ use App\Domains\Api\ApiScopes;
 use App\Domains\Api\Models\OAuthClient;
 use App\Domains\Api\Models\OAuthToken;
 use App\Domains\Api\Passport\GrantableScopeRepository;
+use App\Domains\Api\Passport\OAuthClientRepository;
 use App\Domains\Api\Passport\OAuthConsent;
 use App\Domains\User\Models\User;
 use App\Providers\Filament\AppPanelProvider;
@@ -21,7 +22,6 @@ use Laravel\Passport\ClientRepository;
 use Laravel\Passport\Passport;
 use Laravel\Passport\Scope;
 use Northwestern\SysDev\Chassis\Passport\ExpiringAccessTokenRepository;
-use Northwestern\SysDev\Chassis\Passport\OAuthClientRepository;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -39,7 +39,8 @@ class OAuthServiceProvider extends ServiceProvider
         // shorter than Passport's single lifetime.
         $this->app->bind(AccessTokenRepository::class, ExpiringAccessTokenRepository::class);
 
-        // A malformed client ID is an unknown client, not a database error: they're UUIDs.
+        // A client ID is a UUID, or the URL of an MCP client's metadata document. A
+        // malformed one is an unknown client, not a database error.
         $this->app->bind(ClientRepository::class, OAuthClientRepository::class);
 
         // A person can't give an application a scope they don't hold themselves.

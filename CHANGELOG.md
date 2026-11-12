@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+### Added
+
+- MCP clients can identify themselves with a client ID metadata document instead of registering, as the MCP authorization specification prefers. The client sends the HTTPS URL of a JSON document it publishes as its `client_id`, such as Claude Code's `https://claude.ai/oauth/claude-code-client-metadata`. `App\Mcp\ClientMetadataDocuments` fetches it only when its URL is listed in `MCP_CLIENT_METADATA_URLS` (by default the documents claude.ai, Claude Code, VS Code and the Copilot CLI publish), caches it for a day, and keeps one shared MCP client per document in the new `oauth_clients.client_metadata_url` column. The authorization server metadata advertises `client_id_metadata_document_supported` while that list isn't empty, and those clients use it then.
+- `App\Domains\Api\Passport\OAuthClientRepository` extends Chassis's repository to find a client by its document URL, and lets a `localhost` redirect match one the document lists without its port, as Claude Code's native sign-in needs. `AuthorizeOAuthConsent` finds the client through it, so the `UseMcp` check applies to these clients on the consent screen too.
+
+### Changed
+
+- The consent screen heads its card "Connect" in gray and the client's name in purple, and shows a **Verified by claude.ai** badge for a client from a metadata document, in place of the callouts. A client that registered itself gets no badge rather than a warning, so a client such as Cursor doesn't look discouraged. An AI client's sentence ends "Only approve it if you started this connection." The redirect address is set as code, and "Not you? Switch Account" sits on its own line below the signed-in person. The sign-in card's "Sign In to" is gray beside the purple application name to match. Connected Applications and a person's page in Administration label it "AI client · verified by claude.ai", and **MCP Clients** shows "Verified by claude.ai". A client that registered itself is just "AI client" there, and **Self-registered** in **MCP Clients**.
+- `MCP_CUSTOM_SCHEMES` is lowercased when it's read, as Chassis's `OAuthRedirectUri` lowercases the scheme it checks, so a scheme listed as `Cursor` now matches. It, `MCP_CLIENT_METADATA_URLS` and `CORS_ALLOWED_ORIGINS` are split with a `Str` chain.
+
 ## [v3.3.0] - 2026-11-12
 
 ### Added

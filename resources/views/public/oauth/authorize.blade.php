@@ -11,7 +11,7 @@
 
     @var \App\Domains\Api\Models\OAuthClient $client
     @var \Northwestern\SysDev\Chassis\ValueObjects\OAuthRedirectTarget $redirectTarget Where approving sends the person
-    @var bool $unverified The client registered itself, so its name is only its own claim
+    @var string|null $verifiedBy The host whose client metadata document named the client
     @var bool $seesAccount The token can read the person's account details
     @var \App\Domains\User\Models\User $user
     @var list<\Laravel\Passport\Scope> $scopes The requested scopes the token will carry
@@ -24,32 +24,38 @@
         <div class="bg-nu-purple-100 h-1 rounded-t-xl"></div>
 
         <div class="rounded-b-xl bg-white p-6 shadow-sm ring-1 ring-gray-950/5 sm:p-8">
-            <h1 class="font-nu-heading text-nu-purple-100 text-2xl font-bold tracking-tight">
-                Connect {{ $client->name }}
+            {{-- The verb is quiet so the name, the thing to check, stands out. --}}
+            <h1 class="font-nu-heading text-2xl tracking-tight">
+                <span class="font-medium text-gray-500">Connect</span>
+                <span class="text-nu-purple-100 font-bold">{{ $client->name }}</span>
             </h1>
 
-            <p class="mt-2 text-gray-700">
+            @if ($verifiedBy !== null)
+                <div class="mt-2">
+                    <x-filament::badge class="w-fit"
+                                       data-testid="verified-client"
+                                       color="success"
+                                       icon="heroicon-m-check-badge">Verified by {{ $verifiedBy }}</x-filament::badge>
+                </div>
+            @endif
+
+            <p class="mt-4 text-gray-700">
                 <strong class="font-semibold text-gray-950">{{ $client->name }}</strong> wants to access your
                 <strong class="text-nu-purple-100 font-semibold">{{ config('app.name') }}</strong> account.
+                @if ($client->isMcpClient())
+                    Only approve it if you started this connection.
+                @endif
             </p>
 
-            @if ($unverified)
-                <x-filament::callout class="mt-5"
-                                     color="warning"
-                                     icon="heroicon-o-exclamation-triangle">
-                    <x-slot name="description">
-                        <strong>Unverified AI client.</strong> It registered itself, so its name hasn't been verified.
-                        Only approve it if you started this connection.
-                    </x-slot>
-                </x-filament::callout>
-            @elseif (filled($client->description))
+            @if (!$client->isMcpClient() && filled($client->description))
                 <p class="mt-3 text-sm text-gray-600">{{ $client->description }}</p>
             @endif
 
             {{-- The client's name is a claim; where it sends people is the part they can check. --}}
             <p class="mt-5 text-sm text-gray-700">
                 {{ $redirectTarget->isLoopback ? 'Approving returns you to an app on this computer at' : 'Approving returns you to' }}
-                <span class="wrap-anywhere font-mono text-gray-950"><bdi>{{ $redirectTarget->display }}</bdi></span>.
+                <code
+                      class="wrap-anywhere rounded-md bg-gray-100 px-1.5 py-0.5 font-mono text-[0.8125rem] text-gray-950 ring-1 ring-gray-950/5"><bdi>{{ $redirectTarget->display }}</bdi></code>
             </p>
 
             @if ($redirectTarget->punycode !== null)
@@ -121,12 +127,14 @@
                 </form>
             </div>
 
-            <div class="mt-8 border-t border-gray-100 pt-4 text-sm text-gray-600">
-                Signed in as <strong class="text-gray-950">{{ $user->full_name }}</strong>
-                @if (filled($user->email))
-                    ({{ $user->email }})
-                @endif
-                <form class="inline"
+            <div class="mt-8 border-t border-gray-100 pt-4">
+                <p class="text-sm text-gray-600">
+                    Signed in as <strong class="font-semibold text-gray-950">{{ $user->full_name }}</strong>
+                    @if (filled($user->email))
+                        <span class="text-gray-500">({{ $user->email }})</span>
+                    @endif
+                </p>
+                <form class="mt-1 text-xs text-gray-500"
                       method="post"
                       action="{{ route('oauth.switch-account') }}">
                     @csrf

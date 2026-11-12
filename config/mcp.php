@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\Str;
+
 return [
 
     /*
@@ -29,7 +31,41 @@ return [
     |
     */
 
-    'custom_schemes' => array_values(array_filter(array_map(trim(...), explode(',', (string) env('MCP_CUSTOM_SCHEMES', ''))))),
+    'custom_schemes' => Str::of((string) env('MCP_CUSTOM_SCHEMES', ''))
+        ->lower()
+        ->explode(',')
+        ->map(fn (string $scheme): string => trim($scheme))
+        ->filter()
+        ->values()
+        ->all(),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Client Metadata Documents
+    |--------------------------------------------------------------------------
+    |
+    | A client can identify itself with the URL of a metadata document it publishes,
+    | instead of registering. The server fetches only the documents listed here,
+    | so the client's name is the publishing host's word rather than its own.
+    |
+    | These are the ones Claude and Claude Code publish
+    | on `claude.ai`, VS Code's on `vscode.dev` and
+    | the Copilot CLI's on `github.com`. Leave it
+    | empty and every client registers itself.
+    |
+    */
+
+    'client_metadata_urls' => Str::of((string) env('MCP_CLIENT_METADATA_URLS', implode(',', [
+        'https://claude.ai/oauth/mcp-oauth-client-metadata',
+        'https://claude.ai/oauth/claude-code-client-metadata',
+        'https://vscode.dev/oauth/client-metadata.json',
+        'https://github.com/copilot/cli/client-metadata.json',
+    ])))
+        ->explode(',')
+        ->map(fn (string $url): string => trim($url))
+        ->filter()
+        ->values()
+        ->all(),
 
     /*
     |--------------------------------------------------------------------------

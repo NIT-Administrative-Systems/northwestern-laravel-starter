@@ -10,10 +10,10 @@ use App\Domains\User\Models\User;
 use Closure;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Laravel\Passport\Bridge\Client;
 use Laravel\Passport\Bridge\Scope;
 use Laravel\Passport\Bridge\User as BridgeUser;
+use Laravel\Passport\ClientRepository;
 use League\OAuth2\Server\Entities\ScopeEntityInterface;
 use League\OAuth2\Server\RequestTypes\AuthorizationRequest;
 use Symfony\Component\HttpFoundation\Response;
@@ -36,6 +36,7 @@ class AuthorizeOAuthConsent
 {
     public function __construct(
         private readonly OAuthConsent $consent,
+        private readonly ClientRepository $clients,
     ) {
     }
 
@@ -62,8 +63,11 @@ class AuthorizeOAuthConsent
             $scopes = array_map(fn (ScopeEntityInterface $scope): string => $scope->getIdentifier(), $authRequest?->getScopes() ?? []);
         }
 
-        // Passport answers an unknown or malformed client ID itself.
-        $client = is_string($clientId) && Str::isUuid($clientId) ? OAuthClient::query()->find($clientId) : null;
+        // Found the way Passport finds it, so a metadata
+        // document URL is checked too. Passport itself
+        // answers an unknown or malformed client ID.
+        $client = is_string($clientId) ? $this->clients->find($clientId) : null;
+        $client = $client instanceof OAuthClient ? $client : null;
 
         $this->consent->authorize($user, $client, $scopes);
 

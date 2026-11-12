@@ -19,8 +19,10 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * The MCP clients that registered themselves. Their names are self-reported, so an
- * administrator can see who connected each one and revoke any that don't belong.
+ * The MCP clients: clients that registered themselves, whose names are
+ * self-reported, and those created from a client metadata document,
+ * whose names come from the document's host. An administrator can
+ * see who connected each one and revoke any that don't belong.
  *
  * The mcp:prune-clients command removes the ones nobody connects or uses.
  */
