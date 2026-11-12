@@ -97,7 +97,7 @@ final class ClientMetadataDocumentsTest extends TestCase
         $first = $this->documents->find(self::CLAUDE_CODE_METADATA_URL);
         $second = $this->documents->find(self::CLAUDE_CODE_METADATA_URL);
 
-        $this->assertNotNull($first);
+        $this->assertInstanceOf(OAuthClient::class, $first);
         $this->assertSame($first->getKey(), $second?->getKey());
         Http::assertSentCount(1);
         $this->assertSame(1, OAuthClient::query()->count());
@@ -110,7 +110,7 @@ final class ClientMetadataDocumentsTest extends TestCase
             ->push($document)
             ->push([...$document, 'client_name' => 'Claude Code (Beta)', 'redirect_uris' => ['http://127.0.0.1/callback']])]);
         $client = $this->documents->find(self::CLAUDE_CODE_METADATA_URL);
-        $this->assertNotNull($client);
+        $this->assertInstanceOf(OAuthClient::class, $client);
 
         $this->travel(25)->hours();
 
@@ -126,12 +126,12 @@ final class ClientMetadataDocumentsTest extends TestCase
     {
         $this->fakeClientMetadataDocument();
         $revoked = $this->documents->find(self::CLAUDE_CODE_METADATA_URL);
-        $this->assertNotNull($revoked);
+        $this->assertInstanceOf(OAuthClient::class, $revoked);
         $revoked->forceFill(['revoked' => true])->save();
 
         $replacement = $this->documents->find(self::CLAUDE_CODE_METADATA_URL);
 
-        $this->assertNotNull($replacement);
+        $this->assertInstanceOf(OAuthClient::class, $replacement);
         $this->assertNotSame($revoked->getKey(), $replacement->getKey());
     }
 

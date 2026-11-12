@@ -78,7 +78,7 @@ final class McpClientResourceTest extends TestCase
     {
         $this->fakeClientMetadataDocument();
         $client = resolve(ClientMetadataDocuments::class)->find(self::CLAUDE_CODE_METADATA_URL);
-        $this->assertNotNull($client);
+        $this->assertInstanceOf(\App\Domains\Api\Models\OAuthClient::class, $client);
 
         Livewire::test(ListMcpClients::class)
             ->assertCanSeeTableRecords([$client])
