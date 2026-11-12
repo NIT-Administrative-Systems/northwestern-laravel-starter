@@ -13,7 +13,9 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Support\Uri;
 use Laravel\Mcp\Server\Registrar;
+use League\Uri\Exceptions\SyntaxError;
 use Northwestern\SysDev\Chassis\Rules\OAuthRedirectUri;
 
 /**
@@ -46,18 +48,23 @@ readonly class ClientMetadataDocuments
      */
     public function accepts(string $clientId): bool
     {
-        $parts = parse_url($clientId);
-
-        if (! config('mcp.enabled') || ! is_array($parts) || array_intersect_key($parts, array_flip(['port', 'user', 'pass', 'fragment'])) !== []) {
+        if (! config('mcp.enabled')) {
             return false;
         }
 
-        $path = $parts['path'] ?? '/';
+        try {
+            $uri = Uri::of($clientId);
+        } catch (SyntaxError) {
+            return false;
+        }
 
-        return ($parts['scheme'] ?? null) === 'https'
-            && in_array($parts['host'] ?? null, config('mcp.client_metadata_hosts'), true)
-            && $path !== '/'
-            && array_intersect(explode('/', $path), ['.', '..']) === [];
+        return $uri->scheme() === 'https'
+            && in_array($uri->host(), config('mcp.client_metadata_hosts'), true)
+            && $uri->port() === null
+            && $uri->user() === null
+            && $uri->fragment() === null
+            && $uri->pathSegments()->isNotEmpty()
+            && $uri->pathSegments()->intersect(['.', '..'])->isEmpty();
     }
 
     /**
@@ -145,7 +152,7 @@ readonly class ClientMetadataDocuments
         $redirectUris = $document['redirect_uris'];
 
         return [
-            'name' => $name !== '' ? $name : (string) parse_url($url, PHP_URL_HOST),
+            'name' => $name !== '' ? $name : (string) Uri::of($url)->host(),
             'redirect_uris' => $redirectUris,
         ];
     }

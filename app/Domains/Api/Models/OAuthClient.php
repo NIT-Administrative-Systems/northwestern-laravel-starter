@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Uri;
 use Laravel\Passport\Client;
 
 /**
@@ -177,9 +178,7 @@ class OAuthClient extends Client
      */
     public function verifiedBy(): ?string
     {
-        $host = $this->client_metadata_url === null ? null : parse_url($this->client_metadata_url, PHP_URL_HOST);
-
-        return is_string($host) ? $host : null;
+        return $this->client_metadata_url === null ? null : Uri::of($this->client_metadata_url)->host();
     }
 
     /**

@@ -64,7 +64,7 @@ final class OAuthClientRepositoryTest extends TestCase
 
     public function test_other_redirects_are_left_to_passport(): void
     {
-        foreach (['http://localhost:53143/other', 'http://localhost/callback', 'http://127.0.0.1:53143/callback', 'https://localhost:53143/callback', 'not a url', ''] as $uri) {
+        foreach (['http://localhost:53143/other', 'http://localhost/callback', 'http://127.0.0.1:53143/callback', 'https://localhost:53143/callback', 'http:///callback', 'not a url', ''] as $uri) {
             $this->withRedirectUri($uri);
 
             $client = $this->clients->find(self::CLAUDE_CODE_METADATA_URL);

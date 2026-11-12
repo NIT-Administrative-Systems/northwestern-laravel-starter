@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\Str;
+
 return [
 
     /*
@@ -29,7 +31,13 @@ return [
     |
     */
 
-    'custom_schemes' => array_values(array_filter(array_map(trim(...), explode(',', (string) env('MCP_CUSTOM_SCHEMES', ''))))),
+    'custom_schemes' => Str::of((string) env('MCP_CUSTOM_SCHEMES', ''))
+        ->lower()
+        ->explode(',')
+        ->map(fn (string $scheme): string => trim($scheme))
+        ->filter()
+        ->values()
+        ->all(),
 
     /*
     |--------------------------------------------------------------------------
@@ -44,7 +52,13 @@ return [
     |
     */
 
-    'client_metadata_hosts' => array_values(array_filter(array_map(fn (string $host): string => strtolower(trim($host)), explode(',', (string) env('MCP_CLIENT_METADATA_HOSTS', 'claude.ai'))))),
+    'client_metadata_hosts' => Str::of((string) env('MCP_CLIENT_METADATA_HOSTS', 'claude.ai'))
+        ->lower()
+        ->explode(',')
+        ->map(fn (string $host): string => trim($host))
+        ->filter()
+        ->values()
+        ->all(),
 
     /*
     |--------------------------------------------------------------------------

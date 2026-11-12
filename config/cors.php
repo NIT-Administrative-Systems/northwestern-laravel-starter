@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\Str;
+
 return [
 
     /*
@@ -32,7 +34,12 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => array_values(array_filter(array_map(trim(...), explode(',', (string) env('CORS_ALLOWED_ORIGINS', ''))))),
+    'allowed_origins' => Str::of((string) env('CORS_ALLOWED_ORIGINS', ''))
+        ->explode(',')
+        ->map(fn (string $origin): string => trim($origin))
+        ->filter()
+        ->values()
+        ->all(),
 
     'allowed_origins_patterns' => [],
 

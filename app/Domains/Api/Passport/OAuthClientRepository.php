@@ -6,7 +6,9 @@ namespace App\Domains\Api\Passport;
 
 use App\Domains\Api\Models\OAuthClient;
 use App\Mcp\ClientMetadataDocuments;
+use Illuminate\Support\Uri;
 use Laravel\Passport\Client;
+use League\Uri\Exceptions\SyntaxError;
 use Northwestern\SysDev\Chassis\Passport\OAuthClientRepository as ChassisOAuthClientRepository;
 
 /**
@@ -36,21 +38,21 @@ class OAuthClientRepository extends ChassisOAuthClientRepository
      */
     private function allowingLoopbackPort(OAuthClient $client): OAuthClient
     {
-        $requested = request()->input('redirect_uri');
-        $parts = is_string($requested) ? parse_url($requested) : false;
+        $requested = request()->string('redirect_uri')->toString();
 
-        if (! is_array($parts) || ($parts['scheme'] ?? null) !== 'http' || ($parts['host'] ?? null) !== 'localhost' || ! isset($parts['port'])) {
+        try {
+            $uri = Uri::of($requested);
+        } catch (SyntaxError) {
             return $client;
         }
 
-        $withoutPort = str_replace("localhost:{$parts['port']}", 'localhost', (string) $requested);
-
-        if (! in_array($withoutPort, $client->redirect_uris, true)) {
+        if ($uri->scheme() !== 'http' || $uri->host() !== 'localhost' || $uri->port() === null || ! in_array($uri->withPort(null)->toString(), $client->redirect_uris, true)) {
             return $client;
         }
 
+        // Passport compares the request's redirect URI exactly, so it joins the list as sent.
         $copy = clone $client;
-        $copy->redirect_uris = [...$client->redirect_uris, (string) $requested];
+        $copy->redirect_uris = [...$client->redirect_uris, $requested];
 
         return $copy;
     }

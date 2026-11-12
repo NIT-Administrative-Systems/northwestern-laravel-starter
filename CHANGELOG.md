@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ### Changed
 
 - The consent screen marks a client from a metadata document as a **Verified AI client**, whose name comes from the document's host, instead of an unverified one. Connected Applications and a person's page in Administration label it "AI client · verified by claude.ai", and **MCP Clients** shows "Verified by claude.ai". Clients that register themselves keep the unverified labels.
+- `MCP_CUSTOM_SCHEMES` is lowercased when it's read, as Chassis's `OAuthRedirectUri` lowercases the scheme it checks, so a scheme listed as `Cursor` now matches. It, `MCP_CLIENT_METADATA_HOSTS` and `CORS_ALLOWED_ORIGINS` are split with a `Str` chain.
 
 ## [v3.3.0] - 2026-11-12
 

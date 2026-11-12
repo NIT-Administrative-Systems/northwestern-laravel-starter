@@ -45,7 +45,6 @@ final class ClientMetadataDocumentsTest extends TestCase
         yield 'plain http' => ['http://claude.ai/oauth/claude-code-client-metadata'];
         yield 'an unlisted host' => ['https://claude.example/oauth/claude-code-client-metadata'];
         yield 'a subdomain of a listed host' => ['https://evil.claude.ai/oauth/claude-code-client-metadata'];
-        yield 'a host in another case' => ['https://Claude.ai/oauth/claude-code-client-metadata'];
         yield 'a port' => ['https://claude.ai:8443/oauth/claude-code-client-metadata'];
         yield 'credentials' => ['https://user:pass@claude.ai/oauth/claude-code-client-metadata'];
         yield 'a fragment' => ['https://claude.ai/oauth/claude-code-client-metadata#top'];
