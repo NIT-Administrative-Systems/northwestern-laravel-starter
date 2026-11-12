@@ -6,16 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [v3.3.0] - 2026-11-12
+
 ### Added
 
 - The browser tests check every page's layout with Chassis's layout expectations at 320, 768, 1024 and 1440 pixels. A page fails if it is wider than the screen, if controls in its header overlap, or if a table or badge runs past its container. On guest pages, a control under 44px tall on a touch screen fails too. The administration test fills its pages with long names, NetIDs, job titles and role names.
 
 ### Changed
 
-- Updated `northwestern-sysdev/northwestern-filament-theme` to `^4.4.0` and `northwestern-sysdev/chassis` to `^1.6`. The theme now fits the panels' top bar from 320 pixels, wraps badges in columns and entries marked `->wrap()`, owns the focus ring on purple and styles the sign-in card, so the panel themes keep only the starter's own rules. The site header takes the focus ring with the theme's `nu-focus-on-purple` class, the Help menu shows only its icon below `xl` with `nu-topbar-icon-below-xl`, and the administration top bar leaves out Help below 368 pixels.
+- Updated `northwestern-sysdev/northwestern-filament-theme` to `^4.4.0` and `northwestern-sysdev/chassis` to `^1.6.1`. The theme now fits the panels' top bar from 320 pixels, wraps badges in columns and entries marked `->wrap()`, owns the focus ring on purple and styles the sign-in card, so the panel themes keep only the starter's own rules. The site header takes the focus ring with the theme's `nu-focus-on-purple` class, the Help menu shows only its icon below `xl` with `nu-topbar-icon-below-xl`, and the administration top bar leaves out Help below 368 pixels.
 - Overview's Scheduled Tasks is a list until its section is 896 pixels wide, rather than below `md`. A user's Service Clients shows Client ID and Last Used from `xl`, service client names and audit events wrap, and Sign-In Records shows its stats two to a row until there is room for four, with the segment chart's legend below the donut.
 - The test helpers in `tests/Concerns` say what they do: `personalAccessToken()` is `issuePersonalAccessToken()`, `serviceClientToken()` is `issueServiceClientToken()`, `mcpToken()` is `issueMcpToken()`, `mcp()` is `sendMcpMessage()`, `approve()` is `approveAuthorization()`, `codeFrom()` is `authorizationCodeFrom()`, `exchange()` is `exchangeAuthorizationCode()` and `MocksEventHub::send()` is `sendEventHubMessage()`.
 - `<x-help-menu>` and the public announcement banner decide what to show in their component classes, `HelpMenu` and `PublicAnnouncementBanner`, so their views hold only markup. The MCP client and connected application resources build their tables in `McpClientsTable` and `OAuthApplicationsTable`, like every other resource.
+- The browser tests run in CI as two time-balanced shards, and a new **🌐 Browser Test Results** job combines their reports and fails if either shard failed; require that job in a branch ruleset. A parallel run and a shard each take whole test files, so the page tests are split by audience into `tests/Browser/Pages/Administration`, `App` and `Public`, one file per kind of check. `tests/.pest/shards.json` holds timings for every suite; refresh it with `vendor/bin/pest --testsuite=Unit,Feature,Browser --parallel --update-shards`. With Chassis 1.6.1, which checks a list of pages on one browser page, the suite takes about half as long.
 - PHPStan keeps its cache in `storage/phpstan`, which git ignores, instead of `/tmp/phpstan`, which every checkout on a machine shared.
 - `phpunit.xml` turns on MCP and API request logging, leaves single sign-on unconfigured, and leaves the Directory Search and EventHub keys empty, as `.env.ci` does. A developer's `.env` no longer changes what the tests see or hands them real keys.
 - Comments follow Laravel's tapered style throughout, and the coding standards and `AGENTS.md` describe it. The starter's own config files have one banner per setting, and `.env.example` lists the settings it was missing.
@@ -1116,7 +1119,8 @@ First stable release. For installation, configuration, and usage guides, visit t
 - **CI pipeline**: GitHub Actions workflow with PHP/Node setup, database provisioning, Pest and Cypress test execution; Dependabot configuration.
 - **Developer tooling**: `.editorconfig`, `.prettierrc`, `.nvmrc` (Node v24), custom stubs, Rector configuration.
 
-[Unreleased]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v3.2.0...HEAD
+[Unreleased]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v3.3.0...HEAD
+[v3.3.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v3.2.0...v3.3.0
 [v3.2.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v3.1.0...v3.2.0
 [v3.1.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v3.0.0...v3.1.0
 [v3.0.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v2.6.0...v3.0.0
