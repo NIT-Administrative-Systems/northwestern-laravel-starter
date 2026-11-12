@@ -22,6 +22,7 @@ use App\Mcp\Servers\AppServer;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\Concerns\IssuesPersonalAccessTokens;
 use Tests\Concerns\IssuesServiceClientTokens;
 use Tests\Concerns\RunsAuthorizationCodeFlow;
@@ -125,6 +126,50 @@ final class McpFlowTest extends TestCase
             ->assertOk()
             ->assertJsonStructure(['access_token', 'refresh_token']);
         $this->assertSame($client->getKey(), OAuthConnection::query()->sole()->oauth_client_id);
+    }
+
+    /**
+     * The documents VS Code and the Copilot CLI publish, as their hosts serve them.
+     *
+     * @return iterable<string, array{string, array<string, mixed>, string}>
+     */
+    public static function copilotDocuments(): iterable
+    {
+        yield 'VS Code' => ['https://vscode.dev/oauth/client-metadata.json', [
+            'client_name' => 'Visual Studio Code',
+            'grant_types' => ['authorization_code', 'refresh_token', 'urn:ietf:params:oauth:grant-type:device_code'],
+            'response_types' => ['code'],
+            'token_endpoint_auth_method' => 'none',
+            'application_type' => 'native',
+            'redirect_uris' => ['http://127.0.0.1:33418/', 'https://vscode.dev/redirect'],
+        ], 'https://vscode.dev/redirect'];
+        yield 'Copilot CLI' => ['https://github.com/copilot/cli/client-metadata.json', [
+            'client_name' => 'GitHub Copilot CLI',
+            'application_type' => 'native',
+            'grant_types' => ['authorization_code', 'refresh_token', 'urn:ietf:params:oauth:grant-type:device_code'],
+            'response_types' => ['code'],
+            'token_endpoint_auth_method' => 'none',
+            'redirect_uris' => ['http://127.0.0.1/', 'http://127.0.0.1/callback'],
+        ], 'http://127.0.0.1:51734/callback'];
+    }
+
+    /**
+     * @param  array<string, mixed>  $document
+     */
+    #[DataProvider('copilotDocuments')]
+    public function test_copilot_connects_with_its_client_metadata_document_on_a_default_host(string $url, array $document, string $redirectUri): void
+    {
+        Http::preventStrayRequests();
+        Http::fake([$url => Http::response(['client_id' => $url, ...$document])]);
+        $this->actingAs($this->mcpUser());
+
+        [$consent, $verifier] = $this->requestAuthorization($url, ['mcp:use'], redirectUri: $redirectUri);
+        $consent->assertOk()
+            ->assertSee("Connect {$document['client_name']}")
+            ->assertSee('Its name comes from ' . parse_url($url, PHP_URL_HOST));
+
+        $client = OAuthClient::query()->where('client_metadata_url', $url)->sole();
+        $this->exchangeAuthorizationCode($url, $this->approveAuthorization($client), $verifier, $redirectUri)->assertOk();
     }
 
     public function test_metadata_documents_are_not_advertised_without_a_host_to_fetch_them_from(): void

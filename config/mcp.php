@@ -44,15 +44,16 @@ return [
     | Client Metadata Document Hosts
     |--------------------------------------------------------------------------
     |
-    | A client can identify itself with the URL of a metadata document it
-    | publishes, instead of registering. The server fetches the document
-    | from a host listed here, so the client's name is that host's word
-    | and not only its own. Claude uses `claude.ai`. Leave it empty to
-    | have every client register itself instead.
+    | A client can identify itself with the URL of a metadata document it publishes,
+    | instead of registering. The server fetches the document only from the hosts
+    | listed here, so the client's name is the host's word, not just its own.
+    |
+    | Claude uses `claude.ai`, VS Code uses `vscode.dev` and the Copilot CLI
+    | uses `github.com`. Leave it empty and every client registers itself.
     |
     */
 
-    'client_metadata_hosts' => Str::of((string) env('MCP_CLIENT_METADATA_HOSTS', 'claude.ai'))
+    'client_metadata_hosts' => Str::of((string) env('MCP_CLIENT_METADATA_HOSTS', 'claude.ai,vscode.dev,github.com'))
         ->lower()
         ->explode(',')
         ->map(fn (string $host): string => trim($host))

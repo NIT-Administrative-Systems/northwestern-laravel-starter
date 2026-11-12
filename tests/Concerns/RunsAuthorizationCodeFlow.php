@@ -157,12 +157,12 @@ trait RunsAuthorizationCodeFlow
      * @param  OAuthClient|string  $client  The client, or the client ID to send, such as a metadata document's URL
      * @return TestResponse<\Symfony\Component\HttpFoundation\Response>
      */
-    protected function exchangeAuthorizationCode(OAuthClient|string $client, string $code, string $verifier): TestResponse
+    protected function exchangeAuthorizationCode(OAuthClient|string $client, string $code, string $verifier, string $redirectUri = self::REDIRECT_URI): TestResponse
     {
         return $this->postJson('/oauth/token', [
             'grant_type' => 'authorization_code',
             'client_id' => is_string($client) ? $client : $client->getKey(),
-            'redirect_uri' => self::REDIRECT_URI,
+            'redirect_uri' => $redirectUri,
             'code_verifier' => $verifier,
             'code' => $code,
         ]);
