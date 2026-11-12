@@ -79,4 +79,14 @@ final class OAuthClientTest extends TestCase
         $this->assertTrue($mcpClient->isMcpClient());
         $this->assertFalse($application->isMcpClient());
     }
+
+    public function test_a_client_from_a_metadata_document_is_verified_by_its_host(): void
+    {
+        [, $registered] = resolve(RegisterOAuthApplication::class)('Claude', ['http://localhost/cb'], false, [], origin: ClientOrigin::Dynamic);
+        [, $fromDocument] = resolve(RegisterOAuthApplication::class)('Claude Code', ['http://localhost/callback'], false, [], origin: ClientOrigin::Dynamic, clientMetadataUrl: 'https://claude.ai/oauth/claude-code-client-metadata');
+
+        $this->assertNull($registered->verifiedBy());
+        $this->assertSame('claude.ai', $fromDocument->verifiedBy());
+        $this->assertTrue($fromDocument->isMcpClient());
+    }
 }

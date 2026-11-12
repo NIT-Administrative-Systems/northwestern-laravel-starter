@@ -1,0 +1,159 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Mcp;
+
+use App\Domains\Api\Actions\Applications\RegisterOAuthApplication;
+use App\Domains\Api\Enums\ClientOrigin;
+use App\Domains\Api\Models\OAuthClient;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
+use Laravel\Mcp\Server\Registrar;
+use Northwestern\SysDev\Chassis\Rules\OAuthRedirectUri;
+
+/**
+ * Client ID metadata documents, the MCP authorization spec's way for a client to identify
+ * itself without registering: its `client_id` is the HTTPS URL of a JSON document that
+ * names it and lists its redirect URIs. Claude publishes one for Claude Code and one for
+ * its apps, at `claude.ai`.
+ *
+ * The server fetches only from hosts in `mcp.client_metadata_hosts`, so an anonymous request
+ * can't make it fetch an address of its choosing, and a name from one of these documents is
+ * the host's word rather than the client's own. The consent screen shows it as verified.
+ *
+ * Each document becomes one MCP client that everyone who connects it shares. When that client
+ * is revoked or pruned, the next connection creates a new one, as a client that registers
+ * itself would register again.
+ */
+readonly class ClientMetadataDocuments
+{
+    /** The MCP authorization spec suggests refusing larger documents. */
+    private const int MAX_BYTES = 5120;
+
+    public function __construct(
+        private RegisterOAuthApplication $register,
+    ) {
+    }
+
+    /**
+     * Determine whether `$clientId` is a document URL the server fetches: HTTPS on a listed host,
+     * with a path and no port, credentials, fragment or dot segments, while MCP is on.
+     */
+    public function accepts(string $clientId): bool
+    {
+        $parts = parse_url($clientId);
+
+        if (! config('mcp.enabled') || ! is_array($parts) || array_intersect_key($parts, array_flip(['port', 'user', 'pass', 'fragment'])) !== []) {
+            return false;
+        }
+
+        $path = $parts['path'] ?? '/';
+
+        return ($parts['scheme'] ?? null) === 'https'
+            && in_array($parts['host'] ?? null, config('mcp.client_metadata_hosts'), true)
+            && $path !== '/'
+            && array_intersect(explode('/', $path), ['.', '..']) === [];
+    }
+
+    /**
+     * The MCP client for the document at `$url`, created on first use and kept in step with the
+     * document, or null when the URL isn't accepted or the document can't be fetched or is invalid.
+     */
+    public function find(string $url): ?OAuthClient
+    {
+        if (! $this->accepts($url)) {
+            return null;
+        }
+
+        /** @var array{name: non-empty-string, redirect_uris: list<non-empty-string>}|null $metadata */
+        $metadata = Cache::remember('mcp:client-metadata:' . hash('sha256', $url), now()->addDay(), fn (): ?array => $this->fetch($url));
+
+        if ($metadata === null) {
+            return null;
+        }
+
+        $client = OAuthClient::query()->mcpClients()->where('client_metadata_url', $url)->where('revoked', false)->latest()->first();
+
+        if ($client === null) {
+            [, $client] = ($this->register)(
+                name: $metadata['name'],
+                redirectUris: $metadata['redirect_uris'],
+                confidential: false,
+                scopes: [Registrar::OAUTH_SCOPE],
+                origin: ClientOrigin::Dynamic,
+                clientMetadataUrl: $url,
+            );
+
+            return $client;
+        }
+
+        $client->forceFill(['name' => $metadata['name'], 'redirect_uris' => $metadata['redirect_uris']]);
+
+        if ($client->isDirty()) {
+            $client->save();
+        }
+
+        return $client;
+    }
+
+    /**
+     * @return array{name: non-empty-string, redirect_uris: list<non-empty-string>}|null
+     */
+    private function fetch(string $url): ?array
+    {
+        try {
+            $response = Http::accept('application/json')->connectTimeout(3)->timeout(5)->withoutRedirecting()->get($url);
+        } catch (ConnectionException $exception) {
+            return $this->refuse($url, $exception->getMessage());
+        }
+
+        if (! $response->ok()) {
+            return $this->refuse($url, "HTTP {$response->status()}");
+        }
+
+        if (strlen($response->body()) > self::MAX_BYTES) {
+            return $this->refuse($url, 'larger than ' . self::MAX_BYTES . ' bytes');
+        }
+
+        $document = $response->json();
+
+        if (! is_array($document) || ($document['client_id'] ?? null) !== $url) {
+            return $this->refuse($url, 'its client_id is not its own URL');
+        }
+
+        // A public client only: Passport would need a secret this document can't hold.
+        $validator = Validator::make($document, [
+            'client_name' => ['nullable', 'string', 'max:255'],
+            'redirect_uris' => ['required', 'array', 'list', 'min:1', 'max:10'],
+            'redirect_uris.*' => ['bail', 'required', 'string', 'max:2048', new OAuthRedirectUri(config('mcp.custom_schemes', []))],
+            'token_endpoint_auth_method' => ['nullable', 'in:none'],
+            'client_secret' => ['prohibited'],
+        ]);
+
+        if ($validator->fails()) {
+            return $this->refuse($url, $validator->errors()->first());
+        }
+
+        $name = Str::limit(trim((string) ($document['client_name'] ?? '')), 255, '');
+
+        /** @var list<non-empty-string> $redirectUris */
+        $redirectUris = $document['redirect_uris'];
+
+        return [
+            'name' => $name !== '' ? $name : (string) parse_url($url, PHP_URL_HOST),
+            'redirect_uris' => $redirectUris,
+        ];
+    }
+
+    private function refuse(string $url, string $reason): null
+    {
+        Log::warning('MCP client metadata document refused', ['url' => $url, 'reason' => $reason]);
+
+        return null;
+    }
+}

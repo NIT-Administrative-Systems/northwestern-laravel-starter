@@ -76,6 +76,19 @@ final class ConnectedApplicationsTest extends TestCase
             ->assertSee('AI client · name not verified');
     }
 
+    // Claude's name comes from its metadata document on claude.ai, so the list says who vouched for it.
+    public function test_an_mcp_client_from_a_metadata_document_is_labelled_with_its_host(): void
+    {
+        config(['mcp.enabled' => true]);
+        $this->user->givePermissionTo(SystemPermission::UseMcp);
+        $this->issueMcpTokenWithMetadataDocument();
+
+        Livewire::test(ConnectedApplications::class)
+            ->assertSee('Claude Code')
+            ->assertSee('AI client · verified by claude.ai')
+            ->assertDontSee('name not verified');
+    }
+
     public function test_a_person_disconnects_an_application(): void
     {
         [$theirs] = $this->connectAs(User::factory()->create(), 'Reporting Tool');

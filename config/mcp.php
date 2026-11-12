@@ -33,6 +33,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Client Metadata Document Hosts
+    |--------------------------------------------------------------------------
+    |
+    | A client can identify itself with the URL of a metadata document it
+    | publishes, instead of registering. The server fetches the document
+    | from a host listed here, so the client's name is that host's word
+    | and not only its own. Claude uses `claude.ai`. Leave it empty to
+    | have every client register itself instead.
+    |
+    */
+
+    'client_metadata_hosts' => array_values(array_filter(array_map(fn (string $host): string => strtolower(trim($host)), explode(',', (string) env('MCP_CLIENT_METADATA_HOSTS', 'claude.ai'))))),
+
+    /*
+    |--------------------------------------------------------------------------
     | Rate Limits
     |--------------------------------------------------------------------------
     |

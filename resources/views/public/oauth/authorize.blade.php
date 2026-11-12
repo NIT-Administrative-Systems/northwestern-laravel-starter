@@ -11,6 +11,7 @@
 
     @var \App\Domains\Api\Models\OAuthClient $client
     @var \Northwestern\SysDev\Chassis\ValueObjects\OAuthRedirectTarget $redirectTarget Where approving sends the person
+    @var string|null $verifiedBy The host whose client metadata document named the client
     @var bool $unverified The client registered itself, so its name is only its own claim
     @var bool $seesAccount The token can read the person's account details
     @var \App\Domains\User\Models\User $user
@@ -33,7 +34,17 @@
                 <strong class="text-nu-purple-100 font-semibold">{{ config('app.name') }}</strong> account.
             </p>
 
-            @if ($unverified)
+            @if ($verifiedBy !== null)
+                <x-filament::callout class="mt-5"
+                                     data-testid="verified-client"
+                                     color="info"
+                                     icon="heroicon-o-check-badge">
+                    <x-slot name="description">
+                        <strong>Verified AI client.</strong> Its name comes from {{ $verifiedBy }},
+                        not the client itself. Only approve it if you started this connection.
+                    </x-slot>
+                </x-filament::callout>
+            @elseif ($unverified)
                 <x-filament::callout class="mt-5"
                                      color="warning"
                                      icon="heroicon-o-exclamation-triangle">

@@ -23,7 +23,8 @@ use Laravel\Passport\ClientRepository;
  * gets a client secret; a public one, such as a
  * desktop or browser app, uses PKCE instead.
  *
- * MCP clients register themselves through this action too, with a dynamic origin.
+ * MCP clients register themselves through this action too, with a dynamic origin, and so
+ * does a client the server creates from a client metadata document, with that document's URL.
  *
  * An administrator's registration is audited on them, because
  * the client's UUID key doesn't fit the audits table, and a
@@ -42,6 +43,7 @@ readonly class RegisterOAuthApplication
      * @param  list<non-empty-string>  $redirectUris
      * @param  list<string>  $scopes  The scopes the application may request
      * @param  User|null  $registeredBy  The administrator; null for a seeder or a self-registered MCP client
+     * @param  string|null  $clientMetadataUrl  The client metadata document the MCP client identified itself with
      * @return array{0: non-empty-string|null, 1: OAuthClient} The secret, shown once (null for a public application), and the client
      *
      * @throws AuthorizationException
@@ -56,13 +58,14 @@ readonly class RegisterOAuthApplication
         ?string $contactEmail = null,
         ClientOrigin $origin = ClientOrigin::Administrator,
         ?User $registeredBy = null,
+        ?string $clientMetadataUrl = null,
     ): array {
         // Dynamic registration is anonymous: the MCP routes decide whether it's open.
         if ($origin === ClientOrigin::Administrator) {
             $this->credentials->decide($registeredBy, CredentialOperation::Issue, CredentialKind::ConnectedApplication, null)->authorize();
         }
 
-        return DB::transaction(function () use ($name, $redirectUris, $confidential, $scopes, $firstParty, $description, $contactEmail, $origin, $registeredBy): array {
+        return DB::transaction(function () use ($name, $redirectUris, $confidential, $scopes, $firstParty, $description, $contactEmail, $origin, $registeredBy, $clientMetadataUrl): array {
             /** @var OAuthClient $client */
             $client = $this->clients->createAuthorizationCodeGrantClient($name, array_values($redirectUris), $confidential);
 
@@ -71,6 +74,7 @@ readonly class RegisterOAuthApplication
 
             $client->forceFill([
                 'origin' => $origin,
+                'client_metadata_url' => $clientMetadataUrl,
                 'scopes' => array_values($scopes),
                 'first_party' => $firstParty,
                 'description' => $description,

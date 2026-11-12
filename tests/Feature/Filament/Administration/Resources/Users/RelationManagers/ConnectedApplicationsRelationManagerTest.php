@@ -47,6 +47,25 @@ final class ConnectedApplicationsRelationManagerTest extends TestCase
         $this->assertTrue(Audit::query()->where('event', 'application_disconnected')->where('auditable_id', $person->getKey())->exists());
     }
 
+    public function test_ai_clients_are_labelled_by_who_named_them(): void
+    {
+        config(['mcp.enabled' => true]);
+        $person = User::factory()->create();
+        $person->givePermissionTo(SystemPermission::UseMcp);
+        $this->actingAs($person);
+        $this->issueMcpToken();
+        $this->issueMcpTokenWithMetadataDocument();
+
+        Filament::setCurrentPanel(AdministrationPanelProvider::ID);
+        $admin = User::factory()->create();
+        $admin->givePermissionTo(SystemPermission::AccessAdministrationPanel, SystemPermission::ManageApiAccess);
+        $this->actingAs($admin);
+
+        Livewire::test(ConnectedApplicationsRelationManager::class, ['ownerRecord' => $person, 'pageClass' => ViewUser::class])
+            ->assertSee('AI client · name not verified')
+            ->assertSee('AI client · verified by claude.ai');
+    }
+
     public function test_it_needs_manage_api_access(): void
     {
         $this->actingAs(User::factory()->create());

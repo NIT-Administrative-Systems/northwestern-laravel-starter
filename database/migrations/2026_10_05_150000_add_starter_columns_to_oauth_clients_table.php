@@ -17,6 +17,8 @@ return new class extends Migration
     {
         Schema::table('oauth_clients', function (Blueprint $table) {
             $table->string('origin')->default('administrator')->after('provider');
+            // The client metadata document an MCP client identified itself with, instead of registering.
+            $table->string('client_metadata_url', 2048)->nullable()->after('origin');
             // OAuth applications' purpose, contact, whether consent
             // is skipped, and the scopes they may request, where
             // null allows every scope, as for service clients.
@@ -32,6 +34,7 @@ return new class extends Migration
             $table->foreignId('rotated_by_user_id')->nullable();
 
             $table->index('secret_expires_at');
+            $table->index('client_metadata_url');
         });
     }
 

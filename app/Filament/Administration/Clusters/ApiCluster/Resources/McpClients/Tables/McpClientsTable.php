@@ -25,7 +25,7 @@ class McpClientsTable
             ->columns([
                 TextColumn::make('name')
                     ->label('Name')
-                    ->description('Name not verified')
+                    ->description(fn (OAuthClient $record): string => $record->verifiedBy() !== null ? "Verified by {$record->verifiedBy()}" : 'Name not verified')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('redirect_uris')

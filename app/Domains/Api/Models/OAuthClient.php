@@ -46,6 +46,7 @@ use Laravel\Passport\Client;
  * @property string|null $secret
  * @property list<string> $grant_types
  * @property ClientOrigin $origin
+ * @property string|null $client_metadata_url
  * @property list<string>|null $allowed_ips
  * @property Carbon|null $secret_expires_at
  * @property Carbon|null $secret_expiration_notified_at
@@ -162,11 +163,23 @@ class OAuthClient extends Client
     }
 
     /**
-     * Determine whether this is an MCP client, which named itself when it registered.
+     * Determine whether this is an MCP client: one that registered itself, or one the
+     * server created from the client metadata document the client identified itself with.
      */
     public function isMcpClient(): bool
     {
         return $this->origin === ClientOrigin::Dynamic;
+    }
+
+    /**
+     * The host whose client metadata document gave this MCP client its name, such as
+     * `claude.ai`, or null when the client named itself by registering.
+     */
+    public function verifiedBy(): ?string
+    {
+        $host = $this->client_metadata_url === null ? null : parse_url($this->client_metadata_url, PHP_URL_HOST);
+
+        return is_string($host) ? $host : null;
     }
 
     /**

@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+### Added
+
+- MCP clients can identify themselves with a client ID metadata document instead of registering, as the MCP authorization specification prefers. The client sends the HTTPS URL of a JSON document it publishes as its `client_id`, such as Claude Code's `https://claude.ai/oauth/claude-code-client-metadata`. `App\Mcp\ClientMetadataDocuments` fetches it from a host in `MCP_CLIENT_METADATA_HOSTS` (`claude.ai` by default), caches it for a day, and keeps one shared MCP client per document in the new `oauth_clients.client_metadata_url` column. The authorization server metadata advertises `client_id_metadata_document_supported` while that list isn't empty, and Claude Code and claude.ai use it then.
+- `App\Domains\Api\Passport\OAuthClientRepository` extends Chassis's repository to find a client by its document URL, and lets a `localhost` redirect match one the document lists without its port, as Claude Code's native sign-in needs. `AuthorizeOAuthConsent` finds the client through it, so the `UseMcp` check applies to these clients on the consent screen too.
+
+### Changed
+
+- The consent screen marks a client from a metadata document as a **Verified AI client**, whose name comes from the document's host, instead of an unverified one. Connected Applications and a person's page in Administration label it "AI client · verified by claude.ai", and **MCP Clients** shows "Verified by claude.ai". Clients that register themselves keep the unverified labels.
+
 ## [v3.3.0] - 2026-11-12
 
 ### Added
