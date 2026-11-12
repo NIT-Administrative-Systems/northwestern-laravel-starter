@@ -103,6 +103,7 @@
         "format:frontend": "pnpm run format",
         "analyse:php": "vendor/bin/phpstan analyse --memory-limit=2G",
         "test:browser": "vendor/bin/pest --testsuite=Browser --parallel",
+        "test:shards": "vendor/bin/pest --testsuite=Unit,Feature,Browser --parallel --update-shards",
         "openapi:generate": "@php ./vendor/bin/openapi -c cleanup.enabled=false app/ vendor/northwestern-sysdev/chassis/src/",
         "openapi:generate:v1": "@php ./vendor/bin/openapi -c cleanup.enabled=false app/ vendor/northwestern-sysdev/chassis/src/ --exclude Api/V2 --output docs/schemas/api-schema.yaml",
         "ide-helper:generate": [
