@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [v3.4.0] - 2026-11-12
+
 ### Added
 
 - MCP clients can identify themselves with a client ID metadata document instead of registering, as the MCP authorization specification prefers. The client sends the HTTPS URL of a JSON document it publishes as its `client_id`, such as Claude Code's `https://claude.ai/oauth/claude-code-client-metadata`. `App\Mcp\ClientMetadataDocuments` fetches it only when its URL is listed in `MCP_CLIENT_METADATA_URLS` (by default the documents claude.ai, Claude Code, VS Code and the Copilot CLI publish), caches it for a day, and keeps one shared MCP client per document in the new `oauth_clients.client_metadata_url` column. The authorization server metadata advertises `client_id_metadata_document_supported` while that list isn't empty, and those clients use it then.
@@ -1129,7 +1131,8 @@ First stable release. For installation, configuration, and usage guides, visit t
 - **CI pipeline**: GitHub Actions workflow with PHP/Node setup, database provisioning, Pest and Cypress test execution; Dependabot configuration.
 - **Developer tooling**: `.editorconfig`, `.prettierrc`, `.nvmrc` (Node v24), custom stubs, Rector configuration.
 
-[Unreleased]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v3.3.0...HEAD
+[Unreleased]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v3.4.0...HEAD
+[v3.4.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v3.3.0...v3.4.0
 [v3.3.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v3.2.0...v3.3.0
 [v3.2.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v3.1.0...v3.2.0
 [v3.1.0]: https://github.com/NIT-Administrative-Systems/northwestern-laravel-starter/compare/v3.0.0...v3.1.0
