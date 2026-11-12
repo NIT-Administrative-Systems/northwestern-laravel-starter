@@ -62,7 +62,8 @@ class AuditsTable
                     ->formatStateUsing(fn (string $state): string => AuditEvent::labelFor($state))
                     ->icon(fn (string $state): Heroicon => AuditEvent::iconFor($state))
                     ->color(fn (string $state): string => AuditEvent::colorFor($state))
-                    ->sortable(),
+                    ->sortable()
+                    ->wrap(),
                 TextColumn::make('auditable_type')
                     ->label('Record')
                     ->badge()

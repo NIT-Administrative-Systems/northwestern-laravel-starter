@@ -103,8 +103,9 @@ it('is healthy on the consent screen for a self-registered MCP client', function
     expect($page->assertSee('Unverified AI client.'))->toBeHealthyInEachTheme();
 });
 
-// Long names, emails, job titles and role names are what break a layout.
+// Long names, NetIDs, emails, job titles and role names are what break a layout.
 it('fits every administration page and its tables at each width', function () {
+    auth()->user()->forceFill(['username' => 'featherstonehaugh.max'])->save();
     $person = User::factory()->create([
         'first_name' => 'Maximiliana Alexandrina Josephine',
         'last_name' => 'Featherstonehaugh-Wolstenholme',
