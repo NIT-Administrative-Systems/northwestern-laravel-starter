@@ -3,54 +3,12 @@
 declare(strict_types=1);
 
 use App\Domains\Api\Actions\Applications\RegisterOAuthApplication;
-use App\Domains\Api\Actions\PersonalAccessTokens\CreatePersonalAccessToken;
-use App\Domains\Api\Enums\TokenExpiration;
-use App\Domains\Support\Enums\AnnouncementSeverity;
-use App\Domains\Support\Models\Announcement;
-use Northwestern\SysDev\Chassis\Testing\Browser\FilamentPages;
 
 /*
- * Every page a signed-in person without roles can reach works and passes axe.
- *
- * The app panel's pages are found from the panel, so
- * a new page is checked without being listed here.
+ * The OAuth consent screens a connected application or MCP client opens pass axe.
  */
 
 beforeEach(fn () => $this->signInAsNorthwesternUser());
-
-it('is healthy on every app panel page', function (bool $dark) {
-    if ($dark) {
-        $this->useDarkMode();
-    }
-
-    expect([
-        ...FilamentPages::in('app'),
-        '/support/changelog',
-        '/this-page-does-not-exist',
-        '/administration',
-    ])->toAllBeHealthy();
-})->with(['light' => false, 'dark' => true]);
-
-it('is healthy on the lockdown page', function () {
-    config(['platform.lockdown.enabled' => true]);
-
-    expect(visit('/app/access-restricted')->assertSee('Access Restricted'))->toBeHealthyInEachTheme();
-});
-
-it("is healthy on the app panel's dashboard on a phone", function () {
-    expect(visit('/app'))->toBeHealthyOnMobile();
-});
-
-it('is healthy with the announcement banner and on the Announcements page', function () {
-    Announcement::factory()->severity(AnnouncementSeverity::Warning)->create([
-        'title' => 'Scheduled Maintenance',
-        'body' => 'The application is **unavailable** Saturday from 6 to 8 a.m.',
-    ]);
-    Announcement::factory()->create();
-
-    expect(visit('/app')->assertVisible('@announcement-banner'))->toBeHealthyInEachTheme();
-    expect(visit('/app/announcements')->assertSee('Scheduled Maintenance'))->toBeHealthyInEachTheme();
-});
 
 it('is healthy on the OAuth consent screen', function () {
     [, $client] = resolve(RegisterOAuthApplication::class)(
@@ -104,14 +62,23 @@ it('is healthy on the page for an application that is no longer registered', fun
     expect($page->assertSee('Application Not Registered'))->toBeHealthyInEachTheme();
 });
 
-// An administrator sees every page, here with values long enough to wrap.
-it('fits every app panel page and its tables at each width', function () {
-    $user = $this->signInAsSuperAdministrator();
-    $user->forceFill([
-        'job_titles' => ['Associate Director of Strategic Enrollment Communications and Outreach'],
-        'departments' => ['Feinberg School of Medicine Department of Preventive Medicine'],
-    ])->save();
-    resolve(CreatePersonalAccessToken::class)($user, 'Weekly enrollment report for the dean of the graduate school', [], TokenExpiration::OneMonth);
+it('is healthy on the consent screen for a self-registered MCP client', function () {
+    // Connecting an MCP client takes a permission a person without roles lacks.
+    $this->signInAsSuperAdministrator();
+    $client = $this->postJson('/oauth/register', [
+        'client_name' => 'Claude Code',
+        'redirect_uris' => ['http://localhost:4100/callback'],
+    ])->assertCreated()->json('client_id');
 
-    expect(FilamentPages::in('app'))->toAllFitEachWidth();
+    $page = visit('/oauth/authorize?' . http_build_query([
+        'client_id' => $client,
+        'redirect_uri' => 'http://localhost:4100/callback',
+        'response_type' => 'code',
+        'scope' => 'mcp:use',
+        'state' => 'browser-test',
+        'code_challenge' => 'E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM',
+        'code_challenge_method' => 'S256',
+    ]));
+
+    expect($page->assertSee('Unverified AI client.'))->toBeHealthyInEachTheme();
 });

@@ -486,7 +486,7 @@ jobs:
           fail-on-error: false
 
   browser-tests:
-    name: 🌐 Browser Tests
+    name: 🌐 Browser Tests (${{ matrix.shard }}/2)
     needs: [determine-scope]
     if: needs.determine-scope.outputs.code == 'true'
     runs-on: ubuntu-latest
@@ -494,8 +494,12 @@ jobs:
     timeout-minutes: 20
     permissions:
         contents: read
-        checks: write
-        pull-requests: write
+    # Pest gives each shard test files whose timings in tests/.pest/shards.json add up to about the
+    # same, and each shard runs its files in parallel. Add a shard to the list and to --shard below.
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [ 1, 2 ]
     # S3-compatible object storage, as in production: .env.ci points the application at it, so
     # tests that upload files exercise real signed URLs and CORS.
     services:
@@ -564,7 +568,8 @@ jobs:
           --testsuite=Browser
           --parallel
           --ci
-          --log-junit .build/junit-browser.xml
+          --shard ${{ matrix.shard }}/2
+          --log-junit .build/junit-browser-shard${{ matrix.shard }}.xml
           --teamcity
         # The application runs inside this process, so it reads the bucket's credentials from here.
         env:
@@ -575,7 +580,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: Browser Test Screenshots PR${{ github.event.pull_request.number }} Run${{ github.run_id }}
+          name: Browser Test Screenshots PR${{ github.event.pull_request.number }} Run${{ github.run_id }} Shard${{ matrix.shard }}
           path: tests/Browser/Screenshots
           retention-days: 7
 
@@ -583,10 +588,46 @@ jobs:
         if: always()
         run: cat -n storage/logs/laravel.log | fold -w 120 || true
 
+      - name: 📦 Upload Test Results
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: Browser Test Results PR${{ github.event.pull_request.number }} Run${{ github.run_id }} Shard${{ matrix.shard }}
+          path: .build/junit-browser-shard${{ matrix.shard }}.xml
+          retention-days: 1
+
+  publish-browser-test-results:
+    name: 🌐 Browser Test Results
+    needs: [browser-tests, determine-scope]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: always() && github.actor != 'dependabot[bot]' && needs.determine-scope.outputs.code == 'true'
+    permissions:
+        contents: read
+        checks: write
+        pull-requests: write
+        actions: read
+
+    steps:
+      - name: 📥 Download Test Results
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          path: artifacts
+          pattern: Browser Test Results PR${{ github.event.pull_request.number }} Run${{ github.run_id }}*
+          merge-multiple: true
+
       - name: 📊 Publish Browser Test Results
-        if: always() && github.actor != 'dependabot[bot]'
+        id: test-results
         uses: EnricoMi/publish-unit-test-result-action@da5b7be67623cd59bbbd1a0ce4f022050a55605f # v2.26.0
         with:
-          check_name: "🌐 Browser Test Results"
+          check_name: "🌐 Browser Test Report"
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          files: .build/junit-browser.xml
+          files: "artifacts/**/*.xml"
+
+      # Fails "🌐 Browser Test Results" when a shard failed, even one that failed before it wrote a
+      # report. Require this job in the ruleset, not the "🌐 Browser Test Report" check, for the
+      # reason given in "📊 Unit Test Results".
+      - name: 📉 Fail on Errors
+        if: ${{ needs.browser-tests.result != 'success' || fromJSON( steps.test-results.outputs.json ).conclusion != 'success' }}
+        run: |
+          false
