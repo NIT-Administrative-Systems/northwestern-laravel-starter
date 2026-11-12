@@ -13,8 +13,8 @@ use Northwestern\SysDev\Chassis\Testing\Browser\FilamentPages;
 /*
  * Every administration page fits each width, with values long enough to wrap.
  *
- * Add a record page's path to the list, and give its record long
- * values, since those are what break a layout in practice.
+ * Add a record page's path to the list, and give that record values
+ * long enough to wrap, since long values are what break a layout.
  */
 
 beforeEach(fn () => $this->signInAsSuperAdministrator());

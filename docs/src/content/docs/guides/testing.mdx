@@ -119,10 +119,10 @@ CI splits the PHP tests into three shards and the browser tests into two, each a
 Refresh the timings after adding test classes, with the assets built:
 
 ```bash
-composer test:shards
+vendor/bin/pest --testsuite=Unit,Feature,Browser --parallel --update-shards
 ```
 
-It runs `vendor/bin/pest --testsuite=Unit,Feature,Browser --parallel --update-shards`. Pest rewrites the whole file from the run's timings, so a run of the default suites alone would drop the browser tests' timings. Pest writes the file only when the run passes. Commit it. To change the number of shards, edit both the `matrix.shard` list and the `--shard` argument of that job in `.github/workflows/check-pr.yml`.
+Name all three suites: Pest rewrites the whole file from the run's timings, so a run of the default suites alone would drop the browser tests' timings. Pest writes the file only when the run passes. Commit it. To change the number of shards, edit both the `matrix.shard` list and the `--shard` argument of that job in `.github/workflows/check-pr.yml`.
 
 A shard, like each process in a parallel run, takes whole test files, so one long file sets the pace for everything else. Keep each browser test file to one kind of check: the page files in `tests/Browser/Pages` are split by audience and by check for that reason.
 
@@ -170,7 +170,8 @@ Pages load the application's real assets, so run `pnpm build` again after you ch
 | `Pages/App/ConsentScreensTest.php`  | The OAuth consent screens for a connected application, an internationalized domain, an application no longer registered and a self-registered MCP client |
 | `Pages/App/LayoutTest.php`          | Every app panel page at each width |
 | `Pages/Administration/PagesTest.php` | Every administration page; the dashboard on a phone |
-| `Pages/Administration/RecordPagesTest.php` | Record pages for users, an API user, roles, an announcement, a support ticket and an audit |
+| `Pages/Administration/UserPagesTest.php` | A person's pages for a NetID user, an API user and a deactivated account |
+| `Pages/Administration/RecordPagesTest.php` | Record pages for roles, an announcement, a support ticket and an audit |
 | `Pages/Administration/ActionModalsTest.php` | The modals that add people to a role and deactivate an account |
 | `Pages/Administration/LayoutTest.php` | Every administration page and several record pages at each width, with long values |
 
@@ -226,7 +227,7 @@ A few things about the browser plugin that are easy to miss:
 
 Add the pages they can't find to the file for the people who can see them:
 
-- **A record page**, such as a view or edit page, needs a record. Add it to the dataset in `Pages/Administration/RecordPagesTest.php`, with a closure that makes the record and returns the path. Add its path to the list in `Pages/Administration/LayoutTest.php` too, with a record whose values are long.
+- **A record page**, such as a view or edit page, needs a record. Add it to the dataset in `Pages/Administration/RecordPagesTest.php`, or `UserPagesTest.php` for a page about a person, with a closure that makes the record and returns the path. Add its path to the list in `Pages/Administration/LayoutTest.php` too, with a record whose values are long.
 - **A public page** goes in the `public pages` dataset in `Pages/Public/PagesTest.php`, which also checks it at a phone's width, and in the list of paths in `Pages/Public/LayoutTest.php`.
 - **A page that needs data to show its interesting state**, such as a banner or a consent screen, gets a test of its own that makes the data and asserts that the state is visible before it checks the page.
 - **A new error page** goes in the list of statuses in `Pages/Public/ErrorPagesTest.php`. `ErrorPages::path($status)` registers a test route that answers with that status.

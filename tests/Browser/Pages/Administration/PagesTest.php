@@ -7,8 +7,8 @@ use Northwestern\SysDev\Chassis\Testing\Browser\FilamentPages;
 /*
  * Every administration page works and passes axe for a super administrator.
  *
- * Pages are found from the panel. Pages that need a record are in
- * RecordPagesTest, and the layout checks are in LayoutTest.
+ * Pages are found from the panel. Record pages are in RecordPagesTest
+ * and UserPagesTest, and every layout check is kept in LayoutTest.
  */
 
 beforeEach(fn () => $this->signInAsSuperAdministrator());
