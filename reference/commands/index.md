@@ -462,7 +462,7 @@ Clean up the clients MCP clients register for themselves.
 php artisan mcp:prune-clients
 ```
 
-It deletes a self-registered client nobody connected within `mcp.cleanup.unconnected_hours` (24) of registering, and revokes one nobody has used for `mcp.cleanup.unused_days` (90). Administrator-registered applications and service clients are never touched.
+It deletes a self-registered client nobody connected within `mcp.cleanup.unconnected_hours` (24) of registering, and revokes one nobody has used for `mcp.cleanup.unused_days` (90). A revoked client is kept, so its revoked tokens still name it. Administrator-registered applications and service clients are never touched.
 
 **See also:** [MCP](https://laravel-starter.entapp.northwestern.edu/features/mcp/#managing-clients)
 
