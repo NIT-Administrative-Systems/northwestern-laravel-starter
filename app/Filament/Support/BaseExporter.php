@@ -8,15 +8,20 @@ use Filament\Actions\Exports\Exporter;
 use Filament\Actions\Exports\Models\Export;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use Northwestern\SysDev\Chassis\Formatting\CountInWords;
 
 /**
- * The base for the application's exporters: declare the columns and what a row is, and every
- * export is safe to open in a spreadsheet.
+ * The base for the application's exporters: declare the columns and what
+ * a row is, and every export is then safe to open in any spreadsheet.
  *
- * A cell that starts with `=`, `+`, `-`, `@`, a tab or a carriage return would run as a formula
- * in Excel or Google Sheets, so a name like `=HYPERLINK(...)` could act on whoever opens the
- * file (CSV injection). Every text cell that starts with one gets a leading apostrophe, whatever
- * the column, so a new exporter is safe without remembering to.
+ * A cell that starts with =, +, -, @, a tab or a carriage return
+ * runs as a formula in Excel or Google Sheets. A name such as
+ * =HYPERLINK(...) could then act on whoever opens the file.
+ *
+ * Every text cell that starts with one gets a
+ * leading apostrophe, whatever its column,
+ * so a new exporter is safe without its
+ * author remembering to make it so.
  *
  * ```php
  * class ProjectExporter extends BaseExporter
@@ -45,7 +50,8 @@ abstract class BaseExporter extends Exporter
     }
 
     /**
-     * A text cell a spreadsheet would run as a formula, with an apostrophe in front; anything else unchanged.
+     * Put an apostrophe before a text cell a spreadsheet would
+     * run as a formula, and leave anything else unchanged.
      */
     public static function neutralize(mixed $value): mixed
     {
@@ -54,11 +60,10 @@ abstract class BaseExporter extends Exporter
 
     public static function getCompletedNotificationBody(Export $export): string
     {
-        $exported = $export->successful_rows;
-        $body = sprintf('Exported %s %s.', number_format($exported), Str::plural(static::recordNoun(), $exported));
+        $body = 'Exported ' . CountInWords::of($export->successful_rows, static::recordNoun()) . '.';
 
         if (($failed = $export->getFailedRowsCount()) !== 0) {
-            $body .= sprintf(' %s %s failed.', number_format($failed), Str::plural('row', $failed));
+            $body .= ' ' . Str::ucfirst(CountInWords::of($failed, 'row')) . ' failed.';
         }
 
         return $body;

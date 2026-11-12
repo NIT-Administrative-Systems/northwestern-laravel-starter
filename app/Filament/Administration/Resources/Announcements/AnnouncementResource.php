@@ -21,8 +21,8 @@ use Filament\Tables\Table;
 use UnitEnum;
 
 /**
- * Announcements shown to the application's users in a banner and on their Announcements page.
- * Managed by people with `ManageAnnouncements` ({@see \App\Domains\Support\Policies\AnnouncementPolicy}).
+ * Announcements shown to the application's users in a banner and on their
+ * Announcements page. People with ManageAnnouncements manage them here.
  */
 class AnnouncementResource extends Resource
 {
@@ -35,8 +35,6 @@ class AnnouncementResource extends Resource
     protected static string|null|UnitEnum $navigationGroup = AdministrationNavGroup::Platform;
 
     protected static ?int $navigationSort = 5;
-
-    protected static ?string $description = 'Messages shown to the application\'s users in a banner and on their Announcements page.';
 
     public static function form(Schema $schema): Schema
     {

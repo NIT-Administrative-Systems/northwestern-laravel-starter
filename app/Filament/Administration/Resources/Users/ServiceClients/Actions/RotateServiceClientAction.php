@@ -79,8 +79,8 @@ HTML))
             ->modalSubmitAction($secret->savedAction())
             ->action(fn (ServiceClientsRelationManager $livewire) => $secret->forget($livewire))
             ->successNotificationTitle('Replacement Service Client Created')
-            // An active client, or the one whose rotation is in progress, so the wizard can finish even if
-            // the client changed state meanwhile.
+            // An active client, or the one this run is rotating, so the wizard
+            // can finish even if the client's state changed in the meantime.
             ->visible(fn (OAuthClient $record, ServiceClientsRelationManager $livewire): bool => ServiceClientSchemas::isMutable($record) || $secret->isFor($livewire, $record));
     }
 }

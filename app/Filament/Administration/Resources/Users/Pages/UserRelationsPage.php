@@ -11,8 +11,9 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Illuminate\Contracts\Support\Htmlable;
 
 /**
- * A page of a person's record that groups some of their relation managers, one per tab. It's
- * in the record's sub-navigation only when at least one of its managers applies to the person.
+ * A page of a person's record that groups some of their relation
+ * managers, one per tab. It's in the record's navigation only
+ * when at least one of its managers applies to the person.
  */
 abstract class UserRelationsPage extends ManageRelatedRecords
 {

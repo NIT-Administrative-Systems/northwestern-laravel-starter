@@ -23,12 +23,6 @@ class ListApiRequestLogs extends ListRecords
 
     protected ?string $subheading = 'Every API request, with response times and failures.';
 
-    /** @return array<string, string> */
-    public function getBreadcrumbs(): array
-    {
-        return [];
-    }
-
     public ?string $tableStartDate = null;
 
     public ?string $tableEndDate = null;
@@ -41,6 +35,16 @@ class ListApiRequestLogs extends ListRecords
 
         $this->tableStartDate = now()->subDays(29)->startOfDay()->toDateTimeString();
         $this->tableEndDate = now()->endOfDay()->toDateTimeString();
+    }
+
+    /**
+     * No "List" crumb under a title that already names the list.
+     *
+     * @return array<string, string>
+     */
+    public function getBreadcrumbs(): array
+    {
+        return [];
     }
 
     #[On(ApiRequestFilterWidget::EVENT_DATE_RANGE_UPDATED)]

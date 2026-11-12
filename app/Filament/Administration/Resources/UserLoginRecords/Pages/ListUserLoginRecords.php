@@ -32,6 +32,16 @@ class ListUserLoginRecords extends ListRecords
         $this->tableEndDate = now()->endOfDay()->toDateTimeString();
     }
 
+    /**
+     * No "List" crumb under a title that already names the list.
+     *
+     * @return array<string, string>
+     */
+    public function getBreadcrumbs(): array
+    {
+        return [];
+    }
+
     #[On(DateRangeFilterWidget::EVENT_DATE_RANGE_UPDATED)]
     public function updateTableDateRange(string $startDate, string $endDate): void
     {
@@ -61,15 +71,5 @@ class ListUserLoginRecords extends ListRecords
             LoginTrendsChartWidget::class,
             LoginsBySegmentChartWidget::class,
         ];
-    }
-
-    /**
-     * No "List" crumb under a title that already names the list.
-     *
-     * @return array<string, string>
-     */
-    public function getBreadcrumbs(): array
-    {
-        return [];
     }
 }

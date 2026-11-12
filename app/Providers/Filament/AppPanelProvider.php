@@ -34,11 +34,11 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Northwestern\FilamentTheme\NorthwesternTheme;
 
 /**
- * The end-user panel, and the default panel. Applications build their features here;
- * the administration panel is for back-office work.
+ * The end-user panel, and the default one. Applications build their features
+ * here, and the administration panel is for work done behind the scenes.
  *
- * This panel owns sign-in for the whole application: guests of any panel are sent to
- * its login page.
+ * This panel owns sign-in for the whole application, so
+ * guests on any panel are sent to its sign-in page.
  */
 class AppPanelProvider extends PanelProvider
 {
@@ -88,9 +88,9 @@ class AppPanelProvider extends PanelProvider
                 fn (string $scope): bool => in_array(HasSiteHeader::class, class_uses_recursive($scope), true),
             ) ? view('filament.app.light-only')->render() : '')
             ->renderHook(PanelsRenderHook::TOPBAR_LOGO_AFTER, fn (): string => Blade::render('<x-panel-brand />'))
-            // The top bar shows the application's name from lg up; below that, the sidebar does.
+            // The top bar shows the application name from lg up, and the sidebar below that.
             ->renderHook(PanelsRenderHook::SIDEBAR_NAV_START, fn (): string => Blade::render('<x-sidebar-panel-name class="lg:hidden" :name="config(\'app.name\')" />'))
-            // After global search: after the theme's environment badge and just ahead of the user menu.
+            // After global search: after the environment badge and just before the user menu.
             ->renderHook(PanelsRenderHook::GLOBAL_SEARCH_AFTER, fn (): string => Blade::render('<x-help-menu />'))
             // Sign-in and the lockdown page; see HasSiteHeader.
             ->renderHook(PanelsRenderHook::SIMPLE_LAYOUT_START, fn (): string => Blade::render(<<<'BLADE'
@@ -131,12 +131,15 @@ class AppPanelProvider extends PanelProvider
             ->discoverPages(in: app_path('Filament/App/Pages'), for: 'App\Filament\App\Pages')
             ->discoverPages(in: app_path('Filament/App/Starter/Pages'), for: 'App\Filament\App\Starter\Pages')
             ->discoverClusters(in: app_path('Filament/App/Clusters'), for: 'App\Filament\App\Clusters')
-            // Filament's dashboard renders the widgets in Filament/App/Widgets; replace it with your own page if you need more.
+            // Filament's dashboard renders the widgets in
+            // Filament/App/Widgets. Replace it with a
+            // page of your own for anything more.
             ->pages([
                 Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/App/Widgets'), for: 'App\Filament\App\Widgets')
-            // The bell in the top bar. Send one with Notification::make()->...->sendToDatabase($user).
+            // The bell in the top bar. To send a notification,
+            // call sendToDatabase($user) on a Notification.
             ->databaseNotifications()
             ->databaseNotificationsPolling('30s')
             ->plugins([

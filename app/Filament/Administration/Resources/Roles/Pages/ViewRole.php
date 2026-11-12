@@ -65,6 +65,15 @@ class ViewRole extends ViewRecord
         ]);
     }
 
+    protected function getHeaderActions(): array
+    {
+        return [
+            EditAction::make()
+                ->authorize(SystemPermission::EditRoles)
+                ->hidden(fn () => $this->record->isSystemManagedType()),
+        ];
+    }
+
     /**
      * Why the role can't be changed here, when it can't.
      *
@@ -110,14 +119,5 @@ class ViewRole extends ViewRecord
         $permission = $record->permissions->firstWhere('label', $label);
 
         return $permission instanceof Permission && $permission->scope === PermissionScope::Personal;
-    }
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            EditAction::make()
-                ->authorize(SystemPermission::EditRoles)
-                ->hidden(fn () => $this->record->isSystemManagedType()),
-        ];
     }
 }

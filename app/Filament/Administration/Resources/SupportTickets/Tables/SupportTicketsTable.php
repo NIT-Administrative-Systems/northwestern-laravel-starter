@@ -40,6 +40,7 @@ class SupportTicketsTable
                     ->sortable(),
 
                 TextColumn::make('user.full_name')
+                    ->placeholder('—')
                     ->label('Submitter')
                     ->description(fn (SupportTicket $record) => $record->user?->username)
                     ->searchable(['first_name', 'last_name']),
@@ -78,7 +79,7 @@ class SupportTicketsTable
                 TextColumn::make('ticketing_system')
                     ->label('Gateway')
                     ->badge()
-                    ->formatStateUsing(fn (?TicketSystem $state) => $state?->getLabel() ?? '—')
+                    ->placeholder('—')
                     ->visibleFrom('xl'),
 
                 TextColumn::make('ticket_number')
@@ -89,12 +90,14 @@ class SupportTicketsTable
                     ->visibleFrom('2xl'),
 
                 TextColumn::make('requester_email')
+                    ->placeholder('—')
                     ->label('Email')
                     ->copyable()
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('error_message')
+                    ->placeholder('—')
                     ->label('Error')
                     ->limit(40)
                     ->tooltip(fn (SupportTicket $record) => $record->error_message)

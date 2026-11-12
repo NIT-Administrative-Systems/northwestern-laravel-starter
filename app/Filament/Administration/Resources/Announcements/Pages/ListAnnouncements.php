@@ -12,13 +12,6 @@ class ListAnnouncements extends ListRecords
 {
     protected static string $resource = AnnouncementResource::class;
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            CreateAction::make()->label('New Announcement'),
-        ];
-    }
-
     /**
      * No "List" crumb under a title that already names the list.
      *
@@ -27,5 +20,12 @@ class ListAnnouncements extends ListRecords
     public function getBreadcrumbs(): array
     {
         return [];
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            CreateAction::make()->label('New Announcement'),
+        ];
     }
 }

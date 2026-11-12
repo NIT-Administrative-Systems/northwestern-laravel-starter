@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Filament\Administration\Resources\Users;
 
 use App\Domains\Access\Enums\SystemPermission;
+use App\Domains\Auth\Models\LoginChallenge;
 use App\Domains\User\Models\User;
 use App\Filament\Administration\Resources\UserLoginRecords\UserLoginRecordResource;
 use App\Filament\Administration\Resources\Users\Pages\ListUsers;
@@ -15,21 +16,48 @@ use App\Filament\Administration\Resources\Users\RelationManagers\RoleActivityRel
 use App\Filament\Administration\Resources\Users\UserResource;
 use App\Providers\Filament\AdministrationPanelProvider;
 use Filament\Facades\Filament;
+use Filament\Notifications\Notification;
 use Filament\Tables\Filters\TrashedFilter;
+use Illuminate\Support\Facades\Exceptions;
 use Livewire\Livewire;
 use Northwestern\SysDev\SOA\DirectorySearch;
 use PHPUnit\Framework\Attributes\CoversNothing;
+use RuntimeException;
 use Tests\Feature\Domains\User\Actions\Directory\FindOrUpdateUserFromDirectoryTest;
+use Tests\Feature\Filament\Administration\Concerns\AssertsLinkedRows;
 use Tests\TestCase;
 
 #[CoversNothing]
 final class UserResourceTest extends TestCase
 {
+    use AssertsLinkedRows;
+
     protected function setUp(): void
     {
         parent::setUp();
 
         Filament::setCurrentPanel(AdministrationPanelProvider::ID);
+    }
+
+    public function test_a_person_with_no_details_on_file_has_no_empty_links_in_the_list(): void
+    {
+        $person = User::factory()->create([
+            'first_name' => null,
+            'last_name' => null,
+            'email' => null,
+            'phone' => null,
+            'employee_id' => null,
+            'hr_employee_id' => null,
+            'primary_affiliation' => null,
+            'netid_inactive' => null,
+            'last_directory_sync_at' => null,
+            'directory_sync_last_failed_at' => null,
+        ]);
+        $administrator = User::factory()->affiliate()->create();
+        $administrator->givePermissionTo(SystemPermission::AccessAdministrationPanel, SystemPermission::ViewUsers);
+        $this->actingAs($administrator);
+
+        $this->assertEveryEmptyCellHasPlaceholder(Livewire::test(ListUsers::class), $person);
     }
 
     // Managing API access is enough to manage API users, and no one else.
@@ -60,7 +88,7 @@ final class UserResourceTest extends TestCase
         Livewire::test(ListUsers::class)->assertCanSeeTableRecords([$apiUser, $person]);
     }
 
-    // Manage All grants every permission through Gate::before, which a direct permission check skips.
+    // Manage All works through Gate::before, which a direct permission check skips.
     public function test_manage_all_opens_the_history_tabs_and_sign_in_records(): void
     {
         $superAdministrator = User::factory()->affiliate()->create();
@@ -107,7 +135,7 @@ final class UserResourceTest extends TestCase
             ->assertSee('Connected Applications');
     }
 
-    // An administrator opens an API user's record for its credentials, and it has no activity of its own.
+    // An API user's record is for its credentials; it has no activity of its own.
     public function test_an_api_users_record_puts_its_credentials_first_and_has_no_activity_page(): void
     {
         config(['api.enabled' => true]);
@@ -181,7 +209,8 @@ final class UserResourceTest extends TestCase
             ->assertCanNotSeeTableRecords([$person]);
     }
 
-    // Looking someone up never reactivates them; the administrator is sent to their page to do it.
+    // Looking someone up never reactivates them;
+    // it sends you to their page to do that.
     public function test_adding_a_deactivated_northwestern_user_says_so_and_leaves_them_deactivated(): void
     {
         config(['platform.wildcard_photo_sync' => false, 'nusoa.directorySearch.apiKey' => 'key']);
@@ -195,11 +224,27 @@ final class UserResourceTest extends TestCase
         $this->actingAs($administrator);
 
         Livewire::test(ListUsers::class)
-            ->callAction('create-nu-user', ['netid' => 'gone123'])
+            ->callAction('createNorthwesternUser', ['netid' => 'gone123'])
             ->assertNotified('Account Deactivated')
             ->assertRedirect(UserResource::getUrl('view', ['record' => $deactivated]));
 
         $this->assertSoftDeleted($deactivated);
+    }
+
+    public function test_a_code_that_fails_to_send_says_so_without_the_error_itself(): void
+    {
+        Exceptions::fake();
+        $superAdministrator = User::factory()->create();
+        $superAdministrator->givePermissionTo(SystemPermission::ManageAll);
+        $person = User::factory()->affiliate()->create();
+        $this->actingAs($superAdministrator);
+        LoginChallenge::creating(fn () => throw new RuntimeException('SQLSTATE[08006] could not connect to server'));
+
+        Livewire::test(ViewUser::class, ['record' => $person->getRouteKey()])
+            ->callAction('sendLoginCode')
+            ->assertNotified(Notification::make()->danger()->title('Verification Code Not Sent')->body('We couldn\'t send the code. Try again in a few minutes.'));
+
+        Exceptions::assertReported(RuntimeException::class);
     }
 
     public function test_a_deleted_person_is_offered_no_code_or_impersonation(): void

@@ -12,8 +12,8 @@ use BackedEnum;
 use Filament\Support\Icons\Heroicon;
 
 /**
- * How a person, or an API user's integration, calls the application: their tokens, connected
- * applications, service clients, and the requests those made.
+ * How a person, or an API user's integration, calls the application: their tokens,
+ * connected applications and service clients, and the requests those have made.
  */
 class ManageUserApiCredentials extends UserRelationsPage
 {

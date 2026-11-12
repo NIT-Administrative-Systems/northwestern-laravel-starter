@@ -12,6 +12,7 @@ use App\Domains\User\Models\User;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Validation\ValidationException;
 use Throwable;
 
 class SendLoginCodeAction extends Action
@@ -33,24 +34,35 @@ class SendLoginCodeAction extends Action
             ->icon(Heroicon::OutlinedPaperAirplane)
             ->requiresConfirmation()
             ->modalDescription('Sends a new verification code to their email address.')
-            ->action(function (User $record) {
+            ->action(function (User $record, LoginCodes $loginCodes): void {
                 try {
-                    resolve(LoginCodes::class)->issueFor($record, request());
+                    $loginCodes->issueFor($record, request());
+                } catch (ValidationException $exception) {
+                    // The person's hourly limit, which says when to try again.
+                    $this->notifyNotSent($exception->getMessage());
 
-                    Notification::make()
-                        ->success()
-                        ->title('Verification Code Sent')
-                        ->body('A new code was sent to ' . $record->email . '.')
-                        ->send();
-                } catch (Throwable $e) {
-                    report($e);
+                    return;
+                } catch (Throwable $exception) {
+                    report($exception);
+                    $this->notifyNotSent('We couldn\'t send the code. Try again in a few minutes.');
 
-                    Notification::make()
-                        ->danger()
-                        ->title('Verification Code Not Sent')
-                        ->body($e->getMessage())
-                        ->send();
+                    return;
                 }
+
+                Notification::make()
+                    ->success()
+                    ->title('Verification Code Sent')
+                    ->body('A new code was sent to ' . $record->email . '.')
+                    ->send();
             });
+    }
+
+    private function notifyNotSent(string $reason): void
+    {
+        Notification::make()
+            ->danger()
+            ->title('Verification Code Not Sent')
+            ->body($reason)
+            ->send();
     }
 }

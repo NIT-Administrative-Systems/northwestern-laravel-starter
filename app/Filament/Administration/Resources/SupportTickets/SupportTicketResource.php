@@ -7,6 +7,8 @@ namespace App\Filament\Administration\Resources\SupportTickets;
 use App\Domains\Access\Enums\SystemPermission;
 use App\Domains\Support\Models\SupportTicket;
 use App\Filament\Administration\Navigation\AdministrationNavGroup;
+use App\Filament\Administration\Resources\SupportTickets\Pages\ListSupportTickets;
+use App\Filament\Administration\Resources\SupportTickets\Pages\ViewSupportTicket;
 use App\Filament\Administration\Resources\SupportTickets\Schemas\SupportTicketInfolist;
 use App\Filament\Administration\Resources\SupportTickets\Tables\SupportTicketsTable;
 use BackedEnum;
@@ -36,8 +38,6 @@ class SupportTicketResource extends Resource
     protected static string|null|UnitEnum $navigationGroup = AdministrationNavGroup::Platform;
 
     protected static ?int $navigationSort = 10;
-
-    protected static ?string $description = 'Read-only submission log for user-submitted support tickets.';
 
     public static function canAccess(): bool
     {
@@ -119,8 +119,8 @@ class SupportTicketResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListSupportTickets::route('/'),
-            'view' => Pages\ViewSupportTicket::route('/{record}'),
+            'index' => ListSupportTickets::route('/'),
+            'view' => ViewSupportTicket::route('/{record}'),
         ];
     }
 }

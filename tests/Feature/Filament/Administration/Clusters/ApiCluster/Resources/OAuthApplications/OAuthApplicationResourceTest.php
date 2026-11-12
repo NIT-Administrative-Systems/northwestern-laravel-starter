@@ -147,7 +147,7 @@ final class OAuthApplicationResourceTest extends TestCase
         $this->assertSame([], preg_grep('/^reveal_once_secret:/', array_keys(Session::all())));
     }
 
-    // While the API is off administrators can still see and revoke applications, but not add or change them.
+    // With the API off, applications can still be seen and revoked but not changed.
     public function test_while_the_api_is_off_applications_can_be_revoked_but_not_registered_or_edited(): void
     {
         [, $client] = resolve(\App\Domains\Api\Actions\Applications\RegisterOAuthApplication::class)('Portal', ['https://portal.example.edu/cb'], true, []);

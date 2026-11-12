@@ -11,8 +11,8 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Auth\Access\Response;
 
 /**
- * Adds the people in an uploaded CSV to a role, through {@see AddPeopleToRoleImporter}. It's
- * offered where {@see AddPeopleAction} is, with the same role and permissions.
+ * Adds the people in an uploaded CSV to a role, through AddPeopleToRoleImporter.
+ * It's offered where AddPeopleAction is, with the same roles and permissions.
  */
 class ImportPeopleAction extends ImportAction
 {

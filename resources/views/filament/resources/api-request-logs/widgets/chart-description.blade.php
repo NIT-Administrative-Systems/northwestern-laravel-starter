@@ -15,7 +15,7 @@
     $leftMeta = $leftMeta ?? null;
 @endphp
 
-{{-- The columns follow the widget's width, not the screen's, so a path or a range never breaks mid-word. --}}
+{{-- Columns follow the widget's width, not the screen's, so no path or range breaks. --}}
 <div class="@container">
     <div class="{{ $singleColumn ? 'grid-cols-1' : 'grid-cols-1 @md:grid-cols-2' }} @md:gap-6 grid gap-4 text-sm">
         <div class="flex min-w-0 flex-col">

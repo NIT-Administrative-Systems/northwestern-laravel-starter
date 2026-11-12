@@ -106,7 +106,8 @@ final class AnnouncementResourceTest extends TestCase
         Queue::assertPushed(NotifyAnnouncementAudience::class);
     }
 
-    // Times are entered in the author's timezone and stored as instants. The other tests use a UTC author.
+    // Times are entered in the author's timezone and stored
+    // as instants. The other tests use a author in UTC.
     public function test_a_start_time_is_read_in_the_authors_timezone(): void
     {
         $this->travelTo(CarbonImmutable::parse('2026-10-06 12:00:00', 'UTC'));
@@ -134,6 +135,9 @@ final class AnnouncementResourceTest extends TestCase
             ->assertHasNoFormErrors();
         $this->assertSame('Corrected title', $announcement->fresh()?->title);
 
+        $editPage = $page()->instance();
+        $this->assertInstanceOf(EditAnnouncement::class, $editPage);
+        $this->assertStringStartsWith('It returns to the banner for the one person who dismissed it', (string) $editPage->getAction('showAgain')?->getModalDescription());
         $page()->callAction('showAgain')->assertNotified();
         $this->assertSame(0, $announcement->dismissals()->count());
 
@@ -144,7 +148,7 @@ final class AnnouncementResourceTest extends TestCase
         $this->assertSame(1, Announcement::query()->whereNull('published_at')->where('title', 'Corrected title')->count());
     }
 
-    // An ended announcement can't be republished by editing its dates; it has to be duplicated.
+    // An ended announcement can't be published again by changing its dates.
     public function test_an_ended_announcements_schedule_cannot_be_changed(): void
     {
         $announcement = Announcement::factory()->ended()->create();

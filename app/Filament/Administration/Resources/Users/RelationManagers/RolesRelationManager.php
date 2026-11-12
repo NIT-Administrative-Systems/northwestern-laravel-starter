@@ -36,34 +36,6 @@ class RolesRelationManager extends RelationManager
         return false;
     }
 
-    /**
-     * Get roles available for assignment to the owner user.
-     *
-     * Results are cached within the request to avoid duplicate queries
-     * across disabled(), tooltip(), and schema() callbacks.
-     *
-     * @return Collection<int, Role>
-     */
-    private function getAvailableRolesForAssignment(): Collection
-    {
-        return once(function () {
-            /** @var User $user */
-            $user = $this->getOwnerRecord();
-            $assignedRoleIds = $user->roles()->pluck('id')->toArray();
-
-            return Role::assignable()
-                ->with('role_type')
-                ->whereNotIn('id', $assignedRoleIds)
-                ->when(
-                    $user->is_api_user,
-                    fn ($query) => $query->whereHas('role_type', fn (\Illuminate\Contracts\Database\Query\Builder $q) => $q->where('slug', RoleTypeEnum::ApiIntegration)),
-                    fn ($query) => $query->whereHas('role_type', fn (\Illuminate\Contracts\Database\Query\Builder $q) => $q->where('slug', '!=', RoleTypeEnum::ApiIntegration))
-                )
-                ->get()
-                ->filter(fn (Role $role) => Gate::allows('attachUser', [$role, $user]));
-        });
-    }
-
     public static function getTabComponent(Model $ownerRecord, string $pageClass): Tab
     {
         return Tab::make('Roles')
@@ -95,7 +67,7 @@ class RolesRelationManager extends RelationManager
             ])
             ->headerActions([
                 AttachAction::make()
-                    // Nobody can give themselves a role, so the action isn't offered on your own record.
+                    // Nobody can give themselves a role, so it isn't offered on your own record.
                     ->authorize(fn (): bool => ! $this->getOwnerRecord()->is(auth()->user()) && Gate::allows(SystemPermission::AssignRoles))
                     ->label('Assign Role')
                     ->color('primary')
@@ -104,9 +76,9 @@ class RolesRelationManager extends RelationManager
                     ->modalHeading('Assign Role to User')
                     ->modalSubmitActionLabel('Add Role')
                     ->attachAnother(false)
-                    ->disabled(fn () => $this->getAvailableRolesForAssignment()->isEmpty())
+                    ->disabled(fn () => $this->assignableRoles()->isEmpty())
                     ->tooltip(
-                        fn () => $this->getAvailableRolesForAssignment()->isEmpty()
+                        fn () => $this->assignableRoles()->isEmpty()
                         ? 'This person already has every role that can be assigned.'
                         : 'Choose a role for this person.'
                     )
@@ -117,7 +89,7 @@ class RolesRelationManager extends RelationManager
                         return [
                             Select::make('recordId')
                                 ->label('Role')
-                                ->options($this->getAvailableRolesForAssignment()->pluck('name', 'id'))
+                                ->options($this->assignableRoles()->pluck('name', 'id'))
                                 ->searchable()
                                 ->required()
                                 ->helperText(
@@ -182,5 +154,27 @@ class RolesRelationManager extends RelationManager
                 ->withoutGlobalScopes([
                     SoftDeletingScope::class,
                 ]));
+    }
+
+    /**
+     * Get the roles this person may be given: assignable ones they don't have, of
+     * the kind that suits them, that the signed-in administrator may assign. It
+     * runs once a request, as the action's state, tooltip and form all ask.
+     *
+     * @return Collection<int, Role>
+     */
+    private function assignableRoles(): Collection
+    {
+        return once(function () {
+            /** @var User $user */
+            $user = $this->getOwnerRecord();
+
+            return Role::assignable()
+                ->with('role_type')
+                ->whereNotIn('id', $user->roles()->pluck('id'))
+                ->whereHas('role_type', fn (Builder $query) => $query->where('slug', $user->is_api_user ? '=' : '!=', RoleTypeEnum::ApiIntegration))
+                ->get()
+                ->filter(fn (Role $role) => Gate::allows('attachUser', [$role, $user]));
+        });
     }
 }

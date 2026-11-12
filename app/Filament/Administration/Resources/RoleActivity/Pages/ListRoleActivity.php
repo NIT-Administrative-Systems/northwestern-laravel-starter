@@ -12,11 +12,18 @@ class ListRoleActivity extends ListRecords
 {
     protected static string $resource = RoleActivityResource::class;
 
-    protected ?string $heading = 'Role Activity';
+    protected static ?string $title = 'Role Activity';
 
     protected ?string $subheading = 'Every role assignment and removal.';
 
-    protected static ?int $defaultPaginationPageOption = 25;
+    /** @return array<string, string> */
+    public function getBreadcrumbs(): array
+    {
+        return [
+            route('filament.administration.resources.roles.index') => 'Roles',
+            '' => 'Role Activity',
+        ];
+    }
 
     /** @return list<int> */
     protected function getTableRecordsPerPageSelectOptions(): array
@@ -29,15 +36,6 @@ class ListRoleActivity extends ListRecords
     {
         return [
             RoleActivityStatsWidget::class,
-        ];
-    }
-
-    /** @return array<string> */
-    public function getBreadcrumbs(): array
-    {
-        return [
-            route('filament.administration.resources.roles.index') => 'Roles',
-            '' => 'Role Activity',
         ];
     }
 }

@@ -8,6 +8,7 @@ use App\Domains\Core\Enums\AuditEvent;
 use App\Domains\Core\Models\Audit;
 use App\Filament\Administration\Exports\AuditExporter;
 use Carbon\Carbon;
+use Closure;
 use Filament\Actions\ExportAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
@@ -22,19 +23,15 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Str;
 
 class AuditsTable
 {
     /**
-     * Model types that should be filtered out of the table by default.
-     *
-     * This is useful for:
-     * - Models that generate excessive audit entries (e.g., automated processes)
-     * - Models whose changes are not relevant for typical audit review
-     * - Sensitive models that should only be viewed when specifically needed
-     *
-     * Users can still view these audits by adjusting table filters.
+     * Model types the table hides until someone changes the Ignored
+     * Types filter: models that write many automated or low-value
+     * audits, and sensitive ones to show only when asked for.
      *
      * @var list<class-string>
      */
@@ -45,9 +42,10 @@ class AuditsTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->with('impersonator'))
+            ->modifyQueryUsing(fn (Builder $query) => $query->with(self::people()))
             ->columns([
                 TextColumn::make('trace_id')
+                    ->placeholder('—')
                     ->label('Trace ID')
                     ->fontFamily(FontFamily::Mono)
                     ->searchable(isIndividual: true, isGlobal: false)
@@ -80,6 +78,7 @@ class AuditsTable
                     ->sortable()
                     ->visibleFrom('xl'),
                 TextColumn::make('url')
+                    ->placeholder('—')
                     ->label('URL')
                     ->fontFamily(FontFamily::Mono)
                     ->formatStateUsing(fn ($state) => str_replace(config('app.url'), '', $state))
@@ -120,24 +119,28 @@ class AuditsTable
                     )
                     ->color(fn ($record) => $record->impersonator ? 'warning' : null),
                 TextColumn::make('ip_address')
+                    ->placeholder('—')
                     ->label('IP Address')
                     ->fontFamily(FontFamily::Mono)
                     ->copyable()
                     ->searchable(isIndividual: true, isGlobal: false)
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('user_agent')
+                    ->placeholder('—')
                     ->label('User Agent')
                     ->searchable(isIndividual: true, isGlobal: false)
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('tags')
+                    ->placeholder('—')
                     ->searchable(isIndividual: true, isGlobal: false)
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('created_at', direction: 'desc')
-            // Audits grow without bound; skip the full COUNT(*) the default paginator runs on every request.
+            // Audits grow without bound, so skip the COUNT(*)
+            // the default paginator runs on every request.
             ->paginationMode(PaginationMode::Simple)
-            // Global search covers only the user and impersonator columns. The free-text columns above
-            // search individually, so a global term does not scan every audit's URL and user agent.
+            // Global search covers only the user and impersonator columns, so it never scans
+            // every audit's URL and user agent. Each text column above has its own search.
             ->splitSearchTerms(false)
             ->searchDebounce('750ms')
             ->filters([
@@ -251,6 +254,20 @@ class AuditsTable
     }
 
     /**
+     * Load who made each change and who impersonated them, including deactivated
+     * people, so a change by someone since deactivated still shows as theirs.
+     *
+     * @return array<string, Closure>
+     */
+    public static function people(): array
+    {
+        return [
+            'user' => fn (Relation $user) => $user->withoutGlobalScope(SoftDeletingScope::class),
+            'impersonator' => fn (Relation $impersonator) => $impersonator->withoutGlobalScope(SoftDeletingScope::class),
+        ];
+    }
+
+    /**
      * Grouped options for Filament: "Domain" => [ full_class => short model ]
      *
      * @return array<string,array<string,string>>
@@ -262,9 +279,11 @@ class AuditsTable
             $connection = $audit->getConnection();
             $table = $connection->getQueryGrammar()->wrapTable($audit->getTable());
 
-            // The filter renders on every table request. SELECT DISTINCT would read every audit row, so
-            // this recursive CTE walks the (auditable_type, auditable_id) morph index one distinct type
-            // at a time instead (a loose index scan), touching one index entry per type.
+            // The filter renders on every table request, and
+            // SELECT DISTINCT would read every audit row.
+            // This recursive CTE walks the morph index
+            // one type at a time, as a loose index
+            // scan, reading one entry per type.
             $all = collect($connection->select(<<<SQL
                 WITH RECURSIVE types AS (
                     SELECT MIN(auditable_type) AS type FROM {$table}

@@ -23,9 +23,9 @@ use Illuminate\Support\HtmlString;
 class RoleForm
 {
     /**
-     * The permission lists. Only the lists visible for the chosen role type are validated and
-     * saved, and {@see SyncRolePermissions} keeps only what that type allows and the editor may
-     * grant.
+     * The permission lists. Only those shown for the chosen role type
+     * are validated and saved, and SyncRolePermissions keeps only
+     * what the type allows and the person editing it may grant.
      */
     public const array PERMISSION_LISTS = ['api_permissions', 'regular_permissions', 'system_permissions'];
 
@@ -86,8 +86,8 @@ class RoleForm
                                 Select::make('role_type_id')
                                     ->label('Role Type')
                                     ->options(function ($record) use ($roleTypeOptions, $allRoleTypeOptions) {
-                                        // A System Managed role can never be manually created.
-                                        // When editing existing roles, show all types.
+                                        // A System Managed role can't be created here,
+                                        // but a role being edited shows every type.
                                         if ($record?->isSystemManagedType()) {
                                             return $allRoleTypeOptions;
                                         }
@@ -161,7 +161,7 @@ class RoleForm
                             ->visible(fn ($get): bool => ! self::isApiRoleType($get('role_type_id')))
                             ->columnSpanFull() : null,
 
-                        // System Permissions - only visible to users with ManageAll and hidden for API roles
+                        // System permissions, shown to people with Manage All and never for API roles.
                         filled($systemPermissions) ? CheckboxList::make('system_permissions')
                             ->label('System-Managed Permissions')
                             ->helperText(new HtmlString(<<<'HTML'

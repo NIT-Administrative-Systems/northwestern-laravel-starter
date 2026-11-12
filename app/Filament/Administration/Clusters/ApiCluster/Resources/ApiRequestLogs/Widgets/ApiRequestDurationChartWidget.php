@@ -24,7 +24,8 @@ class ApiRequestDurationChartWidget extends BaseApiRequestChartWidget
             $query->where('user_id', $this->userId);
         }
 
-        /** @var object{
+        /**
+         * @var object{
          *     p50: float|null,
          *     p95: float|null,
          *     avg_duration: float|null,
@@ -130,7 +131,8 @@ class ApiRequestDurationChartWidget extends BaseApiRequestChartWidget
         $avgData = array_fill(0, count($labels), 0);
         $p95Data = array_fill(0, count($labels), 0);
 
-        /** @var object{
+        /**
+         * @var object{
          *     hour?: int,
          *     date?: string,
          *     avg_duration: float|null,

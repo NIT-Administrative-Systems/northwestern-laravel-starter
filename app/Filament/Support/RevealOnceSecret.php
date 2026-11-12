@@ -21,17 +21,24 @@ use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 
 /**
- * A wizard that issues a credential and shows its secret once: a step that creates it, then a
- * step to copy it. The secret is kept encrypted in the session between the steps, never in
- * Livewire state, and never shown again:
+ * A wizard that issues a credential and shows
+ * its secret once: one step creates it, and
+ * the next shows the secret for copying.
  *
- * - each run of the wizard gets its own key when it mounts, kept in the mounted action's
- *   arguments, so a run never sees another's secret, even one open in another browser tab;
- * - it's issued once per run, so stepping back and forward again doesn't create a second one;
- * - a run that was cancelled or closed leaves nothing for the next one, on any record, to show;
- * - confirming the copy forgets it.
+ * Between the steps the secret is kept encrypted in the session
+ * rather than in Livewire state, and it's never shown again.
  *
- * Every method takes the Livewire component, which holds the mounted action and so the run.
+ * Each run of the wizard gets its own key when it mounts,
+ * which the mounted action's arguments keep, so no run
+ * can see another's secret, even one in another tab.
+ *
+ * A run issues its credential once, so stepping back and
+ * forward doesn't create a second one. A cancelled or
+ * closed run leaves nothing for the next to show,
+ * and confirming the copy forgets the secret.
+ *
+ * Every method takes the Livewire component, which
+ * holds the mounted action and so holds the run.
  *
  * ```php
  * $secret = RevealOnceSecret::for('service_client:create');
@@ -84,9 +91,12 @@ final readonly class RevealOnceSecret
     }
 
     /**
-     * Issue the credential, unless this run already did. `$issue` creates it and returns its ID,
-     * its secret (null for a credential without one, such as a public application), and anything
-     * else the wizard needs once it ends. With a `$scope`, the secret shows only on that record.
+     * Issue the credential, unless this run already has. The $issue closure creates
+     * it and returns its ID, its secret and anything else the wizard needs later.
+     *
+     * The secret is null for a credential without
+     * one, such as a public application. With a
+     * $scope, it shows only on that record.
      *
      * @param  Closure(): array<string, mixed>  $issue  Returns at least `id` and `secret`
      */
@@ -115,7 +125,8 @@ final readonly class RevealOnceSecret
     }
 
     /**
-     * Whether this run issued its credential for `$record`, such as the client being rotated.
+     * Determine whether this run issued its credential
+     * for $record, such as the client being rotated.
      */
     public function isFor(HasActions $livewire, Model $record): bool
     {
@@ -156,13 +167,15 @@ final readonly class RevealOnceSecret
     }
 
     /**
-     * For the wizard's `modifyWizardUsing()`: once the credential is issued, going back would only
+     * For the wizard's modifyWizardUsing(): once the
+     * credential is issued, going back would only
      * show a form for one that already exists.
      */
     public function hideBackOnceIssued(): Closure
     {
         return fn (Wizard $wizard): Wizard => $wizard->previousAction(
-            // The wizard renders its Back button even when hidden, so the class takes it off the page.
+            // The wizard renders its Back button even when it's
+            // hidden, so a CSS class takes it off the page.
             fn (Action $action): Action => $action
                 ->hidden(fn (HasActions $livewire): bool => $this->issued($livewire))
                 ->extraAttributes(fn (HasActions $livewire): array => $this->issued($livewire) ? ['class' => 'hidden'] : []),
@@ -170,7 +183,7 @@ final readonly class RevealOnceSecret
     }
 
     /**
-     * For the wizard's `modalSubmitAction()`: the last button confirms the secret was saved.
+     * For the wizard's submit action: the last button confirms the secret was saved.
      */
     public function savedAction(): Closure
     {
@@ -227,7 +240,8 @@ final readonly class RevealOnceSecret
     }
 
     /**
-     * What this run kept, for a credential issued for `$record` or for no record in particular.
+     * Get what this run kept, for a credential issued
+     * for $record or for no record in particular.
      *
      * @return array<string, mixed>|null
      */
@@ -254,9 +268,10 @@ final readonly class RevealOnceSecret
     }
 
     /**
-     * The session key of the run in progress: the innermost mounted action that `mountFresh()`
-     * gave a key. Read from the component's state rather than by resolving the action, so it's
-     * safe while Filament is still resolving it, as when it checks the action's visibility.
+     * Get the session key of the run in progress, from the innermost mounted
+     * action that mountFresh() gave a key. It reads the component's state
+     * instead of resolving the action, so it's safe while Filament is
+     * still resolving it, as when it checks whether it's visible.
      */
     private function sessionKey(HasActions $livewire): ?string
     {

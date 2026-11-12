@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Filament\Administration\Resources\Roles;
 
+use App\Domains\Access\Enums\RoleModificationOrigin;
 use App\Domains\Access\Enums\RoleTypeEnum;
 use App\Domains\Access\Enums\SystemPermission;
 use App\Domains\Access\Models\Role;
@@ -11,6 +12,7 @@ use App\Domains\Access\Models\RoleType;
 use App\Domains\User\Models\User;
 use App\Filament\Administration\Resources\Roles\Pages\CreateRole;
 use App\Filament\Administration\Resources\Roles\Pages\EditRole;
+use App\Filament\Administration\Resources\Roles\RoleResource;
 use App\Providers\Filament\AdministrationPanelProvider;
 use Filament\Facades\Filament;
 use Livewire\Livewire;
@@ -46,7 +48,7 @@ final class RoleResourceTest extends TestCase
 
         Livewire::test(CreateRole::class)
             ->fillForm(['name' => 'Escalated', 'role_type_id' => $this->roleType(RoleTypeEnum::ApplicationRole)->id])
-            // Hidden for this role type, and for anyone without Manage All, so the form never validates it.
+            // Hidden for this role type and without Manage All, so it's never validated.
             ->set('data.api_permissions', [SystemPermission::ManageAll->value])
             ->set('data.system_permissions', [SystemPermission::ManageAll->value])
             ->call('create')
@@ -61,7 +63,7 @@ final class RoleResourceTest extends TestCase
         $this->actingAs($editor);
 
         $role = Role::factory()->forRoleType(RoleTypeEnum::ApplicationRole)->create();
-        $editor->assignRoleWithAudit($role, \App\Domains\Access\Enums\RoleModificationOrigin::System);
+        $editor->assignRoleWithAudit($role, RoleModificationOrigin::System);
 
         Livewire::test(EditRole::class, ['record' => $role->getRouteKey()])
             ->set('data.api_permissions', [SystemPermission::ManageAll->value])
@@ -131,6 +133,20 @@ final class RoleResourceTest extends TestCase
 
         $this->assertSame([], $this->permissionsOf($role->name));
         $this->assertSame(RoleTypeEnum::ApiIntegration, $role->fresh()->role_type->slug);
+    }
+
+    public function test_a_global_search_result_counts_the_roles_people_and_permissions(): void
+    {
+        $role = Role::factory()->forRoleType(RoleTypeEnum::ApplicationRole)->hasPermissions([SystemPermission::ViewUsers, SystemPermission::EditUsers])->create();
+        User::factory()->count(3)->affiliate()->create()->each->assignRoleWithAudit($role, RoleModificationOrigin::System);
+
+        $result = RoleResource::getGlobalSearchEloquentQuery()->whereKey($role)->sole();
+
+        $this->assertSame([
+            'Type' => RoleTypeEnum::ApplicationRole->getLabel(),
+            'Users' => '3 assigned',
+            'Permissions' => '2 permissions',
+        ], RoleResource::getGlobalSearchResultDetails($result));
     }
 
     private function roleEditor(SystemPermission ...$permissions): User

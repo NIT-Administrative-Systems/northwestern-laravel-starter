@@ -22,6 +22,9 @@ use Spatie\Health\ResultStores\StoredCheckResults\StoredCheckResults;
 use Throwable;
 
 /**
+ * The administration panel's home. Only someone who may manage everything sees it;
+ * anyone else who opens the panel starts on the first page in their navigation.
+ *
  * @phpstan-type InfoRow array{value: string, mono?: bool}
  * @phpstan-type FeatureFlag array{label: string, enabled: bool, source: string}
  * @phpstan-type ScheduledTask array{command: string, description: string|null, expression: string, next_due_date: string|null, next_due_date_human: string|null, timezone: string|null}
@@ -30,9 +33,6 @@ use Throwable;
  * @phpstan-type LoginHeatmapRow array{date: Carbon, label: string, cells: list<LoginHeatmapCell>}
  * @phpstan-type LoginHeatmap array{rows: list<LoginHeatmapRow>, total: int, peak: array{count: int, when: Carbon}|null, days: int}
  * @phpstan-type ApiTraffic array{counts: list<int>, total: int, p95_ms: int}
- *
- * The administration panel's home. Only someone who may manage everything sees it; anyone else
- * who opens the panel starts on the first page in their navigation.
  */
 class Overview extends Dashboard
 {
@@ -42,7 +42,7 @@ class Overview extends Dashboard
 
     protected static ?string $title = 'Overview';
 
-    protected ?string $subheading = 'Platform configuration and system health';
+    protected ?string $subheading = 'Platform configuration and system health.';
 
     protected static ?string $navigationLabel = 'Overview';
 
@@ -54,8 +54,8 @@ class Overview extends Dashboard
     }
 
     /**
-     * Send someone who can't see the overview to the first page they can, instead of a 403 on
-     * the panel's home. With nothing to offer them, it stays a 403.
+     * Send someone who can't see the overview to the first page they can, instead
+     * of a 403 on the panel's home. With nothing to offer them, it stays a 403.
      */
     public function mountCanAuthorizeAccess(): void
     {
@@ -193,15 +193,9 @@ class Overview extends Dashboard
     }
 
     /**
-     * External API integrations configuration.
-     *
-     * Each integration returns an array with:
-     * - name: Display name of the integration
-     * - icon: Heroicon class constant (e.g., Heroicon::OutlinedBolt)
-     * - status: 'live', 'mock', or 'disabled'
-     * - url: The API base URL being used
-     *
-     * To add a new integration, add an entry to the returned array.
+     * The external APIs the application calls, each with a display
+     * name, an icon, a status (live, mock or disabled) and the
+     * base URL in use. A new integration adds an entry here.
      *
      * @return array<int, array{name: string, icon: Heroicon, status: string, url: string}>
      */
@@ -231,7 +225,7 @@ class Overview extends Dashboard
 
     public function getHealthResults(): ?StoredCheckResults
     {
-        // The view, getHealthSummary(), and getHealthLastChecked() each read the latest results.
+        // The view, getHealthSummary() and getHealthLastChecked() all read these results.
         return once(fn () => resolve(EloquentHealthResultStore::class)->latestResults());
     }
 
@@ -310,14 +304,11 @@ class Overview extends Dashboard
     }
 
     /**
-     * Queue status — returns null when nothing is stuck so callers can render conditionally.
+     * Get the queue's status, or null when nothing is
+     * stuck, so the view can leave the section out.
      *
-     * Uses the driver-agnostic Queue facade (Laravel 13.6+): `Queue::size()` for the count
-     * and `Queue::pendingJobs()` for the `InspectedJob` collection that carries each job's
-     * queued-at timestamp and display name. That replaces the previous direct reads on the
-     * `jobs` table so this works on Database, Redis, and Beanstalkd queues without needing
-     * a driver check. Failed jobs still come from the `failed_jobs` table — that surface
-     * hasn't moved.
+     * Queue::size() and Queue::pendingJobs() work on every queue driver, so there's
+     * no check for the driver. Failed jobs still come from the failed_jobs table.
      *
      * @return QueueStatus|null
      */
@@ -417,14 +408,11 @@ class Overview extends Dashboard
     }
 
     /**
-     * Login density matrix for the past N days × 24 hours, plus summary stats.
+     * Get sign-ins over the past few days by hour, with
+     * summary figures, or null when there's no table.
      *
-     * Rows are ordered oldest → newest so the bottom row is "today" and reading
-     * down the grid feels like time flowing forward. Each cell includes a
-     * pre-bucketed intensity (0–4) so the view layer doesn't need to know the
-     * global max — that keeps the Blade free of branching logic.
-     *
-     * Returns null only when the backing table is absent.
+     * Rows run from oldest to newest, so today is the bottom row. Each cell comes with
+     * its intensity, from 0 to 4, so the view doesn't need to know the busiest hour.
      *
      * @return LoginHeatmap|null
      */
@@ -578,10 +566,10 @@ class Overview extends Dashboard
     }
 
     /**
-     * Scheduled tasks parsed from `php artisan schedule:list --json`.
+     * Get the scheduled tasks from schedule:list --json.
      *
-     * Running Artisan in-process is cheaper than spawning a shell, and the JSON output
-     * gives us next-run timestamps the scheduler already computed.
+     * Running Artisan in-process is cheaper than starting a shell, and the
+     * JSON gives the next run times the scheduler has already computed.
      *
      * @return list<ScheduledTask>
      */
@@ -617,9 +605,8 @@ class Overview extends Dashboard
     }
 
     /**
-     * Collapse an `artisan` command string into a concise label.
-     *
-     * `php artisan model:prune --path='app/Domains/Auth/Models'` becomes `model:prune`.
+     * Shorten an artisan command to its name: `php artisan
+     * model:prune --path=...` is shown as `model:prune`.
      */
     public function formatScheduledCommand(string $command): string
     {

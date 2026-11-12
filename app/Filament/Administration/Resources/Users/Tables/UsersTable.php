@@ -32,9 +32,11 @@ class UsersTable
                     ->label('Name')
                     ->wrap(),
                 TextColumn::make('first_name')
+                    ->placeholder('—')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('last_name')
+                    ->placeholder('—')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('username')
@@ -43,28 +45,33 @@ class UsersTable
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('employee_id')
+                    ->placeholder('—')
                     ->label('Employee ID')
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('hr_employee_id')
+                    ->placeholder('—')
                     ->label('myHR Employee ID')
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('email')
+                    ->placeholder('—')
                     ->label('Email')
                     ->copyable()
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('phone')
+                    ->placeholder('—')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('timezone')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('primary_affiliation')
+                    ->placeholder('—')
                     ->label('Primary Affiliation')
                     ->searchable()
                     ->badge()
@@ -85,11 +92,13 @@ class UsersTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('last_directory_sync_at')
+                    ->placeholder('Never')
                     ->label('Last Directory Sync')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('directory_sync_last_failed_at')
+                    ->placeholder('Never')
                     ->label('Last Directory Sync Failed')
                     ->dateTime()
                     ->sortable()
@@ -107,14 +116,15 @@ class UsersTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('deleted_at')
+                    ->placeholder('—')
                     ->label('Deleted')
                     ->since()
                     ->dateTimeTooltip()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            // Roles are not searchable: each search term would add a roles subquery, and the Role
-            // filter already matches roles exactly.
+            // Roles aren't searchable: each search term would add a subquery
+            // on roles, and the Role filter already matches roles exactly.
             ->modifyQueryUsing(fn (Builder $query) => $query->with('roles'))
             ->defaultSort(fn (Builder $query) => $query->orderBy('last_name')->orderBy('first_name'))
             ->filters([
@@ -151,8 +161,9 @@ class UsersTable
     }
 
     /**
-     * A person's roles, without the default role every NetID user has, which would push the
-     * roles that tell people apart off the row. Also used by a role's Assigned Users.
+     * A person's roles, leaving out the default role every NetID user has,
+     * which would push the roles that tell people apart off the row. The
+     * Assigned Users tab of a role uses it too, for the same reason.
      */
     public static function rolesColumn(): TextColumn
     {

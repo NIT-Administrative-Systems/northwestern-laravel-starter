@@ -28,7 +28,6 @@ class CreateNorthwesternUserAction extends Action
 
         $this->authorize(SystemPermission::CreateUsers)
             ->label('Add Northwestern User')
-            ->name('create-nu-user')
             ->icon(Heroicon::OutlinedIdentification)
             ->color('primary')
             ->modalHeading('Add Northwestern User')
@@ -77,7 +76,7 @@ class CreateNorthwesternUserAction extends Action
                 $searchValue = trim((string) $data['netid']);
 
                 try {
-                    $user = ($findOrUpdateUserFromDirectory)($searchValue, immediate: true);
+                    $user = $findOrUpdateUserFromDirectory($searchValue, immediate: true);
 
                     if (! $user instanceof User) {
                         // This shouldn't happen since validation passed, but handle it

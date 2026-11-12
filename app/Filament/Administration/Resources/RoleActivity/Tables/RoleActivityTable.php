@@ -70,7 +70,7 @@ class RoleActivityTable
                     ->state(fn (Audit $record): array => array_column($record->getChangedRoles(), 'name'))
                     ->badge()
                     ->color(fn (string $state, Audit $record): string => self::changedRole($record, $state)['color'])
-                    // No link of its own: the whole row already links to the audit, and a link can't sit inside another.
+                    // No link of its own: the whole row links to the audit, and links can't nest.
                     ->formatStateUsing(fn (string $state, Audit $record): string|HtmlString => self::changedRole($record, $state)['exists']
                         ? $state
                         : new HtmlString('<s>' . e($state) . '</s><span class="sr-only"> (deleted)</span>'))
@@ -86,6 +86,7 @@ class RoleActivityTable
                     ->placeholder('None'),
 
                 TextColumn::make('tags')
+                    ->placeholder('—')
                     ->label('Origin')
                     ->badge()
                     ->visibleFrom('2xl')
@@ -159,7 +160,8 @@ class RoleActivityTable
             ])
             ->recordClasses('transition-colors hover:bg-gray-50 dark:hover:bg-white/5')
             ->defaultSort('created_at', direction: 'desc')
-            // Each search term adds three user subqueries; match the term as one phrase instead.
+            // Each search term adds three user subqueries, so match
+            // the whole search term as a single phrase instead.
             ->splitSearchTerms(false)
             ->searchDebounce('750ms')
             ->filters([
@@ -174,22 +176,26 @@ class RoleActivityTable
                     ->options(
                         fn () => Role::withTrashed()
                             ->orderBy('name')
-                            ->pluck('name', 'name')
+                            ->pluck('name', 'id')
                             ->all()
                     )
                     ->searchable()
                     ->preload()
                     ->query(function (Builder $query, array $data): Builder {
-                        $value = $data['value'] ?? null;
+                        $roleId = $data['value'] ?? null;
 
-                        if (blank($value)) {
+                        if (blank($roleId)) {
                             return $query;
                         }
 
-                        return $query->where(function (Builder $q) use ($value) {
-                            $q->where('old_values', 'like', '%"name":"' . $value . '"%')
-                                ->orWhere('new_values', 'like', '%"name":"' . $value . '"%');
-                        });
+                        // An audit lists every role the person had before and after the change,
+                        // so the role that changed is the one in only one of the two lists.
+                        $role = json_encode(['roles' => [['id' => (int) $roleId]]]);
+
+                        return $query->whereRaw(
+                            'coalesce(old_values::jsonb @> ?::jsonb, false) <> coalesce(new_values::jsonb @> ?::jsonb, false)',
+                            [$role, $role],
+                        );
                     }),
 
                 SelectFilter::make('auditable_id')

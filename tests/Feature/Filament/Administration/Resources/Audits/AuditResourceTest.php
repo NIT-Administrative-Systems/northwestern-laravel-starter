@@ -4,18 +4,28 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Filament\Administration\Resources\Audits;
 
+use App\Domains\Access\Enums\RoleModificationOrigin;
 use App\Domains\Access\Enums\SystemPermission;
+use App\Domains\Access\Models\Role;
 use App\Domains\Core\Models\Audit;
 use App\Domains\User\Models\User;
 use App\Filament\Administration\Resources\Audits\AuditResource;
+use App\Filament\Administration\Resources\Audits\Pages\ListAudits;
+use App\Filament\Administration\Resources\RoleActivity\Pages\ListRoleActivity;
 use App\Filament\Administration\Resources\RoleActivity\RoleActivityResource;
+use App\Providers\Filament\AdministrationPanelProvider;
+use Filament\Facades\Filament;
+use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Tests\Feature\Filament\Administration\Concerns\AssertsLinkedRows;
 use Tests\TestCase;
 
 #[CoversNothing]
 final class AuditResourceTest extends TestCase
 {
+    use AssertsLinkedRows;
+
     /** @return \Iterator<string, array{string}> */
     public static function auditPages(): \Iterator
     {
@@ -54,6 +64,43 @@ final class AuditResourceTest extends TestCase
 
         $this->assertTrue(AuditResource::canAccess());
         $this->assertTrue(RoleActivityResource::canAccess());
+    }
+
+    public function test_a_change_by_someone_since_deactivated_is_still_theirs(): void
+    {
+        $changer = User::factory()->create();
+        $this->actingAs($changer);
+        User::factory()->create()->assignRoleWithAudit(Role::factory()->create(), RoleModificationOrigin::UiAction);
+        $audit = Audit::query()->roleActivity()->latest('id')->firstOrFail();
+        $changer->delete();
+
+        $this->actingAs($this->administrator(SystemPermission::ViewAuditLogs));
+        Filament::setCurrentPanel(AdministrationPanelProvider::ID);
+
+        Livewire::test(ListAudits::class)
+            ->loadTable()
+            ->assertTableColumnStateSet('user.username', $changer->username, $audit);
+
+        Livewire::test(ListRoleActivity::class)
+            ->loadTable()
+            ->assertTableColumnStateSet('user.full_name', $changer->full_name, $audit);
+    }
+
+    public function test_an_audit_with_no_request_details_has_no_empty_links(): void
+    {
+        $audit = Audit::query()->latest('id')->firstOrFail();
+        $audit->forceFill(['url' => null, 'ip_address' => null, 'user_agent' => null, 'tags' => null, 'trace_id' => null])->save();
+
+        $this->actingAs($this->administrator(SystemPermission::ViewAuditLogs));
+        Filament::setCurrentPanel(AdministrationPanelProvider::ID);
+
+        $this->assertEveryEmptyCellHasPlaceholder(Livewire::test(ListAudits::class)->loadTable(), $audit);
+    }
+
+    public function test_each_page_is_titled_as_its_navigation_names_it(): void
+    {
+        $this->assertSame('Audit Logs', new ListAudits()->getTitle());
+        $this->assertSame('Role Activity', new ListRoleActivity()->getTitle());
     }
 
     private function administrator(SystemPermission ...$permissions): User
