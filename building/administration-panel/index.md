@@ -82,7 +82,7 @@ The **Role Activity** button on the Roles page lists role assignments and remova
 * **API Overview**, where the cluster opens, shows API users, clients, expiring secrets and the last day’s traffic. It needs `ManageApiAccess`, or `ViewApiRequestLogs` with the API on.
 * **API Requests** is the request log, with its charts. Turn on the **Live** filter to refresh it every 30 seconds. It needs `ViewApiRequestLogs`, with the API and request logging on. See [Request Logging](https://laravel-starter.entapp.northwestern.edu/features/api/#request-logging).
 * **Applications** registers and manages OAuth applications. It needs `ManageApiAccess`; while the API is off it lists and revokes them but can’t register or edit. See [Connected Applications](https://laravel-starter.entapp.northwestern.edu/features/api/#connected-applications).
-* **MCP Clients** lists the clients that registered themselves and revokes them. It needs `ManageApiAccess`, whether or not MCP is on. See [MCP](https://laravel-starter.entapp.northwestern.edu/features/mcp/#managing-clients).
+* **MCP Clients** lists the MCP clients, whether they registered themselves or came from a client metadata document, and revokes them. It needs `ManageApiAccess`, whether or not MCP is on. See [MCP](https://laravel-starter.entapp.northwestern.edu/features/mcp/#managing-clients).
 
 ## Announcements
 

@@ -22,6 +22,10 @@ Turns the MCP server on
 
 URI schemes desktop clients may redirect to after sign-in, comma-separated. Most clients don’t need one; see below
 
+[#](https://laravel-starter.entapp.northwestern.edu/features/mcp/#prop-mcp-client-metadata-urls)`MCP_CLIENT_METADATA_URLS``the four below`
+
+Client metadata documents the server trusts to name a client, comma-separated URLs. Empty to have every client register itself
+
 [#](https://laravel-starter.entapp.northwestern.edu/features/mcp/#prop-mcp-registrations-per-hour)`MCP_REGISTRATIONS_PER_HOUR``20`
 
 Client registrations allowed per IP address per hour
@@ -32,7 +36,7 @@ Tool calls allowed per person per minute
 
 ## Connecting a Client
 
-The server is at `https://your-app.example.edu/mcp`. Add it to the client as a remote (Streamable HTTP) server with OAuth, and the client does the rest: it registers itself, opens the browser for the person to sign in and approve it, and stores the token.
+The server is at `https://your-app.example.edu/mcp`. Add it to the client as a remote (Streamable HTTP) server with OAuth, and the client does the rest: it identifies or registers itself, opens the browser for the person to sign in and approve it, and stores the token.
 
 * **Claude Code**: `claude mcp add --transport http my-app https://your-app.example.edu/mcp`, then `/mcp` in Claude Code to sign in.
 
@@ -60,9 +64,16 @@ Most clients return from sign-in to `https://` or `http://localhost`. A desktop 
 ## How a Client Connects
 
 1. The client calls `POST /mcp` without a token. The server answers `401` with a `WWW-Authenticate` header pointing at its [protected resource metadata](https://datatracker.ietf.org/doc/html/rfc9728), `/.well-known/oauth-protected-resource/mcp`, and naming the scope to request, `mcp:use`. The same document is also served at `/.well-known/oauth-protected-resource` for clients that look there.
+
 2. That document names the application as the authorization server; `/.well-known/oauth-authorization-server` lists its endpoints.
-3. The client registers itself at `POST /oauth/register` ([dynamic client registration](https://datatracker.ietf.org/doc/html/rfc7591)). Its redirect URIs must use HTTPS, HTTP to the person’s own computer (`localhost`, `127.0.0.1` or `[::1]`), or one of `MCP_CUSTOM_SCHEMES`. It gets a public client, with no secret, that may ask only for the `mcp:use` scope.
-4. The person signs in and sees the consent screen, which marks the client as an **unverified AI client**: a client names itself, so its name is only a claim. The screen shows where approving returns the person, which they can check, and the plain (punycode) form of an internationalized domain, which can imitate another site’s name. Only people with `UseMcp` can approve it.
+
+3. The client identifies itself in one of two ways, and either way gets a public client, with no secret, that may ask only for the `mcp:use` scope. Its redirect URIs must use HTTPS, HTTP to the person’s own computer (`localhost`, `127.0.0.1` or `[::1]`), or one of `MCP_CUSTOM_SCHEMES`.
+
+   * **With a client metadata document.** Claude, VS Code and the Copilot CLI send the URL of a JSON document they publish as their client ID: `https://claude.ai/oauth/mcp-oauth-client-metadata` for claude.ai and the Claude apps, `https://claude.ai/oauth/claude-code-client-metadata` for Claude Code, `https://vscode.dev/oauth/client-metadata.json` for VS Code and `https://github.com/copilot/cli/client-metadata.json` for the Copilot CLI ([Client ID Metadata Documents](https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization#client-id-metadata-documents)). The server fetches only the documents listed in `MCP_CLIENT_METADATA_URLS`, which by default are these four, caches each for a day, and keeps one client per document, which everyone who connects it shares. Discovery advertises `client_id_metadata_document_supported` while that list isn’t empty, and these clients use a document only then.
+   * **By registering.** Any other client registers itself at `POST /oauth/register` ([dynamic client registration](https://datatracker.ietf.org/doc/html/rfc7591)), and gets a client of its own.
+
+4. The person signs in and sees the consent screen. A client from a metadata document carries a **Verified by** badge naming the host that publishes the document, such as `claude.ai`. A client that registered itself gets no badge: it named itself, so its name is only a claim. Either way the screen asks the person to approve only a connection they started. The screen also shows where approving returns the person, which they can check, and the plain (punycode) form of an internationalized domain, which can imitate another site’s name. Only people with `UseMcp` can approve it.
+
 5. The client exchanges the code, with PKCE, for an access token that lasts one hour and a refresh token that lasts 30 days, and calls the server with it.
 
 ### Separate from the REST API
@@ -71,11 +82,11 @@ An MCP client’s token carries only `mcp:use`, and the consent screen refuses a
 
 > **Known gap: audience binding**
 >
-> The MCP specification asks a server to accept only tokens issued for it, using [resource indicators](https://datatracker.ietf.org/doc/html/rfc8707) and the token’s audience. Laravel Passport doesn’t yet bind a token’s audience to a resource, so the starter separates MCP from the REST API with the `mcp:use` scope instead. Client ID Metadata Documents aren’t supported for the same reason: Passport doesn’t accept a URL as a client ID yet.
+> The MCP specification asks a server to accept only tokens issued for it, using [resource indicators](https://datatracker.ietf.org/doc/html/rfc8707) and the token’s audience. Laravel Passport doesn’t yet bind a token’s audience to a resource, so the starter separates MCP from the REST API with the `mcp:use` scope instead.
 
 ## Adding Tools
 
-The server is `App\Mcp\Servers\AppServer`, and its routes are in `routes/ai.php`. The rest of `app/Mcp` is the connection the starter provides: the discovery documents and client registration (`Http/Controllers`), the scope on the 401 challenge (`Http/Middleware`), and `McpServiceProvider`, which wires them up with the registration and tool-call rate limits. It ships with no tools, so a connected client can do nothing until you add some. A tool acts as the person who connected the client: `$request->user()` is that person, and your permissions and policies apply as they do in the browser.
+The server is `App\Mcp\Servers\AppServer`, and its routes are in `routes/ai.php`. The rest of `app/Mcp` is the connection the starter provides: the discovery documents and client registration (`Http/Controllers`), client metadata documents (`ClientMetadataDocuments`), the scope on the 401 challenge (`Http/Middleware`), and `McpServiceProvider`, which wires them up with the registration and tool-call rate limits. It ships with no tools, so a connected client can do nothing until you add some. A tool acts as the person who connected the client: `$request->user()` is that person, and your permissions and policies apply as they do in the browser.
 
 1. Generate a tool with `php artisan make:mcp-tool SearchUsers`, which creates `app/Mcp/Tools/SearchUsers.php`.
 2. List it in `AppServer::$tools`.
@@ -164,16 +175,18 @@ See the [Laravel MCP documentation](https://laravel.com/docs/mcp) for resources,
 
 ## Managing Clients
 
-**API** → **MCP Clients** in the administration panel lists the clients that registered themselves, with how many people have them connected and when they were last used. Revoking one ends everyone’s access to it. It’s shown to people with `ManageApiAccess`, even while MCP is off, so its clients can still be revoked.
+**API** → **MCP Clients** in the administration panel lists the MCP clients, each marked **Verified by** the host of its metadata document or **Self-registered**, with how many people have them connected and when they were last used. Revoking one ends everyone’s access to it. It’s shown to people with `ManageApiAccess`, even while MCP is off, so its clients can still be revoked.
 
-People see their MCP clients on their Account area’s [Connected Applications](https://laravel-starter.entapp.northwestern.edu/building/app-panel/#connected-applications) page, labelled as AI clients whose names aren’t verified, and can disconnect them there.
+People see their MCP clients on their Account area’s [Connected Applications](https://laravel-starter.entapp.northwestern.edu/building/app-panel/#connected-applications) page, labelled as AI clients, with the host that verified the name when there is one, such as `claude.ai`, and can disconnect them there.
 
 * `mcp:prune-clients` runs daily. It deletes a client nobody connected within 24 hours of registering, and revokes one nobody has used for 90 days.
 * `oauth:revoke-ineligible` runs hourly in production and at noon on weekdays elsewhere. It disconnects the MCP clients of people who lost `UseMcp`. Their tokens stop working at once, before it runs: the server answers `401`, the client signs in again, and the consent screen refuses it.
 
 ### Reconnecting a Client
 
-A client keeps the client ID it registered, and can’t connect with it once that registration is gone: deleted by `mcp:prune-clients` because nobody connected within 24 hours, revoked after 90 days unused or by an administrator, or deleted by `db:rebuild` locally. When the client sends the person to sign in, they see an **Application Not Registered** page instead of the consent screen, telling them to remove the server from the client and add it again, so it registers anew.
+A client from a metadata document reconnects on its own: when its client has been pruned or revoked, its next sign-in creates a new one. A document the server can’t use (it isn’t listed in `MCP_CLIENT_METADATA_URLS`, it can’t be fetched, or it’s invalid) leaves the client unknown, and the reason is logged as a warning.
+
+A client that registered itself keeps the client ID it registered, and can’t connect with it once that registration is gone: deleted by `mcp:prune-clients` because nobody connected within 24 hours, revoked after 90 days unused or by an administrator, or deleted by `db:rebuild` locally. When the client sends the person to sign in, they see an **Application Not Registered** page instead of the consent screen, telling them to remove the server from the client and add it again, so it registers anew.
 
 Disconnecting doesn’t do this. The client stays registered, and connecting again shows the consent screen.
 

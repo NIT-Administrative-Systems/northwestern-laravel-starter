@@ -94,7 +94,7 @@ The Account area at `/app/account` is each user’s own: who they are, their pre
 
 ### Connected Applications
 
-`/app/account/connected-applications` lists the [applications](https://laravel-starter.entapp.northwestern.edu/features/api/#connected-applications) the user has allowed to act for them, one row per application, with what each may do, when it connected and when it was last used. **Disconnect** removes one application’s access and **Disconnect All** removes every application’s. Every user can open it while the API or the [MCP server](https://laravel-starter.entapp.northwestern.edu/features/mcp/) is enabled; AI clients are labelled as such, with a note that their names aren’t verified.
+`/app/account/connected-applications` lists the [applications](https://laravel-starter.entapp.northwestern.edu/features/api/#connected-applications) the user has allowed to act for them, one row per application, with what each may do, when it connected and when it was last used. **Disconnect** removes one application’s access and **Disconnect All** removes every application’s. Every user can open it while the API or the [MCP server](https://laravel-starter.entapp.northwestern.edu/features/mcp/) is enabled; AI clients are labelled as such, with the host that verified the name when there is one, such as `claude.ai`.
 
 ### Preferences
 

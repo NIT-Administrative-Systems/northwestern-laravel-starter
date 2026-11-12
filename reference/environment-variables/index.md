@@ -155,6 +155,7 @@ See [MCP Server](https://laravel-starter.entapp.northwestern.edu/features/mcp/).
 | ---------------------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | `MCP_ENABLED`                | `false`             | Turns on the MCP server at `/mcp`, its OAuth discovery documents and client registration. When `false`, all of them respond `404` |
 | `MCP_CUSTOM_SCHEMES`         | empty               | URI schemes desktop clients may redirect to after sign-in, comma-separated                                                        |
+| `MCP_CLIENT_METADATA_URLS`   | see description     | Client metadata documents trusted to name a client, comma-separated: by default those Claude, VS Code and the Copilot CLI publish |
 | `MCP_REGISTRATIONS_PER_HOUR` | `20`                | Client registrations allowed per IP address per hour                                                                              |
 | `MCP_TOOL_CALLS_PER_MINUTE`  | `60`                | Tool calls allowed per person per minute                                                                                          |
 | `MCP_AUTHORIZATION_SERVER`   | the application URL | The OAuth issuer the discovery documents name                                                                                     |
