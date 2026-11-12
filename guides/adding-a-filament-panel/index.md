@@ -248,15 +248,15 @@ The `--panel` flag ensures the resource is placed in the correct directory for y
 
 The Administration panel establishes several patterns worth replicating:
 
-| Pattern                 | What to do                                                                                                                      | Reference                                         |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
-| **Panel ID constant**   | Define `public const string ID` on the provider                                                                                 | `AdministrationPanelProvider::ID`                 |
-| **Permission gating**   | One permission per panel in `SystemPermission`                                                                                  | `AccessAdministrationPanel`                       |
-| **Nav group enum**      | A `HasLabel` enum per panel for sidebar organization                                                                            | `AdministrationNavGroup`                          |
-| **Heroicon constants**  | Use the `Heroicon` enum instead of raw strings                                                                                  | `Heroicon::OutlinedUsers`                         |
-| **Resource separation** | Dedicated directories per panel under `app/Filament/`                                                                           | `app/Filament/App/`                               |
-| **Policies**            | Standard Laravel policies, and `->strictAuthorization()` on the panel so a missing policy or ability throws instead of allowing | `UserPolicy`, `RolePolicy`                        |
-| **Browser tests**       | Check every page of the new panel, as the existing panels’ tests do with `FilamentPages::in()`                                  | `tests/Browser/Pages/AdministrationPagesTest.php` |
+| Pattern                 | What to do                                                                                                                      | Reference                                                               |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| **Panel ID constant**   | Define `public const string ID` on the provider                                                                                 | `AdministrationPanelProvider::ID`                                       |
+| **Permission gating**   | One permission per panel in `SystemPermission`                                                                                  | `AccessAdministrationPanel`                                             |
+| **Nav group enum**      | A `HasLabel` enum per panel for sidebar organization                                                                            | `AdministrationNavGroup`                                                |
+| **Heroicon constants**  | Use the `Heroicon` enum instead of raw strings                                                                                  | `Heroicon::OutlinedUsers`                                               |
+| **Resource separation** | Dedicated directories per panel under `app/Filament/`                                                                           | `app/Filament/App/`                                                     |
+| **Policies**            | Standard Laravel policies, and `->strictAuthorization()` on the panel so a missing policy or ability throws instead of allowing | `UserPolicy`, `RolePolicy`                                              |
+| **Browser tests**       | Check every page of the new panel, as the existing panels’ tests do with `FilamentPages::in()`                                  | `tests/Browser/Pages/Administration/PagesTest.php` and `LayoutTest.php` |
 
 > **Tip**
 >

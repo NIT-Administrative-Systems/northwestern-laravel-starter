@@ -59,7 +59,7 @@ The public layout looks up the signed-in user inside `rescue()`, so a failing lo
 
 3. **Cover a whole range** with `4xx.blade.php` or `5xx.blade.php`. Laravel falls back to them when no view matches the exact status. Without one, a status such as 405 renders Laravel’s plain error page.
 
-4. **Check it in the browser tests.** Add the status to the list in the error page test in `tests/Browser/Pages/PublicPagesTest.php`. `ErrorPages::path($status)` registers a test route that answers with that status, so pages only a failure shows are checked too. See [Browser Tests](https://laravel-starter.entapp.northwestern.edu/guides/testing/#browser-tests).
+4. **Check it in the browser tests.** Add the status to the list in the error page test in `tests/Browser/Pages/Public/ErrorPagesTest.php`. `ErrorPages::path($status)` registers a test route that answers with that status, so pages only a failure shows are checked too. See [Browser Tests](https://laravel-starter.entapp.northwestern.edu/guides/testing/#browser-tests).
 
 Both `resources/css/filament/app/theme.css` and `resources/css/errors.css` compile classes from `resources/views/errors/`, so new views there need no `@source` change.
 
