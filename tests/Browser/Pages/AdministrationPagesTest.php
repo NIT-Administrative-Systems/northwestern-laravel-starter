@@ -11,7 +11,6 @@ use App\Domains\Support\Models\SupportTicket;
 use App\Domains\User\Models\User;
 use App\Domains\User\Models\UserLoginRecord;
 use Northwestern\SysDev\Chassis\Testing\Browser\FilamentPages;
-use Tests\Browser\Layout;
 
 /*
  * Every administration page works and passes axe for a super administrator. Pages are found
@@ -103,7 +102,7 @@ it('is healthy on the consent screen for a self-registered MCP client', function
 });
 
 // Long names, emails, job titles and role names are what break a layout.
-it('fits every administration page and its tables at :dataset pixels', function (int $width) {
+it('fits every administration page and its tables at each width', function () {
     $person = User::factory()->create([
         'first_name' => 'Maximiliana Alexandrina Josephine',
         'last_name' => 'Featherstonehaugh-Wolstenholme',
@@ -127,12 +126,5 @@ it('fits every administration page and its tables at :dataset pixels', function 
         "/administration/roles/{$role->getKey()}",
     ];
 
-    $page = Layout::visit('/administration', $width);
-    $problems = [];
-
-    foreach ($paths as $path) {
-        $problems[$path] = Layout::problems($page->navigate($path));
-    }
-
-    expect(array_filter($problems))->toBe([]);
-})->with(['320' => 320, '768' => 768, '1024' => 1024, '1440' => 1440]);
+    expect($paths)->toAllFitEachWidth();
+});

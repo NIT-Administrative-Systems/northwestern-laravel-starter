@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8d099fbef38efa32d096990008f9b583",
+    "content-hash": "4c2035d634530621f20c6b85a8d1341d",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -5511,16 +5511,16 @@
         },
         {
             "name": "northwestern-sysdev/chassis",
-            "version": "v1.5.2",
+            "version": "v1.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/NIT-Administrative-Systems/chassis.git",
-                "reference": "55ceb696aa52e545479f9e4ea42b71b196881ebc"
+                "reference": "7aef10d8dd8dd38a64732200c22fa516ef803fa9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/NIT-Administrative-Systems/chassis/zipball/55ceb696aa52e545479f9e4ea42b71b196881ebc",
-                "reference": "55ceb696aa52e545479f9e4ea42b71b196881ebc",
+                "url": "https://api.github.com/repos/NIT-Administrative-Systems/chassis/zipball/7aef10d8dd8dd38a64732200c22fa516ef803fa9",
+                "reference": "7aef10d8dd8dd38a64732200c22fa516ef803fa9",
                 "shasum": ""
             },
             "require": {
@@ -5580,7 +5580,8 @@
                 "issues": "https://github.com/NIT-Administrative-Systems/chassis/issues",
                 "source": "https://github.com/NIT-Administrative-Systems/chassis"
             },
-            "time": "2026-11-09T14:32:19+00:00"
+            "time": "2026-11-12T14:52:30+00:00",
+            "published-time": "2026-11-12T14:53:15+00:00"
         },
         {
             "name": "northwestern-sysdev/event-hub-php-sdk",

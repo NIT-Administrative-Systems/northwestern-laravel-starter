@@ -8,7 +8,6 @@ use App\Domains\Api\Enums\TokenExpiration;
 use App\Domains\Support\Enums\AnnouncementSeverity;
 use App\Domains\Support\Models\Announcement;
 use Northwestern\SysDev\Chassis\Testing\Browser\FilamentPages;
-use Tests\Browser\Layout;
 
 /*
  * Every page a signed-in person without roles can reach works and passes axe.
@@ -107,7 +106,7 @@ it('is healthy on the page for an application that is no longer registered', fun
 });
 
 // An administrator sees every page, here with values long enough to wrap.
-it('fits every app panel page and its tables at :dataset pixels', function (int $width) {
+it('fits every app panel page and its tables at each width', function () {
     $user = $this->signInAsSuperAdministrator();
     $user->forceFill([
         'job_titles' => ['Associate Director of Strategic Enrollment Communications and Outreach'],
@@ -115,12 +114,5 @@ it('fits every app panel page and its tables at :dataset pixels', function (int 
     ])->save();
     resolve(CreatePersonalAccessToken::class)($user, 'Weekly enrollment report for the dean of the graduate school', [], TokenExpiration::OneMonth);
 
-    $page = Layout::visit('/app', $width);
-    $problems = [];
-
-    foreach (FilamentPages::in('app') as $path) {
-        $problems[$path] = Layout::problems($page->navigate($path));
-    }
-
-    expect(array_filter($problems))->toBe([]);
-})->with(['320' => 320, '768' => 768, '1024' => 1024, '1440' => 1440]);
+    expect(FilamentPages::in('app'))->toAllFitEachWidth();
+});

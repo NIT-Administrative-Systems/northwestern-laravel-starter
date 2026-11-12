@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Route;
 use Lab404\Impersonate\Services\ImpersonateManager;
 use Mockery\MockInterface;
 use Northwestern\SysDev\Chassis\Testing\Browser\ErrorPages;
-use Tests\Browser\Layout;
+use Northwestern\SysDev\Chassis\Testing\Browser\Layout;
 
 /*
  * Every page a guest can reach works and passes axe,
@@ -113,18 +113,12 @@ it('fits a 320 pixel phone, with controls a finger can tap', function () {
         ...array_map(ErrorPages::path(...), [401, 402, 403, 404, 419, 429, 500, 503]),
     ];
 
-    $page = Layout::visit('/', width: 320);
-    $problems = [];
+    expect($paths)->toAllFitEachWidth(widths: [320], tapTargets: true);
 
-    foreach ($paths as $path) {
-        $problems[$path] = Layout::problems($page->navigate($path), tapTargets: true);
-    }
-
-    $page->navigate('/app/login/email')
+    $page = Layout::visit('/app/login/email', width: 320)
         ->type('@email-input', 'partner@example.com')
         ->click('@continue-button')
         ->assertVisible('@code-input');
-    $problems['the code step'] = Layout::problems($page, tapTargets: true);
 
-    expect(array_filter($problems))->toBe([]);
+    expect($page)->toFitTheScreen(tapTargets: true);
 });
