@@ -139,7 +139,11 @@ before pushing again.
   page the starter ships with `toBeHealthy()`: axe, browser errors, server errors and broken
   images, in light and dark mode. `FilamentPages::in()` finds each panel's pages, so a new
   Filament page is checked automatically; add record pages, public pages and pages that need
-  data to the files in `tests/Browser/Pages`. `toBeHealthy(exclude: ['selector'])` excludes an
-  element when a third-party widget can't be fixed, with a comment saying why.
+  data to the files in `tests/Browser/Pages`. Those files also check layout with Chassis's
+  `toAllFitEachWidth()` at 320, 768, 1024 and 1440 pixels, and guest pages at 320 with 44px tap
+  targets: nothing wider than the screen, no overlapping header controls, no table or badge past
+  its container. A new record or public page goes in the layout test's list of paths too. Fix a
+  layout failure rather than excluding it. `exclude: ['selector']` on either expectation is for a
+  third-party widget that can't be fixed, with a comment saying why.
 - In browser tests, `@name` selects by `data-testid`, and a selector with no CSS punctuation is
   matched as text. Never commit `->debug()` or `->tinker()`: CI's lint job fails on them.

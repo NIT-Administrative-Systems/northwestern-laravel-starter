@@ -92,7 +92,7 @@ To gate your own routes on a feature flag, use `EnsureFeatureEnabled` with a con
 
 ## Browser Testing
 
-`Testing\Browser` adds health and accessibility checks to [Pest's browser plugin](https://pestphp.com/docs/browser-testing). `tests/Pest.php` registers the expectations and the suite's accessibility rules, and `Tests\BrowserTestCase` uses `Concerns\InteractsWithBrowser`, which fakes exceptions so a test sees what the application reported while serving the browser.
+`Testing\Browser` adds health, accessibility and layout checks to [Pest's browser plugin](https://pestphp.com/docs/browser-testing). `tests/Pest.php` registers the expectations and the suite's accessibility rules, and `Tests\BrowserTestCase` uses `Concerns\InteractsWithBrowser`, which fakes exceptions so a test sees what the application reported while serving the browser.
 
 | Expectation                                         | Fails when                                                                                                     |
 | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
@@ -102,10 +102,14 @@ To gate your own routes on a feature flag, use `EnsureFeatureEnabled` with a con
 | `toBeHealthy(exclude: [])`                          | Any of the above, or an image failed to load. Every problem is listed at once                                  |
 | `toBeHealthyInEachTheme(exclude: [])`, `toBeHealthyOnMobile(exclude: [])` | The page isn't healthy in light and dark mode, or at a phone's width                                           |
 | `toAllBeHealthy(exclude: [])`                       | Any page in a list of paths isn't healthy. Every unhealthy page is listed                                      |
+| `toFitTheScreen(tapTargets: false, exclude: [])`    | The page is wider than the screen, controls in its header overlap, a table or badge runs past its container, or something makes a scroll container scroll sideways. With `tapTargets: true`, a control on a touch screen under 44 pixels tall fails too |
+| `toFitEachWidth(widths: [320, 768, 1024, 1440], tapTargets: false, exclude: [])` | The page doesn't fit at one of the widths. Every failing width is listed |
+| `toAllFitEachWidth(widths: [...], tapTargets: false, exclude: [])` | Any page in a list of paths doesn't fit every width. Every failing page is listed |
 
 | Helper                                   | What it does                                                                                                                                                       |
 | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `FilamentPages::in('administration')`    | Lists the paths of a panel's pages the signed-in person can open: each resource's index and create pages, and each page, cluster and dashboard. Pages that need a record are left out, and `except:` leaves out the resource and page classes you name |
+| `Layout::visit('/app/login/email', 320)` | Opens a page at a width, as a touch screen below 1024 pixels and a phone below 768, to check its layout after interacting with it |
 | `ErrorPages::path(500)`                  | Registers a test route that answers with that status, so error pages that only a failure shows can be checked                                                     |
 | `FilamentPage::press($page, 'Create')`   | Clicks a Filament button by its label. Pest's own `press()` clicks the first element with that text, which on a Filament page is often a breadcrumb                 |
 | `FilamentPage::openUserMenu($page)`      | Opens the user menu. `confirmModal()`, `cancelModal()`, `assertNotified()` and `assertFieldError()` drive the rest of Filament's markup                             |
