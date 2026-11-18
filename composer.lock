@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "966406591597c6eceb34ac547c9f4737",
+    "content-hash": "912e748ef705c500d9d04615f4ba5093",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -5511,21 +5511,23 @@
         },
         {
             "name": "northwestern-sysdev/chassis",
-            "version": "v1.6.1",
+            "version": "v1.7.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/NIT-Administrative-Systems/chassis.git",
-                "reference": "9cb1c13dfd7e5a0c18f5170e78b827e80b14ceff"
+                "reference": "0d3df85c5601eab7343b5bbea826c0d23df8211b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/NIT-Administrative-Systems/chassis/zipball/9cb1c13dfd7e5a0c18f5170e78b827e80b14ceff",
-                "reference": "9cb1c13dfd7e5a0c18f5170e78b827e80b14ceff",
+                "url": "https://api.github.com/repos/NIT-Administrative-Systems/chassis/zipball/0d3df85c5601eab7343b5bbea826c0d23df8211b",
+                "reference": "0d3df85c5601eab7343b5bbea826c0d23df8211b",
                 "shasum": ""
             },
             "require": {
                 "filament/support": "^4.0||^5.0",
+                "guzzlehttp/psr7": "^2.4||^3.0",
                 "laravel/framework": "^12.0||^13.0",
+                "league/commonmark": "^2.7",
                 "owen-it/laravel-auditing": "^14.0",
                 "php": "^8.3",
                 "spatie/laravel-package-tools": "^1.16",
@@ -5580,8 +5582,8 @@
                 "issues": "https://github.com/NIT-Administrative-Systems/chassis/issues",
                 "source": "https://github.com/NIT-Administrative-Systems/chassis"
             },
-            "time": "2026-11-12T17:49:54+00:00",
-            "published-time": "2026-11-12T17:50:19+00:00"
+            "time": "2026-11-18T20:28:18+00:00",
+            "published-time": "2026-11-18T20:28:46+00:00"
         },
         {
             "name": "northwestern-sysdev/event-hub-php-sdk",
