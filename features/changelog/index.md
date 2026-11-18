@@ -126,6 +126,8 @@ In the `local`, `ci` and `testing` environments, the seeder backdates `created_a
 
 An RSS 2.0 feed is available at `/support/changelog/feed.rss`. The feed includes an Atom self-link, copyright notice, and conforms to the [RSS 2.0 specification](https://www.rssboard.org/rss-specification). The changelog index page links to the feed with **RSS Feed**, and **Copy** beside it puts the feed’s URL on the clipboard. The feed holds the latest 20 entries (`changelog.feed.limit`), and the index shows 10 per page (`changelog.pagination.per_page`).
 
+Feed readers show an entry away from the site, so the feed resolves its relative links and images against the entry’s own page: `[Contact Support](/support/contact)` reaches them as `https://your-app.northwestern.edu/support/contact`. Its headings start at `<h2>`, as they do on the entry’s page.
+
 ***
 
 ## Routes

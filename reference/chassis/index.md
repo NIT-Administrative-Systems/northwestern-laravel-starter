@@ -79,6 +79,7 @@ To gate your own routes on a feature flag, use `EnsureFeatureEnabled` with a con
 | `Formatting\NorthwesternDateTime` | Expiration reminder and support request emails              | Writes dates and times in Northwestern style: “10:12 a.m. CDT Saturday, October 10”                     |
 | `Formatting\CountInWords`         | Sign-in code messages, expiration reminders                 | Writes a count and its noun: “five minutes”                                                             |
 | `Markdown\ShiftHeadings`          | `Changelog::bodyHtml()`                                     | A CommonMark extension that moves a document’s headings so the shallowest lands at the level you choose |
+| `Markdown\ResolveRelativeUrls`    | The changelog’s RSS feed                                    | A CommonMark extension that resolves relative link and image URLs against a base URL                    |
 
 [Interface Conventions](https://laravel-starter.entapp.northwestern.edu/building/interface-conventions/) shows how to use them.
 
