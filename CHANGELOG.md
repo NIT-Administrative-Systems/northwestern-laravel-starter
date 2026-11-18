@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+### Fixed
+
+- The changelog's RSS feed resolves relative links and images in an entry against the entry's page, with Chassis's new `Markdown\ResolveRelativeUrls`, so `[Contact Support](/support/contact)` works in a feed reader. `Changelog::bodyHtml()` takes the base URL as `$baseUrl`, and the feed renders entries with it, so their headings start at `<h2>` as on the entry's page.
+
+### Changed
+
+- Updated `northwestern-sysdev/chassis` to `^1.7.0`.
+
 ## [v3.4.0] - 2026-11-12
 
 ### Added

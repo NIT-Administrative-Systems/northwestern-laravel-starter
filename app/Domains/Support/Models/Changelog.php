@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\HtmlString;
+use Northwestern\SysDev\Chassis\Markdown\ResolveRelativeUrls;
 use Northwestern\SysDev\Chassis\Markdown\ShiftHeadings;
 use Spatie\LaravelMarkdown\MarkdownRenderer;
 
@@ -50,18 +51,26 @@ class Changelog extends BaseModel
      * The page's own headings decide it: level 2 under an entry
      * page's <h1>, and level 3 under the index's <h2> titles.
      *
+     * With $baseUrl, relative links and images resolve against it,
+     * so the HTML still links back when read away from the site.
+     *
      * @param  int<1, 6>  $topHeadingLevel
      */
-    public function bodyHtml(int $topHeadingLevel): HtmlString
+    public function bodyHtml(int $topHeadingLevel, ?string $baseUrl = null): HtmlString
     {
         // Uncached: the renderer's cache key leaves out extensions,
         // so one heading level would be served the other's HTML.
-        return new HtmlString((clone resolve(MarkdownRenderer::class))
+        $renderer = (clone resolve(MarkdownRenderer::class))
             ->cacheStoreName(false)
             ->disableAnchors()
             ->commonmarkOptions(['html_input' => 'escape'])
-            ->addExtension(new ShiftHeadings($topHeadingLevel))
-            ->toHtml((string) $this->body));
+            ->addExtension(new ShiftHeadings($topHeadingLevel));
+
+        if ($baseUrl !== null) {
+            $renderer->addExtension(new ResolveRelativeUrls($baseUrl));
+        }
+
+        return new HtmlString($renderer->toHtml((string) $this->body));
     }
 
     public function getRouteKeyName(): string
